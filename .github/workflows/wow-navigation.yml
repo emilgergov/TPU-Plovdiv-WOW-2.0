@@ -1,0 +1,29 @@
+name: WOW 2.0 navigation audit
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'index.html'
+      - 'WOW_APP.html'
+      - 'tests/**'
+      - '.github/workflows/wow-navigation.yml'
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - name: Test routes in Chromium
+        run: node tests/wow-navigation.mjs
+      - name: Save evidence regardless of result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wow-navigation-evidence
+          path: wow-test-results/
+          if-no-files-found: warn
