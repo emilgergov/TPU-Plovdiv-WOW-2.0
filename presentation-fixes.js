@@ -74,5 +74,23 @@
   const observer=new MutationObserver(()=>{if(pending)return;pending=true;queueMicrotask(()=>{pending=false;refresh()})});
   observer.observe(content,{childList:true,subtree:true});
   content.addEventListener('input',()=>queueMicrotask(refresh));
+  // Remove the obsolete white floating Back button, which does not use
+  // WOWUnified's history. Keep the application's own contextual Back button.
+  function hideLegacyFloatingBack(){
+    for(const b of document.querySelectorAll('button, a, [role="button"]')){
+      const label=(b.textContent||'').replace(/\\s+/g,' ').trim();
+      if(!/^←\\s*НАЗАД$/i.test(label))continue;
+      if(b.closest('#wowUnifiedContent'))continue;
+      const css=getComputedStyle(b);
+      if(css.position==='fixed'||css.position==='absolute'){
+        b.style.setProperty('display','none','important');
+        b.setAttribute('aria-hidden','true');
+        b.tabIndex=-1;
+      }
+    }
+  }
+  hideLegacyFloatingBack();
+  const legacyObserver=new MutationObserver(hideLegacyFloatingBack);
+  legacyObserver.observe(document.body,{childList:true,subtree:true});
   refresh();
 })();
