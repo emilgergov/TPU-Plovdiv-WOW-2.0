@@ -25,7 +25,9 @@ function draw(){
  const ctx=window.WOWUnified.context();
  root=document.getElementById('wowUnifiedContent');if(!root)return;
  root.classList.toggle('wow-species-adapter-active',!!ctx&&ctx.view==='species');
- if(!ctx||ctx.view!=='species')return;
+ if(!ctx||ctx.view!=='species'){
+  root.querySelector('#wowSpeciesCatalogue')?.remove();renderedContext='';return;
+ }
  const target=root.querySelector('#wowSpeciesCatalogue');
  const contextKey=ctx.view+'|'+(ctx.zoneCode||'');
  if(target&&renderedContext===contextKey)return;
@@ -34,7 +36,11 @@ function draw(){
  const zoneCode=ctx.zoneCode;
  const nav=node('div');nav.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px';
  const goBack=node('button','← Назад');goBack.type='button';goBack.addEventListener('click',()=>window.WOWUnified.navigate('zones'));
- const goTree=node('button','🌳 Дървото');goTree.type='button';goTree.addEventListener('click',()=>window.parent?.document?.getElementById('backTree')?.click());
+ const goTree=node('button','🌳 Дървото');goTree.type='button';goTree.addEventListener('click',()=>{
+  const host=window.parent;
+  const button=host?.document?.getElementById('backTree');
+  if(button)button.click();else window.WOWUnified.navigate('zones');
+ });
  nav.append(goBack,goTree);pane.append(nav);
  pane.append(node('h3',zoneCode?'Видове в зона '+zoneCode:'Каталог на видовите разкази'));
  pane.append(node('p',zoneCode?'Показват се само видовете, свързани със зоната в работния регистър.':'Общ каталог на 792 уникални вида — без избрана зона.'));
