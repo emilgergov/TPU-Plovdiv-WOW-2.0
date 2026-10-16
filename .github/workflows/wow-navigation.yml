@@ -52,6 +52,10 @@ jobs:
           for n in range(3322,3328):
               print(f'{n}: {a[n-1][:2400]}')
           PY
+      - name: Inspect original Tera MP4 codec
+        run: |
+          ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_type,codec_name,profile,pix_fmt,width,height -of json media/TERA_TPU_PLOVDIV_PANORAMA_3MIN_12_10_2026.mp4
+          node -e "const fs=require('fs'); const f='media/TERA_TPU_PLOVDIV_PANORAMA_3MIN_12_10_2026.mp4'; console.log('MP4 bytes:',fs.statSync(f).size)"
       - name: Test routes in Chromium
         run: node tests/wow-navigation.mjs
       - name: Save evidence regardless of result
