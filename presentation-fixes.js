@@ -44,6 +44,24 @@
         if(guide)guide.textContent='Природен водач: Показани са само наличните записи за '+selected+'. Липсващите данни са отбелязани „ПРЕДСТОИ“.';
       }
     }
+    // Search results are independent of the route's previously selected zone.
+    // Show the currently displayed result consistently in breadcrumb and guides,
+    // without mutating the application's underlying zone selection.
+    if(messages[view]){
+      const input=content.querySelector('input[aria-label="Търсене на зона"]');
+      const query=input&&input.value.trim();
+      const card=content.querySelector('h3');
+      const label=card&&card.textContent.trim();
+      const crumb=document.getElementById('wowUnifiedBreadcrumb');
+      const natu=document.getElementById('wowNatuContext');
+      const guide=document.getElementById('wowNewGuideContext');
+      if(query&&label){
+        const title=view==='measures'?'Мерки и цели':view==='indicators'?'Индикатори':'Финансиране';
+        if(crumb)crumb.textContent=title+' · Резултат от търсене: '+label;
+        if(natu)natu.textContent='Нату: Показвам резултата за '+label+'.';
+        if(guide)guide.textContent='Природен водач: Търсенето не променя избраната зона в другите маршрути.';
+      }
+    }
     // Hide only the redundant second navigation button; retain the functional Back.
     const buttons=content.querySelectorAll('button');
     for(const b of buttons){
