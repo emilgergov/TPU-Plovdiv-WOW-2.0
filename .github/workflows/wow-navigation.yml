@@ -21,6 +21,8 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Check required WOW media
         run: node tests/check-assets.mjs
+      - name: Validate direct-route startup repair candidate (CI only)
+        run: python3 tests/repair-direct-route-ci.py
       - name: Test routes in Chromium
         run: node tests/wow-navigation.mjs
       - name: Save evidence regardless of result
