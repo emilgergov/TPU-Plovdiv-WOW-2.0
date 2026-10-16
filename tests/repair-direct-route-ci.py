@@ -23,5 +23,8 @@ guards=[
 for before,after in guards:
   assert s.count(before)==1, "Missing unique optional panel decorator"
   s=s.replace(before,after)
+# Skip optional decorators only when their expected DOM nodes are absent.
+s=s.replace("var grid=group.querySelector('.quiet-function-grid'),close=document.createElement('button');", "var grid=group.querySelector('.quiet-function-grid');if(!grid)return;var close=document.createElement('button');")
+s=s.replace("var dock=document.createElement('div');dock.id='wowTreeDock';dock.appendChild(ask);", "if(!panel||!ask||!close)return;var dock=document.createElement('div');dock.id='wowTreeDock';dock.appendChild(ask);")
 p.write_text(s,encoding="utf-8")
 print("CI candidate: preserved direct WOW route instead of resetting to intro")
