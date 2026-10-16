@@ -41,5 +41,29 @@ await shot('08-gis-desktop',desktop,'/WOW_APP.html#wow-route=map','body',async p
   await p.getByText('Отвори GIS картата на цял екран',{exact:false}).first().click({timeout:15000});
   await p.locator('#gisLayer.open').waitFor({state:'visible',timeout:15000});
 });
+// Check that every fruit is reachable and tappable within the mobile scroll region.
+{
+ const page=await browser.newPage({viewport:mobile,hasTouch:true,isMobile:true,deviceScaleFactor:1});
+ try{
+  await page.goto(base+'/index.html#tree',{waitUntil:'domcontentloaded'});
+  await page.locator('#tree').waitFor({state:'visible'});
+  const stage=page.locator('.tree-stage');
+  const bounds=await stage.evaluate(e=>({width:e.clientWidth,content:e.scrollWidth}));
+  if(bounds.content<=bounds.width+100)throw Error('Mobile tree is not horizontally scrollable: '+JSON.stringify(bounds));
+  const fruits=page.locator('#tree .hotspot');
+  for(let i=0;i<await fruits.count();i++){
+   const fruit=fruits.nth(i);
+   await fruit.evaluate(e=>e.scrollIntoView({block:'nearest',inline:'center',behavior:'instant'}));
+   const state=await fruit.evaluate(e=>{
+    const r=e.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+    return {x,y,hit:document.elementFromPoint(x,y)===e,viewport:innerWidth};
+   });
+   if(!state.hit||state.x<0||state.x>mobile.width)throw Error('Mobile fruit inaccessible '+i+': '+JSON.stringify(state));
+  }
+  await page.screenshot({path:resolve(out,'09-tree-mobile-scrolled.png'),animations:'disabled'});
+  console.log('VISUAL PASS mobile fruit reachability '+await fruits.count()+' hotspots');
+ }catch(e){failed++;console.error('VISUAL FAIL mobile fruit reachability',e.message);}
+ finally{await page.close()}
+}
 await browser.close();await new Promise(r=>server.close(r));
 if(failed)process.exitCode=1;
