@@ -23,6 +23,17 @@ jobs:
         run: node tests/check-assets.mjs
       - name: Validate direct-route startup repair candidate (CI only)
         run: python3 tests/repair-direct-route-ci.py
+      - name: Inspect exact failing HTML statements
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          a=Path('WOW_APP.html').read_text(encoding='utf-8').splitlines()
+          for n in (3272,3297,3320):
+              print('ERROR LOCATION',n)
+              for k in range(n-3,n+4):
+                  if 0<k<=len(a):
+                      print(f'{k}: {a[k-1][:320]}')
+          PY
       - name: Test routes in Chromium
         run: node tests/wow-navigation.mjs
       - name: Save evidence regardless of result
