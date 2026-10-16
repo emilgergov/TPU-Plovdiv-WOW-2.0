@@ -58,6 +58,19 @@ jobs:
           sudo apt-get install -y -qq ffmpeg
           ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_type,codec_name,profile,pix_fmt,width,height -of json media/TERA_TPU_PLOVDIV_PANORAMA_3MIN_12_10_2026.mp4
           node -e "const fs=require('fs'); const f='media/TERA_TPU_PLOVDIV_PANORAMA_3MIN_12_10_2026.mp4'; console.log('MP4 bytes:',fs.statSync(f).size)"
+      - name: Verify H264 support in test Chromium
+        run: |
+          node --input-type=module <<'JS'
+          import { chromium } from 'playwright';
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage();
+          console.log('Chromium H264 support:',await page.evaluate(()=>({
+            h264:document.createElement('video').canPlayType('video/mp4; codecs="avc1.64001f, mp4a.40.2"'),
+            mp4:document.createElement('video').canPlayType('video/mp4'),
+            ua:navigator.userAgent
+          })));
+          await browser.close();
+          JS
       - name: Test routes in Chromium
         run: node tests/wow-navigation.mjs
       - name: Save evidence regardless of result
