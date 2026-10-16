@@ -8,6 +8,8 @@
   visualStyle.id='wow-visual-qa-20261017';
   visualStyle.textContent=`
     #wowBackToApprovedTree{display:none!important}
+    /* Keep one contextual Back action. The in-panel button owns navigation history. */
+    #wowUnifiedApp #wowUnifiedBackFloating, #wowUnifiedApp .wow-u-back-floating, #wowUnifiedApp .wow-floating-back{display:none!important}
     #wowUnifiedContent:has(> #wowSpeciesCatalogue) > :not(#wowSpeciesCatalogue){display:none!important}
     @media(max-width:700px){
       #wowUnifiedApp .wow-u-head{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:8px!important;margin-bottom:14px!important}
