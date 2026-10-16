@@ -2,6 +2,8 @@
    Never assigns a species to a Natura zone without an authoritative zone-species link. */
 (()=>{'use strict';
 let root=null;
+// Hide the legacy unfiltered 792-item view while the authoritative zone catalogue is active.
+const css=document.createElement('style');css.id='wow-zone-species-visibility';css.textContent='#wowUnifiedContent.wow-species-adapter-active > :not(#wowSpeciesCatalogue){display:none!important}';document.head.appendChild(css);
 // Injected by the outer shell: it may execute before the unified app is ready.
 // Never permanently exit on a transient startup race.
 let stories=null,loading=null,active='';
@@ -20,14 +22,20 @@ async function load(){
 }
 function node(tag,txt){const e=document.createElement(tag);if(txt!==undefined)e.textContent=txt;return e}
 function draw(){
- const ctx=window.WOWUnified.context();if(!ctx||ctx.view!=='species')return;
+ const ctx=window.WOWUnified.context();
  root=document.getElementById('wowUnifiedContent');if(!root)return;
+ root.classList.toggle('wow-species-adapter-active',!!ctx&&ctx.view==='species');
+ if(!ctx||ctx.view!=='species')return;
  const target=root.querySelector('#wowSpeciesCatalogue');
  const contextKey=ctx.view+'|'+(ctx.zoneCode||'');
  if(target&&renderedContext===contextKey)return;
  if(target)target.remove();renderedContext=contextKey;
  const pane=node('section');pane.id='wowSpeciesCatalogue';pane.style.cssText='margin:18px 0;padding:16px;border:1px solid #b4cbb7;border-radius:14px;background:#f6fbf5;color:#173821';
  const zoneCode=ctx.zoneCode;
+ const nav=node('div');nav.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px';
+ const goBack=node('button','← Назад');goBack.type='button';goBack.addEventListener('click',()=>window.WOWUnified.navigate('zones'));
+ const goTree=node('button','🌳 Дървото');goTree.type='button';goTree.addEventListener('click',()=>window.parent?.document?.getElementById('backTree')?.click());
+ nav.append(goBack,goTree);pane.append(nav);
  pane.append(node('h3',zoneCode?'Видове в зона '+zoneCode:'Каталог на видовите разкази'));
  pane.append(node('p',zoneCode?'Показват се само видовете, свързани със зоната в работния регистър.':'Общ каталог на 792 уникални вида — без избрана зона.'));
  const status=node('p','Зареждане на видовите разкази…');pane.append(status);root.prepend(pane);
