@@ -93,5 +93,13 @@ await check('792 species search and individual narrative render in browser',asyn
  },{name,expected},{timeout:7000}).catch(async e=>{
   const state=await p.evaluate(()=>{const d=document.querySelector('#app')?.contentDocument;const panel=d?.getElementById('wowSpeciesCatalogue');return {view:document.querySelector('#app')?.contentWindow?.WOWUnified?.context?.()?.view,html:panel?.innerHTML?.slice(0,1800),text:panel?.innerText?.slice(0,1000)}});throw Error('Species detail mismatch '+name+': '+JSON.stringify(state)+'; '+e.message);
  });
+ // Preserve an actual screenshot of the working 792-species detail for visual QA.
+ await p.screenshot({path:resolve(out,'species-detail-desktop.png'),fullPage:true});
+});
+await check('Capture mobile tree visual evidence',async p=>{
+ await p.setViewportSize({width:390,height:844});
+ await p.goto(base+'/index.html#tree',{waitUntil:'domcontentloaded'});
+ await p.locator('#tree').waitFor({state:'visible',timeout:15000});
+ await p.screenshot({path:resolve(out,'tree-mobile.png'),fullPage:true});
 });
 writeFileSync(resolve(out,'report.json'),JSON.stringify({tested:results.length,passed:results.length-failures,failed:failures,results},null,2));writeFileSync(resolve(out,'report.txt'),results.map(r=>`${r.status}\t${r.name}${r.detail?'\t'+r.detail:''}`).join('\n')+`\nTOTAL ${results.length} FAIL ${failures}\n`);await browser.close();await new Promise(r=>server.close(r));process.exitCode=failures?1:0;
