@@ -6,6 +6,7 @@ on:
       - 'index.html'
       - 'WOW_APP.html'
       - 'tests/**'
+      - 'media/**'
       - '.github/workflows/wow-navigation.yml'
 jobs:
   audit:
