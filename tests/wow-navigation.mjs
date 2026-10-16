@@ -60,6 +60,15 @@ await check('Measures and indicators filter strictly to selected zone',async p=>
 await check('792 species search and individual narrative render in browser',async p=>{
  await p.goto(base+'/index.html#tree',{waitUntil:'domcontentloaded'});
  await p.locator('#tree [data-route="species"]').click();
+ // The shell can restore an earlier zone selection asynchronously after the fruit click.
+ // Assert the actual app route before checking its content; do not confuse a route race
+ // with a missing 792-species registry.
+ await p.waitForFunction(()=>{
+  const f=document.querySelector('#app');
+  return !!(f?.contentWindow?.WOWUnified?.navigate && f?.contentDocument?.getElementById('wowUnifiedContent'));
+ },null,{timeout:15000});
+ await p.evaluate(()=>{const api=document.querySelector('#app').contentWindow.WOWUnified;if(!api.navigate('species'))throw Error('Species route unavailable')});
+ await p.waitForFunction(()=>document.querySelector('#app')?.contentWindow?.WOWUnified?.context?.()?.view==='species',null,{timeout:10000});
  const frame=p.frameLocator('#app');
  const search=frame.locator('#wowSpeciesCatalogue input[type="search"]');
  try{await search.waitFor({state:'visible',timeout:12000})}catch(e){
