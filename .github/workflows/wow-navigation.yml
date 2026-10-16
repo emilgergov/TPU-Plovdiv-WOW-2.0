@@ -10,6 +10,8 @@ on:
       - '.github/workflows/wow-navigation.yml'
 jobs:
   audit:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -75,6 +77,16 @@ jobs:
           JS
       - name: Test routes in Chromium
         run: node tests/wow-navigation.mjs
+      - name: Commit validated HTML corrections to test branch
+        if: success() && github.ref == 'refs/heads/test/video-fruit-navigation-20261016'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add WOW_APP.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Apply validated WOW navigation repairs to test HTML"
+            git push origin HEAD:test/video-fruit-navigation-20261016
+          fi
       - name: Save evidence regardless of result
         if: always()
         uses: actions/upload-artifact@v4
