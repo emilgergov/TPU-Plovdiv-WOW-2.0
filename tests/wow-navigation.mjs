@@ -62,7 +62,10 @@ await check('792 species search and individual narrative render in browser',asyn
  await p.locator('#tree [data-route="species"]').click();
  const frame=p.frameLocator('#app');
  const search=frame.locator('#wowSpeciesCatalogue input[type="search"]');
- await search.waitFor({state:'visible',timeout:20000});
+ try{await search.waitFor({state:'visible',timeout:12000})}catch(e){
+ const state=await p.evaluate(()=>{const f=document.querySelector('#app');try{const d=f.contentDocument;return {src:f.src,active:f.className,ready:d?.readyState,route:f.contentWindow?.WOWUnified?.context?.(),root:!!d?.getElementById('wowUnifiedContent'),script:!!d?.getElementById('wow-species-catalogue'),panel:!!d?.getElementById('wowSpeciesCatalogue'),panelText:d?.getElementById('wowSpeciesCatalogue')?.innerText?.slice(0,350),scripts:[...d?.scripts||[]].filter(x=>x.src.includes('species')).map(x=>x.src)}}catch(err){return {error:String(err)}}});
+ throw Error('Species catalogue missing: '+JSON.stringify(state)+'; '+e.message);
+}
  const response=await p.request.get(base+'/data/species-stories-792.json');
  if(!response.ok())throw Error('Species JSON HTTP '+response.status());
  const data=await response.json();const names=Object.keys(data);
