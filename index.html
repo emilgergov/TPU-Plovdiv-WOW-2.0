@@ -43,7 +43,7 @@ function route(view){
 document.querySelector('#directApp').addEventListener('click',()=>{window.location.href='WOW_APP.html#wow-route='+encodeURIComponent(pending||'tree')});
 $('#next').addEventListener('click',()=>{if(music.paused&&soundWanted)startMusic();scene(current+1)});
 $('#replay').addEventListener('click',()=>{soundWanted=true;intro.classList.remove('hidden');tree.classList.add('hidden');scene(0);startMusic()});
-$('#openApp').addEventListener('click',()=>route('tree'));
+$('#openApp').addEventListener('click',()=>route('tree'));const treeMenu=document.querySelector('#tree details.tree-more');const treeMenuTrigger=treeMenu.querySelector('summary');treeMenuTrigger.addEventListener('click',e=>{e.preventDefault();treeMenu.open=!treeMenu.open;treeMenuTrigger.setAttribute('aria-expanded',String(treeMenu.open))});document.addEventListener('pointerdown',e=>{if(treeMenu.open&&!treeMenu.contains(e.target))treeMenu.open=false});
 back.addEventListener('click',showTree);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&app.classList.contains('active')){e.preventDefault();showTree()}});
 document.querySelectorAll('[data-route]').forEach(b=>b.addEventListener('click',()=>route(b.dataset.route)));
 
