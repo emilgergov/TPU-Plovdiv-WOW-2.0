@@ -25,4 +25,53 @@ await check('Mobile video fruit actually opens and closes',async p=>{await p.set
 await check('Single return and menu actions on desktop and mobile',async p=>{for(const size of [{width:1365,height:768},{width:390,height:844}]){await p.setViewportSize(size);await p.goto(base+'/index.html#tree');await p.locator('#tree').waitFor({state:'visible'});if(await p.locator('#backTree').isVisible())throw Error('Duplicate floating return is visible');if(await p.locator('#tree [data-route="zones"]').count()!==1)throw Error('Zones hotspot missing');const menu=p.locator('#tree .tree-more summary');await menu.click();await p.locator('#tree details.tree-more[open]').waitFor({state:'attached',timeout:3000});for(const id of ['replay','openApp']){const control=p.locator('#'+id);await control.waitFor({state:'visible',timeout:5000});const rect=await control.boundingBox();if(!rect||rect.width<10||rect.height<10)throw Error('Menu action has no usable hit area: '+id)}if(await p.locator('#wowMediaHub').isVisible())throw Error('Unexpected media overlay');await p.locator('#tree [data-route="zones"]').click();await p.locator('#app.active').waitFor({state:'visible',timeout:15000});await p.keyboard.press('Escape');await p.locator('#tree').waitFor({state:'visible'});if(await p.locator('#app').isVisible())throw Error('Escape failed to return to tree')}});
 await check('Media hub uses neutral video label',async p=>{await p.goto(base+'/index.html#media');await p.locator('#wowMediaHub').waitFor({state:'visible'});const text=await p.locator('#wowMediaHub').innerText();if(!text.includes('Панорамно видео'))throw Error('Neutral video label missing');if(text.includes('Видео с Тера'))throw Error('Deprecated character shown in media menu')});
 await check('Mobile tree controls',async p=>{await p.setViewportSize({width:390,height:844});await p.goto(base+'/index.html#tree');await p.locator('#tree').waitFor({state:'visible'});if(!await p.locator('[data-video-fruit]').count())throw Error('Missing mobile video fruit');for(const r of ['zones','species','measures','photos','indicators','financing','map'])if(!await p.locator(`#tree [data-route="${r}"]`).count())throw Error('Missing mobile route '+r)});
+await check('All 32 zones have unique codes and contextual Natu guidance',async p=>{
+ await p.goto(base+'/WOW_APP.html#wow-route=zones',{waitUntil:'domcontentloaded'});
+ await p.waitForFunction(()=>Boolean(window.WOWUnified?.context),null,{timeout:15000});
+ const initial=await p.locator('#wowUnifiedContent .wow-u-zone-grid button').allTextContents();
+ const codes=initial.map(t=>(t.match(/BG\\d{7}/)||[])[0]).filter(Boolean);
+ if(codes.length!==32||new Set(codes).size!==32)throw Error('Expected 32 unique zone buttons; got '+codes.length+' unique '+new Set(codes).size);
+ for(const code of codes){
+  const info=await p.evaluate(code=>{
+   if(!window.WOWUnified.setZone(code))return {error:'setZone returned false'};
+   const ctx=window.WOWUnified.context();
+   return {ctx,heading:document.querySelector('#wowUnifiedContent')?.innerText||'',natu:document.querySelector('#wowNatuContext')?.textContent||'',crumb:document.querySelector('#wowUnifiedBreadcrumb')?.textContent||''};
+  },code);
+  if(info.error||info.ctx.zoneCode!==code||!info.heading.includes(code)||!info.crumb.includes(code)||!info.natu.includes('Нату:'))throw Error('Zone context mismatch '+code+': '+JSON.stringify(info).slice(0,450));
+ }
+});
+await check('Measures and indicators filter strictly to selected zone',async p=>{
+ await p.goto(base+'/WOW_APP.html#wow-route=zones',{waitUntil:'domcontentloaded'});
+ await p.waitForFunction(()=>Boolean(window.WOWUnified?.context),null,{timeout:15000});
+ const codes=await p.locator('#wowUnifiedContent .wow-u-zone-grid button').allTextContents();
+ const first=(codes[0].match(/BG\\d{7}/)||[])[0],second=(codes[1].match(/BG\\d{7}/)||[])[0];
+ if(!first||!second||first===second)throw Error('Need two distinct zone codes');
+ for(const view of ['measures','indicators','financing']){
+  await p.evaluate(({first,view})=>{window.WOWUnified.setZone(first);window.WOWUnified.navigate(view)}, {first,view});
+  const search=p.locator('#wowUnifiedContent input[aria-label="Търсене на зона"]');
+  await search.waitFor({state:'visible'});
+  if(await search.inputValue()!==first)throw Error('Selected zone not carried to '+view);
+  const heads=await p.locator('#wowUnifiedContent section h3').allTextContents();
+  if(heads.length!==1||!heads[0].includes(first)||heads[0].includes(second))throw Error('Wrong zone in '+view+': '+heads.join('|'));
+  const natu=await p.locator('#wowNatuContext').innerText();
+  if(!natu.includes(first)&&!await p.locator('#wowUnifiedBreadcrumb').innerText().then(t=>t.includes(first)))throw Error('Guide lost selected zone '+view);
+ }
+});
+await check('792 species search and individual narrative render in browser',async p=>{
+ await p.goto(base+'/index.html#tree',{waitUntil:'domcontentloaded'});
+ await p.locator('#tree [data-route="species"]').click();
+ const frame=p.frameLocator('#app');
+ const search=frame.locator('#wowSpeciesCatalogue input[type="search"]');
+ await search.waitFor({state:'visible',timeout:20000});
+ const response=await p.request.get(base+'/data/species-stories-792.json');
+ if(!response.ok())throw Error('Species JSON HTTP '+response.status());
+ const data=await response.json();const names=Object.keys(data);
+ if(names.length!==792)throw Error('Species count mismatch');
+ const name=names.find(n=>n.length>6)||names[0];
+ await search.fill(name);
+ const btn=frame.locator('#wowSpeciesCatalogue button').filter({hasText:name}).first();
+ await btn.waitFor({state:'visible',timeout:5000});await btn.click();
+ const content=await frame.locator('#wowSpeciesCatalogue').innerText();
+ if(!content.includes(name)||!content.includes(data[name]))throw Error('Species narrative not displayed for '+name);
+});
 writeFileSync(resolve(out,'report.json'),JSON.stringify({tested:results.length,passed:results.length-failures,failed:failures,results},null,2));writeFileSync(resolve(out,'report.txt'),results.map(r=>`${r.status}\t${r.name}${r.detail?'\t'+r.detail:''}`).join('\n')+`\nTOTAL ${results.length} FAIL ${failures}\n`);await browser.close();await new Promise(r=>server.close(r));process.exitCode=failures?1:0;
