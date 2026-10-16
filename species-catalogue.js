@@ -46,6 +46,15 @@ function draw(){
 }
 let scheduled=false,observer=null;
 function boot(){
+ // The legacy intro overlay may remain above the unified catalogue even when hidden.
+ // Make it non-interactive only after the unified app exists; keep the shell intro intact.
+ const splash=document.getElementById('tpuApprovedSplash');
+ if(splash&&window.WOWUnified?.context){
+  splash.inert=true;
+  splash.setAttribute('aria-hidden','true');
+  splash.style.setProperty('pointer-events','none','important');
+  splash.style.setProperty('display','none','important');
+ }
  const next=document.getElementById('wowUnifiedContent');
  if(!next||!window.WOWUnified?.context)return false;
  if(root!==next){
