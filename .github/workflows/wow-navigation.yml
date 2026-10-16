@@ -54,6 +54,8 @@ jobs:
           PY
       - name: Inspect original Tera MP4 codec
         run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
           ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_type,codec_name,profile,pix_fmt,width,height -of json media/TERA_TPU_PLOVDIV_PANORAMA_3MIN_12_10_2026.mp4
           node -e "const fs=require('fs'); const f='media/TERA_TPU_PLOVDIV_PANORAMA_3MIN_12_10_2026.mp4'; console.log('MP4 bytes:',fs.statSync(f).size)"
       - name: Test routes in Chromium
