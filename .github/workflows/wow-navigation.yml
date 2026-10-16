@@ -44,6 +44,14 @@ jobs:
               for n in range(start,end+1):
                   print(f'{n}: {a[n-1][:1800]}')
           PY
+      - name: Inspect remaining JS failure line 3324
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          a=Path('WOW_APP.html').read_text(encoding='utf-8').splitlines()
+          for n in range(3322,3328):
+              print(f'{n}: {a[n-1][:2400]}')
+          PY
       - name: Test routes in Chromium
         run: node tests/wow-navigation.mjs
       - name: Save evidence regardless of result
