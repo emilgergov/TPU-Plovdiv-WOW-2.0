@@ -19,6 +19,8 @@ jobs:
           node-version: '22'
       - run: npm install --no-save playwright@1.56.1
       - run: npx playwright install --with-deps chromium
+      - name: Install Chrome with licensed media codec support
+        run: npx playwright install chrome
       - name: Check required WOW media
         run: node tests/check-assets.mjs
       - name: Validate direct-route startup repair candidate (CI only)
