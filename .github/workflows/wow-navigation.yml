@@ -75,6 +75,8 @@ jobs:
           JS
       - name: Test routes in Chromium
         run: node tests/wow-navigation.mjs
+      - name: Capture desktop and mobile visual evidence
+        run: node tests/wow-visual-evidence.mjs
       - name: Save evidence regardless of result
         if: always()
         uses: actions/upload-artifact@v4
