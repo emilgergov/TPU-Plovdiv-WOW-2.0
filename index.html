@@ -43,6 +43,13 @@
  .tree-scroll-nav button:disabled{opacity:.38;cursor:default}
  .tree-swipe-hint{top:68px}
 }
+/* Visual QA 17 Oct: mobile swipe guidance never covers the artwork or caption. */
+@media(max-width:700px){
+ .tree-swipe-hint{top:auto!important;bottom:112px!important;left:50%!important;max-width:calc(100% - 112px)!important;padding:5px 9px!important;font-size:11px!important;line-height:1.25!important}
+ .tree-scroll-nav{bottom:62px!important}
+ .tree-controls{bottom:4px!important}
+ .tree-stage{bottom:54px!important}
+}
 </style></head><body>
 <iframe id="app" title="Интерактивна работна основа на ТПУ Пловдив" ></iframe>
 <section id="intro" aria-label="Кинематографично представяне"><div id="ambient"></div><img id="frame" alt="Кадър от референтните екрани на WOW 2.0"><div class="shade"></div><div class="top"><span>ТПУ ПЛОВДИВ · WOW 2.0</span><span id="counter">01 / 11</span></div><div class="bottom"><a class="classic-link" href="#classic" data-classic="true" title="Петте функции на класическото представяне">📄 Класически ТПУ ↗</a><button id="sound" type="button" aria-label="Включване на музиката">♫ Включи музика</button><button id="next">Напред →</button></div><div class="progress" id="progress"></div></section>
