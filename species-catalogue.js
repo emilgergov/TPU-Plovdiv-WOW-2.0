@@ -5,7 +5,7 @@ let root=null;
 // Injected by the outer shell: it may execute before the unified app is ready.
 // Never permanently exit on a transient startup race.
 let stories=null,loading=null,active='';
-let zoneMap=null,zoneLoading=null;
+let zoneMap=null,zoneLoading=null;let renderedContext='';
 function loadZones(){if(zoneMap)return Promise.resolve(zoneMap);if(!zoneLoading)zoneLoading=fetch('data/zone-species-map.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('zone map unavailable');return r.json()}).then(m=>{if(Object.keys(m).length!==32)throw Error('invalid zone map');return zoneMap=m}).catch(e=>{zoneLoading=null;throw e});return zoneLoading;}
 async function load(){
  if(stories)return stories;
@@ -23,14 +23,16 @@ function draw(){
  const ctx=window.WOWUnified.context();if(!ctx||ctx.view!=='species')return;
  root=document.getElementById('wowUnifiedContent');if(!root)return;
  const target=root.querySelector('#wowSpeciesCatalogue');
- if(target)return;
+ const contextKey=ctx.view+'|'+(ctx.zoneCode||'');
+ if(target&&renderedContext===contextKey)return;
+ if(target)target.remove();renderedContext=contextKey;
  const pane=node('section');pane.id='wowSpeciesCatalogue';pane.style.cssText='margin:18px 0;padding:16px;border:1px solid #b4cbb7;border-radius:14px;background:#f6fbf5;color:#173821';
  const zoneCode=ctx.zoneCode;
  pane.append(node('h3',zoneCode?'Видове в зона '+zoneCode:'Каталог на видовите разкази'));
  pane.append(node('p',zoneCode?'Показват се само видовете, свързани със зоната в работния регистър.':'Общ каталог на 792 уникални вида — без избрана зона.'));
  const status=node('p','Зареждане на видовите разкази…');pane.append(status);root.prepend(pane);
  Promise.all([load(),zoneCode?loadZones():Promise.resolve(null)]).then(([data,zones])=>{
-  if(!pane.isConnected)return;
+  if(!pane.isConnected||window.WOWUnified.context()?.zoneCode!==zoneCode)return;
   status.remove();const input=node('input');input.type='search';input.placeholder='Търси вид по научно име';input.setAttribute('aria-label','Търсене на вид по научно име');input.style.cssText='box-sizing:border-box;width:100%;padding:12px;border:1px solid #7b9e82;border-radius:8px;font-size:16px';pane.append(input);
   const result=node('div');result.setAttribute('aria-live','polite');pane.append(result);
   function render(){
@@ -45,7 +47,7 @@ function draw(){
    }
   }input.addEventListener('input',render);render();
  }).catch(()=>{
-  if(status.isConnected)status.textContent='Липсва видовият регистър или връзката вид–зона — ПРЕДСТОИ. Не показваме общите 792 вида като видове на зоната.';
+  if(status.isConnected&&window.WOWUnified.context()?.zoneCode===zoneCode)status.textContent='Липсва видовият регистър или връзката вид–зона — ПРЕДСТОИ. Не показваме общите 792 вида като видове на зоната.';
  });
 }
 let scheduled=false,observer=null;
