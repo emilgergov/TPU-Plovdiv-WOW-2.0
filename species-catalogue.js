@@ -1,8 +1,9 @@
 /* WOW 2.0 species catalogue adapter. Reads local, versioned stories only.
    Never assigns a species to a Natura zone without an authoritative zone-species link. */
 (()=>{'use strict';
-const root=document.getElementById('wowUnifiedContent');
-if(!root||!window.WOWUnified)return;
+let root=null;
+// Injected by the outer shell: it may execute before the unified app is ready.
+// Never permanently exit on a transient startup race.
 let stories=null,loading=null,active='';
 async function load(){
  if(stories)return stories;
@@ -18,6 +19,7 @@ async function load(){
 function node(tag,txt){const e=document.createElement(tag);if(txt!==undefined)e.textContent=txt;return e}
 function draw(){
  const ctx=window.WOWUnified.context();if(!ctx||ctx.view!=='species')return;
+ root=document.getElementById('wowUnifiedContent');if(!root)return;
  const target=root.querySelector('#wowSpeciesCatalogue');
  if(target)return;
  const pane=node('section');pane.id='wowSpeciesCatalogue';pane.style.cssText='margin:18px 0;padding:16px;border:1px solid #b4cbb7;border-radius:14px;background:#f6fbf5;color:#173821';
@@ -42,5 +44,19 @@ function draw(){
   if(status.isConnected)status.textContent='Видовият регистър още не е публикуван в този кандидат — ПРЕДСТОИ. Не използвай този екран за представяне.';
  });
 }
-let scheduled=false;const observer=new MutationObserver(()=>{if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;draw()})});observer.observe(root,{childList:true,subtree:true});draw();
+let scheduled=false,observer=null;
+function boot(){
+ const next=document.getElementById('wowUnifiedContent');
+ if(!next||!window.WOWUnified?.context)return false;
+ if(root!==next){
+  observer?.disconnect();root=next;
+  observer=new MutationObserver(()=>{if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;draw()})});
+  observer.observe(root,{childList:true,subtree:true});
+ }
+ draw();return true;
+}
+boot();
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
+// The host app can initialize its unified root after DOMContentLoaded.
+let tries=0;const timer=setInterval(()=>{if(boot()||++tries>=100)clearInterval(timer)},100);
 })();
