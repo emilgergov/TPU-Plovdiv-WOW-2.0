@@ -6,6 +6,9 @@ on:
       - 'index.html'
       - 'WOW_APP.html'
       - 'tests/**'
+      - 'data/**'
+      - 'species-catalogue.js'
+      - 'presentation-fixes.js'
       - 'media/**'
       - '.github/workflows/wow-navigation.yml'
 jobs:
@@ -73,6 +76,8 @@ jobs:
           })));
           await browser.close();
           JS
+      - name: Check integrated content readiness
+        run: node tests/wow-integration-readiness.mjs
       - name: Test routes in Chromium
         run: node tests/wow-navigation.mjs
       - name: Capture desktop and mobile visual evidence
