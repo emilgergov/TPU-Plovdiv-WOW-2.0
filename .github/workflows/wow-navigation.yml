@@ -77,6 +77,27 @@ jobs:
         run: node tests/wow-navigation.mjs
       - name: Capture desktop and mobile visual evidence
         run: node tests/wow-visual-evidence.mjs
+      - name: Package verified Netlify deployment
+        if: success()
+        run: |
+          zip -q -r WOW_PLOVDIV_VERIFIED_2026_10_16.zip . -x '.git/*' '.github/*' 'tests/*' 'node_modules/*' 'wow-test-results/*' '*.zip' 'README*'
+          unzip -l WOW_PLOVDIV_VERIFIED_2026_10_16.zip | grep -E '(^|/)index.html
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wow-navigation-evidence
+          path: wow-test-results/
+          if-no-files-found: warn
+
+          unzip -l WOW_PLOVDIV_VERIFIED_2026_10_16.zip | grep 'TERA_TPU_PLOVDIV_PANORAMA_3MIN_12_10_2026.mp4'
+      - name: Upload Netlify-ready verified ZIP
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: WOW-PLOVDIV-NETLIFY-VERIFIED
+          path: WOW_PLOVDIV_VERIFIED_2026_10_16.zip
+          if-no-files-found: error
+          compression-level: 0
       - name: Save evidence regardless of result
         if: always()
         uses: actions/upload-artifact@v4
