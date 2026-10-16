@@ -29,7 +29,7 @@ await check('All 32 zones have unique codes and contextual Natu guidance',async 
  await p.goto(base+'/WOW_APP.html#wow-route=zones',{waitUntil:'domcontentloaded'});
  await p.waitForFunction(()=>Boolean(window.WOWUnified?.context),null,{timeout:15000});
  const initial=await p.locator('#wowUnifiedContent .wow-u-zone-grid button').allTextContents();
- const codes=initial.map(t=>(t.match(/BG\\d{7}/)||[])[0]).filter(Boolean);
+ const codes=initial.map(t=>(t.match(/BG\d{7}/)||[])[0]).filter(Boolean);
  if(codes.length!==32||new Set(codes).size!==32)throw Error('Expected 32 unique zone buttons; got '+codes.length+' unique '+new Set(codes).size);
  for(const code of codes){
   const info=await p.evaluate(code=>{
@@ -44,7 +44,7 @@ await check('Measures and indicators filter strictly to selected zone',async p=>
  await p.goto(base+'/WOW_APP.html#wow-route=zones',{waitUntil:'domcontentloaded'});
  await p.waitForFunction(()=>Boolean(window.WOWUnified?.context),null,{timeout:15000});
  const codes=await p.locator('#wowUnifiedContent .wow-u-zone-grid button').allTextContents();
- const first=(codes[0].match(/BG\\d{7}/)||[])[0],second=(codes[1].match(/BG\\d{7}/)||[])[0];
+ const first=(codes[0].match(/BG\d{7}/)||[])[0],second=(codes[1].match(/BG\d{7}/)||[])[0];
  if(!first||!second||first===second)throw Error('Need two distinct zone codes');
  for(const view of ['measures','indicators','financing']){
   await p.evaluate(({first,view})=>{window.WOWUnified.setZone(first);window.WOWUnified.navigate(view)}, {first,view});
