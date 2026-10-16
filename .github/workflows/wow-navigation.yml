@@ -34,6 +34,16 @@ jobs:
                   if 0<k<=len(a):
                       print(f'{k}: {a[k-1][:320]}')
           PY
+      - name: Inspect remaining optional panel startup failures
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          a=Path('WOW_APP.html').read_text(encoding='utf-8').splitlines()
+          for start,end in ((3287,3298),(3310,3321)):
+              print('DETAIL BLOCK',start,end)
+              for n in range(start,end+1):
+                  print(f'{n}: {a[n-1][:1800]}')
+          PY
       - name: Test routes in Chromium
         run: node tests/wow-navigation.mjs
       - name: Save evidence regardless of result
