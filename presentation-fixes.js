@@ -31,7 +31,7 @@
     // Never imply that absent source records are proof that measures or funding do not exist.
     if(messages[view]){
       for(const p of content.querySelectorAll('p')){
-        if(p.textContent.trim()===messages.measures && view!=='measures')p.textContent=messages[view];
+        if(view!=='measures' && (/За тази зона няма достъпни записи за мерки в текущия регистър/.test(p.textContent)||/За тази зона няма налични записи за мерки в текущия регистър/.test(p.textContent)))p.textContent=messages[view];
       }
       const search=content.querySelector('input[aria-label="Търсене на зона"]');
       const code=(search&&search.value.trim().match(/BG\d{7}/i)||[])[0];
