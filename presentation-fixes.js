@@ -2,6 +2,21 @@
    Preserves existing application, source registries, and all official data. */
 (function () {
   'use strict';
+  // Visual QA: keep the in-app heading and exit action on separate rows on phones.
+  // The catalogue is a standalone screen: do not show the old zone-picker below it.
+  const visualStyle=document.createElement('style');
+  visualStyle.id='wow-visual-qa-20261017';
+  visualStyle.textContent=`
+    #wowBackToApprovedTree{display:none!important}
+    #wowUnifiedContent:has(> #wowSpeciesCatalogue) > :not(#wowSpeciesCatalogue){display:none!important}
+    @media(max-width:700px){
+      #wowUnifiedApp .wow-u-head{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:8px!important;margin-bottom:14px!important}
+      #wowUnifiedApp .wow-u-head h1{font-size:clamp(22px,6vw,29px)!important;line-height:1.2!important;padding:0!important}
+      #wowUnifiedApp .wow-u-head .wow-u-btn{position:static!important;align-self:flex-start!important;max-width:100%!important;margin:0!important}
+      #wowUnifiedContent{clear:both!important}
+      #wowUnifiedContent #wowSpeciesCatalogue{margin:0!important;padding:14px!important}
+    }`;
+  document.head.appendChild(visualStyle);
   const content=document.getElementById('wowUnifiedContent');
   if (!content) return;
   const messages={
