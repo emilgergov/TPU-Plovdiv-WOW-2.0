@@ -73,6 +73,8 @@ jobs:
           })));
           await browser.close();
           JS
+      - name: Check integrated content readiness
+        run: node tests/wow-integration-readiness.mjs
       - name: Test routes in Chromium
         run: node tests/wow-navigation.mjs
       - name: Capture desktop and mobile visual evidence
