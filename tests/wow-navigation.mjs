@@ -83,12 +83,12 @@ await check('792 species search and individual narrative render in browser',asyn
  await search.fill(name);
  const btn=frame.locator('#wowSpeciesCatalogue button').filter({hasText:name}).first();
  await btn.waitFor({state:'visible',timeout:5000});await btn.click();
- const expected=String(data[name]).replace(/\\s+/g,' ').trim();
+ const expected=String(data[name]).replace(/\s+/g,' ').trim();
  await p.waitForFunction(({name,expected})=>{
   const d=document.querySelector('#app')?.contentDocument;
   const panel=d?.getElementById('wowSpeciesCatalogue');
   if(!panel)return false;
-  const actual=(panel.innerText||'').replace(/\\s+/g,' ').trim();
+  const actual=(panel.innerText||'').replace(/\s+/g,' ').trim();
   return actual.includes(name)&&actual.includes(expected);
  },{name,expected},{timeout:7000}).catch(async e=>{
   const state=await p.evaluate(()=>{const d=document.querySelector('#app')?.contentDocument;const panel=d?.getElementById('wowSpeciesCatalogue');return {view:document.querySelector('#app')?.contentWindow?.WOWUnified?.context?.()?.view,html:panel?.innerHTML?.slice(0,1800),text:panel?.innerText?.slice(0,1000)}});throw Error('Species detail mismatch '+name+': '+JSON.stringify(state)+'; '+e.message);
