@@ -2899,7 +2899,13 @@ const skip=$('bridgeSkip');if(skip)skip.addEventListener('click',finish,true);
 if(sound){sound.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();enabled=!enabled;syncSound();if(audio){if(enabled&&running)playAudio();else audio.pause()}},true);syncSound()}
 const back=$('tpuUniversalBack');if(back)back.addEventListener('click',()=>{if(running)intro()},true);
 if(bridge){const hint=document.createElement('div');hint.id='tpuBridgeMediaError';hint.hidden=true;hint.textContent='Видеото не е заредено. Разархивирайте цялата папка и отворете index.html от нея, или изберете „Към резултата“.';bridge.appendChild(hint)}
-intro();root.classList.add('tpu-boot-ready');
+if(location.hash.startsWith('#wow-route=')){
+  root.classList.remove('tpu-intro-mode','wow-pre-intro-lock','tpu-bridge-mode');
+  root.classList.add('tpu-entered');
+  splash.hidden=true;
+  window.tpuNavState='dashboard';
+}else intro();
+root.classList.add('tpu-boot-ready');
 })();</script>
 <style id="tpu-repair-20261009">
 #workBridge #tpuBridgeMediaError:not([hidden]){position:absolute;z-index:100;left:50%;top:50%;transform:translate(-50%,-50%);max-width:min(650px,85vw);background:#103b32f2;border:1px solid #b1e8c9;border-radius:14px;color:white;padding:24px;text-align:center;font:600 17px/1.5 Arial;box-shadow:0 8px 35px #0009}
@@ -3247,7 +3253,7 @@ html.tpu-bridge-mode #ntDirector,body.bridge-running #ntDirector,body.bridge-run
 @media(max-width:700px){#ntPanel.natu-tree .quiet-function-grid,#ntPanel.natu-tree .tree-branch-2 .quiet-function-grid{left:3%!important;right:3%!important;top:auto!important;bottom:13%!important;max-height:32vh!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}#ntPanel.natu-tree.wow-asking .natu-tree-center{left:3%!important;right:3%!important;bottom:25%!important;top:auto!important}#ntPanel.natu-tree.wow-asking .natu-tree-trunk{bottom:15%!important;top:auto!important}#wowAskNatu{bottom:12%}}
 </style>
 <script id="wow-beauty-first-actions">
-(function(){'use strict';var panel=document.getElementById('ntPanel'),groups=panel.querySelectorAll('.quiet-group');
+(function(){'use strict';var panel=document.getElementById('ntPanel');if(!panel)return;var groups=panel.querySelectorAll('.quiet-group');
 var ask=document.createElement('button');ask.id='wowAskNatu';ask.textContent='Попитай Нату';ask.type='button';panel.appendChild(ask);
 function closeGroups(){Array.prototype.forEach.call(groups,function(g){g.open=false;});panel.classList.remove('wow-menu');}
 ask.onclick=function(){closeGroups();panel.classList.add('wow-asking');document.getElementById('ntCommand').focus();};
@@ -3282,10 +3288,10 @@ skip.addEventListener('click',function(){if(audio){audio.pause();audio.currentTi
 @media(prefers-reduced-motion:reduce){#ntPanel.natu-tree .quiet-group>summary:hover{animation:none!important}}
 </style>
 <script id="wow-final-details-actions">
-(function(){'use strict';var panel=document.getElementById('ntPanel'),ask=document.getElementById('wowAskNatu'),groups=panel.querySelectorAll('.quiet-group');
+(function(){'use strict';var panel=document.getElementById('ntPanel'),ask=document.getElementById('wowAskNatu');if(!panel||!ask)return;var groups=panel.querySelectorAll('.quiet-group');
 function closeMenus(){Array.prototype.forEach.call(groups,function(g){g.open=false;});panel.classList.remove('wow-menu');}
 var docs=panel.querySelector('[data-quiet-action="classic"]');if(docs)docs.style.removeProperty('grid-column');
-Array.prototype.forEach.call(groups,function(group){var grid=group.querySelector('.quiet-function-grid'),close=document.createElement('button');close.type='button';close.className='wow-panel-close';close.textContent='×';close.setAttribute('aria-label','Прибери менюто');close.addEventListener('click',function(e){e.stopPropagation();closeMenus();group.querySelector('summary').focus();});grid.appendChild(close);});
+Array.prototype.forEach.call(groups,function(group){var grid=group.querySelector('.quiet-function-grid');if(!grid)return;var close=document.createElement('button');close.type='button';close.className='wow-panel-close';close.textContent='×';close.setAttribute('aria-label','Прибери менюто');close.addEventListener('click',function(e){e.stopPropagation();closeMenus();group.querySelector('summary').focus();});grid.appendChild(close);});
 ask.setAttribute('aria-expanded','false');ask.onclick=function(){var opening=!panel.classList.contains('wow-asking');closeMenus();panel.classList.toggle('wow-asking',opening);ask.textContent=opening?'Прибери разговора':'Попитай Нату';ask.setAttribute('aria-expanded',String(opening));if(opening)document.getElementById('ntCommand').focus();};
 var observer=new MutationObserver(function(){var open=panel.classList.contains('wow-asking');ask.textContent=open?'Прибери разговора':'Попитай Нату';ask.setAttribute('aria-expanded',String(open));});observer.observe(panel,{attributes:true,attributeFilter:['class']});
 })();
@@ -3303,7 +3309,7 @@ body.natu-tree-open #wowEntranceCard{display:none!important}
 </style>
 <script id="wow-tree-last-cleanup-actions">
 (function(){'use strict';var panel=document.getElementById('ntPanel'),ask=document.getElementById('wowAskNatu'),close=document.getElementById('ntClose');
-var dock=document.createElement('div');dock.id='wowTreeDock';dock.appendChild(ask);dock.appendChild(close);panel.appendChild(dock);close.setAttribute('aria-label','Затвори дървото на Нату');
+if(!panel||!ask||!close)return;var dock=document.createElement('div');dock.id='wowTreeDock';dock.appendChild(ask);dock.appendChild(close);panel.appendChild(dock);close.setAttribute('aria-label','Затвори дървото на Нату');
 // Both bird buttons dispatch the same category command; keep the existing main action.
 var birdShortcut=panel.querySelector('.tree-branch-0 [data-cmd="птици"]');if(birdShortcut)birdShortcut.remove();
 var tour=panel.querySelector('[data-quiet-action="presentation"]');if(tour)tour.textContent='Представи ТПУ';var hear=document.getElementById('ntHear');if(hear)hear.textContent='Приветствие';
@@ -3315,7 +3321,7 @@ new MutationObserver(stopGreeting).observe(panel,{attributes:true,attributeFilte
 </script>
 
 <style id="nt-photos-navigation-style">#ntPhotoOverlay[hidden]{display:none!important}#ntPhotoOverlay{position:fixed;inset:0;z-index:2147483100;background:#eff5eb;display:flex;flex-direction:column;font:16px Arial;color:#173e2b}#ntPhotoOverlay header{display:flex;align-items:center;gap:10px;padding:12px;background:#193e2c;color:white}#ntPhotoOverlay header strong{flex:1}#ntPhotoOverlay button{padding:8px 14px;border:1px solid #aaca99;border-radius:8px;background:#f0f8e9;color:#193e2c;cursor:pointer}#ntPhotoOverlay iframe{flex:1;width:100%;border:0;min-height:0}</style>
-<script id="nt-navigation-manual-sync">(function(){var panel=document.getElementById('ntPanel');var previous=panel.querySelector('.tree-branch-2 [data-cmd="назад"]');if(previous){var replacement=previous.cloneNode(true);replacement.dataset.cmd='предишна зона';replacement.textContent='Предишна зона';replacement.onclick=function(){window.WOWNatuTeraDirector.run('предишна зона');};previous.replaceWith(replacement);}window.addEventListener('keydown',function(e){var layer=document.getElementById('ntPhotoOverlay');if(e.key==='Escape'&&layer&&!layer.hidden){e.preventDefault();e.stopImmediatePropagation();document.getElementById('ntPhotoClose').click();}},true);})();</script>
+<script id="nt-navigation-manual-sync">(function(){var panel=document.getElementById('ntPanel');var previous=panel?panel.querySelector('.tree-branch-2 [data-cmd="назад"]'):null;if(previous){var replacement=previous.cloneNode(true);replacement.dataset.cmd='предишна зона';replacement.textContent='Предишна зона';replacement.onclick=function(){window.WOWNatuTeraDirector.run('предишна зона');};previous.replaceWith(replacement);}window.addEventListener('keydown',function(e){var layer=document.getElementById('ntPhotoOverlay');if(e.key==='Escape'&&layer&&!layer.hidden){e.preventDefault();e.stopImmediatePropagation();document.getElementById('ntPhotoClose').click();}},true);})();</script>
 
 <style id="wow-habitat-correction-1310">
 #wowHabitatView{font:15px/1.55 Arial,sans-serif;color:#193c2c}
