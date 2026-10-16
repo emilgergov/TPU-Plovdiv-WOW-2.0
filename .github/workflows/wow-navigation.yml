@@ -6,6 +6,9 @@ on:
       - 'index.html'
       - 'WOW_APP.html'
       - 'tests/**'
+      - 'data/**'
+      - 'species-catalogue.js'
+      - 'presentation-fixes.js'
       - 'media/**'
       - '.github/workflows/wow-navigation.yml'
 jobs:
