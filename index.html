@@ -100,12 +100,13 @@ function updateLinear(){
  linearBack.disabled=activeFruit==='zones'?false:fruitSteps.length<2;
 }
 function trackFruitStep(){
- if(!activeFruit||restoringFruitStep||activeFruit==='species'||activeFruit==='zones')return;
+ if(!activeFruit||restoringFruitStep||activeFruit==='species')return;
  try{
   const api=app.contentWindow.WOWUnified;
   if(!app.contentDocument?.body||!api?.context)return;
   const ctx=api.context(),view=ctx?.view||activeFruit,zone=ctx?.zoneCode||'';
   if(view!==activeFruit&&!zone)return;
+  if(activeFruit==='zones'&&zone&&fruitSteps.length===1){fruitSteps.push({fingerprint:'zones|'+zone,view:'zones',zone});updateLinear();return;}
   // A render from the state just exited is not a new user navigation.
   if(backGuardZone!==null){
    if(zone===backGuardZone)return;
