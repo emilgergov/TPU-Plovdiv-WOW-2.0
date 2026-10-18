@@ -76,8 +76,8 @@
   document.addEventListener('click',function(event){
     const button=event.target.closest('button,a,[role="button"]');
     if(!button||!button.closest('#wowUnifiedApp'))return;
-    const label=(button.textContent||'').replace(/\\s+/g,' ').trim();
-    if(/^(?:🌳\\s*)?(?:Към\\s+)?Дървото$/i.test(label)){
+    const label=(button.textContent||'').replace(/\s+/g,' ').trim();
+    if(/^(?:🌳\s*)?(?:Към\s+)?Дървото$/i.test(label)){
       event.preventDefault();event.stopImmediatePropagation();
       try{window.parent.document.getElementById('backTree').click()}catch(_){}
     }else if(/^Към основния екран$/i.test(label)){
@@ -86,8 +86,8 @@
   },true);
   function removeLegacyHome(){
     for(const button of document.querySelectorAll('#wowUnifiedApp button,#wowUnifiedApp a')){
-      const label=(button.textContent||'').replace(/\\s+/g,' ').trim();
-      if(/^←?\\s*Към основния екран$/i.test(label))button.hidden=true;
+      const label=(button.textContent||'').replace(/\s+/g,' ').trim();
+      if(/^←?\s*Към основния екран$/i.test(label))button.hidden=true;
     }
   }
   const homeObserver=new MutationObserver(removeLegacyHome);
@@ -97,8 +97,8 @@
   // WOWUnified's history. Keep the application's own contextual Back button.
   function hideLegacyFloatingBack(){
     for(const b of document.querySelectorAll('button, a, [role="button"]')){
-      const label=(b.textContent||'').replace(/\\s+/g,' ').trim();
-      if(!/^←\\s*НАЗАД$/i.test(label))continue;
+      const label=(b.textContent||'').replace(/\s+/g,' ').trim();
+      if(!/^←\s*НАЗАД$/i.test(label))continue;
       if(b.closest('#wowUnifiedContent'))continue;
       const css=getComputedStyle(b);
       if(css.position==='fixed'||css.position==='absolute'){
