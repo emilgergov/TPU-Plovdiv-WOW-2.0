@@ -142,15 +142,11 @@ linearBack.addEventListener('click',()=>{
   updateLinear();
  }catch(e){notice('Неуспешно връщане: '+e.message)}
  finally{
-  // Keep the history frozen through the asynchronous redraw.
-  setTimeout(()=>{
-   try{
-    const api=app.contentWindow.WOWUnified;
-    if(previous.zone&&api?.context()?.zoneCode!==previous.zone)api.setZone(previous.zone);
-   }catch(_){}
-   restoringFruitStep=false;
-   updateLinear();
-  },300);
+  // The navigation action has completed synchronously. Never swallow a second
+  // Back click while waiting for the iframe to redraw. backGuardZone prevents
+  // stale MutationObserver events from recreating the departed step.
+  restoringFruitStep=false;
+  updateLinear();
  }
 });
 // An actual user choice is allowed to revisit the zone we just left.
