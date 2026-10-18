@@ -1,0 +1,40 @@
+name: WOW 2.0 browser preview (GitHub Pages)
+on:
+  push:
+    branches:
+      - recovery/wow-navigation-zone-context-20261018
+  workflow_dispatch:
+# Fresh push creates a new workflow run and avoids duplicate Pages artifacts from re-running a failed attempt.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: wow-preview-pages
+  cancel-in-progress: true
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: wow-recovery-preview
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout complete WOW and media
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Confirm preview assets
+        run: |
+          test -s index.html
+          test -s WOW_APP.html
+          echo "index.html and WOW_APP.html found"
+          find . -maxdepth 2 -type f \( -iname '*.mp4' -o -iname '*.png' -o -iname '*.jpg' \) | head -25
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload complete static site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+      - name: Publish browser preview
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,28 @@
+name: WOW recovered zone-context navigation
+on:
+  push:
+    branches:
+      - recovery/wow-navigation-zone-context-20261018
+  workflow_dispatch:
+jobs:
+  navigation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Chromium for Playwright
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Run original zone and navigation checks
+        run: node tests/wow-navigation.mjs
+      - name: Save test screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wow-zone-navigation-results
+          path: wow-test-results/
+          if-no-files-found: ignore

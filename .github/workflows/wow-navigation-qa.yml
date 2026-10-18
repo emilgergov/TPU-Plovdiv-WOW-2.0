@@ -1,0 +1,32 @@
+name: WOW 3.0 browser navigation QA
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'presentation-fixes.js'
+      - 'species-catalogue.js'
+      - 'tests/**'
+      - '.github/workflows/wow-navigation-qa.yml'
+  workflow_dispatch:
+jobs:
+  navigation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Test complete navigation
+        run: node tests/wow-navigation.mjs
+      - name: Preserve screenshots and test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wow-3-navigation-results
+          path: wow-test-results/
+          if-no-files-found: ignore

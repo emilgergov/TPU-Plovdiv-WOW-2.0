@@ -6,9 +6,15 @@ on:
       - 'index.html'
       - 'WOW_APP.html'
       - 'tests/**'
+      - 'data/**'
+      - 'species-catalogue.js'
+      - 'presentation-fixes.js'
+      - 'media/**'
       - '.github/workflows/wow-navigation.yml'
 jobs:
   audit:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -18,8 +24,64 @@ jobs:
           node-version: '22'
       - run: npm install --no-save playwright@1.56.1
       - run: npx playwright install --with-deps chromium
+      - name: Install Chrome with licensed media codec support
+        run: npx playwright install chrome
+      - name: Check required WOW media
+        run: node tests/check-assets.mjs
+      - name: Inspect exact failing HTML statements
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          a=Path('WOW_APP.html').read_text(encoding='utf-8').splitlines()
+          for n in (3272,3297,3320):
+              print('ERROR LOCATION',n)
+              for k in range(n-3,n+4):
+                  if 0<k<=len(a):
+                      print(f'{k}: {a[k-1][:320]}')
+          PY
+      - name: Inspect remaining optional panel startup failures
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          a=Path('WOW_APP.html').read_text(encoding='utf-8').splitlines()
+          for start,end in ((3287,3298),(3310,3321)):
+              print('DETAIL BLOCK',start,end)
+              for n in range(start,end+1):
+                  print(f'{n}: {a[n-1][:1800]}')
+          PY
+      - name: Inspect remaining JS failure line 3324
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          a=Path('WOW_APP.html').read_text(encoding='utf-8').splitlines()
+          for n in range(3322,3328):
+              print(f'{n}: {a[n-1][:2400]}')
+          PY
+      - name: Inspect original Tera MP4 codec
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_type,codec_name,profile,pix_fmt,width,height -of json media/TERA_TPU_PLOVDIV_PANORAMA_3MIN_12_10_2026.mp4
+          node -e "const fs=require('fs'); const f='media/TERA_TPU_PLOVDIV_PANORAMA_3MIN_12_10_2026.mp4'; console.log('MP4 bytes:',fs.statSync(f).size)"
+      - name: Verify H264 support in test Chromium
+        run: |
+          node --input-type=module <<'JS'
+          import { chromium } from 'playwright';
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage();
+          console.log('Chromium H264 support:',await page.evaluate(()=>({
+            h264:document.createElement('video').canPlayType('video/mp4; codecs="avc1.64001f, mp4a.40.2"'),
+            mp4:document.createElement('video').canPlayType('video/mp4'),
+            ua:navigator.userAgent
+          })));
+          await browser.close();
+          JS
+      - name: Check integrated content readiness
+        run: node tests/wow-integration-readiness.mjs
       - name: Test routes in Chromium
         run: node tests/wow-navigation.mjs
+      - name: Capture desktop and mobile visual evidence
+        run: node tests/wow-visual-evidence.mjs
       - name: Save evidence regardless of result
         if: always()
         uses: actions/upload-artifact@v4
