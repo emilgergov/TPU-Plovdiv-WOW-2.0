@@ -86,7 +86,8 @@
   },true);
   function removeLegacyHome(){
     for(const button of document.querySelectorAll('#wowUnifiedApp button,#wowUnifiedApp a')){
-      if(/^Към основния екран$/i.test((button.textContent||'').trim()))button.hidden=true;
+      const label=(button.textContent||'').replace(/\\s+/g,' ').trim();
+      if(/^←?\\s*Към основния екран$/i.test(label))button.hidden=true;
     }
   }
   const homeObserver=new MutationObserver(removeLegacyHome);
