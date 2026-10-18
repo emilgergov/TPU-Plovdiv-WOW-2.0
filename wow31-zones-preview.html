@@ -1,0 +1,229 @@
+<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ТПУ Пловдив — WOW 3.1 · ТЕСТ ЗОНИ</title><style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#07190f;color:#fff;font-family:system-ui,Arial,sans-serif}button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #ffe098;outline-offset:3px}#intro{position:fixed;inset:0;z-index:10;overflow:hidden;background:#07190f}#ambient{position:absolute;inset:-5%;background-position:center;background-size:cover;filter:blur(36px) brightness(.4);transform:scale(1.15)}#frame{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:1;transition:opacity .5s ease;filter:drop-shadow(0 0 12px #0008)}#frame.tone-match{filter:brightness(.80) saturate(.88) contrast(1.02) drop-shadow(0 0 12px #0008)}.shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(#041009a9,transparent 14%,transparent 84%,#041009ce)}.top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:15px 22px;font-size:clamp(13px,1.4vw,19px);font-weight:750;text-shadow:0 2px 6px #000}.bottom{position:absolute;bottom:0;left:0;right:0;display:flex;gap:14px;align-items:center;justify-content:space-between;padding:18px 22px}.bottom button,.nav button{border:1px solid #b6d8bc8a;background:#145b3c;color:#fff;border-radius:24px;padding:10px 18px;font-weight:650}.bottom button:hover,.nav button:hover{background:#278553}.classic-link{display:inline-flex;align-items:center;justify-content:center;gap:5px;text-decoration:none;border:1px solid #ecd69d;background:#173c2e;color:#fff6d8;border-radius:24px;padding:10px 16px;font-weight:700;font-size:14px;white-space:nowrap}.classic-link:hover,.classic-link:focus-visible{background:#286048;outline:2px solid #f6d18b;outline-offset:2px}.classic-tree{position:absolute;z-index:4;top:14px;left:14px;box-shadow:0 4px 18px #0008}@media(max-width:700px){.bottom{gap:5px;padding:12px 8px}.bottom .small{display:none}.bottom button,.classic-link{font-size:12px;padding:9px 10px}.classic-tree{top:8px;left:8px;font-size:12px}}#sound{min-width:136px}#sound:focus-visible{outline:3px solid #ffe098}.progress{position:absolute;bottom:0;left:0;height:4px;background:#f6d18b;transition:width 4.2s linear;width:0}.hidden{display:none!important}#tree{position:fixed;inset:0;z-index:5;background:#08251a;overflow:hidden}
+.tree-stage{position:absolute;inset:0 0 52px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#102c20}
+.tree-stage img{display:block;width:100%;height:100%;object-fit:contain;user-select:none}
+.tree-stage:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#102c20,#102c2000 15%,#102c2000 85%,#102c20);pointer-events:none}
+.hotspot{position:absolute;display:block;border:2px solid transparent;border-radius:50%;background:transparent;cursor:pointer;transition:box-shadow .2s,transform .2s;transform:translate(-50%,-50%)}
+.hotspot:hover,.hotspot:focus-visible{border-color:#fff9bf;box-shadow:0 0 0 5px #f5d67c70,0 0 28px #ffdf61;outline:none;transform:translate(-50%,-50%) scale(1.09)}
+.hotspot:active{transform:translate(-50%,-50%) scale(.98)}
+.tree-controls{position:fixed;z-index:18;right:12px;left:auto;bottom:8px;height:auto;display:flex;align-items:center;justify-content:flex-end;background:transparent;border:0}.tree-more{position:relative}.tree-more summary{list-style:none;cursor:pointer;border:1px solid #ffdf97a8;border-radius:24px;padding:9px 16px;background:#10422ef2;color:#fff;font-weight:700;box-shadow:0 3px 12px #0008}.tree-more summary::-webkit-details-marker{display:none}.tree-more-actions{position:fixed;bottom:70px;right:14px;z-index:30;display:flex;flex-direction:column;gap:8px;min-width:205px;padding:10px;background:#08291ff5;border:1px solid #bfa66b88;border-radius:15px;box-shadow:0 6px 20px #0008}.tree-more-actions button{white-space:nowrap}
+.tree-controls button{border:1px solid #ffdf97a8;border-radius:30px;padding:9px 17px;color:white;background:#10422eea;cursor:pointer;font-weight:700}
+.tree-controls button:hover{background:#1a6d45}
+#app{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:1;background:#07190f;visibility:hidden}#app.active{visibility:visible;z-index:7}
+#backTree{position:fixed;z-index:9;bottom:16px;right:16px;border:1px solid #f3dfa4;border-radius:30px;padding:10px 16px;background:#114c36;color:#fff;display:none}#backTree.show{display:none}/* In-app navigation provides the visible back/tree controls; keep bridge button as a non-visual fallback. */#status{position:fixed;z-index:12;bottom:68px;left:50%;transform:translateX(-50%);max-width:min(92vw,650px);padding:12px 18px;border:1px solid #e6d49b;background:#08291feb;color:#fff;border-radius:14px;text-align:center;box-shadow:0 8px 35px #0008}#status[hidden]{display:none}
+@media(max-width:700px){.tree-stage{overflow-x:auto;overflow-y:hidden;justify-content:flex-start;scrollbar-width:thin;scrollbar-color:#bfa66b #102c20;touch-action:pan-x}.tree-stage .tree-canvas{width:max(620px,calc((100dvh - 52px)*16/9))!important;min-width:620px;height:calc(100dvh - 52px);max-height:calc(100dvh - 52px);flex:0 0 auto}.tree-stage img{width:100%;height:100%;max-width:100%;object-fit:contain}.tree-controls{bottom:0;white-space:nowrap}.tree-controls button{font-size:12px;padding:8px 11px}.tree-stage:after{content:none}}
+
+
+/* Mobile swipe hint is fixed to the visible tree viewport, not the oversized canvas.
+   It remains readable after horizontal scrolling, without covering fruit controls. */
+.tree-swipe-hint{display:none}
+@media(max-width:700px){
+ .tree-swipe-hint{display:block;position:absolute;z-index:5;left:50%;top:94px;bottom:auto;transform:translateX(-50%);max-width:calc(100% - 24px);padding:7px 12px;border-radius:999px;background:#09271de8;border:1px solid #c9b77d;color:#fff7db;font-size:12px;line-height:1.3;text-align:center;white-space:normal;pointer-events:none;box-shadow:0 2px 10px #0008}
+}
+/* Mobile containment: preserve the approved tree and horizontal fruit navigation,
+   but prevent the page itself from becoming wider than the viewport. */
+@media(max-width:700px){
+ html,body{width:100%;max-width:100%;overflow-x:hidden}
+ #tree{width:100%;max-width:100%;overflow:hidden}
+ .tree-stage{left:0;right:0;max-width:100%;min-width:0;overscroll-behavior-x:contain}
+ .tree-stage .tree-canvas{max-width:none}
+ .tree-controls{left:8px;right:8px;max-width:calc(100% - 16px);min-width:0;flex-wrap:wrap;justify-content:flex-end;white-space:normal;gap:4px}
+ .tree-controls button{max-width:100%;white-space:normal}
+ #status{max-width:calc(100vw - 24px);overflow-wrap:anywhere}
+ #app,iframe{max-width:100%}
+}
+
+#classicPanel{position:fixed;inset:0;z-index:30;background:radial-gradient(ellipse at 78% 15%,#6c4a1e88,transparent 50%),linear-gradient(135deg,#09251c,#123b2d 60%,#172a20);color:#f9ebcc;overflow:auto;padding:clamp(18px,4vw,52px)}#classicPanel[hidden]{display:none}#classicPanel .classic-wrap{max-width:1000px;margin:0 auto}#classicPanel h1{font-family:Georgia,serif;font-size:clamp(26px,4vw,44px);margin:12px 0;color:#f9d895}#classicPanel p{line-height:1.6;color:#e5dcc6}#classicPanel .classic-actions{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}#classicPanel button,#classicPanel a.action{display:inline-block;background:#174d37;color:#fff5db;border:1px solid #d7b76c;border-radius:12px;padding:10px 16px;text-decoration:none;cursor:pointer}#classicPanel .classic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,390px),1fr));gap:14px;margin:24px 0}#classicPanel article{border:1px solid #bb985e88;background:#082219cc;border-radius:18px;padding:22px;box-shadow:0 12px 30px #0003}#classicPanel h2{font-family:Georgia,serif;font-size:22px;color:#f9d895;margin:0 0 10px}#classicPanel article p{font-size:14px;margin:0 0 16px}#classicPanel .doclinks{display:flex;gap:10px;flex-wrap:wrap}#classicPanel .doclinks a{color:#fff4da;background:#245b40;border:1px solid #d7b76c88;padding:9px 12px;border-radius:9px;text-decoration:none;font-weight:600}#classicPanel .doclinks a:hover,#classicPanel button:hover{background:#31704d}#classicPanel .note{font-size:13px;opacity:.85}
+
+/* The approved fruit tree is the only navigation hub; legacy duplicate actions are hidden. */
+#tree .tree-controls,#tree .tree-scroll-nav,#tree .tree-swipe-hint{display:none!important}
+/* Mobile tree: accessible horizontal navigation, without modifying fruit geometry. */
+.tree-scroll-nav{display:none}
+@media(max-width:700px){
+ .tree-scroll-nav{position:absolute;z-index:7;left:8px;right:8px;bottom:54px;display:flex;justify-content:space-between;pointer-events:none}
+ .tree-scroll-nav button{pointer-events:auto;min-width:46px;min-height:46px;border-radius:50%;border:2px solid #f3dfa4;background:#10422ef2;color:white;font-size:23px;font-weight:800;box-shadow:0 3px 14px #0009}
+ .tree-scroll-nav button:disabled{opacity:.38;cursor:default}
+ .tree-swipe-hint{top:68px}
+}
+/* Visual QA 17 Oct: mobile swipe guidance never covers the artwork or caption. */
+@media(max-width:700px){
+ .tree-swipe-hint{top:auto!important;bottom:112px!important;left:50%!important;max-width:calc(100% - 112px)!important;padding:5px 9px!important;font-size:11px!important;line-height:1.25!important}
+ .tree-scroll-nav{bottom:62px!important}
+ .tree-controls{bottom:4px!important}
+ .tree-stage{bottom:54px!important}
+}
+/* WOW 3.1: single parent-owned navigation bar. */
+#wowLinearNav{position:fixed;z-index:20;left:12px;right:12px;bottom:10px;display:none;align-items:center;justify-content:space-between;gap:10px;pointer-events:none}
+#wowLinearNav.active{display:flex}
+#wowLinearNav button{pointer-events:auto;background:#104d36;color:#fff;border:1px solid #e4d09a;border-radius:22px;padding:10px 18px;font-weight:700;box-shadow:0 3px 14px #0008}
+#wowLinearNav button:disabled{opacity:.4}
+#wowLinearNav .wow-step{background:#09291fdd;border:1px solid #9eae8b;border-radius:22px;padding:9px 16px;font-weight:650}
+@media(max-width:700px){#wowLinearNav{left:6px;right:6px;bottom:5px;gap:5px}#wowLinearNav button{padding:10px;font-size:13px}#wowLinearNav .wow-step{font-size:12px;padding:8px}}
+</style></head><body>
+<iframe id="app" title="Интерактивна работна основа на ТПУ Пловдив" ></iframe>
+<section id="intro" aria-label="Кинематографично представяне"><div id="ambient"></div><img id="frame" alt="Кадър от референтните екрани на WOW 2.0"><div class="shade"></div><div class="top"><span>ТПУ ПЛОВДИВ · WOW 3.1</span><span id="counter">01 / 11</span></div><div class="bottom"><a class="classic-link" href="#classic" data-classic="true" title="Петте функции на класическото представяне">📄 Класически ТПУ ↗</a><button id="sound" type="button" aria-label="Включване на музиката">♫ Включи музика</button><button id="next">Напред →</button></div><div class="progress" id="progress"></div></section>
+<section id="tree" class="hidden" aria-label="Одобреното WOW дърво"><div class="tree-stage"><div class="tree-canvas" style="position:relative;aspect-ratio:16/9;width:min(100vw,177.78vh);max-height:calc(100vh - 52px)"><img src="wow_tree_cinematic_approved.png" alt="Одобреното дърво на ТПУ Пловдив WOW 2.0 с Нату и интерактивни плодове" style="width:100%;height:100%"><button class="hotspot" style="left:32%;top:31%;width:9%;aspect-ratio:1" data-route="zones" aria-label="Защитени зони" title="Защитени зони"></button><button class="hotspot" style="left:47%;top:16%;width:8%;aspect-ratio:1" data-route="species" aria-label="Видове" title="Видове"></button><button class="hotspot" style="left:53%;top:33%;width:8%;aspect-ratio:1" data-route="documents" aria-label="Документи" title="Документи"></button><button class="hotspot" style="left:66%;top:17%;width:9%;aspect-ratio:1" data-route="measures" aria-label="Мерки и цели" title="Мерки и цели"></button><button class="hotspot" style="left:71%;top:36%;width:8%;aspect-ratio:1" data-route="photos" aria-label="Снимки и видео" title="Снимки и видео"></button><button class="hotspot" style="left:47%;top:51%;width:8%;aspect-ratio:1" data-route="indicators" aria-label="Индикатори" title="Индикатори"></button><button class="hotspot" style="left:65%;top:52%;width:8%;aspect-ratio:1" data-route="financing" aria-label="Финансиране" title="Финансиране"></button><button class="hotspot" style="left:85%;top:7%;width:17%;aspect-ratio:1" data-route="map" aria-label="Карта на зоните" title="Карта на зоните"></button><button class="hotspot" style="left:90%;top:68%;width:7%;aspect-ratio:1" data-video-fruit aria-label="Нашият свят Натура 2000 — видео" title="Нашият свят Натура 2000 — видео"></button></div></div><nav class="tree-scroll-nav" aria-label="Придвижване по дървото"><button id="treeScrollPrev" type="button" aria-label="Покажи плодовете вляво">‹</button><button id="treeScrollNext" type="button" aria-label="Покажи плодовете вдясно">›</button></nav><span class="tree-swipe-hint" aria-hidden="true">← Плъзни дървото наляво или надясно →</span></section><button id="backTree">← Към дървото</button><nav id="wowLinearNav" aria-label="Линейна навигация"><button type="button" id="wowLinearBack">← Назад</button><span class="wow-step" id="wowLinearStep" aria-live="polite">Стъпка 1</span><button type="button" id="wowLinearTree">🌳 Дървото</button></nav><div id="status" role="status" aria-live="polite" hidden></div><button id="directApp" hidden style="position:fixed;z-index:14;bottom:115px;left:50%;transform:translateX(-50%);background:#12583d;color:#fff;border:1px solid #e9d79e;border-radius:25px;padding:12px 20px;cursor:pointer">Отвори директно ↗</button>
+<section id="wowVideoPanel" hidden aria-label="Нашият свят Натура 2000" style="position:fixed;inset:0;z-index:25;background:#07190f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:18px"><button id="closeWowVideo" type="button" style="align-self:flex-start;border:1px solid #b6d8bc;background:#145b3c;color:white;border-radius:22px;padding:10px 16px">← Към дървото</button><h2 style="margin:0">Нашият свят Натура 2000</h2><video id="wowVideo" controls preload="metadata" playsinline style="width:min(100%,1000px);max-height:75vh" src="media/TERA_TPU_PLOVDIV_PANORAMA_3MIN_12_10_2026.mp4"></video><p id="wowVideoError" role="alert" hidden style="max-width:720px;text-align:center;color:#fff0cf;background:#512a19;border:1px solid #e8b17b;border-radius:12px;padding:12px">Видеото все още не е налично в публикувания пакет. Върни се към дървото и опитай отново след възстановяване на оригиналния файл.</p></section><section id="classicPanel" hidden aria-label="Класическо представяне на ТПУ Пловдив"><div class="classic-wrap"><div class="classic-actions"><button type="button" id="classicClose">← Обратно</button><button type="button" id="classicTree">🌳 Към WOW дървото</button></div><h1>Класическо представяне на ТПУ Пловдив</h1><p>Документалният пакет и цифровият фотоархив — в единна навигация, съобразена с одобрената визия на WOW 2.0.</p><div class="classic-grid"><article><h2>01 · Основен ТПУ</h2><p>Основният документ на териториалния план за управление.</p><div class="doclinks"><a href="TPU_V64_59_MAIN.pdf" target="_blank" rel="noopener">↗ Отвори PDF</a><a href="TPU_V64_59_MAIN.pdf" download>↓ Изтегли</a></div></article><article><h2>02 · Обобщение</h2><p>Обобщаващ документ от наличния работен пакет.</p><div class="doclinks"><a href="TPU_V64_59_SUMMARY.pdf" target="_blank" rel="noopener">↗ Отвори PDF</a><a href="TPU_V64_59_SUMMARY.pdf" download>↓ Изтегли</a></div></article><article><h2>03 · Презентационно PDF</h2><p>Презентационна версия V64.60.</p><div class="doclinks"><a href="TPU_V64_60_PRESENTATION.pdf" target="_blank" rel="noopener">↗ Отвори PDF</a><a href="TPU_V64_60_PRESENTATION.pdf" download>↓ Изтегли</a></div></article><article><h2>04 · Картографски атлас</h2><p>Картографският PDF, наличен в работния пакет.</p><div class="doclinks"><a href="TPU_MAP_ATLAS_V25_1.pdf" target="_blank" rel="noopener">↗ Отвори PDF</a><a href="TPU_MAP_ATLAS_V25_1.pdf" download>↓ Изтегли</a></div></article><article><h2>05 · Цифров фотоархив Натура 2000</h2><p>Фотоархивът с изображения на видове и природни обекти.</p><div class="doclinks"><a href="PHOTO_ARCHIVE/index.html">↗ Отвори фотоархива</a></div></article></div><p class="note">WOW 3.1 е образователно представяне и не замества официалния нормативен ТПУ. Наименованията на PDF файловете отразяват наличните версии в този архив.</p></div></section>
+<audio id="soundtrack" src="WOW_V12_Cinematic_Transition.wav" preload="auto" loop></audio>
+<script>
+(()=>{'use strict';const $=s=>document.querySelector(s);const intro=$('#intro'),tree=$('#tree'),frame=$('#frame'),ambient=$('#ambient'),counter=$('#counter'),progress=$('#progress'),app=$('#app'),back=$('#backTree');let current=0,timer=0,ready=false;
+const music=$('#soundtrack'),sound=$('#sound');let soundWanted=true,fadeId=null;
+function fadeAudio(target,ms=1100){if(fadeId){clearInterval(fadeId);fadeId=null}const start=music.volume,t0=performance.now();fadeId=setInterval(()=>{const k=Math.min(1,(performance.now()-t0)/ms);music.volume=Math.max(0,Math.min(1,start+(target-start)*k));if(k>=1){clearInterval(fadeId);fadeId=null;if(target===0)music.pause()}},50)}
+function syncSound(){sound.textContent=music.paused?'♫ Включи музика':'♫ Спри музиката';sound.setAttribute('aria-pressed',String(!music.paused))}
+async function startMusic(){if(!soundWanted)return;try{music.volume=0;await music.play();fadeAudio(.48,1500)}catch(e){/* Browsers may require a click; the sound button remains available. */}syncSound()}
+sound.addEventListener('click',async()=>{if(!music.paused){soundWanted=false;fadeAudio(0,550);sound.textContent='♫ Включи музика';sound.setAttribute('aria-pressed','false')}else{soundWanted=true;await startMusic()}});
+const paths=Array.from({length:11},(_,i)=>`scenes/screen_${String(i+1).padStart(2,'0')}.${i<9?'jpg':'png'}`);function scene(i){clearTimeout(timer);current=i;if(i>=11){showTree();return}let url=paths[i];frame.src=url;frame.classList.toggle('tone-match',false);ambient.style.backgroundImage=`url('${url}')`;counter.textContent=`${String(i+1).padStart(2,'0')} / 11`;progress.style.transition='none';progress.style.width=`${100*i/11}%`;requestAnimationFrame(()=>requestAnimationFrame(()=>{progress.style.transition='width 4.2s linear';progress.style.width=`${100*(i+1)/11}%`}));timer=setTimeout(()=>scene(i+1),4200)}
+/* Scroll only the wide mobile tree canvas, not the document or embedded application. */
+function initMobileTreeScroll(){
+ const stage=tree.querySelector('.tree-stage');
+ const prev=document.getElementById('treeScrollPrev'),next=document.getElementById('treeScrollNext');
+ if(!stage||!prev||!next)return;
+ const mobile=window.matchMedia('(max-width:700px)').matches;
+ function update(){const max=Math.max(0,stage.scrollWidth-stage.clientWidth);prev.disabled=!mobile||stage.scrollLeft<=3;next.disabled=!mobile||stage.scrollLeft>=max-3}
+ if(!stage.dataset.scrollNavReady){
+  stage.dataset.scrollNavReady='1';
+  prev.addEventListener('click',()=>stage.scrollBy({left:-stage.clientWidth*.75,behavior:'smooth'}));
+  next.addEventListener('click',()=>stage.scrollBy({left:stage.clientWidth*.75,behavior:'smooth'}));
+  stage.addEventListener('scroll',update,{passive:true});
+  window.addEventListener('resize',update);
+ }
+ if(mobile){const max=Math.max(0,stage.scrollWidth-stage.clientWidth);stage.scrollLeft=Math.min(max,Math.max(0,stage.scrollWidth*.20-stage.clientWidth*.5));}
+ update();
+}
+function showTree(){activeFruit=null;fruitSteps=[];backGuardZone=null;linearNav.classList.remove('active');history.replaceState(null,'','#tree');requestAnimationFrame(()=>requestAnimationFrame(initMobileTreeScroll));soundWanted=false;fadeAudio(0,1200);pending=null;if(poll){clearInterval(poll);poll=null}clearNotice();clearTimeout(timer);intro.classList.add('hidden');tree.classList.remove('hidden');app.classList.remove('active');back.classList.remove('show');app.setAttribute('aria-hidden','true')}function prepare(){try{let d=app.contentDocument;if(expectedFresh && (!d.location.search.includes('fresh='+expectedFresh)))return false;if(!d||!d.head||!d.body)return false;let st=d.getElementById('wow-clean-bypass');if(!st){st=d.createElement('style');st.id='wow-clean-bypass';st.textContent='#tpuApprovedSplash,#wowIntro,#wowNatkoReplay,#workBridge,#wowEntranceCard{display:none!important}html,body{overflow:auto!important}#wowUnifiedApp{z-index:2147483640!important;visibility:visible!important;opacity:1!important}';d.head.appendChild(st)}/* WOW 3.1: retain only the contextual Back/Tree actions within each step. */if(!d.getElementById('wow-linear-nav-style')){const linear=d.createElement('style');linear.id='wow-linear-nav-style';linear.textContent='#wowGlobalBack,#wowFloatingBack,#wowBackFloating,.wow-floating-back,[data-global-back],.global-back-button{display:none!important}';d.head.appendChild(linear)}if(!d.getElementById('wow-presentation-fixes')){let patch=d.createElement('script');patch.id='wow-presentation-fixes';patch.src='presentation-fixes.js';d.head.appendChild(patch)}if(!d.getElementById('wow-species-catalogue')){let species=d.createElement('script');species.id='wow-species-catalogue';species.src='species-catalogue.js';d.head.appendChild(species)}let splash=d.getElementById('tpuApprovedSplash');if(splash)splash.hidden=true;d.documentElement.classList.remove('wow-pre-intro-lock','tpu-intro-mode','tpu-bridge-mode');d.documentElement.classList.add('tpu-entered');return !!(app.contentWindow.WOWUnified&&typeof app.contentWindow.WOWUnified.navigate==='function')}catch(e){return false}}
+const status=$('#status');let pending=null,poll=null,attempts=0,expectedFresh='';let freshSequence=0;let activeFruit=null;let fruitSteps=[];const linearNav=$('#wowLinearNav'),linearStep=$('#wowLinearStep'),linearBack=$('#wowLinearBack');
+let restoringFruitStep=false;
+let backGuardZone=null;
+function updateLinear(){
+ linearNav.classList.toggle('active',!!activeFruit);
+ linearStep.textContent='Стъпка '+Math.max(1,fruitSteps.length);
+ linearBack.disabled=activeFruit==='zones'?false:fruitSteps.length<2;
+}
+function trackFruitStep(){
+ if(!activeFruit||restoringFruitStep||activeFruit==='species')return;
+ try{
+  const api=app.contentWindow.WOWUnified;
+  if(!app.contentDocument?.body||!api?.context)return;
+  const ctx=api.context(),view=ctx?.view||activeFruit,zone=ctx?.zoneCode||'';
+  if(view!==activeFruit&&!zone)return;
+  if(activeFruit==='zones'&&zone&&fruitSteps.length===1){fruitSteps.push({fingerprint:'zones|'+zone,view:'zones',zone});updateLinear();return;}
+  // A render from the state just exited is not a new user navigation.
+  if(backGuardZone!==null){
+   if(zone===backGuardZone)return;
+   if(zone===fruitSteps[fruitSteps.length-1]?.zone)return;
+   backGuardZone=null;
+  }
+  const fingerprint=[activeFruit,zone].join('|');
+  if(fruitSteps[fruitSteps.length-1]?.fingerprint===fingerprint)return;
+  const prior=fruitSteps.findIndex(step=>step.fingerprint===fingerprint);
+  if(prior>=0)fruitSteps=fruitSteps.slice(0,prior+1);
+  else fruitSteps.push({fingerprint,view:activeFruit,zone});
+  updateLinear();
+ }catch(_){}
+}
+window.addEventListener('message',event=>{if(event.origin!==location.origin||event.source!==app.contentWindow||event.data?.type!=='WOW_SPECIES_DETAIL'||activeFruit!=='species')return;fruitSteps=event.data.open?[{fingerprint:'species|catalogue',view:'species',zone:''},{fingerprint:'species|detail',view:'species',zone:''}]:[{fingerprint:'species|catalogue',view:'species',zone:''}];updateLinear()});
+linearBack.addEventListener('click',()=>{
+ if(activeFruit==='zones'){
+  if(fruitSteps.length<=1){showTree();return}
+  const previous=fruitSteps[fruitSteps.length-2];
+  if(!previous.zone){route('zones');return}
+  restoringFruitStep=true;
+  try{const api=app.contentWindow.WOWUnified;api.navigate('zones');api.setZone(previous.zone);fruitSteps.pop();updateLinear()}catch(e){notice('Навигацията не успя: '+e.message)}finally{restoringFruitStep=false}
+  return;
+ }
+ if(activeFruit==='species'){
+  try{const doc=app.contentDocument;const back=doc?.querySelector('#wowSpeciesCatalogue button');const detail=Array.from(doc?.querySelectorAll('#wowSpeciesCatalogue button')||[]).find(b=>b.textContent.trim()==='← Към видовете');if(detail){detail.click();fruitSteps=[{fingerprint:'species|catalogue',view:'species',zone:''}];updateLinear();return;}}catch(_){}
+  showTree();return;
+ }
+
+ if(fruitSteps.length<2||restoringFruitStep)return;
+ const previous=fruitSteps[fruitSteps.length-2];
+ // Root is a clean iframe, never an attempt to navigate with a stale zone.
+ if(!previous.zone){
+  backGuardZone=null;
+  fruitSteps=[];
+  restoringFruitStep=false;
+  route(activeFruit);
+  return;
+ }
+ const departed=fruitSteps[fruitSteps.length-1];
+ restoringFruitStep=true;
+ try{
+  const api=app.contentWindow.WOWUnified;
+  if(!api.navigate(previous.view))throw Error('Неуспешно връщане');
+  if(api.context()?.zoneCode!==previous.zone)api.setZone(previous.zone);
+  fruitSteps.pop();
+  backGuardZone=departed.zone;
+  updateLinear();
+ }catch(e){notice('Неуспешно връщане: '+e.message)}
+ finally{
+  // The navigation action has completed synchronously. Never swallow a second
+  // Back click while waiting for the iframe to redraw. backGuardZone prevents
+  // stale MutationObserver events from recreating the departed step.
+  restoringFruitStep=false;
+  updateLinear();
+ }
+});
+// An actual user choice is allowed to revisit the zone we just left.
+app.addEventListener('load',()=>{
+ try{
+  app.contentDocument.addEventListener('click',()=>{backGuardZone=null},true);
+ }catch(_){}
+});
+$('#wowLinearTree').addEventListener('click',showTree);
+function notice(t){status.textContent=t;status.hidden=false}function clearNotice(){status.hidden=true;status.textContent='';document.querySelector('#directApp').hidden=true}function finishRoute(view){try{history.replaceState(null,'','#'+encodeURIComponent(view));activeFruit=view;fruitSteps=[];backGuardZone=null;const api=app.contentWindow.WOWUnified;if(!api||!api.navigate(view))throw Error('Разделът не е достъпен');tree.classList.add('hidden');intro.classList.add('hidden');app.classList.add('active');back.classList.add('show');app.removeAttribute('aria-hidden');clearNotice();pending=null;updateLinear();if(view==='zones'){fruitSteps=[{fingerprint:'zones|',view:'zones',zone:''}];updateLinear();installZoneNavigator()}else setTimeout(trackFruitStep,100);return true}catch(e){notice('Неуспешно отваряне: '+e.message);pending=null;return false}}
+function installZoneNavigator(){
+ const doc=app.contentDocument;if(!doc)return;
+ if(!doc.getElementById('wow31-zone-clean')){
+  const css=doc.createElement('style');css.id='wow31-zone-clean';
+  css.textContent='#wowUnifiedContent button:not([data-wow31-allow]){cursor:pointer}#wowGlobalBack,#wowFloatingBack,#wowBackFloating,.wow-floating-back,[data-global-back],.global-back-button{display:none!important}';
+  doc.head.appendChild(css);
+ }
+ function hideDuplicateNav(){for(const b of doc.querySelectorAll('#wowUnifiedApp button,#wowUnifiedApp a')){const label=(b.textContent||'').replace(/\s+/g,' ').trim();if(/^(?:←\s*)?Назад$/i.test(label)||/^(?:🌳\s*)?(?:Към\s+)?Дървото$/i.test(label)){b.style.setProperty('display','none','important');b.setAttribute('aria-hidden','true');b.tabIndex=-1}}}
+ hideDuplicateNav();const content=doc.getElementById('wowUnifiedContent');if(content)new MutationObserver(hideDuplicateNav).observe(content,{childList:true,subtree:true});
+ if(doc.body.dataset.wow31ZoneNavigator)return;
+ doc.body.dataset.wow31ZoneNavigator='yes';
+ doc.addEventListener('click',event=>{
+  if(activeFruit!=='zones'||restoringFruitStep)return;
+  const button=event.target.closest('button,a,[role="button"]');
+  if(!button)return;
+  const label=(button.textContent||'').trim();
+  if(/^(←\\s*)?(назад|дървото|към дървото)/i.test(label)){
+   event.preventDefault();event.stopImmediatePropagation();
+   if(/дървото/i.test(label))showTree();else linearBack.click();
+   return;
+  }
+  setTimeout(()=>{
+   if(activeFruit!=='zones'||restoringFruitStep)return;
+   const ctx=app.contentWindow.WOWUnified?.context?.();
+   if(!ctx)return;
+   const zone=ctx.zoneCode||'';
+   const current=fruitSteps[fruitSteps.length-1];
+   if(zone&&zone!==current?.zone){fruitSteps.push({fingerprint:'zones|'+zone,view:'zones',zone});updateLinear()}
+  },120);
+ },true);
+}
+function checkPending(){if(!pending){clearInterval(poll);poll=null;return}if(prepare()){let view=pending;clearInterval(poll);poll=null;finishRoute(view)}else if(++attempts===30){notice('Интерактивният модул още се зарежда. Можеш да изчакаш или да го отвориш директно.');document.querySelector('#directApp').hidden=false;clearInterval(poll);poll=null}}
+function route(view){
+  // Photos and video share a single accessible choice instead of competing hotspots.
+  if(view==='photos'){openMediaHub();return}
+  if(view==='media-photos')view='photos';
+  /* Each independent fruit starts with a clean iframe state: no stale selected zone, species, or history. */
+  expectedFresh=String(++freshSequence);
+  app.setAttribute('src','WOW_APP.html?fresh='+expectedFresh);
+  pending=view;attempts=0;clearNotice();
+  if(poll)clearInterval(poll);
+  if(prepare()){finishRoute(view);return}
+  notice('Зареждане на интерактивния ТПУ…');
+  poll=setInterval(checkPending,250);
+}
+document.querySelector('#directApp').addEventListener('click',()=>{window.location.href='WOW_APP.html#wow-route='+encodeURIComponent(pending||'tree')});
+$('#next').addEventListener('click',()=>{if(music.paused&&soundWanted)startMusic();scene(current+1)});
+back.addEventListener('click',showTree);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&app.classList.contains('active')){e.preventDefault();showTree()}});
+app.addEventListener('load',()=>{try{const d=app.contentDocument;new MutationObserver(()=>trackFruitStep()).observe(d.getElementById('wowUnifiedContent')||d.body,{subtree:true,childList:true})}catch(_){}});document.querySelectorAll('[data-route]').forEach(b=>b.addEventListener('click',()=>route(b.dataset.route)));
+
+const videoPanel=$('#wowVideoPanel'),video=$('#wowVideo'),videoError=$('#wowVideoError');video.addEventListener('error',()=>{videoError.hidden=false});video.addEventListener('loadedmetadata',()=>{videoError.hidden=true});function openVideo(){showTree();videoError.hidden=true;videoPanel.hidden=false;videoPanel.style.display='flex';history.replaceState(null,'','#video');video.load()}function closeVideo(){video.pause();videoPanel.hidden=true;videoPanel.style.display='none';history.replaceState(null,'','#tree');showTree()}videoPanel.hidden=true;videoPanel.style.display='none';document.querySelector('[data-video-fruit]').addEventListener('click',()=>openMediaHub());$('#closeWowVideo').addEventListener('click',closeVideo);const classicPanel=$('#classicPanel');let classicFrom='intro';function openClassic(ev){if(ev)ev.preventDefault();classicFrom=!tree.classList.contains('hidden')?'tree':'intro';clearTimeout(timer);classicPanel.hidden=false;music.pause();syncSound();}function closeClassic(toTree=false){classicPanel.hidden=true;if(toTree){showTree()}else if(classicFrom==='intro'&&!intro.classList.contains('hidden')){scene(current);if(soundWanted)startMusic()}}document.querySelectorAll('[data-classic]').forEach(el=>el.addEventListener('click',openClassic));$('#classicClose').addEventListener('click',()=>closeClassic(false));$('#classicTree').addEventListener('click',()=>closeClassic(true));document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!classicPanel.hidden)closeClassic(false)});
+const mediaHub=document.createElement('section');mediaHub.id='wowMediaHub';mediaHub.hidden=true;mediaHub.setAttribute('aria-label','Снимки и видео');mediaHub.style.cssText='position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:#092819ee;padding:20px;color:white;text-align:center';mediaHub.innerHTML='<div style="max-width:580px;width:100%;padding:28px;border:1px solid #a8d8b4;border-radius:20px;background:#174b34"><h2>Снимки и видео</h2><p>Избери какво искаш да разгледаш.</p><p><button type="button" id="wowMediaPhotos" style="display:inline-block;padding:13px 20px;margin:8px;background:#246a49;color:white;border:0;border-radius:20px;cursor:pointer">Фотоархив — 32 зони</button><button type="button" id="wowMediaVideo" style="padding:13px 20px;margin:8px;border-radius:20px;background:#246a49;color:white">Панорамно видео — 3 минути</button></p><button type="button" id="wowMediaBack" style="padding:12px 18px;border-radius:20px;background:#194c38;color:white">← Към дървото</button></div>';document.body.appendChild(mediaHub);function openMediaHub(){showTree();mediaHub.hidden=false;mediaHub.style.display='flex';history.replaceState(null,'','#media')}function closeMediaHub(){mediaHub.hidden=true;mediaHub.style.display='none';showTree();history.replaceState(null,'','#tree')}document.getElementById('wowMediaPhotos').addEventListener('click',()=>{mediaHub.hidden=true;mediaHub.style.display='none';route('media-photos')});document.getElementById('wowMediaBack').addEventListener('click',closeMediaHub);document.getElementById('wowMediaVideo').addEventListener('click',()=>{mediaHub.hidden=true;mediaHub.style.display='none';openVideo()});
+if(location.hash==='#media')openMediaHub();else if(location.hash==='#video')openVideo();else if(location.hash==='#classic'){showTree();openClassic()}else if(location.hash==='#tree')showTree();else {scene(0);startMusic()}
+})();
+</script></body></html>
