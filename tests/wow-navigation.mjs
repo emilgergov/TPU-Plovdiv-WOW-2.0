@@ -109,7 +109,7 @@ await check('WOW 3.0 linear route: 1 → 2 → 3 → Back → Back → Tree',asy
  await p.locator('[data-route="zones"]').first().click();
  await p.locator('#wowLinearNav.active').waitFor({state:'visible',timeout:15000});
  await p.waitForFunction(()=>document.querySelector('#wowLinearStep')?.textContent==='Стъпка 1');
- const codes=await p.evaluate(()=>Array.from(document.querySelector('#app')?.contentDocument?.querySelectorAll('#wowUnifiedContent .wow-u-zone-grid button')||[]).map(b=>(b.textContent.match(/BG\\d{7}/)||[])[0]).filter(Boolean));
+ const codes=await p.evaluate(()=>Array.from(document.querySelector('#app')?.contentDocument?.querySelectorAll('#wowUnifiedContent .wow-u-zone-grid button')||[]).map(b=>(b.textContent.match(/BG\d{7}/)||[])[0]).filter(Boolean));
  if(codes.length<2)throw Error('Missing two zone choices');
  for(let j=0;j<2;j++){
   const code=codes[j];
