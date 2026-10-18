@@ -1,4 +1,4 @@
-/* WOW 2.0 presentation candidate: DOM-only compatibility corrections.
+/* WOW 3.0 presentation bridge: DOM-only compatibility corrections.
    Preserves existing application, source registries, and all official data. */
 (function () {
   'use strict';
@@ -8,6 +8,7 @@
   visualStyle.id='wow-visual-qa-20261017';
   visualStyle.textContent=`
     #wowBackToApprovedTree{display:none!important}
+    #wowUnifiedApp button[data-route="home"], #wowUnifiedApp .wow-u-home{display:none!important}
     /* Keep one contextual Back action. The in-panel button owns navigation history. */
     #wowUnifiedApp #wowUnifiedBackFloating, #wowUnifiedApp .wow-u-back-floating, #wowUnifiedApp .wow-floating-back{display:none!important}
     #wowUnifiedContent:has(> #wowSpeciesCatalogue) > :not(#wowSpeciesCatalogue){display:none!important}
@@ -64,16 +65,33 @@
         if(guide)guide.textContent='Природен водач: Търсенето не променя избраната зона в другите маршрути.';
       }
     }
-    // Hide only the redundant second navigation button; retain the functional Back.
-    const buttons=content.querySelectorAll('button');
-    for(const b of buttons){
-      if(b.textContent.trim()==='🌳 Дървото')b.hidden=true;
-    }
+    // Keep contextual Back and explicit Tree; do not hide the Tree action.
   }
   let pending=false;
   const observer=new MutationObserver(()=>{if(pending)return;pending=true;queueMicrotask(()=>{pending=false;refresh()})});
   observer.observe(content,{childList:true,subtree:true});
   content.addEventListener('input',()=>queueMicrotask(refresh));
+  // A Tree action always exits the legacy iframe to the approved cinematic tree.
+  // A separate "main screen" route is obsolete in the linear fruit model.
+  document.addEventListener('click',function(event){
+    const button=event.target.closest('button,a,[role="button"]');
+    if(!button||!button.closest('#wowUnifiedApp'))return;
+    const label=(button.textContent||'').replace(/\\s+/g,' ').trim();
+    if(/^(?:🌳\\s*)?(?:Към\\s+)?Дървото$/i.test(label)){
+      event.preventDefault();event.stopImmediatePropagation();
+      try{window.parent.document.getElementById('backTree').click()}catch(_){}
+    }else if(/^Към основния екран$/i.test(label)){
+      event.preventDefault();event.stopImmediatePropagation();
+    }
+  },true);
+  function removeLegacyHome(){
+    for(const button of document.querySelectorAll('#wowUnifiedApp button,#wowUnifiedApp a')){
+      if(/^Към основния екран$/i.test((button.textContent||'').trim()))button.hidden=true;
+    }
+  }
+  const homeObserver=new MutationObserver(removeLegacyHome);
+  homeObserver.observe(content,{childList:true,subtree:true});
+  removeLegacyHome();
   // Remove the obsolete white floating Back button, which does not use
   // WOWUnified's history. Keep the application's own contextual Back button.
   function hideLegacyFloatingBack(){
