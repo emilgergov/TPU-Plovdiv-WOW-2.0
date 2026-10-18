@@ -100,14 +100,14 @@ function trackFruitStep(){
   const d=app.contentDocument,api=app.contentWindow.WOWUnified;
   if(!d?.body||!api?.context)return;
   const ctx=api.context(),view=ctx?.view||activeFruit,zone=ctx?.zoneCode||'';
-  // Each fruit owns its route; cross-fruit jumps must never enter this history.
-  if(view!==activeFruit)return;
-  // Do not mistake re-rendering or changes in headings for a new navigation step.
-  const fingerprint=[view,zone].join('|');
+  // The selected zone may change the internal view name. Keep the history
+  // scoped to the original tree fruit, rather than rejecting that step.
+  if(view!==activeFruit&&!zone)return;
+  const fingerprint=[activeFruit,zone].join('|');
   if(fruitSteps[fruitSteps.length-1]?.fingerprint===fingerprint)return;
   const prior=fruitSteps.findIndex(step=>step.fingerprint===fingerprint);
   if(prior>=0)fruitSteps=fruitSteps.slice(0,prior+1);
-  else fruitSteps.push({fingerprint,view,zone});
+  else fruitSteps.push({fingerprint,view:activeFruit,zone});
   updateLinear();
  }catch(_){}
 }
