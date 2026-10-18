@@ -127,7 +127,19 @@ linearBack.addEventListener('click',()=>{
   if(previous.zone&&api.context()?.zoneCode!==previous.zone)api.setZone(previous.zone);
   fruitSteps.pop();updateLinear();
  }catch(e){notice('Неуспешно връщане: '+e.message)}
- finally{setTimeout(()=>{restoringFruitStep=false;trackFruitStep()},200)}
+ finally{
+  // Internal rendering may briefly restore the departed zone after navigate().
+  // Keep the observer paused until the previous zone has settled.
+  setTimeout(()=>{
+   try{
+    const api=app.contentWindow.WOWUnified;
+    if(previous.zone&&api?.context()?.zoneCode!==previous.zone)api.setZone(previous.zone);
+   }catch(_){}
+   restoringFruitStep=false;
+   // Do not append a transient state to the history during Back.
+   updateLinear();
+  },900);
+ }
 });
 $('#wowLinearTree').addEventListener('click',showTree);
 function notice(t){status.textContent=t;status.hidden=false}function clearNotice(){status.hidden=true;status.textContent='';document.querySelector('#directApp').hidden=true}function finishRoute(view){try{history.replaceState(null,'','#'+encodeURIComponent(view));activeFruit=view;fruitSteps=[];const api=app.contentWindow.WOWUnified;if(!api||!api.navigate(view))throw Error('Разделът не е достъпен');tree.classList.add('hidden');intro.classList.add('hidden');app.classList.add('active');back.classList.add('show');app.removeAttribute('aria-hidden');clearNotice();pending=null;updateLinear();setTimeout(trackFruitStep,100);return true}catch(e){notice('Неуспешно отваряне: '+e.message);pending=null;return false}}
