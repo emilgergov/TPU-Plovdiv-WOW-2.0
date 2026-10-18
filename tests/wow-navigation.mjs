@@ -102,4 +102,30 @@ await check('Capture mobile tree visual evidence',async p=>{
  await p.locator('#tree').waitFor({state:'visible',timeout:15000});
  await p.screenshot({path:resolve(out,'tree-mobile.png'),fullPage:true});
 });
+
+await check('WOW 3.0 linear route: 1 → 2 → 3 → Back → Back → Tree',async p=>{
+ await p.goto(base+'/index.html#tree',{waitUntil:'domcontentloaded'});
+ await p.locator('#tree').waitFor({state:'visible',timeout:15000});
+ await p.locator('[data-route="zones"]').first().click();
+ await p.locator('#wowLinearNav.active').waitFor({state:'visible',timeout:15000});
+ await p.waitForFunction(()=>document.querySelector('#wowLinearStep')?.textContent==='Стъпка 1');
+ const codes=await p.evaluate(()=>Array.from(document.querySelector('#app')?.contentDocument?.querySelectorAll('#wowUnifiedContent .wow-u-zone-grid button')||[]).map(b=>(b.textContent.match(/BG\\d{7}/)||[])[0]).filter(Boolean));
+ if(codes.length<2)throw Error('Missing two zone choices');
+ for(let j=0;j<2;j++){
+  const code=codes[j];
+  const selected=await p.evaluate(code=>document.querySelector('#app')?.contentWindow?.WOWUnified?.setZone(code),code);
+  if(!selected)throw Error('Cannot select zone '+code);
+  await p.waitForFunction(n=>document.querySelector('#wowLinearStep')?.textContent==='Стъпка '+n,j+2,{timeout:5000});
+ }
+ await p.locator('#wowLinearBack').click();
+ await p.waitForFunction(code=>document.querySelector('#app')?.contentWindow?.WOWUnified?.context?.()?.zoneCode===code,codes[0],{timeout:5000});
+ await p.waitForFunction(()=>document.querySelector('#wowLinearStep')?.textContent==='Стъпка 2');
+ await p.locator('#wowLinearBack').click();
+ await p.waitForFunction(()=>document.querySelector('#wowLinearStep')?.textContent==='Стъпка 1');
+ const zone=await p.evaluate(()=>document.querySelector('#app')?.contentWindow?.WOWUnified?.context?.()?.zoneCode);
+ if(zone)throw Error('Back to first step retained selected zone: '+zone);
+ await p.locator('#wowLinearTree').click();
+ await p.locator('#tree').waitFor({state:'visible',timeout:5000});
+ if(await p.locator('#wowLinearNav.active').count())throw Error('Navigation still visible on tree');
+});
 writeFileSync(resolve(out,'report.json'),JSON.stringify({tested:results.length,passed:results.length-failures,failed:failures,results},null,2));writeFileSync(resolve(out,'report.txt'),results.map(r=>`${r.status}\t${r.name}${r.detail?'\t'+r.detail:''}`).join('\n')+`\nTOTAL ${results.length} FAIL ${failures}\n`);await browser.close();await new Promise(r=>server.close(r));process.exitCode=failures?1:0;
