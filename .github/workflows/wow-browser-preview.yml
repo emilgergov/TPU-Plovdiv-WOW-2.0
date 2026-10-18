@@ -15,7 +15,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     environment:
-      name: github-pages
+      name: wow-recovery-preview
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout complete WOW and media
