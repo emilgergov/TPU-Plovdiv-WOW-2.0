@@ -126,8 +126,9 @@ linearBack.addEventListener('click',()=>{
  if(activeFruit==='zones'){
   if(fruitSteps.length<=1){showTree();return}
   const previous=fruitSteps[fruitSteps.length-2];
+  if(!previous.zone){route('zones');return}
   restoringFruitStep=true;
-  try{const api=app.contentWindow.WOWUnified;api.navigate('zones');if(previous.zone)api.setZone(previous.zone);fruitSteps.pop();updateLinear()}catch(e){notice('Навигацията не успя: '+e.message)}finally{restoringFruitStep=false}
+  try{const api=app.contentWindow.WOWUnified;api.navigate('zones');api.setZone(previous.zone);fruitSteps.pop();updateLinear()}catch(e){notice('Навигацията не успя: '+e.message)}finally{restoringFruitStep=false}
   return;
  }
  if(activeFruit==='species'){
