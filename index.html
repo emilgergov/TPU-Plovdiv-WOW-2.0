@@ -114,6 +114,12 @@ function trackFruitStep(){
 linearBack.addEventListener('click',()=>{
  if(fruitSteps.length<2||restoringFruitStep)return;
  const previous=fruitSteps[fruitSteps.length-2];
+ // Returning to the fruit root must discard the selected zone completely.
+ // WOWUnified.navigate() can retain its zone context, so reload the clean fruit.
+ if(fruitSteps.length===2&&!previous.zone){
+  route(activeFruit);
+  return;
+ }
  try{
   restoringFruitStep=true;
   const api=app.contentWindow.WOWUnified;
