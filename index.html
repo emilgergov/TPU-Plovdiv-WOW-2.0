@@ -100,7 +100,7 @@ function updateLinear(){
  linearBack.disabled=fruitSteps.length<2;
 }
 function trackFruitStep(){
- if(!activeFruit||restoringFruitStep)return;
+ if(!activeFruit||restoringFruitStep||activeFruit==='species')return;
  try{
   const api=app.contentWindow.WOWUnified;
   if(!app.contentDocument?.body||!api?.context)return;
@@ -120,7 +120,13 @@ function trackFruitStep(){
   updateLinear();
  }catch(_){}
 }
+window.addEventListener('message',event=>{if(event.origin!==location.origin||event.source!==app.contentWindow||event.data?.type!=='WOW_SPECIES_DETAIL'||activeFruit!=='species')return;fruitSteps=event.data.open?[{fingerprint:'species|catalogue',view:'species',zone:''},{fingerprint:'species|detail',view:'species',zone:''}]:[{fingerprint:'species|catalogue',view:'species',zone:''}];updateLinear()});
 linearBack.addEventListener('click',()=>{
+ if(activeFruit==='species'){
+  try{const doc=app.contentDocument;const back=doc?.querySelector('#wowSpeciesCatalogue button');const detail=Array.from(doc?.querySelectorAll('#wowSpeciesCatalogue button')||[]).find(b=>b.textContent.trim()==='← Към видовете');if(detail){detail.click();fruitSteps=[{fingerprint:'species|catalogue',view:'species',zone:''}];updateLinear();return;}}catch(_){}
+  showTree();return;
+ }
+
  if(fruitSteps.length<2||restoringFruitStep)return;
  const previous=fruitSteps[fruitSteps.length-2];
  // Root is a clean iframe, never an attempt to navigate with a stale zone.
