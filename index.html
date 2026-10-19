@@ -176,6 +176,10 @@ function installZoneNavigator(){
   if(!activeFruit||restoringFruitStep)return;
   const button=event.target.closest('button,a,[role="button"]');
   if(!button)return;
+  // Catalogue detail return is an internal screen transition, not shell Back.
+  if(button.closest('#wowSpeciesCatalogue'))return;
+  // Do not intercept synthetic clicks issued by the unified controller.
+  if(!event.isTrusted)return;
   const label=(button.textContent||'').trim();
   if(/^(←\s*)?(назад|дървото|към дървото)/i.test(label)){
    event.preventDefault();event.stopImmediatePropagation();
