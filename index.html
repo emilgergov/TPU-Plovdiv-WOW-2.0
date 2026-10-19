@@ -1,4 +1,4 @@
-<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ТПУ Пловдив — WOW 3.0</title><style>
+<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ТПУ Пловдив — WOW 3.1</title><style>
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:#07190f;color:#fff;font-family:system-ui,Arial,sans-serif}button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #ffe098;outline-offset:3px}#intro{position:fixed;inset:0;z-index:10;overflow:hidden;background:#07190f}#ambient{position:absolute;inset:-5%;background-position:center;background-size:cover;filter:blur(36px) brightness(.4);transform:scale(1.15)}#frame{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:1;transition:opacity .5s ease;filter:drop-shadow(0 0 12px #0008)}#frame.tone-match{filter:brightness(.80) saturate(.88) contrast(1.02) drop-shadow(0 0 12px #0008)}.shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(#041009a9,transparent 14%,transparent 84%,#041009ce)}.top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:15px 22px;font-size:clamp(13px,1.4vw,19px);font-weight:750;text-shadow:0 2px 6px #000}.bottom{position:absolute;bottom:0;left:0;right:0;display:flex;gap:14px;align-items:center;justify-content:space-between;padding:18px 22px}.bottom button,.nav button{border:1px solid #b6d8bc8a;background:#145b3c;color:#fff;border-radius:24px;padding:10px 18px;font-weight:650}.bottom button:hover,.nav button:hover{background:#278553}.classic-link{display:inline-flex;align-items:center;justify-content:center;gap:5px;text-decoration:none;border:1px solid #ecd69d;background:#173c2e;color:#fff6d8;border-radius:24px;padding:10px 16px;font-weight:700;font-size:14px;white-space:nowrap}.classic-link:hover,.classic-link:focus-visible{background:#286048;outline:2px solid #f6d18b;outline-offset:2px}.classic-tree{position:absolute;z-index:4;top:14px;left:14px;box-shadow:0 4px 18px #0008}@media(max-width:700px){.bottom{gap:5px;padding:12px 8px}.bottom .small{display:none}.bottom button,.classic-link{font-size:12px;padding:9px 10px}.classic-tree{top:8px;left:8px;font-size:12px}}#sound{min-width:136px}#sound:focus-visible{outline:3px solid #ffe098}.progress{position:absolute;bottom:0;left:0;height:4px;background:#f6d18b;transition:width 4.2s linear;width:0}.hidden{display:none!important}#tree{position:fixed;inset:0;z-index:5;background:#08251a;overflow:hidden}
 .tree-stage{position:absolute;inset:0 0 52px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#102c20}
 .tree-stage img{display:block;width:100%;height:100%;object-fit:contain;user-select:none}
@@ -36,7 +36,7 @@
 #classicPanel{position:fixed;inset:0;z-index:30;background:radial-gradient(ellipse at 78% 15%,#6c4a1e88,transparent 50%),linear-gradient(135deg,#09251c,#123b2d 60%,#172a20);color:#f9ebcc;overflow:auto;padding:clamp(18px,4vw,52px)}#classicPanel[hidden]{display:none}#classicPanel .classic-wrap{max-width:1000px;margin:0 auto}#classicPanel h1{font-family:Georgia,serif;font-size:clamp(26px,4vw,44px);margin:12px 0;color:#f9d895}#classicPanel p{line-height:1.6;color:#e5dcc6}#classicPanel .classic-actions{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}#classicPanel button,#classicPanel a.action{display:inline-block;background:#174d37;color:#fff5db;border:1px solid #d7b76c;border-radius:12px;padding:10px 16px;text-decoration:none;cursor:pointer}#classicPanel .classic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,390px),1fr));gap:14px;margin:24px 0}#classicPanel article{border:1px solid #bb985e88;background:#082219cc;border-radius:18px;padding:22px;box-shadow:0 12px 30px #0003}#classicPanel h2{font-family:Georgia,serif;font-size:22px;color:#f9d895;margin:0 0 10px}#classicPanel article p{font-size:14px;margin:0 0 16px}#classicPanel .doclinks{display:flex;gap:10px;flex-wrap:wrap}#classicPanel .doclinks a{color:#fff4da;background:#245b40;border:1px solid #d7b76c88;padding:9px 12px;border-radius:9px;text-decoration:none;font-weight:600}#classicPanel .doclinks a:hover,#classicPanel button:hover{background:#31704d}#classicPanel .note{font-size:13px;opacity:.85}
 
 /* The approved fruit tree is the only navigation hub; legacy duplicate actions are hidden. */
-#tree .tree-controls{display:none!important}
+#tree .tree-controls,#tree .tree-scroll-nav,#tree .tree-swipe-hint{display:none!important}
 /* Mobile tree: accessible horizontal navigation, without modifying fruit geometry. */
 .tree-scroll-nav{display:none}
 @media(max-width:700px){
@@ -52,7 +52,7 @@
  .tree-controls{bottom:4px!important}
  .tree-stage{bottom:54px!important}
 }
-/* WOW 3.0: single parent-owned navigation bar. */
+/* WOW 3.1: single parent-owned navigation bar. */
 #wowLinearNav{position:fixed;z-index:20;left:12px;right:12px;bottom:10px;display:none;align-items:center;justify-content:space-between;gap:10px;pointer-events:none}
 #wowLinearNav.active{display:flex}
 #wowLinearNav button{pointer-events:auto;background:#104d36;color:#fff;border:1px solid #e4d09a;border-radius:22px;padding:10px 18px;font-weight:700;box-shadow:0 3px 14px #0008}
@@ -61,9 +61,9 @@
 @media(max-width:700px){#wowLinearNav{left:6px;right:6px;bottom:5px;gap:5px}#wowLinearNav button{padding:10px;font-size:13px}#wowLinearNav .wow-step{font-size:12px;padding:8px}}
 </style></head><body>
 <iframe id="app" title="Интерактивна работна основа на ТПУ Пловдив" ></iframe>
-<section id="intro" aria-label="Кинематографично представяне"><div id="ambient"></div><img id="frame" alt="Кадър от референтните екрани на WOW 2.0"><div class="shade"></div><div class="top"><span>ТПУ ПЛОВДИВ · WOW 3.0</span><span id="counter">01 / 11</span></div><div class="bottom"><a class="classic-link" href="#classic" data-classic="true" title="Петте функции на класическото представяне">📄 Класически ТПУ ↗</a><button id="sound" type="button" aria-label="Включване на музиката">♫ Включи музика</button><button id="next">Напред →</button></div><div class="progress" id="progress"></div></section>
+<section id="intro" aria-label="Кинематографично представяне"><div id="ambient"></div><img id="frame" alt="Кадър от референтните екрани на WOW 2.0"><div class="shade"></div><div class="top"><span>ТПУ ПЛОВДИВ · WOW 3.1</span><span id="counter">01 / 11</span></div><div class="bottom"><a class="classic-link" href="#classic" data-classic="true" title="Петте функции на класическото представяне">📄 Класически ТПУ ↗</a><button id="sound" type="button" aria-label="Включване на музиката">♫ Включи музика</button><button id="next">Напред →</button></div><div class="progress" id="progress"></div></section>
 <section id="tree" class="hidden" aria-label="Одобреното WOW дърво"><div class="tree-stage"><div class="tree-canvas" style="position:relative;aspect-ratio:16/9;width:min(100vw,177.78vh);max-height:calc(100vh - 52px)"><img src="wow_tree_cinematic_approved.png" alt="Одобреното дърво на ТПУ Пловдив WOW 2.0 с Нату и интерактивни плодове" style="width:100%;height:100%"><button class="hotspot" style="left:32%;top:31%;width:9%;aspect-ratio:1" data-route="zones" aria-label="Защитени зони" title="Защитени зони"></button><button class="hotspot" style="left:47%;top:16%;width:8%;aspect-ratio:1" data-route="species" aria-label="Видове" title="Видове"></button><button class="hotspot" style="left:53%;top:33%;width:8%;aspect-ratio:1" data-route="documents" aria-label="Документи" title="Документи"></button><button class="hotspot" style="left:66%;top:17%;width:9%;aspect-ratio:1" data-route="measures" aria-label="Мерки и цели" title="Мерки и цели"></button><button class="hotspot" style="left:71%;top:36%;width:8%;aspect-ratio:1" data-route="photos" aria-label="Снимки и видео" title="Снимки и видео"></button><button class="hotspot" style="left:47%;top:51%;width:8%;aspect-ratio:1" data-route="indicators" aria-label="Индикатори" title="Индикатори"></button><button class="hotspot" style="left:65%;top:52%;width:8%;aspect-ratio:1" data-route="financing" aria-label="Финансиране" title="Финансиране"></button><button class="hotspot" style="left:85%;top:7%;width:17%;aspect-ratio:1" data-route="map" aria-label="Карта на зоните" title="Карта на зоните"></button><button class="hotspot" style="left:90%;top:68%;width:7%;aspect-ratio:1" data-video-fruit aria-label="Нашият свят Натура 2000 — видео" title="Нашият свят Натура 2000 — видео"></button></div></div><nav class="tree-scroll-nav" aria-label="Придвижване по дървото"><button id="treeScrollPrev" type="button" aria-label="Покажи плодовете вляво">‹</button><button id="treeScrollNext" type="button" aria-label="Покажи плодовете вдясно">›</button></nav><span class="tree-swipe-hint" aria-hidden="true">← Плъзни дървото наляво или надясно →</span></section><button id="backTree">← Към дървото</button><nav id="wowLinearNav" aria-label="Линейна навигация"><button type="button" id="wowLinearBack">← Назад</button><span class="wow-step" id="wowLinearStep" aria-live="polite">Стъпка 1</span><button type="button" id="wowLinearTree">🌳 Дървото</button></nav><div id="status" role="status" aria-live="polite" hidden></div><button id="directApp" hidden style="position:fixed;z-index:14;bottom:115px;left:50%;transform:translateX(-50%);background:#12583d;color:#fff;border:1px solid #e9d79e;border-radius:25px;padding:12px 20px;cursor:pointer">Отвори директно ↗</button>
-<section id="wowVideoPanel" hidden aria-label="Нашият свят Натура 2000" style="position:fixed;inset:0;z-index:25;background:#07190f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:18px"><button id="closeWowVideo" type="button" style="align-self:flex-start;border:1px solid #b6d8bc;background:#145b3c;color:white;border-radius:22px;padding:10px 16px">← Към дървото</button><h2 style="margin:0">Нашият свят Натура 2000</h2><video id="wowVideo" controls preload="metadata" playsinline style="width:min(100%,1000px);max-height:75vh" src="media/TERA_TPU_PLOVDIV_PANORAMA_3MIN_12_10_2026.mp4"></video><p id="wowVideoError" role="alert" hidden style="max-width:720px;text-align:center;color:#fff0cf;background:#512a19;border:1px solid #e8b17b;border-radius:12px;padding:12px">Видеото все още не е налично в публикувания пакет. Върни се към дървото и опитай отново след възстановяване на оригиналния файл.</p></section><section id="classicPanel" hidden aria-label="Класическо представяне на ТПУ Пловдив"><div class="classic-wrap"><div class="classic-actions"><button type="button" id="classicClose">← Обратно</button><button type="button" id="classicTree">🌳 Към WOW дървото</button></div><h1>Класическо представяне на ТПУ Пловдив</h1><p>Документалният пакет и цифровият фотоархив — в единна навигация, съобразена с одобрената визия на WOW 2.0.</p><div class="classic-grid"><article><h2>01 · Основен ТПУ</h2><p>Основният документ на териториалния план за управление.</p><div class="doclinks"><a href="TPU_V64_59_MAIN.pdf" target="_blank" rel="noopener">↗ Отвори PDF</a><a href="TPU_V64_59_MAIN.pdf" download>↓ Изтегли</a></div></article><article><h2>02 · Обобщение</h2><p>Обобщаващ документ от наличния работен пакет.</p><div class="doclinks"><a href="TPU_V64_59_SUMMARY.pdf" target="_blank" rel="noopener">↗ Отвори PDF</a><a href="TPU_V64_59_SUMMARY.pdf" download>↓ Изтегли</a></div></article><article><h2>03 · Презентационно PDF</h2><p>Презентационна версия V64.60.</p><div class="doclinks"><a href="TPU_V64_60_PRESENTATION.pdf" target="_blank" rel="noopener">↗ Отвори PDF</a><a href="TPU_V64_60_PRESENTATION.pdf" download>↓ Изтегли</a></div></article><article><h2>04 · Картографски атлас</h2><p>Картографският PDF, наличен в работния пакет.</p><div class="doclinks"><a href="TPU_MAP_ATLAS_V25_1.pdf" target="_blank" rel="noopener">↗ Отвори PDF</a><a href="TPU_MAP_ATLAS_V25_1.pdf" download>↓ Изтегли</a></div></article><article><h2>05 · Цифров фотоархив Натура 2000</h2><p>Фотоархивът с изображения на видове и природни обекти.</p><div class="doclinks"><a href="PHOTO_ARCHIVE/index.html">↗ Отвори фотоархива</a></div></article></div><p class="note">WOW 3.0 е образователно представяне и не замества официалния нормативен ТПУ. Наименованията на PDF файловете отразяват наличните версии в този архив.</p></div></section>
+<section id="wowVideoPanel" hidden aria-label="Нашият свят Натура 2000" style="position:fixed;inset:0;z-index:25;background:#07190f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:18px"><button id="closeWowVideo" type="button" style="align-self:flex-start;border:1px solid #b6d8bc;background:#145b3c;color:white;border-radius:22px;padding:10px 16px">← Към дървото</button><h2 style="margin:0">Нашият свят Натура 2000</h2><video id="wowVideo" controls preload="metadata" playsinline style="width:min(100%,1000px);max-height:75vh" src="media/TERA_TPU_PLOVDIV_PANORAMA_3MIN_12_10_2026.mp4"></video><p id="wowVideoError" role="alert" hidden style="max-width:720px;text-align:center;color:#fff0cf;background:#512a19;border:1px solid #e8b17b;border-radius:12px;padding:12px">Видеото все още не е налично в публикувания пакет. Върни се към дървото и опитай отново след възстановяване на оригиналния файл.</p></section><section id="classicPanel" hidden aria-label="Класическо представяне на ТПУ Пловдив"><div class="classic-wrap"><div class="classic-actions"><button type="button" id="classicClose">← Обратно</button><button type="button" id="classicTree">🌳 Към WOW дървото</button></div><h1>Класическо представяне на ТПУ Пловдив</h1><p>Документалният пакет и цифровият фотоархив — в единна навигация, съобразена с одобрената визия на WOW 2.0.</p><div class="classic-grid"><article><h2>01 · Основен ТПУ</h2><p>Основният документ на териториалния план за управление.</p><div class="doclinks"><a href="TPU_V64_59_MAIN.pdf" target="_blank" rel="noopener">↗ Отвори PDF</a><a href="TPU_V64_59_MAIN.pdf" download>↓ Изтегли</a></div></article><article><h2>02 · Обобщение</h2><p>Обобщаващ документ от наличния работен пакет.</p><div class="doclinks"><a href="TPU_V64_59_SUMMARY.pdf" target="_blank" rel="noopener">↗ Отвори PDF</a><a href="TPU_V64_59_SUMMARY.pdf" download>↓ Изтегли</a></div></article><article><h2>03 · Презентационно PDF</h2><p>Презентационна версия V64.60.</p><div class="doclinks"><a href="TPU_V64_60_PRESENTATION.pdf" target="_blank" rel="noopener">↗ Отвори PDF</a><a href="TPU_V64_60_PRESENTATION.pdf" download>↓ Изтегли</a></div></article><article><h2>04 · Картографски атлас</h2><p>Картографският PDF, наличен в работния пакет.</p><div class="doclinks"><a href="TPU_MAP_ATLAS_V25_1.pdf" target="_blank" rel="noopener">↗ Отвори PDF</a><a href="TPU_MAP_ATLAS_V25_1.pdf" download>↓ Изтегли</a></div></article><article><h2>05 · Цифров фотоархив Натура 2000</h2><p>Фотоархивът с изображения на видове и природни обекти.</p><div class="doclinks"><a href="PHOTO_ARCHIVE/index.html">↗ Отвори фотоархива</a></div></article></div><p class="note">WOW 3.1 е образователно представяне и не замества официалния нормативен ТПУ. Наименованията на PDF файловете отразяват наличните версии в този архив.</p></div></section>
 <audio id="soundtrack" src="WOW_V12_Cinematic_Transition.wav" preload="auto" loop></audio>
 <script>
 (()=>{'use strict';const $=s=>document.querySelector(s);const intro=$('#intro'),tree=$('#tree'),frame=$('#frame'),ambient=$('#ambient'),counter=$('#counter'),progress=$('#progress'),app=$('#app'),back=$('#backTree');let current=0,timer=0,ready=false;
@@ -90,14 +90,116 @@ function initMobileTreeScroll(){
  if(mobile){const max=Math.max(0,stage.scrollWidth-stage.clientWidth);stage.scrollLeft=Math.min(max,Math.max(0,stage.scrollWidth*.20-stage.clientWidth*.5));}
  update();
 }
-function showTree(){activeFruit=null;fruitSteps=[];backGuardZone=null;linearNav.classList.remove('active');history.replaceState(null,'','#tree');requestAnimationFrame(()=>requestAnimationFrame(initMobileTreeScroll));soundWanted=false;fadeAudio(0,1200);pending=null;if(poll){clearInterval(poll);poll=null}clearNotice();clearTimeout(timer);intro.classList.add('hidden');tree.classList.remove('hidden');app.classList.remove('active');back.classList.remove('show');app.setAttribute('aria-hidden','true')}function prepare(){try{let d=app.contentDocument;if(expectedFresh && (!d.location.search.includes('fresh='+expectedFresh)))return false;if(!d||!d.head||!d.body)return false;let st=d.getElementById('wow-clean-bypass');if(!st){st=d.createElement('style');st.id='wow-clean-bypass';st.textContent='#tpuApprovedSplash,#wowIntro,#wowNatkoReplay,#workBridge,#wowEntranceCard{display:none!important}html,body{overflow:auto!important}#wowUnifiedApp{z-index:2147483640!important;visibility:visible!important;opacity:1!important}';d.head.appendChild(st)}/* WOW 3.0: retain only the contextual Back/Tree actions within each step. */if(!d.getElementById('wow-linear-nav-style')){const linear=d.createElement('style');linear.id='wow-linear-nav-style';linear.textContent='#wowGlobalBack,#wowFloatingBack,#wowBackFloating,.wow-floating-back,[data-global-back],.global-back-button{display:none!important}';d.head.appendChild(linear)}if(!d.getElementById('wow-presentation-fixes')){let patch=d.createElement('script');patch.id='wow-presentation-fixes';patch.src='presentation-fixes.js';d.head.appendChild(patch)}if(!d.getElementById('wow-species-catalogue')){let species=d.createElement('script');species.id='wow-species-catalogue';species.src='species-catalogue.js';d.head.appendChild(species)}let splash=d.getElementById('tpuApprovedSplash');if(splash)splash.hidden=true;d.documentElement.classList.remove('wow-pre-intro-lock','tpu-intro-mode','tpu-bridge-mode');d.documentElement.classList.add('tpu-entered');return !!(app.contentWindow.WOWUnified&&typeof app.contentWindow.WOWUnified.navigate==='function')}catch(e){return false}}
+function showTree(){lastPhotoZone='';photoAlbumOpened=false;activeFruit=null;fruitSteps=[];backGuardZone=null;linearNav.classList.remove('active');history.replaceState(null,'','#tree');requestAnimationFrame(()=>requestAnimationFrame(initMobileTreeScroll));soundWanted=false;fadeAudio(0,1200);pending=null;if(poll){clearInterval(poll);poll=null}clearNotice();clearTimeout(timer);intro.classList.add('hidden');tree.classList.remove('hidden');app.classList.remove('active');back.classList.remove('show');app.setAttribute('aria-hidden','true')}function prepare(){try{let d=app.contentDocument;if(expectedFresh && (!d.location.search.includes('fresh='+expectedFresh)))return false;if(!d||!d.head||!d.body)return false;let st=d.getElementById('wow-clean-bypass');if(!st){st=d.createElement('style');st.id='wow-clean-bypass';st.textContent='#tpuApprovedSplash,#wowIntro,#wowNatkoReplay,#workBridge,#wowEntranceCard{display:none!important}html,body{overflow:auto!important}#wowUnifiedApp{z-index:2147483640!important;visibility:visible!important;opacity:1!important}';d.head.appendChild(st)}/* WOW 3.1: retain only the contextual Back/Tree actions within each step. */if(!d.getElementById('wow-linear-nav-style')){const linear=d.createElement('style');linear.id='wow-linear-nav-style';linear.textContent='#wowGlobalBack,#wowFloatingBack,#wowBackFloating,.wow-floating-back,[data-global-back],.global-back-button,#wowUnifiedBackFloating,.wow-u-back-floating{display:none!important}#wowSpeciesCatalogue > div:first-child:has(> button){display:none!important}';d.head.appendChild(linear)}if(!d.getElementById('wow-presentation-fixes')){let patch=d.createElement('script');patch.id='wow-presentation-fixes';patch.src='presentation-fixes.js';d.head.appendChild(patch)}if(!d.getElementById('wow-species-catalogue')){let species=d.createElement('script');species.id='wow-species-catalogue';species.src='species-catalogue.js?v=dbcf2d5';d.head.appendChild(species)}let splash=d.getElementById('tpuApprovedSplash');if(splash)splash.hidden=true;d.documentElement.classList.remove('wow-pre-intro-lock','tpu-intro-mode','tpu-bridge-mode');d.documentElement.classList.add('tpu-entered');return !!(app.contentWindow.WOWUnified&&typeof app.contentWindow.WOWUnified.navigate==='function')}catch(e){return false}}
 const status=$('#status');let pending=null,poll=null,attempts=0,expectedFresh='';let freshSequence=0;let activeFruit=null;let fruitSteps=[];const linearNav=$('#wowLinearNav'),linearStep=$('#wowLinearStep'),linearBack=$('#wowLinearBack');
 let restoringFruitStep=false;
 let backGuardZone=null;
 function updateLinear(){
  linearNav.classList.toggle('active',!!activeFruit);
  linearStep.textContent='Стъпка '+Math.max(1,fruitSteps.length);
- linearBack.disabled=fruitSteps.length<2;
+ linearBack.disabled=!activeFruit;
+}
+/* Zone-aware nested views; record the actual screen, not just the menu name. */
+let lastPhotoZone='',photoAlbumOpened=false;
+function photoFrame(){
+ try{return Array.from(app.contentDocument.querySelectorAll('iframe')).find(f=>/PHOTO_ARCHIVE/i.test(f.getAttribute('src')||f.src||''))||null}catch(_){return null}
+}
+function photoTarget(){
+ const f=photoFrame();if(!f)return '';
+ try{return new URL(f.contentWindow.location.href).pathname.match(/\/ZONES\/(BG\d{7})\//i)?.[1]||''}catch(_){return ''}
+}
+function syncPhotoAlbum(){
+ try{
+  const ctx=app.contentWindow.WOWUnified?.context?.();
+  if(!ctx||!/photo/i.test(ctx.view||''))return;
+  const code=ctx.zoneCode||lastPhotoZone;
+  if(!/^BG\d{7}$/.test(code||''))return;
+  const f=photoFrame();if(!f)return;
+  if(photoTarget()===code){photoAlbumOpened=true;return}
+  const url='PHOTO_ARCHIVE/ZONES/'+code+'/index.html';
+  const current=f.getAttribute('src')||'';
+  if(!current.includes('/ZONES/'+code+'/')){f.src=url;f.style.minHeight='min(78vh,900px)';}
+  photoAlbumOpened=true;
+ }catch(_){}
+}
+function currentStep(){
+ const api=app.contentWindow.WOWUnified,ctx=api?.context?.();
+ if(!ctx)return null;
+ const zone=ctx.zoneCode||lastPhotoZone||'';
+ const view=ctx.view||activeFruit;
+ const album=/photo/i.test(view)?photoTarget():'';
+ return {view,zone:ctx.zoneCode||'',album,fingerprint:[view,ctx.zoneCode||'',album].join('|')};
+}
+/* GIS is opened from a selected zone: pass the code to the map and retain it. */
+let lastGISZone='';
+function focusSelectedGIS(code){
+ if(!/^BG\d{7}$/.test(code||''))return false;
+ try{
+  const w=app.contentWindow,d=app.contentDocument;
+  if(typeof w.tpuGisOpen!=='function'||typeof w.tpuGisSelect!=='function')return false;
+  w.__selectedWowZoneCode=code;
+  w.tpuGisOpen();
+  w.tpuGisSelect(code);
+  const layer=d.getElementById('gisLayer'),root=d.getElementById('wowUnifiedApp');
+  if(!layer?.classList.contains('open'))return false;
+  // The unified app uses an exceptionally high stacking order, hiding the
+  // native GIS layer underneath even when GIS is successfully opened.
+  if(!d.getElementById('wow31-gis-overlay-fix')){
+   const style=d.createElement('style');style.id='wow31-gis-overlay-fix';
+   style.textContent='body.wow31-gis-fullscreen #wowUnifiedApp{visibility:hidden!important;pointer-events:none!important}body.wow31-gis-fullscreen #gisLayer.open{position:fixed!important;z-index:2147483646!important;visibility:visible!important;pointer-events:auto!important}';
+   d.head.appendChild(style);
+  }
+  d.body.classList.add('wow31-gis-fullscreen');
+  if(root)root.setAttribute('aria-hidden','true');
+  return true;
+ }catch(_){return false}
+}
+function scheduleGISFocus(code){
+ if(!/^BG\d{7}$/.test(code||''))return;
+ setTimeout(()=>{
+  try{
+   const d=app.contentDocument,w=app.contentWindow;
+   if(d?.getElementById('gisLayer')?.classList.contains('open')&&typeof w.tpuGisSelect==='function')w.tpuGisSelect(code);
+  }catch(_){}
+ },80);
+}
+function installGISFullscreenBridge(){
+ const d=app.contentDocument;
+ if(!d||d.body.dataset.wow31GISBridge)return;
+ d.body.dataset.wow31GISBridge='yes';
+ // The original WOWUnified GIS button calls callVerified(), which closes
+ // #wowUnifiedApp after opening the legacy GIS layer. Replace that handler
+ // rather than layering a second handler on top of it.
+ function wireGISButton(){
+  const root=d.getElementById('wowUnifiedApp');
+  if(!root)return;
+  for(const button of root.querySelectorAll('button')){
+   if(!/Отвори GIS картата на цял екран/i.test(button.textContent||''))continue;
+   if(button.dataset.wow31GISOwned==='yes')continue;
+   const owned=button.cloneNode(true);
+   owned.dataset.wow31GISOwned='yes';
+   owned.addEventListener('click',event=>{
+    event.preventDefault();
+    event.stopPropagation();
+    const code=app.contentWindow.WOWUnified?.context?.()?.zoneCode||lastGISZone;
+    if(!/^BG\d{7}$/.test(code||'')){notice('Първо избери защитена зона.');return}
+    if(!focusSelectedGIS(code)){notice('GIS картата не можа да се отвори за '+code);return}
+    const step={view:'gis-fullscreen',zone:code,album:'',fingerprint:'gis-fullscreen|'+code};
+    if(fruitSteps.at(-1)?.fingerprint!==step.fingerprint)fruitSteps.push(step);
+    clearNotice();updateLinear();
+   });
+   button.replaceWith(owned);
+  }
+ }
+ wireGISButton();
+ const content=d.getElementById('wowUnifiedContent');
+ if(content)new MutationObserver(wireGISButton).observe(content,{childList:true,subtree:true});
+}
+function syncGIS(){
+ try{
+  const ctx=app.contentWindow.WOWUnified?.context?.();
+  if(ctx?.zoneCode)lastGISZone=ctx.zoneCode;
+ }catch(_){}
 }
 function trackFruitStep(){
  if(!activeFruit||restoringFruitStep||activeFruit==='species')return;
@@ -105,55 +207,84 @@ function trackFruitStep(){
   const api=app.contentWindow.WOWUnified;
   if(!app.contentDocument?.body||!api?.context)return;
   const ctx=api.context(),view=ctx?.view||activeFruit,zone=ctx?.zoneCode||'';
-  if(view!==activeFruit&&!zone)return;
-  // A render from the state just exited is not a new user navigation.
+  if(zone)lastPhotoZone=zone;
+  if(/photo/i.test(view))syncPhotoAlbum();
+  if(!view)return;
   if(backGuardZone!==null){
+   // Ignore only the departed screen while the iframe finishes repainting.
    if(zone===backGuardZone)return;
-   if(zone===fruitSteps[fruitSteps.length-1]?.zone)return;
    backGuardZone=null;
   }
-  const fingerprint=[activeFruit,zone].join('|');
+  // A step is a screen and its zone, not merely the fruit name.
+  const step=currentStep();if(!step)return;
+  const fingerprint=step.fingerprint;
   if(fruitSteps[fruitSteps.length-1]?.fingerprint===fingerprint)return;
-  const prior=fruitSteps.findIndex(step=>step.fingerprint===fingerprint);
-  if(prior>=0)fruitSteps=fruitSteps.slice(0,prior+1);
-  else fruitSteps.push({fingerprint,view:activeFruit,zone});
+  // Revisit an earlier screen as a new forward step; Back must remain one-step.
+  fruitSteps.push(step);
   updateLinear();
  }catch(_){}
 }
-window.addEventListener('message',event=>{if(event.origin!==location.origin||event.source!==app.contentWindow||event.data?.type!=='WOW_SPECIES_DETAIL'||activeFruit!=='species')return;fruitSteps=event.data.open?[{fingerprint:'species|catalogue',view:'species',zone:''},{fingerprint:'species|detail',view:'species',zone:''}]:[{fingerprint:'species|catalogue',view:'species',zone:''}];updateLinear()});
+window.addEventListener('message',event=>{
+ if(event.origin!==location.origin||event.source!==app.contentWindow||event.data?.type!=='WOW_SPECIES_DETAIL'||activeFruit!=='species')return;
+ // Species detail is a sub-step of the current zone, not a new global route.
+ const zone=app.contentWindow.WOWUnified?.context?.()?.zoneCode||'';
+ const root={fingerprint:'species|'+zone,view:'species',zone};
+ fruitSteps=event.data.open?[root,{fingerprint:'species-detail|'+zone,view:'species',zone}]:[root];
+ updateLinear();
+});
 linearBack.addEventListener('click',()=>{
- if(activeFruit==='species'){
-  try{const doc=app.contentDocument;const back=doc?.querySelector('#wowSpeciesCatalogue button');const detail=Array.from(doc?.querySelectorAll('#wowSpeciesCatalogue button')||[]).find(b=>b.textContent.trim()==='← Към видовете');if(detail){detail.click();fruitSteps=[{fingerprint:'species|catalogue',view:'species',zone:''}];updateLinear();return;}}catch(_){}
-  showTree();return;
- }
+ if(!activeFruit||restoringFruitStep)return;
+ // The fullscreen GIS overlay is a visual layer, not a WOWUnified route.
+ // Close it first, without calling navigate() or setZone(), which may fail
+ // and leave the user trapped on the map.
+ try{
+  const d=app.contentDocument,layer=d?.getElementById('gisLayer');
+  if(d?.body.classList.contains('wow31-gis-fullscreen')){
+   layer?.classList.remove('open');
+   layer?.setAttribute('aria-hidden','true');
+   d.body.classList.remove('wow31-gis-fullscreen');
+   d.getElementById('wowUnifiedApp')?.removeAttribute('aria-hidden');
+   if(d.getElementById('wowUnifiedApp'))d.getElementById('wowUnifiedApp').hidden=false;
+   const idx=fruitSteps.findLastIndex(step=>step.view==='gis-fullscreen');
+   if(idx>=0)fruitSteps.splice(idx,1);
+   clearNotice();updateLinear();
+   return;
+  }
+ }catch(e){notice('Неуспешно затваряне на GIS: '+e.message);return}
 
- if(fruitSteps.length<2||restoringFruitStep)return;
- const previous=fruitSteps[fruitSteps.length-2];
- // Root is a clean iframe, never an attempt to navigate with a stale zone.
- if(!previous.zone){
-  backGuardZone=null;
-  fruitSteps=[];
-  restoringFruitStep=false;
-  route(activeFruit);
-  return;
+ // Species details are an in-place sub-screen managed by the catalogue adapter.
+ if(activeFruit==='species'){
+  try{
+   const detail=Array.from(app.contentDocument?.querySelectorAll('#wowSpeciesCatalogue button')||[])
+    .find(b=>b.textContent.trim()==='← Към видовете');
+   if(detail){detail.click();return;}
+  }catch(_){}
  }
+ if(fruitSteps.length<2){showTree();return;}
+ const previous=fruitSteps[fruitSteps.length-2];
  const departed=fruitSteps[fruitSteps.length-1];
+ if(departed.view==='gis-fullscreen'){
+  try{const layer=app.contentDocument.getElementById('gisLayer');layer?.classList.remove('open');layer?.setAttribute('aria-hidden','true');app.contentDocument.body.classList.remove('wow31-gis-fullscreen');app.contentDocument.getElementById('wowUnifiedApp')?.removeAttribute('aria-hidden');app.contentWindow.WOWUnified?.navigate(previous.view,false);if(previous.zone)app.contentWindow.WOWUnified?.setZone(previous.zone);fruitSteps.pop();updateLinear();}catch(e){notice('Неуспешно връщане от GIS: '+e.message)}return;
+ }
  restoringFruitStep=true;
  try{
   const api=app.contentWindow.WOWUnified;
-  if(!api.navigate(previous.view))throw Error('Неуспешно връщане');
-  if(api.context()?.zoneCode!==previous.zone)api.setZone(previous.zone);
+  if(!api?.navigate(previous.view))throw Error('Неуспешно връщане');
+  if(/photo/i.test(previous.view)&&previous.album){const pf=photoFrame();if(pf)pf.src='PHOTO_ARCHIVE/ZONES/'+previous.album+'/index.html';}
+  if(!previous.zone&&api.context()?.zoneCode){
+   // The embedded legacy app cannot reliably clear its zone through setZone('').
+   // Recreate this fruit's root in a fresh iframe; do not display Step 1
+   // until the new instance has initialized without a selected zone.
+   route(activeFruit);
+   return;
+  }
+  if(previous.zone&&api.context()?.zoneCode!==previous.zone)api.setZone(previous.zone);
+  if(/gis|map/i.test(previous.view)&&previous.zone)scheduleGISFocus(previous.zone);
   fruitSteps.pop();
   backGuardZone=departed.zone;
   updateLinear();
  }catch(e){notice('Неуспешно връщане: '+e.message)}
- finally{
-  // The navigation action has completed synchronously. Never swallow a second
-  // Back click while waiting for the iframe to redraw. backGuardZone prevents
-  // stale MutationObserver events from recreating the departed step.
-  restoringFruitStep=false;
-  updateLinear();
- }
+ finally{restoringFruitStep=false;updateLinear()}
 });
 // An actual user choice is allowed to revisit the zone we just left.
 app.addEventListener('load',()=>{
@@ -162,7 +293,85 @@ app.addEventListener('load',()=>{
  }catch(_){}
 });
 $('#wowLinearTree').addEventListener('click',showTree);
-function notice(t){status.textContent=t;status.hidden=false}function clearNotice(){status.hidden=true;status.textContent='';document.querySelector('#directApp').hidden=true}function finishRoute(view){try{history.replaceState(null,'','#'+encodeURIComponent(view));activeFruit=view;fruitSteps=[];backGuardZone=null;const api=app.contentWindow.WOWUnified;if(!api||!api.navigate(view))throw Error('Разделът не е достъпен');tree.classList.add('hidden');intro.classList.add('hidden');app.classList.add('active');back.classList.add('show');app.removeAttribute('aria-hidden');clearNotice();pending=null;updateLinear();setTimeout(trackFruitStep,100);return true}catch(e){notice('Неуспешно отваряне: '+e.message);pending=null;return false}}
+function notice(t){status.textContent=t;status.hidden=false}function clearNotice(){status.hidden=true;status.textContent='';document.querySelector('#directApp').hidden=true}function finishRoute(view){try{history.replaceState(null,'','#'+encodeURIComponent(view));activeFruit=view;fruitSteps=[];backGuardZone=null;const api=app.contentWindow.WOWUnified;if(!api||!api.navigate(view))throw Error('Разделът не е достъпен');tree.classList.add('hidden');intro.classList.add('hidden');app.classList.add('active');back.classList.add('show');app.removeAttribute('aria-hidden');clearNotice();pending=null;updateLinear();fruitSteps=[{fingerprint:view+'|',view,zone:''}];updateLinear();installZoneNavigator();installGISFullscreenBridge();setTimeout(trackFruitStep,100);return true}catch(e){notice('Неуспешно отваряне: '+e.message);pending=null;return false}}
+function installZoneNavigator(){
+ const doc=app.contentDocument;if(!doc)return;
+ if(!doc.getElementById('wow31-zone-clean')){
+  const css=doc.createElement('style');css.id='wow31-zone-clean';
+  css.textContent='#wowGlobalBack,#wowFloatingBack,#wowBackFloating,.wow-floating-back,[data-global-back],.global-back-button{display:none!important}';
+  doc.head.appendChild(css);
+ }
+ function hideDuplicateNav(){
+  for(const b of doc.querySelectorAll('button,a,[role="button"]')){
+   if(b.closest('#gisLayer'))continue;
+   if(b.closest('#wowSpeciesCatalogue'))continue;
+   const label=(b.textContent||'').replace(/\s+/g,' ').trim();
+   if(/^(?:←\s*)?Назад$/i.test(label)||/^(?:🌳\s*)?(?:Към\s+)?Дървото$/i.test(label)||/^←?\s*Към основния екран$/i.test(label)){
+    b.style.setProperty('display','none','important');b.setAttribute('aria-hidden','true');b.tabIndex=-1;
+   }
+  }
+ }
+ hideDuplicateNav();
+ const content=doc.getElementById('wowUnifiedContent');
+ if(content&&!doc.body.dataset.wow31ZoneNavigator)new MutationObserver(()=>{hideDuplicateNav();trackFruitStep();syncPhotoAlbum();syncGIS()}).observe(content,{childList:true,subtree:true});
+ if(doc.body.dataset.wow31ZoneNavigator)return;
+ doc.body.dataset.wow31ZoneNavigator='yes';
+ doc.addEventListener('click',event=>{
+  if(!activeFruit||restoringFruitStep)return;
+  const button=event.target.closest('button,a,[role="button"]');
+  if(!button)return;
+  if(/Отвори документния четец/i.test(button.textContent||'')){
+   const d=app.contentDocument,m=d.getElementById('wowContentLinks'),a=d.getElementById('wowContentActions'),f=d.getElementById('wowContentFrame');
+   if(m&&a&&f){event.preventDefault();event.stopImmediatePropagation();
+    const docs=[['Основен ТПУ','TPU_V64_59_MAIN.pdf'],['Представяне','TPU_V64_60_PRESENTATION.pdf'],['Картографски атлас','TPU_MAP_ATLAS_V25_1.pdf'],['Резюме','TPU_V64_59_SUMMARY.pdf']];
+    d.getElementById('wowContentTitle').textContent='Документен четец';a.replaceChildren();
+    function pick(name,file){f.src=encodeURI(file);d.getElementById('wowContentNote').textContent='Документ: '+file;}
+    docs.forEach(([name,file])=>{let b=d.createElement('button');b.textContent=name;b.onclick=()=>pick(name,file);a.appendChild(b)});
+    pick(...docs[0]);m.classList.add('open');m.style.setProperty('z-index','2147483646','important');return;
+   }
+  }
+  // Catalogue detail return is an internal screen transition, not shell Back.
+  if(button.closest('#wowSpeciesCatalogue'))return;
+  // Do not intercept synthetic clicks issued by the unified controller.
+  if(!event.isTrusted)return;
+  const label=(button.textContent||'').trim();
+  if(/Отвори документния четец/i.test(label)){
+   event.preventDefault();event.stopImmediatePropagation();
+   const master=doc.getElementById('wowMaster');
+   const source=Array.from(master?.querySelectorAll('.hot')||[]).find(b=>/документи/i.test(b.getAttribute('aria-label')||''));
+   const modal=doc.getElementById('wowContentLinks');
+   if(!source||!modal){notice('Документният четец не е наличен');return}
+   source.click();
+   if(!modal.classList.contains('open')){notice('Документният четец не се отвори');return}
+   if(!doc.getElementById('wow31-docs-overlay')){
+    const st=doc.createElement('style');st.id='wow31-docs-overlay';
+    st.textContent='#wowContentLinks.open{position:fixed!important;inset:0!important;z-index:2147483646!important;visibility:visible!important;pointer-events:auto!important}';
+    doc.head.appendChild(st);
+   }
+   clearNotice();return;
+  }
+  if(/Отвори GIS картата на цял екран|ГИС изглед|GIS карта/i.test(label)){
+   const code=app.contentWindow.WOWUnified?.context?.()?.zoneCode||lastGISZone;
+   if(code)scheduleGISFocus(code);
+  }
+  if(/^(←\s*)?(назад|дървото|към дървото)/i.test(label)){
+   event.preventDefault();event.stopImmediatePropagation();
+   if(/дървото/i.test(label))showTree();else linearBack.click();
+   return;
+  }
+  setTimeout(()=>{
+   if(!activeFruit||restoringFruitStep)return;
+   const ctx=app.contentWindow.WOWUnified?.context?.();
+   if(!ctx)return;
+   const zone=ctx.zoneCode||'';
+   if(zone)lastPhotoZone=zone;
+   if(/photo/i.test(ctx.view||'')){photoAlbumOpened=false;setTimeout(syncPhotoAlbum,400)}
+   const current=fruitSteps[fruitSteps.length-1];
+   if(ctx.view!==current?.view||zone!==current?.zone)trackFruitStep();
+   syncGIS();
+  },120);
+ },true);
+}
 function checkPending(){if(!pending){clearInterval(poll);poll=null;return}if(prepare()){let view=pending;clearInterval(poll);poll=null;finishRoute(view)}else if(++attempts===30){notice('Интерактивният модул още се зарежда. Можеш да изчакаш или да го отвориш директно.');document.querySelector('#directApp').hidden=false;clearInterval(poll);poll=null}}
 function route(view){
   // Photos and video share a single accessible choice instead of competing hotspots.

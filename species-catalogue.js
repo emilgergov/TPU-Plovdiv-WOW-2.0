@@ -36,14 +36,6 @@ function draw(){
  if(target)target.remove();renderedContext=contextKey;
  const pane=node('section');pane.id='wowSpeciesCatalogue';pane.style.cssText='margin:18px 0;padding:16px;border:1px solid #b4cbb7;border-radius:14px;background:#f6fbf5;color:#173821';
  const zoneCode=ctx.zoneCode;
- const nav=node('div');nav.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px';
- const goBack=node('button','← Назад');goBack.type='button';goBack.addEventListener('click',()=>{notifyDetail(false);window.parent.document.getElementById('wowLinearTree')?.click()});
- const goTree=node('button','🌳 Дървото');goTree.type='button';goTree.addEventListener('click',()=>{
-  const host=window.parent;
-  const button=host?.document?.getElementById('backTree');
-  notifyDetail(false);if(button)button.click();else window.WOWUnified.navigate('zones');
- });
- nav.append(goBack,goTree);pane.append(nav);
  pane.append(node('h3',zoneCode?'Видове в зона '+zoneCode:'Каталог на видовите разкази'));
  pane.append(node('p',zoneCode?'Показват се само видовете, свързани със зоната в работния регистър.':'Общ каталог на 792 уникални вида — без избрана зона.'));
  const status=node('p','Зареждане на видовите разкази…');pane.append(status);root.prepend(pane);
@@ -53,10 +45,10 @@ function draw(){
   const result=node('div');result.setAttribute('aria-live','polite');pane.append(result);
   function render(){
    active='';result.replaceChildren();const q=input.value.trim().toLocaleLowerCase('bg');
-   const names=zoneCode?(zones[zoneCode]||[]):Object.keys(data);
+   const names=zoneCode?(Array.isArray(zones?.[zoneCode])?zones[zoneCode]:[]):Object.keys(data);
    const matches=names.filter(n=>n in data&&n.toLocaleLowerCase('bg').includes(q));
-   result.append(node('p','Намерени видове: '+matches.length+' (показани до 40)'));
-   for(const name of matches.slice(0,40)){
+   result.append(node('p','Намерени видове: '+matches.length+' (показани всички)'));
+   for(const name of matches){
     const b=node('button',name);b.type='button';b.style.cssText='display:block;width:100%;margin:5px 0;padding:9px;text-align:left;border-radius:8px;cursor:pointer';b.addEventListener('click',()=>{
       active=name;notifyDetail(true);result.replaceChildren();const back=node('button','← Към видовете');back.type='button';back.addEventListener('click',()=>{active='';notifyDetail(false);render()});result.append(back,node('h3',name),node('p',data[name]));
     });result.append(b);
