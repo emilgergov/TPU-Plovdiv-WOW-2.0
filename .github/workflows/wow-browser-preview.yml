@@ -18,7 +18,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     environment:
-      name: wow-3-2-cleanup-preview
+      name: wow-3-2-seven-fruits-preview
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout complete WOW and media
