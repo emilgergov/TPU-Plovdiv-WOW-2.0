@@ -218,6 +218,23 @@ window.addEventListener('message',event=>{
 });
 linearBack.addEventListener('click',()=>{
  if(!activeFruit||restoringFruitStep)return;
+ // The fullscreen GIS overlay is a visual layer, not a WOWUnified route.
+ // Close it first, without calling navigate() or setZone(), which may fail
+ // and leave the user trapped on the map.
+ try{
+  const d=app.contentDocument,layer=d?.getElementById('gisLayer');
+  if(d?.body.classList.contains('wow31-gis-fullscreen')){
+   layer?.classList.remove('open');
+   layer?.setAttribute('aria-hidden','true');
+   d.body.classList.remove('wow31-gis-fullscreen');
+   d.getElementById('wowUnifiedApp')?.removeAttribute('aria-hidden');
+   const idx=fruitSteps.findLastIndex(step=>step.view==='gis-fullscreen');
+   if(idx>=0)fruitSteps.splice(idx,1);
+   clearNotice();updateLinear();
+   return;
+  }
+ }catch(e){notice('Неуспешно затваряне на GIS: '+e.message);return}
+
  // Species details are an in-place sub-screen managed by the catalogue adapter.
  if(activeFruit==='species'){
   try{
