@@ -37,7 +37,7 @@ function draw(){
  const pane=node('section');pane.id='wowSpeciesCatalogue';pane.style.cssText='margin:18px 0;padding:16px;border:1px solid #b4cbb7;border-radius:14px;background:#f6fbf5;color:#173821';
  const zoneCode=ctx.zoneCode;
  const nav=node('div');nav.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px';
- const goBack=node('button','← Назад');goBack.type='button';goBack.addEventListener('click',()=>{notifyDetail(false);window.parent.document.getElementById('wowLinearTree')?.click()});
+ const goBack=node('button','← Назад');goBack.type='button';goBack.addEventListener('click',()=>{notifyDetail(false);window.parent.document.getElementById('wowLinearBack')?.click()});
  const goTree=node('button','🌳 Дървото');goTree.type='button';goTree.addEventListener('click',()=>{
   const host=window.parent;
   const button=host?.document?.getElementById('backTree');
@@ -53,7 +53,7 @@ function draw(){
   const result=node('div');result.setAttribute('aria-live','polite');pane.append(result);
   function render(){
    active='';result.replaceChildren();const q=input.value.trim().toLocaleLowerCase('bg');
-   const names=zoneCode?(zones[zoneCode]||[]):Object.keys(data);
+   const names=zoneCode?(Array.isArray(zones?.[zoneCode])?zones[zoneCode]:[]):Object.keys(data);
    const matches=names.filter(n=>n in data&&n.toLocaleLowerCase('bg').includes(q));
    result.append(node('p','Намерени видове: '+matches.length+' (показани до 40)'));
    for(const name of matches.slice(0,40)){
