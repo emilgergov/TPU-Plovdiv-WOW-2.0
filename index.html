@@ -99,24 +99,53 @@ function updateLinear(){
  linearStep.textContent='Стъпка '+Math.max(1,fruitSteps.length);
  linearBack.disabled=!activeFruit;
 }
-/* Keep actual screen visits (including embedded photo albums) in one history. */
+/* Zone-aware nested views; record the actual screen, not just the menu name. */
 let lastPhotoZone='',photoAlbumOpened=false;
 function photoFrame(){
- try{return Array.from(app.contentDocument.querySelectorAll('iframe')).find(f=>/PHOTO_ARCHIVE/i.test(f.src||''))||null}catch(_){return null}
+ try{return Array.from(app.contentDocument.querySelectorAll('iframe')).find(f=>/PHOTO_ARCHIVE/i.test(f.getAttribute('src')||f.src||''))||null}catch(_){return null}
+}
+function photoTarget(){
+ const f=photoFrame();if(!f)return '';
+ try{return new URL(f.contentWindow.location.href).pathname.match(/\/ZONES\/(BG\d{7})\//i)?.[1]||''}catch(_){return ''}
 }
 function syncPhotoAlbum(){
  try{
-  const api=app.contentWindow.WOWUnified,ctx=api?.context?.();
+  const ctx=app.contentWindow.WOWUnified?.context?.();
   if(!ctx||!/photo/i.test(ctx.view||''))return;
   const code=ctx.zoneCode||lastPhotoZone;
-  if(!code)return;
-  const f=photoFrame(),d=f?.contentDocument;
-  if(!d||!d.body)return;
-  const title=(d.querySelector('h1,h2')?.textContent||'');
-  if(d.body.textContent.includes(code)&&/локален фотоархив|всички зони/i.test(title)){
-   const target=Array.from(d.querySelectorAll('a,button,[role="button"]')).find(el=>el.textContent.includes(code));
-   if(target&&!photoAlbumOpened){photoAlbumOpened=true;target.click();}
+  if(!/^BG\d{7}$/.test(code||''))return;
+  const f=photoFrame();if(!f)return;
+  if(photoTarget()===code){photoAlbumOpened=true;return}
+  const url='PHOTO_ARCHIVE/ZONES/'+code+'/index.html';
+  if(!photoAlbumOpened){photoAlbumOpened=true;f.src=url;f.style.minHeight='min(78vh,900px)';}
+ }catch(_){}
+}
+function currentStep(){
+ const api=app.contentWindow.WOWUnified,ctx=api?.context?.();
+ if(!ctx)return null;
+ const zone=ctx.zoneCode||lastPhotoZone||'';
+ const view=ctx.view||activeFruit;
+ const album=/photo/i.test(view)?photoTarget():'';
+ return {view,zone:ctx.zoneCode||'',album,fingerprint:[view,ctx.zoneCode||'',album].join('|')};
+}
+/* GIS is opened from a selected zone: pass the code to the map and retain it. */
+let lastGISZone='';
+function focusSelectedGIS(code){
+ if(!/^BG\d{7}$/.test(code||''))return;
+ try{
+  const d=app.contentDocument;
+  const mapFrame=Array.from(d.querySelectorAll('iframe')).find(f=>/gis|map/i.test(f.src||'')&&!/PHOTO_ARCHIVE/i.test(f.src||''));
+  if(mapFrame){
+   const u=new URL(mapFrame.src,location.href);
+   if(u.searchParams.get('zone')!==code){u.searchParams.set('zone',code);mapFrame.src=u.href;}
   }
+ }catch(_){}
+}
+function syncGIS(){
+ try{
+  const ctx=app.contentWindow.WOWUnified?.context?.();
+  if(ctx?.zoneCode)lastGISZone=ctx.zoneCode;
+  if(/gis|map/i.test(ctx?.view||'')&&lastGISZone)focusSelectedGIS(lastGISZone);
  }catch(_){}
 }
 function trackFruitStep(){
@@ -134,10 +163,11 @@ function trackFruitStep(){
    backGuardZone=null;
   }
   // A step is a screen and its zone, not merely the fruit name.
-  const fingerprint=[view,zone].join('|');
+  const step=currentStep();if(!step)return;
+  const fingerprint=step.fingerprint;
   if(fruitSteps[fruitSteps.length-1]?.fingerprint===fingerprint)return;
   // Revisit an earlier screen as a new forward step; Back must remain one-step.
-  fruitSteps.push({fingerprint,view,zone});
+  fruitSteps.push(step);
   updateLinear();
  }catch(_){}
 }
@@ -166,6 +196,7 @@ linearBack.addEventListener('click',()=>{
  try{
   const api=app.contentWindow.WOWUnified;
   if(!api?.navigate(previous.view))throw Error('Неуспешно връщане');
+  if(/photo/i.test(previous.view)&&previous.album){const pf=photoFrame();if(pf)pf.src='PHOTO_ARCHIVE/ZONES/'+previous.album+'/index.html';}
   if(!previous.zone&&api.context()?.zoneCode){
    // The embedded legacy app cannot reliably clear its zone through setZone('').
    // Recreate this fruit's root in a fresh iframe; do not display Step 1
@@ -174,6 +205,7 @@ linearBack.addEventListener('click',()=>{
    return;
   }
   if(previous.zone&&api.context()?.zoneCode!==previous.zone)api.setZone(previous.zone);
+  if(/gis|map/i.test(previous.view)&&previous.zone)setTimeout(()=>focusSelectedGIS(previous.zone),300);
   fruitSteps.pop();
   backGuardZone=departed.zone;
   updateLinear();
@@ -205,7 +237,7 @@ function installZoneNavigator(){
  }
  hideDuplicateNav();
  const content=doc.getElementById('wowUnifiedContent');
- if(content&&!doc.body.dataset.wow31ZoneNavigator)new MutationObserver(()=>{hideDuplicateNav();trackFruitStep()}).observe(content,{childList:true,subtree:true});
+ if(content&&!doc.body.dataset.wow31ZoneNavigator)new MutationObserver(()=>{hideDuplicateNav();trackFruitStep();syncPhotoAlbum();syncGIS()}).observe(content,{childList:true,subtree:true});
  if(doc.body.dataset.wow31ZoneNavigator)return;
  doc.body.dataset.wow31ZoneNavigator='yes';
  doc.addEventListener('click',event=>{
@@ -231,6 +263,7 @@ function installZoneNavigator(){
    if(/photo/i.test(ctx.view||'')){photoAlbumOpened=false;setTimeout(syncPhotoAlbum,400)}
    const current=fruitSteps[fruitSteps.length-1];
    if(ctx.view!==current?.view||zone!==current?.zone)trackFruitStep();
+   syncGIS();
   },120);
  },true);
 }
