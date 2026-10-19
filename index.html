@@ -176,11 +176,20 @@ function installZoneNavigator(){
  const doc=app.contentDocument;if(!doc)return;
  if(!doc.getElementById('wow31-zone-clean')){
   const css=doc.createElement('style');css.id='wow31-zone-clean';
-  css.textContent='#wowUnifiedContent button:not([data-wow31-allow]){cursor:pointer}#wowGlobalBack,#wowFloatingBack,#wowBackFloating,.wow-floating-back,[data-global-back],.global-back-button{display:none!important}';
+  css.textContent='#wowGlobalBack,#wowFloatingBack,#wowBackFloating,.wow-floating-back,[data-global-back],.global-back-button{display:none!important}';
   doc.head.appendChild(css);
  }
- function hideDuplicateNav(){for(const b of doc.querySelectorAll('#wowUnifiedApp button,#wowUnifiedApp a')){const label=(b.textContent||'').replace(/\s+/g,' ').trim();if(/^(?:←\s*)?Назад$/i.test(label)||/^(?:🌳\s*)?(?:Към\s+)?Дървото$/i.test(label)){b.style.setProperty('display','none','important');b.setAttribute('aria-hidden','true');b.tabIndex=-1}}}
- hideDuplicateNav();const content=doc.getElementById('wowUnifiedContent');if(content)new MutationObserver(hideDuplicateNav).observe(content,{childList:true,subtree:true});
+ function hideDuplicateNav(){
+  for(const b of doc.querySelectorAll('#wowUnifiedApp button,#wowUnifiedApp a')){
+   const label=(b.textContent||'').replace(/\\s+/g,' ').trim();
+   if(/^(?:←\\s*)?Назад$/i.test(label)||/^(?:🌳\\s*)?(?:Към\\s+)?Дървото$/i.test(label)){
+    b.style.setProperty('display','none','important');b.setAttribute('aria-hidden','true');b.tabIndex=-1;
+   }
+  }
+ }
+ hideDuplicateNav();
+ const content=doc.getElementById('wowUnifiedContent');
+ if(content)new MutationObserver(hideDuplicateNav).observe(content,{childList:true,subtree:true});
  if(doc.body.dataset.wow31ZoneNavigator)return;
  doc.body.dataset.wow31ZoneNavigator='yes';
  doc.addEventListener('click',event=>{
