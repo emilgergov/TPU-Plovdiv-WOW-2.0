@@ -40,7 +40,7 @@ jobs:
       group: wow-public-pages
       cancel-in-progress: false
     environment:
-      name: wow-3-2-seven-fruits-preview
+      name: wow-3-3-public
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout approved WOW 3.3
