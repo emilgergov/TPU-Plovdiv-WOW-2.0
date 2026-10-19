@@ -1,8 +1,8 @@
-name: WOW 2.0 browser preview (GitHub Pages)
+name: WOW 3.1 browser preview (GitHub Pages)
 on:
   push:
     branches:
-      - recovery/wow-navigation-zone-context-20261018
+      - wow-3.1-clean-navigation
   workflow_dispatch:
 # Fresh push creates a new workflow run and avoids duplicate Pages artifacts from re-running a failed attempt.
 permissions:
@@ -16,7 +16,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     environment:
-      name: wow-recovery-preview
+      name: wow-3-1-preview
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout complete WOW and media
