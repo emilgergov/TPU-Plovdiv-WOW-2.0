@@ -106,18 +106,16 @@ function trackFruitStep(){
   if(!app.contentDocument?.body||!api?.context)return;
   const ctx=api.context(),view=ctx?.view||activeFruit,zone=ctx?.zoneCode||'';
   if(view!==activeFruit&&!zone)return;
-  if(activeFruit==='zones'&&zone&&fruitSteps.length===1){fruitSteps.push({fingerprint:'zones|'+zone,view:'zones',zone});updateLinear();return;}
-  // A render from the state just exited is not a new user navigation.
   if(backGuardZone!==null){
-   if(zone===backGuardZone)return;
-   if(zone===fruitSteps[fruitSteps.length-1]?.zone)return;
+   if(zone===backGuardZone||zone===fruitSteps[fruitSteps.length-1]?.zone)return;
    backGuardZone=null;
   }
-  const fingerprint=[activeFruit,zone].join('|');
+  // A step is a screen and its zone, not merely the fruit name.
+  const fingerprint=[view,zone].join('|');
   if(fruitSteps[fruitSteps.length-1]?.fingerprint===fingerprint)return;
   const prior=fruitSteps.findIndex(step=>step.fingerprint===fingerprint);
   if(prior>=0)fruitSteps=fruitSteps.slice(0,prior+1);
-  else fruitSteps.push({fingerprint,view:activeFruit,zone});
+  else fruitSteps.push({fingerprint,view,zone});
   updateLinear();
  }catch(_){}
 }
@@ -173,7 +171,7 @@ app.addEventListener('load',()=>{
  }catch(_){}
 });
 $('#wowLinearTree').addEventListener('click',showTree);
-function notice(t){status.textContent=t;status.hidden=false}function clearNotice(){status.hidden=true;status.textContent='';document.querySelector('#directApp').hidden=true}function finishRoute(view){try{history.replaceState(null,'','#'+encodeURIComponent(view));activeFruit=view;fruitSteps=[];backGuardZone=null;const api=app.contentWindow.WOWUnified;if(!api||!api.navigate(view))throw Error('Разделът не е достъпен');tree.classList.add('hidden');intro.classList.add('hidden');app.classList.add('active');back.classList.add('show');app.removeAttribute('aria-hidden');clearNotice();pending=null;updateLinear();if(view==='zones'){fruitSteps=[{fingerprint:'zones|',view:'zones',zone:''}];updateLinear();installZoneNavigator()}else setTimeout(trackFruitStep,100);return true}catch(e){notice('Неуспешно отваряне: '+e.message);pending=null;return false}}
+function notice(t){status.textContent=t;status.hidden=false}function clearNotice(){status.hidden=true;status.textContent='';document.querySelector('#directApp').hidden=true}function finishRoute(view){try{history.replaceState(null,'','#'+encodeURIComponent(view));activeFruit=view;fruitSteps=[];backGuardZone=null;const api=app.contentWindow.WOWUnified;if(!api||!api.navigate(view))throw Error('Разделът не е достъпен');tree.classList.add('hidden');intro.classList.add('hidden');app.classList.add('active');back.classList.add('show');app.removeAttribute('aria-hidden');clearNotice();pending=null;updateLinear();fruitSteps=[{fingerprint:view+'|',view,zone:''}];updateLinear();if(view==='zones')installZoneNavigator();setTimeout(trackFruitStep,100);return true}catch(e){notice('Неуспешно отваряне: '+e.message);pending=null;return false}}
 function installZoneNavigator(){
  const doc=app.contentDocument;if(!doc)return;
  if(!doc.getElementById('wow31-zone-clean')){
