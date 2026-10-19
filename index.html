@@ -108,7 +108,7 @@ function trackFruitStep(){
   if(!view)return;
   if(backGuardZone!==null){
    // Ignore only the departed screen while the iframe finishes repainting.
-   if(zone===backGuardZone&&view===fruitSteps[fruitSteps.length-1]?.view)return;
+   if(zone===backGuardZone)return;
    backGuardZone=null;
   }
   // A step is a screen and its zone, not merely the fruit name.
@@ -177,7 +177,7 @@ function installZoneNavigator(){
   const button=event.target.closest('button,a,[role="button"]');
   if(!button)return;
   // Catalogue detail return is an internal screen transition, not shell Back.
-  if(button.closest('#wowSpeciesCatalogue')){setTimeout(trackFruitStep,0);return;}
+  if(button.closest('#wowSpeciesCatalogue'))return;
   // Do not intercept synthetic clicks issued by the unified controller.
   if(!event.isTrusted)return;
   const label=(button.textContent||'').trim();
