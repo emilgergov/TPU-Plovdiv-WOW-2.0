@@ -117,7 +117,9 @@ function syncPhotoAlbum(){
   const f=photoFrame();if(!f)return;
   if(photoTarget()===code){photoAlbumOpened=true;return}
   const url='PHOTO_ARCHIVE/ZONES/'+code+'/index.html';
-  if(!photoAlbumOpened){photoAlbumOpened=true;f.src=url;f.style.minHeight='min(78vh,900px)';}
+  const current=f.getAttribute('src')||'';
+  if(!current.includes('/ZONES/'+code+'/')){f.src=url;f.style.minHeight='min(78vh,900px)';}
+  photoAlbumOpened=true;
  }catch(_){}
 }
 function currentStep(){
@@ -300,7 +302,8 @@ function installZoneNavigator(){
   doc.head.appendChild(css);
  }
  function hideDuplicateNav(){
-  for(const b of doc.querySelectorAll('#wowUnifiedApp button,#wowUnifiedApp a')){
+  for(const b of doc.querySelectorAll('button,a,[role="button"]')){
+   if(b.closest('#gisLayer'))continue;
    const label=(b.textContent||'').replace(/\s+/g,' ').trim();
    if(/^(?:←\s*)?Назад$/i.test(label)||/^(?:🌳\s*)?(?:Към\s+)?Дървото$/i.test(label)||/^←?\s*Към основния екран$/i.test(label)){
     b.style.setProperty('display','none','important');b.setAttribute('aria-hidden','true');b.tabIndex=-1;
