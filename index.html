@@ -137,7 +137,7 @@ linearBack.addEventListener('click',()=>{
  try{
   const api=app.contentWindow.WOWUnified;
   if(!api?.navigate(previous.view))throw Error('Неуспешно връщане');
-  if(previous.zone&&api.context()?.zoneCode!==previous.zone)api.setZone(previous.zone);
+  if(api.context()?.zoneCode!==(previous.zone||''))api.setZone(previous.zone||'');
   fruitSteps.pop();
   backGuardZone=departed.zone;
   updateLinear();
