@@ -96,11 +96,14 @@ await check('792 species search and individual narrative render in browser',asyn
  // Preserve an actual screenshot of the working 792-species detail for visual QA.
  await p.screenshot({path:resolve(out,'species-detail-desktop.png'),fullPage:true});
 });
-await check('Capture mobile tree visual evidence',async p=>{
- await p.setViewportSize({width:390,height:844});
- await p.goto(base+'/index.html#tree',{waitUntil:'domcontentloaded'});
- await p.locator('#tree').waitFor({state:'visible',timeout:15000});
- await p.screenshot({path:resolve(out,'tree-mobile.png'),fullPage:true});
+await check('Capture actual tree on desktop and mobile',async p=>{
+ for(const viewport of [{width:1366,height:768,name:'desktop'},{width:390,height:844,name:'mobile'}]){
+  await p.setViewportSize({width:viewport.width,height:viewport.height});
+  await p.goto(base+'/index.html#tree',{waitUntil:'domcontentloaded'});
+  await p.locator('#tree').waitFor({state:'visible',timeout:15000});
+  await p.waitForFunction(()=>document.querySelector('#intro')?.classList.contains('hidden') && !document.querySelector('#tree')?.classList.contains('hidden'));
+  await p.screenshot({path:resolve(out,'tree-'+viewport.name+'.png'),fullPage:true});
+ }
 });
 
 await check('WOW 3.0 linear route: 1 → 2 → 3 → Back → Back → Tree',async p=>{
