@@ -20,7 +20,7 @@ jobs:
           s=Path('index.html').read_text(encoding='utf-8')
           for path in ['WOW_APP.html','tree.png','scenes/screen_01.jpg','scenes/screen_11.png']:
               assert Path(path).is_file() and Path(path).stat().st_size>0,path
-          for marker in ['timer=i===0?0:setTimeout','id="wowTreeHome"',"$('#wowTreeHome').addEventListener",'data-route="zones"','data-route="species"','data-route="documents"','data-route="measures"','data-route="photos"','data-route="indicators"','data-route="funding"','wow33-interior-theme']:
+          for marker in ['timer=i===0?0:setTimeout','id="wowTreeHome"',"$('#wowTreeHome').addEventListener",'data-route="zones"','data-route="species"','data-route="documents"','data-route="measures"','data-route="photos"','data-route="indicators"','data-route="financing"','wow33-interior-theme']:
               assert marker in s,marker
           print('PASS: start pause, Home, seven fruits, interior theme, assets')
           PY
