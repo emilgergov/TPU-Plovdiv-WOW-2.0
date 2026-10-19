@@ -121,49 +121,28 @@ function trackFruitStep(){
 }
 window.addEventListener('message',event=>{if(event.origin!==location.origin||event.source!==app.contentWindow||event.data?.type!=='WOW_SPECIES_DETAIL'||activeFruit!=='species')return;fruitSteps=event.data.open?[{fingerprint:'species|catalogue',view:'species',zone:''},{fingerprint:'species|detail',view:'species',zone:''}]:[{fingerprint:'species|catalogue',view:'species',zone:''}];updateLinear()});
 linearBack.addEventListener('click',()=>{
- if(activeFruit==='zones'){
-  if(fruitSteps.length<=1){showTree();return}
-  const previous=fruitSteps[fruitSteps.length-2];
-  if(!previous.zone){
-   restoringFruitStep=true;
-   try{const api=app.contentWindow.WOWUnified;if(!api.navigate('zones'))throw Error('Неуспешно връщане към списъка');fruitSteps.pop();backGuardZone=fruitSteps[fruitSteps.length-1]?.zone??'';updateLinear()}catch(e){notice('Неуспешно връщане: '+e.message)}finally{restoringFruitStep=false}
-   return;
-  }
-  restoringFruitStep=true;
-  try{const api=app.contentWindow.WOWUnified;api.navigate('zones');api.setZone(previous.zone);fruitSteps.pop();updateLinear()}catch(e){notice('Навигацията не успя: '+e.message)}finally{restoringFruitStep=false}
-  return;
- }
+ if(!activeFruit||restoringFruitStep)return;
+ // Species details are an in-place sub-screen managed by the catalogue adapter.
  if(activeFruit==='species'){
-  try{const doc=app.contentDocument;const back=doc?.querySelector('#wowSpeciesCatalogue button');const detail=Array.from(doc?.querySelectorAll('#wowSpeciesCatalogue button')||[]).find(b=>b.textContent.trim()==='← Към видовете');if(detail){detail.click();fruitSteps=[{fingerprint:'species|catalogue',view:'species',zone:''}];updateLinear();return;}}catch(_){}
-  showTree();return;
+  try{
+   const detail=Array.from(app.contentDocument?.querySelectorAll('#wowSpeciesCatalogue button')||[])
+    .find(b=>b.textContent.trim()==='← Към видовете');
+   if(detail){detail.click();return;}
+  }catch(_){}
  }
-
- if(restoringFruitStep)return;
  if(fruitSteps.length<2){showTree();return;}
  const previous=fruitSteps[fruitSteps.length-2];
- // Root is a clean iframe, never an attempt to navigate with a stale zone.
- if(!previous.zone){
-  restoringFruitStep=true;
-  try{const api=app.contentWindow.WOWUnified;if(!api.navigate(previous.view))throw Error('Неуспешно връщане');fruitSteps.pop();backGuardZone='';updateLinear()}catch(e){notice('Неуспешно връщане: '+e.message)}finally{restoringFruitStep=false}
-  return;
- }
  const departed=fruitSteps[fruitSteps.length-1];
  restoringFruitStep=true;
  try{
   const api=app.contentWindow.WOWUnified;
-  if(!api.navigate(previous.view))throw Error('Неуспешно връщане');
-  if(api.context()?.zoneCode!==previous.zone)api.setZone(previous.zone);
+  if(!api?.navigate(previous.view))throw Error('Неуспешно връщане');
+  if(previous.zone&&api.context()?.zoneCode!==previous.zone)api.setZone(previous.zone);
   fruitSteps.pop();
   backGuardZone=departed.zone;
   updateLinear();
  }catch(e){notice('Неуспешно връщане: '+e.message)}
- finally{
-  // The navigation action has completed synchronously. Never swallow a second
-  // Back click while waiting for the iframe to redraw. backGuardZone prevents
-  // stale MutationObserver events from recreating the departed step.
-  restoringFruitStep=false;
-  updateLinear();
- }
+ finally{restoringFruitStep=false;updateLinear()}
 });
 // An actual user choice is allowed to revisit the zone we just left.
 app.addEventListener('load',()=>{
