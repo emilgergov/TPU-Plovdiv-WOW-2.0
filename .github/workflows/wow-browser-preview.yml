@@ -40,4 +40,5 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
+# Clean deployment run after duplicate github-pages artifacts in a rerun; do not rerun old jobs.
 # New commit creates a fresh run and a single Pages artifact.
