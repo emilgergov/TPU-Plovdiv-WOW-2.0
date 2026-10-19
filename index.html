@@ -165,19 +165,33 @@ function installGISFullscreenBridge(){
  const d=app.contentDocument;
  if(!d||d.body.dataset.wow31GISBridge)return;
  d.body.dataset.wow31GISBridge='yes';
- d.addEventListener('click',e=>{
-  if(!activeFruit||!e.isTrusted)return;
-  const button=e.target.closest('button,a');
-  if(!button||!button.closest('#wowUnifiedApp'))return;
-  if(!/Отвори GIS картата на цял екран/i.test(button.textContent||''))return;
-  const code=app.contentWindow.WOWUnified?.context?.()?.zoneCode||lastGISZone;
-  if(!/^BG\d{7}$/.test(code||''))return;
-  e.preventDefault();e.stopImmediatePropagation();
-  if(!focusSelectedGIS(code)){notice('GIS картата не можа да се отвори за '+code);return}
-  const step={view:'gis-fullscreen',zone:code,album:'',fingerprint:'gis-fullscreen|'+code};
-  if(fruitSteps.at(-1)?.fingerprint!==step.fingerprint)fruitSteps.push(step);
-  updateLinear();
- },true);
+ // The original WOWUnified GIS button calls callVerified(), which closes
+ // #wowUnifiedApp after opening the legacy GIS layer. Replace that handler
+ // rather than layering a second handler on top of it.
+ function wireGISButton(){
+  const root=d.getElementById('wowUnifiedApp');
+  if(!root)return;
+  for(const button of root.querySelectorAll('button')){
+   if(!/Отвори GIS картата на цял екран/i.test(button.textContent||''))continue;
+   if(button.dataset.wow31GISOwned==='yes')continue;
+   const owned=button.cloneNode(true);
+   owned.dataset.wow31GISOwned='yes';
+   owned.addEventListener('click',event=>{
+    event.preventDefault();
+    event.stopPropagation();
+    const code=app.contentWindow.WOWUnified?.context?.()?.zoneCode||lastGISZone;
+    if(!/^BG\\d{7}$/.test(code||'')){notice('Първо избери защитена зона.');return}
+    if(!focusSelectedGIS(code)){notice('GIS картата не можа да се отвори за '+code);return}
+    const step={view:'gis-fullscreen',zone:code,album:'',fingerprint:'gis-fullscreen|'+code};
+    if(fruitSteps.at(-1)?.fingerprint!==step.fingerprint)fruitSteps.push(step);
+    clearNotice();updateLinear();
+   });
+   button.replaceWith(owned);
+  }
+ }
+ wireGISButton();
+ const content=d.getElementById('wowUnifiedContent');
+ if(content)new MutationObserver(wireGISButton).observe(content,{childList:true,subtree:true});
 }
 function syncGIS(){
  try{
@@ -228,6 +242,7 @@ linearBack.addEventListener('click',()=>{
    layer?.setAttribute('aria-hidden','true');
    d.body.classList.remove('wow31-gis-fullscreen');
    d.getElementById('wowUnifiedApp')?.removeAttribute('aria-hidden');
+   if(d.getElementById('wowUnifiedApp'))d.getElementById('wowUnifiedApp').hidden=false;
    const idx=fruitSteps.findLastIndex(step=>step.view==='gis-fullscreen');
    if(idx>=0)fruitSteps.splice(idx,1);
    clearNotice();updateLinear();
