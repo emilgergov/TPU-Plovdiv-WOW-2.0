@@ -107,13 +107,13 @@ function trackFruitStep(){
   const ctx=api.context(),view=ctx?.view||activeFruit,zone=ctx?.zoneCode||'';
   if(!view)return;
   if(backGuardZone!==null){
-   if(zone===backGuardZone||zone===fruitSteps[fruitSteps.length-1]?.zone)return;
+   // Ignore only the departed screen while the iframe finishes repainting.
+   if(zone===backGuardZone&&view===fruitSteps[fruitSteps.length-1]?.view)return;
    backGuardZone=null;
   }
   // A step is a screen and its zone, not merely the fruit name.
   const fingerprint=[view,zone].join('|');
   if(fruitSteps[fruitSteps.length-1]?.fingerprint===fingerprint)return;
-  const prior=fruitSteps.findIndex(step=>step.fingerprint===fingerprint);
   // Revisit an earlier screen as a new forward step; Back must remain one-step.
   fruitSteps.push({fingerprint,view,zone});
   updateLinear();
