@@ -126,7 +126,11 @@ linearBack.addEventListener('click',()=>{
  if(activeFruit==='zones'){
   if(fruitSteps.length<=1){showTree();return}
   const previous=fruitSteps[fruitSteps.length-2];
-  if(!previous.zone){route('zones');return}
+  if(!previous.zone){
+   restoringFruitStep=true;
+   try{const api=app.contentWindow.WOWUnified;if(!api.navigate('zones'))throw Error('Неуспешно връщане към списъка');fruitSteps.pop();backGuardZone=fruitSteps[fruitSteps.length-1]?.zone??'';updateLinear()}catch(e){notice('Неуспешно връщане: '+e.message)}finally{restoringFruitStep=false}
+   return;
+  }
   restoringFruitStep=true;
   try{const api=app.contentWindow.WOWUnified;api.navigate('zones');api.setZone(previous.zone);fruitSteps.pop();updateLinear()}catch(e){notice('Навигацията не успя: '+e.message)}finally{restoringFruitStep=false}
   return;
@@ -140,10 +144,8 @@ linearBack.addEventListener('click',()=>{
  const previous=fruitSteps[fruitSteps.length-2];
  // Root is a clean iframe, never an attempt to navigate with a stale zone.
  if(!previous.zone){
-  backGuardZone=null;
-  fruitSteps=[];
-  restoringFruitStep=false;
-  route(activeFruit);
+  restoringFruitStep=true;
+  try{const api=app.contentWindow.WOWUnified;if(!api.navigate(previous.view))throw Error('Неуспешно връщане');fruitSteps.pop();backGuardZone='';updateLinear()}catch(e){notice('Неуспешно връщане: '+e.message)}finally{restoringFruitStep=false}
   return;
  }
  const departed=fruitSteps[fruitSteps.length-1];
