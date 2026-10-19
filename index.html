@@ -131,21 +131,31 @@ function currentStep(){
 /* GIS is opened from a selected zone: pass the code to the map and retain it. */
 let lastGISZone='';
 function focusSelectedGIS(code){
- if(!/^BG\d{7}$/.test(code||''))return;
+ if(!/^BG\d{7}$/.test(code||''))return false;
  try{
-  const d=app.contentDocument;
-  const mapFrame=Array.from(d.querySelectorAll('iframe')).find(f=>/gis|map/i.test(f.src||'')&&!/PHOTO_ARCHIVE/i.test(f.src||''));
-  if(mapFrame){
-   const u=new URL(mapFrame.src,location.href);
-   if(u.searchParams.get('zone')!==code){u.searchParams.set('zone',code);mapFrame.src=u.href;}
-  }
- }catch(_){}
+  const w=app.contentWindow;
+  const layer=w.document.getElementById('gisLayer');
+  if(!layer?.classList.contains('open'))return false;
+  if(typeof w.tpuGisSelect!=='function')return false;
+  const selected=layer.querySelector('path.gis-zone.selected[data-code]');
+  if(selected?.dataset.code===code)return true;
+  const polygon=Array.from(layer.querySelectorAll('path.gis-zone[data-code]')).find(p=>p.dataset.code===code);
+  if(!polygon)return false;
+  w.tpuGisSelect(code);
+  return !!layer.querySelector('path.gis-zone.selected[data-code="'+code+'"]');
+ }catch(_){return false}
+}
+function scheduleGISFocus(code){
+ if(!/^BG\d{7}$/.test(code||''))return;
+ let count=0;
+ const attempt=()=>{if(focusSelectedGIS(code)||++count>=12)return;setTimeout(attempt,160)};
+ setTimeout(attempt,70);
 }
 function syncGIS(){
  try{
   const ctx=app.contentWindow.WOWUnified?.context?.();
   if(ctx?.zoneCode)lastGISZone=ctx.zoneCode;
-  if(/gis|map/i.test(ctx?.view||'')&&lastGISZone)focusSelectedGIS(lastGISZone);
+  if(/gis|map/i.test(ctx?.view||'')&&lastGISZone&&app.contentWindow.document.getElementById('gisLayer')?.classList.contains('open'))scheduleGISFocus(lastGISZone);
  }catch(_){}
 }
 function trackFruitStep(){
@@ -205,7 +215,7 @@ linearBack.addEventListener('click',()=>{
    return;
   }
   if(previous.zone&&api.context()?.zoneCode!==previous.zone)api.setZone(previous.zone);
-  if(/gis|map/i.test(previous.view)&&previous.zone)setTimeout(()=>focusSelectedGIS(previous.zone),300);
+  if(/gis|map/i.test(previous.view)&&previous.zone)scheduleGISFocus(previous.zone);
   fruitSteps.pop();
   backGuardZone=departed.zone;
   updateLinear();
@@ -249,6 +259,10 @@ function installZoneNavigator(){
   // Do not intercept synthetic clicks issued by the unified controller.
   if(!event.isTrusted)return;
   const label=(button.textContent||'').trim();
+  if(/Отвори GIS картата на цял екран|ГИС изглед|GIS карта/i.test(label)){
+   const code=app.contentWindow.WOWUnified?.context?.()?.zoneCode||lastGISZone;
+   if(code)scheduleGISFocus(code);
+  }
   if(/^(←\s*)?(назад|дървото|към дървото)/i.test(label)){
    event.preventDefault();event.stopImmediatePropagation();
    if(/дървото/i.test(label))showTree();else linearBack.click();
