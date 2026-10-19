@@ -36,14 +36,6 @@ function draw(){
  if(target)target.remove();renderedContext=contextKey;
  const pane=node('section');pane.id='wowSpeciesCatalogue';pane.style.cssText='margin:18px 0;padding:16px;border:1px solid #b4cbb7;border-radius:14px;background:#f6fbf5;color:#173821';
  const zoneCode=ctx.zoneCode;
- const nav=node('div');nav.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px';
- const goBack=node('button','← Назад');goBack.type='button';goBack.addEventListener('click',()=>{notifyDetail(false);window.parent.document.getElementById('wowLinearBack')?.click()});
- const goTree=node('button','🌳 Дървото');goTree.type='button';goTree.addEventListener('click',()=>{
-  const host=window.parent;
-  const button=host?.document?.getElementById('backTree');
-  notifyDetail(false);if(button)button.click();else window.WOWUnified.navigate('zones');
- });
- nav.append(goBack,goTree);pane.append(nav);
  pane.append(node('h3',zoneCode?'Видове в зона '+zoneCode:'Каталог на видовите разкази'));
  pane.append(node('p',zoneCode?'Показват се само видовете, свързани със зоната в работния регистър.':'Общ каталог на 792 уникални вида — без избрана зона.'));
  const status=node('p','Зареждане на видовите разкази…');pane.append(status);root.prepend(pane);
