@@ -133,23 +133,34 @@ let lastGISZone='';
 function focusSelectedGIS(code){
  if(!/^BG\d{7}$/.test(code||''))return false;
  try{
-  const w=app.contentWindow;
-  const layer=w.document.getElementById('gisLayer');
-  if(!layer?.classList.contains('open'))return false;
-  if(typeof w.tpuGisSelect!=='function')return false;
-  const selected=layer.querySelector('path.gis-zone.selected[data-code]');
-  if(selected?.dataset.code===code)return true;
-  const polygon=Array.from(layer.querySelectorAll('path.gis-zone[data-code]')).find(p=>p.dataset.code===code);
-  if(!polygon)return false;
+  const w=app.contentWindow,d=app.contentDocument;
+  if(typeof w.tpuGisOpen!=='function'||typeof w.tpuGisSelect!=='function')return false;
+  w.__selectedWowZoneCode=code;
+  w.tpuGisOpen();
   w.tpuGisSelect(code);
-  return !!layer.querySelector('path.gis-zone.selected[data-code="'+code+'"]');
+  // Existing GIS engine owns its map geometry and its actual zone selection.
+  const layer=d.getElementById('gisLayer');
+  return !!layer?.classList.contains('open');
  }catch(_){return false}
 }
-function scheduleGISFocus(code){
- if(!/^BG\d{7}$/.test(code||''))return;
- let count=0;
- const attempt=()=>{if(focusSelectedGIS(code)||++count>=12)return;setTimeout(attempt,160)};
- setTimeout(attempt,70);
+function installGISFullscreenBridge(){
+ const d=app.contentDocument;
+ if(!d||d.body.dataset.wow31GISBridge)return;
+ d.body.dataset.wow31GISBridge='yes';
+ d.addEventListener('click',e=>{
+  if(!activeFruit||!e.isTrusted)return;
+  const button=e.target.closest('button,a');
+  if(!button||!button.closest('#wowUnifiedApp'))return;
+  if(!/Отвори GIS картата на цял екран/i.test(button.textContent||''))return;
+  const code=app.contentWindow.WOWUnified?.context?.()?.zoneCode||lastGISZone;
+  if(!/^BG\d{7}$/.test(code||''))return;
+  e.preventDefault();e.stopImmediatePropagation();
+  if(focusSelectedGIS(code)){
+   const step={view:'gis-fullscreen',zone:code,album:'',fingerprint:'gis-fullscreen|'+code};
+   if(fruitSteps.at(-1)?.fingerprint!==step.fingerprint)fruitSteps.push(step);
+   updateLinear();
+  }else notice('GIS картата не можа да се отвори за '+code);
+ },true);
 }
 function syncGIS(){
  try{
@@ -202,6 +213,9 @@ linearBack.addEventListener('click',()=>{
  if(fruitSteps.length<2){showTree();return;}
  const previous=fruitSteps[fruitSteps.length-2];
  const departed=fruitSteps[fruitSteps.length-1];
+ if(departed.view==='gis-fullscreen'){
+  try{const layer=app.contentDocument.getElementById('gisLayer');layer?.classList.remove('open');layer?.setAttribute('aria-hidden','true');app.contentWindow.WOWUnified?.navigate(previous.view,false);if(previous.zone)app.contentWindow.WOWUnified?.setZone(previous.zone);fruitSteps.pop();updateLinear();}catch(e){notice('Неуспешно връщане от GIS: '+e.message)}return;
+ }
  restoringFruitStep=true;
  try{
   const api=app.contentWindow.WOWUnified;
@@ -229,7 +243,7 @@ app.addEventListener('load',()=>{
  }catch(_){}
 });
 $('#wowLinearTree').addEventListener('click',showTree);
-function notice(t){status.textContent=t;status.hidden=false}function clearNotice(){status.hidden=true;status.textContent='';document.querySelector('#directApp').hidden=true}function finishRoute(view){try{history.replaceState(null,'','#'+encodeURIComponent(view));activeFruit=view;fruitSteps=[];backGuardZone=null;const api=app.contentWindow.WOWUnified;if(!api||!api.navigate(view))throw Error('Разделът не е достъпен');tree.classList.add('hidden');intro.classList.add('hidden');app.classList.add('active');back.classList.add('show');app.removeAttribute('aria-hidden');clearNotice();pending=null;updateLinear();fruitSteps=[{fingerprint:view+'|',view,zone:''}];updateLinear();installZoneNavigator();setTimeout(trackFruitStep,100);return true}catch(e){notice('Неуспешно отваряне: '+e.message);pending=null;return false}}
+function notice(t){status.textContent=t;status.hidden=false}function clearNotice(){status.hidden=true;status.textContent='';document.querySelector('#directApp').hidden=true}function finishRoute(view){try{history.replaceState(null,'','#'+encodeURIComponent(view));activeFruit=view;fruitSteps=[];backGuardZone=null;const api=app.contentWindow.WOWUnified;if(!api||!api.navigate(view))throw Error('Разделът не е достъпен');tree.classList.add('hidden');intro.classList.add('hidden');app.classList.add('active');back.classList.add('show');app.removeAttribute('aria-hidden');clearNotice();pending=null;updateLinear();fruitSteps=[{fingerprint:view+'|',view,zone:''}];updateLinear();installZoneNavigator();installGISFullscreenBridge();setTimeout(trackFruitStep,100);return true}catch(e){notice('Неуспешно отваряне: '+e.message);pending=null;return false}}
 function installZoneNavigator(){
  const doc=app.contentDocument;if(!doc)return;
  if(!doc.getElementById('wow31-zone-clean')){
