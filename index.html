@@ -97,7 +97,7 @@ let backGuardZone=null;
 function updateLinear(){
  linearNav.classList.toggle('active',!!activeFruit);
  linearStep.textContent='Стъпка '+Math.max(1,fruitSteps.length);
- linearBack.disabled=activeFruit==='zones'?false:fruitSteps.length<2;
+ linearBack.disabled=!activeFruit;
 }
 function trackFruitStep(){
  if(!activeFruit||restoringFruitStep||activeFruit==='species')return;
@@ -138,7 +138,8 @@ linearBack.addEventListener('click',()=>{
   showTree();return;
  }
 
- if(fruitSteps.length<2||restoringFruitStep)return;
+ if(restoringFruitStep)return;
+ if(fruitSteps.length<2){showTree();return;}
  const previous=fruitSteps[fruitSteps.length-2];
  // Root is a clean iframe, never an attempt to navigate with a stale zone.
  if(!previous.zone){
@@ -208,7 +209,7 @@ function installZoneNavigator(){
    if(!ctx)return;
    const zone=ctx.zoneCode||'';
    const current=fruitSteps[fruitSteps.length-1];
-   if(zone&&zone!==current?.zone){fruitSteps.push({fingerprint:'zones|'+zone,view:'zones',zone});updateLinear()}
+   if(zone&&zone!==current?.zone){trackFruitStep()}
   },120);
  },true);
 }
