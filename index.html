@@ -137,7 +137,16 @@ linearBack.addEventListener('click',()=>{
  try{
   const api=app.contentWindow.WOWUnified;
   if(!api?.navigate(previous.view))throw Error('Неуспешно връщане');
-  if(api.context()?.zoneCode!==(previous.zone||''))api.setZone(previous.zone||'');
+  if(!previous.zone){
+   // The legacy API may reject an empty zone. Rebuild only the fruit root,
+   // never retain a stale selected-zone context after Back.
+   if(api.context()?.zoneCode){
+    const doc=app.contentDocument;
+    const zoneButtons=doc?.querySelectorAll('#wowUnifiedContent .wow-u-zone-grid button');
+    api.setZone('');
+    if(api.context()?.zoneCode)throw Error('Контекстът на зоната не може да бъде изчистен');
+   }
+  }else if(api.context()?.zoneCode!==previous.zone)api.setZone(previous.zone);
   fruitSteps.pop();
   backGuardZone=departed.zone;
   updateLinear();
