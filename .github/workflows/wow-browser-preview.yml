@@ -38,3 +38,5 @@ jobs:
       - name: Publish browser preview
         id: deployment
         uses: actions/deploy-pages@v4
+
+# New commit creates a fresh run and a single Pages artifact.
