@@ -180,7 +180,7 @@ function installGISFullscreenBridge(){
     event.preventDefault();
     event.stopPropagation();
     const code=app.contentWindow.WOWUnified?.context?.()?.zoneCode||lastGISZone;
-    if(!/^BG\\d{7}$/.test(code||'')){notice('Първо избери защитена зона.');return}
+    if(!/^BG\d{7}$/.test(code||'')){notice('Първо избери защитена зона.');return}
     if(!focusSelectedGIS(code)){notice('GIS картата не можа да се отвори за '+code);return}
     const step={view:'gis-fullscreen',zone:code,album:'',fingerprint:'gis-fullscreen|'+code};
     if(fruitSteps.at(-1)?.fingerprint!==step.fingerprint)fruitSteps.push(step);
