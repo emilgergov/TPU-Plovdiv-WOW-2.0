@@ -138,10 +138,17 @@ function focusSelectedGIS(code){
   w.__selectedWowZoneCode=code;
   w.tpuGisOpen();
   w.tpuGisSelect(code);
-  // Existing GIS engine owns its map geometry and its actual zone selection.
-  const layer=d.getElementById('gisLayer');
-  return !!layer?.classList.contains('open');
+  return !!d.getElementById('gisLayer')?.classList.contains('open');
  }catch(_){return false}
+}
+function scheduleGISFocus(code){
+ if(!/^BG\d{7}$/.test(code||''))return;
+ setTimeout(()=>{
+  try{
+   const d=app.contentDocument,w=app.contentWindow;
+   if(d?.getElementById('gisLayer')?.classList.contains('open')&&typeof w.tpuGisSelect==='function')w.tpuGisSelect(code);
+  }catch(_){}
+ },80);
 }
 function installGISFullscreenBridge(){
  const d=app.contentDocument;
@@ -153,22 +160,18 @@ function installGISFullscreenBridge(){
   if(!button||!button.closest('#wowUnifiedApp'))return;
   if(!/Отвори GIS картата на цял екран/i.test(button.textContent||''))return;
   const code=app.contentWindow.WOWUnified?.context?.()?.zoneCode||lastGISZone;
-  if(!/^BG\\d{7}$/.test(code||''))return;
-  // Do not suppress the app's own button handler; it opens and closes the
-  // unified panel. Select the zone once that native handler has run.
-  setTimeout(()=>{
-   if(!focusSelectedGIS(code)){notice('GIS картата не можа да се отвори за '+code);return}
-   const step={view:'gis-fullscreen',zone:code,album:'',fingerprint:'gis-fullscreen|'+code};
-   if(fruitSteps.at(-1)?.fingerprint!==step.fingerprint)fruitSteps.push(step);
-   updateLinear();
-  },0);
+  if(!/^BG\d{7}$/.test(code||''))return;
+  e.preventDefault();e.stopImmediatePropagation();
+  if(!focusSelectedGIS(code)){notice('GIS картата не можа да се отвори за '+code);return}
+  const step={view:'gis-fullscreen',zone:code,album:'',fingerprint:'gis-fullscreen|'+code};
+  if(fruitSteps.at(-1)?.fingerprint!==step.fingerprint)fruitSteps.push(step);
+  updateLinear();
  },true);
 }
 function syncGIS(){
  try{
   const ctx=app.contentWindow.WOWUnified?.context?.();
   if(ctx?.zoneCode)lastGISZone=ctx.zoneCode;
-  if(/gis|map/i.test(ctx?.view||'')&&lastGISZone&&app.contentWindow.document.getElementById('gisLayer')?.classList.contains('open'))scheduleGISFocus(lastGISZone);
  }catch(_){}
 }
 function trackFruitStep(){
