@@ -177,7 +177,7 @@ function installZoneNavigator(){
   const button=event.target.closest('button,a,[role="button"]');
   if(!button)return;
   // Catalogue detail return is an internal screen transition, not shell Back.
-  if(button.closest('#wowSpeciesCatalogue'))return;
+  if(button.closest('#wowSpeciesCatalogue')){setTimeout(trackFruitStep,0);return;}
   // Do not intercept synthetic clicks issued by the unified controller.
   if(!event.isTrusted)return;
   const label=(button.textContent||'').trim();
@@ -192,7 +192,7 @@ function installZoneNavigator(){
    if(!ctx)return;
    const zone=ctx.zoneCode||'';
    const current=fruitSteps[fruitSteps.length-1];
-   if(zone&&zone!==current?.zone){trackFruitStep()}
+   if(ctx.view!==current?.view||zone!==current?.zone)trackFruitStep();
   },120);
  },true);
 }
