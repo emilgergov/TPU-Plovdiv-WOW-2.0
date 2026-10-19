@@ -161,15 +161,15 @@ function installZoneNavigator(){
  }
  function hideDuplicateNav(){
   for(const b of doc.querySelectorAll('#wowUnifiedApp button,#wowUnifiedApp a')){
-   const label=(b.textContent||'').replace(/\\s+/g,' ').trim();
-   if(/^(?:←\\s*)?Назад$/i.test(label)||/^(?:🌳\\s*)?(?:Към\\s+)?Дървото$/i.test(label)){
+   const label=(b.textContent||'').replace(/\s+/g,' ').trim();
+   if(/^(?:←\s*)?Назад$/i.test(label)||/^(?:🌳\s*)?(?:Към\s+)?Дървото$/i.test(label)){
     b.style.setProperty('display','none','important');b.setAttribute('aria-hidden','true');b.tabIndex=-1;
    }
   }
  }
  hideDuplicateNav();
  const content=doc.getElementById('wowUnifiedContent');
- if(content)new MutationObserver(hideDuplicateNav).observe(content,{childList:true,subtree:true});
+ if(content&&!doc.body.dataset.wow31ZoneNavigator)new MutationObserver(()=>{hideDuplicateNav();trackFruitStep()}).observe(content,{childList:true,subtree:true});
  if(doc.body.dataset.wow31ZoneNavigator)return;
  doc.body.dataset.wow31ZoneNavigator='yes';
  doc.addEventListener('click',event=>{
@@ -177,13 +177,13 @@ function installZoneNavigator(){
   const button=event.target.closest('button,a,[role="button"]');
   if(!button)return;
   const label=(button.textContent||'').trim();
-  if(/^(←\\s*)?(назад|дървото|към дървото)/i.test(label)){
+  if(/^(←\s*)?(назад|дървото|към дървото)/i.test(label)){
    event.preventDefault();event.stopImmediatePropagation();
    if(/дървото/i.test(label))showTree();else linearBack.click();
    return;
   }
   setTimeout(()=>{
-   if(activeFruit!=='zones'||restoringFruitStep)return;
+   if(!activeFruit||restoringFruitStep)return;
    const ctx=app.contentWindow.WOWUnified?.context?.();
    if(!ctx)return;
    const zone=ctx.zoneCode||'';
