@@ -335,6 +335,21 @@ function installZoneNavigator(){
   // Do not intercept synthetic clicks issued by the unified controller.
   if(!event.isTrusted)return;
   const label=(button.textContent||'').trim();
+  if(/Отвори документния четец/i.test(label)){
+   event.preventDefault();event.stopImmediatePropagation();
+   const master=doc.getElementById('wowMaster');
+   const source=Array.from(master?.querySelectorAll('.hot')||[]).find(b=>/документи/i.test(b.getAttribute('aria-label')||''));
+   const modal=doc.getElementById('wowContentLinks');
+   if(!source||!modal){notice('Документният четец не е наличен');return}
+   source.click();
+   if(!modal.classList.contains('open')){notice('Документният четец не се отвори');return}
+   if(!doc.getElementById('wow31-docs-overlay')){
+    const st=doc.createElement('style');st.id='wow31-docs-overlay';
+    st.textContent='#wowContentLinks.open{position:fixed!important;inset:0!important;z-index:2147483646!important;visibility:visible!important;pointer-events:auto!important}';
+    doc.head.appendChild(st);
+   }
+   clearNotice();return;
+  }
   if(/Отвори GIS картата на цял екран|ГИС изглед|GIS карта/i.test(label)){
    const code=app.contentWindow.WOWUnified?.context?.()?.zoneCode||lastGISZone;
    if(code)scheduleGISFocus(code);
