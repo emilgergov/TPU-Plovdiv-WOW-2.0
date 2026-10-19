@@ -1,4 +1,4 @@
-name: WOW 3.3 isolated QA package
+name: WOW 3.3 approved QA and Pages deploy
 on:
   push:
     branches:
@@ -6,6 +6,8 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  pages: write
+  id-token: write
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -30,3 +32,27 @@ jobs:
           name: WOW-3.3-isolated-preview
           path: .
           retention-days: 14
+
+  deploy:
+    needs: verify
+    runs-on: ubuntu-latest
+    concurrency:
+      group: wow-public-pages
+      cancel-in-progress: false
+    environment:
+      name: wow-3-2-seven-fruits-preview
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout approved WOW 3.3
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload complete approved site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+      - name: Deploy public GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
