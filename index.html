@@ -151,7 +151,7 @@ app.addEventListener('load',()=>{
  }catch(_){}
 });
 $('#wowLinearTree').addEventListener('click',showTree);
-function notice(t){status.textContent=t;status.hidden=false}function clearNotice(){status.hidden=true;status.textContent='';document.querySelector('#directApp').hidden=true}function finishRoute(view){try{history.replaceState(null,'','#'+encodeURIComponent(view));activeFruit=view;fruitSteps=[];backGuardZone=null;const api=app.contentWindow.WOWUnified;if(!api||!api.navigate(view))throw Error('Разделът не е достъпен');tree.classList.add('hidden');intro.classList.add('hidden');app.classList.add('active');back.classList.add('show');app.removeAttribute('aria-hidden');clearNotice();pending=null;updateLinear();fruitSteps=[{fingerprint:view+'|',view,zone:''}];updateLinear();if(view==='zones')installZoneNavigator();setTimeout(trackFruitStep,100);return true}catch(e){notice('Неуспешно отваряне: '+e.message);pending=null;return false}}
+function notice(t){status.textContent=t;status.hidden=false}function clearNotice(){status.hidden=true;status.textContent='';document.querySelector('#directApp').hidden=true}function finishRoute(view){try{history.replaceState(null,'','#'+encodeURIComponent(view));activeFruit=view;fruitSteps=[];backGuardZone=null;const api=app.contentWindow.WOWUnified;if(!api||!api.navigate(view))throw Error('Разделът не е достъпен');tree.classList.add('hidden');intro.classList.add('hidden');app.classList.add('active');back.classList.add('show');app.removeAttribute('aria-hidden');clearNotice();pending=null;updateLinear();fruitSteps=[{fingerprint:view+'|',view,zone:''}];updateLinear();installZoneNavigator();setTimeout(trackFruitStep,100);return true}catch(e){notice('Неуспешно отваряне: '+e.message);pending=null;return false}}
 function installZoneNavigator(){
  const doc=app.contentDocument;if(!doc)return;
  if(!doc.getElementById('wow31-zone-clean')){
@@ -173,7 +173,7 @@ function installZoneNavigator(){
  if(doc.body.dataset.wow31ZoneNavigator)return;
  doc.body.dataset.wow31ZoneNavigator='yes';
  doc.addEventListener('click',event=>{
-  if(activeFruit!=='zones'||restoringFruitStep)return;
+  if(!activeFruit||restoringFruitStep)return;
   const button=event.target.closest('button,a,[role="button"]');
   if(!button)return;
   const label=(button.textContent||'').trim();
