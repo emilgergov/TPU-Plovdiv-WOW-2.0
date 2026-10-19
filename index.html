@@ -320,6 +320,16 @@ function installZoneNavigator(){
   if(!activeFruit||restoringFruitStep)return;
   const button=event.target.closest('button,a,[role="button"]');
   if(!button)return;
+  if(/Отвори документния четец/i.test(button.textContent||'')){
+   const d=app.contentDocument,m=d.getElementById('wowContentLinks'),a=d.getElementById('wowContentActions'),f=d.getElementById('wowContentFrame');
+   if(m&&a&&f){event.preventDefault();event.stopImmediatePropagation();
+    const docs=[['Основен ТПУ','TPU_V64_59_MAIN.pdf'],['Представяне','TPU_V64_60_PRESENTATION.pdf'],['Картографски атлас','TPU_MAP_ATLAS_V25_1.pdf'],['Резюме','TPU_V64_59_SUMMARY.pdf']];
+    d.getElementById('wowContentTitle').textContent='Документен четец';a.replaceChildren();
+    function pick(name,file){f.src=encodeURI(file);d.getElementById('wowContentNote').textContent='Документ: '+file;}
+    docs.forEach(([name,file])=>{let b=d.createElement('button');b.textContent=name;b.onclick=()=>pick(name,file);a.appendChild(b)});
+    pick(...docs[0]);m.classList.add('open');m.style.setProperty('z-index','2147483646','important');return;
+   }
+  }
   // Catalogue detail return is an internal screen transition, not shell Back.
   if(button.closest('#wowSpeciesCatalogue'))return;
   // Do not intercept synthetic clicks issued by the unified controller.
