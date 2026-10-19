@@ -138,7 +138,18 @@ function focusSelectedGIS(code){
   w.__selectedWowZoneCode=code;
   w.tpuGisOpen();
   w.tpuGisSelect(code);
-  return !!d.getElementById('gisLayer')?.classList.contains('open');
+  const layer=d.getElementById('gisLayer'),root=d.getElementById('wowUnifiedApp');
+  if(!layer?.classList.contains('open'))return false;
+  // The unified app uses an exceptionally high stacking order, hiding the
+  // native GIS layer underneath even when GIS is successfully opened.
+  if(!d.getElementById('wow31-gis-overlay-fix')){
+   const style=d.createElement('style');style.id='wow31-gis-overlay-fix';
+   style.textContent='body.wow31-gis-fullscreen #wowUnifiedApp{visibility:hidden!important;pointer-events:none!important}body.wow31-gis-fullscreen #gisLayer.open{position:fixed!important;z-index:2147483646!important;visibility:visible!important;pointer-events:auto!important}';
+   d.head.appendChild(style);
+  }
+  d.body.classList.add('wow31-gis-fullscreen');
+  if(root)root.setAttribute('aria-hidden','true');
+  return true;
  }catch(_){return false}
 }
 function scheduleGISFocus(code){
@@ -219,7 +230,7 @@ linearBack.addEventListener('click',()=>{
  const previous=fruitSteps[fruitSteps.length-2];
  const departed=fruitSteps[fruitSteps.length-1];
  if(departed.view==='gis-fullscreen'){
-  try{const layer=app.contentDocument.getElementById('gisLayer');layer?.classList.remove('open');layer?.setAttribute('aria-hidden','true');app.contentWindow.WOWUnified?.navigate(previous.view,false);if(previous.zone)app.contentWindow.WOWUnified?.setZone(previous.zone);fruitSteps.pop();updateLinear();}catch(e){notice('Неуспешно връщане от GIS: '+e.message)}return;
+  try{const layer=app.contentDocument.getElementById('gisLayer');layer?.classList.remove('open');layer?.setAttribute('aria-hidden','true');app.contentDocument.body.classList.remove('wow31-gis-fullscreen');app.contentDocument.getElementById('wowUnifiedApp')?.removeAttribute('aria-hidden');app.contentWindow.WOWUnified?.navigate(previous.view,false);if(previous.zone)app.contentWindow.WOWUnified?.setZone(previous.zone);fruitSteps.pop();updateLinear();}catch(e){notice('Неуспешно връщане от GIS: '+e.message)}return;
  }
  restoringFruitStep=true;
  try{
