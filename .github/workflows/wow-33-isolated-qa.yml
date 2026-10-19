@@ -1,0 +1,32 @@
+name: WOW 3.3 isolated QA package
+on:
+  push:
+    branches:
+      - work/WOW-3.3-panoramic-interiors
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Verify essential files and navigation invariants
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          for path in ['WOW_APP.html','tree.png','scenes/screen_01.jpg','scenes/screen_11.png']:
+              assert Path(path).is_file() and Path(path).stat().st_size>0,path
+          for marker in ['timer=i===0?0:setTimeout','id="wowTreeHome"',"$('#wowTreeHome').addEventListener",'data-route="zones"','data-route="species"','data-route="documents"','data-route="measures"','data-route="photos"','data-route="indicators"','data-route="funding"','wow33-interior-theme']:
+              assert marker in s,marker
+          print('PASS: start pause, Home, seven fruits, interior theme, assets')
+          PY
+      - name: Save complete preview without publishing Pages
+        uses: actions/upload-artifact@v4
+        with:
+          name: WOW-3.3-isolated-preview
+          path: .
+          retention-days: 14
