@@ -119,7 +119,14 @@ function trackFruitStep(){
   updateLinear();
  }catch(_){}
 }
-window.addEventListener('message',event=>{if(event.origin!==location.origin||event.source!==app.contentWindow||event.data?.type!=='WOW_SPECIES_DETAIL'||activeFruit!=='species')return;fruitSteps=event.data.open?[{fingerprint:'species|catalogue',view:'species',zone:''},{fingerprint:'species|detail',view:'species',zone:''}]:[{fingerprint:'species|catalogue',view:'species',zone:''}];updateLinear()});
+window.addEventListener('message',event=>{
+ if(event.origin!==location.origin||event.source!==app.contentWindow||event.data?.type!=='WOW_SPECIES_DETAIL'||activeFruit!=='species')return;
+ // Species detail is a sub-step of the current zone, not a new global route.
+ const zone=app.contentWindow.WOWUnified?.context?.()?.zoneCode||'';
+ const root={fingerprint:'species|'+zone,view:'species',zone};
+ fruitSteps=event.data.open?[root,{fingerprint:'species-detail|'+zone,view:'species',zone}]:[root];
+ updateLinear();
+});
 linearBack.addEventListener('click',()=>{
  if(!activeFruit||restoringFruitStep)return;
  // Species details are an in-place sub-screen managed by the catalogue adapter.
