@@ -313,7 +313,7 @@ function installZoneNavigator(){
  }
  hideDuplicateNav();
  const content=doc.getElementById('wowUnifiedContent');
- if(content&&!doc.body.dataset.wow31ZoneNavigator)new MutationObserver(()=>{hideDuplicateNav();trackFruitStep();syncPhotoAlbum();syncGIS()}).observe(content,{childList:true,subtree:true});
+ if(!doc.body.dataset.wow31ZoneNavigator)new MutationObserver(()=>{hideDuplicateNav();trackFruitStep();syncPhotoAlbum();syncGIS()}).observe(doc.body,{childList:true,subtree:true});
  if(doc.body.dataset.wow31ZoneNavigator)return;
  doc.body.dataset.wow31ZoneNavigator='yes';
  doc.addEventListener('click',event=>{
