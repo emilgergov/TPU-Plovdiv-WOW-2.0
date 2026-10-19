@@ -105,7 +105,7 @@ function trackFruitStep(){
   const api=app.contentWindow.WOWUnified;
   if(!app.contentDocument?.body||!api?.context)return;
   const ctx=api.context(),view=ctx?.view||activeFruit,zone=ctx?.zoneCode||'';
-  if(view!==activeFruit&&!zone)return;
+  if(!view)return;
   if(backGuardZone!==null){
    if(zone===backGuardZone||zone===fruitSteps[fruitSteps.length-1]?.zone)return;
    backGuardZone=null;
@@ -114,8 +114,8 @@ function trackFruitStep(){
   const fingerprint=[view,zone].join('|');
   if(fruitSteps[fruitSteps.length-1]?.fingerprint===fingerprint)return;
   const prior=fruitSteps.findIndex(step=>step.fingerprint===fingerprint);
-  if(prior>=0)fruitSteps=fruitSteps.slice(0,prior+1);
-  else fruitSteps.push({fingerprint,view,zone});
+  // Revisit an earlier screen as a new forward step; Back must remain one-step.
+  fruitSteps.push({fingerprint,view,zone});
   updateLinear();
  }catch(_){}
 }
