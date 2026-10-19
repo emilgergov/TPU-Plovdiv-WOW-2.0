@@ -64,7 +64,7 @@
 @media(min-width:701px){
  #tree .tree-stage{inset:0;overflow:hidden;background:#102c20}
  #tree .tree-canvas{width:max(100vw,177.7778dvh)!important;height:max(100dvh,56.25vw)!important;max-height:none!important;flex:0 0 auto;aspect-ratio:16/9}
- #tree .tree-canvas>img{width:100%;height:100%;object-fit:fill}
+ #tree .tree-canvas>img{width:100%;height:100%;object-fit:cover}
  #tree .tree-stage:before{display:none}
  #wowTreeHome{bottom:22px!important}
 }
@@ -100,7 +100,7 @@ function initMobileTreeScroll(){
  update();
 }
 function showTree(){lastPhotoZone='';photoAlbumOpened=false;activeFruit=null;fruitSteps=[];backGuardZone=null;linearNav.classList.remove('active');history.replaceState(null,'','#tree');requestAnimationFrame(()=>requestAnimationFrame(initMobileTreeScroll));soundWanted=false;fadeAudio(0,1200);pending=null;if(poll){clearInterval(poll);poll=null}clearNotice();clearTimeout(timer);intro.classList.add('hidden');tree.classList.remove('hidden');app.classList.remove('active');back.classList.remove('show');app.setAttribute('aria-hidden','true')}function prepare(){try{let d=app.contentDocument;if(expectedFresh && (!d.location.search.includes('fresh='+expectedFresh)))return false;if(!d||!d.head||!d.body)return false;let st=d.getElementById('wow-clean-bypass');if(!st){st=d.createElement('style');st.id='wow-clean-bypass';st.textContent='#tpuApprovedSplash,#wowIntro,#wowNatkoReplay,#workBridge,#wowEntranceCard{display:none!important}html,body{overflow:auto!important}#wowUnifiedApp{z-index:2147483640!important;visibility:visible!important;opacity:1!important}';d.head.appendChild(st)}/* WOW 3.1: retain only the contextual Back/Tree actions within each step. */if(!d.getElementById('wow-linear-nav-style')){const linear=d.createElement('style');linear.id='wow-linear-nav-style';linear.textContent='#wowGlobalBack,#wowFloatingBack,#wowBackFloating,.wow-floating-back,[data-global-back],.global-back-button,#wowUnifiedBackFloating,.wow-u-back-floating{display:none!important}#wowSpeciesCatalogue > div:first-child:has(> button){display:none!important}';d.head.appendChild(linear)}/* WOW 3.3: purely cosmetic, isolated iframe theme; no navigation or data changes. */if(!d.getElementById('wow33-interior-theme')){const theme=d.createElement('style');theme.id='wow33-interior-theme';theme.textContent=`/* Nature-inspired backdrop only inside the interactive content, never over maps or dialogs. */
-#wowUnifiedContent{position:relative;isolation:isolate;background:linear-gradient(145deg,rgba(12,45,32,.93),rgba(24,65,45,.83)),url('tree.png') center center/cover fixed!important;color:#f4f0df;min-height:100vh}
+#wowUnifiedContent{position:relative;isolation:isolate;background:linear-gradient(145deg,rgba(12,45,32,.78),rgba(24,65,45,.70)),url('tree.png') center center/cover fixed!important;min-height:100vh}
 #wowUnifiedContent::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(ellipse at 85% 5%,rgba(225,184,97,.19),transparent 42%)}
 #wowUnifiedContent button,#wowUnifiedContent a{transition:filter .18s ease,box-shadow .18s ease}
 #wowUnifiedContent button:hover,#wowUnifiedContent a:hover{filter:brightness(1.09)}
