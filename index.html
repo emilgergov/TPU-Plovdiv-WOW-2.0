@@ -90,7 +90,7 @@ function initMobileTreeScroll(){
  if(mobile){const max=Math.max(0,stage.scrollWidth-stage.clientWidth);stage.scrollLeft=Math.min(max,Math.max(0,stage.scrollWidth*.20-stage.clientWidth*.5));}
  update();
 }
-function showTree(){activeFruit=null;fruitSteps=[];backGuardZone=null;linearNav.classList.remove('active');history.replaceState(null,'','#tree');requestAnimationFrame(()=>requestAnimationFrame(initMobileTreeScroll));soundWanted=false;fadeAudio(0,1200);pending=null;if(poll){clearInterval(poll);poll=null}clearNotice();clearTimeout(timer);intro.classList.add('hidden');tree.classList.remove('hidden');app.classList.remove('active');back.classList.remove('show');app.setAttribute('aria-hidden','true')}function prepare(){try{let d=app.contentDocument;if(expectedFresh && (!d.location.search.includes('fresh='+expectedFresh)))return false;if(!d||!d.head||!d.body)return false;let st=d.getElementById('wow-clean-bypass');if(!st){st=d.createElement('style');st.id='wow-clean-bypass';st.textContent='#tpuApprovedSplash,#wowIntro,#wowNatkoReplay,#workBridge,#wowEntranceCard{display:none!important}html,body{overflow:auto!important}#wowUnifiedApp{z-index:2147483640!important;visibility:visible!important;opacity:1!important}';d.head.appendChild(st)}/* WOW 3.1: retain only the contextual Back/Tree actions within each step. */if(!d.getElementById('wow-linear-nav-style')){const linear=d.createElement('style');linear.id='wow-linear-nav-style';linear.textContent='#wowGlobalBack,#wowFloatingBack,#wowBackFloating,.wow-floating-back,[data-global-back],.global-back-button{display:none!important}';d.head.appendChild(linear)}if(!d.getElementById('wow-presentation-fixes')){let patch=d.createElement('script');patch.id='wow-presentation-fixes';patch.src='presentation-fixes.js';d.head.appendChild(patch)}if(!d.getElementById('wow-species-catalogue')){let species=d.createElement('script');species.id='wow-species-catalogue';species.src='species-catalogue.js';d.head.appendChild(species)}let splash=d.getElementById('tpuApprovedSplash');if(splash)splash.hidden=true;d.documentElement.classList.remove('wow-pre-intro-lock','tpu-intro-mode','tpu-bridge-mode');d.documentElement.classList.add('tpu-entered');return !!(app.contentWindow.WOWUnified&&typeof app.contentWindow.WOWUnified.navigate==='function')}catch(e){return false}}
+function showTree(){lastPhotoZone='';photoAlbumOpened=false;activeFruit=null;fruitSteps=[];backGuardZone=null;linearNav.classList.remove('active');history.replaceState(null,'','#tree');requestAnimationFrame(()=>requestAnimationFrame(initMobileTreeScroll));soundWanted=false;fadeAudio(0,1200);pending=null;if(poll){clearInterval(poll);poll=null}clearNotice();clearTimeout(timer);intro.classList.add('hidden');tree.classList.remove('hidden');app.classList.remove('active');back.classList.remove('show');app.setAttribute('aria-hidden','true')}function prepare(){try{let d=app.contentDocument;if(expectedFresh && (!d.location.search.includes('fresh='+expectedFresh)))return false;if(!d||!d.head||!d.body)return false;let st=d.getElementById('wow-clean-bypass');if(!st){st=d.createElement('style');st.id='wow-clean-bypass';st.textContent='#tpuApprovedSplash,#wowIntro,#wowNatkoReplay,#workBridge,#wowEntranceCard{display:none!important}html,body{overflow:auto!important}#wowUnifiedApp{z-index:2147483640!important;visibility:visible!important;opacity:1!important}';d.head.appendChild(st)}/* WOW 3.1: retain only the contextual Back/Tree actions within each step. */if(!d.getElementById('wow-linear-nav-style')){const linear=d.createElement('style');linear.id='wow-linear-nav-style';linear.textContent='#wowGlobalBack,#wowFloatingBack,#wowBackFloating,.wow-floating-back,[data-global-back],.global-back-button,#wowUnifiedBackFloating,.wow-u-back-floating{display:none!important}';d.head.appendChild(linear)}if(!d.getElementById('wow-presentation-fixes')){let patch=d.createElement('script');patch.id='wow-presentation-fixes';patch.src='presentation-fixes.js';d.head.appendChild(patch)}if(!d.getElementById('wow-species-catalogue')){let species=d.createElement('script');species.id='wow-species-catalogue';species.src='species-catalogue.js';d.head.appendChild(species)}let splash=d.getElementById('tpuApprovedSplash');if(splash)splash.hidden=true;d.documentElement.classList.remove('wow-pre-intro-lock','tpu-intro-mode','tpu-bridge-mode');d.documentElement.classList.add('tpu-entered');return !!(app.contentWindow.WOWUnified&&typeof app.contentWindow.WOWUnified.navigate==='function')}catch(e){return false}}
 const status=$('#status');let pending=null,poll=null,attempts=0,expectedFresh='';let freshSequence=0;let activeFruit=null;let fruitSteps=[];const linearNav=$('#wowLinearNav'),linearStep=$('#wowLinearStep'),linearBack=$('#wowLinearBack');
 let restoringFruitStep=false;
 let backGuardZone=null;
@@ -99,12 +99,34 @@ function updateLinear(){
  linearStep.textContent='Стъпка '+Math.max(1,fruitSteps.length);
  linearBack.disabled=!activeFruit;
 }
+/* Keep actual screen visits (including embedded photo albums) in one history. */
+let lastPhotoZone='',photoAlbumOpened=false;
+function photoFrame(){
+ try{return Array.from(app.contentDocument.querySelectorAll('iframe')).find(f=>/PHOTO_ARCHIVE/i.test(f.src||''))||null}catch(_){return null}
+}
+function syncPhotoAlbum(){
+ try{
+  const api=app.contentWindow.WOWUnified,ctx=api?.context?.();
+  if(!ctx||!/photo/i.test(ctx.view||''))return;
+  const code=ctx.zoneCode||lastPhotoZone;
+  if(!code)return;
+  const f=photoFrame(),d=f?.contentDocument;
+  if(!d||!d.body)return;
+  const title=(d.querySelector('h1,h2')?.textContent||'');
+  if(d.body.textContent.includes(code)&&/локален фотоархив|всички зони/i.test(title)){
+   const target=Array.from(d.querySelectorAll('a,button,[role="button"]')).find(el=>el.textContent.includes(code));
+   if(target&&!photoAlbumOpened){photoAlbumOpened=true;target.click();}
+  }
+ }catch(_){}
+}
 function trackFruitStep(){
  if(!activeFruit||restoringFruitStep||activeFruit==='species')return;
  try{
   const api=app.contentWindow.WOWUnified;
   if(!app.contentDocument?.body||!api?.context)return;
   const ctx=api.context(),view=ctx?.view||activeFruit,zone=ctx?.zoneCode||'';
+  if(zone)lastPhotoZone=zone;
+  if(/photo/i.test(view))syncPhotoAlbum();
   if(!view)return;
   if(backGuardZone!==null){
    // Ignore only the departed screen while the iframe finishes repainting.
@@ -176,7 +198,7 @@ function installZoneNavigator(){
  function hideDuplicateNav(){
   for(const b of doc.querySelectorAll('#wowUnifiedApp button,#wowUnifiedApp a')){
    const label=(b.textContent||'').replace(/\s+/g,' ').trim();
-   if(/^(?:←\s*)?Назад$/i.test(label)||/^(?:🌳\s*)?(?:Към\s+)?Дървото$/i.test(label)){
+   if(/^(?:←\s*)?Назад$/i.test(label)||/^(?:🌳\s*)?(?:Към\s+)?Дървото$/i.test(label)||/^←?\s*Към основния екран$/i.test(label)){
     b.style.setProperty('display','none','important');b.setAttribute('aria-hidden','true');b.tabIndex=-1;
    }
   }
@@ -205,6 +227,8 @@ function installZoneNavigator(){
    const ctx=app.contentWindow.WOWUnified?.context?.();
    if(!ctx)return;
    const zone=ctx.zoneCode||'';
+   if(zone)lastPhotoZone=zone;
+   if(/photo/i.test(ctx.view||'')){photoAlbumOpened=false;setTimeout(syncPhotoAlbum,400)}
    const current=fruitSteps[fruitSteps.length-1];
    if(ctx.view!==current?.view||zone!==current?.zone)trackFruitStep();
   },120);
