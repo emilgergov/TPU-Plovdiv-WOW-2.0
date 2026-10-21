@@ -5,8 +5,10 @@ on:
     paths:
       - 'expert-module/v26_zone_overlay.py'
       - 'expert-module/v26_batch_analysis.py'
+      - 'expert-module/v26_evidence_report.py'
       - 'expert-module/tests/test_zone_overlay.py'
       - 'expert-module/tests/test_v26_batch_analysis.py'
+      - 'expert-module/tests/test_v26_evidence_report.py'
       - '.github/workflows/v26-zone-overlay.yml'
   workflow_dispatch:
 permissions:
