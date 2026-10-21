@@ -1,0 +1,35 @@
+name: V26 private real GIS acceptance
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  private-gis:
+    if: github.event.repository.private == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install GIS dependencies
+        run: python -m pip install shapely pyproj reportlab
+      - name: Retrieve authenticated real GIS bundle
+        env:
+          BUNDLE_URL: \${{ secrets.V26_GIS_BUNDLE_URL }}
+          BUNDLE_SHA256: \${{ secrets.V26_GIS_BUNDLE_SHA256 }}
+        run: |
+          set -euo pipefail
+          test -n "$BUNDLE_URL" || { echo 'Missing secret V26_GIS_BUNDLE_URL'; exit 1; }
+          test -n "$BUNDLE_SHA256" || { echo 'Missing secret V26_GIS_BUNDLE_SHA256'; exit 1; }
+          curl --fail --silent --show-error --location --output "$RUNNER_TEMP/v26-private.zip" "$BUNDLE_URL"
+          echo "$BUNDLE_SHA256  $RUNNER_TEMP/v26-private.zip" | sha256sum --check --status
+      - name: Generate real GIS vector PDF and map
+        run: python expert-module/v26_real_build.py "$RUNNER_TEMP/v26-private.zip" "$RUNNER_TEMP/v26-private-output"
+      - name: Preserve real evidence as short-lived private artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: v26-real-gis-draft-private
+          path: \${{ runner.temp }}/v26-private-output/
+          if-no-files-found: error
+          retention-days: 1
