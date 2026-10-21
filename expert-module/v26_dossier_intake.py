@@ -10,7 +10,7 @@ from pathlib import PurePosixPath
 import re
 from zipfile import ZipFile, BadZipFile
 
-CADASTRAL = re.compile(r"(?<![0-9.])([0-9]{5}\\.[0-9]+\\.[0-9]+)(?![0-9.])")
+CADASTRAL = re.compile(r"(?<![0-9.])([0-9]{5}\.[0-9]+\.[0-9]+)(?![0-9.])")
 MAX_FILES = 2000
 MAX_UNCOMPRESSED = 250 * 1024 * 1024
 MAX_SINGLE = 80 * 1024 * 1024
