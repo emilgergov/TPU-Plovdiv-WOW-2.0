@@ -11,7 +11,7 @@
 <p><strong>Имот:</strong> <code>40717.28.4</code></p>
 <p><strong>Зона:</strong> BG0002057 — Бесапарски ридове (архивна връзка)</p>
 <p>Вдясно е вградена истинската локална програма. Въведи имота в нейното поле. Данните не се изпращат към GitHub.</p>
-<p><button id="refresh-local">Презареди локалната карта</button> <a href="http://127.0.0.1:8765/" target="_blank" rel="noopener">Отвори в отделен прозорец</a></p>
+<p><button id="refresh-local">Отвори локалната карта</button> <a href="http://127.0.0.1:8765/" target="_blank" rel="noopener">Отвори в отделен прозорец</a></p>
 <p id="local-hint" role="status">Ако рамката е празна, стартирай локалния V26 сървър. Ако браузърът блокира вграждането, използвай връзката за отделен прозорец.</p>
 <h3>Отбележи резултатите</h3>
 <label><input type="checkbox"> Имотът е намерен</label><p></p>
@@ -22,8 +22,8 @@
 <label><input type="checkbox"> PDF и карта са съгласувани</label>
 <p><button id="copy-report">Копирай протокол</button></p>
 <p id="report-status" role="status"></p>
-</section><section><iframe id="live-frame" title="Локален ГИС модул V26" src="http://127.0.0.1:8765/" referrerpolicy="no-referrer"></iframe></section></div>
+</section><section><div style="background:white;padding:28px;border-radius:16px;border:2px solid #9db9a7"><h2>Реална ГИС карта V26</h2><p>Отвори локалната програма в отделен раздел на браузъра. Това избягва блокиране на HTTP съдържание в HTTPS тестовата страница.</p><p><a class="action" href="http://127.0.0.1:8765/" target="_blank" rel="noopener">Отвори локалната карта</a></p><p>След теста се върни в този раздел и отбележи резултатите вляво. Не качвай ZIP преписки в публични уеб услуги.</p><p class="note">Ако страницата не се отваря, локалният Python сървър V26 не е достъпен на порт 8765.</p></div></section></div>
 <script>
-document.getElementById('refresh-local').onclick=()=>{document.getElementById('live-frame').src='http://127.0.0.1:8765/?zztest='+Date.now()};
+document.getElementById('refresh-local').onclick=()=>{window.open('http://127.0.0.1:8765/','_blank','noopener');};
 document.getElementById('copy-report').onclick=async()=>{const labels=[...document.querySelectorAll('.test-layout label')];const lines=['V26 — 40717.28.4 — BG0002057',...labels.map(el=>(el.querySelector('input').checked?'PASS':'НЕПОТВЪРДЕНО')+' — '+el.textContent.trim())];try{await navigator.clipboard.writeText(lines.join('\n'));document.getElementById('report-status').textContent='Протоколът е копиран';}catch(e){document.getElementById('report-status').textContent=lines.join(' | ')}};
 </script></body></html>
