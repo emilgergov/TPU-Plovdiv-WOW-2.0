@@ -1,0 +1,23 @@
+name: V26 isolated zone overlay tests
+on:
+  push:
+    branches: [work/expert-module-isolated-20261020]
+    paths:
+      - 'expert-module/v26_zone_overlay.py'
+      - 'expert-module/tests/test_zone_overlay.py'
+      - '.github/workflows/v26-zone-overlay.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  overlay-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install GIS test dependencies
+        run: python -m pip install shapely pyproj
+      - name: Test parcel and zone overlay
+        run: python -m unittest discover -s expert-module/tests -p 'test_zone_overlay.py' -v
