@@ -8,11 +8,13 @@ on:
       - 'expert-module/v26_evidence_report.py'
       - 'expert-module/v26_dossier_intake.py'
       - 'expert-module/v26_workflow.py'
+      - 'expert-module/v26_evidence_pdf.py'
       - 'expert-module/tests/test_zone_overlay.py'
       - 'expert-module/tests/test_v26_batch_analysis.py'
       - 'expert-module/tests/test_v26_evidence_report.py'
       - 'expert-module/tests/test_v26_dossier_intake.py'
       - 'expert-module/tests/test_v26_workflow.py'
+      - 'expert-module/tests/test_v26_evidence_pdf.py'
       - '.github/workflows/v26-zone-overlay.yml'
   workflow_dispatch:
 permissions:
@@ -26,6 +28,6 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install GIS test dependencies
-        run: python -m pip install shapely pyproj
+        run: python -m pip install shapely pyproj reportlab
       - name: Test parcel and zone overlay
         run: python -m unittest discover -s expert-module/tests -p 'test*.py' -v
