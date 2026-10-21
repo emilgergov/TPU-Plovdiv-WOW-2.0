@@ -4,7 +4,9 @@ on:
     branches: [work/expert-module-isolated-20261020]
     paths:
       - 'expert-module/v26_zone_overlay.py'
+      - 'expert-module/v26_batch_analysis.py'
       - 'expert-module/tests/test_zone_overlay.py'
+      - 'expert-module/tests/test_v26_batch_analysis.py'
       - '.github/workflows/v26-zone-overlay.yml'
   workflow_dispatch:
 permissions:
@@ -20,4 +22,4 @@ jobs:
       - name: Install GIS test dependencies
         run: python -m pip install shapely pyproj
       - name: Test parcel and zone overlay
-        run: python -m unittest discover -s expert-module/tests -p 'test_zone_overlay.py' -v
+        run: python -m unittest discover -s expert-module/tests -p 'test*.py' -v
