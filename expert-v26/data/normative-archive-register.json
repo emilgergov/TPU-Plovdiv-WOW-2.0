@@ -1,0 +1,102 @@
+[
+  {
+    "id": "N01",
+    "title": "Закон за биологичното разнообразие",
+    "source": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/ZAKON_za_biologichnoto_raznoobrazie24.pdf",
+    "purpose": "Нормативна основа ЗЗ; чл.31",
+    "source_status": "Официален PDF линк установен; файлът не е изтеглен",
+    "page": "ПРЕДСТОИ",
+    "date": "ПРЕДСТОИ",
+    "verified": false
+  },
+  {
+    "id": "N02",
+    "title": "Наредба за оценка за съвместимост",
+    "source": "https://www.moew.government.bg/static/media/ups/tiny/%D0%9D%D0%A1%D0%97%D0%9F/NAREDBA_za_usloviqta_i_reda_za_izvyrsvane_na_ocenka_za_syvmestimostta_na_planove_programi_proekti_i_.pdf",
+    "purpose": "Процедура ОС; контролен лист",
+    "source_status": "Официален PDF линк установен; файлът не е изтеглен",
+    "page": "ПРЕДСТОИ",
+    "date": "ПРЕДСТОИ",
+    "verified": false
+  },
+  {
+    "id": "N03",
+    "title": "Закон за опазване на околната среда",
+    "source": "https://www.moew.government.bg/bg/zakon-za-opazvane-na-okolnata-sreda-6671/",
+    "purpose": "Приложения №1 и №2; ОВОС",
+    "source_status": "Официална страница; файлът не е изтеглен",
+    "page": "ПРЕДСТОИ",
+    "date": "ПРЕДСТОИ",
+    "verified": false
+  },
+  {
+    "id": "N04",
+    "title": "Наредба за териториални планове за управление на защитени зони",
+    "source": "https://www.moew.government.bg/bg/priroda/zakonodatelstvo/nacionalno-zakonodatelstvo/naredbi-pravilnici-instrukcii-tarifi/",
+    "purpose": "ТПУ - нормативна рамка",
+    "source_status": "Официална страница; директен PDF предстои",
+    "page": "ПРЕДСТОИ",
+    "date": "ПРЕДСТОИ",
+    "verified": false
+  },
+  {
+    "id": "Z01",
+    "title": "BG0002057 Заповед РД-786/29.10.2008 (ДВ 106/2008)",
+    "source": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/PublicDownloads/Auto/PS_SPA/BG0002057/BG0002057_PS_11.pdf",
+    "purpose": "Режими и забрани",
+    "source_status": "Официален PDF линк установен; файлът не е изтеглен",
+    "page": "ПРЕДСТОИ",
+    "date": "ПРЕДСТОИ",
+    "verified": false
+  },
+  {
+    "id": "Z02",
+    "title": "BG0002057 Заповед РД-78/28.01.2013 (ДВ 10/2013)",
+    "source": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/PublicDownloads/Auto/PS_SPA/BG0002057/BG0002057_PS_13.pdf",
+    "purpose": "Изменение на режими",
+    "source_status": "Официален PDF линк установен; файлът не е изтеглен",
+    "page": "ПРЕДСТОИ",
+    "date": "ПРЕДСТОИ",
+    "verified": false
+  },
+  {
+    "id": "Z03",
+    "title": "BG0002057 стандартен формуляр",
+    "source": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/PublicDownloads/SDF/Site_BG0002057.pdf",
+    "purpose": "Предмет и цели на опазване, видове",
+    "source_status": "Официален PDF прочетен онлайн; файлът не е изтеглен; проверете версията",
+    "page": "ПРЕДСТОИ",
+    "date": "ПРЕДСТОИ",
+    "verified": false
+  },
+  {
+    "id": "Z04",
+    "title": "BG0002057 страница на защитената зона",
+    "source": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0002057&siteType=BirdsDirective",
+    "purpose": "Координатен регистър, цифрови граници, заповеди",
+    "source_status": "Официална страница установена",
+    "page": "ПРЕДСТОИ",
+    "date": "ПРЕДСТОИ",
+    "verified": false
+  },
+  {
+    "id": "R01",
+    "title": "Регистър защитени територии и зони ИАОС",
+    "source": "https://pdbase.government.bg/zpo/bg/",
+    "purpose": "Актуални актове и режими",
+    "source_status": "Официален регистър установен",
+    "page": "ПРЕДСТОИ",
+    "date": "ПРЕДСТОИ",
+    "verified": false
+  },
+  {
+    "id": "P01",
+    "title": "МОСВ административна услуга 3035",
+    "source": "https://www.moew.government.bg/bg/3035-izdavane-na-pismo-za-precenyavane-veroyatnostta-ot-vuzdejstvie-vurhu-zastitenite-zoni-na-planove-programi-proekti-i-investicionni-predlojeniya-i-tehnite-izmeneniya-ili-razshireniya/",
+    "purpose": "Преценка вероятност въздействие",
+    "source_status": "Официална процедура установена",
+    "page": "ПРЕДСТОИ",
+    "date": "ПРЕДСТОИ",
+    "verified": false
+  }
+]
