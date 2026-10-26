@@ -7,7 +7,9 @@ output.id='v26BrowserInventory';output.className='hint';output.setAttribute('rol
 output.style.cssText='display:none;border:1px solid #c7dfcf;border-radius:8px;padding:10px;white-space:pre-wrap';
 document.getElementById('intakeResult').after(output);
 const u16=(v,p)=>v.getUint16(p,true),u32=(v,p)=>v.getUint32(p,true);
+let generation=0;
 async function inspect(file){
+ const token=++generation;delete window.V26ArchiveInventory;
  if(!file||!file.name.toLowerCase().endsWith('.zip'))return;
  output.style.display='block';output.textContent='Четене на ZIP каталога в браузъра…';
  try{
@@ -27,11 +29,12 @@ async function inspect(file){
  p+=46+n+ex+co;
  }
  if(!entries)throw Error('Не са открити файлове.');
+ if(token!==generation)return;
  window.V26ArchiveInventory={archive:file.name,archive_bytes:file.size,entries,files,source:'browser-central-directory',verified_at:new Date().toISOString()};document.dispatchEvent(new CustomEvent('v26:archive-inventory',{detail:window.V26ArchiveInventory}));
  output.textContent='ZIP проверен локално: '+entries+' файла; '+gis+' възможни ГИС файла. Архивът не е качван. Това е проверка на съдържанието, не ГИС анализ.';
- }catch(e){output.textContent='ZIP каталог: '+e.message}
+ }catch(e){if(token===generation){delete window.V26ArchiveInventory;output.textContent='ZIP каталог: '+e.message}}
 }
 input.addEventListener('change',()=>inspect(input.files?.[0]));
 drop.addEventListener('drop',e=>{const file=e.dataTransfer?.files?.[0];if(file)inspect(file)});
-document.getElementById('reset')?.addEventListener('click',()=>{output.style.display='none';output.textContent='';delete window.V26ArchiveInventory});
+document.getElementById('reset')?.addEventListener('click',()=>{generation++;output.style.display='none';output.textContent='';delete window.V26ArchiveInventory});
 })();
