@@ -49,7 +49,7 @@ $('runAnalysis').onclick=async()=>{
   const data=await response.json();
   if(!response.ok)throw Error(data.error||'ГИС обработката не е успешна');
   const raw=atob(data.pdf_base64);const bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
-  state.pdf=bytes;document.dispatchEvent(new CustomEvent('v26:annex1',{detail:bytes}));state.map=data.html;$('plan').value=data.summary.results.some(r=>Number(r.area_m2)>0)?'PLAN_B':'PLAN_A';document.dispatchEvent(new CustomEvent('v26:gis-ready',{detail:data.summary}));
+  state.pdf=bytes;document.dispatchEvent(new CustomEvent('v26:annex1',{detail:bytes}));state.map=data.html;/* План А/Б се избира от експерт, а не автоматично от ГИС площта. */document.dispatchEvent(new CustomEvent('v26:gis-ready',{detail:data.summary}));
   $('downloadPdf').disabled=false;$('downloadMap').disabled=false;
   message('result','ГИС анализът е изчислен: '+data.summary.pair_count+' двойки имот–зона. PDF и картата са готови за изтегляне. Статус: РАБОТЕН ПРОЕКТ — изисква експертно приемане.',true);
   $('summary').textContent=JSON.stringify(data.summary,null,2);
