@@ -17,6 +17,22 @@ const pattern=/^\d{5}\.\d+\.\d+$/;
 function message(id,text,good=false){$(id).textContent=text;$(id).className='status'+(good?' good':'')}
 function update(){const data={преписка:state.dossier?'ПРИЛОЖЕНА — има опис и кандидати за КАДНУМ; изисква експертно приемане':'ПРЕДСТОИ',имоти:state.ids.length,водещи_имоти:state.leading,имотна_геометрия:!!state.parcelGeo,зонална_геометрия:!!state.zoneGeo,валидирани_входове:state.checked,гис_изчисление:'ПРЕДСТОИ — изпълнение чрез V26 Python',доказателствен_pdf:'ПРЕДСТОИ',предложение:$('proposal').value==='yes'?'ИЗИСКВА СЕ ЕКСПЕРТЕН ПРОЕКТ':'НЕ Е ИЗИСКАНО'};$('summary').textContent=JSON.stringify(data,null,2);return data}
 function invalidateGIS(){state.checked=false;state.pdf=null;state.map=null;const plan=$('plan');if(plan)plan.value='';$('downloadPdf').disabled=true;$('downloadMap').disabled=true;message('gisStatus','Входните данни са променени. Повтори проверката на геометрията преди ГИС анализа.');document.dispatchEvent(new CustomEvent('v26:gis-invalidated'));update()}
+function derivePlanFromGIS(summary,leading){
+ if(!summary||!Array.isArray(summary.results)||!leading.length)return {plan:'',reason:'Липсват проверени резултати или водещи имоти'};
+ const selected=new Set(leading.map(String));
+ const byId=new Map(leading.map(id=>[String(id),[]]));
+ for(const rec of summary.results){
+  if(!rec||typeof rec!=='object')return {plan:'',reason:'Невалиден запис от ГИС'};
+  const id=String(rec.KADNUM??rec.kadnum??rec.parcel_id??rec.parcel_kadnum??'');
+  if(!id||!selected.has(id))continue;
+  if(rec.status&& !['OK','ok','COMPLETE','complete','SUCCESS','success'].includes(rec.status))return {plan:'',reason:'Непотвърден ГИС статус за '+id};
+  const area=Number(rec.area_m2);
+  if(rec.area_m2===null||rec.area_m2===undefined||rec.area_m2===''||!Number.isFinite(area)||area<0)return {plan:'',reason:'Липсва надеждна площ на пресичане за '+id};
+  byId.get(id).push(area);
+ }
+ for(const [id,areas] of byId)if(!areas.length)return {plan:'',reason:'Липсва ГИС резултат за водещ имот '+id};
+ return {plan:[...byId.values()].some(areas=>areas.some(a=>a>0))?'PLAN_B':'PLAN_A',reason:'Автоматично определен от ГИС пресичанията на водещите имоти'};
+}
 function save(name,data,type='application/json'){const blob=new Blob([data],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 $('inventory').onclick=async()=>{const f=$('dossier').files[0];state.dossier=false;$('referencesPdf').disabled=true;if(!f){message('dossierStatus','Не е избран ZIP.');update();return}message('dossierStatus','Извършва се безопасен опис на архива…');try{const res=await fetch('/api/dossier/inventory',{method:'POST',headers:{'Content-Type':'application/zip'},body:f});const inv=await res.json();if(!res.ok)throw Error(inv.error||'Неуспешен опис');state.dossier=true;document.dispatchEvent(new CustomEvent('v26:dossier-ready'));$('referencesPdf').disabled=false;const ids=Object.keys(inv.candidate_parcels||{});const issues=(inv.issues||[]).length;message('dossierStatus','Описани файлове: '+inv.files.length+'; кандидати за КАДНУМ: '+ids.length+'; предупреждения: '+issues+'.\\nКандидатите не са автоматично определени като водещи. DOCX и текстови PDF файлове се обработват; сканираните остават за експертен преглед.',issues===0);if(ids.length){$('ids').value=ids.join('\\n');$('prepare').click()}update()}catch(e){message('dossierStatus','Неуспешен опис: '+e.message);update()}};
 $('prepare').onclick=()=>{const ids=[...new Set($('ids').value.split(/[\s,;]+/).map(x=>x.trim()).filter(Boolean))];const invalid=ids.filter(x=>!pattern.test(x));if(invalid.length){message('gisStatus','Невалидни кадастрални номера: '+invalid.join(', '));return}state.ids=ids;state.leading=[];state.checked=false;state.pdf=null;state.map=null;$('plan').value='';$('downloadPdf').disabled=true;$('downloadMap').disabled=true;const root=$('parcels');root.replaceChildren();for(const id of ids){const l=document.createElement('label');l.className='row';const cb=document.createElement('input');cb.type='checkbox';cb.value=id;cb.onchange=()=>{state.leading=[...root.querySelectorAll('input:checked')].map(x=>x.value);invalidateGIS()};l.append(cb,document.createTextNode(id+' · водещ имот'));root.append(l)}update()};
@@ -49,7 +65,7 @@ $('runAnalysis').onclick=async()=>{
   const data=await response.json();
   if(!response.ok)throw Error(data.error||'ГИС обработката не е успешна');
   const raw=atob(data.pdf_base64);const bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
-  state.pdf=bytes;document.dispatchEvent(new CustomEvent('v26:annex1',{detail:bytes}));state.map=data.html;/* План А/Б се избира от експерт, а не автоматично от ГИС площта. */document.dispatchEvent(new CustomEvent('v26:gis-ready',{detail:data.summary}));
+  state.pdf=bytes;document.dispatchEvent(new CustomEvent('v26:annex1',{detail:bytes}));state.map=data.html;const scenario=derivePlanFromGIS(data.summary,state.leading);$('plan').value=scenario.plan;message('gisStatus',scenario.plan?'Предложен автоматично '+(scenario.plan==='PLAN_A'?'План А':'План Б')+' въз основа на водещите имоти. Изисква експертно потвърждение.':'Сценарият е ПРЕДСТОИ: '+scenario.reason,!!scenario.plan);document.dispatchEvent(new CustomEvent('v26:gis-ready',{detail:data.summary}));
   $('downloadPdf').disabled=false;$('downloadMap').disabled=false;
   message('result','ГИС анализът е изчислен: '+data.summary.pair_count+' двойки имот–зона. PDF и картата са готови за изтегляне. Статус: РАБОТЕН ПРОЕКТ — изисква експертно приемане.',true);
   $('summary').textContent=JSON.stringify(data.summary,null,2);
