@@ -1,14 +1,10 @@
 /* V26 PDF2 browser preparation: no server, no invented legal verification. */
 (()=>{'use strict';
 const state={gis:null,register:null};
-const host=document.createElement('section');
-host.id='v26Annex2';host.style.cssText='margin:14px 0;padding:12px;border:1px solid #c7dfcf;border-radius:8px;background:#fff';
-const title=document.createElement('strong');title.textContent='Приложение №2 · Нормативни референции';
-const info=document.createElement('p');info.style.cssText='font-size:13px;margin:8px 0';info.textContent='Изчаква се завършена ГИС справка и нормативен регистър.';
-const button=document.createElement('button');button.type='button';button.disabled=true;button.textContent='Подготви приложение №2 за PDF';
-host.append(title,info,button);
-const anchor=document.getElementById('summary');if(!anchor)return;
-anchor.parentNode.insertBefore(host,anchor.nextSibling);
+const host=document.getElementById('v26Annex2Static');
+const info=document.getElementById('v26Annex2Info');
+const button=document.getElementById('v26Annex2Button');
+if(!host||!info||!button)return;
 function update(){
  const count=state.register?.records?.length||0,verified=state.register?.verified||0;
  const hasGIS=!!state.gis;
