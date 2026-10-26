@@ -8,8 +8,10 @@ if(!host||!info||!button)return;
 function update(){
  const count=state.register?.records?.length||0,verified=state.register?.verified||0;
  const hasGIS=!!state.gis;
- button.disabled=!(hasGIS&&count);
- info.textContent='ГИС резултат: '+(hasGIS?'получен':'ПРЕДСТОИ')+' · Нормативни записи: '+count+' · Проверени записи: '+verified+' · Непроверени: '+(count-verified)+'. '+(button.disabled?'За подготовка са нужни и двата източника.':'Подготвя се справочно приложение, не правно заключение.');
+ const verifiedGeometry=hasGIS&&(state.gis.results||[]).some(r=>r.status==='Намерен'&&r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type)));
+ const allVerified=count>0&&verified===count;
+ button.disabled=!(verifiedGeometry&&allVerified);
+ info.textContent='ГИС резултат: '+(hasGIS?'получен':'ПРЕДСТОИ')+' · Нормативни записи: '+count+' · Проверени записи: '+verified+' · Непроверени: '+(count-verified)+'. '+(button.disabled?'PDF №2 не се отключва при непотвърдени нормативни източници или липсваща ГИС геометрия.':'Източниците са потвърдени; достъпен е справочен проект.');
 }
 document.addEventListener('v26:gis-ready',e=>{state.gis=e.detail;update()});
 document.addEventListener('v26:gis-invalidated',()=>{state.gis=null;update()});
