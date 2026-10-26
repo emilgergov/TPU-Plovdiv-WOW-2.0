@@ -16,7 +16,7 @@ const state={dossier:false,ids:[],leading:[],parcelGeo:null,zoneGeo:null,checked
 const pattern=/^\d{5}\.\d+\.\d+$/;
 function message(id,text,good=false){$(id).textContent=text;$(id).className='status'+(good?' good':'')}
 function update(){const data={преписка:state.dossier?'ПРИЛОЖЕНА — има опис и кандидати за КАДНУМ; изисква експертно приемане':'ПРЕДСТОИ',имоти:state.ids.length,водещи_имоти:state.leading,имотна_геометрия:!!state.parcelGeo,зонална_геометрия:!!state.zoneGeo,валидирани_входове:state.checked,гис_изчисление:'ПРЕДСТОИ — изпълнение чрез V26 Python',доказателствен_pdf:'ПРЕДСТОИ',предложение:$('proposal').value==='yes'?'ИЗИСКВА СЕ ЕКСПЕРТЕН ПРОЕКТ':'НЕ Е ИЗИСКАНО'};$('summary').textContent=JSON.stringify(data,null,2);return data}
-function invalidateGIS(){state.checked=false;state.pdf=null;state.map=null;const plan=$('plan');if(plan)plan.value='';$('downloadPdf').disabled=true;$('downloadMap').disabled=true;message('gisStatus','Входните данни са променени. Повтори проверката на геометрията преди ГИС анализа.');document.dispatchEvent(new CustomEvent('v26:gis-invalidated'));update()}
+function invalidateGIS(){state.checked=false;state.pdf=null;state.map=null;const plan=$('plan');if(plan){plan.value='';plan.disabled=true}const acceptPlan=$('acceptPlan');if(acceptPlan)acceptPlan.checked=false;$('downloadPdf').disabled=true;$('downloadMap').disabled=true;message('gisStatus','Входните данни са променени. Повтори проверката на геометрията преди ГИС анализа.');document.dispatchEvent(new CustomEvent('v26:gis-invalidated'));update()}
 function derivePlanFromGIS(summary,leading){
  if(!summary||!Array.isArray(summary.results)||!leading.length)return {plan:'',reason:'Липсват проверени резултати или водещи имоти'};
  const selected=new Set(leading.map(String));
@@ -42,7 +42,7 @@ $('clearDossier').onclick=()=>{
  if(!window.confirm('Изчисти текущата преписка, имотите, картата и генерираните резултати?'))return;
  for(const id of ['reg','subject','ids','dossier','parcelGeo','zoneGeo','referenceRecords','originalDocx']){const el=$(id);if(el)el.value=''}
  for(const id of ['acceptDossier','acceptLeading','acceptPlan','acceptSources','acceptFixed']){const el=$(id);if(el)el.checked=false}
- $('proposal').value='no';$('plan').value='';
+ $('proposal').value='no';$('plan').value='';$('plan').disabled=true;
  Object.assign(state,{dossier:false,ids:[],leading:[],parcelGeo:null,zoneGeo:null,checked:false,pdf:null,map:null});
  $('parcels').replaceChildren();$('downloadPdf').disabled=true;$('downloadMap').disabled=true;$('referencesPdf').disabled=true;
  $('dossierSelected').textContent='Няма избран ZIP.';
@@ -54,7 +54,7 @@ $('clearDossier').onclick=()=>{
 $('ids').addEventListener('input',invalidateGIS);
 $('parcelGeo').addEventListener('change',invalidateGIS);
 $('zoneGeo').addEventListener('change',invalidateGIS);
-$('check').onclick=async()=>{state.checked=false;state.pdf=null;state.map=null;$('downloadPdf').disabled=true;$('downloadMap').disabled=true;try{state.parcelGeo=await readFC($('parcelGeo'),'имотна геометрия');state.zoneGeo=await readFC($('zoneGeo'),'зонална геометрия');const ids=new Set(state.parcelGeo.features.map(f=>String(f.properties?.KADNUM||'')));const missing=state.ids.filter(id=>!ids.has(id));if(missing.length)throw Error('Липсва геометрия за: '+missing.join(', '));if(!state.leading.length)throw Error('Потвърди поне един водещ имот');for(const f of state.zoneGeo.features){if(!f.properties?.zone_code||!f.properties?.source)throw Error('Зона без код или източник')}state.checked=true;message('gisStatus','Структурата е проверена. Пространственото пресичане и източниците още изискват V26 Python и експертна проверка.',true)}catch(e){message('gisStatus',e.message)}update()};
+$('check').onclick=async()=>{state.checked=false;state.pdf=null;state.map=null;$('plan').value='';$('plan').disabled=true;$('acceptPlan').checked=false;$('downloadPdf').disabled=true;$('downloadMap').disabled=true;try{state.parcelGeo=await readFC($('parcelGeo'),'имотна геометрия');state.zoneGeo=await readFC($('zoneGeo'),'зонална геометрия');const ids=new Set(state.parcelGeo.features.map(f=>String(f.properties?.KADNUM||'')));const missing=state.ids.filter(id=>!ids.has(id));if(missing.length)throw Error('Липсва геометрия за: '+missing.join(', '));if(!state.leading.length)throw Error('Потвърди поне един водещ имот');for(const f of state.zoneGeo.features){if(!f.properties?.zone_code||!f.properties?.source)throw Error('Зона без код или източник')}state.checked=true;message('gisStatus','Структурата е проверена. Пространственото пресичане и източниците още изискват V26 Python и експертна проверка.',true)}catch(e){message('gisStatus',e.message)}update()};
 $('runAnalysis').onclick=async()=>{
  if(!state.checked){message('result','Първо провери входните геометрии и потвърди водещите имоти.');return}
  $('runAnalysis').disabled=true;
@@ -65,7 +65,7 @@ $('runAnalysis').onclick=async()=>{
   const data=await response.json();
   if(!response.ok)throw Error(data.error||'ГИС обработката не е успешна');
   const raw=atob(data.pdf_base64);const bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
-  state.pdf=bytes;document.dispatchEvent(new CustomEvent('v26:annex1',{detail:bytes}));state.map=data.html;const scenario=derivePlanFromGIS(data.summary,state.leading);$('plan').value=scenario.plan;message('gisStatus',scenario.plan?'Предложен автоматично '+(scenario.plan==='PLAN_A'?'План А':'План Б')+' въз основа на водещите имоти. Изисква експертно потвърждение.':'Сценарият е ПРЕДСТОИ: '+scenario.reason,!!scenario.plan);document.dispatchEvent(new CustomEvent('v26:gis-ready',{detail:data.summary}));
+  state.pdf=bytes;document.dispatchEvent(new CustomEvent('v26:annex1',{detail:bytes}));state.map=data.html;const scenario=derivePlanFromGIS(data.summary,state.leading);$('plan').disabled=!scenario.plan;$('plan').value=scenario.plan;const acceptPlan=$('acceptPlan');if(acceptPlan)acceptPlan.checked=false;message('gisStatus',scenario.plan?'Предложен автоматично '+(scenario.plan==='PLAN_A'?'План А':'План Б')+' въз основа на водещите имоти. Изисква експертно потвърждение.':'Сценарият е ПРЕДСТОИ: '+scenario.reason,!!scenario.plan);document.dispatchEvent(new CustomEvent('v26:gis-ready',{detail:data.summary}));
   $('downloadPdf').disabled=false;$('downloadMap').disabled=false;
   message('result','ГИС анализът е изчислен: '+data.summary.pair_count+' двойки имот–зона. PDF и картата са готови за изтегляне. Статус: РАБОТЕН ПРОЕКТ — изисква експертно приемане.',true);
   $('summary').textContent=JSON.stringify(data.summary,null,2);
