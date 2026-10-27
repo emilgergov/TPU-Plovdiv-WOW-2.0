@@ -87,6 +87,9 @@ header{min-width:0;gap:12px}header>*{min-width:0}
  .workspace .details #details>div:last-child:nth-child(odd){grid-column:1/-1}
 }
 
+/* Group 2: keep the right-hand results scrollbar visible, even before GIS results load. */
+@media(min-width:761px){body>main>.workspace>.details{overflow-y:scroll!important;scrollbar-gutter:stable!important}}
+
 /* V26 Group 2: expert workflow sections; keep original handlers and IDs. */
 .v26-step-label{font-weight:700;color:#174d37;background:#edf5ee;border-left:3px solid #3c8b62;padding:6px 8px;margin:6px 0 2px;border-radius:3px;font-size:14px}
 aside #v26Annex2Static{margin:4px 0!important;padding:8px!important}
