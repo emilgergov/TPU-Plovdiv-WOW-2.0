@@ -199,9 +199,13 @@ function select(i,keepAll=false){selected=i;const r=found[i];if(!keepAll){combin
  function fit(){
   if(innerWidth<=760){main.style.removeProperty('top');return;}
   const header=document.querySelector('body>header');
-  const top=header?header.getBoundingClientRect().bottom:main.getBoundingClientRect().top;
+  const announcement=document.querySelector('body>details,body>.v26-wow341-announcement,body>#v26-wow341');
+  const top=(header?header.offsetHeight:0)+(announcement?announcement.offsetHeight:0);
   main.style.setProperty('top',Math.max(0,top)+'px','important');
  }
- addEventListener('resize',fit,{passive:true});fit();
+ if('scrollRestoration' in history)history.scrollRestoration='manual';
+ addEventListener('resize',fit,{passive:true});
+ window.scrollTo(0,0);fit();
+ requestAnimationFrame(()=>{window.scrollTo(0,0);fit()});
 })();
 </script></body></html>
