@@ -1,7 +1,23 @@
 /* V26 local browser cadastral index: SQLite read-only; no upload or invented geometry. */
 (()=>{'use strict';
-let db=null,source='',geometryCache=null;
+let db=null,source='',geometryCache=null,geometrySource='';
 async function geometryRecords(){if(geometryCache)return geometryCache;const response=await fetch('data/v26-parcel-geometry-verified-sample.json',{cache:'no-store'});if(!response.ok)throw Error('Липсва файлът с геометрията');const data=await response.json();geometryCache=data.records||{};return geometryCache;}
+async function loadGeometryFile(file){
+ if(!file||!/\\.json$/i.test(file.name))throw Error('Изберете JSON с имотна геометрия.');
+ if(file.size>15000000)throw Error('Геометричният JSON надхвърля 15 MB.');
+ const data=JSON.parse(await file.text());
+ if(!data||data.status!=='ARCHIVAL_ONLY'||!data.records||typeof data.records!=='object'||Array.isArray(data.records))throw Error('Неподдържан формат на архивния геометричен набор.');
+ const records={};let count=0;
+ for(const [id,record] of Object.entries(data.records)){
+  if(!/^\\d{5}\\.\\d+\\.\\d+$/.test(id)||record.cadnum!==id||!Array.isArray(record.geojson?.features))throw Error('Несъответствие на идентификатор или GeoJSON.');
+  const features=record.geojson.features;
+  if(!features.length||features.some(f=>!['Polygon','MultiPolygon'].includes(f?.geometry?.type)||!Array.isArray(f.geometry.coordinates)))throw Error('Невалидна геометрия: '+id);
+  records[id]=record;count++;
+ }
+ if(!count)throw Error('Няма имотни геометрии.');
+ geometryCache=records;geometrySource=String(data.source||file.name);
+ return {count,source:geometrySource};
+}
 const validId=id=>/^\d{5}\.\d+\.\d+(?:\.\d+){0,2}$/.test(id);
 function loadScript(src){return new Promise((resolve,reject)=>{const el=document.createElement('script');el.src=src;el.onload=resolve;el.onerror=()=>reject(Error('Не се зареди библиотеката: '+src));document.head.appendChild(el)})}
 async function openSQLite(bytes,name){
@@ -49,7 +65,7 @@ async function lookup(ids){
  const spatialResults=results.filter(x=>x.status==='Намерен'&&x.geojson?.features?.length);
  return {results,summary:{found_count:spatialResults.length,requested_count:ids.length,geometry_area_sum_m2:spatialResults.reduce((sum,x)=>sum+(x.area_m2_geometry||0),0),archived_zones:[],note:db?'Индекс: '+source+'. Реална архивна имотна геометрия е налична само за подготвените идентификатори; за останалите: ПРЕДСТОИ. Няма удостоверено актуално зонално пресичане.':'ПРЕДСТОИ: зареждане на локалния SQLite индекс.'},geometry_qa:[]};
 }
-window.V26BrowserGIS=Object.freeze({lookup,loadArchive,isLoaded:()=>!!db});
+window.V26BrowserGIS=Object.freeze({lookup,loadArchive,loadGeometryFile,isLoaded:()=>!!db});
 function mount(){
  const anchor=document.getElementById('v26LocalIndexMount')||document.getElementById('zipDrop')||document.getElementById('extract');
  if(!anchor||document.getElementById('v26SqliteLoad'))return;
@@ -59,7 +75,11 @@ function mount(){
  const status=document.createElement('div');status.className='hint';status.textContent='ZIP/SQLite остава на компютъра. Не се изпраща към GitHub.';
  btn.onclick=()=>input.click();
  input.onchange=async()=>{if(!input.files?.[0])return;btn.disabled=true;status.textContent='Зареждане на SQLite индекса в браузъра…';try{const r=await loadArchive(input.files[0]);status.textContent='Индекс: '+r.parcels+' имота, '+r.overlays+' архивни пресичания. Геометрия: ПРЕДСТОИ.';}catch(e){status.textContent='Грешка: '+e.message;}finally{btn.disabled=false;input.value=''}};
- container.append(btn,input,status);anchor.id==='v26LocalIndexMount'?anchor.appendChild(container):anchor.insertAdjacentElement('afterend',container);
+ const geoInput=document.createElement('input');geoInput.type='file';geoInput.accept='.json,application/json';geoInput.hidden=true;
+ const geoBtn=document.createElement('button');geoBtn.type='button';geoBtn.className='secondary';geoBtn.textContent='Зареди архивни имотни геометрии';geoBtn.onclick=()=>geoInput.click();
+ const geoStatus=document.createElement('div');geoStatus.className='hint';geoStatus.textContent='Незадължителен JSON набор с реални полигони. Без изпращане към сървър.';
+ geoInput.onchange=async()=>{if(!geoInput.files?.[0])return;geoBtn.disabled=true;try{const x=await loadGeometryFile(geoInput.files[0]);geoStatus.textContent='Заредени '+x.count+' архивни имотни геометрии. Източник: '+x.source+'. Актуално зонално пресичане: ПРЕДСТОИ.';}catch(e){geoStatus.textContent='Грешка: '+e.message}finally{geoBtn.disabled=false;geoInput.value=''}};
+ container.append(btn,input,status,geoBtn,geoInput,geoStatus);anchor.id==='v26LocalIndexMount'?anchor.appendChild(container):anchor.insertAdjacentElement('afterend',container);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })();
