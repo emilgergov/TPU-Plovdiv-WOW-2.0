@@ -99,11 +99,19 @@ function pdfDef(title,content){
 }
 function gisPdf(results){
  const content=[{text:'Източник: RIOSV_PLOVDIV_KAIS_CADASTRE_REGIONAL_02_10_2026.gdb (архивна регионална геобаза).',margin:[0,0,0,12]}];
- for(const r of results){
-  content.push({text:'Имот: '+String(r.input||r.cadnum),style:'sub'});
+ for(let i=0;i<results.length;i++){
+  const r=results[i],id=String(r.input||r.cadnum);
   const has=!!r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));
+  content.push({text:'Имот '+(i+1)+' от '+results.length+': '+id,style:'sub',...(i>0?{pageBreak:'before'}:{})});
   content.push({text:'Имотна геометрия: '+(has?'архивна':'ПРЕДСТОИ')+'. Актуално зонално пресичане: ПРЕДСТОИ.'});
-  if(has){const drawing=svg(r);if(!drawing)throw Error('Геометрията на имот '+String(r.input||r.cadnum)+' не може да се изчертае.');content.push({svg:drawing,width:480,margin:[0,10,0,8]});if(r.area_m2_geometry!=null)content.push({text:'Площ по геометрия: '+r.area_m2_geometry+' кв. м'});}
+  if(has){
+   const drawing=svg(r);
+   if(!drawing)throw Error('Геометрията на имот '+id+' не може да се изчертае.');
+   content.push({svg:drawing,width:480,margin:[0,10,0,8]});
+   content.push({text:'Площ по геометрия САМО за имот '+id+': '+(r.area_m2_geometry!=null?r.area_m2_geometry+' кв. м':'ПРЕДСТОИ'),bold:true});
+  }else{
+   content.push({text:'Площ по геометрия за имот '+id+': ПРЕДСТОИ. За този имот няма потвърдена геометрия; не се пренасят площи от други имоти.',bold:true});
+  }
  }
  return pdfDef('Приложение №1 — ГИС анализ',content);
 }
