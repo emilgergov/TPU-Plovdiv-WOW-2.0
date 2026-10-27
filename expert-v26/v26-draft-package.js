@@ -66,7 +66,7 @@ function gisPdf(results){
   content.push({text:'Имот: '+String(r.input||r.cadnum),style:'sub'});
   const has=!!r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));
   content.push({text:'Имотна геометрия: '+(has?'архивна':'ПРЕДСТОИ')+'. Актуално зонално пресичане: ПРЕДСТОИ.'});
-  if(has){const drawing=svg(r);if(drawing)content.push({svg:drawing,width:480,margin:[0,10,0,8]});if(r.area_m2_geometry!=null)content.push({text:'Площ по геометрия: '+r.area_m2_geometry+' кв. м'});}
+  if(has){const drawing=svg(r);if(!drawing)throw Error('Геометрията на имот '+String(r.input||r.cadnum)+' не може да се изчертае.');content.push({svg:drawing,width:480,margin:[0,10,0,8]});if(r.area_m2_geometry!=null)content.push({text:'Площ по геометрия: '+r.area_m2_geometry+' кв. м'});}
  }
  return pdfDef('Приложение №1 — ГИС анализ',content);
 }
