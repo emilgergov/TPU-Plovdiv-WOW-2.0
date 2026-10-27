@@ -1,6 +1,6 @@
 /* V26 PDF2 browser preparation: no server, no invented legal verification. */
 (()=>{'use strict';
-const state={gis:null,register:null};
+const state={gis:null,register:null,archive:null};
 const host=document.getElementById('v26Annex2Static');
 const info=document.getElementById('v26Annex2Info');
 const button=document.getElementById('v26Annex2Button');
@@ -10,8 +10,9 @@ function update(){
  const hasGIS=!!state.gis;
  const verifiedGeometry=hasGIS&&(state.gis.results||[]).some(r=>r.status==='Намерен'&&r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type)));
  button.disabled=!(verifiedGeometry&&count>0);
- info.textContent='ГИС резултат: '+(hasGIS?'получен':'ПРЕДСТОИ')+' · Нормативни записи: '+count+' · Проверени записи: '+verified+' · Непроверени: '+(count-verified)+'. '+(button.disabled?'За справочен проект са необходими реална имотна геометрия и нормативен регистър.':'Достъпен е справочен проект; непроверените записи остават ПРЕДСТОИ.');
+ info.textContent='ГИС резултат: '+(hasGIS?'получен':'ПРЕДСТОИ')+' · Нормативни записи: '+count+' · Проверени записи: '+verified+' · Непроверени: '+(count-verified)+' · Архивна преписка: '+(state.archive?state.archive.entries+' файла, индекс проверен':'не е избрана')+'. '+(button.disabled?'За справочен проект са необходими реална имотна геометрия и нормативен регистър.':'Достъпен е справочен проект; непроверените записи остават ПРЕДСТОИ.');
 }
+document.addEventListener('v26:archive-inventory',e=>{state.archive=e.detail;update()});
 document.addEventListener('v26:gis-ready',e=>{state.gis=e.detail;update()});
 document.addEventListener('v26:gis-invalidated',()=>{state.gis=null;update()});
 document.addEventListener('v26:normative-register-ready',e=>{state.register=e.detail;update()});
@@ -21,7 +22,7 @@ button.onclick=async()=>{
  if(button.disabled||!state.gis||!state.register?.records?.length)return;
  button.disabled=true;
  try{
-  const blob=await window.V26DraftPackage.standalonePDF(state.gis.results||[],2,state.register);
+  const blob=await window.V26DraftPackage.standalonePDF(state.gis.results||[],2,{...state.register,archive:state.archive});
   const url=URL.createObjectURL(blob),link=document.createElement('a');
   link.href=url;link.download='TPU_Plovdiv_V26_Prilozhenie_2_Normativno.pdf';
   document.body.appendChild(link);link.click();link.remove();
