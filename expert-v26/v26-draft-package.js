@@ -110,15 +110,16 @@ function gisPdf(results,options={}){
   content.push({text:'Картата възпроизвежда видимите слоеве в браузъра: имот, граници на зони, архивни пресичания и етикети. Източник на границите: работен набор на ТПУ; актуална правна проверка: ПРЕДСТОИ.',fontSize:9,margin:[0,0,0,10]});
  }
  if(results.length>1){
-  content.push({text:'Индивидуални картни изгледи по имоти',style:'sub',pageBreak:'before'});
+  content.push({text:'Индивидуални картни изгледи по имоти · до 4 карти на страница',style:'sub',pageBreak:'before'});
+  const cards=[];
   for(const r of results){
    const id=String(r.input||r.cadnum||'');
    const polygons=(r.geojson?.features||[]).filter(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));
    const pts=[];
    const collect=c=>{if(Array.isArray(c)&&typeof c[0]==='number'&&typeof c[1]==='number'){if(Number.isFinite(c[0])&&Number.isFinite(c[1]))pts.push(c)}else if(Array.isArray(c))c.forEach(collect)};
    polygons.forEach(f=>collect(f.geometry.coordinates));
-   content.push({text:'Поземлен имот '+id,style:'sub',pageBreak:content.some(x=>x.text==='Индивидуални картни изгледи по имоти')&&id!==String(results[0].input||results[0].cadnum||'')?'before':undefined});
-   if(!pts.length){content.push({text:'Няма налична имотна геометрия за самостоятелен картен изглед. ПРЕДСТОИ.',margin:[0,8,0,12]});continue}
+
+   if(!pts.length){cards.push({stack:[{text:'Поземлен имот '+id,bold:true,fontSize:10},{text:'Липсва имотна геометрия · ПРЕДСТОИ',fontSize:9}],margin:[0,4,0,8]});continue}
    const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
    const spanX=Math.max(maxX-minX,1e-10),spanY=Math.max(maxY-minY,1e-10),scale=Math.min(680/spanX,390/spanY);
    const dx=(740-spanX*scale)/2,dy=(450-spanY*scale)/2;
@@ -133,8 +134,12 @@ function gisPdf(results,options={}){
     }
    }
    const svg='<svg xmlns="http://www.w3.org/2000/svg" width="740" height="450" viewBox="0 0 740 450"><rect width="740" height="450" fill="#e8f2ed"/>'+shapes.join('')+'<text x="370" y="430" text-anchor="middle" font-size="17" fill="#183c30">'+E(id)+'</text></svg>';
-   content.push({svg,width:510,margin:[0,10,0,10]});
-   content.push({text:'Самостоятелен изглед на архивната имотна геометрия. Не удостоверява актуални граници на защитени зони или правен режим.',fontSize:9,margin:[0,0,0,10]});
+   cards.push({stack:[{text:'Поземлен имот '+id,bold:true,fontSize:10,margin:[0,0,0,4]},{svg,width:235,margin:[0,0,0,4]},{text:'Архивна имотна геометрия · правен режим: ПРЕДСТОИ',fontSize:8,color:'#526a5e'}],margin:[0,4,0,8]});
+  }
+  for(let i=0;i<cards.length;i+=2){
+   const row={columns:[{width:'49%',...cards[i]},{width:'49%',...(cards[i+1]||{text:''})}],columnGap:10,margin:[0,3,0,8]};
+   if(i>0&&i%4===0)row.pageBreak='before';
+   content.push(row);
   }
  }
  const features=[],points=[];
