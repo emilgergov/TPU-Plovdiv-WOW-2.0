@@ -1,0 +1,22 @@
+name: V26 offline PDF browser test
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'expert-v26/v26-offline-pdf.js'
+      - 'expert-v26/v26-draft-package.js'
+      - 'expert-v26/tests/browser-pdf.spec.cjs'
+      - '.github/workflows/v26-offline-pdf-browser.yml'
+  workflow_dispatch:
+jobs:
+  offline-pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-package-lock @playwright/test@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/v26-http.log 2>&1 &
+      - run: npx playwright test expert-v26/tests/browser-pdf.spec.cjs --browser chromium --reporter=line
