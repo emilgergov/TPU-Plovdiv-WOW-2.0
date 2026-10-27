@@ -152,7 +152,7 @@ function normativePdf(results,register){
  const zoneMap=new Map();
  for(const r of results){
   for(const z of [...(r.archived_overlay_records||[]),...(r.archived_zones||[])]){
-   const code=String(z.sitecode||z.code||'');
+   const code=typeof z==='string'?z:String(z.sitecode||z.code||'');
    if(!/^BG\d{7}$/.test(code))continue;
    if(!zoneMap.has(code))zoneMap.set(code,{code,name:z.name_bg||z.name||'',order:z.order_no||''});
   }
@@ -187,6 +187,13 @@ function normativePdf(results,register){
   content.push({text:'Изменения и допълнения на заповедта: ПРЕДСТОИ документална проверка.'});
   content.push({text:'Конкретни забрани, ограничения и изключения: ПРЕДСТОИ извличане на точните точки от действащата заповед. Не се допуска предположение за забрана.',bold:true});
   content.push({text:'Доказателствена връзка: '+ids.join(', ')+' → ГИС Приложение №1 → '+z.code+' → заповед → конкретна точка от режим: ПРЕДСТОИ.'});
+  const zoneRecords=records.filter(r=>String(r.zone_code||'')===z.code);
+  for(const rr of zoneRecords){
+   const exact=String(rr.provision||rr.clause||rr.article||'').trim();
+   const verified=rr.verified===true&&exact&&String(rr.source||'').startsWith('https://');
+   content.push({text:'Режим / точна разпоредба: '+(verified?exact:'ПРЕДСТОИ проверена точна точка/алинея')});
+   content.push({text:'Приложимост към предмета и дейностите: '+(verified&&subject?.confirmed&&subject.activities?.length?'НЕОБХОДИМА ЕКСПЕРТНА СЪПОСТАВКА':'ПРЕДСТОИ — недостатъчно потвърдени данни'),bold:true});
+  }
  }
  content.push({text:'III. Нормативни основания и проследимост',style:'sub'});
  const selected=records.filter(r=>{
