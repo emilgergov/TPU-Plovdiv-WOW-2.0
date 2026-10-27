@@ -1,6 +1,6 @@
 /* V26 approved GIS: read complete deployment ZIP locally; never upload parcel data. */
 (function(global){'use strict';
-let entries=null,reader=null,archiveName='',cache=new Map();
+let entries=null,reader=null,archiveName='',cache=new Map(),hostedRoot=null,hostedManifest=null;
 const normalize=id=>String(id||'').trim().split('.').slice(0,3).join('.');
 async function openArchive(file){
  if(!file||!(/\.zip$/i.test(file.name)))throw Error('Изберете пълния V26 ГИС ZIP пакет.');
@@ -28,14 +28,23 @@ async function rows(kind,prefix){
  const name=kind+'_'+prefix+'.json.gz',key=name;
  if(cache.has(key))return cache.get(key);
  const entry=entries?.get(name);
- if(!entry)return [];
- const compressed=await entry.getData(new global.zip.Uint8ArrayWriter());
+ let compressed;
+ if(hostedRoot){const response=await fetch(hostedRoot+'/'+name);if(response.status===404)return [];if(!response.ok)throw Error('ГИС сегмент '+name+': HTTP '+response.status);compressed=new Uint8Array(await response.arrayBuffer());}
+ else {if(!entry)return [];compressed=await entry.getData(new global.zip.Uint8ArrayWriter());}
  if(!global.DecompressionStream)throw Error('Този браузър не поддържа gzip разархивиране.');
  const bytes=await new Response(new Blob([compressed]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
  let result;try{result=JSON.parse(bytes)}catch(e){const fixed=normalizeNonFiniteJson(bytes);if(!fixed.changes)throw Error('Невалиден JSON в '+name+': '+e.message);try{result=JSON.parse(fixed.text)}catch(second){throw Error('Сегмент '+name+': '+second.message)}console.info('V26 GIS: normalized '+fixed.changes+' non-finite values in '+name)}if(!Array.isArray(result))throw Error('Невалиден формат на сегмент: '+name);cache.set(key,result);return result;
 }
+async function openHosted(base){
+ const root=String(base||'').replace(/\\/$/,'');
+ const response=await fetch(root+'/manifest.json',{cache:'no-store'});
+ if(!response.ok)throw Error('ГИС сегментите още не са публикувани ('+response.status+').');
+ const manifest=await response.json();
+ if(manifest.status!=='PASS_COUNT_BY_PREFIX'||manifest.parcel_geometry!==917418)throw Error('Непотвърден ГИС манифест.');
+ hostedRoot=root;hostedManifest=manifest;cache.clear();return manifest;
+}
 async function lookup(ids){
- if(!entries)throw Error('Първо заредете одобрения пълен ГИС пакет.');
+ if(!entries&&!hostedRoot)throw Error('ГИС базата не е заредена.');
  if(!Array.isArray(ids)||ids.length<1||ids.length>100)throw Error('Допустими са 1–100 имота.');
  const wanted=ids.map(input=>({input:String(input),cadnum:normalize(input)}));
  const prefixes=[...new Set(wanted.map(x=>x.cadnum.slice(0,2)))];
@@ -53,5 +62,5 @@ async function lookup(ids){
  });
  return {results,summary:{found_count:results.filter(r=>r.status==='Намерен').length,requested_count:results.length,geometry_area_sum_m2:results.reduce((s,r)=>s+r.area_m2_source,0),archived_zones:[],note:'Работна ГИС база V26: '+archiveName},geometry_qa:[]};
 }
-global.V26ApprovedGIS=Object.freeze({openArchive,lookup,isLoaded:()=>!!entries});
+global.V26ApprovedGIS=Object.freeze({openArchive,openHosted,lookup,isLoaded:()=>!!entries||!!hostedRoot});
 })(window);
