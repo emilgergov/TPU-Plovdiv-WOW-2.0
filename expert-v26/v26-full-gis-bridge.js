@@ -2,9 +2,9 @@
 (()=>{'use strict';
 function mount(){
  const api=window.V26ApprovedGIS,original=window.V26BrowserGIS;
- if(!api||!original||document.getElementById('v26FullGISFile'))return;
+ if(!api||!original||document.getElementById('v26HostedReady')||document.getElementById('v26FullGISFile'))return;
  const anchor=document.getElementById('v26LocalIndexMount')||document.getElementById('zipDrop')||document.getElementById('extract');
- if(!anchor)return;
+ if(!anchor){console.error('V26 GIS: anchor not found');return;}
  const panel=document.createElement('section');panel.style.cssText='margin:12px 0;padding:12px;border:1px solid #4c8068;border-radius:9px;background:#f1f8f3;color:#153c29';
  const title=document.createElement('strong');title.textContent='Пълна ГИС база V26 (одобрена)';
  const input=document.createElement('input');input.type='file';input.accept='.zip';input.id='v26FullGISFile';input.style.cssText='display:block;margin:8px 0;max-width:100%';
