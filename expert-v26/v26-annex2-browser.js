@@ -4,12 +4,14 @@ const state={gis:null,register:null,archive:null,preview:null};
 const host=document.getElementById('v26Annex2Static');
 const info=document.getElementById('v26Annex2Info');
 const button=document.getElementById('v26Annex2Button');
+const brief=document.getElementById('v26Annex2Brief');
 if(!host||!info||!button)return;
 function update(){
  const count=state.register?.records?.length||0,verified=state.register?.verified||0;
  const hasGIS=!!state.gis;
  const verifiedGeometry=hasGIS&&(state.gis.results||[]).some(r=>r.status==='Намерен'&&r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type)));
- button.disabled=!(verifiedGeometry&&count>0);
+ button.disabled=!(verifiedGeometry&&count>0&&window.V26DraftPackage?.standalonePDF);
+ if(brief)brief.textContent=!hasGIS?'ГИС справка: предстои':!verifiedGeometry?'Липсва реална имотна геометрия':!count?'Нормативният архив не е зареден':verified===0?'Справочен PDF е достъпен · 0 проверени нормативни записа':'Справочен PDF е достъпен · '+verified+' проверени записа';
  info.textContent='ГИС резултат: '+(hasGIS?'получен':'ПРЕДСТОИ')+' · Нормативни записи: '+count+' · Проверени записи: '+verified+' · Непроверени: '+(count-verified)+' · Архивна преписка: '+(state.archive?state.archive.entries+' файла, индекс проверен':'не е избрана')+' · Прочетени текстови файлове: '+(state.preview?.files?.filter(f=>!f.error).length||0)+'. '+(button.disabled?'За справочен проект са необходими реална имотна геометрия и нормативен регистър.':'Достъпен е справочен проект; непроверените записи остават ПРЕДСТОИ.');
 }
 document.addEventListener('v26:archive-inventory',e=>{state.archive=e.detail;state.preview=null;update()});
@@ -24,12 +26,13 @@ button.onclick=async()=>{
  button.disabled=true;
  try{
   const blob=await window.V26DraftPackage.standalonePDF(state.gis.results||[],2,{...state.register,archive:state.archive,preview:state.preview});
+  if(!(blob instanceof Blob)||blob.size<100||await blob.slice(0,4).text()!=='%PDF')throw Error('Генерираният файл не е валиден PDF.');
   const url=URL.createObjectURL(blob),link=document.createElement('a');
   link.href=url;link.download='TPU_Plovdiv_V26_Prilozhenie_2_Normativno.pdf';
   document.body.appendChild(link);link.click();link.remove();
   setTimeout(()=>URL.revokeObjectURL(url),30000);
   info.textContent='Изтеглено е справочно Приложение №2 (PDF). Непотвърдените нормативни данни остават ПРЕДСТОИ.';
- }catch(e){info.textContent='PDF №2: '+e.message}finally{update()}
+ }catch(e){update();info.textContent='Грешка при Приложение №2: '+e.message;return}finally{button.disabled=false;update()}
 };
 if(window.V26NormativeRegister?.status==='ready'){const records=window.V26NormativeRegister.records;state.register={records,verified:records.filter(r=>r.verified===true).length};}
 update();
