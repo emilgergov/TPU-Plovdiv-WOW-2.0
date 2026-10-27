@@ -11,7 +11,7 @@ let generation=0;
 let selectedArchive=null;
 const readButton=document.createElement('button');
 readButton.type='button';readButton.className='secondary';readButton.textContent='Прочети TXT/JSON от архива';
-readButton.style.display='none';output.after(readButton);
+readButton.style.display='none';(document.getElementById('v26LocalIndexHost')||output).append(readButton);
 const preview=document.createElement('div');preview.className='hint';preview.style.whiteSpace='pre-wrap';readButton.after(preview);
 async function entryText(file,e){
  if(e.size_bytes>262144||e.compressed_bytes>524288)throw Error('Файлът е твърде голям.');
