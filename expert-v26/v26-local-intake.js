@@ -1,5 +1,6 @@
 (()=>{'use strict';
 const rx=/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g;
+function parcelId(id){return String(id).split('.').slice(0,3).join('.')}
 function u16(v,p){return v.getUint16(p,true)}function u32(v,p){return v.getUint32(p,true)}
 function loadScript(src){return new Promise((resolve,reject)=>{const el=document.createElement('script');el.src=src;el.onload=resolve;el.onerror=()=>reject(Error('Неуспешно зареждане на библиотека: '+src));document.head.appendChild(el)})}
 async function readEntry(bytes,v,item){
@@ -54,9 +55,9 @@ async function process(file){
     if(unpacked.byteLength!==item.size)throw Error('Несъответствие в ZIP размер.');
     text=await extractText(unpacked,item.name);
     status=text.trim()?'текстът е прочетен':'няма извлекаем текст (възможно сканиран документ)';
-    for(const id of text.match(rx)||[]){all.add(id);other.add(id)}
+    for(const id of text.match(rx)||[]){const parcel=parcelId(id);all.add(parcel);other.add(parcel)}
     const location=text.match(/Местоположение на ИП\s*[:：]\s*([^\n\r]+)/i);
-    if(/уведомлен/i.test(item.name+' '+text.slice(0,800))){for(const id of text.match(/(?:позем[еe]н\s+имот|ПИ)\s+(?:с\s+)?(?:идентификатор\s+)?(\d{5}\.\d+\.\d+)/gi)||[]){const m=id.match(/\d{5}\.\d+\.\d+/);if(m)leading.add(m[0]);}}
+    if(/уведомлен/i.test(item.name+' '+text.slice(0,800))){for(const id of text.match(/(?:позем[еe]н\s+имот|ПИ)\s+(?:с\s+)?(?:идентификатор\s+)?(\d{5}\.\d+\.\d+)/gi)||[]){const m=id.match(/\d{5}\.\d+\.\d+/);if(m)leading.add(parcelId(m[0]));}}
    }catch(err){status='неуспешно извличане: '+err.message}
   }
   docs.push({filename:item.name,status});
