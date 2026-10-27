@@ -33,7 +33,7 @@ function mount(){
  });
  const fallback=original.lookup;
  const wrapper=Object.freeze({...original,lookup:async ids=>{
-  if(!api.isLoaded())return fallback(ids);
+  if(!api.isLoaded())throw Error('Пълната ГИС V26 още не е готова. Изчакайте автоматичното зареждане или възстановете одобрения архив. Не се използва непълният резервен индекс.');
   const data=await api.lookup(ids);
   if(data.results.some(x=>x.status==='Геометрия липсва'))throw Error('ГИС пакетът няма геометрия за един или повече имоти. Не може да се издаде непълен PDF №1.');
   return data;
