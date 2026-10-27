@@ -18,7 +18,7 @@
 }
 $('confirmRoles').onclick=()=>{const roles={};const selects=[...$('roleRows').querySelectorAll('select')];if(!selects.length)return;
   for(const s of selects){if(!s.value){confirmedRoles=null;$('roleStatus').textContent='Всички роли трябва да бъдат изрично потвърдени.';return}roles[s.dataset.cadnum]=s.value}
-  confirmedRoles=roles;$('roleStatus').textContent='Потвърдени '+selects.length+' роли за тази преписка.';
+  confirmedRoles=roles;$('roleStatus').textContent='Потвърдени '+selects.length+' роли за тази преписка.';if(!found.length&&window.V26BrowserGIS?.isLoaded()){$('run').click()}else if(!found.length){$('roleStatus').textContent+=' ГИС индексът още не е наличен; справката ще започне след зареждането му.'}
 };
 function setStatus(t){
  $('status').textContent=t;
