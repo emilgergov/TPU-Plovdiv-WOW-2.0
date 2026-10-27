@@ -60,6 +60,23 @@ async function generate(def){
    const drawRow=(cells,header)=>{ctx.font=(header?'bold 17px':'17px')+' Arial';const lines=cells.map(v=>wrap(ctx,String(v??''),cellW-14));const rh=Math.max(37,...lines.map(x=>x.length*24+14));if(y+rh>H-100){finish();start();if(!header&&rows.length){drawRow(rows[0],true)}}ctx.fillStyle=header?'#e3efe8':'#ffffff';ctx.fillRect(M,y,available,rh);ctx.strokeStyle='#b6c9bf';ctx.strokeRect(M,y,available,rh);ctx.fillStyle='#173d30';for(let c=0;c<cols;c++){if(c)ctx.beginPath(),ctx.moveTo(M+c*cellW,y),ctx.lineTo(M+c*cellW,y+rh),ctx.stroke();(lines[c]||[]).forEach((line,k)=>ctx.fillText(line,M+c*cellW+7,y+23+k*24))}y+=rh};
    rows.forEach((cells,i)=>drawRow(cells,i===0));y+=12;continue;
   }
+  if(item.columns){
+   const cards=item.columns.filter(c=>c&&Array.isArray(c.stack));
+   const cardHeight=360;
+   if(y+cardHeight>H-110){finish();start()}
+   const top=y, gap=20, cardWidth=(W-2*M-gap)/2;
+   for(let i=0;i<cards.length&&i<2;i++){
+    const card=cards[i],x=M+i*(cardWidth+gap);
+    ctx.fillStyle='#f1f7f3';ctx.fillRect(x,top,cardWidth,cardHeight-8);
+    ctx.strokeStyle='#bfd5c8';ctx.strokeRect(x,top,cardWidth,cardHeight-8);
+    let cy=top+32;
+    for(const part of card.stack){
+     if(part.svg){const imageWidth=cardWidth-24;const h=await drawSVG(ctx,part.svg,x+12,cy,imageWidth);cy+=h+10}
+     else if(part.text){ctx.font=part.bold?'bold 19px Arial':'16px Arial';ctx.fillStyle='#173d30';for(const line of wrap(ctx,part.text,cardWidth-24)){ctx.fillText(line,x+12,cy);cy+=23}}
+    }
+   }
+   y=top+cardHeight+12;continue;
+  }
   if(item.svg){const h=680;if(y+h>H-100){finish();start()}const drawn=await drawSVG(ctx,item.svg,M,y,W-2*M);y+=drawn+20;continue}
   const title=item.style==='heading',sub=item.style==='sub';
   ctx.font=(title?'bold 35px':sub?'bold 26px':item.bold?'bold 22px':'22px')+' Arial';
