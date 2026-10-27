@@ -28,6 +28,32 @@ async function extractText(data,name){
  }
  return '';
 }
+function semanticReview(subjects,documents){
+ const main=subjects.find(x=>x.title)||subjects[0]||null;
+ const notices=subjects.flatMap(x=>x.sections||[]);
+ const full=documents.filter(x=>x.text).map(x=>({source:x.source,text:x.text}));
+ const pick=(re)=>full.filter(x=>re.test(x.text)).map(x=>x.source);
+ const flags=[];
+ const water=pick(/сондаж|тръбен кладенец|собствен водоизточник|подземни води|водовземане/i);
+ if(water.length)flags.push({kind:'water',label:'Т. 5: възможно собствено водовземане — проверка на приложимостта на процедурите по Закона за водите и участие на БД',sources:water});
+ const power=pick(/кабелно трасе|електрозахранване|електроснабдяване|присъединяване към (?:електро)?мреж/i);
+ if(power.length)flags.push({kind:'power',label:'Т. 5: електрозахранване / кабелно трасе — проверете обхват и имоти',sources:power});
+ const discharge=pick(/заустван|водоприемник|в дере|в река/i);
+ const sealed=pick(/изгребна яма|водоплътн|без заустване/i);
+ if(discharge.length)flags.push({kind:'discharge',label:'Т. 9: данни за заустване — проверка на водоприемник и приложими процедури',sources:discharge});
+ if(discharge.length&&sealed.length)flags.push({kind:'conflict',label:'ПРОТИВОРЕЧИЕ по т. 9: данни за заустване и за водоплътно събиране — необходимо е експертно уточнение',sources:[...new Set([...discharge,...sealed])]});
+ const location=(notices.find(x=>x.key==='location')||{}).text||'';
+ const locPieces=[];
+ for(const re of [/\b(?:ПИ|поземлен имот)(?:\s+с\s+идентификатор)?\s*\d{5}\.\d+\.\d+/ig,/\b(?:с\.|гр\.)\s*[А-Яа-я-]+/g,/\bобщина\s+[А-Яа-я-]+/ig,/\bобласт\s+[А-Яа-я-]+/ig,/\bместност\s*[„"]?[^,.;\n]{2,55}/ig,/\bУПИ\s+[IVXLCDM\d-]+(?:\.\d+)?/ig]){
+  for(const m of location.matchAll(re))if(!locPieces.includes(m[0]))locPieces.push(m[0]);
+ }
+ const ancillary=[];
+ const test=[[/сондаж|кладенец/i,'сондажен кладенец'],[/кабелно трасе/i,'подземно кабелно трасе'],[/площадка за измиване/i,'площадка за измиване'],[/водопроводна връзка/i,'водопроводна връзка']];
+ for(const [re,label] of test)if(full.some(x=>re.test(x.text)))ancillary.push(label);
+ const title=main?.title||'';
+ const heading=title?'Относно: Уведомление за инвестиционно предложение (ИП): „'+title+'“'+(locPieces.length?' в '+locPieces.join(', '):' [ТОЧНО МЕСТОПОЛОЖЕНИЕ — ПРЕДСТОИ ПОТВЪРЖДЕНИЕ]'):'';
+ return {flags,location:locPieces,ancillary,heading,needs_review:flags.some(x=>x.kind==='conflict')||!locPieces.length,source:main?.source||''};
+}
 async function process(file){
  if(!file||file.size>40*1024*1024)throw Error('Изберете ZIP до 40 MB.');
  const bytes=await file.arrayBuffer(),v=new DataView(bytes),list=[];let e=-1;
@@ -46,7 +72,7 @@ async function process(file){
   total+=size;if(total>80*1024*1024)throw Error('Твърде голям разархивиран архив.');
   list.push({name,method,size,packed,offset});
  }
- const docs=[],all=new Set(),leading=new Set(),other=new Set(),subjects=[];
+ const docs=[],all=new Set(),leading=new Set(),other=new Set(),subjects=[],documentTexts=[];
  for(const item of list){
   let status='описан',text='';
   if(/\.(txt|csv|json|md|pdf|docx)$/i.test(item.name)&&item.size<=20*1024*1024){
@@ -54,7 +80,7 @@ async function process(file){
     const unpacked=await readEntry(bytes,v,item);
     if(unpacked.byteLength!==item.size)throw Error('Несъответствие в ZIP размер.');
     text=await extractText(unpacked,item.name);
-    status=text.trim()?'текстът е прочетен':'няма извлекаем текст (възможно сканиран документ)';
+    status=text.trim()?'текстът е прочетен':'няма извлекаем текст (възможно сканиран документ)';if(text.trim())documentTexts.push({source:item.name,text:text.slice(0,150000)});
     for(const id of text.match(rx)||[]){const parcel=parcelId(id);all.add(parcel);other.add(parcel)}
     const isNotice=/уведомлен/i.test(item.name+' '+text.slice(0,800));
     if(isNotice&&text.trim()){
@@ -102,7 +128,7 @@ async function process(file){
   docs.push({filename:item.name,status});
  }
  for(const id of leading)other.delete(id);
- return {archive_name:file.name,archive_entries:list.length,files:docs,evidence:[],subject_candidates:subjects,all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[...other],warnings:['Локален предварителен текстов анализ. Проверете ролите ръчно.','PDF/DOCX се извличат локално, когато съдържат текст. Сканирани документи без текстов слой изискват отделно разчитане.']}};
+ return {archive_name:file.name,archive_entries:list.length,files:docs,evidence:[],subject_candidates:subjects,semantic_review:semanticReview(subjects,documentTexts),all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[...other],warnings:['Локален предварителен текстов анализ. Проверете ролите ръчно.','PDF/DOCX се извличат локално, когато съдържат текст. Сканирани документи без текстов слой изискват отделно разчитане.']}};
 }
 window.V26LocalIntake={process};
 })();
