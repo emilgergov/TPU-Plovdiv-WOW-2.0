@@ -14,7 +14,9 @@ function mount(){
  api.openHosted('./gis-data').then(()=>{
   panel.style.display='none';
   const legacy=document.getElementById('v26LocalIndexMount');
-  if(legacy)legacy.style.display='none';
+  if(legacy)legacy.style.setProperty('display','none','important');
+  const oldBtn=document.getElementById('v26SqliteLoad');if(oldBtn){const oldGroup=oldBtn.parentElement;if(oldGroup)oldGroup.style.setProperty('display','none','important');}
+  const oldHeading=[...document.querySelectorAll('h1,h2,h3,h4,strong')].find(x=>x.textContent?.includes('Кадастрален индекс — локална ГИС справка'));if(oldHeading){const block=oldHeading.closest('section,article,.card')||oldHeading.parentElement;if(block&&block!==panel)block.style.setProperty('display','none','important');}
   for(const el of document.querySelectorAll('[id*="LocalIndex"],[id*="localIndex"],[id*="GeometryFile"],[id*="geometryFile"]')){const section=el.closest('section');if(section&&section!==panel)section.style.display='none';}
   const status=document.createElement('div');status.id='v26HostedReady';status.textContent='ГИС V26 — автоматично заредена';status.style.cssText='margin:8px 0;color:#17633e;font-weight:600';panel.parentElement.insertBefore(status,panel);
   document.dispatchEvent(new Event('v26:gis-invalidated'));
