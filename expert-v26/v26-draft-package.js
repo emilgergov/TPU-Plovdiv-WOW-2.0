@@ -13,7 +13,24 @@ function docx(zip,ids,roles){
  return d.generateAsync({type:'blob'});
 }
 function annex(title,rows){return '<!doctype html><html lang="bg"><meta charset="utf-8"><title>'+E(title)+'</title><style>body{font:12px Arial;margin:20mm}h1{font-size:19px}section{break-inside:avoid;margin:20px 0}svg{width:100%;max-height:370px}@page{size:A4;margin:18mm}</style><h1>'+E(title)+'</h1><p>Работен справочен документ. Не удостоверява актуални граници, режими или правни заключения.</p>'+rows+'</html>'}
-function svg(r){const points=[];function walk(x){if(Array.isArray(x)&&typeof x[0]==='number'&&typeof x[1]==='number')points.push(x);else if(Array.isArray(x))x.forEach(walk)}for(const f of r.geojson?.features||[])walk(f.geometry?.coordinates);if(!points.length)return '';const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys),scale=Math.min(600/Math.max(x1-x0,1e-9),340/Math.max(y1-y0,1e-9));const polys=[];for(const f of r.geojson.features){const g=f.geometry;if(!g||!['Polygon','MultiPolygon'].includes(g.type))continue;const rings=g.type==='Polygon'?g.coordinates:g.coordinates.flat(1);for(const ring of rings)polys.push('<polygon points="'+ring.map(p=>(35+(p[0]-x0)*scale).toFixed(2)+','+(370-(p[1]-y0)*scale).toFixed(2)).join(' ')+'" fill="#b5d8c8" stroke="#176749" stroke-width="1.5"/>')}return '<svg viewBox="0 0 700 410" xmlns="http://www.w3.org/2000/svg">'+polys.join('')+'</svg>'}
+function svg(r){
+ const features=(r.geojson?.features||[]).filter(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));
+ let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity,count=0;
+ function visit(coords){if(Array.isArray(coords)&&typeof coords[0]==='number'&&typeof coords[1]==='number'){const x=coords[0],y=coords[1];if(!Number.isFinite(x)||!Number.isFinite(y))return;minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);count++;}else if(Array.isArray(coords))for(const p of coords)visit(p)}
+ for(const f of features)visit(f.geometry.coordinates);
+ if(!count)return '';
+ const scale=Math.min(600/Math.max(maxX-minX,1e-9),340/Math.max(maxY-minY,1e-9));
+ const paths=[];
+ for(const f of features){
+  const g=f.geometry,polys=g.type==='Polygon'?[g.coordinates]:g.coordinates;
+  for(const poly of polys)for(const ring of poly){
+   const pts=ring.filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1]));
+   if(pts.length<3)continue;
+   paths.push('<polygon points="'+pts.map(p=>(35+(p[0]-minX)*scale).toFixed(2)+','+(370-(p[1]-minY)*scale).toFixed(2)).join(' ')+'" fill="#b5d8c8" stroke="#176749" stroke-width="1.5"/>');
+  }
+ }
+ return '<svg xmlns="http://www.w3.org/2000/svg" width="700" height="410" viewBox="0 0 700 410">'+paths.join('')+'</svg>';
+}
 async function ensurePDF(){
  if(!window.pdfMake?.createPdf){
   await script('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.20/pdfmake.min.js');
