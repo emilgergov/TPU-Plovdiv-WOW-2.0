@@ -46,7 +46,7 @@ async function lookup(ids){
 }
 window.V26BrowserGIS=Object.freeze({lookup,loadArchive,isLoaded:()=>!!db});
 function mount(){
- const anchor=document.getElementById('zipDrop')||document.getElementById('extract');
+ const anchor=document.getElementById('v26LocalIndexMount')||document.getElementById('zipDrop')||document.getElementById('extract');
  if(!anchor||document.getElementById('v26SqliteLoad'))return;
  const container=document.createElement('div');container.style.marginTop='8px';
  const input=document.createElement('input');input.type='file';input.accept='.zip,.sqlite';input.hidden=true;
@@ -54,7 +54,7 @@ function mount(){
  const status=document.createElement('div');status.className='hint';status.textContent='ZIP/SQLite остава на компютъра. Не се изпраща към GitHub.';
  btn.onclick=()=>input.click();
  input.onchange=async()=>{if(!input.files?.[0])return;btn.disabled=true;status.textContent='Зареждане на SQLite индекса в браузъра…';try{const r=await loadArchive(input.files[0]);status.textContent='Индекс: '+r.parcels+' имота, '+r.overlays+' архивни пресичания. Геометрия: ПРЕДСТОИ.';}catch(e){status.textContent='Грешка: '+e.message;}finally{btn.disabled=false;input.value=''}};
- container.append(btn,input,status);anchor.insertAdjacentElement('afterend',container);
+ container.append(btn,input,status);anchor.id==='v26LocalIndexMount'?anchor.appendChild(container):anchor.insertAdjacentElement('afterend',container);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })();
