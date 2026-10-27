@@ -3,8 +3,45 @@
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const X=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 function script(url){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=url;s.onload=ok;s.onerror=()=>no(Error('Не може да се зареди необходимата библиотека: '+url));document.head.append(s)})}
+/* Minimal browser-only ZIP writer: STORE, CRC32, UTF-8, no CDN dependency. */
+function zipWriter(){
+ const entries=[],enc=new TextEncoder();
+ const crcTable=new Uint32Array(256);
+ for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1);crcTable[n]=c>>>0}
+ function crc32(bytes){let c=0xffffffff;for(const b of bytes)c=crcTable[(c^b)&255]^(c>>>8);return(c^0xffffffff)>>>0}
+ function u16(a,o,v){a[o]=v&255;a[o+1]=(v>>>8)&255}
+ function u32(a,o,v){u16(a,o,v&65535);u16(a,o+2,Math.floor(v/65536))}
+ const api={
+  file(name,data){entries.push({name:String(name),data});return api},
+  folder(prefix){return {file(name,data){api.file(prefix+'/'+name,data);return this}}},
+  async generateAsync(){
+   const chunks=[],central=[];let offset=0;
+   for(const e of entries){
+    const name=enc.encode(e.name);
+    let payload=e.data;
+    if(payload instanceof Blob)payload=new Uint8Array(await payload.arrayBuffer());
+    else if(typeof payload==='string')payload=enc.encode(payload);
+    else if(payload instanceof ArrayBuffer)payload=new Uint8Array(payload);
+    else if(!(payload instanceof Uint8Array))throw Error('Неподдържан ZIP запис: '+e.name);
+    if(name.length>65535||payload.length>0xffffffff)throw Error('ZIP записът е твърде голям.');
+    const crc=crc32(payload),local=new Uint8Array(30+name.length);
+    u32(local,0,0x04034b50);u16(local,4,20);u16(local,6,2048);u16(local,8,0);
+    u32(local,14,crc);u32(local,18,payload.length);u32(local,22,payload.length);u16(local,26,name.length);local.set(name,30);
+    const cd=new Uint8Array(46+name.length);
+    u32(cd,0,0x02014b50);u16(cd,4,20);u16(cd,6,20);u16(cd,8,2048);u16(cd,10,0);
+    u32(cd,16,crc);u32(cd,20,payload.length);u32(cd,24,payload.length);u16(cd,28,name.length);u32(cd,42,offset);cd.set(name,46);
+    chunks.push(local,payload);central.push(cd);offset+=local.length+payload.length;
+   }
+   if(entries.length>65535)throw Error('Твърде много ZIP файлове.');
+   const centralOffset=offset,centralSize=central.reduce((n,a)=>n+a.length,0),end=new Uint8Array(22);
+   u32(end,0,0x06054b50);u16(end,8,entries.length);u16(end,10,entries.length);u32(end,12,centralSize);u32(end,16,centralOffset);
+   return new Blob([...chunks,...central,end],{type:'application/zip'});
+  }
+ };
+ return api;
+}
 function docx(zip,ids,roles){
- const d=new JSZip();
+ const d=zipWriter();
  const lines=['ТПУ Пловдив — РАБОТЕН ПРОЕКТ на предложение за становище','Не е издадено становище. Не представлява правно заключение.','Имотни идентификатори: '+ids.join(', '),'Експертно потвърдени роли: '+ids.map(id=>id+' — '+(roles[id]==='leading'?'водещ':'съпътстващ')).join('; '),'Актуално пространствено пресичане със защитени зони: ПРЕДСТОИ.','Нормативна преценка: ПРЕДСТОИ.','Приложение №1: справочен ГИС анализ (PDF).','Приложение №2: справочен нормативен регистър (PDF).'];
  const paragraphs=lines.map(t=>'<w:p><w:r><w:t xml:space="preserve">'+X(t)+'</w:t></w:r></w:p>').join('');
  d.file('[Content_Types].xml','<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>');
@@ -122,8 +159,7 @@ function normativePdf(results,register){
 async function make(results,roles,register){
  if(!results.length||results.some(r=>!['leading','ancillary'].includes(roles[r.input]||roles[r.cadnum])))throw Error('Потвърдете ролите за всички имоти.');
  if(!results.some(r=>r.status==='Намерен'&&r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type))))throw Error('Няма действителна имотна геометрия за Приложение №1.');
- if(!window.JSZip)await script('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
- const z=new JSZip(),ids=results.map(r=>r.input),normalized=Object.fromEntries(results.map(r=>[r.input,roles[r.input]||roles[r.cadnum]]));
+ const z=zipWriter(),ids=results.map(r=>r.input),normalized=Object.fromEntries(results.map(r=>[r.input,roles[r.input]||roles[r.cadnum]]));
  z.file('01_Predlozhenie_RABOTEN_PROEKT.docx',await docx(z,ids,normalized));
  await ensurePDF();
  z.file('02_Prilozhenie_1_GIS.pdf',await pdfBlob(gisPdf(results)));
