@@ -107,13 +107,27 @@ function drawZones(){
   const code=f.properties.SITECODE||f.properties.sitecode||'';
   const name=f.properties.NAME_BG||f.properties.name_bg||f.properties.SITENAME||'';
   if(!code||!name)continue;
-  const point=parcelAnchor(f.geometry);if(!point)continue;
+  // Find a label position INSIDE the zone AND the currently visible map viewport.
   const scale=Math.min(900/Math.max(extent.maxX-extent.minX,1e-8),530/Math.max(extent.maxY-extent.minY,1e-8));
-  const x=(point[0]-(extent.minX+extent.maxX)/2)*scale+500;
-  const y=((extent.minY+extent.maxY)/2-point[1])*scale+325;
-  if(x<80||x>920||y<45||y>605)continue;
+  const ox=500-(extent.minX+extent.maxX)/2*scale,oy=325+(extent.minY+extent.maxY)/2*scale;
+  const vb=viewBox||[0,0,1000,650],labelWidth=Math.max(140,Math.min(310,name.length*7.5+25));
+  const polygons=f.geometry.type==='Polygon'?[f.geometry.coordinates]:f.geometry.type==='MultiPolygon'?f.geometry.coordinates:[];
+  const candidates=[];
+  // Prefer centre of visible viewport, then scan outward for an interior point.
+  for(let radius=0;radius<=5;radius++)for(let iy=-radius;iy<=radius;iy++)for(let ix=-radius;ix<=radius;ix++){
+   if(Math.max(Math.abs(ix),Math.abs(iy))!==radius)continue;
+   candidates.push([vb[0]+vb[2]*(.5+ix*.075),vb[1]+vb[3]*(.5+iy*.075)]);
+  }
+  let point=null;
+  for(const [px,py] of candidates){
+   if(px<vb[0]+labelWidth/2+12||px>vb[0]+vb[2]-labelWidth/2-12||py<vb[1]+35||py>vb[1]+vb[3]-35)continue;
+   const geo=[(px-ox)/scale,(oy-py)/scale];
+   if(polygons.some(p=>pointInPolygon(geo,p))){point=[px,py];break}
+  }
+  if(!point)continue;
+  const [x,y]=point;
   const label=elt('g',{'pointer-events':'none'});
-  const width=Math.max(140,Math.min(310,name.length*7.5+25));
+  const width=labelWidth;
   label.appendChild(elt('rect',{x:x-width/2,y:y-23,width,height:46,rx:7,fill:'#ffffff',opacity:'.9',stroke:'#2268bb','stroke-width':1.5}));
   const t1=elt('text',{x,y:y-3,'text-anchor':'middle','font-size':14,'font-weight':'bold',fill:'#164e8a'});t1.textContent=code;label.appendChild(t1);
   const t2=elt('text',{x,y:y+14,'text-anchor':'middle','font-size':12,fill:'#164e8a'});t2.textContent=name;label.appendChild(t2);
