@@ -71,11 +71,33 @@ function gisPdf(results){
  return pdfDef('Приложение №1 — ГИС анализ',content);
 }
 function normativePdf(results,register){
- const content=[{text:'Имотни идентификатори: '+results.map(r=>r.input).join(', '),margin:[0,0,0,12]},{text:'Актуални нормативни изводи и зонални пресичания: ПРЕДСТОИ.',margin:[0,0,0,12]}];
- for(const r of register?.records||[])content.push({text:String(r.id||'')+' — '+String(r.title||'')+' — '+(r.verified===true?'Потвърден':'ПРЕДСТОИ'),margin:[0,3,0,3]});
- if(!(register?.records||[]).length)content.push({text:'Нормативни записи: ПРЕДСТОИ.'});
+ const ids=results.map(r=>String(r.input||r.cadnum||'')).filter(Boolean);
+ const codes=new Set();
+ for(const r of results)for(const o of r.archived_overlay_records||[])if(/^BG\\d{7}$/.test(String(o.sitecode||'')))codes.add(String(o.sitecode));
+ const records=register?.records||[];
+ const content=[
+  {text:'Имотни идентификатори: '+ids.join(', '),margin:[0,0,0,10]},
+  {text:'Статус: СПРАВОЧЕН ПРОЕКТ. Актуалното пресичане със защитени зони, приложимите режими и правните изводи: ПРЕДСТОИ.',bold:true,margin:[0,0,0,10]},
+  {text:'Източници: архивен работен регистър на нормативни препратки. Посочените интернет адреси НЕ означават потвърдено съдържание или действаща редакция.',margin:[0,0,0,12]},
+  {text:'Архивни кодове на зони от справката: '+(codes.size?[...codes].sort().join(', '):'ПРЕДСТОИ')+'. Това не е актуално пространствено пресичане.',margin:[0,0,0,12]}
+ ];
+ let shown=0;
+ for(const r of records){
+  const title=String(r.title||''),code=(title.match(/BG\\d{7}/)||[])[0];
+  if(code&&!codes.has(code))continue;
+  shown++;
+  content.push({text:String(r.id||'')+' — '+title,style:'sub'});
+  content.push({text:'Предназначение на препратката: '+String(r.purpose||'ПРЕДСТОИ')});
+  content.push({text:'Адрес на източника: '+String(r.source||'ПРЕДСТОИ')});
+  content.push({text:'Състояние на източника: '+String(r.source_status||'ПРЕДСТОИ')});
+  content.push({text:'Страница/точка: '+String(r.page||'ПРЕДСТОИ')+' · Дата/редакция: '+String(r.date||'ПРЕДСТОИ')});
+  content.push({text:'Проверка на съдържание и приложимост: ПРЕДСТОИ.',bold:true});
+ }
+ if(!shown)content.push({text:'Нормативни записи за тази справка: ПРЕДСТОИ.'});
+ content.push({text:'Заключение: настоящото приложение е опис на източници, а не удостоверяване на режими, забрани или становище.',bold:true});
  return pdfDef('Приложение №2 — нормативни основания',content);
 }
+
 async function make(results,roles,register){
  if(!results.length||results.some(r=>!['leading','ancillary'].includes(roles[r.input]||roles[r.cadnum])))throw Error('Потвърдете ролите за всички имоти.');
  if(!results.some(r=>r.status==='Намерен'&&r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type))))throw Error('Няма действителна имотна геометрия за Приложение №1.');
