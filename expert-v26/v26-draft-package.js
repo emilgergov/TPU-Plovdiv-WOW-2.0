@@ -99,8 +99,8 @@ function pdfDef(title,content){
 }
 function gisPdf(results,options={}){
  const content=[{text:'Източник: RIOSV_PLOVDIV_KAIS_CADASTRE_REGIONAL_02_10_2026.gdb (архивна регионална геобаза).',margin:[0,0,0,8]}];
- if(options.mapSvg&&/<svg[\\s>]/.test(options.mapSvg)){
-  const clean=options.mapSvg.replace(/<title(?:\\s[^>]*)?>[\\s\\S]*?<\\/title>/g,'');
+ if(options.mapSvg&&String(options.mapSvg).includes('<svg')){
+  const clean=options.mapSvg;
   const contentMap={svg:clean,width:510,margin:[0,5,0,10]};
   content.push({text:'Картографски материал — одобрена ГИС карта (избран мащаб и изглед)',style:'sub'});
   content.push(contentMap);
