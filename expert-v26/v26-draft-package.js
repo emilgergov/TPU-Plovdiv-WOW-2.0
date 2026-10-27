@@ -31,12 +31,27 @@ function svg(r){
  }
  return '<svg xmlns="http://www.w3.org/2000/svg" width="700" height="410" viewBox="0 0 700 410">'+paths.join('')+'</svg>';
 }
-async function ensurePDF(){
- if(!window.pdfMake?.createPdf){
-  await script('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.20/pdfmake.min.js');
-  await script('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.20/vfs_fonts.js');
+async function loadAny(urls,check){
+ if(check())return;
+ const failures=[];
+ for(const url of urls){
+  try{await script(url);if(check())return}catch(e){failures.push(url)}
  }
- if(!window.pdfMake?.createPdf)throw Error('PDF библиотеката не е заредена.');
+ throw Error('Неуспешно зареждане на PDF библиотеката от резервните източници. Проверете достъпа до CDN или използвайте локална версия.');
+}
+async function ensurePDF(){
+ await loadAny([
+  './vendor/pdfmake.min.js',
+  'https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/pdfmake.min.js',
+  'https://unpkg.com/pdfmake@0.2.20/build/pdfmake.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.20/pdfmake.min.js'
+ ],()=>!!window.pdfMake?.createPdf);
+ await loadAny([
+  './vendor/vfs_fonts.js',
+  'https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/vfs_fonts.js',
+  'https://unpkg.com/pdfmake@0.2.20/build/vfs_fonts.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.20/vfs_fonts.js'
+ ],()=>!!window.pdfMake?.vfs);
 }
 function pdfBlob(def){return new Promise((resolve,reject)=>{try{window.pdfMake.createPdf(def).getBlob(b=>{if(!b||b.size<100)reject(Error('PDF файлът е празен или невалиден.'));else resolve(b)})}catch(e){reject(e)}})}
 function pdfDef(title,content){
