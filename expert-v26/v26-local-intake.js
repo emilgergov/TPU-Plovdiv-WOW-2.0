@@ -46,7 +46,7 @@ async function process(file){
   total+=size;if(total>80*1024*1024)throw Error('Твърде голям разархивиран архив.');
   list.push({name,method,size,packed,offset});
  }
- const docs=[],all=new Set(),leading=new Set(),other=new Set();
+ const docs=[],all=new Set(),leading=new Set(),other=new Set(),subjects=[];
  for(const item of list){
   let status='описан',text='';
   if(/\.(txt|csv|json|md|pdf|docx)$/i.test(item.name)&&item.size<=20*1024*1024){
@@ -56,14 +56,20 @@ async function process(file){
     text=await extractText(unpacked,item.name);
     status=text.trim()?'текстът е прочетен':'няма извлекаем текст (възможно сканиран документ)';
     for(const id of text.match(rx)||[]){const parcel=parcelId(id);all.add(parcel);other.add(parcel)}
-    const location=text.match(/Местоположение на ИП\s*[:：]\s*([^\n\r]+)/i);
+    const isNotice=/уведомлен/i.test(item.name+' '+text.slice(0,800));
+    if(isNotice&&text.trim()){
+     const clean=text.replace(/\\s+/g,' ').trim();
+     const match=clean.match(/(?:относно|предмет(?:\\s+на\\s+(?:инвестиционното\\s+)?предложение)?|наименование\\s+на\\s+(?:инвестиционното\\s+)?предложение)\\s*[:：–-]\\s*(.{15,450}?)(?=\\s+(?:възложител|местоположение|адрес|имот\\s+с|приложения|описание\\s+на)|$)/i);
+     const title=match?match[1].trim():'';
+     subjects.push({title,source:item.name,evidence:title?'Автоматично извлечен откъс от текст':'Текст е прочетен; заглавието не е надеждно установено',activities:[]});
+    }
     if(/уведомлен/i.test(item.name+' '+text.slice(0,800))){for(const id of text.match(/(?:позем[еe]н\s+имот|ПИ)\s+(?:с\s+)?(?:идентификатор\s+)?(\d{5}\.\d+\.\d+)/gi)||[]){const m=id.match(/\d{5}\.\d+\.\d+/);if(m)leading.add(parcelId(m[0]));}}
    }catch(err){status='неуспешно извличане: '+err.message}
   }
   docs.push({filename:item.name,status});
  }
  for(const id of leading)other.delete(id);
- return {archive_name:file.name,archive_entries:list.length,files:docs,evidence:[],all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[...other],warnings:['Локален предварителен текстов анализ. Проверете ролите ръчно.','PDF/DOCX се извличат локално, когато съдържат текст. Сканирани документи без текстов слой изискват отделно разчитане.']}};
+ return {archive_name:file.name,archive_entries:list.length,files:docs,evidence:[],subject_candidates:subjects,all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[...other],warnings:['Локален предварителен текстов анализ. Проверете ролите ръчно.','PDF/DOCX се извличат локално, когато съдържат текст. Сканирани документи без текстов слой изискват отделно разчитане.']}};
 }
 window.V26LocalIntake={process};
 })();
