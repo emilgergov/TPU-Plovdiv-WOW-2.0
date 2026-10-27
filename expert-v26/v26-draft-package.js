@@ -81,6 +81,16 @@ function normativePdf(results,register){
   {text:'Източници: архивен работен регистър на нормативни препратки. Посочените интернет адреси НЕ означават потвърдено съдържание или действаща редакция.',margin:[0,0,0,12]},
   {text:'Архивни кодове на зони от справката: '+(codes.size?[...codes].sort().join(', '):'ПРЕДСТОИ')+'. Това не е актуално пространствено пресичане.',margin:[0,0,0,12]}
  ];
+ const archive=register?.archive;
+ if(archive?.files?.length){
+  content.push({text:'Локална преписка — опис на ZIP архива',style:'sub'});
+  content.push({text:'Архив: '+String(archive.archive||'')+' · Файлове: '+archive.entries+' · Общо байтове: '+archive.archive_bytes});
+  content.push({text:'Това е автоматичен опис на файлови имена, а не проверка на съдържание, автентичност или нормативна приложимост.',bold:true});
+  const candidates=archive.files.filter(f=>f.gis_candidate);
+  content.push({text:'Възможни ГИС източници: '+candidates.length+' (непроверени)'});
+  for(const f of archive.files.slice(0,80))content.push({text:'• '+String(f.path||'')+' ('+Number(f.size_bytes||0)+' байта)'+(f.gis_candidate?' [ГИС кандидат]':'')});
+  if(archive.files.length>80)content.push({text:'Още '+(archive.files.length-80)+' файла не са изписани в PDF. Пълният опис остава в локалната браузърна справка.'});
+ }else content.push({text:'Преписка ZIP: не е приложен проверен локален опис.'});
  let shown=0;
  for(const r of records){
   const title=String(r.title||''),code=(title.match(/BG\\d{7}/)||[])[0];
