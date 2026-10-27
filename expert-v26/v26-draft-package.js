@@ -128,9 +128,19 @@ function gisPdf(results,options={}){
  content.push({text:'ГИС данни по имоти — обща таблица',style:'sub'});
  content.push({table:{headerRows:1,widths:[112,72,82,82,'*'],body:[
   ['Кадастрален №','Площ, кв.м','Зона','Пресичане','Статус'],
-  ...results.map(r=>{const id=String(r.input||r.cadnum||'');const has=!!r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));const area=Number(r.area_m2_source);const zones=[...new Set((r.archived_overlay_records||[]).map(z=>String(z.sitecode||'').trim()).filter(z=>/^BG\\d{7}$/.test(z)))];return [id,Number.isFinite(area)&&area>0?area.toLocaleString('bg-BG',{maximumFractionDigits:2})+' (арх.)':'ПРЕДСТОИ',zones.length?zones.join(', ')+' (арх.)':'ПРЕДСТОИ',r.spatial_verification_complete===true?(zones.length?'ИМА ПРЕСИЧАНЕ':'НЯМА ПРЕСИЧАНЕ'):(zones.length?'АРХИВЕН ЗАПИС — ПРЕДСТОИ ГИС ПРОВЕРКА':'ПРЕДСТОИ ГИС ПРОВЕРКА'),has?'Архивна':'ПРЕДСТОИ']})
+  ...results.map(r=>{
+   const id=String(r.input||r.cadnum||'');
+   const has=!!r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));
+   const area=Number(r.area_m2_source);
+   const overlays=r.archived_overlay_records||[];
+   const zones=[...new Set(overlays.map(z=>String(z.sitecode||z.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z)))];
+   const names=[...new Set(overlays.map(z=>String(z.name_bg||z.name||'').trim()).filter(Boolean))];
+   const zoneText=zones.length?zones.join(', ')+(names.length?' · '+names.join('; '):''):'Няма зона в архивния резултат';
+   const intersection=zones.length?'УСТАНОВЕНО ПРЕСИЧАНЕ (работна ГИС база)':has?'Няма отчетено пресичане в работния набор':'Няма геометрия';
+   return [id,Number.isFinite(area)&&area>0?area.toLocaleString('bg-BG',{maximumFractionDigits:2})+' (арх.)':'Не е налична',zoneText,intersection,has?'ГИС геометрия налична':'Липсва геометрия'];
+  })
  ]},layout:'lightHorizontalLines'});
- content.push({text:'Актуални площи и пресичания със защитени зони се попълват само след потвърждение от официален източник. Таблицата продължава на следваща страница само при необходимост.',margin:[0,10,0,0]});
+ content.push({text:'Таблицата възпроизвежда резултата от извършения ГИС анализ на работния набор; не изисква повторна проверка на пресичането. Произходът на геометрията и правната актуалност на режимите са отделни въпроси.',margin:[0,10,0,0]});
  return pdfDef('Приложение №1 — ГИС анализ',content);
 }
 function visitForLabel(coords,out){if(Array.isArray(coords)&&typeof coords[0]==='number'&&typeof coords[1]==='number'){if(Number.isFinite(coords[0])&&Number.isFinite(coords[1]))out.push(coords)}else if(Array.isArray(coords))coords.forEach(x=>visitForLabel(x,out))}
