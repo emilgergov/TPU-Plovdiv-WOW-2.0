@@ -5,6 +5,7 @@ on:
     paths:
       - 'expert-v26/v26-draft-package.js'
       - 'expert-v26/tests/document-smoke.cjs'
+      - 'expert-v26/tests/document-real-pdf.cjs'
       - '.github/workflows/v26-document-smoke.yml'
   workflow_dispatch:
 jobs:
@@ -15,7 +16,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-save --no-package-lock --ignore-scripts jszip@3.10.1
+      - run: npm install --no-save --no-package-lock --ignore-scripts jszip@3.10.1 pdfmake@0.2.20
       - run: node --check expert-v26/v26-draft-package.js
       - run: node --check expert-v26/tests/document-smoke.cjs
       - run: node expert-v26/tests/document-smoke.cjs
+      - run: node --check expert-v26/tests/document-real-pdf.cjs
+      - run: node expert-v26/tests/document-real-pdf.cjs
