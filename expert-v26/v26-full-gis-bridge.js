@@ -15,6 +15,8 @@ function mount(){
   panel.style.display='none';
   const legacy=document.getElementById('v26LocalIndexMount');
   if(legacy)legacy.style.display='none';
+  for(const el of document.querySelectorAll('[id*="LocalIndex"],[id*="localIndex"],[id*="GeometryFile"],[id*="geometryFile"]')){const section=el.closest('section');if(section&&section!==panel)section.style.display='none';}
+  const status=document.createElement('div');status.id='v26HostedReady';status.textContent='ГИС V26 — автоматично заредена';status.style.cssText='margin:8px 0;color:#17633e;font-weight:600';panel.parentElement.insertBefore(status,panel);
   document.dispatchEvent(new Event('v26:gis-invalidated'));
  }).catch(async()=>{const file=await restore();if(file){try{const loaded=await api.openArchive(file);info.textContent='ГИС V26 готова: '+loaded.files+' файла, възстановена автоматично от този браузър.';panel.style.display='none';document.dispatchEvent(new Event('v26:gis-invalidated'));return}catch(e){info.textContent='Локалният архив не може да се възстанови: '+e.message}}else info.textContent='Първоначално зареждане: изберете одобрения ZIP архив само веднъж. След това ще се възстановява автоматично.';});
  async function remember(file){if(!window.indexedDB)return;return new Promise((resolve,reject)=>{const req=indexedDB.open('V26_APPROVED_GIS',1);req.onupgradeneeded=()=>req.result.createObjectStore('archives');req.onerror=()=>reject(req.error);req.onsuccess=()=>{const db=req.result,tx=db.transaction('archives','readwrite');tx.objectStore('archives').put(file,'approved');tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)}}})}
