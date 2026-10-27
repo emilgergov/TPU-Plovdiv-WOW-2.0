@@ -3,13 +3,13 @@
 let db=null,source='',geometryCache=null,geometrySource='';
 async function geometryRecords(){if(geometryCache)return geometryCache;const response=await fetch('data/v26-parcel-geometry-verified-sample.json',{cache:'no-store'});if(!response.ok)throw Error('Липсва файлът с геометрията');const data=await response.json();geometryCache=data.records||{};return geometryCache;}
 async function loadGeometryFile(file){
- if(!file||!/\\.json$/i.test(file.name))throw Error('Изберете JSON с имотна геометрия.');
+ if(!file||!/\.json$/i.test(file.name))throw Error('Изберете JSON с имотна геометрия.');
  if(file.size>15000000)throw Error('Геометричният JSON надхвърля 15 MB.');
  const data=JSON.parse(await file.text());
  if(!data||data.status!=='ARCHIVAL_ONLY'||!data.records||typeof data.records!=='object'||Array.isArray(data.records))throw Error('Неподдържан формат на архивния геометричен набор.');
  const records={};let count=0;
  for(const [id,record] of Object.entries(data.records)){
-  if(!/^\\d{5}\\.\\d+\\.\\d+$/.test(id)||record.cadnum!==id||!Array.isArray(record.geojson?.features))throw Error('Несъответствие на идентификатор или GeoJSON.');
+  if(!/^\d{5}\.\d+\.\d+$/.test(id)||record.cadnum!==id||!Array.isArray(record.geojson?.features))throw Error('Несъответствие на идентификатор или GeoJSON.');
   const features=record.geojson.features;
   if(!features.length||features.some(f=>!['Polygon','MultiPolygon'].includes(f?.geometry?.type)||!Array.isArray(f.geometry.coordinates)))throw Error('Невалидна геометрия: '+id);
   records[id]=record;count++;
