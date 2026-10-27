@@ -329,9 +329,11 @@ $('v26SubjectConfirm').onclick=()=>{const heading=wordHeading.value.trim(),title
 let v26Semantic=null;
 let v26CaseTitle='';
 function v26CleanSubjectHeading(){
- const raw=(v26CaseTitle||subjectTitle.value||'').trim().replace(/^Относно:\\s*/i,'').replace(/^Уведомление за инвестиционно предложение\\s*\\(ИП\\)\\s*:\\s*/i,'').replace(/^[„"']|[“"']$/g,'').trim();
- const ids=[...new Set([...(v26Semantic?.location||[]).join(' ').match(/\\b\\d{5}\\.\\d+\\.\\d+\\b/g)||[]),...words($('ids').value)])];
- const primary=confirmedRoles?Object.keys(confirmedRoles).filter(id=>confirmedRoles[id]==='leading'||confirmedRoles[id]==='main'||confirmedRoles[id]==='водещ'):[];
+ const raw=(v26CaseTitle||subjectTitle.value||'').trim().replace(/^Относно:\s*/i,'').replace(/^Уведомление за инвестиционно предложение\s*\(ИП\)\s*:\s*/i,'').replace(/^[„"']|[“"']$/g,'').trim();
+ const locationText=(v26Semantic?.location||[]).join(' ');
+ const locationIds=locationText.match(/\b\d{5}\.\d+\.\d+\b/g)||[];
+ const ids=[...new Set([...locationIds,...words($('ids').value)])];
+ const primary=confirmedRoles?Object.keys(confirmedRoles).filter(id=>confirmedRoles[id]==='leading'):[];
  const chosen=primary.length?primary:ids;
  const pieces=chosen.length?['ПИ с идентификатор'+(chosen.length>1?'и':'')+' '+chosen.join(', ')]:[];
  const matched=found.filter(x=>chosen.includes(x.cadnum));
