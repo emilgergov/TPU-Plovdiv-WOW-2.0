@@ -17,4 +17,5 @@ jobs:
           node-version: '22'
       - run: npm install --no-save --no-package-lock --ignore-scripts jszip@3.10.1
       - run: node --check expert-v26/v26-draft-package.js
+      - run: node --check expert-v26/tests/document-smoke.cjs
       - run: node expert-v26/tests/document-smoke.cjs
