@@ -119,9 +119,9 @@ function gisPdf(results){
   content.push({svg:drawing,width:480,margin:[0,4,0,8]});
  }else content.push({text:'Картографски материал: ПРЕДСТОИ — няма налична имотна геометрия.',bold:true});
  content.push({text:'ГИС данни по имоти — обща таблица',style:'sub'});
- content.push({table:{headerRows:1,widths:['*','auto','auto','auto','auto'],body:[
+ content.push({table:{headerRows:1,widths:[112,72,82,82,'*'],body:[
   ['Кадастрален №','Площ, кв.м','Зона','Пресичане','Статус'],
-  ...results.map(r=>{const id=String(r.input||r.cadnum||'');const has=!!r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));return [id,has&&r.area_m2_geometry!=null?String(r.area_m2_geometry):'ПРЕДСТОИ','ПРЕДСТОИ','ПРЕДСТОИ',has?'Архивна геометрия':'ПРЕДСТОИ']})
+  ...results.map(r=>{const id=String(r.input||r.cadnum||'');const has=!!r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));return [id,has&&r.area_m2_geometry!=null?String(r.area_m2_geometry):'ПРЕДСТОИ','ПРЕДСТОИ','ПРЕДСТОИ',has?'Архивна':'ПРЕДСТОИ']})
  ]},layout:'lightHorizontalLines'});
  content.push({text:'Актуални площи и пресичания със защитени зони се попълват само след потвърждение от официален източник. Таблицата продължава на следваща страница само при необходимост.',margin:[0,10,0,0]});
  return pdfDef('Приложение №1 — ГИС анализ',content);
