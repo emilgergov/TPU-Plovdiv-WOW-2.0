@@ -3,8 +3,8 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),JSZip=require('jszip');
 const PdfPrinter=require('pdfmake');
 const path=require('node:path');
-const fontPath=path.join(process.cwd(),'node_modules','pdfmake','examples','fonts');
-const fonts={Roboto:{normal:path.join(fontPath,'Roboto-Regular.ttf'),bold:path.join(fontPath,'Roboto-Medium.ttf'),italics:path.join(fontPath,'Roboto-Italic.ttf'),bolditalics:path.join(fontPath,'Roboto-MediumItalic.ttf')}};
+const fontPath='/usr/share/fonts/truetype/dejavu';
+const fonts={Roboto:{normal:path.join(fontPath,'DejaVuSans.ttf'),bold:path.join(fontPath,'DejaVuSans-Bold.ttf'),italics:path.join(fontPath,'DejaVuSans-Oblique.ttf'),bolditalics:path.join(fontPath,'DejaVuSans-BoldOblique.ttf')}};
 const printer=new PdfPrinter(fonts);
 function render(def){return new Promise((resolve,reject)=>{const pdf=printer.createPdfKitDocument(def);const parts=[];pdf.on('data',p=>parts.push(p));pdf.on('error',reject);pdf.on('end',()=>resolve(new Blob([Buffer.concat(parts)],{type:'application/pdf'})));pdf.end()})}
 const sandbox={Blob,JSZip,window:{JSZip,pdfMake:{createPdf(def){return {getBlob(cb){render(def).then(cb).catch(e=>{console.error(e);process.exitCode=1})}}}}},document:{createElement(){throw Error('Unexpected CDN fetch')}}};
