@@ -188,11 +188,11 @@ body>main>aside .v26-step-label{margin:4px 0 1px!important}
 function words(s){return v26EditIds(s).ids};function reviewRoles(d){
   const toParcel=id=>String(id).split('.').slice(0,3).join('.');
   const unique=xs=>[...new Set((xs||[]).map(toParcel))];
-  confirmedRoles=null;caseParcels=unique(d.all_parcels);
+  confirmedRoles=null;const roleButton=$('confirmRoles');roleButton.disabled=false;roleButton.textContent='Потвърди ролите';caseParcels=unique(d.all_parcels);
   const c={...d.classification,leading_candidates:unique(d.classification.leading_candidates),ancillary_candidates:unique(d.classification.ancillary_candidates)};const host=$('roleRows');host.replaceChildren();
   for(const id of caseParcels){const line=document.createElement('label');line.style.cssText='display:block;font-size:13px;margin:7px 0';
     const label=document.createElement('span');label.textContent=id+' · ';line.appendChild(label);
-    const select=document.createElement('select');select.dataset.cadnum=id;select.style.maxWidth='100%';select.onchange=()=>{confirmedRoles=null;$('roleStatus').textContent='Променени роли — потвърдете отново.'};
+    const select=document.createElement('select');select.dataset.cadnum=id;select.style.maxWidth='100%';select.onchange=()=>{confirmedRoles=null;const b=$('confirmRoles');b.disabled=false;b.textContent='Потвърди ролите';$('roleStatus').textContent='Променени роли — потвърдете отново.'};
     const opts=[['','Непотвърден'],['leading','Водещ'],['ancillary','Съпътстващ']];
     for(const [v,t] of opts){const o=document.createElement('option');o.value=v;o.textContent=t;select.appendChild(o)}
     // Candidate information is shown as a hint, never preselected as confirmed.
@@ -202,7 +202,7 @@ function words(s){return v26EditIds(s).ids};function reviewRoles(d){
 }
 $('confirmRoles').onclick=()=>{const roles={};const selects=[...$('roleRows').querySelectorAll('select')];if(!selects.length){$('roleStatus').textContent='Няма намерени имоти за потвърждаване. Първо използвайте „Намери имотите“.';return;}
   for(const s of selects){if(!s.value){confirmedRoles=null;$('roleStatus').textContent='Изберете „Водещ“ или „Съпътстващ“ за всеки имот, преди да натиснете „Потвърди ролите“.';s.focus();return}roles[s.dataset.cadnum]=s.value}
-  confirmedRoles=roles;v26RefreshSubjectHeading();$('roleStatus').textContent='Потвърдени '+selects.length+' роли за тази преписка.';if(!found.length){$('run').click()}
+  confirmedRoles=roles;v26RefreshSubjectHeading();const b=$('confirmRoles');b.textContent='Ролите са потвърдени';b.disabled=true;$('roleStatus').textContent='Потвърдени '+selects.length+' роли за тази преписка.';if(!found.length){$('run').click()}
 };
 function setStatus(t){
  $('status').textContent=t;
