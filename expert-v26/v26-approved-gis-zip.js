@@ -17,18 +17,12 @@ async function openArchive(file){
 }
 /* Python geometry export may contain non-standard NaN numeric literals. Normalize only tokens outside JSON strings. */
 function normalizeNonFiniteJson(source){
- let out='',quoted=false,escaped=false,changes=0;
- for(let i=0;i<source.length;){
-  const c=source[i];
-  if(quoted){out+=c;i++;if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c==='"')quoted=false;continue;}
-  if(c==='"'){quoted=true;out+=c;i++;continue;}
-  const match=/^(?:-Infinity|Infinity|NaN)\b/.exec(source.slice(i,i+10));
-  if(match && (i===0||/[\s,:[\]]/.test(source[i-1])) && (i+match[0].length===source.length||/[\s,}\]]/.test(source[i+match[0].length]))){
-   out+='null';i+=match[0].length;changes++;continue;
-  }
-  out+=c;i++;
- }
- return {text:out,changes};
+ let changes=0;
+ const text=source.replace(/"(?:\\.|[^"\\])*"|\b(?:NaN|Infinity)\b|-Infinity\b/g,token=>{
+  if(token[0]==='"')return token;
+  changes++;return 'null';
+ });
+ return {text,changes};
 }
 async function rows(kind,prefix){
  const name=kind+'_'+prefix+'.json.gz',key=name;
@@ -38,7 +32,7 @@ async function rows(kind,prefix){
  const compressed=await entry.getData(new global.zip.Uint8ArrayWriter());
  if(!global.DecompressionStream)throw Error('Този браузър не поддържа gzip разархивиране.');
  const bytes=await new Response(new Blob([compressed]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
- let result;try{result=JSON.parse(bytes)}catch(e){const fixed=normalizeNonFiniteJson(bytes);if(!fixed.changes)throw Error('Невалиден JSON в '+name+': '+e.message);result=JSON.parse(fixed.text);console.info('V26 GIS: normalized '+fixed.changes+' non-finite values in '+name)}if(!Array.isArray(result))throw Error('Невалиден формат на сегмент: '+name);cache.set(key,result);return result;
+ let result;try{result=JSON.parse(bytes)}catch(e){const fixed=normalizeNonFiniteJson(bytes);if(!fixed.changes)throw Error('Невалиден JSON в '+name+': '+e.message);try{result=JSON.parse(fixed.text)}catch(second){throw Error('Сегмент '+name+': '+second.message)}console.info('V26 GIS: normalized '+fixed.changes+' non-finite values in '+name)}if(!Array.isArray(result))throw Error('Невалиден формат на сегмент: '+name);cache.set(key,result);return result;
 }
 async function lookup(ids){
  if(!entries)throw Error('Първо заредете одобрения пълен ГИС пакет.');
