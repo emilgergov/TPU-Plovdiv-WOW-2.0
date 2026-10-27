@@ -5,7 +5,7 @@ on:
     paths:
       - 'expert-v26/v26-offline-pdf.js'
       - 'expert-v26/v26-draft-package.js'
-      - 'expert-v26/tests/browser-pdf.spec.cjs'
+      - 'expert-v26/tests/browser-pdf.spec.js'
       - '.github/workflows/v26-offline-pdf-browser.yml'
   workflow_dispatch:
 jobs:
@@ -19,4 +19,4 @@ jobs:
       - run: npm install --no-save --no-package-lock @playwright/test@1.56.1
       - run: npx playwright install --with-deps chromium
       - run: python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/v26-http.log 2>&1 &
-      - run: npx playwright test expert-v26/tests/browser-pdf.spec.cjs --browser chromium --reporter=line
+      - run: npx playwright test expert-v26/tests/browser-pdf.spec.js --browser chromium --reporter=line
