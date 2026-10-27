@@ -1,6 +1,31 @@
 (()=>{'use strict';
 const rx=/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g;
 function u16(v,p){return v.getUint16(p,true)}function u32(v,p){return v.getUint32(p,true)}
+function loadScript(src){return new Promise((resolve,reject)=>{const el=document.createElement('script');el.src=src;el.onload=resolve;el.onerror=()=>reject(Error('Неуспешно зареждане на библиотека: '+src));document.head.appendChild(el)})}
+async function readEntry(bytes,v,item){
+ const h=item.offset;if(h+30>bytes.byteLength||u32(v,h)!==0x04034b50)throw Error('Невалиден ZIP запис.');
+ const start=h+30+u16(v,h+26)+u16(v,h+28);
+ if(start+item.packed>bytes.byteLength)throw Error('Повреден ZIP запис.');
+ if(item.method===0)return bytes.slice(start,start+item.packed);
+ if(!window.zip?.ZipReader)await loadScript('https://cdn.jsdelivr.net/npm/@zip.js/zip.js@2.7.57/dist/zip.min.js');
+ const zr=new window.zip.ZipReader(new window.zip.BlobReader(new Blob([bytes])));
+ try{const entries=await zr.getEntries();const entry=entries.find(e=>e.filename===item.name);if(!entry)throw Error('Липсва ZIP запис '+item.name);const data=await entry.getData(new window.zip.Uint8ArrayWriter());return data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength)}finally{await zr.close()}
+}
+async function extractText(data,name){
+ if(/\\.(txt|csv|json|md)$/i.test(name))return new TextDecoder('utf-8').decode(data);
+ if(/\\.pdf$/i.test(name)){
+  if(!window.pdfjsLib)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const doc=await window.pdfjsLib.getDocument({data:new Uint8Array(data)}).promise;
+  const parts=[];for(let i=1;i<=Math.min(doc.numPages,100);i++){const page=await doc.getPage(i);const content=await page.getTextContent();parts.push(content.items.map(x=>x.str||'').join(' '))}
+  return parts.join('\\n');
+ }
+ if(/\\.docx$/i.test(name)){
+  if(!window.mammoth)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js');
+  return (await window.mammoth.extractRawText({arrayBuffer:data})).value||'';
+ }
+ return '';
+}
 async function process(file){
  if(!file||file.size>40*1024*1024)throw Error('Изберете ZIP до 40 MB.');
  const bytes=await file.arrayBuffer(),v=new DataView(bytes),list=[];let e=-1;
@@ -22,28 +47,21 @@ async function process(file){
  const docs=[],all=new Set(),leading=new Set(),other=new Set();
  for(const item of list){
   let status='описан',text='';
-  if(/\.(txt|csv|json|md)$/i.test(item.name)&&item.size<=1024*1024){
-   const h=item.offset;if(h+30>bytes.byteLength||u32(v,h)!==0x04034b50)throw Error('Невалиден ZIP запис.');
-   const start=h+30+u16(v,h+26)+u16(v,h+28);
-   if(start+item.packed>bytes.byteLength)throw Error('Повреден ZIP запис.');
-   const blob=new Blob([bytes.slice(start,start+item.packed)]);
-   let unpacked;
-   if(item.method===0)unpacked=await blob.arrayBuffer();
-   else if(typeof DecompressionStream!=='undefined')unpacked=await new Response(blob.stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();
-   else{status='неподдържана компресия';docs.push({filename:item.name,status});continue}
-   if(unpacked.byteLength!==item.size)throw Error('Несъответствие в ZIP размер.');
-   text=new TextDecoder('utf-8').decode(unpacked);status='текстът е прочетен';
-   const ids=[...text.matchAll(rx)].map(m=>m[0]);
-   for(const id of ids){all.add(id);other.add(id)}
-   const location=text.match(/Местоположение на ИП\s*[:：]\s*([^\n\r]+)/i);
-   if(location&&/уведомлен/i.test(item.name+' '+text.slice(0,160))){
-    for(const id of location[1].match(rx)||[])leading.add(id);
-   }
+  if(/\\.(txt|csv|json|md|pdf|docx)$/i.test(item.name)&&item.size<=20*1024*1024){
+   try{
+    const unpacked=await readEntry(bytes,v,item);
+    if(unpacked.byteLength!==item.size)throw Error('Несъответствие в ZIP размер.');
+    text=await extractText(unpacked,item.name);
+    status=text.trim()?'текстът е прочетен':'няма извлекаем текст (възможно сканиран документ)';
+    for(const id of text.match(rx)||[]){all.add(id);other.add(id)}
+    const location=text.match(/Местоположение на ИП\\s*[:：]\\s*([^\\n\\r]+)/i);
+    if(location&&/уведомлен/i.test(item.name+' '+text.slice(0,160)))for(const id of location[1].match(rx)||[])leading.add(id);
+   }catch(err){status='неуспешно извличане: '+err.message}
   }
   docs.push({filename:item.name,status});
  }
  for(const id of leading)other.delete(id);
- return {archive_name:file.name,archive_entries:list.length,files:docs,evidence:[],all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[...other],warnings:['Локален предварителен текстов анализ. Проверете ролите ръчно.','PDF/DOCX съдържание не се извлича от този модул.']}};
+ return {archive_name:file.name,archive_entries:list.length,files:docs,evidence:[],all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[...other],warnings:['Локален предварителен текстов анализ. Проверете ролите ръчно.','PDF/DOCX се извличат локално, когато съдържат текст. Сканирани документи без текстов слой изискват отделно разчитане.']}};
 }
 window.V26LocalIntake={process};
 })();
