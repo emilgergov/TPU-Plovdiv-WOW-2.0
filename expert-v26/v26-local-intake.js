@@ -82,6 +82,18 @@ async function process(file){
       if(excerpt&&excerpt.length>12)foundSections.push({key,text:excerpt.slice(0,1000),source:item.name,review_required:true});
      }
      const activities=[];
+     // Въвеждаме само откъси от попълнен текст; указанията на празния образец не са дейности.
+     const candidates=foundSections.filter(x=>['summary','processes'].includes(x.key));
+     for(const section of candidates){
+      const chunks=section.text.split(/(?<=[.!?;])\s+/).map(x=>x.trim());
+      for(const chunk of chunks){
+       if(chunk.length<22||chunk.length>350||/[.…]{3,}|_{3,}/.test(chunk))continue;
+       if(/^(посочва се|в т\.ч\.|описание на|характеристика на|съгласно приложение|предвидени изкопни работи)/i.test(chunk))continue;
+       if(/(?:ще се (?:изгражда|извършва|ползва|реализира)|предвижда се|изграждане на|реконструкция на|експлоатация на|разширение на|промяна на|монтаж на)/i.test(chunk)&&!activities.includes(chunk))activities.push(chunk);
+       if(activities.length>=12)break;
+      }
+     }
+
      subjects.push({title,source:item.name,evidence:title?'Автоматично извлечен откъс от текст':'Текст е прочетен; заглавието не е надеждно установено',activities,sections:foundSections});
     }
     if(/уведомлен/i.test(item.name+' '+text.slice(0,800))){for(const id of text.match(/(?:позем[еe]н\s+имот|ПИ)\s+(?:с\s+)?(?:идентификатор\s+)?(\d{5}\.\d+\.\d+)/gi)||[]){const m=id.match(/\d{5}\.\d+\.\d+/);if(m)leading.add(parcelId(m[0]));}}
