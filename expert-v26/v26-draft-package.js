@@ -150,8 +150,13 @@ function normativePdf(results,register){
  }
  const zones=[...zoneMap.values()].sort((a,b)=>a.code.localeCompare(b.code));
  const records=register?.records||[];
+ const subject=window.V26SubjectContext;
  const content=[
   {text:'I. Предмет и установени факти',style:'sub'},
+  {text:'Предмет на ИП: '+(subject?.confirmed?subject.title:'НЕ Е УСТАНОВЕН / НЕ Е ПОТВЪРДЕН'),bold:true},
+  {text:'Източник на предмета: '+(subject?.confirmed?subject.source:'ПРЕДСТОИ')},
+  {text:'Дейности от ИП: '+(subject?.confirmed?(subject.activities.join('; ')||'НЕ СА УТОЧНЕНИ'):'ПРЕДСТОИ')},
+  {text:'Статус на анализа на дейностите: '+(subject?.confirmed&&subject.activities.length?'Предметът е експертно потвърден; съпоставката с конкретните режими ПРЕДСТОИ.':'ПРЕДВАРИТЕЛНА НОРМАТИВНА СПРАВКА — липсва потвърден предмет и/или дейности.'),bold:true},
   {text:'Имотни идентификатори: '+ids.join(', ')},
   {text:'Пространствена основа: резултатът от ГИС анализ / Приложение №1 е приет за настоящата справка. Пресичането НЕ се проверява повторно в Приложение №2.',bold:true},
   {text:'Установени от ГИС справката зони: '+(zones.length?zones.map(z=>z.code+(z.name?' „'+z.name+'“':'')).join('; '):'Няма предадени кодове на зони в резултата.')},
