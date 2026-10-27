@@ -12,15 +12,15 @@ async function readEntry(bytes,v,item){
  try{const entries=await zr.getEntries();const entry=entries.find(e=>e.filename===item.name);if(!entry)throw Error('Липсва ZIP запис '+item.name);const data=await entry.getData(new window.zip.Uint8ArrayWriter());return data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength)}finally{await zr.close()}
 }
 async function extractText(data,name){
- if(/\\.(txt|csv|json|md)$/i.test(name))return new TextDecoder('utf-8').decode(data);
- if(/\\.pdf$/i.test(name)){
+ if(/\.(txt|csv|json|md)$/i.test(name))return new TextDecoder('utf-8').decode(data);
+ if(/\.pdf$/i.test(name)){
   if(!window.pdfjsLib)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
   window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const doc=await window.pdfjsLib.getDocument({data:new Uint8Array(data)}).promise;
   const parts=[];for(let i=1;i<=Math.min(doc.numPages,100);i++){const page=await doc.getPage(i);const content=await page.getTextContent();parts.push(content.items.map(x=>x.str||'').join(' '))}
-  return parts.join('\\n');
+  return parts.join('\n');
  }
- if(/\\.docx$/i.test(name)){
+ if(/\.docx$/i.test(name)){
   if(!window.mammoth)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js');
   return (await window.mammoth.extractRawText({arrayBuffer:data})).value||'';
  }
@@ -47,7 +47,7 @@ async function process(file){
  const docs=[],all=new Set(),leading=new Set(),other=new Set();
  for(const item of list){
   let status='описан',text='';
-  if(/\\.(txt|csv|json|md|pdf|docx)$/i.test(item.name)&&item.size<=20*1024*1024){
+  if(/\.(txt|csv|json|md|pdf|docx)$/i.test(item.name)&&item.size<=20*1024*1024){
    try{
     const unpacked=await readEntry(bytes,v,item);
     if(unpacked.byteLength!==item.size)throw Error('Несъответствие в ZIP размер.');
