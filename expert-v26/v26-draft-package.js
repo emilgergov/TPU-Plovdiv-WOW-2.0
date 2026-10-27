@@ -130,7 +130,10 @@ function visitForLabel(coords,out){if(Array.isArray(coords)&&typeof coords[0]===
 function normativePdf(results,register){
  const ids=results.map(r=>String(r.input||r.cadnum||'')).filter(Boolean);
  const codes=new Set();
- for(const r of results)for(const o of r.archived_overlay_records||[])if(/^BG\\d{7}$/.test(String(o.sitecode||'')))codes.add(String(o.sitecode));
+ for(const r of results){
+  for(const o of r.archived_overlay_records||[])if(/^BG\\d{7}$/.test(String(o.sitecode||'')))codes.add(String(o.sitecode));
+  for(const z of r.archived_zones||[])if(/^BG\\d{7}$/.test(String(z.sitecode||z.code||'')))codes.add(String(z.sitecode||z.code));
+ }
  const records=register?.records||[];
  const content=[
   {text:'Имотни идентификатори: '+ids.join(', '),margin:[0,0,0,10]},
@@ -161,17 +164,17 @@ function normativePdf(results,register){
  }
  let shown=0;
  for(const r of records){
-  const title=String(r.title||''),code=(title.match(/BG\\d{7}/)||[])[0];
+  const title=String(r.title||''),code=String(r.zone_code||'')||(title.match(/BG\\d{7}/)||[])[0];
   if(code&&!codes.has(code))continue;
   shown++;
   content.push({text:String(r.id||'')+' — '+title,style:'sub'});
   content.push({text:'Предназначение на препратката: '+String(r.purpose||'ПРЕДСТОИ')});
-  content.push({text:'Адрес на източника: '+String(r.source||'ПРЕДСТОИ')});
+  content.push({text:'Официален източник (отворете връзката)',link:String(r.source||''),color:'#165c86',decoration:'underline',margin:[0,2,0,3]});
   content.push({text:'Състояние на източника: '+String(r.source_status||'ПРЕДСТОИ')});
   content.push({text:'Страница/точка: '+String(r.page||'ПРЕДСТОИ')+' · Дата/редакция: '+String(r.date||'ПРЕДСТОИ')});
-  content.push({text:'Проверка на съдържание и приложимост: ПРЕДСТОИ.',bold:true});
+  content.push({text:'Точна приложима разпоредба и действаща редакция: '+(r.verified===true?'потвърдена в регистъра':'ПРЕДСТОИ'),bold:true});
  }
- if(!shown)content.push({text:'Нормативни записи за тази справка: ПРЕДСТОИ.'});
+ if(!shown)content.push({text:'Няма подбрани нормативни записи за установените кодове.'});
  content.push({text:'Заключение: настоящото приложение е опис на източници, а не удостоверяване на режими, забрани или становище.',bold:true});
  return pdfDef('Приложение №2 — нормативни основания',content);
 }
