@@ -2,7 +2,8 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),JSZip=require('jszip');
 const source=fs.readFileSync('expert-v26/v26-draft-package.js','utf8');
 const docs=[];
-const context={JSZip,Blob,URL,document:{createElement(){throw Error('Unexpected CDN request')}},window:{JSZip,pdfMake:{createPdf(def){docs.push(def);return {getBlob(cb){cb(new Blob(['%PDF-1.4\\n'+('x'.repeat(200))],{type:'application/pdf'}))}}}}}};
+const BrowserJSZip=class extends JSZip{file(name,data,options){if(data instanceof Blob)return super.file(name,data.arrayBuffer().then(b=>new Uint8Array(b)),options);return super.file(name,data,options)}};
+const context={JSZip:BrowserJSZip,Blob,URL,document:{createElement(){throw Error('Unexpected CDN request')}},window:{JSZip:BrowserJSZip,pdfMake:{createPdf(def){docs.push(def);return {getBlob(cb){cb(new Blob(['%PDF-1.4\\n'+('x'.repeat(200))],{type:'application/pdf'}))}}}}}};
 vm.runInNewContext(source,context,{filename:'v26-draft-package.js'});
 const geometry={type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Polygon',coordinates:[[[1,1],[2,1],[2,2],[1,2],[1,1]]]},properties:{}}]};
 (async()=>{
