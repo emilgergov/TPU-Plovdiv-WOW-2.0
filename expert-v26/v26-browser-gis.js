@@ -1,6 +1,7 @@
 /* V26 local browser cadastral index: SQLite read-only; no upload or invented geometry. */
 (()=>{'use strict';
-let db=null,source='';
+let db=null,source='',geometryCache=null;
+async function geometryRecords(){if(geometryCache)return geometryCache;const response=await fetch('data/v26-parcel-geometry-verified-sample.json',{cache:'no-store'});if(!response.ok)throw Error('Липсва файлът с геометрията');const data=await response.json();geometryCache=data.records||{};return geometryCache;}
 const validId=id=>/^\d{5}\.\d+\.\d+(?:\.\d+){0,2}$/.test(id);
 function loadScript(src){return new Promise((resolve,reject)=>{const el=document.createElement('script');el.src=src;el.onload=resolve;el.onerror=()=>reject(Error('Не се зареди библиотеката: '+src));document.head.appendChild(el)})}
 async function openSQLite(bytes,name){
@@ -31,6 +32,7 @@ async function loadArchive(file){
 function rows(sql,params){const stmt=db.prepare(sql);try{stmt.bind(params);const out=[];while(stmt.step())out.push(stmt.getAsObject());return out}finally{stmt.free()}}
 async function lookup(ids){
  if(!Array.isArray(ids)||!ids.length||ids.length>100)throw Error('Невалиден брой имоти (1–100).');
+ const geometry=await geometryRecords();
  const results=ids.map(raw=>{
   const input=String(raw).trim(),base=input.split('.').slice(0,3).join('.');
   const empty={input,cadnum:base,status:'ПРЕДСТОИ',geojson:{type:'FeatureCollection',features:[]}};
@@ -39,10 +41,13 @@ async function lookup(ids){
   const parcels=rows('SELECT cadnum,ekattefn,place,area_m2 FROM parcels WHERE cadnum=?',[base]);
   if(!parcels.length)return {...empty,status:'Не е намерен',note:'Няма запис в локалния кадастрален индекс.'};
   const p=parcels[0];
+  const spatial=geometry[base];
+  if(spatial?.geojson?.features?.length)return {...spatial,input,status:'Намерен',caveat:'Геометрия от архивна регионална FileGDB; актуални зонови граници и нормативно пресичане не са удостоверени.'};
   const overlays=rows('SELECT sitecode,name_bg,order_no,dv,area_ha_source FROM overlays WHERE cadnum=? ORDER BY sitecode',[base]);
   return {...empty,settlement:p.ekattefn,locality:p.place,area_m2_source:p.area_m2,archived_overlay_records:overlays,note:'Имотът е намерен в архивния индекс. Геометрията и актуалното пространствено пресичане остават ПРЕДСТОИ.'};
  });
- return {results,summary:{found_count:0,requested_count:ids.length,geometry_area_sum_m2:0,archived_zones:[],note:db?'Индекс: '+source+'. Налични са архивни справочни записи; няма заредена имотна геометрия и няма удостоверени пространствени пресичания.':'ПРЕДСТОИ: зареждане на локалния SQLite индекс.'},geometry_qa:[]};
+ const spatialResults=results.filter(x=>x.status==='Намерен'&&x.geojson?.features?.length);
+ return {results,summary:{found_count:spatialResults.length,requested_count:ids.length,geometry_area_sum_m2:spatialResults.reduce((sum,x)=>sum+(x.area_m2_geometry||0),0),archived_zones:[],note:db?'Индекс: '+source+'. Реална архивна имотна геометрия е налична само за подготвените идентификатори; за останалите: ПРЕДСТОИ. Няма удостоверено актуално зонално пресичане.':'ПРЕДСТОИ: зареждане на локалния SQLite индекс.'},geometry_qa:[]};
 }
 window.V26BrowserGIS=Object.freeze({lookup,loadArchive,isLoaded:()=>!!db});
 function mount(){
