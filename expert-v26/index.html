@@ -104,6 +104,20 @@ function drawZones(){
   // The entire boundary is rendered in the parcel's coordinate frame; the SVG viewport clips it.
   const path=elt('path',{d:pathFor(f.geometry,extent),fill:'none',stroke:'#2268bb','stroke-width':used.has(f.properties.SITECODE||f.properties.sitecode)?3:2,'stroke-linejoin':'round','pointer-events':'none'});
   const tip=elt('title');tip.textContent='Защитена зона '+(f.properties.SITECODE||f.properties.sitecode||'')+' — '+(f.properties.NAME_BG||f.properties.name_bg||'');path.appendChild(tip);target.appendChild(path);
+  const code=f.properties.SITECODE||f.properties.sitecode||'';
+  const name=f.properties.NAME_BG||f.properties.name_bg||f.properties.SITENAME||'';
+  if(!code||!name)continue;
+  const point=parcelAnchor(f.geometry);if(!point)continue;
+  const scale=Math.min(900/Math.max(extent.maxX-extent.minX,1e-8),530/Math.max(extent.maxY-extent.minY,1e-8));
+  const x=(point[0]-(extent.minX+extent.maxX)/2)*scale+500;
+  const y=((extent.minY+extent.maxY)/2-point[1])*scale+325;
+  if(x<80||x>920||y<45||y>605)continue;
+  const label=elt('g',{'pointer-events':'none'});
+  const width=Math.max(140,Math.min(310,name.length*7.5+25));
+  label.appendChild(elt('rect',{x:x-width/2,y:y-23,width,height:46,rx:7,fill:'#ffffff',opacity:'.9',stroke:'#2268bb','stroke-width':1.5}));
+  const t1=elt('text',{x,y:y-3,'text-anchor':'middle','font-size':14,'font-weight':'bold',fill:'#164e8a'});t1.textContent=code;label.appendChild(t1);
+  const t2=elt('text',{x,y:y+14,'text-anchor':'middle','font-size':12,fill:'#164e8a'});t2.textContent=name;label.appendChild(t2);
+  target.appendChild(label);
  }
 }
 let showArchivedOverlaps=true;function redraw(){const target=$('shapes');target.replaceChildren();drawZones();if(!baseBox)return;for(const f of allFeatures){const overlay=f.properties.role==='archived_intersection';if(overlay&&!showArchivedOverlaps)continue;const path=elt('path',{d:pathFor(f.geometry,baseBox),fill:overlay?'url(#overlapHatch)':'#369b6d55',stroke:overlay?'#b97714':'#075c3b','stroke-width':overlay?2:3,'fill-rule':'evenodd'});const cad=f.properties.cadnum||'';const tip=elt('title');tip.textContent=overlay?('Архивно пресичане · '+(f.properties.sitecode||'неизвестна зона')+' · имот '+cad):('Имот · '+cad);path.appendChild(tip);if(!overlay&&cad){path.style.cursor='pointer';path.setAttribute('tabindex','0');path.setAttribute('role','button');path.setAttribute('aria-label','Избери имот '+cad);path.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();const idx=found.findIndex(r=>r.cadnum===cad&&r.status==='Намерен');if(idx>=0)select(idx,combined)}});path.addEventListener('click',()=>{const idx=found.findIndex(r=>r.cadnum===cad&&r.status==='Намерен');if(idx>=0)select(idx,combined)})}target.appendChild(path)}if(viewBox)$('map').setAttribute('viewBox',viewBox.join(' '));drawLabels(target)}function fit(){viewBox=[0,0,1000,650];redraw()}function zoom(f){if(!viewBox)return;const [x,y,w,h]=viewBox;viewBox=[x+w*(1-f)/2,y+h*(1-f)/2,w*f,h*f];redraw()}// Навигация по картата: колелце за мащаб, влачене за преместване.
