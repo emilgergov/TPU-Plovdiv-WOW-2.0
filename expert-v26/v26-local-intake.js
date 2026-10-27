@@ -7,9 +7,10 @@ async function readEntry(bytes,v,item){
  const start=h+30+u16(v,h+26)+u16(v,h+28);
  if(start+item.packed>bytes.byteLength)throw Error('Повреден ZIP запис.');
  if(item.method===0)return bytes.slice(start,start+item.packed);
- if(!window.zip?.ZipReader)await loadScript('https://cdn.jsdelivr.net/npm/@zip.js/zip.js@2.7.57/dist/zip.min.js');
- const zr=new window.zip.ZipReader(new window.zip.BlobReader(new Blob([bytes])));
- try{const entries=await zr.getEntries();const entry=entries.find(e=>e.filename===item.name);if(!entry)throw Error('Липсва ZIP запис '+item.name);const data=await entry.getData(new window.zip.Uint8ArrayWriter());return data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength)}finally{await zr.close()}
+ if(!window.fflate?.unzlibSync)await loadScript('https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js');
+ const compressed=new Uint8Array(bytes,start,item.packed);
+ const result=window.fflate.inflateSync(compressed);
+ return result.buffer.slice(result.byteOffset,result.byteOffset+result.byteLength);
 }
 async function extractText(data,name){
  if(/\.(txt|csv|json|md)$/i.test(name))return new TextDecoder('utf-8').decode(data);
@@ -54,8 +55,8 @@ async function process(file){
     text=await extractText(unpacked,item.name);
     status=text.trim()?'текстът е прочетен':'няма извлекаем текст (възможно сканиран документ)';
     for(const id of text.match(rx)||[]){all.add(id);other.add(id)}
-    const location=text.match(/Местоположение на ИП\\s*[:：]\\s*([^\\n\\r]+)/i);
-    if(location&&/уведомлен/i.test(item.name+' '+text.slice(0,160)))for(const id of location[1].match(rx)||[])leading.add(id);
+    const location=text.match(/Местоположение на ИП\s*[:：]\s*([^\n\r]+)/i);
+    if(/уведомлен/i.test(item.name+' '+text.slice(0,800))){for(const id of text.match(/(?:позем[еe]н\s+имот|ПИ)\s+(?:с\s+)?(?:идентификатор\s+)?(\d{5}\.\d+\.\d+)/gi)||[]){const m=id.match(/\d{5}\.\d+\.\d+/);if(m)leading.add(m[0]);}}
    }catch(err){status='неуспешно извличане: '+err.message}
   }
   docs.push({filename:item.name,status});
