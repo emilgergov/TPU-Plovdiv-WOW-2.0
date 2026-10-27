@@ -2,6 +2,7 @@
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),JSZip=require('jszip');
 const PdfPrinter=require('pdfmake');
+const pdfParse=require('pdf-parse');
 const path=require('node:path');
 const fontPath='/usr/share/fonts/truetype/dejavu';
 const fonts={Roboto:{normal:path.join(fontPath,'DejaVuSans.ttf'),bold:path.join(fontPath,'DejaVuSans-Bold.ttf'),italics:path.join(fontPath,'DejaVuSans-Oblique.ttf'),bolditalics:path.join(fontPath,'DejaVuSans-BoldOblique.ttf')}};
@@ -20,8 +21,13 @@ const poly={type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'P
   const b=await zip.file(name).async('nodebuffer');
   assert.equal(b.subarray(0,5).toString(),'%PDF-','PDF signature '+name);
   assert(b.length>1000,'PDF too small '+name);
+  const parsed=await pdfParse(b);
+  assert(parsed.numpages>=1,'No PDF pages: '+name);
+  assert(parsed.text.includes('ТПУ Пловдив'),'Missing Bulgarian heading: '+name);
+  assert(parsed.text.includes('ПРЕДСТОИ'),'Missing pending disclaimer: '+name);
+  if(name.includes('GIS'))assert(parsed.text.includes('47295.27.259'),'Missing cadastral number in PDF1');
  }
  const doc=await JSZip.loadAsync(await zip.file(names[0]).async('nodebuffer'));
  assert((await doc.file('word/document.xml').async('string')).includes('ПРЕДСТОИ'));
- console.log('PASS: two real PDF byte streams and one DOCX inside ZIP');
+ console.log('PASS: two parsed PDFs with Cyrillic text, parcel ID, pending disclaimers, and one DOCX inside ZIP');
 })().catch(e=>{console.error(e);process.exitCode=1});
