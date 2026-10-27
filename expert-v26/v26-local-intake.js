@@ -45,9 +45,9 @@ function semanticReview(subjects,documents){
  const locationSources=full.filter(x=>/уведомлен/i.test(x.source));
  const searchTexts=locationSources.length?locationSources:full;
  const locPieces=[],locEvidence=[];
- const patterns=[/(?:ПИ|поземлен\\s+имот|имот)\\s+(?:с\\s+)?(?:кадастрален\\s+)?идентификатор\\s*[:№]?\\s*\\d{5}\\.\\d+\\.\\d+/ig,/(?:ПИ|поземлен\\s+имот)\\s*№?\\s*\\d{5}\\.\\d+\\.\\d+/ig,/(?:^|[\\s,;(])(?:с\\.|гр\\.|село|град)\\s*[А-Яа-яЁё-]+/g,/община\\s+[А-Яа-я-]+/ig,/област\\s+[А-Яа-я-]+/ig,/местност\\s*[„"]?[^,.;\\n]{2,55}/ig,/УПИ\\s+[IVXLCDM\\d-]+(?:\\.\\d+)?/ig];
+ const patterns=[/(?:ПИ|поземлен\s+имот|имот)\s+(?:с\s+)?(?:кадастрален\s+)?идентификатор\s*[:№]?\s*\d{5}\.\d+\.\d+/ig,/(?:ПИ|поземлен\s+имот)\s*№?\s*\d{5}\.\d+\.\d+/ig,/(?:^|[\s,;(])(?:с\.|гр\.|село|град)\s*[А-Яа-яЁё-]+/g,/община\s+[А-Яа-я-]+/ig,/област\s+[А-Яа-я-]+/ig,/местност\s*[„"]?[^,.;\n]{2,55}/ig,/УПИ\s+[IVXLCDM\d-]+(?:\.\d+)?/ig];
  for(const doc of searchTexts){for(const re of patterns){re.lastIndex=0;for(const m of doc.text.matchAll(re)){const piece=m[0].trim();if(!locPieces.includes(piece)){locPieces.push(piece);locEvidence.push(doc.source)}}}}
- if(!locPieces.some(x=>/\\d{5}\\.\\d+\\.\\d+/.test(x))){for(const doc of searchTexts){for(const id of [...new Set(doc.text.match(/\\d{5}\\.\\d+\\.\\d+/g)||[])].slice(0,10)){const piece='ПИ с идентификатор '+id;if(!locPieces.includes(piece)){locPieces.push(piece);locEvidence.push(doc.source)}}}}
+ if(!locPieces.some(x=>/\d{5}\.\d+\.\d+/.test(x))){for(const doc of searchTexts){for(const id of [...new Set(doc.text.match(/\d{5}\.\d+\.\d+/g)||[])].slice(0,10)){const piece='ПИ с идентификатор '+id;if(!locPieces.includes(piece)){locPieces.push(piece);locEvidence.push(doc.source)}}}}
  const hasParcel=locPieces.some(x=>/\\d{5}\\.\\d+\\.\\d+/.test(x));
  const hasSettlement=locPieces.some(x=>/^(?:с\\.|гр\\.|село|град)/i.test(x));
  const hasMunicipality=locPieces.some(x=>/^община/i.test(x));
