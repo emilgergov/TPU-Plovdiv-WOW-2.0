@@ -8,7 +8,8 @@ const fontPath='/usr/share/fonts/truetype/dejavu';
 const fonts={Roboto:{normal:path.join(fontPath,'DejaVuSans.ttf'),bold:path.join(fontPath,'DejaVuSans-Bold.ttf'),italics:path.join(fontPath,'DejaVuSans-Oblique.ttf'),bolditalics:path.join(fontPath,'DejaVuSans-BoldOblique.ttf')}};
 const printer=new PdfPrinter(fonts);
 function render(def){return new Promise((resolve,reject)=>{const pdf=printer.createPdfKitDocument(def);const parts=[];pdf.on('data',p=>parts.push(p));pdf.on('error',reject);pdf.on('end',()=>resolve(new Blob([Buffer.concat(parts)],{type:'application/pdf'})));pdf.end()})}
-const sandbox={Blob,JSZip,window:{JSZip,pdfMake:{createPdf(def){return {getBlob(cb){render(def).then(cb).catch(e=>{console.error(e);process.exitCode=1})}}}}},document:{createElement(){throw Error('Unexpected CDN fetch')}}};
+const BrowserJSZip=class extends JSZip{file(name,data,options){if(data instanceof Blob)return super.file(name,data.arrayBuffer().then(b=>new Uint8Array(b)),options);return super.file(name,data,options)}};
+const sandbox={Blob,JSZip:BrowserJSZip,window:{JSZip:BrowserJSZip,pdfMake:{createPdf(def){return {getBlob(cb){render(def).then(cb).catch(e=>{console.error(e);process.exitCode=1})}}}}},document:{createElement(){throw Error('Unexpected CDN fetch')}}};
 vm.runInNewContext(fs.readFileSync('expert-v26/v26-draft-package.js','utf8'),sandbox);
 const poly={type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Polygon',coordinates:[[[1,1],[2,1],[2,2],[1,2],[1,1]]]},properties:{}}]};
 (async()=>{
