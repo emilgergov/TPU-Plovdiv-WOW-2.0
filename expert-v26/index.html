@@ -185,7 +185,7 @@ body>main>aside .v26-step-label{margin:4px 0 1px!important}
  }
  return {ids:output,changes,uncertain,invalid};
 }
-function words(s){return v26EditIds(s).ids};let v26ZipLookupMode=false;function v26SetLookupMode(zip){v26ZipLookupMode=!!zip;$('run').style.display=zip?'none':'';const note=$('v26LookupMode');note.style.display=zip?'block':'none';if(zip)note.textContent='ГИС проверка: автоматично търсене на имотите от ZIP…';}function reviewRoles(d){
+function words(s){return v26EditIds(s).ids};let v26ZipLookupMode=false;function v26SetLookupMode(zip){v26ZipLookupMode=!!zip;$('run').style.display=zip?'none':'';const note=$('v26LookupMode');note.style.display=zip?'block':'none';if(zip)note.textContent='ГИС проверка: автоматично търсене на имотите от ZIP…';}$('ids').addEventListener('input',()=>{if(v26ZipLookupMode){v26SetLookupMode(false);$('roleStatus').textContent='Идентификаторите са променени ръчно — изпълнете „Намери имотите“.';}});function reviewRoles(d){
   const toParcel=id=>String(id).split('.').slice(0,3).join('.');
   const unique=xs=>[...new Set((xs||[]).map(toParcel))];
   confirmedRoles=null;const roleButton=$('confirmRoles');roleButton.disabled=false;roleButton.textContent='Потвърди ролите';caseParcels=unique(d.all_parcels);
