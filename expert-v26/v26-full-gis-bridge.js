@@ -10,6 +10,13 @@ function mount(){
  const input=document.createElement('input');input.type='file';input.accept='.zip';input.id='v26FullGISFile';input.style.cssText='display:block;margin:8px 0;max-width:100%';
  const info=document.createElement('div');info.id='v26FullGISStatus';info.textContent='Заредете пълния ГИС пакет за всички имоти и пресичания. Файлът остава локално на компютъра.';
  panel.append(title,input,info);anchor.parentElement.insertBefore(panel,anchor.nextSibling);
+ /* Hosted mode is preferred; retain manual controls until its manifest and shards are live. */
+ api.openHosted('./gis-data').then(()=>{
+  panel.style.display='none';
+  const legacy=document.getElementById('v26LocalIndexMount');
+  if(legacy)legacy.style.display='none';
+  document.dispatchEvent(new Event('v26:gis-invalidated'));
+ }).catch(()=>{info.textContent='Автоматичната ГИС база още не е публикувана. Временно заредете одобрения ZIP архив.';});
  input.addEventListener('change',async()=>{
   info.textContent='Проверка на ГИС пакета…';
   try{
