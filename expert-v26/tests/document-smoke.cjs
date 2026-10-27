@@ -9,7 +9,7 @@ const geometry={type:'FeatureCollection',features:[{type:'Feature',geometry:{typ
  const result=[{input:'47295.27.259',cadnum:'47295.27.259',status:'Намерен',geojson:geometry,area_m2_geometry:679.581}];
  const roles={'47295.27.259':'leading'};
  const blob=await context.window.V26DraftPackage.make(result,roles,{records:[{id:'N1',title:'Тестов запис',verified:false}]});
- const zip=await JSZip.loadAsync(blob);
+ const zip=await JSZip.loadAsync(await blob.arrayBuffer());
  const names=Object.keys(zip.files);
  for(const name of ['01_Predlozhenie_RABOTEN_PROEKT.docx','02_Prilozhenie_1_GIS.pdf','03_Prilozhenie_2_Normativno.pdf','README_BG.txt'])assert(names.includes(name),'Missing '+name);
  const docx=await JSZip.loadAsync(await zip.file('01_Predlozhenie_RABOTEN_PROEKT.docx').async('nodebuffer'));
