@@ -91,6 +91,17 @@ function normativePdf(results,register){
   for(const f of archive.files.slice(0,80))content.push({text:'• '+String(f.path||'')+' ('+Number(f.size_bytes||0)+' байта)'+(f.gis_candidate?' [ГИС кандидат]':'')});
   if(archive.files.length>80)content.push({text:'Още '+(archive.files.length-80)+' файла не са изписани в PDF. Пълният опис остава в локалната браузърна справка.'});
  }else content.push({text:'Преписка ZIP: не е приложен проверен локален опис.'});
+ const preview=register?.preview;
+ if(preview?.files?.length){
+  content.push({text:'Локално прочетени текстови документи от преписката',style:'sub'});
+  const identifiers=ids.map(id=>id.split('.').slice(0,3).join('.'));
+  for(const file of preview.files.slice(0,20)){
+   const matches=identifiers.filter(id=>String(file.path||'').includes(id)||String(file.text||'').includes(id));
+   content.push({text:'Файл: '+String(file.path||'')+' · '+(file.error?'Не е прочетен: '+file.error:'Прочетен локално')+' · Връзка с имот: '+(matches.length?matches.join(', '):'не е установена')});
+   if(file.truncated)content.push({text:'Текстът е съкратен за предварителен преглед.'});
+  }
+  content.push({text:'Съвпадението на кадастрален идентификатор е текстово, не доказва принадлежност на документа към имота. Нормативна и експертна проверка: ПРЕДСТОИ.',bold:true});
+ }
  let shown=0;
  for(const r of records){
   const title=String(r.title||''),code=(title.match(/BG\\d{7}/)||[])[0];
