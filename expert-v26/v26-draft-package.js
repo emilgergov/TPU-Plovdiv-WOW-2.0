@@ -2,7 +2,7 @@
 (()=>{'use strict';
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const X=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
-function script(url){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=url;s.onload=ok;s.onerror=()=>no(Error('Не може да се зареди ZIP библиотеката'));document.head.append(s)})}
+function script(url){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=url;s.onload=ok;s.onerror=()=>no(Error('Не може да се зареди необходимата библиотека: '+url));document.head.append(s)})}
 function docx(zip,ids,roles){
  const d=new JSZip();
  const lines=['ТПУ Пловдив — РАБОТЕН ПРОЕКТ на предложение за становище','Не е издадено становище. Не представлява правно заключение.','Имотни идентификатори: '+ids.join(', '),'Експертно потвърдени роли: '+ids.map(id=>id+' — '+(roles[id]==='leading'?'водещ':'съпътстващ')).join('; '),'Актуално пространствено пресичане със защитени зони: ПРЕДСТОИ.','Нормативна преценка: ПРЕДСТОИ.','Приложение №1: справочен ГИС анализ (PDF).','Приложение №2: справочен нормативен регистър (PDF).'];
@@ -38,7 +38,7 @@ async function ensurePDF(){
  }
  if(!window.pdfMake?.createPdf)throw Error('PDF библиотеката не е заредена.');
 }
-function pdfBlob(def){return new Promise((resolve,reject)=>{try{window.pdfMake.createPdf(def).getBlob(resolve)}catch(e){reject(e)}})}
+function pdfBlob(def){return new Promise((resolve,reject)=>{try{window.pdfMake.createPdf(def).getBlob(b=>{if(!b||b.size<100)reject(Error('PDF файлът е празен или невалиден.'));else resolve(b)})}catch(e){reject(e)}})}
 function pdfDef(title,content){
  return {pageSize:'A4',pageMargins:[42,50,42,50],defaultStyle:{font:'Roboto',fontSize:10},styles:{heading:{fontSize:16,bold:true,margin:[0,0,0,14]},sub:{fontSize:12,bold:true,margin:[0,12,0,6]}},content:[{text:'ТПУ Пловдив — '+title,style:'heading'},{text:'РАБОТЕН СПРАВОЧЕН ДОКУМЕНТ. Не удостоверява актуални граници, режими или правни заключения.',bold:true,margin:[0,0,0,14]},...content]};
 }
@@ -70,5 +70,6 @@ async function make(results,roles,register){
  z.file('README_BG.txt','РАБОТЕН ПАКЕТ — НЕ Е ОФИЦИАЛНО СТАНОВИЩЕ.\\nСъдържа DOCX проект и две PDF приложения, генерирани локално в браузъра.\\nАктуални зонови граници и правна преценка: ПРЕДСТОИ.\\n');
  return z.generateAsync({type:'blob',compression:'DEFLATE'});
 }
-window.V26DraftPackage=Object.freeze({make});
+async function standalonePDF(results,kind,register){if(!results?.length)throw Error('Първо изпълнете ГИС справката.');await ensurePDF();return pdfBlob(kind===2?normativePdf(results,register):gisPdf(results))}
+window.V26DraftPackage=Object.freeze({make,standalonePDF});
 })();
