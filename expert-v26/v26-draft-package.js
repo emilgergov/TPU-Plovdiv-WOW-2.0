@@ -98,23 +98,35 @@ function pdfDef(title,content){
  return {pageSize:'A4',pageMargins:[42,50,42,50],defaultStyle:{font:'Roboto',fontSize:10},styles:{heading:{fontSize:16,bold:true,margin:[0,0,0,14]},sub:{fontSize:12,bold:true,margin:[0,12,0,6]}},content:[{text:'ТПУ Пловдив — '+title,style:'heading'},{text:'РАБОТЕН СПРАВОЧЕН ДОКУМЕНТ. Не удостоверява актуални граници, режими или правни заключения.',bold:true,margin:[0,0,0,14]},...content]};
 }
 function gisPdf(results){
- const content=[{text:'Източник: RIOSV_PLOVDIV_KAIS_CADASTRE_REGIONAL_02_10_2026.gdb (архивна регионална геобаза).',margin:[0,0,0,12]}];
- for(let i=0;i<results.length;i++){
-  const r=results[i],id=String(r.input||r.cadnum);
-  const has=!!r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));
-  content.push({text:'Имот '+(i+1)+' от '+results.length+': '+id,style:'sub',...(i>0?{pageBreak:'before'}:{})});
-  content.push({text:'Имотна геометрия: '+(has?'архивна':'ПРЕДСТОИ')+'. Актуално зонално пресичане: ПРЕДСТОИ.'});
-  if(has){
-   const drawing=svg(r);
-   if(!drawing)throw Error('Геометрията на имот '+id+' не може да се изчертае.');
-   content.push({svg:drawing,width:480,margin:[0,10,0,8]});
-   content.push({text:'Площ по геометрия САМО за имот '+id+': '+(r.area_m2_geometry!=null?r.area_m2_geometry+' кв. м':'ПРЕДСТОИ'),bold:true});
-  }else{
-   content.push({text:'Площ по геометрия за имот '+id+': ПРЕДСТОИ. За този имот няма потвърдена геометрия; не се пренасят площи от други имоти.',bold:true});
+ const content=[{text:'Източник: RIOSV_PLOVDIV_KAIS_CADASTRE_REGIONAL_02_10_2026.gdb (архивна регионална геобаза).',margin:[0,0,0,8]}];
+ const features=[],points=[];
+ function visit(coords){if(Array.isArray(coords)&&typeof coords[0]==='number'&&typeof coords[1]==='number'){if(Number.isFinite(coords[0])&&Number.isFinite(coords[1]))points.push(coords)}else if(Array.isArray(coords))coords.forEach(visit)}
+ results.forEach((r,i)=>{const fs=(r.geojson?.features||[]).filter(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));for(const f of fs){features.push({f,i});visit(f.geometry.coordinates)}});
+ if(points.length){
+  const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+  const scale=Math.min(600/Math.max(maxX-minX,1e-9),330/Math.max(maxY-minY,1e-9));
+  const shapes=[];
+  for(const {f,i} of features){const g=f.geometry,polys=g.type==='Polygon'?[g.coordinates]:g.coordinates;
+   for(const poly of polys)for(const ring of poly){const pts=ring.filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1]));if(pts.length<3)continue;
+    shapes.push('<polygon points="'+pts.map(p=>(35+(p[0]-minX)*scale).toFixed(2)+','+(365-(p[1]-minY)*scale).toFixed(2)).join(' ')+'" fill="#b5d8c8" fill-opacity=".65" stroke="#176749" stroke-width="1.6"/>');
+   }
+   const pp=[];visitForLabel(g.coordinates,pp);
+   if(pp.length){const x=pp.reduce((n,p)=>n+p[0],0)/pp.length,y=pp.reduce((n,p)=>n+p[1],0)/pp.length;
+    shapes.push('<text x="'+(35+(x-minX)*scale).toFixed(2)+'" y="'+(365-(y-minY)*scale).toFixed(2)+'" font-size="13" text-anchor="middle" fill="#123e2b">'+E(String(results[i].input||results[i].cadnum))+'</text>')}
   }
- }
+  const drawing='<svg xmlns="http://www.w3.org/2000/svg" width="700" height="410" viewBox="0 0 700 410">'+shapes.join('')+'</svg>';
+  content.push({text:'Картографски материал — архивни имотни контури (общ изглед)',style:'sub'});
+  content.push({svg:drawing,width:480,margin:[0,4,0,8]});
+ }else content.push({text:'Картографски материал: ПРЕДСТОИ — няма налична имотна геометрия.',bold:true});
+ content.push({text:'ГИС данни по имоти — обща таблица',style:'sub'});
+ content.push({table:{headerRows:1,widths:['*','auto','auto','auto','auto'],body:[
+  ['Кадастрален №','Площ, кв.м','Зона','Пресичане','Статус'],
+  ...results.map(r=>{const id=String(r.input||r.cadnum||'');const has=!!r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));return [id,has&&r.area_m2_geometry!=null?String(r.area_m2_geometry):'ПРЕДСТОИ','ПРЕДСТОИ','ПРЕДСТОИ',has?'Архивна геометрия':'ПРЕДСТОИ']})
+ ]},layout:'lightHorizontalLines'});
+ content.push({text:'Актуални площи и пресичания със защитени зони се попълват само след потвърждение от официален източник. Таблицата продължава на следваща страница само при необходимост.',margin:[0,10,0,0]});
  return pdfDef('Приложение №1 — ГИС анализ',content);
 }
+function visitForLabel(coords,out){if(Array.isArray(coords)&&typeof coords[0]==='number'&&typeof coords[1]==='number'){if(Number.isFinite(coords[0])&&Number.isFinite(coords[1]))out.push(coords)}else if(Array.isArray(coords))coords.forEach(x=>visitForLabel(x,out))}
 function normativePdf(results,register){
  const ids=results.map(r=>String(r.input||r.cadnum||'')).filter(Boolean);
  const codes=new Set();
