@@ -135,11 +135,11 @@ function gisPdf(results,options={}){
    const id=String(r.input||r.cadnum||'');
    const has=!!r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));
    const area=Number(r.area_m2_source);
-   const overlays=r.archived_overlay_records||[];
-   const zones=[...new Set(overlays.map(z=>String(z.sitecode||z.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z)))];
+   const overlays=[...(r.archived_overlay_records||[]),...(r.archived_zones||[])];
+   const zones=[...new Set(overlays.map(z=>typeof z==='string'?z.trim():String(z.sitecode||z.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z)))];
    const names=[...new Set(overlays.map(z=>String(z.name_bg||z.name||'').trim()).filter(Boolean))];
-   const zoneText=zones.length?zones.join(', ')+(names.length?' · '+names.join('; '):''):'Няма зона в архивния резултат';
-   const intersection=zones.length?'УСТАНОВЕНО ПРЕСИЧАНЕ (работна ГИС база)':has?'Няма отчетено пресичане в работния набор':'Няма геометрия';
+   const zoneText=zones.length?zones.join(', ')+(names.length?' · '+names.join('; '):''):'Не е отчетена зона в имотния резултат';
+   const intersection=zones.length?'АРХИВНО ПРЕСИЧАНЕ (ГИС справка)':has?'Не е отчетено пресичане в имотния резултат':'Няма геометрия';
    return [id,Number.isFinite(area)&&area>0?area.toLocaleString('bg-BG',{maximumFractionDigits:2})+' (арх.)':'Не е налична',zoneText,intersection,has?'ГИС геометрия налична':'Липсва геометрия'];
   })
  ]},layout:'lightHorizontalLines'});
