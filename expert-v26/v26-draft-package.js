@@ -41,6 +41,7 @@ function zipWriter(){
  return api;
 }
 function docx(zip,ids,roles,results,includeAnnex2){
+ const d=zipWriter();
  const zones=[...new Set(results.flatMap(r=>(r.archived_overlay_records||[]).map(z=>String(z.sitecode||z.code||'')).filter(z=>/^BG\d{7}$/.test(z))))];
  const scenario=zones.length?'Б':'А';
  const subject=window.V26SubjectContext;
