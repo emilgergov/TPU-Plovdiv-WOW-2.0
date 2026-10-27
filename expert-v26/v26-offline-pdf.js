@@ -53,6 +53,8 @@ async function generate(def){
  function finish(){ctx.font='18px Arial';ctx.fillStyle='#667';ctx.fillText('Работен документ · актуални правни изводи: ПРЕДСТОИ',M,H-45);pages.push(canvas.toDataURL('image/jpeg',0.90))}
  start();
  for(const item of def.content||[]){
+  // Respect explicit per-parcel page boundaries in the shared PDF generator.
+  if(item.pageBreak==='before'&&y>95){finish();start()}
   if(item.svg){const h=680;if(y+h>H-100){finish();start()}const drawn=await drawSVG(ctx,item.svg,M,y,W-2*M);y+=drawn+20;continue}
   const title=item.style==='heading',sub=item.style==='sub';
   ctx.font=(title?'bold 35px':sub?'bold 26px':item.bold?'bold 22px':'22px')+' Arial';
