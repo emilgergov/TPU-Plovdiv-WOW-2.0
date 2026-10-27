@@ -40,10 +40,10 @@ function wrap(ctx,text,maxWidth){
  }return out;
 }
 function drawSVG(ctx,svg,x,y,w){
- return new Promise(resolve=>{
+ return new Promise((resolve,reject)=>{
   const blob=new Blob([svg],{type:'image/svg+xml'}),url=URL.createObjectURL(blob),im=new Image();
-  im.onload=()=>{try{const h=w*(im.naturalHeight||410)/(im.naturalWidth||700);ctx.drawImage(im,x,y,w,h);resolve(h)}catch(e){resolve(0)}finally{URL.revokeObjectURL(url)}};
-  im.onerror=()=>{URL.revokeObjectURL(url);resolve(0)};
+  im.onload=()=>{try{const h=w*(im.naturalHeight||410)/(im.naturalWidth||700);ctx.drawImage(im,x,y,w,h);resolve(h)}catch(e){reject(Error('Неуспешно изчертаване на имотната геометрия: '+e.message))}finally{URL.revokeObjectURL(url)}};
+  im.onerror=()=>{URL.revokeObjectURL(url);reject(Error('SVG геометрията не може да бъде заредена като изображение.'))};
   im.src=url;
  });
 }
@@ -53,7 +53,7 @@ async function generate(def){
  function finish(){ctx.font='18px Arial';ctx.fillStyle='#667';ctx.fillText('Работен документ · актуални правни изводи: ПРЕДСТОИ',M,H-45);pages.push(canvas.toDataURL('image/jpeg',0.90))}
  start();
  for(const item of def.content||[]){
-  if(item.svg){const h=480;if(y+h>H-100){finish();start()}const drawn=await drawSVG(ctx,item.svg,M,y,W-2*M);y+=Math.max(drawn,60)+20;continue}
+  if(item.svg){const h=680;if(y+h>H-100){finish();start()}const drawn=await drawSVG(ctx,item.svg,M,y,W-2*M);y+=drawn+20;continue}
   const title=item.style==='heading',sub=item.style==='sub';
   ctx.font=(title?'bold 35px':sub?'bold 26px':item.bold?'bold 22px':'22px')+' Arial';
   ctx.fillStyle='#173d30';
