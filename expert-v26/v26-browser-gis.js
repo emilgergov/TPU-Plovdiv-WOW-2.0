@@ -60,7 +60,7 @@ async function lookup(ids){
   const input=String(raw).trim(),base=input.split('.').slice(0,3).join('.');
   const empty={input,cadnum:base,status:'ПРЕДСТОИ',geojson:{type:'FeatureCollection',features:[]}};
   if(!validId(input))return {...empty,note:'Невалиден кадастрален идентификатор.'};
-  if(!db)return {...empty,note:'Локалният кадастрален индекс не е зареден.'};
+  if(!db){const spatial=geometry[base];if(spatial?.geojson?.features?.length)return {...spatial,input,status:'Намерен',caveat:'Архивна геометрия от публикувания набор. Актуално пресичане: ПРЕДСТОИ.'};return {...empty,note:'Няма публикувана геометрия за този имот. Пълният кадастрален индекс не е интегриран: ПРЕДСТОИ.'};}
   const parcels=rows('SELECT cadnum,ekattefn,place,area_m2 FROM parcels WHERE cadnum=?',[base]);
   if(!parcels.length)return {...empty,status:'Не е намерен',note:'Няма запис в локалния кадастрален индекс.'};
   const p=parcels[0];
@@ -70,7 +70,7 @@ async function lookup(ids){
   return {...empty,settlement:p.ekattefn,locality:p.place,area_m2_source:p.area_m2,archived_overlay_records:overlays,note:'Имотът е намерен в архивния индекс. Геометрията и актуалното пространствено пресичане остават ПРЕДСТОИ.'};
  });
  const spatialResults=results.filter(x=>x.status==='Намерен'&&x.geojson?.features?.length);
- return {results,summary:{found_count:spatialResults.length,requested_count:ids.length,geometry_area_sum_m2:spatialResults.reduce((sum,x)=>sum+(x.area_m2_geometry||0),0),archived_zones:[],note:db?'Индекс: '+source+'. Реална архивна имотна геометрия е налична само за подготвените идентификатори; за останалите: ПРЕДСТОИ. Няма удостоверено актуално зонално пресичане.':'ПРЕДСТОИ: зареждане на локалния SQLite индекс.'},geometry_qa:[]};
+ return {results,summary:{found_count:spatialResults.length,requested_count:ids.length,geometry_area_sum_m2:spatialResults.reduce((sum,x)=>sum+(x.area_m2_geometry||0),0),archived_zones:[],note:db?'Индекс: '+source+'. Реална архивна имотна геометрия е налична само за подготвените идентификатори; за останалите: ПРЕДСТОИ. Няма удостоверено актуално зонално пресичане.':'Автоматична справка по публикуваните архивни геометрии; пълният кадастрален индекс и актуалните пресичания: ПРЕДСТОИ.'},geometry_qa:[]};
 }
 window.V26BrowserGIS=Object.freeze({lookup,loadArchive,loadGeometryFile,restoreCachedIndex,isLoaded:()=>!!db});
 function mount(){
