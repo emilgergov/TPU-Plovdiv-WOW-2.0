@@ -58,10 +58,31 @@ async function process(file){
     for(const id of text.match(rx)||[]){const parcel=parcelId(id);all.add(parcel);other.add(parcel)}
     const isNotice=/уведомлен/i.test(item.name+' '+text.slice(0,800));
     if(isNotice&&text.trim()){
-     const clean=text.replace(/\\s+/g,' ').trim();
-     const match=clean.match(/(?:относно|предмет(?:\\s+на\\s+(?:инвестиционното\\s+)?предложение)?|наименование\\s+на\\s+(?:инвестиционното\\s+)?предложение)\\s*[:：–-]\\s*(.{15,450}?)(?=\\s+(?:възложител|местоположение|адрес|имот\\s+с|приложения|описание\\s+на)|$)/i);
+     const clean=text.replace(/\s+/g,' ').trim();
+     const match=clean.match(/(?:относно|предмет(?:\s+на\s+(?:инвестиционното\s+)?предложение)?|наименование\s+на\s+(?:инвестиционното\s+)?предложение)\s*[:：–-]\s*(.{15,450}?)(?=\s+(?:възложител|местоположение|адрес|имот\s+с|приложения|описание\s+на)|$)/i);
      const title=match?match[1].trim():'';
-     subjects.push({title,source:item.name,evidence:title?'Автоматично извлечен откъс от текст':'Текст е прочетен; заглавието не е надеждно установено',activities:[]});
+     const sections=[
+      ['summary',/1\.\s*Резюме на предложението\s*:/i],
+      ['processes',/2\.\s*Описание на основните процеси/i],
+      ['related',/3\.\s*Връзка с други съществуващи/i],
+      ['location',/4\.\s*Местоположение\s*:/i],
+      ['resources',/5\.\s*Природни ресурси/i],
+      ['substances',/6\.\s*Очаквани вещества/i],
+      ['air',/7\.\s*Очаквани общи емисии/i],
+      ['waste',/8\.\s*Отпадъци/i],
+      ['wastewater',/9\.\s*Отпадъчни води/i],
+      ['chemicals',/10\.\s*Опасни химични вещества/i]
+     ];
+     const foundSections=[];
+     for(let k=0;k<sections.length;k++){
+      const [key,re]=sections[k],m=re.exec(text);if(!m)continue;
+      const following=sections.slice(k+1).map(x=>x[1].exec(text)).filter(Boolean).map(x=>x.index).filter(x=>x>m.index);
+      const end=following.length?Math.min(...following):text.length;
+      const excerpt=text.slice(m.index+m[0].length,Math.min(end,m.index+2400)).replace(/\s+/g,' ').trim();
+      if(excerpt&&excerpt.length>12)foundSections.push({key,text:excerpt.slice(0,1000),source:item.name,review_required:true});
+     }
+     const activities=[];
+     subjects.push({title,source:item.name,evidence:title?'Автоматично извлечен откъс от текст':'Текст е прочетен; заглавието не е надеждно установено',activities,sections:foundSections});
     }
     if(/уведомлен/i.test(item.name+' '+text.slice(0,800))){for(const id of text.match(/(?:позем[еe]н\s+имот|ПИ)\s+(?:с\s+)?(?:идентификатор\s+)?(\d{5}\.\d+\.\d+)/gi)||[]){const m=id.match(/\d{5}\.\d+\.\d+/);if(m)leading.add(parcelId(m[0]));}}
    }catch(err){status='неуспешно извличане: '+err.message}
