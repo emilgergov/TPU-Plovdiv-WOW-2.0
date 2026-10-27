@@ -1,7 +1,7 @@
 /* V26 local browser cadastral index: SQLite read-only; no upload or invented geometry. */
 (()=>{'use strict';
 let db=null,source='',geometryCache=null,geometrySource='';
-async function geometryRecords(){if(geometryCache)return geometryCache;const response=await fetch('data/v26-parcel-geometry-verified-sample.json',{cache:'no-store'});if(!response.ok)throw Error('Липсва файлът с геометрията');const data=await response.json();geometryCache=data.records||{};return geometryCache;}
+async function geometryRecords(){if(geometryCache)return geometryCache;const response=await fetch('data/v26-parcel-geometry-batch-51.json',{cache:'no-store'});if(!response.ok)throw Error('Липсва файлът с геометрията');const data=await response.json();if(data.status!=='ARCHIVAL_ONLY'||!data.records||typeof data.records!=='object')throw Error('Невалиден архивен геометричен набор');geometryCache=data.records;geometrySource=String(data.source||'архивна FileGDB');return geometryCache;}
 async function loadGeometryFile(file){
  if(!file||!/\.json$/i.test(file.name))throw Error('Изберете JSON с имотна геометрия.');
  if(file.size>15000000)throw Error('Геометричният JSON надхвърля 15 MB.');
