@@ -10,8 +10,11 @@ header{min-width:0;gap:12px}header>*{min-width:0}
 .map .controls{max-width:calc(100% - 24px)}
 .details{min-width:0;overflow-wrap:anywhere}
 @media(min-width:761px){
- html,body{height:100%;overflow:hidden}
- body{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto}
+ html,body{height:100%;overflow:hidden!important;overscroll-behavior:none}
+ body{position:fixed!important;inset:0!important;height:100dvh!important;max-height:100dvh!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+ body>#v26-wow341,body>header,body>footer{flex:0 0 auto!important}
+ body>main{flex:1 1 0!important;min-height:0!important;max-height:none!important;overflow:hidden!important}
+
  body>main{display:grid;grid-template-columns:minmax(260px,300px) minmax(0,1fr);width:100%;height:auto;min-height:0;max-height:100%;overflow:hidden}
  body>main>aside{min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:14px;gap:9px}
  body>main>.workspace{min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;padding:12px;grid-template-rows:minmax(260px,1fr) auto}
