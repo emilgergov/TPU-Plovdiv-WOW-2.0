@@ -36,7 +36,7 @@ async function rows(kind,prefix){
  let result;try{result=JSON.parse(bytes)}catch(e){const fixed=normalizeNonFiniteJson(bytes);if(!fixed.changes)throw Error('Невалиден JSON в '+name+': '+e.message);try{result=JSON.parse(fixed.text)}catch(second){throw Error('Сегмент '+name+': '+second.message)}console.info('V26 GIS: normalized '+fixed.changes+' non-finite values in '+name)}if(!Array.isArray(result))throw Error('Невалиден формат на сегмент: '+name);cache.set(key,result);return result;
 }
 async function openHosted(base){
- const root=String(base||'').replace(/\\/$/,'');
+ const root=String(base||'').replace(/\/$/,'');
  const response=await fetch(root+'/manifest.json',{cache:'no-store'});
  if(!response.ok)throw Error('ГИС сегментите още не са публикувани ('+response.status+').');
  const manifest=await response.json();
