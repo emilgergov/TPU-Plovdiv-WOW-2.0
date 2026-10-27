@@ -40,20 +40,23 @@ async function loadAny(urls,check){
  throw Error('Неуспешно зареждане на PDF библиотеката от резервните източници. Проверете достъпа до CDN или използвайте локална версия.');
 }
 async function ensurePDF(){
- await loadAny([
-  './vendor/pdfmake.min.js',
-  'https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/pdfmake.min.js',
-  'https://unpkg.com/pdfmake@0.2.20/build/pdfmake.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.20/pdfmake.min.js'
- ],()=>!!window.pdfMake?.createPdf);
- await loadAny([
-  './vendor/vfs_fonts.js',
-  'https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/vfs_fonts.js',
-  'https://unpkg.com/pdfmake@0.2.20/build/vfs_fonts.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.20/vfs_fonts.js'
- ],()=>!!window.pdfMake?.vfs);
+ if(window.V26OfflinePDF?.generate)return;
+ try{
+  await loadAny([
+   './vendor/pdfmake.min.js',
+   'https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/pdfmake.min.js',
+   'https://unpkg.com/pdfmake@0.2.20/build/pdfmake.min.js',
+   'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.20/pdfmake.min.js'
+  ],()=>!!window.pdfMake?.createPdf);
+  await loadAny([
+   './vendor/vfs_fonts.js',
+   'https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/vfs_fonts.js',
+   'https://unpkg.com/pdfmake@0.2.20/build/vfs_fonts.js',
+   'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.20/vfs_fonts.js'
+  ],()=>!!window.pdfMake?.vfs);
+ }catch(e){if(!window.V26OfflinePDF?.generate)throw e}
 }
-function pdfBlob(def){return new Promise((resolve,reject)=>{try{window.pdfMake.createPdf(def).getBlob(b=>{if(!b||b.size<100)reject(Error('PDF файлът е празен или невалиден.'));else resolve(b)})}catch(e){reject(e)}})}
+function pdfBlob(def){if(window.V26OfflinePDF?.generate)return window.V26OfflinePDF.generate(def);return new Promise((resolve,reject)=>{try{window.pdfMake.createPdf(def).getBlob(b=>{if(!b||b.size<100)reject(Error('PDF файлът е празен или невалиден.'));else resolve(b)})}catch(e){reject(e)}})}
 function pdfDef(title,content){
  return {pageSize:'A4',pageMargins:[42,50,42,50],defaultStyle:{font:'Roboto',fontSize:10},styles:{heading:{fontSize:16,bold:true,margin:[0,0,0,14]},sub:{fontSize:12,bold:true,margin:[0,12,0,6]}},content:[{text:'ТПУ Пловдив — '+title,style:'heading'},{text:'РАБОТЕН СПРАВОЧЕН ДОКУМЕНТ. Не удостоверява актуални граници, режими или правни заключения.',bold:true,margin:[0,0,0,14]},...content]};
 }
