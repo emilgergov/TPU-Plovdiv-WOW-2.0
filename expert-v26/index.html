@@ -157,6 +157,8 @@ body>main>aside .v26-step-label{margin:4px 0 1px!important}
 #zipDrop strong{font-size:14px}
 #zipName{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 #v26SubjectEditor{margin:7px 0!important}
+#v26SubjectConfirm:disabled{background:#dce7df!important;color:#5c7065!important;border-color:#bdcfc2!important;cursor:default!important;opacity:.8}
+#v26SubjectConfirm:not(:disabled){cursor:pointer}
 #roleReview>.hint{display:none!important}
 #roleStatus{display:block!important;font-size:12px;line-height:1.4;margin:7px 0 0;color:#24553f;white-space:normal}
 #progressPanel{padding:5px!important;border:0!important;background:transparent!important}
@@ -324,9 +326,9 @@ if(r.area_m2_geometry!=null)full('Геометрична площ:',v26DisplayNu
 for(const z of r.archived_overlay_records||[])full('Архивно пресичане:',z.sitecode+' '+z.name_bg+' · '+(z.order_no||'няма данни за заповед'));
 if(r.caveat)full('Бележка:',r.caveat)}window.V26SubjectContext=null;
 const subjectTitle=$('v26SubjectTitle'),subjectActivities=$('v26SubjectActivities'),subjectStatus=$('v26SubjectStatus'),subjectSource=$('v26SubjectSource'),wordHeading=$('v26WordHeading');
-function invalidateSubject(){window.V26SubjectContext=null;$('v26SubjectBadge').textContent=wordHeading.value.trim()?'Определен · непотвърден':'Неопределен';subjectStatus.textContent='Не е потвърдено.'}
+function invalidateSubject(){window.V26SubjectContext=null;$('v26SubjectConfirm').disabled=false;$('v26SubjectConfirm').textContent='Потвърди предмета';$('v26SubjectBadge').textContent=wordHeading.value.trim()?'Определен · непотвърден':'Неопределен';subjectStatus.textContent='Не е потвърдено.';subjectStatus.style.display='none'}
 wordHeading.addEventListener('input',()=>{wordHeading.dataset.edited='1';invalidateSubject()});
-$('v26SubjectConfirm').onclick=()=>{const heading=wordHeading.value.trim(),title=subjectTitle.value.trim(),activities=subjectActivities.value.split(/\n/).map(x=>x.trim()).filter(Boolean);if(!heading||!(/\d{5}\.\d+\.\d+/.test(heading))){subjectStatus.style.display='block';subjectStatus.textContent='Проверете кадастралния идентификатор и предмета.';return}window.V26SubjectContext={title:title||heading,activities,semanticReview:v26Semantic,wordHeading:/^Относно:/i.test(heading)?heading:'Относно: инвестиционно предложение „'+heading+'“',source:subjectSource.dataset.source||'Експертно уточнение',confirmed:true};$('v26SubjectBadge').textContent='Потвърден';$('v26SubjectEditor').open=false;subjectStatus.style.display='none'};
+$('v26SubjectConfirm').onclick=()=>{const heading=wordHeading.value.trim(),title=subjectTitle.value.trim(),activities=subjectActivities.value.split(/\n/).map(x=>x.trim()).filter(Boolean);if(!heading||!(/\d{5}\.\d+\.\d+/.test(heading))){subjectStatus.style.display='block';subjectStatus.textContent='Проверете кадастралния идентификатор и предмета.';return}window.V26SubjectContext={title:title||heading,activities,semanticReview:v26Semantic,wordHeading:/^Относно:/i.test(heading)?heading:'Относно: инвестиционно предложение „'+heading+'“',source:subjectSource.dataset.source||'Експертно уточнение',confirmed:true};$('v26SubjectBadge').textContent='Потвърден';$('v26SubjectConfirm').disabled=true;$('v26SubjectConfirm').textContent='Предметът е потвърден';$('v26SubjectEditor').open=false;subjectStatus.style.display='none'};
 let v26Semantic=null;
 let v26CaseTitle='';
 function v26CleanSubjectHeading(){
