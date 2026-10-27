@@ -74,7 +74,7 @@ function mount(){
  const btn=document.createElement('button');btn.id='v26SqliteLoad';btn.type='button';btn.className='secondary';btn.textContent='Зареди локален кадастрален индекс';
  const status=document.createElement('div');status.className='hint';status.textContent='ZIP/SQLite остава на компютъра. Не се изпраща към GitHub.';
  btn.onclick=()=>input.click();
- input.onchange=async()=>{if(!input.files?.[0])return;btn.disabled=true;status.textContent='Зареждане на SQLite индекса в браузъра…';try{const r=await loadArchive(input.files[0]);status.textContent='Индекс: '+r.parcels+' имота, '+r.overlays+' архивни пресичания. Геометрия: ПРЕДСТОИ.';}catch(e){status.textContent='Грешка: '+e.message;}finally{btn.disabled=false;input.value=''}};
+ input.onchange=async()=>{if(!input.files?.[0])return;btn.disabled=true;status.textContent='Зареждане на SQLite индекса в браузъра…';try{const r=await loadArchive(input.files[0]);status.textContent='Индекс: '+r.parcels+' имота, '+r.overlays+' архивни пресичания. Геометрията се зарежда автоматично при ГИС справка, когато е налична.';if(document.getElementById('ids')?.value.trim())document.getElementById('run')?.click();}catch(e){status.textContent='Грешка: '+e.message;}finally{btn.disabled=false;input.value=''}};
  const geoInput=document.createElement('input');geoInput.type='file';geoInput.accept='.json,application/json';geoInput.hidden=true;
  const geoBtn=document.createElement('button');geoBtn.type='button';geoBtn.className='secondary';geoBtn.textContent='Зареди архивни имотни геометрии';geoBtn.onclick=()=>geoInput.click();
  const geoStatus=document.createElement('div');geoStatus.className='hint';geoStatus.textContent='Незадължителен JSON набор с реални полигони. Без изпращане към сървър.';
