@@ -136,54 +136,56 @@ function gisPdf(results,options={}){
 function visitForLabel(coords,out){if(Array.isArray(coords)&&typeof coords[0]==='number'&&typeof coords[1]==='number'){if(Number.isFinite(coords[0])&&Number.isFinite(coords[1]))out.push(coords)}else if(Array.isArray(coords))coords.forEach(x=>visitForLabel(x,out))}
 function normativePdf(results,register){
  const ids=results.map(r=>String(r.input||r.cadnum||'')).filter(Boolean);
- const codes=new Set();
+ const zoneMap=new Map();
  for(const r of results){
-  for(const o of r.archived_overlay_records||[])if(/^BG\\d{7}$/.test(String(o.sitecode||'')))codes.add(String(o.sitecode));
-  for(const z of r.archived_zones||[])if(/^BG\\d{7}$/.test(String(z.sitecode||z.code||'')))codes.add(String(z.sitecode||z.code));
+  for(const z of [...(r.archived_overlay_records||[]),...(r.archived_zones||[])]){
+   const code=String(z.sitecode||z.code||'');
+   if(!/^BG\d{7}$/.test(code))continue;
+   if(!zoneMap.has(code))zoneMap.set(code,{code,name:z.name_bg||z.name||'',order:z.order_no||''});
+  }
  }
+ for(const z of register?.gisSummary?.archived_zones||[]){
+  const code=String(z.sitecode||z.code||'');
+  if(/^BG\d{7}$/.test(code)&&!zoneMap.has(code))zoneMap.set(code,{code,name:z.name_bg||'',order:z.order_no||''});
+ }
+ const zones=[...zoneMap.values()].sort((a,b)=>a.code.localeCompare(b.code));
  const records=register?.records||[];
  const content=[
-  {text:'Имотни идентификатори: '+ids.join(', '),margin:[0,0,0,10]},
-  {text:'Статус: СПРАВОЧЕН ПРОЕКТ. Актуалното пресичане със защитени зони, приложимите режими и правните изводи: ПРЕДСТОИ.',bold:true,margin:[0,0,0,10]},
-  {text:'Източници: архивен работен регистър на нормативни препратки. Посочените интернет адреси НЕ означават потвърдено съдържание или действаща редакция.',margin:[0,0,0,12]},
-  {text:'Архивни кодове на зони от справката: '+(codes.size?[...codes].sort().join(', '):'ПРЕДСТОИ')+'. Това не е актуално пространствено пресичане.',margin:[0,0,0,12]}
+  {text:'I. Предмет и установени факти',style:'sub'},
+  {text:'Имотни идентификатори: '+ids.join(', ')},
+  {text:'Пространствена основа: резултатът от ГИС анализ / Приложение №1 е приет за настоящата справка. Пресичането НЕ се проверява повторно в Приложение №2.',bold:true},
+  {text:'Установени от ГИС справката зони: '+(zones.length?zones.map(z=>z.code+(z.name?' „'+z.name+'“':'')).join('; '):'Няма предадени кодове на зони в резултата.')},
+  {text:'II. Заповеди за обявяване, изменения и режими',style:'sub'}
  ];
- const archive=register?.archive;
- if(archive?.files?.length){
-  content.push({text:'Локална преписка — опис на ZIP архива',style:'sub'});
-  content.push({text:'Архив: '+String(archive.archive||'')+' · Файлове: '+archive.entries+' · Общо байтове: '+archive.archive_bytes});
-  content.push({text:'Това е автоматичен опис на файлови имена, а не проверка на съдържание, автентичност или нормативна приложимост.',bold:true});
-  const candidates=archive.files.filter(f=>f.gis_candidate);
-  content.push({text:'Възможни ГИС източници: '+candidates.length+' (непроверени)'});
-  for(const f of archive.files.slice(0,80))content.push({text:'• '+String(f.path||'')+' ('+Number(f.size_bytes||0)+' байта)'+(f.gis_candidate?' [ГИС кандидат]':'')});
-  if(archive.files.length>80)content.push({text:'Още '+(archive.files.length-80)+' файла не са изписани в PDF. Пълният опис остава в локалната браузърна справка.'});
- }else content.push({text:'Преписка ZIP: не е приложен проверен локален опис.'});
- const preview=register?.preview;
- if(preview?.files?.length){
-  content.push({text:'Локално прочетени текстови документи от преписката',style:'sub'});
-  const identifiers=ids.map(id=>id.split('.').slice(0,3).join('.'));
-  for(const file of preview.files.slice(0,20)){
-   const matches=identifiers.filter(id=>String(file.path||'').includes(id)||String(file.text||'').includes(id));
-   content.push({text:'Файл: '+String(file.path||'')+' · '+(file.error?'Не е прочетен: '+file.error:'Прочетен локално')+' · Връзка с имот: '+(matches.length?matches.join(', '):'не е установена')});
-   if(file.truncated)content.push({text:'Текстът е съкратен за предварителен преглед.'});
+ if(!zones.length)content.push({text:'Няма предаден код на защитена зона. Не се извеждат зонално специфични режими.',bold:true});
+ for(const z of zones){
+  content.push({text:z.code+(z.name?' — '+z.name:''),style:'sub'});
+  const order=z.order|| (z.code==='BG0000194'?'РД-688/25.08.2020 г.':'ПРЕДСТОИ');
+  content.push({text:'Заповед за обявяване: '+order+(z.code==='BG0000194'?' (ДВ, бр. 80/11.09.2020 г.)':'')});
+  if(z.code==='BG0000194'){
+   content.push({text:'Източник за обявяването: МОСВ — официален документ за специфичните цели на зоната',link:'https://www.moew.government.bg/static/media/ups/articles/attachments/BG0000194_Reka_Chaya_specifichni_tseli_zap12a55845b82036a39b7ee327cf53070a5cb.pdf',color:'#165c86',decoration:'underline'});
+   content.push({text:'Специфични цели: Заповед № РД-507/12.06.2024 г. (чл. 12а ЗБР). Това е акт за цели, а не замества заповедта за режимите.'});
   }
-  content.push({text:'Съвпадението на кадастрален идентификатор е текстово, не доказва принадлежност на документа към имота. Нормативна и експертна проверка: ПРЕДСТОИ.',bold:true});
+  content.push({text:'Изменения и допълнения на заповедта: ПРЕДСТОИ документална проверка.'});
+  content.push({text:'Конкретни забрани, ограничения и изключения: ПРЕДСТОИ извличане на точните точки от действащата заповед. Не се допуска предположение за забрана.',bold:true});
+  content.push({text:'Доказателствена връзка: '+ids.join(', ')+' → ГИС Приложение №1 → '+z.code+' → заповед → конкретна точка от режим: ПРЕДСТОИ.'});
  }
- let shown=0;
- for(const r of records){
-  const title=String(r.title||''),code=String(r.zone_code||'')||(title.match(/BG\\d{7}/)||[])[0];
-  if(code&&!codes.has(code))continue;
-  shown++;
-  content.push({text:String(r.id||'')+' — '+title,style:'sub'});
-  content.push({text:'Предназначение на препратката: '+String(r.purpose||'ПРЕДСТОИ')});
-  content.push({text:'Официален източник (отворете връзката)',link:String(r.source||''),color:'#165c86',decoration:'underline',margin:[0,2,0,3]});
-  content.push({text:'Състояние на източника: '+String(r.source_status||'ПРЕДСТОИ')});
-  content.push({text:'Страница/точка: '+String(r.page||'ПРЕДСТОИ')+' · Дата/редакция: '+String(r.date||'ПРЕДСТОИ')});
-  content.push({text:'Точна приложима разпоредба и действаща редакция: '+(r.verified===true?'потвърдена в регистъра':'ПРЕДСТОИ'),bold:true});
+ content.push({text:'III. Нормативни основания и проследимост',style:'sub'});
+ const selected=records.filter(r=>{
+  const code=String(r.zone_code||'')||(String(r.title||'').match(/BG\d{7}/)||[])[0];
+  return code?zoneMap.has(code):r.verified===true;
+ });
+ if(!selected.length)content.push({text:'Няма потвърдени общи нормативни разпоредби или зонално специфични записи за избраните зони. ПРЕДСТОИ.',bold:true});
+ for(const r of selected){
+  content.push({text:String(r.id||'')+' — '+String(r.title||''),style:'sub'});
+  content.push({text:'Източник: '+String(r.source||'ПРЕДСТОИ'),link:/^https:\/\//.test(String(r.source||''))?String(r.source):undefined,color:'#165c86'});
+  content.push({text:'Документ / редакция: '+String(r.date||'ПРЕДСТОИ')+' · Страница / точка: '+String(r.page||'ПРЕДСТОИ')});
+  content.push({text:'Проверка на точната приложима разпоредба: '+(r.verified===true?'Потвърдена според регистъра':'ПРЕДСТОИ'),bold:true});
  }
- if(!shown)content.push({text:'Няма подбрани нормативни записи за установените кодове.'});
- content.push({text:'Заключение: настоящото приложение е опис на източници, а не удостоверяване на режими, забрани или становище.',bold:true});
- return pdfDef('Приложение №2 — нормативни основания',content);
+ content.push({text:'IV. Мотивиран експертен извод',style:'sub'});
+ content.push({text:'ГИС фактът за установените зони се приема от Приложение №1 и не се поставя на повторно потвърждаване. Наличните данни позволяват идентифициране на зоните и проследяване на част от административните актове. Не позволяват окончателна преценка за допустимост, докато не бъдат извлечени точните действащи режими и не бъде съпоставена конкретната дейност с всяка приложима забрана, ограничение и изключение.',bold:true});
+ content.push({text:'Статус: МОТИВИРАН РАБОТЕН ДОКЛАД. Не представлява издадено становище или окончателна правна преценка.'});
+ return pdfDef('Приложение №2 — нормативен и документален анализ',content);
 }
 
 async function make(results,roles,register){
