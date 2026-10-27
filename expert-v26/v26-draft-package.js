@@ -109,6 +109,34 @@ function gisPdf(results,options={}){
   content.push(contentMap);
   content.push({text:'Картата възпроизвежда видимите слоеве в браузъра: имот, граници на зони, архивни пресичания и етикети. Източник на границите: работен набор на ТПУ; актуална правна проверка: ПРЕДСТОИ.',fontSize:9,margin:[0,0,0,10]});
  }
+ if(results.length>1){
+  content.push({text:'Индивидуални картни изгледи по имоти',style:'sub',pageBreak:'before'});
+  for(const r of results){
+   const id=String(r.input||r.cadnum||'');
+   const polygons=(r.geojson?.features||[]).filter(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));
+   const pts=[];
+   const collect=c=>{if(Array.isArray(c)&&typeof c[0]==='number'&&typeof c[1]==='number'){if(Number.isFinite(c[0])&&Number.isFinite(c[1]))pts.push(c)}else if(Array.isArray(c))c.forEach(collect)};
+   polygons.forEach(f=>collect(f.geometry.coordinates));
+   content.push({text:'Поземлен имот '+id,style:'sub',pageBreak:content.some(x=>x.text==='Индивидуални картни изгледи по имоти')&&id!==String(results[0].input||results[0].cadnum||'')?'before':undefined});
+   if(!pts.length){content.push({text:'Няма налична имотна геометрия за самостоятелен картен изглед. ПРЕДСТОИ.',margin:[0,8,0,12]});continue}
+   const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+   const spanX=Math.max(maxX-minX,1e-10),spanY=Math.max(maxY-minY,1e-10),scale=Math.min(680/spanX,390/spanY);
+   const dx=(740-spanX*scale)/2,dy=(450-spanY*scale)/2;
+   const shapes=[];
+   for(const f of polygons){
+    const polys=f.geometry.type==='Polygon'?[f.geometry.coordinates]:f.geometry.coordinates;
+    for(const poly of polys){
+     const outer=poly[0]||[];
+     const rings=poly.map(ring=>ring.filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1])));
+     const d=rings.filter(ring=>ring.length>=3).map(ring=>ring.map((p,i)=>(i?'L':'M')+(dx+(p[0]-minX)*scale).toFixed(2)+' '+(450-dy-(p[1]-minY)*scale).toFixed(2)).join(' ')+' Z').join(' ');
+     if(d)shapes.push('<path d="'+d+'" fill="#e8c47e" fill-rule="evenodd" fill-opacity=".55" stroke="#a66b12" stroke-width="2"/>');
+    }
+   }
+   const svg='<svg xmlns="http://www.w3.org/2000/svg" width="740" height="450" viewBox="0 0 740 450"><rect width="740" height="450" fill="#e8f2ed"/>'+shapes.join('')+'<text x="370" y="430" text-anchor="middle" font-size="17" fill="#183c30">'+E(id)+'</text></svg>';
+   content.push({svg,width:510,margin:[0,10,0,10]});
+   content.push({text:'Самостоятелен изглед на архивната имотна геометрия. Не удостоверява актуални граници на защитени зони или правен режим.',fontSize:9,margin:[0,0,0,10]});
+  }
+ }
  const features=[],points=[];
  function visit(coords){if(Array.isArray(coords)&&typeof coords[0]==='number'&&typeof coords[1]==='number'){if(Number.isFinite(coords[0])&&Number.isFinite(coords[1]))points.push(coords)}else if(Array.isArray(coords))coords.forEach(visit)}
  results.forEach((r,i)=>{const fs=(r.geojson?.features||[]).filter(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));for(const f of fs){features.push({f,i});visit(f.geometry.coordinates)}});
@@ -140,7 +168,7 @@ function gisPdf(results,options={}){
    const names=[...new Set(overlays.map(z=>String(z.name_bg||z.name||'').trim()).filter(Boolean))];
    const zoneText=zones.length?zones.join(', ')+(names.length?' · '+names.join('; '):''):'Не е отчетена зона в имотния резултат';
    const intersection=zones.length?'АРХИВНО ПРЕСИЧАНЕ (ГИС справка)':has?'Не е отчетено пресичане в имотния резултат':'Няма геометрия';
-   return [id,Number.isFinite(area)&&area>0?area.toLocaleString('bg-BG',{maximumFractionDigits:2})+' (арх.)':'Не е налична',zoneText,intersection,has?'ГИС геометрия налична':'Липсва геометрия'];
+   return [id,Number.isFinite(area)&&area>0?area.toLocaleString('bg-BG',{maximumFractionDigits:3})+' (арх.)':'Не е налична',zoneText,intersection,has?'ГИС геометрия налична':'Липсва геометрия'];
   })
  ]},layout:'lightHorizontalLines'});
  content.push({text:'Таблицата възпроизвежда резултата от извършения ГИС анализ на работния набор; не изисква повторна проверка на пресичането. Произходът на геометрията и правната актуалност на режимите са отделни въпроси.',margin:[0,10,0,0]});
