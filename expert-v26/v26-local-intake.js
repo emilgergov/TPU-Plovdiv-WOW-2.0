@@ -42,17 +42,30 @@ function semanticReview(subjects,documents){
  const sealed=pick(/изгребна яма|водоплътн|без заустване/i);
  if(discharge.length)flags.push({kind:'discharge',label:'Т. 9: данни за заустване — проверка на водоприемник и приложими процедури',sources:discharge});
  if(discharge.length&&sealed.length)flags.push({kind:'conflict',label:'ПРОТИВОРЕЧИЕ по т. 9: данни за заустване и за водоплътно събиране — необходимо е експертно уточнение',sources:[...new Set([...discharge,...sealed])]});
- const location=(notices.find(x=>x.key==='location')||{}).text||'';
- const locPieces=[];
- for(const re of [/\b(?:ПИ|поземлен имот)(?:\s+с\s+идентификатор)?\s*\d{5}\.\d+\.\d+/ig,/\b(?:с\.|гр\.)\s*[А-Яа-я-]+/g,/\bобщина\s+[А-Яа-я-]+/ig,/\bобласт\s+[А-Яа-я-]+/ig,/\bместност\s*[„"]?[^,.;\n]{2,55}/ig,/\bУПИ\s+[IVXLCDM\d-]+(?:\.\d+)?/ig]){
-  for(const m of location.matchAll(re))if(!locPieces.includes(m[0]))locPieces.push(m[0]);
+ const locationSources=full.filter(x=>/уведомлен/i.test(x.source));
+ const searchTexts=locationSources.length?locationSources:full;
+ const locPieces=[],locEvidence=[];
+ const patterns=[/\\b(?:ПИ|поземлен\\s+имот|имот)\\s+(?:с\\s+)?(?:кадастрален\\s+)?идентификатор\\s*[:№]?\\s*\\d{5}\\.\\d+\\.\\d+/ig,/\\b(?:ПИ|поземлен\\s+имот)\\s*№?\\s*\\d{5}\\.\\d+\\.\\d+/ig,/\\b(?:с\\.|гр\\.|село|град)\\s*[А-Яа-яЁё-]+/g,/\\bобщина\\s+[А-Яа-я-]+/ig,/\\bобласт\\s+[А-Яа-я-]+/ig,/\\bместност\\s*[„"]?[^,.;\\n]{2,55}/ig,/\\bУПИ\\s+[IVXLCDM\\d-]+(?:\\.\\d+)?/ig];
+ for(const doc of searchTexts){
+  for(const re of patterns){re.lastIndex=0;for(const m of doc.text.matchAll(re)){
+   const piece=m[0].trim();if(!locPieces.includes(piece)){locPieces.push(piece);locEvidence.push(doc.source)}
+  }}
  }
+ // Fallback: explicit cadastral identifiers in notice, without guessing municipality or cadastral locality.
+ if(!locPieces.some(x=>/\\d{5}\\.\\d+\\.\\d+/.test(x))){
+  for(const doc of searchTexts){const ids=[...new Set((doc.text.match(/\\b\\d{5}\\.\\d+\\.\\d+\\b/g)||[]))];for(const id of ids.slice(0,10)){const piece='ПИ с идентификатор '+id;if(!locPieces.includes(piece)){locPieces.push(piece);locEvidence.push(doc.source)}}}
+ }
+ const hasParcel=locPieces.some(x=>/\\d{5}\\.\\d+\\.\\d+/.test(x));
+ const hasSettlement=locPieces.some(x=>/^(?:с\\.|гр\\.|село|град)/i.test(x));
+ const hasMunicipality=locPieces.some(x=>/^община/i.test(x));
+ const hasRegion=locPieces.some(x=>/^област/i.test(x));
+ const missing=[!hasParcel?'кадастрален идентификатор':null,!hasSettlement?'населено място':null,!hasMunicipality?'община':null,!hasRegion?'област':null].filter(Boolean);
  const ancillary=[];
  const test=[[/сондаж|кладенец/i,'сондажен кладенец'],[/кабелно трасе/i,'подземно кабелно трасе'],[/площадка за измиване/i,'площадка за измиване'],[/водопроводна връзка/i,'водопроводна връзка']];
  for(const [re,label] of test)if(full.some(x=>re.test(x.text)))ancillary.push(label);
  const title=main?.title||'';
- const heading=title?'Относно: Уведомление за инвестиционно предложение (ИП): „'+title+'“'+(locPieces.length?' в '+locPieces.join(', '):' [ТОЧНО МЕСТОПОЛОЖЕНИЕ — ПРЕДСТОИ ПОТВЪРЖДЕНИЕ]'):'';
- return {flags,location:locPieces,ancillary,heading,needs_review:flags.some(x=>x.kind==='conflict')||!locPieces.length,source:main?.source||''};
+ const heading=title?'„'+title+'“'+(locPieces.length?' — '+locPieces.join(', '):'')+(missing.length?' [ЗА ПОТВЪРЖДЕНИЕ: '+missing.join(', ')+']':''):'';
+ return {flags,location:locPieces,location_sources:[...new Set(locEvidence)],missing,ancillary,heading,needs_review:flags.some(x=>x.kind==='conflict')||missing.length>0,source:main?.source||''};
 }
 async function process(file){
  if(!file||file.size>40*1024*1024)throw Error('Изберете ZIP до 40 MB.');
