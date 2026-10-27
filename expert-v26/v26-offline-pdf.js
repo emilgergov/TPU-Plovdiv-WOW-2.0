@@ -55,6 +55,11 @@ async function generate(def){
  for(const item of def.content||[]){
   // Respect explicit per-parcel page boundaries in the shared PDF generator.
   if(item.pageBreak==='before'&&y>95){finish();start()}
+  if(item.table){
+   const rows=item.table.body||[],cols=rows[0]?.length||1,available=W-2*M,cellW=available/cols;
+   const drawRow=(cells,header)=>{ctx.font=(header?'bold 17px':'17px')+' Arial';const lines=cells.map(v=>wrap(ctx,String(v??''),cellW-14));const rh=Math.max(37,...lines.map(x=>x.length*24+14));if(y+rh>H-100){finish();start();if(!header&&rows.length){drawRow(rows[0],true)}}ctx.fillStyle=header?'#e3efe8':'#ffffff';ctx.fillRect(M,y,available,rh);ctx.strokeStyle='#b6c9bf';ctx.strokeRect(M,y,available,rh);ctx.fillStyle='#173d30';for(let c=0;c<cols;c++){if(c)ctx.beginPath(),ctx.moveTo(M+c*cellW,y),ctx.lineTo(M+c*cellW,y+rh),ctx.stroke();(lines[c]||[]).forEach((line,k)=>ctx.fillText(line,M+c*cellW+7,y+23+k*24))}y+=rh};
+   rows.forEach((cells,i)=>drawRow(cells,i===0));y+=12;continue;
+  }
   if(item.svg){const h=680;if(y+h>H-100){finish();start()}const drawn=await drawSVG(ctx,item.svg,M,y,W-2*M);y+=drawn+20;continue}
   const title=item.style==='heading',sub=item.style==='sub';
   ctx.font=(title?'bold 35px':sub?'bold 26px':item.bold?'bold 22px':'22px')+' Arial';
