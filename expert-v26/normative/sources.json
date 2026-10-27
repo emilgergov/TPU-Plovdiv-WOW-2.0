@@ -1,0 +1,106 @@
+{
+  "title": "ТПУ Пловдив · Нормативен браузърен архив V26",
+  "compiled": "2026-10-27",
+  "status": "Каталог на официални източници; не удостоверява консолидирана актуална редакция",
+  "items": [
+    {
+      "id": 1,
+      "title": "Закон за биологичното разнообразие (ЗБР)",
+      "category": "Закони",
+      "url": "https://www.moew.government.bg/bg/priroda/zakonodatelstvo/nacionalno-zakonodatelstvo/zakoni/",
+      "note": "Официален каталог; редакцията се проверява преди цитиране.",
+      "authority": "МОСВ",
+      "verified_revision": false
+    },
+    {
+      "id": 2,
+      "title": "Закон за опазване на околната среда (ЗООС)",
+      "category": "Закони",
+      "url": "https://www.moew.government.bg/bg/zakon-za-opazvane-na-okolnata-sreda-6671/",
+      "note": "МОСВ посочва изменение ДВ бр. 16/10.02.2026 г.",
+      "authority": "МОСВ",
+      "verified_revision": false
+    },
+    {
+      "id": 3,
+      "title": "Закон за защитените територии (ЗЗТ)",
+      "category": "Закони",
+      "url": "https://www.moew.government.bg/bg/priroda/zakonodatelstvo/nacionalno-zakonodatelstvo/zakoni/",
+      "note": "Проверка на приложимостта към конкретния имот.",
+      "authority": "МОСВ",
+      "verified_revision": false
+    },
+    {
+      "id": 4,
+      "title": "Наредба за оценка за съвместимост (ОС)",
+      "category": "Наредби",
+      "url": "https://www.moew.government.bg/static/media/ups/tiny/%D0%9D%D0%A1%D0%97%D0%9F/NAREDBA_za_usloviqta_i_reda_za_izvyrsvane_na_ocenka_za_syvmestimostta_na_planove_programi_proekti_i_.pdf",
+      "note": "Официален PDF; преди правно цитиране проверка за последващи изменения.",
+      "authority": "МОСВ",
+      "verified_revision": false
+    },
+    {
+      "id": 5,
+      "title": "Наредба за ОВОС",
+      "category": "Наредби",
+      "url": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ocenka-na-vuzdejstvieto-vurhu-okolnata-sreda/",
+      "note": "Нормативна процедура по глава шеста ЗООС.",
+      "authority": "МОСВ",
+      "verified_revision": false
+    },
+    {
+      "id": 6,
+      "title": "Наредба за екологична оценка на планове и програми",
+      "category": "Наредби",
+      "url": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ekologichna-ocenka-na-planove-i-programi/",
+      "note": "За планове и програми.",
+      "authority": "МОСВ",
+      "verified_revision": false
+    },
+    {
+      "id": 7,
+      "title": "Законодателство по ОВОС — МОСВ",
+      "category": "Официални каталози",
+      "url": "https://www.moew.government.bg/bg/prevantivna-dejnost/ovos/zakonodatelstvo/",
+      "note": "Официален секторен каталог.",
+      "authority": "МОСВ",
+      "verified_revision": false
+    },
+    {
+      "id": 8,
+      "title": "Законодателство по екологична оценка — МОСВ",
+      "category": "Официални каталози",
+      "url": "https://www.moew.government.bg/bg/prevantivna-dejnost/ekologichna-ocenka/zakonodatelstvo/",
+      "note": "Официален секторен каталог.",
+      "authority": "МОСВ",
+      "verified_revision": false
+    },
+    {
+      "id": 9,
+      "title": "Указания по прилагането на ОВОС — МОСВ",
+      "category": "Указания (ненормативни)",
+      "url": "https://www.moew.government.bg/bg/prevantivna-dejnost/ovos/ukazaniya-po-prilaganeto/ukazaniya/",
+      "note": "Указанията не са нормативни актове.",
+      "authority": "МОСВ",
+      "verified_revision": false
+    },
+    {
+      "id": 10,
+      "title": "Указания по екологична оценка — МОСВ",
+      "category": "Указания (ненормативни)",
+      "url": "https://www.moew.government.bg/bg/prevantivna-dejnost/ekologichna-ocenka/ukazaniya-po-prilaganeto/ukazaniya/",
+      "note": "Указанията не са нормативни актове.",
+      "authority": "МОСВ",
+      "verified_revision": false
+    },
+    {
+      "id": 11,
+      "title": "Образци на заявления за ОВОС — МОСВ",
+      "category": "Образци",
+      "url": "https://www.moew.government.bg/bg/prevantivna-dejnost/ovos/obrazci-na-zayavleniya-ovos/",
+      "note": "Формуляри и приложения; не са самостоятелно правно основание.",
+      "authority": "МОСВ",
+      "verified_revision": false
+    }
+  ]
+}
