@@ -29,7 +29,7 @@ async function rows(kind,prefix){
  if(cache.has(key))return cache.get(key);
  const entry=entries?.get(name);
  let compressed;
- if(hostedRoot){const response=await fetch(hostedRoot+'/'+name);if(response.status===404)return [];if(!response.ok)throw Error('ГИС сегмент '+name+': HTTP '+response.status);compressed=new Uint8Array(await response.arrayBuffer());}
+ if(hostedRoot){const response=await fetch(hostedRoot+'/'+name);if(!response.ok)throw Error('ГИС сегмент '+name+': HTTP '+response.status);compressed=new Uint8Array(await response.arrayBuffer());}
  else {if(!entry)return [];compressed=await entry.getData(new global.zip.Uint8ArrayWriter());}
  if(!global.DecompressionStream)throw Error('Този браузър не поддържа gzip разархивиране.');
  const bytes=await new Response(new Blob([compressed]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
@@ -40,8 +40,8 @@ async function openHosted(base){
  const response=await fetch(root+'/manifest.json',{cache:'no-store'});
  if(!response.ok)throw Error('ГИС сегментите още не са публикувани ('+response.status+').');
  const manifest=await response.json();
- if(manifest.status!=='PASS_COUNT_BY_PREFIX'||manifest.parcel_geometry!==917418)throw Error('Непотвърден ГИС манифест.');
- hostedRoot=root;hostedManifest=manifest;cache.clear();return manifest;
+ if(manifest.status!=='PASS_COUNT_BY_PREFIX'||manifest.parcel_geometry!==917418||manifest.overlap_records_expected!==181154||manifest.shards!==258)throw Error('Непотвърден ГИС манифест.');
+ const probe=await fetch(root+'/parcelgeom_36.json.gz',{method:'HEAD',cache:'no-store'});if(!probe.ok)throw Error('Пълният ГИС пакет не е публикуван: липсва parcelgeom_36.json.gz.');hostedRoot=root;hostedManifest=manifest;cache.clear();return manifest;
 }
 async function lookup(ids){
  if(!entries&&!hostedRoot)throw Error('ГИС базата не е заредена.');
