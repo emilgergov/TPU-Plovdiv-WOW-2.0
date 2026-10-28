@@ -4,7 +4,7 @@ const NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const MAP={A:[18,19,20,21],B:[16,17,18,19]};
 const templatePaths={A:'templates/V26_3_Obrazec_A.docx',B:'templates/V26_3_Obrazec_B.docx'};
 function nodes(p,n){return Array.from(p.getElementsByTagNameNS(NS,n))}
-async function make(scenario,paragraphs){
+async function make(scenario,paragraphs,metadata){
  scenario=({'А':'A','Б':'B'})[scenario]||scenario;
  if(!MAP[scenario])throw Error('ГИС сценарият А/Б не е потвърден.');
  if(!Array.isArray(paragraphs)||paragraphs.length!==4||paragraphs.some(x=>!String(x).trim()))throw Error('Липсват четирите проверени абзаца.');
@@ -34,6 +34,23 @@ async function make(scenario,paragraphs){
  // Protected territories (ЗЗТ) and Natura 2000 protected zones (ЗБР) are distinct concepts.
  const protectedTerritoryText=nodes(xml,'t').map(t=>t.textContent).join(' ');
  if(!protectedTerritoryText.includes('защитени територии'))throw Error('Липсва отделната проверка за защитени територии по ЗЗТ.');
+ // Case-specific identity, subject, and incoming reference must be supplied and reviewed.
+ const required=['recipient','address','subject','incomingReference','salutation'];
+ if(!metadata||required.some(k=>!String(metadata[k]||'').trim()))throw Error('Липсват потвърдени адресат, адрес, предмет, входящ номер или обръщение.');
+ const replaceParagraph=(index,value)=>{
+  const p=ps[index],texts=nodes(p,'t');if(!texts.length)throw Error('Липсва променливо текстово поле.');
+  if(nodes(p,'drawing').length||nodes(p,'fldChar').length)throw Error('Променливото поле съдържа защитен елемент.');
+  texts[0].textContent=value;texts[0].setAttribute('xml:space','preserve');for(const t of texts.slice(1))t.textContent='';
+ };
+ if(scenario==='A'){
+  replaceParagraph(6,metadata.recipient);replaceParagraph(7,metadata.address);
+  replaceParagraph(10,'Относно: '+metadata.subject);replaceParagraph(13,metadata.salutation);
+  replaceParagraph(16,metadata.incomingReference+' — '+metadata.subject);
+ }else{
+  replaceParagraph(5,metadata.recipient);replaceParagraph(6,'');replaceParagraph(7,metadata.address);
+  replaceParagraph(9,'Относно: '+metadata.subject);replaceParagraph(10,metadata.salutation);replaceParagraph(11,'');
+  replaceParagraph(14,metadata.incomingReference+' — '+metadata.subject);
+ }
  const sampleIds=nodes(xml,'t').map(t=>t.textContent).join(' ').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  if(sampleIds.length)throw Error('Оригиналният образец съдържа примерни кадастрални идентификатори: '+[...new Set(sampleIds)].slice(0,3).join(', ')+'. Не е безопасно да се издаде Word преди попълване на цялата преписка.');
  zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
