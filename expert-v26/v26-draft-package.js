@@ -40,10 +40,20 @@ function zipWriter(){
  };
  return api;
 }
+function scenarioFromGIS(results,roles){
+ const leading=results.filter(r=>(roles[r.input]||roles[r.cadnum])==='leading');
+ if(!leading.length)throw Error('Няма потвърден водещ имот.');
+ if(leading.some(r=>r.status!=='Намерен'||!r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type))))throw Error('Липсва геометрия за водещ имот; сценарият А/Б не може да се определи.');
+ const zones=leading.flatMap(r=>r.archived_overlay_records||[]).map(z=>String(z.sitecode||z.code||'')).filter(z=>/^BG\\d{7}$/.test(z));
+ if(zones.length)return {scenario:'Б',basis:'архивни записи за пресичане',zones:[...new Set(zones)]};
+ if(leading.some(r=>r.intersection_verified_outside!==true))return {scenario:null,basis:'липсва изрично потвърдено отсъствие на пресичане',zones:[]};
+ return {scenario:'А',basis:'потвърден ГИС резултат извън зоните',zones:[]};
+}
 function docx(zip,ids,roles,results,includeAnnex2){
  const d=zipWriter();
  const zones=[...new Set(results.flatMap(r=>(r.archived_overlay_records||[]).map(z=>String(z.sitecode||z.code||'')).filter(z=>/^BG\d{7}$/.test(z))))];
- const scenario=zones.length?'Б':'А';
+ const determination=scenarioFromGIS(results,roles);
+ const scenario=determination.scenario||'НЕОПРЕДЕЛЕН';
  const subject=window.V26SubjectContext;
  const lines=['ТПУ Пловдив — РАБОТЕН ПРОЕКТ на предложение за становище','Сценарий '+scenario+' — '+(zones.length?'установено пресичане с зона в работния ГИС набор':'не е отчетено пресичане в работния ГИС набор'),'Не е издадено становище. Не представлява правно заключение.','Предмет на ИП: '+(subject?.confirmed?subject.title:'ПРЕДСТОИ потвърждение'),'Заглавие за предложението: '+(subject?.confirmed?(subject.wordHeading||subject.title):'ПРЕДСТОИ потвърждение'),'Дейности: '+(subject?.confirmed?(subject.activities.join('; ')||'ПРЕДСТОИ уточнение'):'ПРЕДСТОИ уточнение'),'Имотни идентификатори: '+ids.join(', '),'Експертно потвърдени роли: '+ids.map(id=>id+' — '+(roles[id]==='leading'?'водещ':'съпътстващ')).join('; '),'ГИС резултат — зони: '+(zones.join(', ')||'няма отчетени в работния набор'),'Източник на пространствените данни: работен архивен ГИС набор. Актуална правна проверка: ПРЕДСТОИ.','Нормативна преценка: ПРЕДСТОИ проверка на точните режими и приложимостта им към дейностите.','Приложение №1: ГИС анализ (PDF) — задължително.',includeAnnex2?'Приложение №2: нормативни референции (PDF) — приложено по избор.':'Приложение №2: не е заявено (незадължително).'];
 
@@ -254,6 +264,8 @@ async function make(results,roles,register){
  if(!results.length||results.some(r=>!['leading','ancillary'].includes(roles[r.input]||roles[r.cadnum])))throw Error('Потвърдете ролите за всички имоти.');
  if(!results.some(r=>r.status==='Намерен'&&r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type))))throw Error('Няма действителна имотна геометрия за Приложение №1.');
  const z=zipWriter(),ids=results.map(r=>r.input),normalized=Object.fromEntries(results.map(r=>[r.input,roles[r.input]||roles[r.cadnum]]));
+ const determination=scenarioFromGIS(results,normalized);
+ if(!determination.scenario)throw Error('Не е доказано, че всички водещи имоти са извън Натура 2000. Сценарий А не се допуска по подразбиране.');
  const includeAnnex2=register?.includeAnnex2===true;const word=await docx(z,ids,normalized,results,includeAnnex2);if(word.size<100||new TextDecoder().decode(await word.slice(0,2).arrayBuffer())!=='PK')throw Error('DOCX не е валиден ZIP контейнер.');z.file('01_Predlozhenie_RABOTEN_PROEKT.docx',word);
  await ensurePDF();
  const pdf1=await pdfBlob(gisPdf(results,register));if(pdf1.size<100||await pdf1.slice(0,4).text()!=='%PDF')throw Error('Приложение №1 не е валиден PDF.');z.file('02_Prilozhenie_1_GIS.pdf',pdf1);
