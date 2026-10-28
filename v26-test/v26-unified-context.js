@@ -38,7 +38,7 @@ function build(intake,roles,gis){
    zip:true,roles:!!roles&&parcels.length>0&&parcels.every(id=>!!roles[id]),gis:!!gis,
    appendix1:!!gis&&!!gis.pdf1_confirmed,
    appendix2:!!gis&&!!gis.pdf1_confirmed,
-   word:!!gis&&!!gis.pdf1_confirmed&&!!roles
+   word:!!gis&&!!gis.pdf1_confirmed&&!!roles&&parcels.length>0&&diagnosis.scenario!==null
   },
   caveats:['Документалните откъси изискват смислова проверка.','Непотвърдените нормативни основания се означават с конкретната причина за непотвърждаването.']
  });
