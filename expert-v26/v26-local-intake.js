@@ -79,6 +79,7 @@ async function process(file){
   list.push({name,method,size,packed,offset});
  }
  const docs=[],all=new Set(),leading=new Set(),other=new Set(),subjects=[],documentTexts=[];
+ const dossierDocuments=[];
  for(const item of list){
   let status='описан',text='';
   if(/\.(txt|csv|json|md|pdf|docx)$/i.test(item.name)&&item.size<=20*1024*1024){
@@ -131,10 +132,12 @@ async function process(file){
     if(/уведомлен/i.test(item.name+' '+text.slice(0,800))){for(const id of text.match(/(?:позем[еe]н\s+имот|ПИ)\s+(?:с\s+)?(?:идентификатор\s+)?(\d{5}\.\d+\.\d+)/gi)||[]){const m=id.match(/\d{5}\.\d+\.\d+/);if(m)leading.add(parcelId(m[0]));}}
    }catch(err){status='неуспешно извличане: '+err.message}
   }
+  const referenceMatches=[...text.matchAll(/(?:вх\\.?\\s*(?:№|номер)?\\s*|входящ\\s*(?:№|номер)\\s*)([А-ЯA-Z0-9][А-ЯA-Z0-9\\-\\/\\. ]{0,45}?)\\s*(?:от\\s*|\\/\\s*)(\\d{1,2}[.\\-/]\\d{1,2}[.\\-/]\\d{4})/giu)].slice(0,30).map(m=>({number:m[1].trim(),date:m[2],source:item.name}));
+  dossierDocuments.push({file:item.name,type:/уведомлен/i.test(item.name+' '+text.slice(0,800))?'notification':/допълнителна\\s+информация|доп\\.\\s*информация/i.test(item.name+' '+text.slice(0,800))?'supplementary':'attachment',readable:!!text.trim(),references:referenceMatches,facts:[]});
   docs.push({filename:item.name,status});
  }
  for(const id of leading)other.delete(id);
- return {archive_name:file.name,archive_entries:list.length,files:docs,evidence:[],subject_candidates:subjects,semantic_review:semanticReview(subjects,documentTexts),all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[...other],warnings:['Локален предварителен текстов анализ. Проверете ролите ръчно.','PDF/DOCX се извличат локално, когато съдържат текст. Сканирани документи без текстов слой изискват отделно разчитане.']}};
+ return {archive_name:file.name,archive_entries:list.length,files:docs,dossier_documents:dossierDocuments,evidence:[],subject_candidates:subjects,semantic_review:semanticReview(subjects,documentTexts),all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[...other],warnings:['Локален предварителен текстов анализ. Проверете ролите ръчно.','PDF/DOCX се извличат локално, когато съдържат текст. Сканирани документи без текстов слой изискват отделно разчитане.']}};
 }
 window.V26LocalIntake={process};
 })();
