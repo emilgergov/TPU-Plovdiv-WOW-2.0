@@ -37,7 +37,12 @@ jobs:
             assert (root/f'parcelgeom_{prefix}.json.gz').is_file()
           shards=list(root.glob('*.json.gz'))
           assert len(shards)==258, f'Incomplete GIS dataset: {len(shards)}/258 shards'
-          print('Complete GIS package verified: 258 shards')
+          import gzip
+          for prefix,cadnum in [('36','36676.129.457'),('47','47295.27.259')]:
+            with gzip.open(root/f'parcelgeom_{prefix}.json.gz','rt',encoding='utf-8') as f:
+              records=json.load(f)
+            assert any(row[0]==cadnum and isinstance(row[1],dict) and row[1].get('type') in ('Polygon','MultiPolygon') for row in records), f'Missing test geometry: {cadnum}'
+          print('Complete GIS package verified: 258 shards; both real test parcel geometries found')
           PY
       - name: Publish isolated folder without changing existing WOW
         run: |
