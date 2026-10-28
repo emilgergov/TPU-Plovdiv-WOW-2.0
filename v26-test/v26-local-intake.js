@@ -212,15 +212,21 @@ async function process(file){
   window.V26DossierEvidence.evidenceDraft(dossierDocuments,dossierAnalysis):null;
  // Equal-strength candidates in proposal description and location are all leading.
  // A neighbour or former cadastral number alone never becomes a leading parcel.
- const contextualNonLeading=new Set(dossierParcelEvidence.filter(x=>x.role==='neighbour'||x.role==='former').map(x=>x.id));
  const proposalCandidates=new Set();
  for(const subject of subjects){
   for(const section of subject.sections||[]){
    if(!['summary','location'].includes(section.key))continue;
-   for(const match of section.text.matchAll(rx))proposalCandidates.add(parcelId(match[0]));
+   const lines=section.text.split(/(?<=[.!?;])\s+|\n+/);
+   for(const line of lines){
+    if(/(?:предишен|стар|предходен)\s+идентификатор|съседи\s*:/i.test(line))continue;
+    for(const match of line.matchAll(rx))proposalCandidates.add(parcelId(match[0]));
+   }
   }
  }
- for(const id of proposalCandidates)if(!contextualNonLeading.has(id))leading.add(id);
+ // Exclude neighbours/former IDs only if no independent proposal evidence exists.
+ const nonLeading=new Set(dossierParcelEvidence.filter(x=>x.role==='neighbour'||x.role==='former').map(x=>x.id));
+ for(const id of proposalCandidates)leading.add(id);
+ for(const id of [...leading])if(nonLeading.has(id)&&!proposalCandidates.has(id))leading.delete(id);
  for(const id of leading)other.delete(id);
  return {archive_name:file.name,archive_entries:list.length,elapsed_ms:Math.round(performance.now()-startedAt),files:docs,dossier_documents:dossierDocuments,dossier_analysis:dossierAnalysis,dossier_characterization:dossierCharacterization,dossier_draft:dossierDraft,evidence:dossierParcelEvidence,subject_candidates:subjects,semantic_review:semanticReview(subjects,documentTexts),all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[],mentioned_candidates:[...other],warnings:['Кандидатите за предмет на ИП са предварителни и изискват експертно потвърждение.','Другите срещнати идентификатори НЕ са автоматично съпътстващи имоти.','PDF и изображения се разчитат с OCR при необходимост; проверете качеството и пълнотата на извличането.']}};
 }
