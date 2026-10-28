@@ -151,7 +151,18 @@ async function process(file){
    }
    if(factualSnippets.length>=60)break;
   }
-  dossierDocuments.push({file:item.name,type:/уведомлен/i.test(item.name+' '+text.slice(0,800))?'notification':/допълнителна\s+информация|доп\.\s*информация/i.test(item.name+' '+text.slice(0,800))?'supplementary':'attachment',readable:!!text.trim(),references:referenceMatches,facts:factualSnippets});
+  const wastewaterClaims=[];
+  for(const fact of factualSnippets){
+   if(fact.key!=='wastewater')continue;
+   const sentence=fact.value;
+   const sewer=/канализац/i.test(sentence),tank=/изгребна яма|водоплът.{0,30}(яма|резервоар)/i.test(sentence);
+   if(sewer===tank||/не се предвижда|няма да се|отпада/i.test(sentence))continue;
+   if(!/предвижда|ще се|отвежда|зауства|изгражда|включва|свързва/i.test(sentence))continue;
+   wastewaterClaims.push({key:'wastewater_solution',scope:'proposal',value:sewer?'sewer':'tank',reference:sentence,source:item.name});
+  }
+  const dates=[...new Set(referenceMatches.map(x=>x.date))];
+  const documentDate=dates.length===1?dates[0]:null;
+  dossierDocuments.push({file:item.name,type:/уведомлен/i.test(item.name+' '+text.slice(0,800))?'notification':/допълнителна\s+информация|доп\.\s*информация/i.test(item.name+' '+text.slice(0,800))?'supplementary':'attachment',readable:!!text.trim(),date:documentDate,references:referenceMatches,facts:factualSnippets,claims:wastewaterClaims});
   docs.push({filename:item.name,status});
  }
  for(const id of leading)other.delete(id);
