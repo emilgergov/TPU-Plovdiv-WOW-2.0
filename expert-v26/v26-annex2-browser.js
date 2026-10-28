@@ -25,7 +25,7 @@ button.onclick=async()=>{
  if(button.disabled||!state.gis||!state.register?.records?.length)return;
  button.disabled=true;
  try{
-  const blob=await window.V26DraftPackage.standalonePDF(state.gis.results||[],2,{...state.register,archive:state.archive,preview:state.preview,gisSummary:state.gis.summary||{}});
+  const blob=await window.V26DraftPackage.standalonePDF(state.gis.results||[],2,{...state.register,archive:state.archive,preview:state.preview,gisSummary:state.gis.summary||{},dossierReferences:window.V26WorkingContext?window.V26UnifiedContext.toAnnex2(window.V26WorkingContext):null});
   if(!(blob instanceof Blob)||blob.size<100||await blob.slice(0,4).text()!=='%PDF')throw Error('Генерираният файл не е валиден PDF.');
   const url=URL.createObjectURL(blob),link=document.createElement('a');
   link.href=url;link.download='TPU_Plovdiv_V26_Prilozhenie_2_Normativno.pdf';
