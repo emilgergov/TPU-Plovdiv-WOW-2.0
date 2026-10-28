@@ -34,9 +34,9 @@ async function extractText(data,name){
   if(!window.pdfjsLib)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
   window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const doc=await window.pdfjsLib.getDocument({data:new Uint8Array(data)}).promise;
-  extractText.lastOcrPages=0;extractText.lastOcrError='';
+  extractText.lastOcrPages=0;extractText.lastOcrError='';extractText.lastPageWarnings=[];
   const parts=[];let worker=null;
-  try{for(let i=1;i<=Math.min(doc.numPages,100);i++){
+  try{for(let i=1;i<=doc.numPages;i++){
    const page=await doc.getPage(i),content=await page.getTextContent();
    let pageText=content.items.map(x=>x.str||'').join(' ').trim();
    if(pageText.replace(/[^\p{L}\p{N}]/gu,'').length<25){
@@ -46,6 +46,7 @@ async function extractText(data,name){
      if(scanned.replace(/[^\p{L}\p{N}]/gu,'').length>pageText.replace(/[^\p{L}\p{N}]/gu,'').length){pageText=scanned;extractText.lastOcrPages++}
     }catch(err){extractText.lastOcrError=String(err.message||err)}
    }
+   if(pageText.replace(/[^\p{L}\p{N}]/gu,'').length<25)extractText.lastPageWarnings.push('стр. '+i+' — недостатъчно разчетен текст');
    parts.push(pageText);
   }}finally{if(worker)await worker.terminate()}
   return parts.join('\n');
@@ -114,8 +115,8 @@ async function process(file){
    try{
     const unpacked=await readEntry(bytes,v,item);
     if(unpacked.byteLength!==item.size)throw Error('Несъответствие в ZIP размер.');
-    extractText.lastOcrPages=0;extractText.lastOcrError='';text=await extractText(unpacked,item.name);
-    status=text.trim()?(extractText.lastOcrPages?'OCR: '+extractText.lastOcrPages+' сканирани страници; експертна проверка':'текстът е прочетен'):(extractText.lastOcrError?'OCR неуспешен: '+extractText.lastOcrError:'няма извлекаем текст (възможно сканиран документ)');if(text.trim())documentTexts.push({source:item.name,text:text.slice(0,150000)});
+    extractText.lastOcrPages=0;extractText.lastOcrError='';extractText.lastPageWarnings=[];text=await extractText(unpacked,item.name);
+    status=text.trim()?(extractText.lastOcrPages?'OCR: '+extractText.lastOcrPages+' сканирани страници; експертна проверка':'текстът е прочетен'):(extractText.lastOcrError?'OCR неуспешен: '+extractText.lastOcrError:'няма извлекаем текст (възможно сканиран документ)');if(extractText.lastPageWarnings?.length)status+='; ПРОВЕРКА: '+extractText.lastPageWarnings.join(', ');if(text.trim())documentTexts.push({source:item.name,text:text.slice(0,150000)});
     // Distinguish cadastral context: neighbours and former IDs are evidence, not project parcels.
     const contextualIds=[];
     for(const line of text.split(/\r?\n/)){
