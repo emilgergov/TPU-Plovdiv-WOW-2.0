@@ -197,8 +197,11 @@ function normativePdf(results,register){
  }
  const zones=[...zoneMap.values()].sort((a,b)=>a.code.localeCompare(b.code));
  const records=register?.records||[];
+ const dossier=register?.dossierReferences;
  const subject=window.V26SubjectContext;
  const content=[
+  {text:'Документална проследимост: '+(dossier?.documents?.length||0)+' документа от единната ZIP преписка. Непотвърдените твърдения не представляват установени факти.',fontSize:9},
+  ...((dossier?.documents||[]).slice(0,35).map(d=>({text:'Документ: '+d.file+' · входящи референции: '+(d.references||[]).map(x=>x.number+' / '+x.date).join('; '),fontSize:8}))),
   {text:'I. Предмет и установени факти',style:'sub'},
   {text:'Предмет на ИП: '+(subject?.confirmed?subject.title:'НЕ Е УСТАНОВЕН / НЕ Е ПОТВЪРДЕН'),bold:true},
   {text:'Източник на предмета: '+(subject?.confirmed?subject.source:'ПРЕДСТОИ')},
