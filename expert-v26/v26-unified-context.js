@@ -14,9 +14,9 @@ function build(intake,roles,gis){
   references:docs.flatMap(d=>(d.references||[]).map(r=>({...r,file:d.file}))),
   readiness:{
    zip:true,roles:!!roles,gis:!!gis,
-   appendix1:!!gis,
-   appendix2:!!gis,
-   word:!!gis&&!!roles
+   appendix1:!!gis&&!!gis.pdf1_confirmed,
+   appendix2:!!gis&&!!gis.pdf1_confirmed,
+   word:!!gis&&!!gis.pdf1_confirmed&&!!roles
   },
   caveats:['Документалните откъси изискват смислова проверка.','Непотвърдените нормативни основания се означават ПРЕДСТОИ.']
  });
