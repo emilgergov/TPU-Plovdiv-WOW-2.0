@@ -222,7 +222,7 @@ function normativePdf(results,register){
   {text:'Предмет на ИП: '+(subject?.confirmed?subject.title:'НЕ Е УСТАНОВЕН / НЕ Е ПОТВЪРДЕН'),bold:true},
   {text:'Източник на предмета: '+(subject?.confirmed?subject.source:'Неустановено')},
   {text:'Дейности от ИП: '+(subject?.confirmed?(subject.activities.join('; ')||'НЕ СА УТОЧНЕНИ'):'Неустановено')},
-  {text:'Статус на анализа на дейностите: '+(subject?.confirmed&&subject.activities.length?'Предметът е експертно потвърден; съпоставката с конкретните режими Неустановено.':'ПРЕДВАРИТЕЛНА НОРМАТИВНА СПРАВКА — липсва потвърден предмет и/или дейности.'),bold:true},
+  {text:'Статус на анализа на дейностите: '+(subject?.confirmed&&subject.activities.length?'Предметът е експертно потвърден; приложимостта на конкретните режими не е оценена.':'ПРЕДВАРИТЕЛНА НОРМАТИВНА СПРАВКА — липсва потвърден предмет и/или дейности.'),bold:true},
   {text:'Имотни идентификатори: '+ids.join(', ')},
   {text:'Пространствена основа: резултатът от ГИС анализ / Приложение №1 е приет за настоящата справка. Пресичането НЕ се проверява повторно в Приложение №2.',bold:true},
   {text:'Установени от ГИС справката зони: '+(zones.length?zones.map(z=>z.code+(z.name?' „'+z.name+'“':'')).join('; '):'Няма предадени кодове на зони в резултата.')},
@@ -232,7 +232,7 @@ function normativePdf(results,register){
  for(const z of zones){
   content.push({text:z.code+(z.name?' — '+z.name:''),style:'sub'});
   const order=z.order||'Неустановено';
-  content.push({text:'Заповед за обявяване: '+order+(z.code==='BG0000194'?' (ДВ, бр. 80/11.09.2020 г.)':'')});
+  content.push({text:'Заповед за обявяване: '+order});
   if(z.code==='BG0000194'){
    content.push({text:'Източник за обявяването: МОСВ — официален документ за специфичните цели на зоната',link:'https://www.moew.government.bg/static/media/ups/articles/attachments/BG0000194_Reka_Chaya_specifichni_tseli_zap12a55845b82036a39b7ee327cf53070a5cb.pdf',color:'#165c86',decoration:'underline'});
    content.push({text:'Специфични цели: Заповед № РД-507/12.06.2024 г. (чл. 12а ЗБР). Това е акт за цели, а не замества заповедта за режимите.'});
@@ -253,12 +253,12 @@ function normativePdf(results,register){
   const code=String(r.zone_code||'')||(String(r.title||'').match(/BG\d{7}/)||[])[0];
   return code?zoneMap.has(code):Boolean(r.article||r.provision||r.clause);
  });
- if(!selected.length)content.push({text:'Няма потвърдени общи нормативни разпоредби или зонално специфични записи за избраните зони. Неустановено.',bold:true});
+ if(!selected.length)content.push({text:'Няма документално потвърдени приложими разпоредби за избраните зони.',bold:true});
  for(const r of selected){
   content.push({text:String(r.id||'')+' — '+String(r.title||''),style:'sub'});
   content.push({text:'Източник: '+String(r.source||'Неустановено'),link:/^https:\/\//.test(String(r.source||''))?String(r.source):undefined,color:'#165c86'});
-  content.push({text:'Документ / редакция: '+String(r.date||'Неустановено')+' · Страница / точка: '+String(r.page||'Неустановено')});
-  content.push({text:'Проверка на точната приложима разпоредба: '+(r.verified===true?'Проверен текст; актуална редакция: '+(r.revision_verified===true?'удостоверена':'Неустановено'):'Неустановено'),bold:true});
+  content.push({text:'Документ / редакция: '+String(r.date||'Неустановено')+' · Страница / точка: '+String(r.page||'Неустановено')+' · Разпоредба: '+String(r.article||r.provision||r.clause||'Неустановена нормативна разпоредба')});
+  content.push({text:'Проверка на точната приложима разпоредба: '+(r.verified===true?'Проверен текст; актуална редакция: '+(r.revision_verified===true?'удостоверена':'актуалността не е потвърдена'):'Неустановено'),bold:true});
  }
  content.push({text:'IV. Мотивиран експертен извод',style:'sub'});
  content.push({text:'ГИС фактът за установените зони се приема от Приложение №1 и не се поставя на повторно потвърждаване. Наличните данни позволяват идентифициране на зоните и проследяване на част от административните актове. Не позволяват окончателна преценка за допустимост, докато не бъдат извлечени точните действащи режими и не бъде съпоставена конкретната дейност с всяка приложима забрана, ограничение и изключение.',bold:true});
