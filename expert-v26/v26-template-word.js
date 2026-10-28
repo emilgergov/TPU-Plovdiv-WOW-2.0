@@ -22,7 +22,7 @@ async function make(scenario,paragraphs){
  const expected=['С реализацията','Електроснабдяването','Водоснабдяването','Отпадъчните води'];
  const expectedB=['С реализацията','Електроснабдяването','Водозахранването','Отпадъчните води'];
  const labels=scenario==='A'?expected:expectedB;
- for(let i=0;i<4;i++){const text=nodes(ps[MAP[scenario][i]],'t').map(t=>t.textContent).join('').trim();if(!text.replace(/^\\s+/,'').startsWith(labels[i]))throw Error('Неочакван абзац в оригиналния Word образец.');}
+ for(let i=0;i<4;i++){const text=nodes(ps[MAP[scenario][i]],'t').map(t=>t.textContent).join('').trim();if(!text.replace(/^\s+/,'').startsWith(labels[i]))throw Error('Неочакван абзац в оригиналния Word образец.');}
  for(let i=0;i<4;i++){
   const p=ps[MAP[scenario][i]],runs=nodes(p,'r');
   if(!runs.length||runs.some(r=>nodes(r,'highlight').length)||nodes(p,'drawing').length||nodes(p,'fldChar').length)throw Error('Защитен или сложен абзац; редакцията е спряна.');
@@ -30,7 +30,7 @@ async function make(scenario,paragraphs){
   texts[0].textContent=String(paragraphs[i]);texts[0].setAttribute('xml:space','preserve');
   for(const t of texts.slice(1))t.textContent='';
  }
- const sampleIds=nodes(xml,'t').map(t=>t.textContent).join(' ').match(/\\b\\d{5}\\.\\d+\\.\\d+(?:\\.\\d+){0,2}\\b/g)||[];
+ const sampleIds=nodes(xml,'t').map(t=>t.textContent).join(' ').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  if(sampleIds.length)throw Error('Оригиналният образец съдържа примерни кадастрални идентификатори: '+[...new Set(sampleIds)].slice(0,3).join(', ')+'. Не е безопасно да се издаде Word преди попълване на цялата преписка.');
  zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
  return new Blob([root.fflate.zipSync(zip,{level:6})],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
