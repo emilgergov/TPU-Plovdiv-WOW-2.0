@@ -136,7 +136,7 @@ async function process(file){
     }
     for(const id of text.match(rx)||[]){const parcel=parcelId(id);all.add(parcel);other.add(parcel)}
     dossierParcelEvidence.push(...contextualIds);
-    const isNotice=/уведомлен/i.test(item.name+' '+text.slice(0,800))||(/инвестиционно\s+предложение|предмет\s+на\s+ИП/i.test(text.slice(0,3000))&&/\b(?:ПИ|поземлен\s+имот)\b/i.test(text));
+    const isNotice=/уведомлен/i.test(item.name+' '+text.slice(0,800))||(/инвестиционно\s+предложение|предмет\s+на\s+ИП/i.test(text.slice(0,3000))&&/(?:^|[^\p{L}])(?:ПИ|поземлен\s+имот)(?!\p{L})/iu.test(text));
     if(isNotice&&text.trim()){
      const clean=text.replace(/\s+/g,' ').trim();
      const match=clean.match(/(?:относно|предмет(?:\s+на\s+(?:инвестиционното\s+)?предложение)?|наименование\s+на\s+(?:инвестиционното\s+)?предложение)\s*[:：–-]\s*(.{15,450}?)(?=\s+(?:възложител|местоположение|адрес|имот\s+с|приложения|описание\s+на)|$)/i);
