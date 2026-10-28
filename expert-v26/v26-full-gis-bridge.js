@@ -24,10 +24,12 @@ function mount(){
  async function remember(file){if(!window.indexedDB)return;return new Promise((resolve,reject)=>{const req=indexedDB.open('V26_APPROVED_GIS',1);req.onupgradeneeded=()=>req.result.createObjectStore('archives');req.onerror=()=>reject(req.error);req.onsuccess=()=>{const db=req.result,tx=db.transaction('archives','readwrite');tx.objectStore('archives').put(file,'approved');tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)}}})}
  async function restore(){if(!window.indexedDB)return null;return new Promise(resolve=>{const req=indexedDB.open('V26_APPROVED_GIS',1);req.onupgradeneeded=()=>req.result.createObjectStore('archives');req.onerror=()=>resolve(null);req.onsuccess=()=>{const db=req.result,tx=db.transaction('archives','readonly'),get=tx.objectStore('archives').get('approved');get.onsuccess=()=>{db.close();resolve(get.result||null)};get.onerror=()=>{db.close();resolve(null)}}})}
   input.addEventListener('change',async()=>{
-  info.textContent='Проверка на ГИС пакета…';
+  const selected=input.files&&input.files[0];
+  if(!selected){info.textContent='Не е избран ГИС ZIP файл. Изберете одобрения архив отново.';return;}
+  info.textContent='Избран архив: '+selected.name+' ('+Math.round(selected.size/1048576)+' MB). Проверка на ГИС пакета…';
   try{
-   const loaded=await api.openArchive(input.files[0]);
-   info.textContent='ГИС V26 готов: '+loaded.files+' файла. Запазване за следващи посещения…';try{await remember(input.files[0]);info.textContent='ГИС V26 готова. Архивът е запазен локално и ще се зарежда автоматично.';panel.style.display='none';}catch(e){info.textContent='ГИС V26 готова. Локалното запазване не успя ('+e.message+').';}
+   const loaded=await api.openArchive(selected);
+   info.textContent='ГИС V26 готов: '+loaded.files+' файла. Запазване за следващи посещения…';try{await remember(selected);info.textContent='ГИС V26 готова. Архивът е запазен локално и ще се зарежда автоматично.';panel.style.display='none';}catch(e){info.textContent='ГИС V26 готова. Локалното запазване не успя ('+e.message+').';}
    document.dispatchEvent(new Event('v26:gis-invalidated'));
   }catch(e){info.textContent='ГИС пакетът не е активиран: '+e.message;}
  });
