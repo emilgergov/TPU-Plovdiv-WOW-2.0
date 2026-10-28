@@ -5,6 +5,7 @@ const MAP={A:[18,19,20,21],B:[16,17,18,19]};
 const templatePaths={A:'templates/V26_3_Obrazec_A.docx',B:'templates/V26_3_Obrazec_B.docx'};
 function nodes(p,n){return Array.from(p.getElementsByTagNameNS(NS,n))}
 async function make(scenario,paragraphs){
+ scenario=({'А':'A','Б':'B'})[scenario]||scenario;
  if(!MAP[scenario])throw Error('ГИС сценарият А/Б не е потвърден.');
  if(!Array.isArray(paragraphs)||paragraphs.length!==4||paragraphs.some(x=>!String(x).trim()))throw Error('Липсват четирите проверени абзаца.');
  if(!root.JSZip)throw Error('Липсва JSZip.');
