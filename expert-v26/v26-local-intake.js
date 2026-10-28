@@ -20,7 +20,15 @@ async function ocrPdfPage(page,worker){
   const result=await worker.recognize(canvas);return String(result?.data?.text||'').trim();
  }finally{canvas.width=0;canvas.height=0}
 }
+async function imageOcr(data,name){
+ if(!window.Tesseract)await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+ const blob=new Blob([data],{type:/\.png$/i.test(name)?'image/png':/\.webp$/i.test(name)?'image/webp':/\.tiff?$/i.test(name)?'image/tiff':/\.bmp$/i.test(name)?'image/bmp':'image/jpeg'});
+ const url=URL.createObjectURL(blob);let worker=null;
+ try{worker=await window.Tesseract.createWorker('bul+eng',1);const result=await worker.recognize(url);extractText.lastOcrPages=1;return String(result?.data?.text||'')}
+ finally{if(worker)await worker.terminate();URL.revokeObjectURL(url)}
+}
 async function extractText(data,name){
+ if(/\.(jpe?g|png|webp|bmp|tiff?)$/i.test(name))return imageOcr(data,name);
  if(/\.(txt|csv|json|md)$/i.test(name))return new TextDecoder('utf-8').decode(data);
  if(/\.pdf$/i.test(name)){
   if(!window.pdfjsLib)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
@@ -102,7 +110,7 @@ async function process(file){
  const dossierDocuments=[];
  for(const item of list){
   let status='описан',text='';
-  if(/\.(txt|csv|json|md|pdf|docx)$/i.test(item.name)&&item.size<=20*1024*1024){
+  if(/\.(txt|csv|json|md|pdf|docx|jpe?g|png|webp|bmp|tiff?)$/i.test(item.name)&&item.size<=20*1024*1024){
    try{
     const unpacked=await readEntry(bytes,v,item);
     if(unpacked.byteLength!==item.size)throw Error('Несъответствие в ZIP размер.');
