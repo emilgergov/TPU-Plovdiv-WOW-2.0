@@ -17,3 +17,5 @@ console.log('PASS: V26 GIS archive picker regression (static wiring)');
 
 assert.match(bridge,/panel\.style\.display='none'/, 'Full GIS picker should collapse after activation');
 assert.match(bridge,/Архив: '\+selected\.name/, 'Successful load must identify archive');
+
+assert.equal((bridge.match(/new Event\('v26:index-ready'\)/g)||[]).length,3,'Hosted, restored and manually loaded GIS must all notify the existing parcel lookup');
