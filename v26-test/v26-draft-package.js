@@ -213,12 +213,12 @@ function normativePdf(results,register){
   for(const z of [...(r.archived_overlay_records||[]),...(r.archived_zones||[])]){
    const code=typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim();
    if(!/^BG\d{7}$/.test(code))continue;
-   if(!zoneMap.has(code))zoneMap.set(code,{code,name:z.name_bg||z.name||'',order:z.order_no||''});
+   if(!zoneMap.has(code))zoneMap.set(code,{code,name:z?.name_bg||z?.name||'',order:z?.order_no||''});
   }
  }
  for(const z of register?.gisSummary?.archived_zones||[]){
   const code=String(z?.sitecode||z?.code||'').trim();
-  if(/^BG\d{7}$/.test(code)&&!zoneMap.has(code))zoneMap.set(code,{code,name:z.name_bg||'',order:z.order_no||''});
+  if(/^BG\d{7}$/.test(code)&&!zoneMap.has(code))zoneMap.set(code,{code,name:z?.name_bg||'',order:z?.order_no||''});
  }
  const zones=[...zoneMap.values()].sort((a,b)=>a.code.localeCompare(b.code));
  const records=register?.records||[];
