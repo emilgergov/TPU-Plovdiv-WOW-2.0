@@ -30,6 +30,10 @@ async function make(scenario,paragraphs){
   texts[0].textContent=String(paragraphs[i]);texts[0].setAttribute('xml:space','preserve');
   for(const t of texts.slice(1))t.textContent='';
  }
+ // Protect the administrative conclusion and parcel/recipient sections from stale sample facts.
+ // Protected territories (ЗЗТ) and Natura 2000 protected zones (ЗБР) are distinct concepts.
+ const protectedTerritoryText=nodes(xml,'t').map(t=>t.textContent).join(' ');
+ if(!protectedTerritoryText.includes('защитени територии'))throw Error('Липсва отделната проверка за защитени територии по ЗЗТ.');
  const sampleIds=nodes(xml,'t').map(t=>t.textContent).join(' ').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  if(sampleIds.length)throw Error('Оригиналният образец съдържа примерни кадастрални идентификатори: '+[...new Set(sampleIds)].slice(0,3).join(', ')+'. Не е безопасно да се издаде Word преди попълване на цялата преписка.');
  zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
