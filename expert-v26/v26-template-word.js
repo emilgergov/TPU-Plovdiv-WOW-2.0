@@ -30,6 +30,8 @@ async function make(scenario,paragraphs){
   texts[0].textContent=String(paragraphs[i]);texts[0].setAttribute('xml:space','preserve');
   for(const t of texts.slice(1))t.textContent='';
  }
+ const sampleIds=nodes(xml,'t').map(t=>t.textContent).join(' ').match(/\\b\\d{5}\\.\\d+\\.\\d+(?:\\.\\d+){0,2}\\b/g)||[];
+ if(sampleIds.length)throw Error('Оригиналният образец съдържа примерни кадастрални идентификатори: '+[...new Set(sampleIds)].slice(0,3).join(', ')+'. Не е безопасно да се издаде Word преди попълване на цялата преписка.');
  zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
  return new Blob([root.fflate.zipSync(zip,{level:6})],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
 }
