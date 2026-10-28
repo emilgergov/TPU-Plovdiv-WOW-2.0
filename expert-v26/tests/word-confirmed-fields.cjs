@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const review=fs.readFileSync('expert-v26/v26-word-review.js','utf8');
 const word=fs.readFileSync('expert-v26/v26-template-word.js','utf8');
 const ui=fs.readFileSync('expert-v26/index.html','utf8');
-assert.match(review,/if\(auto\.subject\)result\.subject=auto\.subject/,'confirmed subject must override review field');
+assert.match(review,/if\(auto\.subject\)result\.subject=auto\.subject\.replace/,'confirmed subject must override review field and normalize heading');
 assert.match(review,/document\.getElementById\('ids'\)/,'parcel IDs must come from main input');
 assert.match(word,/metadata\.subject/,'Word subject must use confirmed metadata');
 assert.match(word,/parcelIds\.join\(', '\)/,'Word must insert confirmed parcels');
