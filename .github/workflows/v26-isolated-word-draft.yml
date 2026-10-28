@@ -12,6 +12,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install test-only DOCX dependencies
+        run: npm install --no-save --no-package-lock --ignore-scripts fflate@0.8.2 jsdom@25
       - name: JavaScript syntax
         run: |
           node --check expert-v26/v26-word-review.js
@@ -22,6 +24,8 @@ jobs:
         run: node expert-v26/tests/evidence-reconciliation.cjs
       - name: Confirmed fields regression
         run: node expert-v26/tests/word-confirmed-fields.cjs
+      - name: Generate both original Word templates
+        run: node expert-v26/tests/word-real-templates.cjs
       - name: Verify original Word templates exist
         run: |
           test -s expert-v26/templates/V26_3_Obrazec_A.docx
