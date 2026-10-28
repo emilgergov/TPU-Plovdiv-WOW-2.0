@@ -123,7 +123,7 @@ async function process(file){
    try{
     const unpacked=await readEntry(bytes,v,item);
     if(unpacked.byteLength!==item.size)throw Error('Несъответствие в ZIP размер.');
-    extractText.lastOcrPages=0;extractText.lastOcrError='';extractText.lastPageWarnings=[];text=await extractText(unpacked,item.name,{allowOcr:/уведомлен|notification/i.test(item.name)||!/\.pdf$/i.test(item.name)});
+    extractText.lastOcrPages=0;extractText.lastOcrError='';extractText.lastPageWarnings=[];text=await extractText(unpacked,item.name,{allowOcr:/уведомлен|notification/i.test(item.name)||!/\.pdf$/i.test(item.name)||(!leading.size&&!documentTexts.length)});
     status=text.trim()?(extractText.lastOcrPages?'OCR: '+extractText.lastOcrPages+' сканирани страници; експертна проверка':'текстът е прочетен'):(extractText.lastOcrError?'OCR неуспешен: '+extractText.lastOcrError:'няма извлекаем текст (възможно сканиран документ)');if(extractText.lastPageWarnings?.length)status+='; ПРОВЕРКА: '+extractText.lastPageWarnings.join(', ');if(/\.pdf$/i.test(item.name)&&!/уведомлен|notification/i.test(item.name)&&extractText.lastPageWarnings?.length)status+='; OCR на приложението е отложен за документален анализ';if(text.trim())documentTexts.push({source:item.name,text:text.slice(0,150000)});
     // Distinguish cadastral context: neighbours and former IDs are evidence, not project parcels.
     const contextualIds=[];
@@ -136,7 +136,7 @@ async function process(file){
     }
     for(const id of text.match(rx)||[]){const parcel=parcelId(id);all.add(parcel);other.add(parcel)}
     dossierParcelEvidence.push(...contextualIds);
-    const isNotice=/уведомлен/i.test(item.name+' '+text.slice(0,800));
+    const isNotice=/уведомлен/i.test(item.name+' '+text.slice(0,800))||(/инвестиционно\s+предложение|предмет\s+на\s+ИП/i.test(text.slice(0,3000))&&/\b(?:ПИ|поземлен\s+имот)\b/i.test(text));
     if(isNotice&&text.trim()){
      const clean=text.replace(/\s+/g,' ').trim();
      const match=clean.match(/(?:относно|предмет(?:\s+на\s+(?:инвестиционното\s+)?предложение)?|наименование\s+на\s+(?:инвестиционното\s+)?предложение)\s*[:：–-]\s*(.{15,450}?)(?=\s+(?:възложител|местоположение|адрес|имот\s+с|приложения|описание\s+на)|$)/i);
