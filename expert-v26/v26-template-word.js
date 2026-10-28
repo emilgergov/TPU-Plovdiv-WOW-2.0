@@ -56,6 +56,11 @@ async function make(scenario,paragraphs,metadata){
   replaceParagraph(14,'Във връзка с уведомление '+metadata.incomingReference+' за '+metadata.subject+', имоти '+parcelIds.join(', ')+'.');
  }
  legalIndices.forEach((index,i)=>replaceParagraph(index,String(metadata.legalParagraphs[i])));
+ // The procedure statement and five impact findings are case-specific, never reusable sample findings.
+ if(!String(metadata.procedureFinding||'').trim())throw Error('Липсва проверена констатация за приложимата процедура по Наредбата за ОС.');
+ if(!Array.isArray(metadata.impactFindings)||metadata.impactFindings.length!==5||metadata.impactFindings.some(v=>!String(v).trim()))throw Error('Липсват петте проверени констатации за въздействията.');
+ replaceParagraph(scenario==='A'?17:15,metadata.procedureFinding);
+ for(let i=0;i<5;i++)replaceParagraph(26+i,String(metadata.impactFindings[i]));
  const sampleIds=nodes(xml,'t').map(t=>t.textContent).join(' ').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  if(sampleIds.some(id=>!parcelIds.includes(id)))throw Error('Оригиналният образец съдържа примерни кадастрални идентификатори: '+[...new Set(sampleIds)].slice(0,3).join(', ')+'. Не е безопасно да се издаде Word преди попълване на цялата преписка.');
  zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
