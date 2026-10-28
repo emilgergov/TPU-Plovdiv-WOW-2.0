@@ -132,8 +132,26 @@ async function process(file){
     if(/уведомлен/i.test(item.name+' '+text.slice(0,800))){for(const id of text.match(/(?:позем[еe]н\s+имот|ПИ)\s+(?:с\s+)?(?:идентификатор\s+)?(\d{5}\.\d+\.\d+)/gi)||[]){const m=id.match(/\d{5}\.\d+\.\d+/);if(m)leading.add(parcelId(m[0]));}}
    }catch(err){status='неуспешно извличане: '+err.message}
   }
-  const referenceMatches=[...text.matchAll(/(?:вх\\.?\\s*(?:№|номер)?\\s*|входящ\\s*(?:№|номер)\\s*)([А-ЯA-Z0-9][А-ЯA-Z0-9\\-\\/\\. ]{0,45}?)\\s*(?:от\\s*|\\/\\s*)(\\d{1,2}[.\\-/]\\d{1,2}[.\\-/]\\d{4})/giu)].slice(0,30).map(m=>({number:m[1].trim(),date:m[2],source:item.name}));
-  dossierDocuments.push({file:item.name,type:/уведомлен/i.test(item.name+' '+text.slice(0,800))?'notification':/допълнителна\\s+информация|доп\\.\\s*информация/i.test(item.name+' '+text.slice(0,800))?'supplementary':'attachment',readable:!!text.trim(),references:referenceMatches,facts:[]});
+  // Extract only text-supported, traceable claims; never infer facts from filenames.
+  const referenceMatches=[...text.matchAll(/(?:вх\.?\s*(?:№|номер)?\s*|входящ\s*(?:№|номер)\s*)([А-ЯA-Z0-9][А-ЯA-Z0-9\-\/\. ]{0,45}?)\s*(?:от\s*|\/\s*)(\d{1,2}[.\-/]\d{1,2}[.\-/]\d{4})/giu)].slice(0,30).map(m=>({number:m[1].trim(),date:m[2],source:item.name}));
+  const factualSnippets=[];
+  const lines=text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const factPatterns=[
+   ['water_supply',/водоснабдяване|водоизточник|сондаж|кладенец/i],
+   ['wastewater',/отпадъчни води|канализац|изгребна яма|водоплът/i],
+   ['electricity',/електрозахранване|електропровод|кабелно трасе/i],
+   ['access',/транспортен достъп|пътен достъп|подход към имота/i],
+   ['construction',/застрояване|строителство|изграждане|реконструкция/i]
+  ];
+  for(const line of lines){
+   if(line.length<20||line.length>900)continue;
+   for(const [key,re] of factPatterns)if(re.test(line)){
+    factualSnippets.push({key,value:line.slice(0,700),source:item.name,kind:'source_excerpt',requires_semantic_review:true});
+    break;
+   }
+   if(factualSnippets.length>=60)break;
+  }
+  dossierDocuments.push({file:item.name,type:/уведомлен/i.test(item.name+' '+text.slice(0,800))?'notification':/допълнителна\s+информация|доп\.\s*информация/i.test(item.name+' '+text.slice(0,800))?'supplementary':'attachment',readable:!!text.trim(),references:referenceMatches,facts:factualSnippets});
   docs.push({filename:item.name,status});
  }
  for(const id of leading)other.delete(id);
