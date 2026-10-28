@@ -20,6 +20,10 @@ jobs:
           node --check expert-v26/v26-template-word.js
           node --check expert-v26/v26-draft-package.js
           node --check expert-v26/v26-dossier-evidence.js
+          node --check expert-v26/v26-full-gis-bridge.js
+          node --check expert-v26/v26-approved-gis-zip.js
+      - name: GIS archive picker regression
+        run: node expert-v26/tests/v26-gis-archive-picker.test.cjs
       - name: Evidence regression
         run: node expert-v26/tests/evidence-reconciliation.cjs
       - name: Confirmed fields regression
