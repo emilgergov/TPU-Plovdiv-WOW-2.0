@@ -5,14 +5,14 @@ let fields=[],confirmed=null,caseFields={};
 function mount(){
  const button=document.getElementById('proposal');if(!button||document.getElementById('v26WordReview'))return;
  const box=document.createElement('details');box.id='v26WordReview';box.style.cssText='margin:12px 0;padding:12px;border:1px solid #82998a;border-radius:8px';
- const summary=document.createElement('summary');summary.textContent='Проверка на четирите абзаца за Word предложението';box.append(summary);
+ const summary=document.createElement('summary');summary.textContent='Проверка на съдържанието и данните за Word предложението';box.append(summary);
  const hint=document.createElement('p');hint.textContent='Попълнете само доказани обстоятелства от преписката. Прегледът е задължителен преди Word. Празни или непотвърдени абзаци блокират генерирането.';box.append(hint);
  fields=labels.map(label=>{const wrap=document.createElement('div');wrap.style.margin='8px 0';const title=document.createElement('label');title.textContent=label;title.style.display='block';const area=document.createElement('textarea');area.rows=3;area.style.cssText='display:block;width:100%;box-sizing:border-box';area.addEventListener('input',()=>{confirmed.checked=false});wrap.append(title,area);box.append(wrap);return area});
  const caseTitle=document.createElement('h4');caseTitle.textContent='Променливи данни за Word — потвърждение';box.append(caseTitle);
  for(const [key,label] of [['recipient','Адресат'],['address','Адрес'],['subject','Предмет на ИП'],['incomingReference','Входящ номер и дата'],['salutation','Обръщение']]){
   const wrap=document.createElement('div');wrap.style.margin='6px 0';const caption=document.createElement('label');caption.textContent=label;caption.style.display='block';const input=document.createElement('input');input.type='text';input.style.cssText='width:100%;box-sizing:border-box';input.addEventListener('input',()=>{confirmed.checked=false});caseFields[key]=input;wrap.append(caption,input);box.append(wrap);
  }
- const check=document.createElement('label');confirmed=document.createElement('input');confirmed.type='checkbox';check.append(confirmed,document.createTextNode(' Потвърждавам, че четирите абзаца са проверени по документите от преписката.'));box.append(check);
+ const check=document.createElement('label');confirmed=document.createElement('input');confirmed.type='checkbox';check.append(confirmed,document.createTextNode(' Потвърждавам, че четирите абзаца и административните данни са проверени по документите от преписката.'));box.append(check);
  button.parentNode.insertBefore(box,button);
 }
 function getConfirmedParagraphs(){
@@ -22,11 +22,15 @@ function getConfirmedParagraphs(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 function getConfirmedMetadata(){
  if(!confirmed?.checked)throw Error('Потвърдете данните за Word предложението.');
+ if(Object.keys(caseFields).length!==5)throw Error('Формулярът за административни данни не е зареден.');
  const result=Object.fromEntries(Object.entries(caseFields).map(([k,v])=>[k,v.value.trim()]));
  if(Object.values(result).some(v=>!v))throw Error('Попълнете адресат, адрес, предмет, входящ номер и обръщение.');
  return result;
 }
 document.addEventListener('v26:dossier-loaded',event=>{
+ if(confirmed)confirmed.checked=false;
+ for(const f of fields)f.value='';
+ for(const f of Object.values(caseFields))f.value='';
  const draft=event.detail?.context?.characterization;
  const topics=[['construction','Строителни дейности'],['electricity','Електрозахранване'],['water_supply','Водоснабдяване'],['wastewater','Отпадъчни води']];
  const box=document.getElementById('v26WordReview');if(!box)return;
