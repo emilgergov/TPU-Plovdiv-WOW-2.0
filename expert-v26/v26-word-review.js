@@ -37,12 +37,17 @@ function autoEvidence(){
  const subject=window.V26SubjectContext;
  return {paragraphs,ids:[...new Set(ids)].join(', '),subject:subject?.confirmed?(subject.wordHeading||subject.title):null};
 }
+function requireExpertConfirmation(){
+ if(!confirmed||!confirmed.checked){const panel=document.getElementById('v26WordReview');if(panel){panel.hidden=false;panel.open=true;}throw Error('Преди генериране на Word потвърдете експертната проверка на описанията, данните и правните констатации.');}
+}
 function getConfirmedParagraphs(){
+ requireExpertConfirmation();
  const fallback='ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва достатъчно потвърдена информация от преписката.';
  const auto=autoEvidence();return fields.map((f,i)=>f.value.trim()||auto.paragraphs[i]||fallback);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 function getConfirmedMetadata(){
+ requireExpertConfirmation();
  // Working proposal: unresolved fields remain explicit review notes in DOCX.
  if(Object.keys(caseFields).length!==6)throw Error('Формулярът за административни данни не е зареден.');
  const result=Object.fromEntries(Object.entries(caseFields).map(([k,v])=>[k,v.value.trim()]));
