@@ -12,7 +12,7 @@ async function openArchive(file){
  const m=new Map(list.filter(x=>!x.directory).map(x=>[x.filename.split('/').pop(),x]));
  for(const key of ['parcels_04.json.gz','parcelgeom_04.json.gz','overlays_04.json.gz'])if(!m.has(key)){await next.close();throw Error('Непълен ГИС пакет: '+key)}
  if(reader)await reader.close();
- reader=next;entries=m;cache.clear();archiveName=file.name;
+ reader=next;entries=m;hostedRoot=null;hostedManifest=null;cache.clear();archiveName=file.name;
  return {name:archiveName,files:m.size};
 }
 /* Python geometry export may contain non-standard NaN numeric literals. Normalize only tokens outside JSON strings. */
@@ -58,7 +58,7 @@ async function lookup(ids){
   const d=maps.get(cadnum.slice(0,2)),p=d.parcels.get(cadnum)?.[0],g=d.geoms.get(cadnum)||[],o=d.overlays.get(cadnum)||[],inter=d.intersections.get(cadnum)||[];
   const features=g.filter(r=>r[1]?.type).map((r,i)=>({type:'Feature',properties:{cadnum,source:'V26_APPROVED',part:i},geometry:r[1]}));
   const overlapFeatures=inter.filter(r=>r[2]?.type).map((r,i)=>({type:'Feature',properties:{cadnum,sitecode:r[1],part:i},geometry:r[2]}));
-  return {input,cadnum,status:features.length?'Намерен':p?'Геометрия липсва':'Не е намерен',settlement:p?.[1]||'',locality:p?.[2]||'',area_m2_source:p?.[3]||0,geojson:{type:'FeatureCollection',features},overlap_geojson:{type:'FeatureCollection',features:overlapFeatures},archived_overlay_records:o.map(r=>({sitecode:r[1],name_bg:r[2],order_no:r[3],dv:r[4],area_ha_source:r[5]})),intersection_verified_outside:!!features.length&&!o.length&&!inter.length&&!!hostedManifest&&hostedManifest.shards===258,spatial_check_basis:hostedManifest?'Пълен публикуван ГИС набор (258 сегмента), проверени пресичания за кадастралния идентификатор':'Архивен ГИС набор — пълнотата на покритието не е потвърдена',source:'Одобрена работна ГИС база V26'};
+  return {input,cadnum,status:features.length?'Намерен':p?'Геометрия липсва':'Не е намерен',settlement:p?.[1]||'',locality:p?.[2]||'',area_m2_source:p?.[3]||0,geojson:{type:'FeatureCollection',features},overlap_geojson:{type:'FeatureCollection',features:overlapFeatures},archived_overlay_records:o.map(r=>({sitecode:r[1],name_bg:r[2],order_no:r[3],dv:r[4],area_ha_source:r[5]})),intersection_verified_outside:!!features.length&&!o.length&&!inter.length&&((!!hostedManifest&&hostedManifest.shards===258)||(!hostedRoot&&!!entries&&['parcels','parcelgeom','overlays','overlapgeom'].every(kind=>entries.has(kind+'_'+cadnum.slice(0,2)+'.json.gz')))),spatial_check_basis:hostedManifest?'Пълен публикуван ГИС набор (258 сегмента), проверени пресичания за кадастралния идентификатор':(!hostedRoot&&entries?'Локален ГИС ZIP — четирите пространствени сегмента за кадастралния префикс':'ГИС покритието не е потвърдено'),source:'Одобрена работна ГИС база V26'};
  });
  return {results,summary:{found_count:results.filter(r=>r.status==='Намерен').length,requested_count:results.length,geometry_area_sum_m2:results.reduce((s,r)=>s+r.area_m2_source,0),archived_zones:[],note:'Работна ГИС база V26: '+archiveName},geometry_qa:[]};
 }
