@@ -8,12 +8,13 @@ async function make(scenario,paragraphs){
  scenario=({'А':'A','Б':'B'})[scenario]||scenario;
  if(!MAP[scenario])throw Error('ГИС сценарият А/Б не е потвърден.');
  if(!Array.isArray(paragraphs)||paragraphs.length!==4||paragraphs.some(x=>!String(x).trim()))throw Error('Липсват четирите проверени абзаца.');
- if(!root.JSZip)throw Error('Липсва JSZip.');
+ if(!root.fflate?.unzipSync||!root.fflate?.zipSync){await new Promise((resolve,reject)=>{const el=document.createElement('script');el.src='https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js';el.onload=resolve;el.onerror=()=>reject(Error('Неуспешно зареждане на ZIP библиотеката.'));document.head.appendChild(el)});}
+ if(!root.fflate?.unzipSync||!root.fflate?.zipSync)throw Error('Липсва ZIP библиотека.');
  const response=await fetch(templatePaths[scenario],{cache:'no-store'});
  if(!response.ok)throw Error('Оригиналният образец '+scenario+' не е публикуван. Не се създава заместител.');
- const zip=await root.JSZip.loadAsync(await response.arrayBuffer());
- const entry=zip.file('word/document.xml');if(!entry)throw Error('Невалиден Word образец.');
- const xml=new DOMParser().parseFromString(await entry.async('string'),'application/xml');
+ const zip=root.fflate.unzipSync(new Uint8Array(await response.arrayBuffer()));
+ const entry=zip['word/document.xml'];if(!entry)throw Error('Невалиден Word образец.');
+ const xml=new DOMParser().parseFromString(new TextDecoder().decode(entry),'application/xml');
  if(xml.getElementsByTagName('parsererror').length)throw Error('Грешка в Word XML.');
  const body=nodes(xml,'body')[0];
  const ps=Array.from(body.childNodes).filter(x=>x.nodeType===1&&x.namespaceURI===NS&&x.localName==='p');
@@ -29,8 +30,8 @@ async function make(scenario,paragraphs){
   texts[0].textContent=String(paragraphs[i]);texts[0].setAttribute('xml:space','preserve');
   for(const t of texts.slice(1))t.textContent='';
  }
- zip.file('word/document.xml',new XMLSerializer().serializeToString(xml));
- return zip.generateAsync({type:'blob',compression:'DEFLATE'});
+ zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
+ return new Blob([root.fflate.zipSync(zip,{level:6})],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
 }
 root.V26TemplateWord=Object.freeze({make,templatePaths});
 })(typeof window!=='undefined'?window:globalThis);
