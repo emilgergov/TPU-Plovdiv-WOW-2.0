@@ -211,7 +211,7 @@ function normativePdf(results,register){
  const zoneMap=new Map();
  for(const r of results){
   for(const z of [...(r.archived_overlay_records||[]),...(r.archived_zones||[])]){
-   const code=typeof z==='string'?z:String(z.sitecode||z.code||'');
+   const code=typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim();
    if(!/^BG\d{7}$/.test(code))continue;
    if(!zoneMap.has(code))zoneMap.set(code,{code,name:z.name_bg||z.name||'',order:z.order_no||''});
   }
