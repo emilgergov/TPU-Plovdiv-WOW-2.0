@@ -1,0 +1,26 @@
+name: V26 isolated Word draft checks
+on:
+  push:
+    branches:
+      - work/v26-auto-word-evidence-20261028
+  workflow_dispatch:
+jobs:
+  word-draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check expert-v26/v26-word-review.js
+          node --check expert-v26/v26-template-word.js
+          node --check expert-v26/v26-draft-package.js
+          node --check expert-v26/v26-dossier-evidence.js
+      - name: Evidence regression
+        run: node expert-v26/tests/evidence-reconciliation.cjs
+      - name: Verify original Word templates exist
+        run: |
+          test -s expert-v26/templates/V26_3_Obrazec_A.docx
+          test -s expert-v26/templates/V26_3_Obrazec_B.docx
