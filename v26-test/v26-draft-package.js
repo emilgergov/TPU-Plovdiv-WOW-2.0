@@ -47,7 +47,7 @@ function scenarioFromGIS(results,roles){
  const leading=results.filter(r=>(roles[r.input]||roles[r.cadnum])==='leading');
  if(!leading.length)throw Error('Няма потвърден водещ имот.');
  if(leading.some(r=>r.status!=='Намерен'||!r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type))))throw Error('Липсва действителна геометрия за водещ имот.');
- const zones=leading.flatMap(r=>r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z:String(z.sitecode||z.code||'')).filter(z=>/^BG[0-9]{7}$/.test(z.trim()));
+ const zones=leading.flatMap(r=>r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG[0-9]{7}$/.test(z.trim()));
  if(zones.length)return {scenario:'Б',basis:'потвърдени пространствени пресичания',zones:[...new Set(zones)]};
  // Archived overlays justify a provisional B draft, not a verified current legal intersection.
  const archived=leading.flatMap(r=>[...(r.archived_overlay_records||[]),...(r.archived_zones||[])]).map(z=>typeof z==='string'?z.trim():String(z.sitecode||z.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z));
