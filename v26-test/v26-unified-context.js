@@ -10,8 +10,10 @@ function sharedDiagnosis(intake,roles,gis){
  }
  for(const f of intake.dossier_analysis?.findings||[])facts.push({kind:'dossier',claim:f,source:'ZIP преписка',status:'нерешено'});
  const complete=!!leading.length&&leading.every(r=>r.status==='Намерен'&&r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type)));
- const current=leading.flatMap(r=>r.verified_zone_intersections||[]);
- const archived=leading.flatMap(r=>[...(r.archived_overlay_records||[]),...(r.archived_zones||[])]);
+ const code=z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim();
+ const valid=z=>/^BG[0-9]{7}$/.test(code(z));
+ const current=leading.flatMap(r=>r.verified_zone_intersections||[]).filter(valid);
+ const archived=leading.flatMap(r=>[...(r.archived_overlay_records||[]),...(r.archived_zones||[])]).filter(valid);
  const outside=complete&&leading.every(r=>r.intersection_verified_outside===true);
  let scenario=null,spatialStatus='нерешено';
  if(current.length){scenario='Б';spatialStatus='доказано'}
