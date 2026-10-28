@@ -16,5 +16,6 @@ function getConfirmedParagraphs(){
  const values=fields.map(f=>f.value.trim());if(values.some(x=>!x))throw Error('Попълнете четирите абзаца за Word предложението.');return values;
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
+document.addEventListener('v26:gis-invalidated',()=>{if(confirmed)confirmed.checked=false;for(const f of fields)f.value='';});
 window.V26WordReview=Object.freeze({getConfirmedParagraphs});
 })();
