@@ -57,13 +57,28 @@ jobs:
           s=p.read_text(encoding='utf-8').replace("api.openHosted('./gis-data')", "api.openHosted('../expert-v26/gis-data')")
           p.write_text(s,encoding='utf-8')
           PY
+          # Frozen V26.4 checkpoint: copy the accepted functional build only once.
+          if [ ! -f public/v26-4/CHECKPOINT_V26_4_BG.txt ]; then
+            mkdir -p public/v26-4
+            rsync -a public/v26-test/ public/v26-4/
+            cat > public/v26-4/CHECKPOINT_V26_4_BG.txt <<'EOF'
+ТПУ Пловдив — Експертен анализ V26.4
+КОНТРОЛНА ТОЧКА · 28.10.2026
+База: публикувана стабилна V26.3 + функционално проверен работен ZIP пакет (Word + Приложение №1 PDF + Приложение №2 PDF).
+ВЪТРЕШНИ БЕЛЕЖКИ ЗА ПРОДЪЛЖЕНИЕ:
+1. Функционалността на генерирането е проверена с примерната ZIP преписка и два кадастрални идентификатора. Това не е потвърждение на окончателната правна или аналитична редакция.
+2. Да се възстанови и интегрира вече проверената единна аналитична логика за стъпка 4 (PDF №2) и стъпка 5 (Word предложение), без да се започва анализът отначало. Да се проследят предходните проверени материали и решения.
+ОСТАВА: довършване на аналитичното съдържание и оформлението на PDF №2 и Word; правните изводи изискват официална проверка. ГИС и PDF №1 не се променят.
+Не презаписвайте тази контролна версия при следващи тестове.
+EOF
+          fi
           test -s public/v26-test/index.html
           test -s public/expert-v26/gis-data/manifest.json
           test "$(find public/expert-v26/gis-data -name '*.json.gz' | wc -l)" -eq 258
           cd public
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add v26-test
+          git add v26-test v26-4
           if git diff --cached --quiet; then echo 'No preview changes'; exit 0; fi
           git commit -m 'Update isolated V26 preview (keep WOW unchanged)'
           # Rebase only the isolated preview update onto the latest main if another publisher won the race.
