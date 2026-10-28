@@ -242,7 +242,7 @@ function normativePdf(results,register){
   const order=z.order||'Неустановено';
   content.push({text:'Заповед за обявяване: '+order});
   if(z.code==='BG0000194'){
-   content.push({text:'Източник за обявяването: МОСВ — официален документ за специфичните цели на зоната',link:'https://www.moew.government.bg/static/media/ups/articles/attachments/BG0000194_Reka_Chaya_specifichni_tseli_zap12a55845b82036a39b7ee327cf53070a5cb.pdf',color:'#165c86',decoration:'underline'});
+   content.push({text:'Източник: МОСВ — специфични цели за BG0000194 (отворете електронната препратка)',link:'https://www.moew.government.bg/static/media/ups/articles/attachments/BG0000194_Reka_Chaya_specifichni_tseli_zap12a55845b82036a39b7ee327cf53070a5cb.pdf',color:'#165c86',decoration:'underline',fontSize:9});
    content.push({text:'Специфични цели: Заповед № РД-507/12.06.2024 г. (чл. 12а ЗБР). Това е акт за цели, а не замества заповедта за режимите.'});
   }
   content.push({text:'Изменения и допълнения на заповедта: Актуалността на измененията не е потвърдена.'});
@@ -264,7 +264,8 @@ function normativePdf(results,register){
  if(!selected.length)content.push({text:'Няма документално потвърдени приложими разпоредби за избраните зони.',bold:true});
  for(const r of selected){
   content.push({text:String(r.id||'')+' — '+String(r.title||''),style:'sub'});
-  content.push({text:'Източник: '+String(r.source||'Неустановено'),link:/^https:\/\//.test(String(r.source||''))?String(r.source):undefined,color:'#165c86'});
+  const sourceUrl=String(r.source||'');
+  content.push({text:/^https:\/\//.test(sourceUrl)?'Източник: електронна препратка (отворете в PDF)':'Източник: '+(sourceUrl||'Неустановено'),link:/^https:\/\//.test(sourceUrl)?sourceUrl:undefined,color:'#165c86',fontSize:9});
   content.push({text:'Документ / редакция: '+String(r.date||'Неустановено')+' · Страница / точка: '+String(r.page||'Неустановено')+' · Разпоредба: '+String(r.article||r.provision||r.clause||'Неустановена нормативна разпоредба')});
   content.push({text:'Проверка на точната приложима разпоредба: '+(r.verified===true?'Проверен текст; актуална редакция: '+(r.revision_verified===true?'удостоверена':'актуалността не е потвърдена'):'Неустановено'),bold:true});
  }
