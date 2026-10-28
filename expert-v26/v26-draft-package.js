@@ -272,7 +272,12 @@ function normativePdf(results,register){
  content.push({text:'IV. Мотивиран експертен извод',style:'sub'});
  content.push({text:'ГИС фактът за установените зони се приема от Приложение №1 и не се поставя на повторно потвърждаване. Наличните данни позволяват идентифициране на зоните и проследяване на част от административните актове. Не позволяват окончателна преценка за допустимост, докато не бъдат извлечени точните действащи режими и не бъде съпоставена конкретната дейност с всяка приложима забрана, ограничение и изключение.',bold:true});
  content.push({text:'Статус: МОТИВИРАН РАБОТЕН ДОКЛАД. Не представлява издадено становище или окончателна правна преценка.'});
- return pdfDef('Приложение №2 — нормативен и документален анализ',content);
+ const def=pdfDef('Приложение №2 — нормативен и документален анализ',content);
+ // Compact only Annex 2; leave the approved GIS Annex 1 layout untouched.
+ def.pageMargins=[42,35,42,35];
+ def.defaultStyle={...def.defaultStyle,fontSize:9,lineHeight:1.02};
+ def.styles={...def.styles,heading:{...def.styles.heading,fontSize:14,margin:[0,0,0,8]},sub:{...def.styles.sub,fontSize:10,margin:[0,7,0,3]}};
+ return def;
 }
 
 async function make(results,roles,register){
