@@ -165,8 +165,10 @@ async function process(file){
   dossierDocuments.push({file:item.name,type:/уведомлен/i.test(item.name+' '+text.slice(0,800))?'notification':/допълнителна\s+информация|доп\.\s*информация/i.test(item.name+' '+text.slice(0,800))?'supplementary':'attachment',readable:!!text.trim(),date:documentDate,references:referenceMatches,facts:factualSnippets,claims:wastewaterClaims});
   docs.push({filename:item.name,status});
  }
+ const dossierAnalysis=(window.V26DossierEvidence&&typeof window.V26DossierEvidence.analyze==='function')?
+  window.V26DossierEvidence.analyze(dossierDocuments.map(d=>({file:d.file,type:d.type,date:d.date,registration:d.references[0]?.number||null,facts:d.claims||[]}))):null;
  for(const id of leading)other.delete(id);
- return {archive_name:file.name,archive_entries:list.length,files:docs,dossier_documents:dossierDocuments,evidence:[],subject_candidates:subjects,semantic_review:semanticReview(subjects,documentTexts),all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[...other],warnings:['Локален предварителен текстов анализ. Проверете ролите ръчно.','PDF/DOCX се извличат локално, когато съдържат текст. Сканирани документи без текстов слой изискват отделно разчитане.']}};
+ return {archive_name:file.name,archive_entries:list.length,files:docs,dossier_documents:dossierDocuments,dossier_analysis:dossierAnalysis,evidence:[],subject_candidates:subjects,semantic_review:semanticReview(subjects,documentTexts),all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[...other],warnings:['Локален предварителен текстов анализ. Проверете ролите ръчно.','PDF/DOCX се извличат локално, когато съдържат текст. Сканирани документи без текстов слой изискват отделно разчитане.']}};
 }
 window.V26LocalIntake={process};
 })();
