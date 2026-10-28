@@ -11,7 +11,7 @@ function mount(){
  const info=document.createElement('div');info.id='v26FullGISStatus';info.textContent='Заредете пълния ГИС пакет за всички имоти и пресичания. Файлът остава локално на компютъра.';
  panel.append(title,input,info);anchor.parentElement.insertBefore(panel,anchor.nextSibling);
  /* Hosted mode is preferred; retain manual controls until its manifest and shards are live. */
- api.openHosted('./gis-data').then(()=>{
+ api.openHosted('../expert-v26/gis-data').then(()=>{
   panel.style.display='none';
   const legacy=document.getElementById('v26LocalIndexMount');
   if(legacy)legacy.style.setProperty('display','none','important');
