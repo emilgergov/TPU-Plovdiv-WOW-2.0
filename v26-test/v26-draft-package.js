@@ -281,7 +281,13 @@ async function make(results,roles,register){
  const z=zipWriter(),ids=results.map(r=>r.input),normalized=Object.fromEntries(results.map(r=>[r.input,roles[r.input]||roles[r.cadnum]]));
  const determination=scenarioFromGIS(results,normalized);
  if(!determination.scenario)throw Error('Не е доказано, че всички водещи имоти са извън Натура 2000. Сценарий А не се допуска по подразбиране.');
- const includeAnnex2=register?.includeAnnex2===true;const paragraphs=register?.verifiedCharacterizationParagraphs; if(!window.V26TemplateWord?.make)throw Error('Липсва модулът за оригиналните Word образци.');const word=await window.V26TemplateWord.make(determination.scenario,paragraphs,register?.verifiedCaseMetadata);if(word.size<100||new TextDecoder().decode(await word.slice(0,2).arrayBuffer())!=='PK')throw Error('DOCX не е валиден ZIP контейнер.');z.file('01_Predlozhenie_RABOTEN_PROEKT.docx',word);
+ const includeAnnex2=register?.includeAnnex2===true;const paragraphs=register?.verifiedCharacterizationParagraphs; if(!window.V26TemplateWord?.make)throw Error('Липсва модулът за оригиналните Word образци.');const caseMetadata={...(register?.verifiedCaseMetadata||{})};
+ // Confirmed parcel roles and resolved GIS results are the authoritative input for the working draft.
+ // Never require a second, manually retyped copy of cadastral identifiers.
+ const confirmedIds=results.map(r=>String(r.input||r.cadnum||'').trim()).filter(id=>/^\d{5}\.\d+\.\d+(?:\.\d+){0,2}$/.test(id));
+ if(confirmedIds.length!==results.length)throw Error('Липсва валиден кадастрален идентификатор в потвърдената ГИС справка.');
+ caseMetadata.parcelIds=[...new Set(confirmedIds)].join(', ');
+ const word=await window.V26TemplateWord.make(determination.scenario,paragraphs,caseMetadata);if(word.size<100||new TextDecoder().decode(await word.slice(0,2).arrayBuffer())!=='PK')throw Error('DOCX не е валиден ZIP контейнер.');z.file('01_Predlozhenie_RABOTEN_PROEKT.docx',word);
  await ensurePDF();
  const pdf1=await pdfBlob(gisPdf(results,register));if(pdf1.size<100||await pdf1.slice(0,4).text()!=='%PDF')throw Error('Приложение №1 не е валиден PDF.');z.file('02_Prilozhenie_1_GIS.pdf',pdf1);
  if(includeAnnex2){const pdf2=await pdfBlob(normativePdf(results,register));if(pdf2.size<100||await pdf2.slice(0,4).text()!=='%PDF')throw Error('Приложение №2 не е валиден PDF.');z.file('03_Prilozhenie_2_Normativno.pdf',pdf2);}
