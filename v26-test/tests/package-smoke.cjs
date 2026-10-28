@@ -38,7 +38,7 @@ assert.equal(unified([{...base,intersection_verified_outside:true}],{}).readines
  const z=context.zipWriter();z.file('README_BG.txt','Проверка');z.file('02_Prilozhenie_1_GIS.pdf',new Blob(['%PDF-1.4']));
  const blob=await z.generateAsync();const bytes=new Uint8Array(await blob.arrayBuffer());
  assert.equal(String.fromCharCode(...bytes.slice(0,2)),'PK');
- assert.equal(String.fromCharCode(...bytes.slice(-22,-18)),'PK\\u0005\\u0006'.replace('\\u0005','\\x05').replace('\\u0006','\\x06'));
+ assert.equal(String.fromCharCode(...bytes.slice(-22,-18)),String.fromCharCode(0x50,0x4b,0x05,0x06));
  const count=bytes[bytes.length-14]+256*bytes[bytes.length-13];assert.equal(count,2);
  console.log('PASS: scenarios A/B/unresolved, leading-role safety, archive-null safety, ZIP container (16 assertions)');
 })().catch(e=>{console.error(e);process.exitCode=1});
