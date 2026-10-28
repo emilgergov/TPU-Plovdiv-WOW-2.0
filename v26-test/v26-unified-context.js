@@ -35,7 +35,7 @@ function build(intake,roles,gis){
   evidence:analysis,characterization:draft,
   references:docs.flatMap(d=>(d.references||[]).map(r=>({...r,file:d.file}))),
   readiness:{
-   zip:true,roles:!!roles&&parcels.length>0&&parcels.every(id=>!!roles[id]),gis:!!gis,
+   zip:true,roles:!!roles&&parcels.length>0&&parcels.every(id=>!!roles[id]),gis:!!gis&&Array.isArray(gis.results)&&gis.results.length>0,
    appendix1:!!gis&&!!gis.pdf1_confirmed&&diagnosis.scenario!==null,
    appendix2:!!gis&&!!gis.pdf1_confirmed&&diagnosis.scenario!==null,
    word:!!gis&&!!gis.pdf1_confirmed&&!!roles&&parcels.length>0&&diagnosis.scenario!==null
