@@ -30,3 +30,15 @@ jobs:
         run: |
           test -s expert-v26/templates/V26_3_Obrazec_A.docx
           test -s expert-v26/templates/V26_3_Obrazec_B.docx
+
+      - name: Package isolated browser test
+        run: |
+          mkdir -p v26-browser-test
+          cp -a expert-v26 v26-browser-test/
+          python3 -m zipfile -c v26-browser-test.zip v26-browser-test
+      - name: Upload isolated browser test ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: V26-isolated-browser-test
+          path: v26-browser-test.zip
+          retention-days: 14
