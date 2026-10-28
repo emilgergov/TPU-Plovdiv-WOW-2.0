@@ -23,9 +23,23 @@ function mount(){
  const check=document.createElement('label');confirmed=document.createElement('input');confirmed.type='checkbox';check.append(confirmed,document.createTextNode(' Потвърждавам проверката на описанията, административните данни и правните констатации по преписката.'));box.append(check);
  box.hidden=true;button.parentNode.insertBefore(box,button);
 }
+function autoEvidence(){
+ const ctx=window.V26WorkingContext||{};
+ const sections=ctx.characterization?.sections||[];
+ const topics=['construction','electricity','water_supply','wastewater'];
+ const note='ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва проверено описание в преписката.';
+ const paragraphs=topics.map((key,i)=>{
+  const section=sections.find(s=>s.key===key);
+  const verified=(section?.sources||[]).filter(s=>s.status==='verified'&&s.excerpt);
+  return verified.length?verified.map(s=>String(s.excerpt)+' (Източник: '+s.file+')').join(' '):note;
+ });
+ const ids=(document.getElementById('ids')?.value||'').match(/\\b\\d{5}\\.\\d+\\.\\d+(?:\\.\\d+){0,2}\\b/g)||[];
+ const subject=window.V26SubjectContext;
+ return {paragraphs,ids:[...new Set(ids)].join(', '),subject:subject?.confirmed?(subject.wordHeading||subject.title):null};
+}
 function getConfirmedParagraphs(){
  const fallback='ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва достатъчно потвърдена информация от преписката.';
- return fields.map(f=>f.value.trim()||fallback);
+ const auto=autoEvidence();return fields.map((f,i)=>f.value.trim()||auto.paragraphs[i]||fallback);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 function getConfirmedMetadata(){
@@ -40,7 +54,9 @@ function getConfirmedMetadata(){
  result.impactFindings=result.impactFindings.map(v=>v||note);
  result.procedureFinding=result.procedureFinding||note;
  for(const k of ['recipient','address','subject','incomingReference','salutation'])result[k]=result[k]||note;
- if(!result.parcelIds)result.parcelIds=(document.getElementById('parcels')?.value||document.getElementById('cadnums')?.value||'').trim();
+ const auto=autoEvidence();
+ if(!caseFields.subject.value.trim()&&auto.subject)result.subject=auto.subject;
+ if(!result.parcelIds)result.parcelIds=auto.ids;
  return result;
 }
 document.addEventListener('v26:dossier-loaded',event=>{
