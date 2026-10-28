@@ -1,0 +1,33 @@
+name: Publish isolated V26 browser preview
+on:
+  workflow_dispatch:
+  push:
+    branches: [work/v26-auto-word-evidence-20261028]
+    paths:
+      - 'expert-v26/**'
+      - '.github/workflows/v26-preview-pages.yml'
+permissions:
+  contents: write
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: source
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: public
+          persist-credentials: true
+      - name: Publish isolated folder without changing existing WOW
+        run: |
+          mkdir -p public/v26-test
+          cp -a source/expert-v26/. public/v26-test/
+          cd public
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add v26-test
+          if git diff --cached --quiet; then echo 'No preview changes'; exit 0; fi
+          git commit -m 'Update isolated V26 preview (keep WOW unchanged)'
+          git push origin HEAD:main
