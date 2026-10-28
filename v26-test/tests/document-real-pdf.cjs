@@ -25,7 +25,10 @@ const poly={type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'P
   const parsed=await pdfParse(b);
   assert(parsed.numpages>=1,'No PDF pages: '+name);
   assert(parsed.text.includes('ТПУ Пловдив'),'Missing Bulgarian heading: '+name);
-  if(name.includes('Normativno'))assert(parsed.text.includes('Непотвърдените твърдения не представляват установени факти.'),'Missing evidence limitation in optional PDF2');
+  if(name.includes('Normativno')){
+   const normalized=parsed.text.replace(/\s+/g,' ').normalize('NFC');
+   assert(/Непотвърдените\s+твърдения\s+не\s+представляват\s+установени\s+факти/.test(normalized),'Missing evidence limitation in optional PDF2; extracted snippet: '+normalized.slice(0,750));
+  }
   if(name.includes('GIS'))assert(parsed.text.includes('47295.27.259'),'Missing cadastral number in PDF1');
  }
  const doc=await JSZip.loadAsync(await zip.file(names[0]).async('nodebuffer'));
