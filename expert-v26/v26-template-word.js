@@ -18,7 +18,7 @@ async function make(scenario,paragraphs,metadata){
  if(xml.getElementsByTagName('parsererror').length)throw Error('Грешка в Word XML.');
  const body=nodes(xml,'body')[0];
  const ps=Array.from(body.childNodes).filter(x=>x.nodeType===1&&x.namespaceURI===NS&&x.localName==='p');
- if(ps.length!==41)throw Error('Непозната версия на Word образеца.');
+ if(ps.length<34)throw Error('Непозната структура на Word образеца.');
  const expected=['С реализацията','Електроснабдяването','Водоснабдяването','Отпадъчните води'];
  const expectedB=['С реализацията','Електроснабдяването','Водозахранването','Отпадъчните води'];
  const labels=scenario==='A'?expected:expectedB;
@@ -44,7 +44,7 @@ async function make(scenario,paragraphs,metadata){
  };
  const legalIndices=scenario==='A'?[22,23,24,25,31]:[20,21,22,23,24,25,31];
  if(!Array.isArray(metadata.legalParagraphs)||metadata.legalParagraphs.length<legalIndices.length||metadata.legalParagraphs.slice(0,legalIndices.length).some(x=>!String(x).trim()))throw Error('Не са потвърдени всички фактически и правни констатации.');
- const parcelIds=String(metadata.parcelIds||'').match(/\\b\\d{5}\\.\\d+\\.\\d+(?:\\.\\d+){0,2}\\b/g)||[];
+ const parcelIds=String(metadata.parcelIds||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  if(!parcelIds.length)throw Error('Липсват потвърдени кадастрални идентификатори.');
  if(scenario==='A'){
   replaceParagraph(6,metadata.recipient);replaceParagraph(7,metadata.address);
