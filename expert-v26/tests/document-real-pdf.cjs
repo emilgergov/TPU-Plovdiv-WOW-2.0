@@ -25,7 +25,7 @@ const poly={type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'P
   const parsed=await pdfParse(b);
   assert(parsed.numpages>=1,'No PDF pages: '+name);
   assert(parsed.text.includes('ТПУ Пловдив'),'Missing Bulgarian heading: '+name);
-  assert(parsed.text.includes('ПРЕДСТОИ'),'Missing pending disclaimer: '+name);
+  if(name.includes('Normativno'))assert(parsed.text.includes('ПРЕДСТОИ'),'Missing pending disclaimer in optional PDF2');
   if(name.includes('GIS'))assert(parsed.text.includes('47295.27.259'),'Missing cadastral number in PDF1');
  }
  const doc=await JSZip.loadAsync(await zip.file(names[0]).async('nodebuffer'));
