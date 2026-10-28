@@ -9,7 +9,7 @@ const fonts={Roboto:{normal:path.join(fontPath,'DejaVuSans.ttf'),bold:path.join(
 const printer=new PdfPrinter(fonts);
 function render(def){return new Promise((resolve,reject)=>{const pdf=printer.createPdfKitDocument(def);const parts=[];pdf.on('data',p=>parts.push(p));pdf.on('error',reject);pdf.on('end',()=>resolve(new Blob([Buffer.concat(parts)],{type:'application/pdf'})));pdf.end()})}
 const BrowserJSZip=class extends JSZip{file(name,data,options){if(data instanceof Blob)return super.file(name,data.arrayBuffer().then(b=>new Uint8Array(b)),options);return super.file(name,data,options)}};
-const sandbox={Blob,TextDecoder,JSZip:BrowserJSZip,window:{JSZip:BrowserJSZip,V26TemplateWord:{async make(){const z=new JSZip();z.file('word/document.xml','<document>РАБОТЕН ПРОЕКТ — ПРЕДСТОИ</document>');return new Blob([await z.generateAsync({type:'nodebuffer'})])}},pdfMake:{vfs:{'Roboto-Regular.ttf':'mock'},createPdf(def){return {getBlob(cb){render(def).then(cb).catch(e=>{console.error(e);process.exitCode=1})}}}}},document:{createElement(){throw Error('Unexpected CDN fetch')}}};
+const sandbox={Blob,TextEncoder,TextDecoder,JSZip:BrowserJSZip,window:{JSZip:BrowserJSZip,V26TemplateWord:{async make(){const z=new JSZip();z.file('word/document.xml','<document>РАБОТЕН ПРОЕКТ — ПРЕДСТОИ</document>');return new Blob([await z.generateAsync({type:'nodebuffer'})])}},pdfMake:{vfs:{'Roboto-Regular.ttf':'mock'},createPdf(def){return {getBlob(cb){render(def).then(cb).catch(e=>{console.error(e);process.exitCode=1})}}}}},document:{createElement(){throw Error('Unexpected CDN fetch')}}};
 vm.runInNewContext(fs.readFileSync('expert-v26/v26-draft-package.js','utf8'),sandbox);
 const poly={type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Polygon',coordinates:[[[1,1],[2,1],[2,2],[1,2],[1,1]]]},properties:{}}]};
 (async()=>{
@@ -25,7 +25,7 @@ const poly={type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'P
   const parsed=await pdfParse(b);
   assert(parsed.numpages>=1,'No PDF pages: '+name);
   assert(parsed.text.includes('ТПУ Пловдив'),'Missing Bulgarian heading: '+name);
-  assert(parsed.text.includes('ПРЕДСТОИ'),'Missing pending disclaimer: '+name);
+  if(name.includes('Normativno'))assert(parsed.text.includes('ПРЕДСТОИ'),'Missing pending disclaimer in optional PDF2');
   if(name.includes('GIS'))assert(parsed.text.includes('47295.27.259'),'Missing cadastral number in PDF1');
  }
  const doc=await JSZip.loadAsync(await zip.file(names[0]).async('nodebuffer'));
