@@ -217,7 +217,7 @@ function normativePdf(results,register){
   }
  }
  for(const z of register?.gisSummary?.archived_zones||[]){
-  const code=String(z.sitecode||z.code||'');
+  const code=String(z?.sitecode||z?.code||'').trim();
   if(/^BG\d{7}$/.test(code)&&!zoneMap.has(code))zoneMap.set(code,{code,name:z.name_bg||'',order:z.order_no||''});
  }
  const zones=[...zoneMap.values()].sort((a,b)=>a.code.localeCompare(b.code));
