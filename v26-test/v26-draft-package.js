@@ -291,7 +291,8 @@ async function make(results,roles,register){
  const z=zipWriter(),ids=results.map(r=>r.input),normalized=Object.fromEntries(results.map(r=>[r.input,roles[r.input]||roles[r.cadnum]]));
  const determination=scenarioFromGIS(results,normalized);
  const sharedDiagnosis=register?.unifiedContext?.diagnosis;
- if(sharedDiagnosis?.scenario&&determination.scenario&&sharedDiagnosis.scenario!==determination.scenario)throw Error('Несъответствие между единния аналитичен регистър и ГИС сценария. Не може да се издаде проект.');
+ if(!sharedDiagnosis||!register?.unifiedContext?.commonEvidence)throw Error('Липсва единният анализ ПАЦИЕНТ за преписката. Обновете ГИС анализа и потвърдете ролите.');
+ if(sharedDiagnosis.scenario!==determination.scenario)throw Error('Несъответствие между единния аналитичен регистър и ГИС сценария. Не може да се издаде проект.');
  if(!determination.scenario)throw Error('Не е доказано, че всички водещи имоти са извън Натура 2000. Сценарий А не се допуска по подразбиране.');
  const includeAnnex2=register?.includeAnnex2===true;const paragraphs=register?.verifiedCharacterizationParagraphs; if(!window.V26TemplateWord?.make)throw Error('Липсва модулът за оригиналните Word образци.');const caseMetadata={...(register?.verifiedCaseMetadata||{})};
  // Confirmed parcel roles and resolved GIS results are the authoritative input for the working draft.
