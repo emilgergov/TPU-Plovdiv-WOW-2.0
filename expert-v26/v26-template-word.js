@@ -64,17 +64,10 @@ async function make(scenario,paragraphs,metadata){
  const used=new Set([...MAP[scenario],...legalIndices,...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])]);
  if(impactIndices.some(i=>used.has(i)))throw Error('Конфликт между полета на образеца — генерирането е спряно за защита на правния текст.');
  for(let i=0;i<5;i++)replaceParagraph(impactIndices[i],String(metadata.impactFindings[i]));
- // Remove stale sample cadastral identifiers only from text nodes, never from protected drawings.
- // Unknown identifiers are not silently replaced with an arbitrary parcel.
- const stale=[];
- for(const t of nodes(xml,'t')){
-  const original=t.textContent||'';
-  const found=original.match(/\\b\\d{5}\\.\\d+\\.\\d+(?:\\.\\d+){0,2}\\b/g)||[];
-  if(!found.some(id=>!parcelIds.includes(id)))continue;
-  stale.push(...found.filter(id=>!parcelIds.includes(id)));
-  t.textContent=original.replace(/\\b\\d{5}\\.\\d+\\.\\d+(?:\\.\\d+){0,2}\\b/g,id=>parcelIds.includes(id)?id:'ЗА ЕКСПЕРТНА ПРОВЕРКА — примерен идентификатор в образеца');
- }
- if(stale.length&&nodes(xml,'t').some(t=>(t.textContent||'').match(/\\b\\d{5}\\.\\d+\\.\\d+(?:\\.\\d+){0,2}\\b/g)?.some(id=>!parcelIds.includes(id))))throw Error('Останал е примерен кадастрален идентификатор.');
+ // The confirmed parcel list is the single source of truth for the proposal.
+ // Unknown sample IDs mean an unmapped template paragraph, not an unconfirmed parcel.
+ const unmatched=nodes(xml,'t').flatMap(t=>(t.textContent||'').match(/\\b\\d{5}\\.\\d+\\.\\d+(?:\\.\\d+){0,2}\\b/g)||[]).filter(id=>!parcelIds.includes(id));
+ if(unmatched.length)throw Error('Останал е примерен идентификатор в образеца: '+[...new Set(unmatched)].join(', ')+'. Поправете полето на образеца, без повторно потвърждаване на имотите.');
  zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
  return new Blob([root.fflate.zipSync(zip,{level:6})],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
 }
