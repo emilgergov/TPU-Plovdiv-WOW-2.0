@@ -13,14 +13,34 @@ async function readEntry(bytes,v,item){
  const result=window.fflate.inflateSync(compressed);
  return result.buffer.slice(result.byteOffset,result.byteOffset+result.byteLength);
 }
+async function ocrPdfPage(page,worker){
+ const viewport=page.getViewport({scale:1.65});const canvas=document.createElement('canvas');
+ canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
+ try{await page.render({canvasContext:canvas.getContext('2d',{willReadFrequently:true}),viewport}).promise;
+  const result=await worker.recognize(canvas);return String(result?.data?.text||'').trim();
+ }finally{canvas.width=0;canvas.height=0}
+}
 async function extractText(data,name){
  if(/\.(txt|csv|json|md)$/i.test(name))return new TextDecoder('utf-8').decode(data);
  if(/\.pdf$/i.test(name)){
   if(!window.pdfjsLib)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
   window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const doc=await window.pdfjsLib.getDocument({data:new Uint8Array(data)}).promise;
-  const parts=[];for(let i=1;i<=Math.min(doc.numPages,100);i++){const page=await doc.getPage(i);const content=await page.getTextContent();parts.push(content.items.map(x=>x.str||'').join(' '))}
-  return parts.join('\n');
+  extractText.lastOcrPages=0;extractText.lastOcrError='';
+  const parts=[];let worker=null;
+  try{for(let i=1;i<=Math.min(doc.numPages,100);i++){
+   const page=await doc.getPage(i),content=await page.getTextContent();
+   let pageText=content.items.map(x=>x.str||'').join(' ').trim();
+   if(pageText.replace(/[^\\p{L}\\p{N}]/gu,'').length<25){
+    try{if(!window.Tesseract)await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+     if(!worker)worker=await window.Tesseract.createWorker('bul+eng',1);
+     const scanned=await ocrPdfPage(page,worker);
+     if(scanned.replace(/[^\\p{L}\\p{N}]/gu,'').length>pageText.replace(/[^\\p{L}\\p{N}]/gu,'').length){pageText=scanned;extractText.lastOcrPages++}
+    }catch(err){extractText.lastOcrError=String(err.message||err)}
+   }
+   parts.push(pageText);
+  }}finally{if(worker)await worker.terminate()}
+  return parts.join('\\n');
  }
  if(/\.docx$/i.test(name)){
   if(!window.mammoth)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js');
