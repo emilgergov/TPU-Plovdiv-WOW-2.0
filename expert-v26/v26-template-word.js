@@ -69,13 +69,14 @@ async function make(scenario,paragraphs,metadata){
  const unmatched=nodes(xml,'t').flatMap(t=>(t.textContent||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[]).filter(id=>!parcelIds.includes(id));
  if(unmatched.length)throw Error('Останал е примерен идентификатор в образеца: '+[...new Set(unmatched)].join(', ')+'. Поправете полето на образеца, без повторно потвърждаване на имотите.');
  const evidence=metadata.dossierEvidence;
- if(evidence&&((evidence.findings||[]).length||(evidence.warnings||[]).length)){
+ if(evidence){
   const addParagraph=(value)=>{
    const p=xml.createElementNS(NS,'w:p'),r=xml.createElementNS(NS,'w:r'),t=xml.createElementNS(NS,'w:t');
    t.setAttribute('xml:space','preserve');t.textContent=String(value);r.appendChild(t);p.appendChild(r);
    const section=nodes(body,'sectPr')[0];if(section&&section.parentNode===body)body.insertBefore(p,section);else body.appendChild(p);
   };
   addParagraph('ПРИЛОЖЕНА ДОКУМЕНТАЛНА ПРОСЛЕДИМОСТ — РАБОТНИ ДАННИ, ЗА ЕКСПЕРТНА ПРОВЕРКА');
+  addParagraph('Единен анализ ПАЦИЕНТ: сценарий '+String(evidence.diagnosis?.scenario||'НЕОПРЕДЕЛЕН')+'; пространствен статус: '+String(evidence.diagnosis?.spatialStatus||'нерешено')+'. Правната приложимост се потвърждава от експерта.');
   for(const item of (evidence.findings||[]).slice(0,20)){
    const sources=(item.evidence||[]).slice(0,5).map(e=>String(e.file||'неизвестен документ')+' ('+String(e.date||'дата предстои')+')').join('; ');
    addParagraph('Запис: '+String(item.key||'')+'; статус: '+String(item.status||'непотвърден')+'; източници: '+sources+'. Правна приложимост: ПРЕДСТОИ.');
