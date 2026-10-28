@@ -20,10 +20,24 @@ jobs:
           ref: main
           path: public
           persist-credentials: true
+      - name: Check V26 JavaScript and published geometry
+        run: |
+          node --check source/expert-v26/v26-browser-gis.js
+          node --check source/expert-v26/v26-word-review.js
+          python3 - <<'PY'
+          import json
+          p='source/expert-v26/data/v26-parcel-geometry-batch-51.json'
+          data=json.load(open(p,encoding='utf-8'))
+          assert data['status']=='ARCHIVAL_ONLY'
+          assert '47295.27.259' in data['records']
+          print('Geometry bundle valid; incomplete coverage is explicitly marked')
+          PY
       - name: Publish isolated folder without changing existing WOW
         run: |
           mkdir -p public/v26-test
           cp -a source/expert-v26/. public/v26-test/
+          test -s public/v26-test/index.html
+          test -s public/v26-test/data/v26-parcel-geometry-batch-51.json
           cd public
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
