@@ -231,7 +231,7 @@ function normativePdf(results,register){
  if(!zones.length)content.push({text:'Няма предаден код на защитена зона. Не се извеждат зонално специфични режими.',bold:true});
  for(const z of zones){
   content.push({text:z.code+(z.name?' — '+z.name:''),style:'sub'});
-  const order=z.order|| (z.code==='BG0000194'?'РД-688/25.08.2020 г.':'ПРЕДСТОИ');
+  const order=z.order||'ПРЕДСТОИ';
   content.push({text:'Заповед за обявяване: '+order+(z.code==='BG0000194'?' (ДВ, бр. 80/11.09.2020 г.)':'')});
   if(z.code==='BG0000194'){
    content.push({text:'Източник за обявяването: МОСВ — официален документ за специфичните цели на зоната',link:'https://www.moew.government.bg/static/media/ups/articles/attachments/BG0000194_Reka_Chaya_specifichni_tseli_zap12a55845b82036a39b7ee327cf53070a5cb.pdf',color:'#165c86',decoration:'underline'});
