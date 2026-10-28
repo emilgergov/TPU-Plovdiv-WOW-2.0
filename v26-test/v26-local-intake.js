@@ -142,7 +142,7 @@ async function process(file){
      const match=clean.match(/(?:относно|предмет(?:\s+на\s+(?:инвестиционното\s+)?предложение)?|наименование\s+на\s+(?:инвестиционното\s+)?предложение)\s*[:：–-]\s*(.{15,450}?)(?=\s+(?:възложител|местоположение|адрес|имот\s+с|приложения|описание\s+на)|$)/i);
      const rawTitle=match?match[1].trim():'';
      const candidateTitle=rawTitle.replace(/^[\s„“\"'«»—–\-:;,]+|[\s„“\"'«»—–\-:;,]+$/g,'').trim();
-     const title=/[\p{L}]{3,}/u.test(candidateTitle)&&candidateTitle.replace(/[^\p{L}\p{N}]/gu,'').length>=12&&!/^(?:ПИ|поземлен имот)\s+(?:с\s+)?идентификатор\b/i.test(candidateTitle)?candidateTitle:'';
+     const title=/[\p{L}]{3,}/u.test(candidateTitle)&&candidateTitle.replace(/[^\p{L}\p{N}]/gu,'').length>=12&&!/^(?:ПИ|поземлен\s+имот)\s+(?:с\s+)?идентификатор(?:\s|$)/i.test(candidateTitle)?candidateTitle:'';
      const sections=[
       ['summary',/1\.\s*Резюме на предложението\s*:/i],
       ['processes',/2\.\s*Описание на основните процеси/i],
