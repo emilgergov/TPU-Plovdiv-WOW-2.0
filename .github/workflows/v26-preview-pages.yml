@@ -72,6 +72,8 @@ jobs:
 Не презаписвайте тази контролна версия при следващи тестове.
 EOF
           fi
+          test -s public/v26-4/index.html
+          test -s public/v26-4/CHECKPOINT_V26_4_BG.txt
           test -s public/v26-test/index.html
           test -s public/expert-v26/gis-data/manifest.json
           test "$(find public/expert-v26/gis-data -name '*.json.gz' | wc -l)" -eq 258
