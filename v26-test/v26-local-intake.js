@@ -106,10 +106,10 @@ async function process(file){
   total+=size;if(total>80*1024*1024)throw Error('Твърде голям разархивиран архив.');
   list.push({name,method,size,packed,offset});
  }
- const docs=[],all=new Set(),leading=new Set(),other=new Set(),subjects=[],documentTexts=[];
+ const docs=[],all=new Set(),leading=new Set(),other=new Set(),subjects=[],documentTexts=[];const startedAt=performance.now();
  const dossierDocuments=[];
  for(const item of list){
-  let status='описан',text='';
+  let status='описан',text='';const entryStartedAt=performance.now();
   if(/\.(txt|csv|json|md|pdf|docx|jpe?g|png|webp|bmp|tiff?)$/i.test(item.name)&&item.size<=20*1024*1024){
    try{
     const unpacked=await readEntry(bytes,v,item);
@@ -192,7 +192,7 @@ async function process(file){
   const dates=[...new Set(referenceMatches.map(x=>x.date))];
   const documentDate=dates.length===1?dates[0]:null;
   dossierDocuments.push({file:item.name,type:/уведомлен/i.test(item.name+' '+text.slice(0,800))?'notification':/допълнителна\s+информация|доп\.\s*информация/i.test(item.name+' '+text.slice(0,800))?'supplementary':'attachment',readable:!!text.trim(),date:documentDate,references:referenceMatches,facts:factualSnippets,claims:wastewaterClaims});
-  docs.push({filename:item.name,status});
+  docs.push({filename:item.name,status,elapsed_ms:Math.round(performance.now()-entryStartedAt)});
  }
  const dossierAnalysis=(window.V26DossierEvidence&&typeof window.V26DossierEvidence.analyze==='function')?
   window.V26DossierEvidence.analyze(dossierDocuments.map(d=>({file:d.file,type:d.type,date:d.date,registration:d.references[0]?.number||null,facts:d.claims||[]}))):null;
@@ -201,7 +201,7 @@ async function process(file){
  const dossierDraft=(window.V26DossierEvidence&&typeof window.V26DossierEvidence.evidenceDraft==='function')?
   window.V26DossierEvidence.evidenceDraft(dossierDocuments,dossierAnalysis):null;
  for(const id of leading)other.delete(id);
- return {archive_name:file.name,archive_entries:list.length,files:docs,dossier_documents:dossierDocuments,dossier_analysis:dossierAnalysis,dossier_characterization:dossierCharacterization,dossier_draft:dossierDraft,evidence:[],subject_candidates:subjects,semantic_review:semanticReview(subjects,documentTexts),all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[],mentioned_candidates:[...other],warnings:['Кандидатите за предмет на ИП са предварителни и изискват експертно потвърждение.','Другите срещнати идентификатори НЕ са автоматично съпътстващи имоти.','PDF и изображения се разчитат с OCR при необходимост; проверете качеството и пълнотата на извличането.']}};
+ return {archive_name:file.name,archive_entries:list.length,elapsed_ms:Math.round(performance.now()-startedAt),files:docs,dossier_documents:dossierDocuments,dossier_analysis:dossierAnalysis,dossier_characterization:dossierCharacterization,dossier_draft:dossierDraft,evidence:[],subject_candidates:subjects,semantic_review:semanticReview(subjects,documentTexts),all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[],mentioned_candidates:[...other],warnings:['Кандидатите за предмет на ИП са предварителни и изискват експертно потвърждение.','Другите срещнати идентификатори НЕ са автоматично съпътстващи имоти.','PDF и изображения се разчитат с OCR при необходимост; проверете качеството и пълнотата на извличането.']}};
 }
 window.V26LocalIntake={process};
 })();
