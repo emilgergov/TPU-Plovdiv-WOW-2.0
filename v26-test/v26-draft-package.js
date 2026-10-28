@@ -195,7 +195,7 @@ function gisPdf(results,options={}){
    const has=!!r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));
    const area=Number(r.area_m2_source);
    const overlays=[...(r.archived_overlay_records||[]),...(r.archived_zones||[])];
-   const zones=[...new Set(overlays.map(z=>typeof z==='string'?z.trim():String(z.sitecode||z.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z)))];
+   const zones=[...new Set(overlays.map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z)))];
    const names=[...new Set(overlays.map(z=>String(z.name_bg||z.name||'').trim()).filter(Boolean))];
    const zoneText=zones.length?zones.join(', ')+(names.length?' · '+names.join('; '):''):'Не е отчетена зона в имотния резултат';
    const intersection=zones.length?'АРХИВНО ПРЕСИЧАНЕ (ГИС справка)':has?'Не е отчетено пресичане в имотния резултат':'Няма геометрия';
