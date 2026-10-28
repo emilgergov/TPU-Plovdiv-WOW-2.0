@@ -25,7 +25,7 @@ async function make(scenario,paragraphs,metadata){
  for(let i=0;i<4;i++){const text=nodes(ps[MAP[scenario][i]],'t').map(t=>t.textContent).join('').trim();if(!text.replace(/^\s+/,'').startsWith(labels[i]))throw Error('Неочакван абзац в оригиналния Word образец.');}
  for(let i=0;i<4;i++){
   const p=ps[MAP[scenario][i]],runs=nodes(p,'r');
-  if(!runs.length||runs.some(r=>nodes(r,'highlight').length)||nodes(p,'drawing').length||nodes(p,'fldChar').length)throw Error('Защитен или сложен абзац; редакцията е спряна.');
+  if(!runs.length||nodes(p,'drawing').length||nodes(p,'fldChar').length)throw Error('Защитен или сложен абзац; редакцията е спряна.');
   const texts=nodes(p,'t');if(!texts.length)throw Error('Липсва текстово поле.');
   texts[0].textContent=String(paragraphs[i]);texts[0].setAttribute('xml:space','preserve');
   for(const t of texts.slice(1))t.textContent='';
@@ -60,7 +60,7 @@ async function make(scenario,paragraphs,metadata){
  if(!String(metadata.procedureFinding||'').trim())throw Error('Липсва проверена констатация за приложимата процедура по Наредбата за ОС.');
  if(!Array.isArray(metadata.impactFindings)||metadata.impactFindings.length!==5||metadata.impactFindings.some(v=>!String(v).trim()))throw Error('Липсват петте проверени констатации за въздействията.');
  replaceParagraph(scenario==='A'?17:15,metadata.procedureFinding);
- const impactIndices=scenario==='A'?[26,27,28,29,30]:[27,28,29,30,32];
+ const impactIndices=[26,27,28,29,30];
  const used=new Set([...MAP[scenario],...legalIndices,...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])]);
  if(impactIndices.some(i=>used.has(i)))throw Error('Конфликт между полета на образеца — генерирането е спряно за защита на правния текст.');
  for(let i=0;i<5;i++)replaceParagraph(impactIndices[i],String(metadata.impactFindings[i]));
