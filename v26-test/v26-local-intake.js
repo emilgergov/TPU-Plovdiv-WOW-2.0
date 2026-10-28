@@ -14,7 +14,7 @@ async function readEntry(bytes,v,item){
  return result.buffer.slice(result.byteOffset,result.byteOffset+result.byteLength);
 }
 function withDeadline(promise,ms,label){return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(Error(label+' — надвишено време '+Math.round(ms/1000)+' сек.')),ms))])}
-function intakeProgress(message){if(typeof window.V26IntakeProgress==='function')window.V26IntakeProgress(message)}
+function intakeProgress(message,detail){if(typeof window.V26IntakeProgress==='function')window.V26IntakeProgress(message,detail)}
 async function ocrPdfPage(page,worker){
  const viewport=page.getViewport({scale:1.65});const canvas=document.createElement('canvas');
  canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
@@ -38,7 +38,7 @@ async function extractText(data,name){
   const doc=await window.pdfjsLib.getDocument({data:new Uint8Array(data)}).promise;
   extractText.lastOcrPages=0;extractText.lastOcrError='';extractText.lastPageWarnings=[];
   const parts=[];let worker=null;
-  try{for(let i=1;i<=doc.numPages;i++){intakeProgress('PDF: страница '+i+' от '+doc.numPages+' · '+name);
+  try{for(let i=1;i<=doc.numPages;i++){intakeProgress('PDF: страница '+i+' от '+doc.numPages+' · '+name,{page:i,pages:doc.numPages});
    const page=await doc.getPage(i),content=await page.getTextContent();
    let pageText=content.items.map(x=>x.str||'').join(' ').trim();
    if(pageText.replace(/[^\p{L}\p{N}]/gu,'').length<25){
@@ -112,7 +112,7 @@ async function process(file){
  const docs=[],all=new Set(),leading=new Set(),other=new Set(),subjects=[],documentTexts=[];const dossierParcelEvidence=[];const startedAt=performance.now();
  const dossierDocuments=[];
  for(const item of list){
-  intakeProgress('Прочит на документ '+(docs.length+1)+' от '+list.length+' · '+item.name);
+  intakeProgress('Прочит на документ '+(docs.length+1)+' от '+list.length+' · '+item.name,{document:docs.length+1,documents:list.length,page:0,pages:0});
   let status='описан',text='';const entryStartedAt=performance.now();
   if(/\.(txt|csv|json|md|pdf|docx|jpe?g|png|webp|bmp|tiff?)$/i.test(item.name)&&item.size<=20*1024*1024){
    try{
