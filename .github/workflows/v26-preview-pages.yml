@@ -26,18 +26,24 @@ jobs:
           node --check source/expert-v26/v26-word-review.js
           python3 - <<'PY'
           import json
-          p='source/expert-v26/data/v26-parcel-geometry-batch-51.json'
-          data=json.load(open(p,encoding='utf-8'))
-          assert data['status']=='ARCHIVAL_ONLY'
-          assert '47295.27.259' in data['records']
-          print('Geometry bundle valid; incomplete coverage is explicitly marked')
+          from pathlib import Path
+          root=Path('source/expert-v26/gis-data')
+          manifest=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+          assert manifest['status']=='PASS_COUNT_BY_PREFIX'
+          assert manifest['parcel_geometry']==917418
+          assert manifest['overlap_records_expected']==181154
+          assert manifest['shards']==258
+          shards=list(root.glob('*.json.gz'))
+          assert len(shards)==258, f'Incomplete GIS dataset: {len(shards)}/258 shards'
+          print('Complete GIS package verified: 258 shards')
           PY
       - name: Publish isolated folder without changing existing WOW
         run: |
           mkdir -p public/v26-test
           cp -a source/expert-v26/. public/v26-test/
           test -s public/v26-test/index.html
-          test -s public/v26-test/data/v26-parcel-geometry-batch-51.json
+          test -s public/v26-test/gis-data/manifest.json
+          test "$(find public/v26-test/gis-data -name '*.json.gz' | wc -l)" -eq 258
           cd public
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
