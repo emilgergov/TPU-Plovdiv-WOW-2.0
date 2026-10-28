@@ -66,7 +66,7 @@ async function make(scenario,paragraphs,metadata){
  for(let i=0;i<5;i++)replaceParagraph(impactIndices[i],String(metadata.impactFindings[i]));
  // The confirmed parcel list is the single source of truth for the proposal.
  // Unknown sample IDs mean an unmapped template paragraph, not an unconfirmed parcel.
- const unmatched=nodes(xml,'t').flatMap(t=>(t.textContent||'').match(/\\b\\d{5}\\.\\d+\\.\\d+(?:\\.\\d+){0,2}\\b/g)||[]).filter(id=>!parcelIds.includes(id));
+ const unmatched=nodes(xml,'t').flatMap(t=>(t.textContent||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[]).filter(id=>!parcelIds.includes(id));
  if(unmatched.length)throw Error('Останал е примерен идентификатор в образеца: '+[...new Set(unmatched)].join(', ')+'. Поправете полето на образеца, без повторно потвърждаване на имотите.');
  zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
  return new Blob([root.fflate.zipSync(zip,{level:6})],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
