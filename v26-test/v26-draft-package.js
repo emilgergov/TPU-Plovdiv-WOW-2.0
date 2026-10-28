@@ -228,7 +228,7 @@ function normativePdf(results,register){
  const content=[
   {text:'Документална проследимост: '+(dossier?.documents?.length||0)+' документа от единната ZIP преписка. Непотвърдените твърдения не представляват установени факти.',fontSize:9},
   ...((dossier?.documents||[]).slice(0,35).map(d=>({text:'Документ: '+shortSource(d.file)+' · входящи референции: '+(d.references||[]).map(x=>x.number+' / '+x.date).join('; '),fontSize:8}))),
-  {text:'Предварителен аналитичен сценарий: '+String(dossier?.commonEvidence?.diagnosis?.scenario||'НЕОПРЕДЕЛЕН')+'; пространствен статус: '+String(dossier?.commonEvidence?.diagnosis?.spatialStatus||'нерешено'),bold:true},
+  {text:'Предварителен аналитичен сценарий: '+String(register?.unifiedContext?.diagnosis?.scenario||'НЕОПРЕДЕЛЕН')+'; пространствен статус: '+String(register?.unifiedContext?.diagnosis?.spatialStatus||'нерешено'),bold:true},
   ...((dossier?.commonEvidence?.ledger||[]).slice(0,30).map(f=>({text:'Доказателство: '+readableKind(f.kind)+' / '+readableStatus(f.status)+' / '+shortSource(f.source),fontSize:8}))),
   {text:'Единни доказателствени констатации от преписката: '+(dossier?.commonEvidence?.findings?.length||0)+' · предупреждения: '+(dossier?.commonEvidence?.warnings?.length||0)+'. Изискват експертна проверка.',fontSize:9},
   ...((dossier?.commonEvidence?.findings||[]).slice(0,20).map(f=>({text:'Доказателствен запис: '+readableKind(f.key)+' · статус '+readableStatus(f.status)+' · източници '+(f.evidence||[]).slice(0,5).map(e=>String(e.file||'неизвестен документ')+' ('+String(e.date||'дата предстои')+')').join('; ')+' · правна приложимост: ПРЕДСТОИ',fontSize:8}))),
