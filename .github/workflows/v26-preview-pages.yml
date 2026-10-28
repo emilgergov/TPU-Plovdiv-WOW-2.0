@@ -27,12 +27,14 @@ jobs:
           python3 - <<'PY'
           import json
           from pathlib import Path
-          root=Path('source/expert-v26/gis-data')
+          root=Path('public/expert-v26/gis-data')
           manifest=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
           assert manifest['status']=='PASS_COUNT_BY_PREFIX'
           assert manifest['parcel_geometry']==917418
           assert manifest['overlap_records_expected']==181154
           assert manifest['shards']==258
+          for prefix in ('36','47'):
+            assert (root/f'parcelgeom_{prefix}.json.gz').is_file()
           shards=list(root.glob('*.json.gz'))
           assert len(shards)==258, f'Incomplete GIS dataset: {len(shards)}/258 shards'
           print('Complete GIS package verified: 258 shards')
@@ -40,10 +42,19 @@ jobs:
       - name: Publish isolated folder without changing existing WOW
         run: |
           mkdir -p public/v26-test
-          cp -a source/expert-v26/. public/v26-test/
+          rsync -a --exclude='gis-data/' source/expert-v26/ public/v26-test/
+          ln -s ../expert-v26/gis-data public/v26-test/gis-data
+          # Symlinks are not reliably served by GitHub Pages: the preview uses the existing main data URL.
+          rm public/v26-test/gis-data
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('public/v26-test/v26-full-gis-bridge.js')
+          s=p.read_text(encoding='utf-8').replace("api.openHosted('./gis-data')", "api.openHosted('../expert-v26/gis-data')")
+          p.write_text(s,encoding='utf-8')
+          PY
           test -s public/v26-test/index.html
-          test -s public/v26-test/gis-data/manifest.json
-          test "$(find public/v26-test/gis-data -name '*.json.gz' | wc -l)" -eq 258
+          test -s public/expert-v26/gis-data/manifest.json
+          test "$(find public/expert-v26/gis-data -name '*.json.gz' | wc -l)" -eq 258
           cd public
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
