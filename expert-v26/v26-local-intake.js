@@ -31,16 +31,16 @@ async function extractText(data,name){
   try{for(let i=1;i<=Math.min(doc.numPages,100);i++){
    const page=await doc.getPage(i),content=await page.getTextContent();
    let pageText=content.items.map(x=>x.str||'').join(' ').trim();
-   if(pageText.replace(/[^\\p{L}\\p{N}]/gu,'').length<25){
+   if(pageText.replace(/[^\p{L}\p{N}]/gu,'').length<25){
     try{if(!window.Tesseract)await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
      if(!worker)worker=await window.Tesseract.createWorker('bul+eng',1);
      const scanned=await ocrPdfPage(page,worker);
-     if(scanned.replace(/[^\\p{L}\\p{N}]/gu,'').length>pageText.replace(/[^\\p{L}\\p{N}]/gu,'').length){pageText=scanned;extractText.lastOcrPages++}
+     if(scanned.replace(/[^\p{L}\p{N}]/gu,'').length>pageText.replace(/[^\p{L}\p{N}]/gu,'').length){pageText=scanned;extractText.lastOcrPages++}
     }catch(err){extractText.lastOcrError=String(err.message||err)}
    }
    parts.push(pageText);
   }}finally{if(worker)await worker.terminate()}
-  return parts.join('\\n');
+  return parts.join('\n');
  }
  if(/\.docx$/i.test(name)){
   if(!window.mammoth)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js');
