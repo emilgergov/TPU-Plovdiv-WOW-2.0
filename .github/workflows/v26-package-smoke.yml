@@ -16,6 +16,12 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           for f in v26-test/*.js; do node --check "$f"; done
-          node --check v26-test/tests/package-smoke.cjs
+          for f in v26-test/tests/*.cjs; do node --check "$f"; done
       - name: Test GIS scenarios and ZIP package writer
         run: node v26-test/tests/package-smoke.cjs
+      - name: Install document test dependencies
+        run: npm install --no-save --no-package-lock jszip fflate jsdom@26
+      - name: Test document package A/B routing and optional PDF2
+        run: node v26-test/tests/document-smoke.cjs
+      - name: Test original Word A/B templates
+        run: node v26-test/tests/word-real-templates.cjs
