@@ -131,7 +131,7 @@ async function process(file){
      const ids=[...line.matchAll(rx)].map(m=>parcelId(m[0]));
      if(!ids.length)continue;
      const role=/предишен идентификатор|стар идентификатор|предходен идентификатор/i.test(line)?'former':
-      /съседи\s*:/i.test(line)?'neighbour':'mentioned';
+      /съседи\s*:|съседн(?:и|ия|ият|ите)?\s+(?:поземни\s+)?имот|граничи\s+с|граници\s+на\s+имота/i.test(line)?'neighbour':'mentioned';
      for(const id of ids)contextualIds.push({id,role,source:item.name,excerpt:line.trim().slice(0,300)});
     }
     for(const id of text.match(rx)||[]){const parcel=parcelId(id);all.add(parcel);other.add(parcel)}
@@ -247,7 +247,7 @@ async function process(file){
  }
  // Exclude neighbours/former IDs only if no independent proposal evidence exists.
  const nonLeading=new Set(dossierParcelEvidence.filter(x=>x.role==='neighbour'||x.role==='former').map(x=>x.id));
- for(const id of proposalCandidates)leading.add(id);
+ for(const id of proposalCandidates)if(!nonLeading.has(id))leading.add(id);
  for(const id of [...leading])if(nonLeading.has(id)&&!proposalCandidates.has(id))leading.delete(id);
  for(const id of leading)other.delete(id);
  return {archive_name:file.name,archive_entries:list.length,elapsed_ms:Math.round(performance.now()-startedAt),files:docs,dossier_documents:dossierDocuments,dossier_analysis:dossierAnalysis,dossier_characterization:dossierCharacterization,dossier_draft:dossierDraft,evidence:dossierParcelEvidence,subject_candidates:subjects,semantic_review:semanticReview(subjects,documentTexts),all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[],mentioned_candidates:[...other],warnings:['Кандидатите за предмет на ИП са предварителни и изискват експертно потвърждение.','Другите срещнати идентификатори НЕ са автоматично съпътстващи имоти.','PDF и изображения се разчитат с OCR при необходимост; проверете качеството и пълнотата на извличането.']}};
