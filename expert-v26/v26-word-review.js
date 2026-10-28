@@ -16,6 +16,19 @@ function getConfirmedParagraphs(){
  const values=fields.map(f=>f.value.trim());if(values.some(x=>!x))throw Error('Попълнете четирите абзаца за Word предложението.');return values;
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
+document.addEventListener('v26:dossier-loaded',event=>{
+ const draft=event.detail?.context?.characterization;
+ const topics=[['construction','Строителни дейности'],['electricity','Електрозахранване'],['water_supply','Водоснабдяване'],['wastewater','Отпадъчни води']];
+ const box=document.getElementById('v26WordReview');if(!box)return;
+ box.querySelectorAll('.v26-evidence-suggestion').forEach(el=>el.remove());
+ topics.forEach(([key],i)=>{
+  const section=draft?.sections?.find(x=>x.key===key);if(!section?.sources?.length||!fields[i])return;
+  const wrapper=document.createElement('div');wrapper.className='v26-evidence-suggestion';wrapper.style.cssText='font-size:0.9em;margin:3px 0 10px;padding:7px;border-left:3px solid #819d89';
+  const title=document.createElement('strong');title.textContent='Откъси от преписката — за проверка:';wrapper.append(title);
+  section.sources.slice(0,3).forEach(source=>{const p=document.createElement('p');p.textContent=source.file+' · '+(source.date||'дата неустановена')+': '+source.excerpt.slice(0,380);wrapper.append(p)});
+  fields[i].parentNode.append(wrapper);
+ });
+});
 document.addEventListener('v26:gis-invalidated',()=>{if(confirmed)confirmed.checked=false;for(const f of fields)f.value='';});
 window.V26WordReview=Object.freeze({getConfirmedParagraphs});
 })();
