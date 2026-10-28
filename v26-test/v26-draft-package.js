@@ -2,7 +2,7 @@
 (()=>{'use strict';
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const readableStatus=s=>({'corroborated':'съгласувани сведения (непотвърдени експертно)','latest_documented_fact':'последно документирано сведение','unresolved_missing_date':'неустановено — липсва дата','unresolved_same_date':'противоречиви сведения от една дата','unresolved_unverified_change':'непотвърдена промяна','нерешено':'изисква проверка'}[String(s)]||String(s||'изисква проверка'));
-const readableKind=s=>({'documentary':'документална референция','dossier':'преписка','GIS':'пространствен анализ','wastewater_solution':'начин на отвеждане на отпадъчни води'}[String(s)]||String(s||'друг източник'));
+const readableKind=s=>({'documentary':'документална референция','dossier':'преписка','GIS':'пространствен анализ','wastewater_solution':'начин на отвеждане на отпадъчни води','water_supply':'водоснабдяване','wastewater':'отпадъчни води','electricity':'електроснабдяване','access':'транспортен достъп','construction':'строителни дейности','discharge':'заустване','water':'водовземане','power':'електрозахранване','conflict':'противоречиви сведения'}[String(s)]||String(s||'друг източник'));
 const X=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 function script(url){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=url;s.onload=ok;s.onerror=()=>no(Error('Не може да се зареди необходимата библиотека: '+url));document.head.append(s)})}
 /* Minimal browser-only ZIP writer: STORE, CRC32, UTF-8, no CDN dependency. */
