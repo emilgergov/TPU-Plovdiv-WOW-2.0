@@ -7,6 +7,8 @@ on:
       - 'expert-v26/index.html'
       - 'expert-v26/v26-unified-context.js'
       - 'expert-v26/v26-word-review.js'
+      - 'expert-v26/v26-template-word.js'
+      - 'expert-v26/templates/**'
       - 'expert-v26/v26-annex2-browser.js'
       - 'expert-v26/tests/document-smoke.cjs'
       - 'expert-v26/tests/document-real-pdf.cjs'
@@ -22,6 +24,8 @@ jobs:
           node-version: '22'
       - run: npm install --no-save --no-package-lock --ignore-scripts jszip@3.10.1 pdfmake@0.2.20 pdf-parse@1.1.1
       - run: node --check expert-v26/v26-draft-package.js
+      - run: node --check expert-v26/v26-template-word.js
+      - run: node --check expert-v26/v26-word-review.js
       - run: node --check expert-v26/tests/document-smoke.cjs
       - run: node expert-v26/tests/document-smoke.cjs
       - run: node --check expert-v26/tests/document-real-pdf.cjs
