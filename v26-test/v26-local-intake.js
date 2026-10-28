@@ -93,7 +93,8 @@ async function process(file){
     if(isNotice&&text.trim()){
      const clean=text.replace(/\s+/g,' ').trim();
      const match=clean.match(/(?:относно|предмет(?:\s+на\s+(?:инвестиционното\s+)?предложение)?|наименование\s+на\s+(?:инвестиционното\s+)?предложение)\s*[:：–-]\s*(.{15,450}?)(?=\s+(?:възложител|местоположение|адрес|имот\s+с|приложения|описание\s+на)|$)/i);
-     const title=match?match[1].trim():'';
+     const rawTitle=match?match[1].trim():'';
+     const title=/[\p{L}]{3,}/u.test(rawTitle)&&rawTitle.replace(/[^\p{L}\p{N}]/gu,'').length>=12?rawTitle:'';
      const sections=[
       ['summary',/1\.\s*Резюме на предложението\s*:/i],
       ['processes',/2\.\s*Описание на основните процеси/i],
