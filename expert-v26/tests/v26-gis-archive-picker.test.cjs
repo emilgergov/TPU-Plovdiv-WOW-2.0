@@ -14,3 +14,6 @@ assert.match(bridge,/v26:gis-invalidated/,'GIS result must invalidate stale view
 assert.match(gis,/parcelgeom_04\.json\.gz/,'GIS package completeness guard must remain');
 assert.match(gis,/overlays_04\.json\.gz/,'Overlay completeness guard must remain');
 console.log('PASS: V26 GIS archive picker regression (static wiring)');
+
+assert.doesNotMatch(bridge,/panel\.style\.display\s*=\s*['"]none['"]/, 'Full GIS status panel must remain visible after activation');
+assert.match(bridge,/Архив: '\+selected\.name/, 'Successful load must identify archive');
