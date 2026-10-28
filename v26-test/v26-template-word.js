@@ -76,7 +76,7 @@ async function make(scenario,paragraphs,metadata){
    const section=nodes(body,'sectPr')[0];if(section&&section.parentNode===body)body.insertBefore(p,section);else body.appendChild(p);
   };
   addParagraph('ПРИЛОЖЕНА ДОКУМЕНТАЛНА ПРОСЛЕДИМОСТ — РАБОТНИ ДАННИ, ЗА ЕКСПЕРТНА ПРОВЕРКА');
-  addParagraph('Единен анализ ПАЦИЕНТ: сценарий '+String(evidence.diagnosis?.scenario||'НЕОПРЕДЕЛЕН')+'; пространствен статус: '+String(evidence.diagnosis?.spatialStatus||'нерешено')+'. Правната приложимост се потвърждава от експерта.');
+  addParagraph('Единен анализ на преписката: сценарий '+String(evidence.diagnosis?.scenario||'НЕОПРЕДЕЛЕН')+'; пространствен статус: '+String(evidence.diagnosis?.spatialStatus||'нерешено')+'. Правната приложимост се потвърждава от експерта.');
   for(const item of (evidence.findings||[]).slice(0,20)){
    const sources=(item.evidence||[]).slice(0,5).map(e=>String(e.file||'неизвестен документ')+' ('+String(e.date||'дата предстои')+')').join('; ');
    addParagraph('Запис: '+String(item.key||'')+'; статус: '+String(item.status||'непотвърден')+'; източници: '+sources+'. Правна приложимост: ПРЕДСТОИ.');
