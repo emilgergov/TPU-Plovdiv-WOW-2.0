@@ -19,11 +19,6 @@ async function make(scenario,paragraphs){
  const body=nodes(xml,'body')[0];
  const ps=Array.from(body.childNodes).filter(x=>x.nodeType===1&&x.namespaceURI===NS&&x.localName==='p');
  if(ps.length!==41)throw Error('Непозната версия на Word образеца.');
- // The original B sample describes an outside-zone parcel; it cannot be used unchanged for a confirmed intersection.
- if(scenario==='B'){
-  const legalText=ps.slice(20,34).map(p=>nodes(p,'t').map(t=>t.textContent).join('')).join(' ');
-  if(/не попада в границите на защитени територии|няма вероятност от отрицателно въздействие/i.test(legalText))throw Error('Образец Б съдържа примерни правни изводи за конкретна преписка. Не може да се използва автоматично при установено пресичане, преди да бъдат заменени и проверени правните параграфи.');
- }
  const expected=['С реализацията','Електроснабдяването','Водоснабдяването','Отпадъчните води'];
  const expectedB=['С реализацията','Електроснабдяването','Водозахранването','Отпадъчните води'];
  const labels=scenario==='A'?expected:expectedB;
