@@ -15,7 +15,7 @@ function sharedDiagnosis(intake,roles,gis){
  const outside=complete&&leading.every(r=>r.intersection_verified_outside===true);
  let scenario=null,spatialStatus='нерешено';
  if(current.length){scenario='Б';spatialStatus='доказано'}
- else if(archived.length){scenario='Б';spatialStatus='нерешено'}
+ else if(archived.length){scenario='Б';spatialStatus='установено архивно пресичане; актуалният правен статус не е потвърден'}
  else if(outside){scenario='А';spatialStatus='доказано'}
  facts.push({kind:'GIS',claim:scenario?'Сценарий '+scenario:'Сценарият не е установен',source:'ГИС анализ на водещите имоти',status:spatialStatus,verifiedOutside:outside,archivedIntersections:archived.length,currentIntersections:current.length});
  return Object.freeze({scenario,spatialStatus,leadingParcels:leading.map(r=>r.cadnum),facts,requiresExpertReview:true,legalStatusOfArchivedIntersections:'нерешено'});
@@ -25,7 +25,7 @@ function build(intake,roles,gis){
  const docs=intake.dossier_documents||[];
  const analysis=intake.dossier_analysis||null;
  const draft=intake.dossier_draft||null;
- const parcels=intake.all_parcels||[];
+ const parcels=Object.keys(roles||{}).filter(id=>roles[id]==='leading'||roles[id]==='ancillary');
  const diagnosis=sharedDiagnosis(intake,roles,gis);
  return Object.freeze({
   version:'V26.5-working',archive:intake.archive_name,
@@ -33,7 +33,7 @@ function build(intake,roles,gis){
   evidence:analysis,characterization:draft,
   references:docs.flatMap(d=>(d.references||[]).map(r=>({...r,file:d.file}))),
   readiness:{
-   zip:true,roles:!!roles,gis:!!gis,
+   zip:true,roles:!!roles&&parcels.length>0&&parcels.every(id=>!!roles[id]),gis:!!gis,
    appendix1:!!gis&&!!gis.pdf1_confirmed,
    appendix2:!!gis&&!!gis.pdf1_confirmed,
    word:!!gis&&!!gis.pdf1_confirmed&&!!roles
