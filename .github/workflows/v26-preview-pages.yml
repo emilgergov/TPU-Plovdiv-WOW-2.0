@@ -8,6 +8,9 @@ on:
       - '.github/workflows/v26-preview-pages.yml'
 permissions:
   contents: write
+concurrency:
+  group: v26-preview-publish-main
+  cancel-in-progress: false
 jobs:
   preview:
     runs-on: ubuntu-latest
@@ -63,4 +66,19 @@ jobs:
           git add v26-test
           if git diff --cached --quiet; then echo 'No preview changes'; exit 0; fi
           git commit -m 'Update isolated V26 preview (keep WOW unchanged)'
-          git push origin HEAD:main
+          # Rebase only the isolated preview update onto the latest main if another publisher won the race.
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              echo 'Preview publication conflict; aborting without touching WOW files'
+              git rebase --abort || true
+              exit 1
+            fi
+            if git push origin HEAD:main; then
+              echo 'Isolated V26 preview published successfully'
+              exit 0
+            fi
+            sleep 3
+          done
+          echo 'Preview publication failed after 4 safe attempts'
+          exit 1
