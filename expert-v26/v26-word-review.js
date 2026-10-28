@@ -55,7 +55,7 @@ function getConfirmedMetadata(){
  result.procedureFinding=result.procedureFinding||note;
  for(const k of ['recipient','address','subject','incomingReference','salutation'])result[k]=result[k]||note;
  const auto=autoEvidence();
- if(auto.subject)result.subject=auto.subject;
+ if(auto.subject)result.subject=auto.subject.replace(/^Относно:\s*/i,'').trim();
  if(!result.parcelIds)result.parcelIds=auto.ids;
  return result;
 }
