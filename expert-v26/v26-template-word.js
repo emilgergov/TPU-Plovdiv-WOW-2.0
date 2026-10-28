@@ -43,7 +43,7 @@ async function make(scenario,paragraphs,metadata){
   texts[0].textContent=value;texts[0].setAttribute('xml:space','preserve');for(const t of texts.slice(1))t.textContent='';
  };
  const legalIndices=scenario==='A'?[22,23,24,25,31]:[20,21,22,23,24,25,31];
- if(!Array.isArray(metadata.legalParagraphs)||metadata.legalParagraphs.length!==legalIndices.length||metadata.legalParagraphs.some(x=>!String(x).trim()))throw Error('Не са потвърдени всички фактически и правни констатации.');
+ if(!Array.isArray(metadata.legalParagraphs)||metadata.legalParagraphs.length<legalIndices.length||metadata.legalParagraphs.slice(0,legalIndices.length).some(x=>!String(x).trim()))throw Error('Не са потвърдени всички фактически и правни констатации.');
  const parcelIds=String(metadata.parcelIds||'').match(/\\b\\d{5}\\.\\d+\\.\\d+(?:\\.\\d+){0,2}\\b/g)||[];
  if(!parcelIds.length)throw Error('Липсват потвърдени кадастрални идентификатори.');
  if(scenario==='A'){
