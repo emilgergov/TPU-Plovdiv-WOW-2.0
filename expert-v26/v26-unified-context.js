@@ -8,7 +8,7 @@ function build(intake,roles,gis){
  const draft=intake.dossier_draft||null;
  const parcels=intake.all_parcels||[];
  return Object.freeze({
-  version:'V26.4-working',archive:intake.archive_name,
+  version:'V26.5-working',archive:intake.archive_name,
   documents:docs,parcels,roles:roles||null,gis:gis||null,
   evidence:analysis,characterization:draft,
   references:docs.flatMap(d=>(d.references||[]).map(r=>({...r,file:d.file}))),
@@ -21,11 +21,12 @@ function build(intake,roles,gis){
   caveats:['Документалните откъси изискват смислова проверка.','Непотвърдените нормативни основания се означават с конкретната причина за непотвърждаването.']
  });
 }
+function commonEvidence(context){return {findings:context.evidence?.findings||[],warnings:context.evidence?.warnings||[],archive:context.archive,parcels:context.parcels,roles:context.roles,gis:context.gis,requiresReview:true};}
 function toAnnex2(context){
- return {archive:context.archive,documents:context.documents.map(d=>({file:d.file,type:d.type,readable:d.readable,references:d.references||[]})),facts:context.evidence?.findings||[],warnings:context.evidence?.warnings||[]};
+ return {archive:context.archive,documents:context.documents.map(d=>({file:d.file,type:d.type,readable:d.readable,references:d.references||[]})),facts:context.evidence?.findings||[],warnings:context.evidence?.warnings||[],commonEvidence:commonEvidence(context)};
 }
 function toWord(context){
- return {archive:context.archive,parcels:context.parcels,roles:context.roles,characterization:context.characterization,requiresReview:true};
+ return {archive:context.archive,parcels:context.parcels,roles:context.roles,characterization:context.characterization,commonEvidence:commonEvidence(context),requiresReview:true};
 }
 root.V26UnifiedContext=Object.freeze({build,toAnnex2,toWord});
 })(typeof window!=='undefined'?window:globalThis);
