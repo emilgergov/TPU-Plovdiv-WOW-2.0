@@ -35,7 +35,17 @@ function mount(){
  const wrapper=Object.freeze({...original,lookup:async ids=>{
   if(!api.isLoaded())throw Error('Пълната ГИС V26 още не е готова. Изчакайте автоматичното зареждане или възстановете одобрения архив. Не се използва непълният резервен индекс.');
   const data=await api.lookup(ids);
-  if(data.results.some(x=>x.status==='Геометрия липсва'))throw Error('ГИС пакетът няма геометрия за един или повече имоти. Не може да се издаде непълен PDF №1.');
+  if(!Array.isArray(data.results)||data.results.length!==ids.length)throw Error('Непълен отговор от ГИС базата: броят на резултатите не съответства на въведените имоти.');
+  for(let i=0;i<ids.length;i++){
+   const expected=String(ids[i]).trim().split('.').slice(0,3).join('.');
+   const item=data.results[i];
+   if(item.cadnum!==expected)throw Error('ГИС резултатът не съответства на имот '+expected+'.');
+   if(item.status!=='Намерен')throw Error('Неуспешна ГИС проверка за '+expected+': '+item.status+'.');
+   const features=item.geojson?.features;
+   if(!Array.isArray(features)||!features.length||features.some(f=>!['Polygon','MultiPolygon'].includes(f?.geometry?.type)||!Array.isArray(f.geometry.coordinates)||!f.geometry.coordinates.length))throw Error('Липсва или е невалидна кадастралната геометрия на '+expected+'.');
+   const overlaps=item.overlap_geojson?.features;
+   if(!Array.isArray(overlaps)||overlaps.some(f=>!['Polygon','MultiPolygon'].includes(f?.geometry?.type)||!Array.isArray(f.geometry.coordinates)||!f.geometry.coordinates.length))throw Error('Невалидна геометрия на архивно пресичане за '+expected+'.');
+  }
   return data;
  }});
  window.V26BrowserGIS=wrapper;
