@@ -243,7 +243,7 @@ function normativePdf(results,register){
   const zoneRecords=records.filter(r=>String(r.zone_code||'')===z.code);
   for(const rr of zoneRecords){
    const exact=String(rr.provision||rr.clause||rr.article||'').trim();
-   const verified=rr.verified===true&&exact&&String(rr.source||'').startsWith('https://');
+   const verified=rr.verified===true&&rr.revision_verified===true&&exact&&String(rr.source||'').startsWith('https://');
    content.push({text:'Режим / точна разпоредба: '+(verified?exact:'ПРЕДСТОИ проверена точна точка/алинея')});
    content.push({text:'Приложимост към предмета и дейностите: '+(verified&&subject?.confirmed&&subject.activities?.length?'НЕОБХОДИМА ЕКСПЕРТНА СЪПОСТАВКА':'ПРЕДСТОИ — недостатъчно потвърдени данни'),bold:true});
   }
@@ -251,14 +251,14 @@ function normativePdf(results,register){
  content.push({text:'III. Нормативни основания и проследимост',style:'sub'});
  const selected=records.filter(r=>{
   const code=String(r.zone_code||'')||(String(r.title||'').match(/BG\d{7}/)||[])[0];
-  return code?zoneMap.has(code):r.verified===true;
+  return code?zoneMap.has(code):Boolean(r.article||r.provision||r.clause);
  });
  if(!selected.length)content.push({text:'Няма потвърдени общи нормативни разпоредби или зонално специфични записи за избраните зони. ПРЕДСТОИ.',bold:true});
  for(const r of selected){
   content.push({text:String(r.id||'')+' — '+String(r.title||''),style:'sub'});
   content.push({text:'Източник: '+String(r.source||'ПРЕДСТОИ'),link:/^https:\/\//.test(String(r.source||''))?String(r.source):undefined,color:'#165c86'});
   content.push({text:'Документ / редакция: '+String(r.date||'ПРЕДСТОИ')+' · Страница / точка: '+String(r.page||'ПРЕДСТОИ')});
-  content.push({text:'Проверка на точната приложима разпоредба: '+(r.verified===true?'Потвърдена според регистъра':'ПРЕДСТОИ'),bold:true});
+  content.push({text:'Проверка на точната приложима разпоредба: '+(r.verified===true?'Проверен текст; актуална редакция: '+(r.revision_verified===true?'удостоверена':'ПРЕДСТОИ'):'ПРЕДСТОИ'),bold:true});
  }
  content.push({text:'IV. Мотивиран експертен извод',style:'sub'});
  content.push({text:'ГИС фактът за установените зони се приема от Приложение №1 и не се поставя на повторно потвърждаване. Наличните данни позволяват идентифициране на зоните и проследяване на част от административните актове. Не позволяват окончателна преценка за допустимост, докато не бъдат извлечени точните действащи режими и не бъде съпоставена конкретната дейност с всяка приложима забрана, ограничение и изключение.',bold:true});
