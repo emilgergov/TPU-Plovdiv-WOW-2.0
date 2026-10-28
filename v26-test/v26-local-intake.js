@@ -247,7 +247,7 @@ async function process(file){
  }
  // Exclude neighbours/former IDs only if no independent proposal evidence exists.
  const nonLeading=new Set(dossierParcelEvidence.filter(x=>x.role==='neighbour'||x.role==='former').map(x=>x.id));
- for(const id of proposalCandidates)if(!nonLeading.has(id))leading.add(id);
+ for(const id of proposalCandidates){const explicit=dossierParcelEvidence.some(e=>e.id===id&&e.role==='mentioned'&&/(?:предмет|инвестиционно предложение|предвижда се|ще се изгради|местоположение)/i.test(e.excerpt));if(!nonLeading.has(id)||explicit)leading.add(id);}
  for(const id of [...leading])if(nonLeading.has(id)&&!proposalCandidates.has(id))leading.delete(id);
  for(const id of leading)other.delete(id);
  return {archive_name:file.name,archive_entries:list.length,elapsed_ms:Math.round(performance.now()-startedAt),files:docs,dossier_documents:dossierDocuments,dossier_analysis:dossierAnalysis,dossier_characterization:dossierCharacterization,dossier_draft:dossierDraft,evidence:dossierParcelEvidence,subject_candidates:subjects,semantic_review:semanticReview(subjects,documentTexts),all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[],mentioned_candidates:[...other],warnings:['Кандидатите за предмет на ИП са предварителни и изискват експертно потвърждение.','Другите срещнати идентификатори НЕ са автоматично съпътстващи имоти.','PDF и изображения се разчитат с OCR при необходимост; проверете качеството и пълнотата на извличането.']}};
