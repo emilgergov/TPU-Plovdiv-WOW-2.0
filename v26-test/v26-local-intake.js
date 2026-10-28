@@ -109,6 +109,11 @@ async function process(file){
   total+=size;if(total>80*1024*1024)throw Error('Твърде голям разархивиран архив.');
   list.push({name,method,size,packed,offset});
  }
+ // Prioritize notifications and machine-readable files before slower scanned attachments.
+ list.sort((a,b)=>{
+  const rank=x=>/уведомлен|notification/i.test(x.name)?0:/\.(txt|csv|json|md|docx)$/i.test(x.name)?1:/\.pdf$/i.test(x.name)?2:3;
+  return rank(a)-rank(b);
+ });
  const docs=[],all=new Set(),leading=new Set(),other=new Set(),subjects=[],documentTexts=[];const dossierParcelEvidence=[];const startedAt=performance.now();
  const dossierDocuments=[];
  for(const item of list){
