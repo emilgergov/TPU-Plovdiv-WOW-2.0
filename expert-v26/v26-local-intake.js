@@ -106,8 +106,8 @@ async function process(file){
    try{
     const unpacked=await readEntry(bytes,v,item);
     if(unpacked.byteLength!==item.size)throw Error('Несъответствие в ZIP размер.');
-    text=await extractText(unpacked,item.name);
-    status=text.trim()?'текстът е прочетен':'няма извлекаем текст (възможно сканиран документ)';if(text.trim())documentTexts.push({source:item.name,text:text.slice(0,150000)});
+    extractText.lastOcrPages=0;extractText.lastOcrError='';text=await extractText(unpacked,item.name);
+    status=text.trim()?(extractText.lastOcrPages?'OCR: '+extractText.lastOcrPages+' сканирани страници; експертна проверка':'текстът е прочетен'):(extractText.lastOcrError?'OCR неуспешен: '+extractText.lastOcrError:'няма извлекаем текст (възможно сканиран документ)');if(text.trim())documentTexts.push({source:item.name,text:text.slice(0,150000)});
     for(const id of text.match(rx)||[]){const parcel=parcelId(id);all.add(parcel);other.add(parcel)}
     const isNotice=/уведомлен/i.test(item.name+' '+text.slice(0,800));
     if(isNotice&&text.trim()){
