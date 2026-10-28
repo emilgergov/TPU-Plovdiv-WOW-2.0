@@ -12,6 +12,7 @@ function mount(){
  for(const [key,label] of [['recipient','Адресат'],['address','Адрес'],['subject','Предмет на ИП'],['incomingReference','Входящ номер и дата'],['salutation','Обръщение'],['parcelIds','Кадастрални идентификатори на имотите']]){
   const wrap=document.createElement('div');wrap.style.margin='6px 0';const caption=document.createElement('label');caption.textContent=label;caption.style.display='block';const input=document.createElement('input');input.type='text';input.style.cssText='width:100%;box-sizing:border-box';input.addEventListener('input',()=>{confirmed.checked=false});caseFields[key]=input;wrap.append(caption,input);box.append(wrap);
  }
+ const evidenceHeading=document.createElement('p');evidenceHeading.textContent='Откъсите от преписката са помощен материал. Отваряйте ги само когато е необходимо да сверите източника.';box.insertBefore(evidenceHeading,caseTitle);
  const legalTitle=document.createElement('h4');legalTitle.textContent='Фактически и правни констатации — задължителна експертна проверка';box.append(legalTitle);
  const legalHint=document.createElement('p');legalHint.textContent='Попълнете само проверени констатации. Не пренасяйте автоматично примерни изводи за допустимост, въздействие или защитени територии. За сценарий А се използват първите 5 полета; за сценарий Б — всичките 7.';box.append(legalHint);
  const legalLabels=['Местоположение и защитени територии / предназначение','Защитени зони и най-близки зони','Допустимост и режими / ЗООС','Проверка по ЗЗТ / вероятност за въздействие','Преценка на въздействието','Заключение / преценка','Допълнителна констатация за сценарий Б'];
@@ -19,7 +20,7 @@ function mount(){
  const procLabel=document.createElement('label');procLabel.textContent='Проверена приложима процедура по Наредбата за ОС';procLabel.style.display='block';procedureField=document.createElement('textarea');procedureField.rows=3;procedureField.style.cssText='width:100%;box-sizing:border-box';procedureField.addEventListener('input',()=>{confirmed.checked=false});box.append(procLabel,procedureField);
  const impactTitle=document.createElement('h4');impactTitle.textContent='Пет констатации за въздействията — поотделно';box.append(impactTitle);
  impactFields=['Местообитания','Видове','Цялост и цели','Кохерентност','Кумулативни въздействия'].map(label=>{const wrap=document.createElement('div');const caption=document.createElement('label');caption.textContent=label;caption.style.display='block';const area=document.createElement('textarea');area.rows=2;area.style.cssText='width:100%;box-sizing:border-box';area.addEventListener('input',()=>{confirmed.checked=false});wrap.append(caption,area);box.append(wrap);return area});
- const check=document.createElement('label');confirmed=document.createElement('input');confirmed.type='checkbox';check.append(confirmed,document.createTextNode(' Потвърждавам, че четирите абзаца и административните данни са проверени по документите от преписката.'));box.append(check);
+ const check=document.createElement('label');confirmed=document.createElement('input');confirmed.type='checkbox';check.append(confirmed,document.createTextNode(' Потвърждавам проверката на описанията, административните данни и правните констатации по преписката.'));box.append(check);
  button.parentNode.insertBefore(box,button);
 }
 function getConfirmedParagraphs(){
@@ -36,7 +37,7 @@ function getConfirmedMetadata(){
  result.impactFindings=impactFields.map(f=>f.value.trim());
  if(!result.procedureFinding||result.impactFindings.length!==5||result.impactFindings.some(v=>!v))throw Error('Попълнете приложимата процедура и петте констатации за въздействията.');
  if(result.legalParagraphs.slice(0,5).some(v=>!v))throw Error('Попълнете петте основни фактически и правни констатации.');
- if(Object.values(result).some(v=>!v))throw Error('Попълнете адресат, адрес, предмет, входящ номер и обръщение.');
+ if(['recipient','address','subject','incomingReference','salutation','parcelIds'].some(k=>!result[k]))throw Error('Попълнете адресат, адрес, предмет, входящ номер и обръщение.');
  return result;
 }
 document.addEventListener('v26:dossier-loaded',event=>{
@@ -50,8 +51,8 @@ document.addEventListener('v26:dossier-loaded',event=>{
  topics.forEach(([key],i)=>{
   const section=draft?.sections?.find(x=>x.key===key);if(!section?.sources?.length||!fields[i])return;
   const wrapper=document.createElement('div');wrapper.className='v26-evidence-suggestion';wrapper.style.cssText='font-size:0.9em;margin:3px 0 10px;padding:7px;border-left:3px solid #819d89';
-  const title=document.createElement('strong');title.textContent='Откъси от преписката — за проверка:';wrapper.append(title);
-  section.sources.slice(0,3).forEach(source=>{const p=document.createElement('p');p.textContent=source.file+' · '+(source.date||'дата неустановена')+': '+source.excerpt.slice(0,380);wrapper.append(p)});
+  const evidenceDetails=document.createElement('details');const title=document.createElement('summary');title.textContent='Покажи източници от преписката ('+Math.min(section.sources.length,3)+')';evidenceDetails.append(title);wrapper.append(evidenceDetails);
+  section.sources.slice(0,3).forEach(source=>{const p=document.createElement('p');p.textContent=source.file+' · '+(source.date||'дата неустановена')+': '+source.excerpt.slice(0,380);evidenceDetails.append(p)});
   fields[i].parentNode.append(wrapper);
  });
 });
