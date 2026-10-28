@@ -35,24 +35,29 @@ async function make(scenario,paragraphs,metadata){
  const protectedTerritoryText=nodes(xml,'t').map(t=>t.textContent).join(' ');
  if(!protectedTerritoryText.includes('защитени територии'))throw Error('Липсва отделната проверка за защитени територии по ЗЗТ.');
  // Case-specific identity, subject, and incoming reference must be supplied and reviewed.
- const required=['recipient','address','subject','incomingReference','salutation'];
- if(!metadata||required.some(k=>!String(metadata[k]||'').trim()))throw Error('Липсват потвърдени адресат, адрес, предмет, входящ номер или обръщение.');
+ const required=['recipient','address','subject','incomingReference','salutation','legalParagraphs'];
+ if(!metadata||required.some(k=>k!=='legalParagraphs'&&!String(metadata[k]||'').trim()))throw Error('Липсват потвърдени адресат, адрес, предмет, входящ номер или обръщение.');
  const replaceParagraph=(index,value)=>{
   const p=ps[index],texts=nodes(p,'t');if(!texts.length)throw Error('Липсва променливо текстово поле.');
   if(nodes(p,'drawing').length||nodes(p,'fldChar').length)throw Error('Променливото поле съдържа защитен елемент.');
   texts[0].textContent=value;texts[0].setAttribute('xml:space','preserve');for(const t of texts.slice(1))t.textContent='';
  };
+ const legalIndices=scenario==='A'?[22,23,24,25,31]:[20,21,22,23,24,25,31];
+ if(!Array.isArray(metadata.legalParagraphs)||metadata.legalParagraphs.length!==legalIndices.length||metadata.legalParagraphs.some(x=>!String(x).trim()))throw Error('Не са потвърдени всички фактически и правни констатации.');
+ const parcelIds=String(metadata.parcelIds||'').match(/\\b\\d{5}\\.\\d+\\.\\d+(?:\\.\\d+){0,2}\\b/g)||[];
+ if(!parcelIds.length)throw Error('Липсват потвърдени кадастрални идентификатори.');
  if(scenario==='A'){
   replaceParagraph(6,metadata.recipient);replaceParagraph(7,metadata.address);
-  replaceParagraph(10,'Относно: '+metadata.subject);replaceParagraph(13,metadata.salutation);
-  replaceParagraph(16,metadata.incomingReference+' — '+metadata.subject);
+  replaceParagraph(10,'Относно: '+metadata.subject+' — имоти '+parcelIds.join(', '));replaceParagraph(13,metadata.salutation);
+  replaceParagraph(16,'Във връзка с уведомление '+metadata.incomingReference+' за '+metadata.subject+', имоти '+parcelIds.join(', ')+'.');
  }else{
   replaceParagraph(5,metadata.recipient);replaceParagraph(6,'');replaceParagraph(7,metadata.address);
-  replaceParagraph(9,'Относно: '+metadata.subject);replaceParagraph(10,metadata.salutation);replaceParagraph(11,'');
-  replaceParagraph(14,metadata.incomingReference+' — '+metadata.subject);
+  replaceParagraph(9,'Относно: '+metadata.subject+' — имоти '+parcelIds.join(', '));replaceParagraph(11,metadata.salutation);replaceParagraph(12,'');
+  replaceParagraph(14,'Във връзка с уведомление '+metadata.incomingReference+' за '+metadata.subject+', имоти '+parcelIds.join(', ')+'.');
  }
+ legalIndices.forEach((index,i)=>replaceParagraph(index,String(metadata.legalParagraphs[i])));
  const sampleIds=nodes(xml,'t').map(t=>t.textContent).join(' ').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
- if(sampleIds.length)throw Error('Оригиналният образец съдържа примерни кадастрални идентификатори: '+[...new Set(sampleIds)].slice(0,3).join(', ')+'. Не е безопасно да се издаде Word преди попълване на цялата преписка.');
+ if(sampleIds.some(id=>!parcelIds.includes(id)))throw Error('Оригиналният образец съдържа примерни кадастрални идентификатори: '+[...new Set(sampleIds)].slice(0,3).join(', ')+'. Не е безопасно да се издаде Word преди попълване на цялата преписка.');
  zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
  return new Blob([root.fflate.zipSync(zip,{level:6})],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
 }
