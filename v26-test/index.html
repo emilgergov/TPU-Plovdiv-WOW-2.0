@@ -214,7 +214,7 @@ function words(s){return v26EditIds(s).ids};let v26ZipLookupMode=false;let v26Zi
 }
 $('confirmRoles').onclick=()=>{const roles={};const selects=[...$('roleRows').querySelectorAll('select')];if(!selects.length){$('roleStatus').textContent='Няма намерени имоти за потвърждаване. Първо използвайте „Намери имотите“.';return;}
   for(const s of selects){if(s.value)roles[s.dataset.cadnum]=s.value}
-  confirmedRoles=roles;v26RefreshSubjectHeading();document.dispatchEvent(new CustomEvent('v26:roles-confirmed',{detail:{roles:{...roles}}}));const b=$('confirmRoles');b.textContent='Приложи промени';b.style.display='none';b.disabled=false;$('roleStatus').textContent='Промените са приложени: '+Object.keys(roles).length+' имота.';$('ids').value=Object.keys(roles).join('\n');v26SetLookupMode(false);$('run').click()
+  confirmedRoles=roles;v26ContextState.roles={...roles};v26UpdateContext();v26RefreshSubjectHeading();document.dispatchEvent(new CustomEvent('v26:roles-confirmed',{detail:{roles:{...roles}}}));const b=$('confirmRoles');b.textContent='Приложи промени';b.style.display='none';b.disabled=false;$('roleStatus').textContent='Промените са приложени: '+Object.keys(roles).length+' имота.';$('ids').value=Object.keys(roles).join('\n');v26SetLookupMode(false);$('run').click()
 };
 function setStatus(t){
  $('status').textContent=t;
