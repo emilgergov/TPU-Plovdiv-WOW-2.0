@@ -403,7 +403,7 @@ window.V26EarlyGisReady=({ids,source,subject})=>{
  const clean=[...new Set(ids.map(id=>String(id).split('.').slice(0,3).join('.')))];
  if(!clean.length)return;
  v26EarlyGisStarted=true;
- $('ids').value=clean.join('\\n');
+ $('ids').value=clean.join('\n');
  v26ZipManualOverride=false;
  v26SetLookupMode(true);
  confirmedRoles=Object.fromEntries(clean.map(id=>[id,'leading']));
