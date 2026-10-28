@@ -43,9 +43,6 @@ jobs:
         run: |
           mkdir -p public/v26-test
           rsync -a --exclude='gis-data/' source/expert-v26/ public/v26-test/
-          ln -s ../expert-v26/gis-data public/v26-test/gis-data
-          # Symlinks are not reliably served by GitHub Pages: the preview uses the existing main data URL.
-          rm public/v26-test/gis-data
           python3 - <<'PY'
           from pathlib import Path
           p=Path('public/v26-test/v26-full-gis-bridge.js')
