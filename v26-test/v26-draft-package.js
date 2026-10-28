@@ -50,7 +50,7 @@ function scenarioFromGIS(results,roles){
  const zones=leading.flatMap(r=>r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG[0-9]{7}$/.test(z.trim()));
  if(zones.length)return {scenario:'Б',basis:'потвърдени пространствени пресичания',zones:[...new Set(zones)]};
  // Archived overlays justify a provisional B draft, not a verified current legal intersection.
- const archived=leading.flatMap(r=>[...(r.archived_overlay_records||[]),...(r.archived_zones||[])]).map(z=>typeof z==='string'?z.trim():String(z.sitecode||z.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z));
+ const archived=leading.flatMap(r=>[...(r.archived_overlay_records||[]),...(r.archived_zones||[])]).map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z));
  if(archived.length)return {scenario:'Б',basis:'архивно ГИС пресичане — актуалният правен статус предстои да се провери',zones:[...new Set(archived)],provisional:true};
  if(leading.every(r=>r.intersection_verified_outside===true))return {scenario:'А',basis:'потвърдено отсъствие на пресичания',zones:[]};
  return {scenario:null,basis:'непотвърдено пространствено пресичане или отсъствие',zones:[]};
