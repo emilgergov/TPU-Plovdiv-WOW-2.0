@@ -3,6 +3,7 @@
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const readableStatus=s=>({'corroborated':'съгласувани сведения (непотвърдени експертно)','latest_documented_fact':'последно документирано сведение','unresolved_missing_date':'неустановено — липсва дата','unresolved_same_date':'противоречиви сведения от една дата','unresolved_unverified_change':'непотвърдена промяна','нерешено':'изисква проверка'}[String(s)]||String(s||'изисква проверка'));
 const readableKind=s=>({'documentary':'документална референция','dossier':'преписка','GIS':'пространствен анализ','wastewater_solution':'начин на отвеждане на отпадъчни води','water_supply':'водоснабдяване','wastewater':'отпадъчни води','electricity':'електроснабдяване','access':'транспортен достъп','construction':'строителни дейности','discharge':'заустване','water':'водовземане','power':'електрозахранване','conflict':'противоречиви сведения'}[String(s)]||String(s||'друг източник'));
+const shortSource=s=>{const n=String(s||'неустановен източник');return n.length>78?n.slice(0,36)+' … '+n.slice(-32):n};
 const X=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 function script(url){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=url;s.onload=ok;s.onerror=()=>no(Error('Не може да се зареди необходимата библиотека: '+url));document.head.append(s)})}
 /* Minimal browser-only ZIP writer: STORE, CRC32, UTF-8, no CDN dependency. */
@@ -226,9 +227,9 @@ function normativePdf(results,register){
  const review=register?.verifiedCaseMetadata||null;
  const content=[
   {text:'Документална проследимост: '+(dossier?.documents?.length||0)+' документа от единната ZIP преписка. Непотвърдените твърдения не представляват установени факти.',fontSize:9},
-  ...((dossier?.documents||[]).slice(0,35).map(d=>({text:'Документ: '+d.file+' · входящи референции: '+(d.references||[]).map(x=>x.number+' / '+x.date).join('; '),fontSize:8}))),
+  ...((dossier?.documents||[]).slice(0,35).map(d=>({text:'Документ: '+shortSource(d.file)+' · входящи референции: '+(d.references||[]).map(x=>x.number+' / '+x.date).join('; '),fontSize:8}))),
   {text:'Предварителен аналитичен сценарий: '+String(dossier?.commonEvidence?.diagnosis?.scenario||'НЕОПРЕДЕЛЕН')+'; пространствен статус: '+String(dossier?.commonEvidence?.diagnosis?.spatialStatus||'нерешено'),bold:true},
-  ...((dossier?.commonEvidence?.ledger||[]).slice(0,30).map(f=>({text:'Доказателство: '+readableKind(f.kind)+' / '+readableStatus(f.status)+' / '+String(f.source||'неустановен'),fontSize:8}))),
+  ...((dossier?.commonEvidence?.ledger||[]).slice(0,30).map(f=>({text:'Доказателство: '+readableKind(f.kind)+' / '+readableStatus(f.status)+' / '+shortSource(f.source),fontSize:8}))),
   {text:'Единни доказателствени констатации от преписката: '+(dossier?.commonEvidence?.findings?.length||0)+' · предупреждения: '+(dossier?.commonEvidence?.warnings?.length||0)+'. Изискват експертна проверка.',fontSize:9},
   ...((dossier?.commonEvidence?.findings||[]).slice(0,20).map(f=>({text:'Доказателствен запис: '+readableKind(f.key)+' · статус '+readableStatus(f.status)+' · източници '+(f.evidence||[]).slice(0,5).map(e=>String(e.file||'неизвестен документ')+' ('+String(e.date||'дата предстои')+')').join('; ')+' · правна приложимост: ПРЕДСТОИ',fontSize:8}))),
   {text:'Единен експертен преглед за PDF №2 и Word: '+(review?'налични са данни от общия преглед; експертното потвърждение се извършва преди издаване':'не е предоставен общ експертен преглед'),bold:true},
