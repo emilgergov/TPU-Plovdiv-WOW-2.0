@@ -41,6 +41,16 @@ function analyze(documents){
  }
  return {inventory,findings,warnings,requiresReview:findings.some(f=>f.status.startsWith('unresolved'))};
 }
-root.V26DossierEvidence={iso,analyze};
+function characterize(analysis){
+ const paragraphs=[];
+ for(const f of (analysis&&analysis.findings)||[]){
+  if(f.key!=='wastewater_solution'||!f.selected)continue;
+  const e=f.selected;
+  const wording=e.value==='sewer'?'Предвидено е отвеждане към канализационната мрежа.':e.value==='tank'?'Предвидено е събиране във водоплътно съоръжение.':null;
+  if(wording)paragraphs.push({topic:'Отпадъчни води',text:wording,source:e.file,date:e.date,excerpt:e.reference||'',review:true});
+ }
+ return {paragraphs,requiresReview:!!(analysis&&analysis.requiresReview)||paragraphs.length>0};
+}
+root.V26DossierEvidence={iso,analyze,characterize};
 if(typeof module==='object'&&module.exports)module.exports=root.V26DossierEvidence;
 })(typeof window!=='undefined'?window:globalThis);
