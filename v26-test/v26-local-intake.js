@@ -13,19 +13,21 @@ async function readEntry(bytes,v,item){
  const result=window.fflate.inflateSync(compressed);
  return result.buffer.slice(result.byteOffset,result.byteOffset+result.byteLength);
 }
+function withDeadline(promise,ms,label){return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(Error(label+' — надвишено време '+Math.round(ms/1000)+' сек.')),ms))])}
+function intakeProgress(message){if(typeof window.V26IntakeProgress==='function')window.V26IntakeProgress(message)}
 async function ocrPdfPage(page,worker){
  const viewport=page.getViewport({scale:1.65});const canvas=document.createElement('canvas');
  canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
  try{await page.render({canvasContext:canvas.getContext('2d',{willReadFrequently:true}),viewport}).promise;
-  const result=await worker.recognize(canvas);return String(result?.data?.text||'').trim();
+  const result=await withDeadline(worker.recognize(canvas),25000,'OCR на PDF страница');return String(result?.data?.text||'').trim();
  }finally{canvas.width=0;canvas.height=0}
 }
 async function imageOcr(data,name){
  if(!window.Tesseract)await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
  const blob=new Blob([data],{type:/\.png$/i.test(name)?'image/png':/\.webp$/i.test(name)?'image/webp':/\.tiff?$/i.test(name)?'image/tiff':/\.bmp$/i.test(name)?'image/bmp':'image/jpeg'});
  const url=URL.createObjectURL(blob);let worker=null;
- try{worker=await window.Tesseract.createWorker('bul+eng',1);const result=await worker.recognize(url);extractText.lastOcrPages=1;return String(result?.data?.text||'')}
- finally{if(worker)await worker.terminate();URL.revokeObjectURL(url)}
+ try{worker=await withDeadline(window.Tesseract.createWorker('bul+eng',1),30000,'OCR зареждане');const result=await withDeadline(worker.recognize(url),25000,'OCR на изображение');extractText.lastOcrPages=1;return String(result?.data?.text||'')}
+ finally{if(worker)await withDeadline(worker.terminate(),3000,'OCR приключване').catch(()=>{});URL.revokeObjectURL(url)}
 }
 async function extractText(data,name){
  if(/\.(jpe?g|png|webp|bmp|tiff?)$/i.test(name))return imageOcr(data,name);
@@ -36,12 +38,12 @@ async function extractText(data,name){
   const doc=await window.pdfjsLib.getDocument({data:new Uint8Array(data)}).promise;
   extractText.lastOcrPages=0;extractText.lastOcrError='';extractText.lastPageWarnings=[];
   const parts=[];let worker=null;
-  try{for(let i=1;i<=doc.numPages;i++){
+  try{for(let i=1;i<=doc.numPages;i++){intakeProgress('PDF: страница '+i+' от '+doc.numPages+' · '+name);
    const page=await doc.getPage(i),content=await page.getTextContent();
    let pageText=content.items.map(x=>x.str||'').join(' ').trim();
    if(pageText.replace(/[^\p{L}\p{N}]/gu,'').length<25){
     try{if(!window.Tesseract)await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
-     if(!worker)worker=await window.Tesseract.createWorker('bul+eng',1);
+     if(!worker)worker=await withDeadline(window.Tesseract.createWorker('bul+eng',1),30000,'OCR зареждане');
      const scanned=await ocrPdfPage(page,worker);
      if(scanned.replace(/[^\p{L}\p{N}]/gu,'').length>pageText.replace(/[^\p{L}\p{N}]/gu,'').length){pageText=scanned;extractText.lastOcrPages++}
     }catch(err){extractText.lastOcrError=String(err.message||err)}
@@ -110,6 +112,7 @@ async function process(file){
  const docs=[],all=new Set(),leading=new Set(),other=new Set(),subjects=[],documentTexts=[];const dossierParcelEvidence=[];const startedAt=performance.now();
  const dossierDocuments=[];
  for(const item of list){
+  intakeProgress('Прочит на документ '+(docs.length+1)+' от '+list.length+' · '+item.name);
   let status='описан',text='';const entryStartedAt=performance.now();
   if(/\.(txt|csv|json|md|pdf|docx|jpe?g|png|webp|bmp|tiff?)$/i.test(item.name)&&item.size<=20*1024*1024){
    try{
