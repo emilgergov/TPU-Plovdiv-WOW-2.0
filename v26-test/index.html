@@ -200,7 +200,7 @@ const $=id=>document.getElementById(id);let found=[],selected=0,allFeatures=[],b
 function words(s){return v26EditIds(s).ids};let v26ZipLookupMode=false;let v26ZipManualOverride=false;function v26SetLookupMode(zip){document.body.classList.remove('v26-gis-retry');v26ZipLookupMode=!!zip;document.body.classList.toggle('v26-zip-auto-lookup',!!zip);$('run').style.display=zip?'none':'';const note=$('v26LookupMode');note.style.display=zip?'block':'none';if(zip)note.textContent='ГИС проверка: автоматично търсене на имотите от ZIP…';}$('ids').addEventListener('input',()=>{if(v26ZipLookupMode){v26ZipManualOverride=true;v26SetLookupMode(false);$('roleStatus').textContent='Идентификаторите са променени ръчно — изпълнете „Намери имотите“.';}});function reviewRoles(d){
   const toParcel=id=>String(id).split('.').slice(0,3).join('.');
   const unique=xs=>[...new Set((xs||[]).map(toParcel))];
-  confirmedRoles=null;const roleButton=$('confirmRoles');roleButton.disabled=false;roleButton.textContent='Приложи промени';roleButton.style.display='none';caseParcels=unique(d.all_parcels);
+  if(!v26EarlyGisStarted)confirmedRoles=null;const roleButton=$('confirmRoles');roleButton.disabled=false;roleButton.textContent='Приложи промени';roleButton.style.display='none';caseParcels=unique(d.all_parcels);
   const c={...d.classification,leading_candidates:unique(d.classification.leading_candidates),ancillary_candidates:unique(d.classification.ancillary_candidates)};const host=$('roleRows');host.replaceChildren();
   for(const id of caseParcels){const line=document.createElement('label');line.style.cssText='display:block;font-size:13px;margin:7px 0';
     const label=document.createElement('span');label.textContent=id+' · ';line.appendChild(label);
@@ -208,7 +208,7 @@ function words(s){return v26EditIds(s).ids};let v26ZipLookupMode=false;let v26Zi
     const opts=[['','Непотвърден'],['leading','Водещ'],['ancillary','Съпътстващ']];
     for(const [v,t] of opts){const o=document.createElement('option');o.value=v;o.textContent=t;select.appendChild(o)}
     // Candidate information is shown as a hint, never preselected as confirmed.
-    line.appendChild(select);const hint=document.createElement('small');hint.textContent=c.leading_candidates.includes(id)?' (кандидат за водещ)':c.ancillary_candidates.includes(id)?' (кандидат за съпътстващ)':'';line.appendChild(hint);host.appendChild(line);
+    if(v26EarlyGisStarted&&confirmedRoles?.[id])select.value=confirmedRoles[id];line.appendChild(select);const hint=document.createElement('small');hint.textContent=c.leading_candidates.includes(id)?' (кандидат за водещ)':c.ancillary_candidates.includes(id)?' (кандидат за съпътстващ)':'';line.appendChild(hint);host.appendChild(line);
   }
   $('roleReview').style.display=caseParcels.length?'block':'none';$('roleStatus').textContent='Имотен обхват: '+caseParcels.length+' открити имота. Ролите са предложени автоматично; редакцията е по желание.';
 }
