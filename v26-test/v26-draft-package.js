@@ -57,7 +57,7 @@ function scenarioFromGIS(results,roles){
 }
 function docx(zip,ids,roles,results,includeAnnex2,unifiedContext){
  const d=zipWriter();
- const zones=[...new Set(results.flatMap(r=>(r.archived_overlay_records||[]).map(z=>String(z.sitecode||z.code||'')).filter(z=>/^BG\d{7}$/.test(z))))];
+ const zones=[...new Set(results.flatMap(r=>(r.archived_overlay_records||[]).map(z=>String(z?.sitecode||z?.code||'')).filter(z=>/^BG\d{7}$/.test(z))))];
  const determination=scenarioFromGIS(results,roles);
  const scenario=determination.scenario||'НЕОПРЕДЕЛЕН';
  const subject=window.V26SubjectContext;
