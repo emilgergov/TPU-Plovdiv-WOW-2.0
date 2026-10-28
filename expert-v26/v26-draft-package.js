@@ -62,6 +62,7 @@ function docx(zip,ids,roles,results,includeAnnex2,unifiedContext){
 
  const shared=unifiedContext?.commonEvidence;
  if(shared)lines.push('Единни доказателствени констатации: '+(shared.findings||[]).length+' · предупреждения: '+(shared.warnings||[]).length+'; всички изискват експертна проверка.');
+ for(const f of (unifiedContext?.commonEvidence?.findings||[]).slice(0,20))lines.push('Доказателствен запис: '+String(f.key||'')+' · статус '+String(f.status||'')+' · източници '+(f.evidence||[]).map(e=>String(e.file||'')).join(', ')+' · изисква експертна проверка');
  const evidence=unifiedContext?.characterization;
  for(const section of evidence?.sections||[]){
   lines.push('Доказателствена тема: '+section.title+' — Приложимостта не е оценена.');
@@ -225,6 +226,7 @@ function normativePdf(results,register){
   {text:'Документална проследимост: '+(dossier?.documents?.length||0)+' документа от единната ZIP преписка. Непотвърдените твърдения не представляват установени факти.',fontSize:9},
   ...((dossier?.documents||[]).slice(0,35).map(d=>({text:'Документ: '+d.file+' · входящи референции: '+(d.references||[]).map(x=>x.number+' / '+x.date).join('; '),fontSize:8}))),
   {text:'Единни доказателствени констатации от преписката: '+(dossier?.commonEvidence?.findings?.length||0)+' · предупреждения: '+(dossier?.commonEvidence?.warnings?.length||0)+'. Изискват експертна проверка.',fontSize:9},
+  ...((dossier?.commonEvidence?.findings||[]).slice(0,20).map(f=>({text:'Доказателствен запис: '+String(f.key||'')+' · статус '+String(f.status||'')+' · източници '+(f.evidence||[]).map(e=>String(e.file||'')).join(', ')+' · изисква експертна проверка',fontSize:8}))),
   {text:'Единен експертен преглед за PDF №2 и Word: '+(review?'налични са данни от общия преглед; експертното потвърждение се извършва преди издаване':'не е предоставен общ експертен преглед'),bold:true},
   ...((review?.legalParagraphs||[]).map((value,i)=>({text:'Експертна констатация '+(i+1)+': '+String(value),fontSize:9}))),
   {text:'Проверена приложима процедура: '+String(review?.procedureFinding||'Приложимостта не е оценена'),fontSize:9},
