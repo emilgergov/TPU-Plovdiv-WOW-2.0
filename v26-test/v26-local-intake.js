@@ -114,7 +114,7 @@ async function process(file){
   const rank=x=>/уведомлен|notification/i.test(x.name)?0:/\.(txt|csv|json|md|docx)$/i.test(x.name)?1:/\.pdf$/i.test(x.name)?2:3;
   return rank(a)-rank(b);
  });
- const docs=[],all=new Set(),leading=new Set(),other=new Set(),subjects=[],documentTexts=[];const dossierParcelEvidence=[];const startedAt=performance.now();
+ const docs=[],all=new Set(),leading=new Set(),other=new Set(),subjects=[],documentTexts=[];let earlyGisSent=false;const dossierParcelEvidence=[];const startedAt=performance.now();
  const dossierDocuments=[];
  for(const item of list){
   intakeProgress('Прочит на документ '+(docs.length+1)+' от '+list.length+' · '+item.name,{document:docs.length+1,documents:list.length,page:0,pages:0});
@@ -212,6 +212,18 @@ async function process(file){
   const documentDate=dates.length===1?dates[0]:null;
   dossierDocuments.push({file:item.name,type:/уведомлен/i.test(item.name+' '+text.slice(0,800))?'notification':/допълнителна\s+информация|доп\.\s*информация/i.test(item.name+' '+text.slice(0,800))?'supplementary':'attachment',readable:!!text.trim(),date:documentDate,references:referenceMatches,facts:factualSnippets,claims:wastewaterClaims});
   docs.push({filename:item.name,status,elapsed_ms:Math.round(performance.now()-entryStartedAt)});
+  // Start GIS as soon as a readable notification establishes proposal parcels.
+  // Other attachments remain available for the later documentary pass.
+  if(!earlyGisSent && /уведомлен/i.test(item.name+' '+text.slice(0,800)) && text.trim() &&
+     !/OCR неуспешен|ПРОВЕРКА:|неуспешно извличане/i.test(status) && leading.size &&
+     typeof window.V26EarlyGisReady==='function'){
+    const candidates=[...leading].filter(id=>!dossierParcelEvidence.some(e=>e.id===id&&(e.role==='neighbour'||e.role==='former')));
+    if(candidates.length){
+      earlyGisSent=true;
+      try{window.V26EarlyGisReady({ids:candidates,source:item.name,subject:subjects[subjects.length-1]||null})}
+      catch(e){console.warn('V26 early GIS notification:',e)}
+    }
+  }
  }
  const dossierAnalysis=(window.V26DossierEvidence&&typeof window.V26DossierEvidence.analyze==='function')?
   window.V26DossierEvidence.analyze(dossierDocuments.map(d=>({file:d.file,type:d.type,date:d.date,registration:d.references[0]?.number||null,facts:d.claims||[]}))):null;
