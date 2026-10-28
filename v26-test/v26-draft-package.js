@@ -1,6 +1,8 @@
 /* Browser-only optional draft package: DOCX and two real PDFs. No official legal findings. */
 (()=>{'use strict';
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const readableStatus=s=>({'corroborated':'съгласувани сведения (непотвърдени експертно)','latest_documented_fact':'последно документирано сведение','unresolved_missing_date':'неустановено — липсва дата','unresolved_same_date':'противоречиви сведения от една дата','unresolved_unverified_change':'непотвърдена промяна','нерешено':'изисква проверка'}[String(s)]||String(s||'изисква проверка'));
+const readableKind=s=>({'documentary':'документална референция','dossier':'преписка','GIS':'пространствен анализ','wastewater_solution':'начин на отвеждане на отпадъчни води'}[String(s)]||String(s||'друг източник'));
 const X=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 function script(url){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=url;s.onload=ok;s.onerror=()=>no(Error('Не може да се зареди необходимата библиотека: '+url));document.head.append(s)})}
 /* Minimal browser-only ZIP writer: STORE, CRC32, UTF-8, no CDN dependency. */
@@ -62,7 +64,7 @@ function docx(zip,ids,roles,results,includeAnnex2,unifiedContext){
 
  const shared=unifiedContext?.commonEvidence;
  if(shared)lines.push('Единни доказателствени констатации: '+(shared.findings||[]).length+' · предупреждения: '+(shared.warnings||[]).length+'; всички изискват експертна проверка.');
- for(const f of (unifiedContext?.commonEvidence?.findings||[]).slice(0,20))lines.push('Доказателствен запис: '+String(f.key||'')+' · статус '+String(f.status||'')+' · източници '+(f.evidence||[]).slice(0,5).map(e=>String(e.file||'неизвестен документ')+' ('+String(e.date||'дата предстои')+')').join('; ')+' · правна приложимост: ПРЕДСТОИ');
+ for(const f of (unifiedContext?.commonEvidence?.findings||[]).slice(0,20))lines.push('Доказателствен запис: '+readableKind(f.key)+' · статус '+readableStatus(f.status)+' · източници '+(f.evidence||[]).slice(0,5).map(e=>String(e.file||'неизвестен документ')+' ('+String(e.date||'дата предстои')+')').join('; ')+' · правна приложимост: ПРЕДСТОИ');
  const evidence=unifiedContext?.characterization;
  for(const section of evidence?.sections||[]){
   lines.push('Доказателствена тема: '+section.title+' — Приложимостта не е оценена.');
@@ -124,7 +126,7 @@ function pdfDef(title,content){
  return {pageSize:'A4',pageMargins:[42,50,42,50],defaultStyle:{font:'Roboto',fontSize:10},styles:{heading:{fontSize:16,bold:true,margin:[0,0,0,14]},sub:{fontSize:12,bold:true,margin:[0,12,0,6]}},content:[{text:'ТПУ Пловдив — '+title,style:'heading'},{text:'РАБОТЕН СПРАВОЧЕН ДОКУМЕНТ. Не удостоверява актуални граници, режими или правни заключения.',bold:true,margin:[0,0,0,14]},...content]};
 }
 function gisPdf(results,options={}){
- const content=[{text:'Източник: RIOSV_PLOVDIV_KAIS_CADASTRE_REGIONAL_02_10_2026.gdb (архивна регионална геобаза).',margin:[0,0,0,8]}];
+ const content=[{text:'Източник: архивна регионална кадастрална геобаза на РИОСВ – Пловдив (02.10.2026 г.). Технически идентификатор: RIOSV_PLOVDIV_KAIS_CADASTRE_REGIONAL_02_10_2026.gdb.',margin:[0,0,0,8]}];
  if(options.mapSvg&&String(options.mapSvg).includes('<svg')){
   const clean=options.mapSvg;
   const contentMap={svg:clean,width:510,margin:[0,5,0,10]};
@@ -225,8 +227,8 @@ function normativePdf(results,register){
  const content=[
   {text:'Документална проследимост: '+(dossier?.documents?.length||0)+' документа от единната ZIP преписка. Непотвърдените твърдения не представляват установени факти.',fontSize:9},
   ...((dossier?.documents||[]).slice(0,35).map(d=>({text:'Документ: '+d.file+' · входящи референции: '+(d.references||[]).map(x=>x.number+' / '+x.date).join('; '),fontSize:8}))),
-  {text:'ПАЦИЕНТ — общ сценарий: '+String(dossier?.commonEvidence?.diagnosis?.scenario||'НЕОПРЕДЕЛЕН')+'; пространствен статус: '+String(dossier?.commonEvidence?.diagnosis?.spatialStatus||'нерешено'),bold:true},
-  ...((dossier?.commonEvidence?.ledger||[]).slice(0,30).map(f=>({text:'Доказателство: '+String(f.kind||'')+' / '+String(f.status||'нерешено')+' / '+String(f.source||'неустановен'),fontSize:8}))),
+  {text:'Предварителен аналитичен сценарий: '+String(dossier?.commonEvidence?.diagnosis?.scenario||'НЕОПРЕДЕЛЕН')+'; пространствен статус: '+String(dossier?.commonEvidence?.diagnosis?.spatialStatus||'нерешено'),bold:true},
+  ...((dossier?.commonEvidence?.ledger||[]).slice(0,30).map(f=>({text:'Доказателство: '+readableKind(f.kind)+' / '+readableStatus(f.status)+' / '+String(f.source||'неустановен'),fontSize:8}))),
   {text:'Единни доказателствени констатации от преписката: '+(dossier?.commonEvidence?.findings?.length||0)+' · предупреждения: '+(dossier?.commonEvidence?.warnings?.length||0)+'. Изискват експертна проверка.',fontSize:9},
   ...((dossier?.commonEvidence?.findings||[]).slice(0,20).map(f=>({text:'Доказателствен запис: '+String(f.key||'')+' · статус '+String(f.status||'')+' · източници '+(f.evidence||[]).slice(0,5).map(e=>String(e.file||'неизвестен документ')+' ('+String(e.date||'дата предстои')+')').join('; ')+' · правна приложимост: ПРЕДСТОИ',fontSize:8}))),
   {text:'Единен експертен преглед за PDF №2 и Word: '+(review?'налични са данни от общия преглед; експертното потвърждение се извършва преди издаване':'не е предоставен общ експертен преглед'),bold:true},
@@ -293,7 +295,7 @@ async function make(results,roles,register){
  const z=zipWriter(),ids=results.map(r=>r.input),normalized=Object.fromEntries(results.map(r=>[r.input,roles[r.input]||roles[r.cadnum]]));
  const determination=scenarioFromGIS(results,normalized);
  const sharedDiagnosis=register?.unifiedContext?.diagnosis;
- if(!sharedDiagnosis||!register?.unifiedContext?.commonEvidence)throw Error('Липсва единният анализ ПАЦИЕНТ за преписката. Обновете ГИС анализа и потвърдете ролите.');
+ if(!sharedDiagnosis||!register?.unifiedContext?.commonEvidence)throw Error('Липсва единният анализ на преписката. Обновете ГИС анализа и потвърдете ролите.');
  if(sharedDiagnosis.scenario!==determination.scenario)throw Error('Несъответствие между единния аналитичен регистър и ГИС сценария. Не може да се издаде проект.');
  if(!determination.scenario)throw Error('Не е доказано, че всички водещи имоти са извън Натура 2000. Сценарий А не се допуска по подразбиране.');
  const includeAnnex2=register?.includeAnnex2===true;const paragraphs=register?.verifiedCharacterizationParagraphs; if(!window.V26TemplateWord?.make)throw Error('Липсва модулът за оригиналните Word образци.');const caseMetadata={...(register?.verifiedCaseMetadata||{})};
