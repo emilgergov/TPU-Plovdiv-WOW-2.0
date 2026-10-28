@@ -369,6 +369,7 @@ function populateSubject(d){
  $('v26SemanticReview').textContent=(v26Semantic?.flags||[]).map(f=>'• '+f.label+'\n  Източници: '+f.sources.join(', ')).join('\n')+(v26Semantic?.location?.length?'\nМестоположение (за проверка): '+v26Semantic.location.join(', '):'\nМестоположение: ПРЕДСТОИ проверка');
  const extracted=(c?.activities||[]).filter(Boolean);
  subjectActivities.value=extracted.join('\n');$('v26ActivitiesPreview').textContent='Извлечени дейности: '+extracted.length+'. Оригиналният текст се запазва за анализа.';
+ const subjectReady=!!(c?.title&&String(c.title).trim()&&extracted.length&&!conflict&&!v26Semantic?.needs_review);if(!subjectReady){$('v26ActivitiesPreview').textContent+=' · Недостатъчни или противоречиви данни: предложението остава за проверка, без автоматично одобрение.';}else{$('v26ActivitiesPreview').textContent+=' · Автоматично подготвено предложение; експертът може да редактира и одобри.';}
  const provenance=c?.source||'Експертно уточнение';
  subjectSource.dataset.source=provenance;
  subjectSource.textContent='Източник: '+provenance;
