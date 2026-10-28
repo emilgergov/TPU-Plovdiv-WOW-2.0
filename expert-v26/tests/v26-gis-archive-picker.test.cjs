@@ -15,5 +15,5 @@ assert.match(gis,/parcelgeom_04\.json\.gz/,'GIS package completeness guard must 
 assert.match(gis,/overlays_04\.json\.gz/,'Overlay completeness guard must remain');
 console.log('PASS: V26 GIS archive picker regression (static wiring)');
 
-assert.doesNotMatch(bridge,/panel\.style\.display\s*=\s*['"]none['"]/, 'Full GIS status panel must remain visible after activation');
+assert.match(bridge,/panel\.style\.display='none'/, 'Full GIS picker should collapse after activation');
 assert.match(bridge,/Архив: '\+selected\.name/, 'Successful load must identify archive');
