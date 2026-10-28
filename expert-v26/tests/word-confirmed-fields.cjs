@@ -1,0 +1,13 @@
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const review=fs.readFileSync('expert-v26/v26-word-review.js','utf8');
+const word=fs.readFileSync('expert-v26/v26-template-word.js','utf8');
+const ui=fs.readFileSync('expert-v26/index.html','utf8');
+assert.match(review,/if\(auto\.subject\)result\.subject=auto\.subject/,'confirmed subject must override review field');
+assert.match(review,/document\.getElementById\('ids'\)/,'parcel IDs must come from main input');
+assert.match(word,/metadata\.subject/,'Word subject must use confirmed metadata');
+assert.match(word,/parcelIds\.join\(', '\)/,'Word must insert confirmed parcels');
+assert.doesNotMatch(word,/ЗА ЕКСПЕРТНА ПРОВЕРКА — примерен идентификатор/,'do not replace confirmed parcels with review markers');
+assert.match(word,/if\(unmatched\.length\)throw Error/,'stale template IDs must block export');
+assert.match(ui,/verifiedCaseMetadata:window\.V26WordReview\.getConfirmedMetadata\(\)/);
+console.log('PASS: confirmed subject and parcels feed the Word template; stale sample IDs block export');
