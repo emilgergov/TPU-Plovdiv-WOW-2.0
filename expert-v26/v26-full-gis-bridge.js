@@ -12,7 +12,7 @@ function mount(){
  panel.append(title,input,info);anchor.parentElement.insertBefore(panel,anchor.nextSibling);
  /* Hosted mode is preferred; retain manual controls until its manifest and shards are live. */
  api.openHosted('./gis-data').then(()=>{
-  info.textContent='ГИС V26: автоматичната база е активна. Ръчното зареждане остава достъпно при нужда.';
+  info.textContent='ГИС V26: автоматичната база е активна.';panel.style.display='none';
   const legacy=document.getElementById('v26LocalIndexMount');
   if(legacy)legacy.style.setProperty('display','none','important');
   const oldBtn=document.getElementById('v26SqliteLoad');if(oldBtn){const oldGroup=oldBtn.parentElement;if(oldGroup)oldGroup.style.setProperty('display','none','important');}
@@ -20,7 +20,7 @@ function mount(){
   for(const el of document.querySelectorAll('[id*="LocalIndex"],[id*="localIndex"],[id*="GeometryFile"],[id*="geometryFile"]')){const section=el.closest('section');if(section&&section!==panel)section.style.display='none';}
   const status=document.createElement('div');status.id='v26HostedReady';status.textContent='ГИС V26 — автоматично заредена';status.style.cssText='margin:8px 0;color:#17633e;font-weight:600';panel.parentElement.insertBefore(status,panel);
   document.dispatchEvent(new Event('v26:gis-invalidated'));
- }).catch(async(error)=>{info.textContent='Автоматичната ГИС връзка не е готова: '+error.message;console.error('V26 hosted GIS activation failed',error);const file=await restore();if(file){try{const loaded=await api.openArchive(file);info.textContent='ГИС V26 готова: '+loaded.files+' файла, възстановена автоматично от този браузър.';info.textContent='ГИС V26 готова: '+loaded.files+' файла, възстановена от локалния архив. Източник: '+file.name+'.';document.dispatchEvent(new Event('v26:gis-invalidated'));return}catch(e){info.textContent='Локалният архив не може да се възстанови: '+e.message}}else info.textContent='Първоначално зареждане: изберете одобрения ZIP архив само веднъж. След това ще се възстановява автоматично.';});
+ }).catch(async(error)=>{info.textContent='Автоматичната ГИС връзка не е готова: '+error.message;console.error('V26 hosted GIS activation failed',error);const file=await restore();if(file){try{const loaded=await api.openArchive(file);info.textContent='ГИС V26 готова: '+loaded.files+' файла, възстановена автоматично от този браузър.';info.textContent='ГИС V26 готова: '+loaded.files+' файла, възстановена от локалния архив. Източник: '+file.name+'.';panel.style.display='none';document.dispatchEvent(new Event('v26:gis-invalidated'));return}catch(e){info.textContent='Локалният архив не може да се възстанови: '+e.message}}else info.textContent='Първоначално зареждане: изберете одобрения ZIP архив само веднъж. След това ще се възстановява автоматично.';});
  async function remember(file){if(!window.indexedDB)return;return new Promise((resolve,reject)=>{const req=indexedDB.open('V26_APPROVED_GIS',1);req.onupgradeneeded=()=>req.result.createObjectStore('archives');req.onerror=()=>reject(req.error);req.onsuccess=()=>{const db=req.result,tx=db.transaction('archives','readwrite');tx.objectStore('archives').put(file,'approved');tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)}}})}
  async function restore(){if(!window.indexedDB)return null;return new Promise(resolve=>{const req=indexedDB.open('V26_APPROVED_GIS',1);req.onupgradeneeded=()=>req.result.createObjectStore('archives');req.onerror=()=>resolve(null);req.onsuccess=()=>{const db=req.result,tx=db.transaction('archives','readonly'),get=tx.objectStore('archives').get('approved');get.onsuccess=()=>{db.close();resolve(get.result||null)};get.onerror=()=>{db.close();resolve(null)}}})}
   input.addEventListener('change',async()=>{
@@ -29,7 +29,7 @@ function mount(){
   info.textContent='Избран архив: '+selected.name+' ('+Math.round(selected.size/1048576)+' MB). Проверка на ГИС пакета…';
   try{
    const loaded=await api.openArchive(selected);
-   info.textContent='ГИС V26 готов: '+loaded.files+' файла. Запазване за следващи посещения…';try{await remember(selected);info.textContent='ГИС V26 готова: '+loaded.files+' файла. Архив: '+selected.name+'. Запазен локално за следващи посещения.';}catch(e){info.textContent='ГИС V26 готова. Локалното запазване не успя ('+e.message+').';}
+   info.textContent='ГИС V26 готов: '+loaded.files+' файла. Запазване за следващи посещения…';try{await remember(selected);info.textContent='ГИС V26 готова: '+loaded.files+' файла. Архив: '+selected.name+'. Запазен локално за следващи посещения.';panel.style.display='none';}catch(e){info.textContent='ГИС V26 готова. Локалното запазване не успя ('+e.message+').';}
    document.dispatchEvent(new Event('v26:gis-invalidated'));
   }catch(e){info.textContent='ГИС пакетът не е активиран: '+e.message;}
  });
