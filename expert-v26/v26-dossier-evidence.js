@@ -51,6 +51,21 @@ function characterize(analysis){
  }
  return {paragraphs,requiresReview:!!(analysis&&analysis.requiresReview)||paragraphs.length>0};
 }
-root.V26DossierEvidence={iso,analyze,characterize};
+function evidenceDraft(documents,analysis){
+ const topics={water_supply:'Водоснабдяване',wastewater:'Отпадъчни води',electricity:'Електрозахранване',access:'Транспортен достъп',construction:'Строителни дейности'};
+ const sections=[];
+ for(const [key,title] of Object.entries(topics)){
+  const sources=[];
+  for(const doc of documents||[]){
+   for(const f of doc.facts||[]){
+    if(f.key!==key||!f.value)continue;
+    sources.push({file:doc.file,date:doc.date||null,excerpt:String(f.value),status:'source_excerpt_not_verified'});
+   }
+  }
+  if(sources.length)sections.push({key,title,sources,requiresReview:true});
+ }
+ return {sections,normalized:characterize(analysis),warning:'Текстовите откъси не са самостоятелно установени факти. Не се включват автоматично в официален документ.'};
+}
+root.V26DossierEvidence={iso,analyze,characterize,evidenceDraft};
 if(typeof module==='object'&&module.exports)module.exports=root.V26DossierEvidence;
 })(typeof window!=='undefined'?window:globalThis);
