@@ -201,7 +201,7 @@ async function process(file){
  const dossierDraft=(window.V26DossierEvidence&&typeof window.V26DossierEvidence.evidenceDraft==='function')?
   window.V26DossierEvidence.evidenceDraft(dossierDocuments,dossierAnalysis):null;
  for(const id of leading)other.delete(id);
- return {archive_name:file.name,archive_entries:list.length,files:docs,dossier_documents:dossierDocuments,dossier_analysis:dossierAnalysis,dossier_characterization:dossierCharacterization,dossier_draft:dossierDraft,evidence:[],subject_candidates:subjects,semantic_review:semanticReview(subjects,documentTexts),all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[...other],warnings:['Локален предварителен текстов анализ. Проверете ролите ръчно.','PDF/DOCX се извличат локално, когато съдържат текст. Сканирани документи без текстов слой изискват отделно разчитане.']}};
+ return {archive_name:file.name,archive_entries:list.length,files:docs,dossier_documents:dossierDocuments,dossier_analysis:dossierAnalysis,dossier_characterization:dossierCharacterization,dossier_draft:dossierDraft,evidence:[],subject_candidates:subjects,semantic_review:semanticReview(subjects,documentTexts),all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[],mentioned_candidates:[...other],warnings:['Кандидатите за предмет на ИП са предварителни и изискват експертно потвърждение.','Другите срещнати идентификатори НЕ са автоматично съпътстващи имоти.','PDF и изображения се разчитат с OCR при необходимост; проверете качеството и пълнотата на извличането.']}};
 }
 window.V26LocalIntake={process};
 })();
