@@ -120,6 +120,15 @@ async function make(scenario,paragraphs,metadata){
  for(const [name,bytes] of protectedSnapshot){
   if(!bytes || zip[name]!==bytes)throw Error('Променена е защитена част от образеца: '+name);
  }
+ // Internal workflow: explicit empty signature slots at start and end.
+ // They are labels only, not embedded electronic signatures or certificates.
+ const makeSlot=label=>{const p=xml.createElementNS(NS,'w:p'),r=xml.createElementNS(NS,'w:r'),t=xml.createElementNS(NS,'w:t');t.textContent=label;r.appendChild(t);p.appendChild(r);return p;};
+ const first=Array.from(body.childNodes).find(n=>n.nodeType===1&&n.localName==='p');
+ if(!first)throw Error('Липсва начало на документа за полето за съгласуване.');
+ body.insertBefore(makeSlot('Място за електронен подпис — вътрешно съгласуване'),first);
+ const section=Array.from(body.childNodes).find(n=>n.nodeType===1&&n.localName==='sectPr');
+ if(!section)throw Error('Липсва крайна секция за поле за подпис.');
+ body.insertBefore(makeSlot('Място за електронен подпис — окончателно подписване'),section);
  zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
  return new Blob([root.fflate.zipSync(zip,{level:6})],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
 }
