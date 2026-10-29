@@ -226,8 +226,7 @@ function normativePdf(results,register){
  const subject=window.V26SubjectContext;
  const review=register?.verifiedCaseMetadata||null;
  const confirmed=!!subject?.confirmed;
- const verifiedRecords=records.filter(r=>r.verified===true&&r.revision_verified===true&&/^https:\/\//.test(String(r.source||''))&&String(r.article||r.provision||r.clause||'').trim());
- const applicable=verifiedRecords.filter(r=>{const code=String(r.zone_code||'');return !code||zoneMap.has(code)});
+ const applicable=records.filter(r=>r.title&&/^https:\/\//.test(String(r.source||''))&&(!r.zone_code||zoneMap.has(String(r.zone_code)))&&(/биологичното разнообразие|съвместимост|защитена зона|заповед/i.test(String(r.title)+' '+String(r.purpose||'')))).slice(0,12);
  const content=[
   {text:'I. Предмет и фактическа основа',style:'sub'},
   {text:'Предмет на инвестиционното предложение: '+(confirmed?subject.title:'Не е потвърден по представените материали.')},
@@ -238,13 +237,13 @@ function normativePdf(results,register){
   {text:zones.length?'Отчетени защитени зони: '+zones.map(z=>z.code+(z.name?' — '+z.name:'')).join('; '):'В предоставените ГИС резултати няма установен код на пресечена защитена зона.'},
   {text:'III. Нормативни и документални основания',style:'sub'},
   {text:'За правната преценка се отчитат Законът за биологичното разнообразие и действащите заповеди за обявяване и изменение на относимите защитени зони. Самото пространствено пресичане не доказва нарушение на конкретен режим.'},
-  ...applicable.map(r=>({text:[r.title||'Нормативен акт',r.article||r.provision||r.clause].filter(Boolean).join(' — '),link:String(r.source),color:'#165c86',fontSize:9})),
-  ...(applicable.length?[]:[{text:'Към настоящата справка не са приложени едновременно проверен точен текст, действаща редакция и официален източник за конкретна режимна разпоредба. Поради това такава разпоредба не се цитира като установена.'}]),
+  ...applicable.map(r=>({text:[r.title||'Нормативен акт',r.article||r.provision||r.clause,r.id?'архив '+r.id:''].filter(Boolean).join(' — '),link:String(r.source),color:'#165c86',fontSize:9})),
+  ...(applicable.length?[]:[{text:'В интегрирания нормативен архив няма относима референция за този обхват.'}]),
   {text:'IV. Приложимост към инвестиционното предложение',style:'sub'},
   {text:confirmed?'Предметът е идентифициран. Преценката за приложимост на режимите изисква съпоставка на действителните дейности с конкретните действащи разпоредби за всяка относима зона.':'Необходима е проверка и потвърждение на предмета и дейностите преди съпоставка с режимите.'},
   {text:'V. Експертен извод',style:'sub'},
   {text:zones.length?'Налице е пространствена относимост към посочените защитени зони според Приложение №1. Само от този факт не следва извод за допустимост или недопустимост на предложението.':'От предоставените ГИС резултати не се установява пресичане със защитена зона. Това не отменя проверката на останалите приложими нормативни изисквания.'},
-  {text:applicable.length?'Посочените проверени нормативни референции подлежат на експертна съпоставка с конкретните дейности.':'Не се формулира окончателен правен извод без проверени приложими режимни разпоредби.'},
+  {text:applicable.length?'Посочените архивни нормативни референции подлежат на експертна съпоставка с конкретните дейности.':'Не се формулира окончателен правен извод без проверени приложими режимни разпоредби.'},
   {text:'Документът е проект за експертна проверка, а не административен акт.',italics:true,fontSize:9}
  ];
  const def=pdfDef('Приложение №2 — нормативен и документален анализ',content);
