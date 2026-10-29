@@ -57,7 +57,7 @@ function scenarioFromGIS(results,roles){
 }
 function docx(zip,ids,roles,results,includeAnnex2,unifiedContext){
  const d=zipWriter();
- const zones=[...new Set(results.flatMap(r=>(r.archived_overlay_records||[]).map(z=>String(z?.sitecode||z?.code||'')).filter(z=>/^BG\d{7}$/.test(z))))];
+ const zones=[...new Set(results.flatMap(r=>(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z:String(z?.sitecode||z?.code||'')).filter(z=>/^BG\d{7}$/.test(z))))];
  const determination=scenarioFromGIS(results,roles);
  const scenario=determination.scenario||'НЕОПРЕДЕЛЕН';
  const subject=window.V26SubjectContext;
@@ -199,7 +199,8 @@ function gisPdf(results,options={}){
    const overlays=[...(r.archived_overlay_records||[]),...(r.archived_zones||[])];
    const zones=[...new Set(overlays.map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z)))];
    const names=[...new Set(overlays.map(z=>String(z.name_bg||z.name||'').trim()).filter(Boolean))];
-   const zoneText=zones.length?zones.join(', ')+(names.length?' · '+names.join('; '):''):'Няма данни за проверено пресичане в имотния резултат';
+   const verifiedCodes=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z));
+    const zoneText=verifiedCodes.length?verifiedCodes.join(', ')+' (потвърдено)':zones.length?zones.join(', ')+(names.length?' · '+names.join('; '):'')+' (архивно)':'Няма данни за проверено пресичане в имотния резултат';
    const verifiedZones=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z));
     const intersection=verifiedZones.length?'ПОТВЪРДЕНО ПРЕСИЧАНЕ':r.intersection_verified_outside===true?'ПОТВЪРДЕНО НЕПРЕСИЧАНЕ':zones.length?'АРХИВНО ПРЕСИЧАНЕ — НЕПОТВЪРДЕНО':has?'НЕПОТВЪРДЕНО — необходим е пълен overlay':'Няма геометрия';
    return [id,Number.isFinite(area)&&area>0?area.toLocaleString('bg-BG',{maximumFractionDigits:3})+' (архивна ГИС площ)':'Не е налична',zoneText,intersection,has?'ГИС геометрия налична':'Липсва геометрия'];
