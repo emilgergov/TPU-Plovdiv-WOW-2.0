@@ -228,6 +228,13 @@ async function process(file){
    if(!/предвижда|ще се|отвежда|зауства|изгражда|включва|свързва/i.test(sentence))continue;
    wastewaterClaims.push({key:'wastewater_solution',scope:'proposal',value:sewer?'sewer':'tank',reference:sentence,source:item.name});
   }
+  // Same substantive claim in DOC and PDF is one claim, not two
+  // independent corroborations. Keep both filenames in the inventory.
+  const duplicateEvidence=new Set(dossierDocuments.flatMap(d=>(d.facts||[]).map(f=>f.key+'|'+String(f.value||'').replace(/\\s+/g,' ').trim().toLocaleLowerCase('bg'))));
+  for(let i=factualSnippets.length-1;i>=0;i--){
+   const fact=factualSnippets[i],fingerprint=fact.key+'|'+String(fact.value||'').replace(/\\s+/g,' ').trim().toLocaleLowerCase('bg');
+   if(duplicateEvidence.has(fingerprint))factualSnippets.splice(i,1);
+  }
   const dates=[...new Set(referenceMatches.map(x=>x.date))];
   const documentDate=dates.length===1?dates[0]:null;
   dossierDocuments.push({file:item.name,type:/уведомлен/i.test(item.name+' '+text.slice(0,800))?'notification':/допълнителна\s+информация|доп\.\s*информация/i.test(item.name+' '+text.slice(0,800))?'supplementary':'attachment',readable:!!text.trim(),date:documentDate,references:referenceMatches,facts:factualSnippets,claims:wastewaterClaims});
