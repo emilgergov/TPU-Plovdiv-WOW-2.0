@@ -1,5 +1,6 @@
 (()=>{'use strict';
-const rx=/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g;
+const rx=/\b\d{5}\s*\.\s*\d+\s*\.\s*\d+(?:\s*\.\s*\d+){0,2}\b/g;
+function normalizedIds(text){return [...String(text||'').matchAll(rx)].map(m=>parcelId(m[0].replace(/\s+/g,'')))}
 function parcelId(id){return String(id).split('.').slice(0,3).join('.')}
 function u16(v,p){return v.getUint16(p,true)}function u32(v,p){return v.getUint32(p,true)}
 function loadScript(src){return new Promise((resolve,reject)=>{const el=document.createElement('script');el.src=src;el.onload=resolve;el.onerror=()=>reject(Error('Неуспешно зареждане на библиотека: '+src));document.head.appendChild(el)})}
@@ -128,13 +129,13 @@ async function process(file){
     // Distinguish cadastral context: neighbours and former IDs are evidence, not project parcels.
     const contextualIds=[];
     for(const line of text.split(/\r?\n/)){
-     const ids=[...line.matchAll(rx)].map(m=>parcelId(m[0]));
+     const ids=normalizedIds(line);
      if(!ids.length)continue;
      const role=/предишен идентификатор|стар идентификатор|предходен идентификатор/i.test(line)?'former':
       /съседи\s*:|съседн(?:и|ия|ият|ите)?\s+(?:поземни\s+)?имот|граничи\s+с|граници\s+на\s+имота/i.test(line)?'neighbour':'mentioned';
      for(const id of ids)contextualIds.push({id,role,source:item.name,excerpt:line.trim().slice(0,300)});
     }
-    for(const id of text.match(rx)||[]){const parcel=parcelId(id);all.add(parcel);other.add(parcel)}
+    for(const id of normalizedIds(text)){const parcel=id;all.add(parcel);other.add(parcel)}
     dossierParcelEvidence.push(...contextualIds);
     const isNotice=/уведомлен/i.test(item.name+' '+text.slice(0,800))||(/инвестиционно\s+предложение|предмет\s+на\s+ИП/i.test(text.slice(0,3000))&&/(?:^|[^\p{L}])(?:ПИ|поземлен\s+имот)(?!\p{L})/iu.test(text));
     if(isNotice&&text.trim()){
@@ -178,7 +179,7 @@ async function process(file){
 
      subjects.push({title,source:item.name,evidence:title?'Автоматично извлечен откъс от текст':'Текст е прочетен; заглавието не е надеждно установено',activities,sections:foundSections});
     }
-    if(/уведомлен/i.test(item.name+' '+text.slice(0,800))){for(const id of text.match(/(?:позем[еe]н\s+имот|ПИ)\s+(?:с\s+)?(?:идентификатор\s+)?(\d{5}\.\d+\.\d+)/gi)||[]){const m=id.match(/\d{5}\.\d+\.\d+/);if(m)leading.add(parcelId(m[0]));}}
+    if(isNotice){for(const entry of contextualIds){if(entry.role!=='mentioned')continue;const line=entry.excerpt;const explicit=/(?:предмет|местоположение|инвестиционно\s+предложение|предвижда\s+се|ще\s+се\s+изгради|площадка\s+на|в\s+(?:поземлен\s+)?имот|ПИ\s*(?:№|с\s+идентификатор)?)/i.test(line);if(explicit)leading.add(entry.id)}}
    }catch(err){status='неуспешно извличане: '+err.message}
   }
   // Extract only text-supported, traceable claims; never infer facts from filenames.
