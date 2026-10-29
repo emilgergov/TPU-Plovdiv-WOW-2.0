@@ -46,12 +46,12 @@ async function make(draft){
  const blocks=[
   paragraph(doc,'Място за електронен подпис — вътрешно съгласуване'),
   paragraph(doc,'РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ — НЕ Е АДМИНИСТРАТИВЕН АКТ',{heading:true}),
-  paragraph(doc,m.recipient,{bold:true}),paragraph(doc,m.address),
+  ...(isPending(m.recipient)?[]:[paragraph(doc,m.recipient,{bold:true})]),...(isPending(m.address)?[]:[paragraph(doc,m.address)]),
   paragraph(doc,'Относно: '+subject,{bold:true}),
-  paragraph(doc,'Преписка: '+m.incomingReference),
-  paragraph(doc,m.salutation),
+  ...(isPending(m.incomingReference)?[]:[paragraph(doc,'Преписка: '+m.incomingReference)]),
+  ...(isPending(m.salutation)?[]:[paragraph(doc,m.salutation)]),
   paragraph(doc,'I. ПРЕДМЕТ И ИМОТЕН ОБХВАТ',{heading:true}),
-  paragraph(doc,'Инвестиционно предложение: '+subject),
+  paragraph(doc,'Предмет на ИП: '+subject),
   paragraph(doc,'Поземлени имоти: '+draft.parcels.map(p=>p.id+' ('+(p.role==='leading'?'предмет на ИП':'съпътстващ')+')').join('; ')),
   ...(m.location?[paragraph(doc,'Местоположение: '+m.location)]:[]),
   paragraph(doc,'II. ПРОСТРАНСТВЕН АНАЛИЗ',{heading:true}),
@@ -70,7 +70,7 @@ async function make(draft){
   ...(impacts.some(isPending)?[paragraph(doc,'Не е изготвена окончателна оценка на въздействията. Изводите се попълват след проверка на приложимите режими и доказателствата.')]:[]),
   paragraph(doc,'VII. ПРИЛОЖЕНИЯ',{heading:true}),
   paragraph(doc,'Приложение №1 — ГИС анализ (самостоятелен PDF). Приложение №2 — Нормативни и документални референции (самостоятелен PDF, когато е изготвен).'),
-  paragraph(doc,'Проект за експертна проверка и подписване; не представлява издаден административен акт.')
+  paragraph(doc,'НЕОБХОДИМА Е ЕКСПЕРТНА ПРОВЕРКА НА ПРЕПИСКАТА, ПРАВНИТЕ ОСНОВАНИЯ И ИЗВОДИТЕ. Документът не представлява издаден административен акт.')
  ];
  body.replaceChildren(...blocks,paragraph(doc,'Място за електронен подпис — окончателно подписване'),sect.cloneNode(true));
  const serialized=new XMLSerializer().serializeToString(doc);
