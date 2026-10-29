@@ -80,5 +80,6 @@ document.addEventListener('v26:dossier-loaded',event=>{
  });
 });
 document.addEventListener('v26:gis-invalidated',()=>{if(confirmed)confirmed.checked=false;for(const f of fields)f.value='';for(const f of Object.values(caseFields))f.value='';});
+document.addEventListener('v26:full-reset',()=>{if(confirmed)confirmed.checked=false;for(const f of fields)f.value='';for(const f of Object.values(caseFields))f.value='';for(const f of legalFields)f.value='';for(const f of impactFields)f.value='';if(procedureField)procedureField.value='';document.querySelectorAll('.v26-evidence-suggestion').forEach(el=>el.remove());});
 window.V26WordReview=Object.freeze({getConfirmedParagraphs,getConfirmedMetadata});
 })();
