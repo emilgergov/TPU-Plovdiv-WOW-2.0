@@ -70,6 +70,9 @@ async function make(scenario,paragraphs,metadata){
  if(unmatched.length)throw Error('Останал е примерен идентификатор в образеца: '+[...new Set(unmatched)].join(', ')+'. Поправете полето на образеца, без повторно потвърждаване на имотите.');
  // Protect template paragraphs that are not explicitly approved for case-specific replacement.
  const editableIndices=new Set([...MAP[scenario],...legalIndices,...impactIndices,...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])]);
+ // The two signature slots must remain present and untouched in the template body.
+ const signatureCandidates=ps.map((p,i)=>({i,text:nodes(p,'t').map(t=>t.textContent).join('')})).filter(x=>/електронен\s+подпис|електронно\s+подпис|подписал|подпис\s*:/i.test(x.text));
+ for(const item of signatureCandidates){if(editableIndices.has(item.i))throw Error('Поле за подпис попада сред редактираните абзаци: '+(item.i+1));}
  const sourceXml=new DOMParser().parseFromString(new TextDecoder().decode(entry),'application/xml');
  const originalParagraphs=Array.from(nodes(sourceXml,'body')[0].childNodes).filter(x=>x.nodeType===1&&x.namespaceURI===NS&&x.localName==='p');
  for(let i=0;i<Math.min(originalParagraphs.length,ps.length);i++){
