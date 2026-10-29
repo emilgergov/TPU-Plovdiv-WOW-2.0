@@ -84,9 +84,11 @@ async function make(scenario,paragraphs,metadata){
   const p=ps[i],current=nodes(p,'t').map(t=>t.textContent||'').join('');
   if(!/\b\d{5}\.\d+\.\d+\b/.test(current))continue;
   if(/подпис/i.test(current))continue;
-  for(const t of nodes(p,'t')){
-   t.textContent=(t.textContent||'').replace(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g,id=>parcelIds.includes(id)?id:parcelIds.join(', '));
-  }
+  // Replace the combined paragraph exactly once: Word may split a single
+  // cadastral identifier across multiple runs. Per-run substitutions can
+  // duplicate identifiers and corrupt the administrative sentence.
+  const updated=current.replace(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g,id=>parcelIds.includes(id)?id:parcelIds.join(', '));
+  if(updated!==current)replaceParagraph(i,updated);
  }
  // The confirmed parcel list is the single source of truth for the proposal.
  // Unknown sample IDs mean an unmapped template paragraph, not an unconfirmed parcel.
