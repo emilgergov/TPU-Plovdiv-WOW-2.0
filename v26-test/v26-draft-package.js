@@ -197,13 +197,13 @@ function gisPdf(results,options={}){
    const zones=[...new Set(overlays.map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z)))];
    const names=[...new Set(overlays.map(z=>String(z.name_bg||z.name||'').trim()).filter(Boolean))];
    const verifiedCodes=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z));
-    const zoneText=verifiedCodes.length?verifiedCodes.join(', ')+' (потвърдено)':zones.length?zones.join(', ')+(names.length?' · '+names.join('; '):'')+' (архивно)':'Няма данни за проверено пресичане в имотния резултат';
+    const zoneText=verifiedCodes.length?verifiedCodes.join(', '):r.intersection_verified_outside===true?'Няма пресечена защитена зона':zones.length?zones.join(', ')+(names.length?' · '+names.join('; '):''):'ПРЕДСТОИ';
    const verifiedZones=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z));
-    const intersection=verifiedZones.length?'ПОТВЪРДЕНО ПРЕСИЧАНЕ':r.intersection_verified_outside===true?'ПОТВЪРДЕНО НЕПРЕСИЧАНЕ':zones.length?'АРХИВНО ПРЕСИЧАНЕ — НЕПОТВЪРДЕНО':has?'НЕПОТВЪРДЕНО — необходим е пълен overlay':'Няма геометрия';
+    const intersection=verifiedZones.length?'УСТАНОВЕНО ПРЕСИЧАНЕ':r.intersection_verified_outside===true?'НЯМА ПРЕСИЧАНЕ':has?'ПРЕДСТОИ':'ПРЕДСТОИ';
    return [id,Number.isFinite(area)&&area>0?area.toLocaleString('bg-BG',{maximumFractionDigits:3})+' (архивна ГИС площ)':'Не е налична',zoneText,intersection,has?'ГИС геометрия налична':'Липсва геометрия'];
   })
  ]},layout:'lightHorizontalLines'});
- content.push({text:'Таблицата възпроизвежда наличните имотни и архивни данни. Липсата на отчетена зона НЕ доказва отсъствие на пресичане: необходим е проверен overlay с пълния слой на защитените зони Natura 2000. Произходът на геометрията и правната актуалност на режимите се проверяват отделно.',margin:[0,10,0,0]});
+ content.push({text:'Пресичанията са изчислени по интегрирания ГИС архив на ТПУ. „ПРЕДСТОИ“ обозначава липсващи данни.',margin:[0,10,0,0]});
  return pdfDef('Приложение №1 — ГИС анализ',content);
 }
 function visitForLabel(coords,out){if(Array.isArray(coords)&&typeof coords[0]==='number'&&typeof coords[1]==='number'){if(Number.isFinite(coords[0])&&Number.isFinite(coords[1]))out.push(coords)}else if(Array.isArray(coords))coords.forEach(x=>visitForLabel(x,out))}
