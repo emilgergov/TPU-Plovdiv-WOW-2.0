@@ -140,14 +140,14 @@ async function process(file){
     // The filled notification's introductory statement is authoritative for the proposed site.
     // Latin filenames such as Uvedomlenie_OVOS must also be recognized as notifications.
     const noticeFile=/уведомлен|uvedomlen|notification/i.test(item.name);
-    const introductory=text.replace(/\\s+/g,' ').match(/(?:Уведомяваме\\s+Ви,?\\s+че|следното\\s+инвестиционно\\s+предложение\\s*:)\\s*(.{0,650}?)(?=Характеристика\\s+на\\s+инвестиционното\\s+предложение|1\\.\\s*Резюме|$)/i);
-    const directNoticeIds=introductory?[...introductory[1].matchAll(/(?:ПИ\\s+с\\s+(?:ИД|идентификатор)|поземлен\\s+имот\\s+с\\s+идентификатор)\\s*[:№]?\\s*(\\d{5}\\.\\d+\\.\\d+)/gi)].map(x=>x[1]):[];
+    const introductory=text.replace(/\s+/g,' ').match(/(?:Уведомяваме\s+Ви,?\s+че|следното\s+инвестиционно\s+предложение\s*:)\s*(.{0,650}?)(?=Характеристика\s+на\s+инвестиционното\s+предложение|1\.\s*Резюме|$)/i);
+    const directNoticeIds=introductory?[...introductory[1].matchAll(/(?:ПИ\s+с\s+(?:ИД|идентификатор)|поземлен\s+имот\s+с\s+идентификатор)\s*[:№]?\s*(\d{5}\.\d+\.\d+)/gi)].map(x=>x[1]):[];
     if(noticeFile&&directNoticeIds.length===1)leading.add(directNoticeIds[0]);
     const isNotice=/уведомлен|uvedomlen/i.test(item.name+' '+text.slice(0,800))||(/инвестиционно\s+предложение|предмет\s+на\s+ИП/i.test(text.slice(0,3000))&&/(?:^|[^\p{L}])(?:ПИ|поземлен\s+имот)(?!\p{L})/iu.test(text));
     if(isNotice&&text.trim()){
      const clean=text.replace(/\s+/g,' ').trim();
      const match=clean.match(/(?:относно|предмет(?:\s+на\s+(?:инвестиционното\s+)?предложение)?|наименование\s+на\s+(?:инвестиционното\s+)?предложение)\s*[:：–-]\s*(.{15,450}?)(?=\s+(?:възложител|местоположение|адрес|имот\s+с|приложения|описание\s+на)|$)/i);
-     const directTitle=noticeFile&&introductory?introductory[1].replace(/^.*?следното\\s+инвестиционно\\s+предложение\\s*:\\s*/i,'').trim():'';
+     const directTitle=noticeFile&&introductory?introductory[1].replace(/^.*?следното\s+инвестиционно\s+предложение\s*:\s*/i,'').trim():'';
      const rawTitle=directTitle|| (match?match[1].trim():'');
      // Recover a descriptive project heading from the populated summary when the
      // document uses a nonstandard subject label. Never treat parcel IDs as a title.
