@@ -287,6 +287,9 @@ async function make(results,roles,register){
  const confirmedIds=results.map(r=>String(r.input||r.cadnum||'').trim()).filter(id=>/^\d{5}\.\d+\.\d+(?:\.\d+){0,2}$/.test(id));
  if(confirmedIds.length!==results.length)throw Error('Липсва валиден кадастрален идентификатор в потвърдената ГИС справка.');
  caseMetadata.parcelIds=[...new Set(confirmedIds)].join(', ');
+  // The dossier's confirmed parcel location is shared by Word and both annexes.
+  if(!caseMetadata.location){const gisLocation=results.map(x=>x.location).filter(x=>typeof x==='string'&&x.trim());if(gisLocation.length===1)caseMetadata.location=gisLocation[0].trim();}
+  register={...register,verifiedCaseMetadata:caseMetadata};
  const dossierEvidence=register?.unifiedContext?.commonEvidence||null;
  const word=await window.V26TemplateWord.make(determination.scenario,paragraphs,caseMetadata);if(word.size<100||new TextDecoder().decode(await word.slice(0,2).arrayBuffer())!=='PK')throw Error('DOCX не е валиден ZIP контейнер.');z.file('01_Predlozhenie_RABOTEN_PROEKT.docx',word);
  await ensurePDF();
