@@ -202,8 +202,12 @@ async function process(file){
   // Multiple themes may be present in the same source sentence.
   const instructionOnly=/^(?:посочете|опишете|представете|да се посочи|информация за|данни за|описание на|включително|например|при необходимост|съгласно изискванията|попълва се)\b/i;
   const seenFacts=new Set();
+  // A notice's printed questions often contain topic keywords but no answer.
+  // Keep only a candidate excerpt with a substantive proposal assertion.
+  const assertion=/(?:предвижда\s+се|не\s+се\s+предвижда|ще\s+се|ще\s+бъде|ще\s+има|няма\s+да|не\s+са\s+предвидени|изгражда\s+се|ще\s+използва|осъществява\s+се|осигурява\s+се|отвежда\s+се|зауства\s+се|съществуващ[а-я]*|новопроектир[а-я]*|водоплътн[а-я]*\s+ям[а-я]*|мощност\s*(?:до\s*)?\d|\d+\s*(?:kw|квт|kva|ква))/i;
+
   for(const line of lines){
-   if(line.length<20||line.length>900||instructionOnly.test(line))continue;
+   if(line.length<20||line.length>900||instructionOnly.test(line)||!assertion.test(line))continue;
    const matches=factPatterns.filter(([,re])=>re.test(line)).map(([key])=>key);
    if(!matches.length)continue;
    for(const key of matches){
