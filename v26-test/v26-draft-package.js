@@ -271,8 +271,7 @@ async function make(results,roles,register){
  if(!results.some(r=>r.status==='Намерен'&&r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type))))throw Error('Няма действителна имотна геометрия за Приложение №1.');
  const z=zipWriter(),ids=results.map(r=>r.input),normalized=Object.fromEntries(results.map(r=>[r.input,roles[r.input]||roles[r.cadnum]]));
  const determination=scenarioFromGIS(results,normalized);
- const sharedDiagnosis=register?.unifiedContext?.diagnosis;
- if(!sharedDiagnosis||!register?.unifiedContext?.commonEvidence)throw Error('Липсва единният анализ на преписката. Обновете ГИС анализа и потвърдете ролите.');
+ if(!register?.unifiedContext?.commonEvidence)throw Error('Липсва анализът на преписката.');
  // The completed GIS calculation is the shared spatial determination for every generated document.
  if(!determination.scenario)throw Error('Не е доказано, че всички водещи имоти са извън Натура 2000. Сценарий А не се допуска по подразбиране.');
  register={...register,spatialDetermination:determination};
@@ -293,7 +292,7 @@ async function make(results,roles,register){
  const evidenceLines=['РАБОТЕН ПАКЕТ — НЕ Е ОФИЦИАЛНО СТАНОВИЩЕ.','Съдържа DOCX проект и задължителното PDF приложение №1; приложение №2 се включва само по избор.','Правната приложимост и изводите подлежат на експертна проверка.','','ТЕХНИЧЕСКА ПРОСЛЕДИМОСТ — САМО ЗА ВЪТРЕШНА ПРОВЕРКА'];
  if(dossierEvidence){
   evidenceLines.push('Сценарий (ГИС): '+String(determination.scenario||'неопределен'));
-  evidenceLines.push('Пространствен статус: '+String(dossierEvidence.diagnosis?.spatialStatus||'неустановен'));
+  evidenceLines.push('Пространствен статус (ГИС): '+(determination.scenario==='Б'?'Установено пресичане: '+determination.zones.join(', '):determination.scenario==='А'?'Установено непресичане':'ПРЕДСТОИ'));
   for(const item of (dossierEvidence.findings||[]).slice(0,20)){
    const sources=(item.evidence||[]).slice(0,5).map(e=>String(e.file||'неизвестен документ')+' ('+String(e.date||'дата неустановена')+')').join('; ');
    evidenceLines.push('Запис: '+String(item.key||'')+'; статус: '+String(item.status||'непотвърден')+'; източници: '+sources);
