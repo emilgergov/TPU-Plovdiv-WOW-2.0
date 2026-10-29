@@ -1,0 +1,17 @@
+name: KT13 expert documents integration
+on:
+  push:
+    paths:
+      - 'v26-test/**'
+      - '.github/workflows/kt13-integration.yml'
+  workflow_dispatch:
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check shared draft and ZIP integration contracts
+        run: node v26-test/kt13-integration.test.cjs
