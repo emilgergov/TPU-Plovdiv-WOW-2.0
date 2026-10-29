@@ -232,10 +232,10 @@ function reviewRoles(d){
     const opts=[['','Непотвърден'],['leading','Водещ'],['ancillary','Съпътстващ']];
     for(const [v,t] of opts){const o=document.createElement('option');o.value=v;o.textContent=t;select.appendChild(o)}
     // Candidate information is shown as a hint, never preselected as confirmed.
-    if(v26EarlyGisStarted&&confirmedRoles?.[id])select.value=confirmedRoles[id];else if(resolved?.id===id){select.value='leading';}line.appendChild(select);const hint=document.createElement('small');hint.textContent=c.leading_candidates.includes(id)?' (кандидат за водещ)':c.ancillary_candidates.includes(id)?' (кандидат за съпътстващ)':'';line.appendChild(hint);host.appendChild(line);
+    if(v26EarlyGisStarted&&confirmedRoles?.[id])select.value=confirmedRoles[id];else select.value=(c.leading_candidates.includes(id)||resolved?.id===id)?'leading':'ancillary';line.appendChild(select);const hint=document.createElement('small');hint.textContent=c.leading_candidates.includes(id)?' (кандидат за водещ)':c.ancillary_candidates.includes(id)?' (кандидат за съпътстващ)':'';line.appendChild(hint);host.appendChild(line);
   }
   $('roleReview').style.display=caseParcels.length?'block':'none';$('roleStatus').textContent='Имотен обхват: '+caseParcels.length+' открити имота. '+(resolved?'Автоматично определен водещ: '+resolved.id+'. Стартиране на ГИС.':'Не е установен водещ имот от извлечените сведения — необходима е проверка на прочита.');
-  if(resolved){confirmedRoles={[resolved.id]:'leading'};v26ContextState.roles={...confirmedRoles};v26UpdateContext();v26RefreshSubjectHeading();$('ids').value=resolved.id;v26SetLookupMode(false);$('run').click();}
+  if(resolved){confirmedRoles=Object.fromEntries(caseParcels.map(id=>[id,(c.leading_candidates.includes(id)||resolved.id===id)?'leading':'ancillary']));v26ContextState.roles={...confirmedRoles};v26UpdateContext();v26RefreshSubjectHeading();$('ids').value=resolved.id;v26SetLookupMode(false);$('run').click();}
 }
 $('confirmRoles').onclick=()=>{const roles={};const selects=[...$('roleRows').querySelectorAll('select')];if(!selects.length){$('roleStatus').textContent='Няма намерени имоти за потвърждаване. Първо използвайте „Намери имотите“.';return;}
   for(const s of selects){if(s.value)roles[s.dataset.cadnum]=s.value}
