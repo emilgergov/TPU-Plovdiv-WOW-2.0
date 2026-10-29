@@ -28,7 +28,7 @@ async function make(scenario,paragraphs,metadata){
  const mandatory=ps.map((p,i)=>({p,i})).filter(({p})=>nodes(p,'shd').some(n=>/^(?:ffff00|fff2cc|ffeb9c|ffff99)$/i.test(n.getAttributeNS(NS,'fill')||n.getAttribute('w:fill')||n.getAttribute('fill')||''))||nodes(p,'highlight').some(n=>/yellow/i.test(n.getAttributeNS(NS,'val')||n.getAttribute('w:val')||n.getAttribute('val')||'')));
  const mandatoryIndices=new Set(mandatory.map(x=>x.i));
  // In original B, yellow also marks case-specific sample text; only designated fields may change.
- const caseSpecificHighlighted=scenario==='B'?new Set([9,14,21,22,23,24,25,31]):new Set();
+ const caseSpecificHighlighted=scenario==='B'?new Set([9,14,21,22,23,24,25,31]):new Set([10,16,22,23,24,25,31]);
  for(const i of MAP[scenario])if(mandatoryIndices.has(i))throw Error('Задължителен жълт блок съвпада с характеристиката на ИП: '+(i+1));
  // Mandatory highlighted paragraphs are immutable; case details are carried by other editable fields.
  const writable=(index)=>!mandatoryIndices.has(index)||caseSpecificHighlighted.has(index);
