@@ -13,5 +13,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install DOCX test dependencies
+        run: npm install --no-save --package-lock=false jsdom@26 fflate@0.8.2
       - name: Check shared draft and ZIP integration contracts
         run: node v26-test/kt13-integration.test.cjs
+      - name: Generate real expert DOCX for GIS scenarios A and B
+        run: node v26-test/kt13-docx-smoke.test.cjs
