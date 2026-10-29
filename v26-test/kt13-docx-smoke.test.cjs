@@ -38,6 +38,12 @@ async function run(scenario){
  const texts=paragraphTexts(xml).join(' ');
  for(const value of [metadata.recipient,metadata.subject,'36676.129.457','Приложение №1 — ГИС анализ'])assert(texts.includes(value),'Missing expert content: '+value);
  for(const key of Object.keys(sourceZip).filter(x=>x!=='word/document.xml'))assert.deepEqual(out[key],sourceZip[key],'Institutional DOCX part changed: '+key);
- console.log('Expert DOCX scenario '+scenario+': PASS');
+ // The classic renderer is tested against the same draft; do not allow silent
+ // divergence between expert and template-based outputs.
+ const classic=await w.V26TemplateWord.make(draft.scenario,draft.characterization,draft.metadata);
+ const classicZip=fflate.unzipSync(new Uint8Array(await classic.arrayBuffer()));
+ const classicText=paragraphTexts(new TextDecoder().decode(classicZip['word/document.xml'])).join(' ');
+ for(const value of [metadata.recipient,metadata.subject,'36676.129.457'])assert(classicText.includes(value),'Classic Word missing: '+value);
+ console.log('Expert + classic DOCX scenario '+scenario+': PASS');
 }
 (async()=>{await run('А');await run('Б')})().catch(e=>{console.error(e);process.exitCode=1});
