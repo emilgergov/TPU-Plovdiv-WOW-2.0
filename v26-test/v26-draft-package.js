@@ -225,11 +225,13 @@ function normativePdf(results,register){
  const dossier=register?.dossierReferences;
  const subject=window.V26SubjectContext;
  const review=register?.verifiedCaseMetadata||null;
- const confirmed=!!subject?.confirmed;
- const applicable=records.filter(r=>r.title&&/^https:\/\//.test(String(r.source||''))&&(!r.zone_code||zoneMap.has(String(r.zone_code)))&&(/биологичното разнообразие|съвместимост|защитена зона|заповед/i.test(String(r.title)+' '+String(r.purpose||'')))).slice(0,12);
+ const resolvedTitle=String(subject?.title||review?.subject||review?.title||dossier?.subject?.title||dossier?.subject_title||'').trim();
+ const confirmed=!!(subject?.confirmed&&resolvedTitle);
+ const subjectDisplay=resolvedTitle||'Не е установен в обработените материали — за експертна проверка.';
+ const applicable=records.filter(r=>{const title=String(r.title||'');const code=String(r.zone_code||r.sitecode||'');const mentioned=[...title.matchAll(/BG\d{7}/g)].map(m=>m[0]);return title&&/^https:\/\//.test(String(r.source||''))&&(!code||zoneMap.has(code))&&(!mentioned.length||mentioned.every(z=>zoneMap.has(z)))&&(/биологичното разнообразие|съвместимост|защитена зона|заповед/i.test(title+' '+String(r.purpose||'')));}).slice(0,12);
  const content=[
   {text:'I. Предмет и фактическа основа',style:'sub'},
-  {text:'Предмет на инвестиционното предложение: '+(confirmed?subject.title:'Не е потвърден по представените материали.')},
+  {text:'Предмет на инвестиционното предложение: '+(subjectDisplay)},
   {text:'Обхват по кадастрални идентификатори: '+(ids.join(', ')||'Не е установен.')},
   ...(confirmed&&subject.activities?.length?[{text:'Предвидени дейности: '+subject.activities.join('; ')}]:[]),
   {text:'II. Пространствена относимост',style:'sub'},
@@ -240,7 +242,7 @@ function normativePdf(results,register){
   ...applicable.map(r=>({text:[r.title||'Нормативен акт',r.article||r.provision||r.clause,r.id?'архив '+r.id:''].filter(Boolean).join(' — '),link:String(r.source),color:'#165c86',fontSize:9})),
   ...(applicable.length?[]:[{text:'В интегрирания нормативен архив няма относима референция за този обхват.'}]),
   {text:'IV. Приложимост към инвестиционното предложение',style:'sub'},
-  {text:confirmed?'За предложение „'+subject.title+'“ относимостта на посочените основания се разглежда спрямо описаните дейности и пространствените резултати от Приложение №1. Режимите на конкретна зона се преценяват отделно; настоящата справка не установява автоматично допустимост или забрана.':'Предметът и дейностите подлежат на потвърждение преди индивидуална преценка за приложимост на режимите.'},
+  {text:resolvedTitle?'За предложение „'+resolvedTitle+'“ относимостта на посочените основания се разглежда спрямо описаните дейности и пространствените резултати от Приложение №1. Режимите на конкретна зона се преценяват отделно; настоящата справка не установява автоматично допустимост или забрана.':'Предметът и дейностите подлежат на потвърждение преди индивидуална преценка за приложимост на режимите.'},
   ...(confirmed&&Array.isArray(subject.activities)&&subject.activities.length?[{text:'Съпоставка с предвидените дейности: '+subject.activities.slice(0,8).join('; ')+'. За всяка дейност се проверява дали попада в предметния обхват на относимите ограничения и процедурни изисквания; самото й посочване не е доказателство за нарушение.'}]:[]),
   ...zones.map(z=>({text:'Защитена зона '+z.code+(z.name?' „'+z.name+'“':'')+': установената пространствена връзка изисква съпоставка на конкретните дейности със заповедите и приложимите режими за тази зона. При липса на проверена режимна разпоредба не се прави извод за забрана.'})),
   {text:'V. Експертен извод',style:'sub'},
@@ -250,9 +252,9 @@ function normativePdf(results,register){
  ];
  const def=pdfDef('Приложение №2 — нормативен и документален анализ',content);
  // Compact only Annex 2; leave the approved GIS Annex 1 layout untouched.
- def.pageMargins=[42,35,42,35];
- def.defaultStyle={...def.defaultStyle,fontSize:9,lineHeight:1.02};
- def.styles={...def.styles,heading:{...def.styles.heading,fontSize:14,margin:[0,0,0,8]},sub:{...def.styles.sub,fontSize:10,margin:[0,7,0,3]}};
+ def.pageMargins=[42,28,42,28];
+ def.defaultStyle={...def.defaultStyle,fontSize:8.5,lineHeight:1.0};
+ def.styles={...def.styles,heading:{...def.styles.heading,fontSize:13,margin:[0,0,0,5]},sub:{...def.styles.sub,fontSize:9.5,margin:[0,5,0,2]}};
  return def;
 }
 
