@@ -41,7 +41,27 @@ async function extractText(data,name,options={}){
   const parts=[];let worker=null;
   try{for(let i=1;i<=doc.numPages;i++){intakeProgress('PDF: страница '+i+' от '+doc.numPages+' · '+name,{page:i,pages:doc.numPages});
    const page=await doc.getPage(i),content=await page.getTextContent();
-   let pageText=content.items.map(x=>x.str||'').join(' ').trim();
+   // Preserve PDF.js word boundaries for notification headings. A PDF text item
+   // can be a fragment inside a word; inserting a space after every item
+   // breaks Bulgarian words (e.g. "Склад ове"). Keep the legacy reader for
+   // all other documents to avoid changing the approved ZIP -> GIS route.
+   const isNoticePdf=/уведомлен|uvedomlen|notification/i.test(name);
+   const pdfItems=content.items||[];
+   let pageText=isNoticePdf?pdfItems.map((item,index)=>{
+    const part=String(item.str||'');
+    const next=pdfItems[index+1];
+    if(!next)return part;
+    if(item.hasEOL)return part+'\\n';
+    if(item.hasSpace||/\\s$/.test(part)||/^\\s/.test(String(next.str||'')))return part;
+    const a=item.transform,b=next.transform;
+    if(a&&b&&item.width!=null){
+     const right=a[4]+Number(item.width),gap=b[4]-right;
+     const size=Math.max(1,Math.abs(a[0])||Math.abs(a[3])||10);
+     if(Math.abs(a[5]-b[5])>size*0.55)return part+'\\n';
+     return part+(gap>size*0.22?' ':'');
+    }
+    return part+' ';
+   }).join('').trim():pdfItems.map(x=>x.str||'').join(' ').trim();
    if(options.allowOcr!==false&&pageText.replace(/[^\p{L}\p{N}]/gu,'').length<25){
     try{if(!window.Tesseract)await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
      if(!worker)worker=await withDeadline(window.Tesseract.createWorker('bul+eng',1),30000,'OCR зареждане');
