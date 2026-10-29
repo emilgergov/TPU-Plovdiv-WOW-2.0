@@ -19,7 +19,7 @@ function build({results,roles,determination,metadata,paragraphs,evidence}){
  if(characterization.length!==4||characterization.some(x=>!x))throw Error('КТ13: липсват четирите експертно потвърдени описания.');
  const data=Object.fromEntries(Object.entries(metadata||{}).map(([k,v])=>[k,Array.isArray(v)?Object.freeze(v.map(clean)):clean(v)]));
  if(data.parcelIds&&data.parcelIds!==parcels.map(p=>p.id).join(', '))throw Error('КТ13: несъответствие между Word и ГИС идентификаторите.');
- const zones=Object.freeze((determination.zones||[]).map(clean));
+ const zones=Object.freeze((determination.zones||[]).map(z=>clean(typeof z==='string'?z:z?.code||z?.sitecode||z?.zone_code)).filter(Boolean));
  if(scenario==='Б'&&!zones.length)throw Error('КТ13: сценарий Б без посочена защитена зона.');
  return Object.freeze({
   schema:'KT13_EXPERT_DRAFT_V1',scenario,parcels:freezeList(parcels),
