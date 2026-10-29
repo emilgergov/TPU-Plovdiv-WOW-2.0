@@ -202,19 +202,23 @@ function words(s){return v26EditIds(s).ids};let v26ZipLookupMode=false;let v26Zi
  const all=[...new Set((d.all_parcels||[]).map(parcel).filter(Boolean))];
  if(!all.length)return null;
  const classification=d.classification||{};
- const leading=new Set((classification.leading_candidates||[]).map(parcel));
- const ancillary=new Set((classification.ancillary_candidates||[]).map(parcel));
- const sources=(d.subject_candidates||[]);
- const notification=sources.filter(x=>/уведомлен/i.test(String(x.source||'')));
- const textOf=x=>[x.title,...(x.sections||[]),...(x.activities||[])].filter(v=>typeof v==='string').join(' ');
- const ranked=all.map(id=>{let score=0;const detail=[];
- if(leading.has(id)){score+=12;detail.push('класификация на преписката')}
- if(ancillary.has(id)){score-=10}
- for(const x of sources){const t=textOf(x);if(!t.includes(id))continue;const weight=notification.includes(x)?18:6;score+=weight;detail.push(notification.includes(x)?'уведомление':'описание на ИП');
- if(new RegExp('(?:предмет|реализира|изграждан|инвестиционн|местоположен)[^\\n.]{0,110}'+id.replace(/\./g,'\\.')).test(t.toLowerCase()))score+=10;
- if(new RegExp('(?:съсед|съпътстващ|прилежащ)[^\\n.]{0,100}'+id.replace(/\./g,'\\.')).test(t.toLowerCase()))score-=16;
- }
- return {id,score,detail};}).sort((a,b)=>b.score-a.score);
+ const leading=new Set((classification.leading_candidates||[]).map(parcel).filter(Boolean));
+ const ancillary=new Set((classification.ancillary_candidates||[]).map(parcel).filter(Boolean));
+ const sources=d.subject_candidates||[];
+ const isNotice=x=>/уведомлен|uvedomlen|notification/i.test(String(x.source||''));
+ const textOf=x=>[x.title,...(x.sections||[]).map(v=>typeof v==='string'?v:v?.text),...(x.activities||[]).map(v=>typeof v==='string'?v:v?.text)].filter(v=>typeof v==='string').join(' ');
+ const ranked=all.map(id=>{
+  let score=0;const detail=[];const escaped=id.replace(/\./g,'\\.');
+  if(leading.has(id)){score+=12;detail.push('класификация на преписката')}
+  if(ancillary.has(id)){score-=10}
+  for(const x of sources){
+   const t=textOf(x);if(!t.includes(id))continue;
+   const notice=isNotice(x);score+=notice?18:6;detail.push(notice?'уведомление':'описание на ИП');
+   if(new RegExp('(?:предмет|реализира|изграждан|инвестиционн|местоположен)[\\s\\S]{0,110}'+escaped,'i').test(t))score+=10;
+   if(new RegExp('(?:съсед|съпътстващ|прилежащ)[\\s\\S]{0,100}'+escaped,'i').test(t))score-=16;
+  }
+  return {id,score,detail};
+ }).sort((a,b)=>b.score-a.score);
  return ranked[0].score>0&&(!ranked[1]||ranked[0].score>ranked[1].score)?ranked[0]:null;
 }
 function reviewRoles(d){
