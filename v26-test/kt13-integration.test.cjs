@@ -42,4 +42,7 @@ assert(review.includes("panel.hidden=false;panel.open=true"),'Missing evidence m
 assert(html.includes("window.V26WordReview.getConfirmedParagraphs();const m=window.V26WordReview.getConfirmedMetadata()"),'Word preflight must precede ZIP confirmation');
 assert(html.indexOf("window.V26WordReview.getConfirmedParagraphs();const m=")<html.indexOf("if(!window.confirm('Да се създаде РАБОТЕН ZIP"),'Do not show ZIP confirmations before Word preflight');
 assert(html.includes('ГИС анализ · PDF')&&html.includes('Нормативни референции · PDF')&&html.includes('Изготви проектите · Word'),'KT14 short UI labels must be retained');
+assert(pkg.includes("classicWord===expertWord"),'ZIP must reject identical Word outputs');
+assert(html.includes("slice(0,found.some("),'Word preflight must select 5/7 legal findings from GIS scenario');
+assert(pkg.includes("paragraphPrefixes"),'Word scenario paragraph prefixes must be normalized before packaging');
 console.log('KT13 shared model and cross-module static integration: PASS');
