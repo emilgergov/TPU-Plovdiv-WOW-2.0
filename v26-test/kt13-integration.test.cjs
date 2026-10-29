@@ -35,4 +35,11 @@ assert(word.includes('sect.cloneNode(true)'),'Original section/header/footer ref
 assert(pkg.includes("if(includeAnnex2){"),'Annex 2 must remain optional');
 assert(pkg.includes("await window.V26ExpertWord.make(expertDraft)")&&pkg.includes("window.V26TemplateWord.make(expertDraft.scenario,expertDraft.characterization,expertDraft.metadata)"),'Both Word documents must use the same expert draft');
 for(const name of ['v26-expert-draft.js','v26-expert-word.js','v26-draft-package.js','v26-template-word.js','v26-word-review.js'])new vm.Script(read(name),{filename:name});
+const review=read('v26-word-review.js');
+assert(review.includes('function autoEvidence()'),'Evidence-derived Word descriptions must remain available');
+assert(review.includes('const auto=autoEvidence();'),'Word review must consult existing dossier evidence');
+assert(review.includes("panel.hidden=false;panel.open=true"),'Missing evidence must reveal expert review');
+assert(html.includes("window.V26WordReview.getConfirmedParagraphs();const m=window.V26WordReview.getConfirmedMetadata()"),'Word preflight must precede ZIP confirmation');
+assert(html.indexOf("window.V26WordReview.getConfirmedParagraphs();const m=")<html.indexOf("if(!window.confirm('Да се създаде РАБОТЕН ZIP"),'Do not show ZIP confirmations before Word preflight');
+assert(html.includes('ГИС анализ · PDF')&&html.includes('Нормативни референции · PDF')&&html.includes('Изготви проектите · Word'),'KT14 short UI labels must be retained');
 console.log('KT13 shared model and cross-module static integration: PASS');
