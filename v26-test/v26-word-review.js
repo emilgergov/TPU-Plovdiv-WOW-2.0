@@ -9,7 +9,7 @@ function mount(){
  const hint=document.createElement('p');hint.textContent='Попълнете само доказани обстоятелства от преписката. Прегледът е задължителен преди Word. Празни или непотвърдени абзаци блокират генерирането.';box.append(hint);
  fields=labels.map(label=>{const wrap=document.createElement('div');wrap.style.margin='8px 0';const title=document.createElement('label');title.textContent=label;title.style.display='block';const area=document.createElement('textarea');area.rows=3;area.style.cssText='display:block;width:100%;box-sizing:border-box';area.addEventListener('input',()=>{confirmed.checked=false});wrap.append(title,area);box.append(wrap);return area});
  const caseTitle=document.createElement('h4');caseTitle.textContent='Променливи данни за Word — потвърждение';box.append(caseTitle);
- for(const [key,label] of [['recipient','Адресат'],['address','Адрес'],['subject','Предмет на ИП'],['incomingReference','Входящ номер и дата'],['salutation','Обръщение'],['parcelIds','Кадастрални идентификатори на имотите']]){
+ for(const [key,label] of [['recipient','Адресат'],['address','Адрес'],['subject','Предмет на ИП'],['incomingReference','Входящ номер и дата'],['salutation','Обръщение'],['parcelIds','Кадастрални идентификатори на имотите'],['location','Местоположение (населено място, община, област; само потвърдени данни)']]){
   const wrap=document.createElement('div');wrap.style.margin='6px 0';const caption=document.createElement('label');caption.textContent=label;caption.style.display='block';const input=document.createElement('input');input.type='text';input.style.cssText='width:100%;box-sizing:border-box';input.addEventListener('input',()=>{confirmed.checked=false});caseFields[key]=input;wrap.append(caption,input);box.append(wrap);
  }
  const evidenceHeading=document.createElement('p');evidenceHeading.textContent='Откъсите от преписката са помощен материал. Отваряйте ги само когато е необходимо да сверите източника.';box.insertBefore(evidenceHeading,caseTitle);
@@ -63,7 +63,7 @@ function getConfirmedParagraphs(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 function getConfirmedMetadata(){
  // Working proposal: unresolved fields remain explicit review notes in DOCX.
- if(Object.keys(caseFields).length!==6)throw Error('Формулярът за административни данни не е зареден.');
+ if(Object.keys(caseFields).length!==7)throw Error('Формулярът за административни данни не е зареден.');
  const result=Object.fromEntries(Object.entries(caseFields).map(([k,v])=>[k,v.value.trim()]));
  result.legalParagraphs=legalFields.map(f=>f.value.trim());
  result.procedureFinding=procedureField?.value.trim()||'';
