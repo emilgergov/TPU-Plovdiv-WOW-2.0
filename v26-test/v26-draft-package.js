@@ -225,63 +225,28 @@ function normativePdf(results,register){
  const dossier=register?.dossierReferences;
  const subject=window.V26SubjectContext;
  const review=register?.verifiedCaseMetadata||null;
+ const confirmed=!!subject?.confirmed;
+ const verifiedRecords=records.filter(r=>r.verified===true&&r.revision_verified===true&&/^https:\/\//.test(String(r.source||''))&&String(r.article||r.provision||r.clause||'').trim());
+ const applicable=verifiedRecords.filter(r=>{const code=String(r.zone_code||'');return !code||zoneMap.has(code)});
  const content=[
-  {text:'Документална проследимост: '+(dossier?.documents?.length||0)+' документа от единната ZIP преписка. Непотвърдените твърдения не представляват установени факти.',fontSize:9},
-  ...((dossier?.documents||[]).slice(0,35).map(d=>({text:'Документ: '+shortSource(d.file)+' · входящи референции: '+(d.references||[]).map(x=>x.number+' / '+x.date).join('; '),fontSize:8}))),
-  {text:'Предварителен аналитичен сценарий: '+String(register?.unifiedContext?.diagnosis?.scenario||'НЕОПРЕДЕЛЕН')+'; пространствен статус: '+String(register?.unifiedContext?.diagnosis?.spatialStatus||'нерешено'),bold:true},
-  ...((dossier?.commonEvidence?.ledger||[]).slice(0,30).map(f=>({text:'Доказателство: '+readableKind(f.kind)+' / '+readableStatus(f.status)+' / '+shortSource(f.source),fontSize:8}))),
-  {text:'Единни доказателствени констатации от преписката: '+(dossier?.commonEvidence?.findings?.length||0)+' · предупреждения: '+(dossier?.commonEvidence?.warnings?.length||0)+'. Изискват експертна проверка.',fontSize:9},
-  ...((dossier?.commonEvidence?.findings||[]).slice(0,20).map(f=>({text:'Доказателствен запис: '+readableKind(f.key)+' · статус '+readableStatus(f.status)+' · източници '+(f.evidence||[]).slice(0,5).map(e=>String(e.file||'неизвестен документ')+' ('+String(e.date||'дата предстои')+')').join('; ')+' · правна приложимост: ПРЕДСТОИ',fontSize:8}))),
-  {text:'Единен експертен преглед за PDF №2 и Word: '+(review?'налични са данни от общия преглед; експертното потвърждение се извършва преди издаване':'не е предоставен общ експертен преглед'),bold:true},
-  ...((review?.legalParagraphs||[]).map((value,i)=>({text:'Експертна констатация '+(i+1)+': '+String(value),fontSize:9}))),
-  {text:'Проверена приложима процедура: '+String(review?.procedureFinding||'Приложимостта не е оценена'),fontSize:9},
-  ...((review?.impactFindings||[]).map((value,i)=>({text:'Оценка на въздействията '+(i+1)+': '+String(value),fontSize:9}))),
-  {text:'I. Предмет и установени факти',style:'sub'},
-  {text:'Предмет на ИП: '+(subject?.confirmed?subject.title:'НЕ Е УСТАНОВЕН / НЕ Е ПОТВЪРДЕН'),bold:true},
-  {text:'Източник на предмета: '+(subject?.confirmed?subject.source:'Неустановено')},
-  {text:'Дейности от ИП: '+(subject?.confirmed?(subject.activities.join('; ')||'НЕ СА УТОЧНЕНИ'):'Неустановено')},
-  {text:'Статус на анализа на дейностите: '+(subject?.confirmed&&subject.activities.length?'Предметът е експертно потвърден; приложимостта на конкретните режими не е оценена.':'ПРЕДВАРИТЕЛНА НОРМАТИВНА СПРАВКА — липсва потвърден предмет и/или дейности.'),bold:true},
-  {text:'Имотни идентификатори: '+ids.join(', ')},
-  {text:'Пространствена основа: резултатът от ГИС анализ / Приложение №1 е приет за настоящата справка. Пресичането НЕ се проверява повторно в Приложение №2.',bold:true},
-  {text:'Установени от ГИС справката зони: '+(zones.length?zones.map(z=>z.code+(z.name?' „'+z.name+'“':'')).join('; '):'Няма предадени кодове на зони в резултата.')},
-  {text:'II. Заповеди за обявяване, изменения и режими',style:'sub'}
+  {text:'I. Предмет и фактическа основа',style:'sub'},
+  {text:'Предмет на инвестиционното предложение: '+(confirmed?subject.title:'Не е потвърден по представените материали.')},
+  {text:'Обхват по кадастрални идентификатори: '+(ids.join(', ')||'Не е установен.')},
+  ...(confirmed&&subject.activities?.length?[{text:'Предвидени дейности: '+subject.activities.join('; ')}]:[]),
+  {text:'II. Пространствена относимост',style:'sub'},
+  {text:'Пространствените резултати са представени в самостоятелното Приложение №1 (ГИС анализ). Настоящият документ използва резултатите му, без да ги замества.'},
+  {text:zones.length?'Отчетени защитени зони: '+zones.map(z=>z.code+(z.name?' — '+z.name:'')).join('; '):'В предоставените ГИС резултати няма установен код на пресечена защитена зона.'},
+  {text:'III. Нормативни и документални основания',style:'sub'},
+  {text:'За правната преценка се отчитат Законът за биологичното разнообразие и действащите заповеди за обявяване и изменение на относимите защитени зони. Самото пространствено пресичане не доказва нарушение на конкретен режим.'},
+  ...applicable.map(r=>({text:[r.title||'Нормативен акт',r.article||r.provision||r.clause].filter(Boolean).join(' — '),link:String(r.source),color:'#165c86',fontSize:9})),
+  ...(applicable.length?[]:[{text:'Към настоящата справка не са приложени едновременно проверен точен текст, действаща редакция и официален източник за конкретна режимна разпоредба. Поради това такава разпоредба не се цитира като установена.'}]),
+  {text:'IV. Приложимост към инвестиционното предложение',style:'sub'},
+  {text:confirmed?'Предметът е идентифициран. Преценката за приложимост на режимите изисква съпоставка на действителните дейности с конкретните действащи разпоредби за всяка относима зона.':'Необходима е проверка и потвърждение на предмета и дейностите преди съпоставка с режимите.'},
+  {text:'V. Експертен извод',style:'sub'},
+  {text:zones.length?'Налице е пространствена относимост към посочените защитени зони според Приложение №1. Само от този факт не следва извод за допустимост или недопустимост на предложението.':'От предоставените ГИС резултати не се установява пресичане със защитена зона. Това не отменя проверката на останалите приложими нормативни изисквания.'},
+  {text:applicable.length?'Посочените проверени нормативни референции подлежат на експертна съпоставка с конкретните дейности.':'Не се формулира окончателен правен извод без проверени приложими режимни разпоредби.'},
+  {text:'Документът е проект за експертна проверка, а не административен акт.',italics:true,fontSize:9}
  ];
- if(!zones.length)content.push({text:'Няма предаден код на защитена зона. Не се извеждат зонално специфични режими.',bold:true});
- for(const z of zones){
-  content.push({text:z.code+(z.name?' — '+z.name:''),style:'sub'});
-  const order=z.order||'Неустановено';
-  content.push({text:'Заповед за обявяване: '+order});
-  if(z.code==='BG0000194'){
-   content.push({text:'Източник: МОСВ — специфични цели за BG0000194 (отворете електронната препратка)',link:'https://www.moew.government.bg/static/media/ups/articles/attachments/BG0000194_Reka_Chaya_specifichni_tseli_zap12a55845b82036a39b7ee327cf53070a5cb.pdf',color:'#165c86',decoration:'underline',fontSize:9});
-   content.push({text:'Специфични цели: Заповед № РД-507/12.06.2024 г. (чл. 12а ЗБР). Това е акт за цели, а не замества заповедта за режимите.'});
-  }
-  content.push({text:'Изменения и допълнения на заповедта: Актуалността на измененията не е потвърдена.'});
-  content.push({text:'Конкретни забрани, ограничения и изключения: Неустановена нормативна разпоредба. Не се допуска предположение за забрана.',bold:true});
-  content.push({text:'Доказателствена връзка: '+ids.join(', ')+' → ГИС Приложение №1 → '+z.code+' → заповед → конкретна точка от режим: Неустановено.'});
-  const zoneRecords=records.filter(r=>String(r.zone_code||'')===z.code);
-  for(const rr of zoneRecords){
-   const exact=String(rr.provision||rr.clause||rr.article||'').trim();
-   const verified=rr.verified===true&&rr.revision_verified===true&&exact&&String(rr.source||'').startsWith('https://');
-   content.push({text:'Режим / точна разпоредба: '+(verified?exact:'Неустановена нормативна разпоредба')});
-   content.push({text:'Приложимост към предмета и дейностите: '+(verified&&subject?.confirmed&&subject.activities?.length?'НЕОБХОДИМА ЕКСПЕРТНА СЪПОСТАВКА':'Недостатъчни данни за заключение'),bold:true});
-  }
- }
- content.push({text:'III. Нормативни основания и проследимост',style:'sub'});
- const selected=records.filter(r=>{
-  const code=String(r.zone_code||'')||(String(r.title||'').match(/BG\d{7}/)||[])[0];
-  return code?zoneMap.has(code):Boolean(r.article||r.provision||r.clause);
- });
- if(!selected.length)content.push({text:'Няма документално потвърдени приложими разпоредби за избраните зони.',bold:true});
- for(const r of selected){
-  content.push({text:String(r.id||'')+' — '+String(r.title||''),style:'sub'});
-  const sourceUrl=String(r.source||'');
-  content.push({text:/^https:\/\//.test(sourceUrl)?'Източник: електронна препратка (отворете в PDF)':'Източник: '+(sourceUrl||'Неустановено'),link:/^https:\/\//.test(sourceUrl)?sourceUrl:undefined,color:'#165c86',fontSize:9});
-  content.push({text:'Документ / редакция: '+String(r.date||'Неустановено')+' · Страница / точка: '+String(r.page||'Неустановено')+' · Разпоредба: '+String(r.article||r.provision||r.clause||'Неустановена нормативна разпоредба')});
-  content.push({text:'Проверка на точната приложима разпоредба: '+(r.verified===true?'Проверен текст; актуална редакция: '+(r.revision_verified===true?'удостоверена':'актуалността не е потвърдена'):'Неустановено'),bold:true});
- }
- content.push({text:'IV. Мотивиран експертен извод',style:'sub'});
- content.push({text:'ГИС фактът за установените зони се приема от Приложение №1 и не се поставя на повторно потвърждаване. Наличните данни позволяват идентифициране на зоните и проследяване на част от административните актове. Не позволяват окончателна преценка за допустимост, докато не бъдат извлечени точните действащи режими и не бъде съпоставена конкретната дейност с всяка приложима забрана, ограничение и изключение.',bold:true});
- content.push({text:'Статус: МОТИВИРАН РАБОТЕН ДОКЛАД. Не представлява издадено становище или окончателна правна преценка.'});
  const def=pdfDef('Приложение №2 — нормативен и документален анализ',content);
  // Compact only Annex 2; leave the approved GIS Annex 1 layout untouched.
  def.pageMargins=[42,35,42,35];
