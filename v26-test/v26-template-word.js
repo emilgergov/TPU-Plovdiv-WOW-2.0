@@ -23,6 +23,10 @@ async function make(scenario,paragraphs,metadata){
  const expectedB=['С реализацията','Електроснабдяването','Водозахранването','Отпадъчните води'];
  const labels=scenario==='A'?expected:expectedB;
  for(let i=0;i<4;i++){const text=nodes(ps[MAP[scenario][i]],'t').map(t=>t.textContent).join('').trim();if(!text.replace(/^\s+/,'').startsWith(labels[i]))throw Error('Неочакван абзац в оригиналния Word образец.');}
+ // Preflight original template: mandatory highlighted text must not be editable.
+ const plannedEditable=new Set([...MAP[scenario],...(scenario==='A'?[22,23,24,25,31,26,27,28,29,30,6,7,10,13,16,17]:[20,21,22,23,24,25,31,26,27,28,29,30,5,6,7,9,11,12,14,15])]);
+ const mandatory=ps.map((p,i)=>({p,i})).filter(({p})=>nodes(p,'shd').some(n=>/^(?:ffff00|fff2cc|ffeb9c|ffff99)$/i.test(n.getAttributeNS(NS,'fill')||n.getAttribute('w:fill')||n.getAttribute('fill')||''))||nodes(p,'highlight').some(n=>/yellow/i.test(n.getAttributeNS(NS,'val')||n.getAttribute('w:val')||n.getAttribute('val')||'')));
+ for(const {i} of mandatory)if(plannedEditable.has(i))throw Error('Задължителен жълт блок попада в променливо поле: '+(i+1));
  for(let i=0;i<4;i++){
   const p=ps[MAP[scenario][i]],runs=nodes(p,'r');
   if(!runs.length||nodes(p,'drawing').length||nodes(p,'fldChar').length)throw Error('Защитен или сложен абзац; редакцията е спряна.');
@@ -71,9 +75,6 @@ async function make(scenario,paragraphs,metadata){
  // Protect template paragraphs that are not explicitly approved for case-specific replacement.
  const editableIndices=new Set([...MAP[scenario],...legalIndices,...impactIndices,...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])]);
  // The two signature slots must remain present and untouched in the template body.
- // Highlighted template text is mandatory and must never be overwritten.
- const highlightedParagraphs=ps.map((p,i)=>({p,i})).filter(({p})=>nodes(p,'shd').some(n=>/^(?:ffff00|fff2cc|ffeb9c|ffff99)$/i.test(n.getAttributeNS(NS,'fill')||n.getAttribute('w:fill')||n.getAttribute('fill')||''))||nodes(p,'highlight').some(n=>/yellow/i.test(n.getAttributeNS(NS,'val')||n.getAttribute('w:val')||n.getAttribute('val')||'')));
- for(const {i} of highlightedParagraphs){if(editableIndices.has(i))throw Error('Жълт задължителен блок е сред редактираните полета: абзац '+(i+1));}
  const signatureCandidates=ps.map((p,i)=>({i,text:nodes(p,'t').map(t=>t.textContent).join('')})).filter(x=>/електронен\s+подпис|електронно\s+подпис|подписал|подпис\s*:/i.test(x.text));
  for(const item of signatureCandidates){if(editableIndices.has(item.i))throw Error('Поле за подпис попада сред редактираните абзаци: '+(item.i+1));}
  const sourceXml=new DOMParser().parseFromString(new TextDecoder().decode(entry),'application/xml');
