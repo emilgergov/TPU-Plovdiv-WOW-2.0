@@ -60,12 +60,12 @@ async function make(scenario,paragraphs,metadata){
  if(!parcelIds.length)throw Error('Липсват потвърдени кадастрални идентификатори.');
  if(scenario==='A'){
   replaceParagraph(6,metadata.recipient);replaceParagraph(7,metadata.address);
-  replaceParagraph(10,'Относно: '+metadata.subject+' — имоти '+parcelIds.join(', '));replaceParagraph(13,metadata.salutation);
-  replaceParagraph(16,'Във връзка с уведомление '+metadata.incomingReference+' за '+metadata.subject+', имоти '+parcelIds.join(', ')+'.');
+  replaceParagraph(10,'Относно: '+metadata.subject+' — '+parcelDescription);replaceParagraph(13,metadata.salutation);
+  replaceParagraph(16,'Във връзка с уведомление '+metadata.incomingReference+' за '+metadata.subject+', '+parcelDescription+'.');
  }else{
   replaceParagraph(5,metadata.recipient);replaceParagraph(6,'');replaceParagraph(7,metadata.address);
-  replaceParagraph(9,'Относно: '+metadata.subject+' — имоти '+parcelIds.join(', '));replaceParagraph(11,metadata.salutation);replaceParagraph(12,'');
-  replaceParagraph(14,'Във връзка с уведомление '+metadata.incomingReference+' за '+metadata.subject+', имоти '+parcelIds.join(', ')+'.');
+  replaceParagraph(9,'Относно: '+metadata.subject+' — '+parcelDescription);replaceParagraph(11,metadata.salutation);replaceParagraph(12,'');
+  replaceParagraph(14,'Във връзка с уведомление '+metadata.incomingReference+' за '+metadata.subject+', '+parcelDescription+'.');
  }
  legalIndices.forEach((index,i)=>replaceParagraph(index,String(metadata.legalParagraphs[i])));
  // The procedure statement and five impact findings are case-specific, never reusable sample findings.
