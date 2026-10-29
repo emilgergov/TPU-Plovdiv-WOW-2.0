@@ -21,7 +21,7 @@ const outside=build({...args,determination:{scenario:'А',zones:[]}});
 assert.equal(outside.scenario,'А');
 assert.equal(outside.zones.length,0);
 assert.throws(()=>build({...args,paragraphs:['','','','']}),/четирите/);
-assert.throws(()=>build({...args,results:[{input:'99999.999.9999'}],roles:{'99999.999.9999':'leading'},metadata:{...args.metadata,parcelIds:'99999.999.9999'}}),/идентификатор/);
+assert.throws(()=>build({...args,results:[{input:'bad-id'}],roles:{'bad-id':'leading'},metadata:{...args.metadata,parcelIds:'bad-id'}}),/идентификатор/);
 const pkg=read('v26-draft-package.js'),html=read('index.html'),word=read('v26-expert-word.js');
 for(const token of ['V26ExpertDraft?.build','V26ExpertWord.make','V26TemplateWord.make','01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_Prilozhenie_1_GIS_analiz.pdf','04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf'])assert(pkg.includes(token),'ZIP integration missing: '+token);
 for(const token of ['v26-expert-draft.js','v26-expert-word.js','v26-draft-package.js','Приложение №1 — ГИС анализ','Приложение №2 — Нормативни и документални референции'])assert(html.includes(token),'UI integration missing: '+token);
