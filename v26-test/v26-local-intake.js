@@ -124,7 +124,7 @@ async function process(file){
    try{
     const unpacked=await readEntry(bytes,v,item);
     if(unpacked.byteLength!==item.size)throw Error('Несъответствие в ZIP размер.');
-    extractText.lastOcrPages=0;extractText.lastOcrError='';extractText.lastPageWarnings=[];text=await extractText(unpacked,item.name,{allowOcr:/уведомлен|notification/i.test(item.name)||!/\.pdf$/i.test(item.name)||(!leading.size&&!all.size)});
+    extractText.lastOcrPages=0;extractText.lastOcrError='';extractText.lastPageWarnings=[];text=await withDeadline(extractText(unpacked,item.name,{allowOcr:/уведомлен|notification/i.test(item.name)||!/\.pdf$/i.test(item.name)||(!leading.size&&!all.size)}),90000,'Прочит на документ '+item.name);
     status=text.trim()?(extractText.lastOcrPages?'OCR: '+extractText.lastOcrPages+' сканирани страници; експертна проверка':'текстът е прочетен'):(extractText.lastOcrError?'OCR неуспешен: '+extractText.lastOcrError:'няма извлекаем текст (възможно сканиран документ)');if(extractText.lastPageWarnings?.length)status+='; ПРОВЕРКА: '+extractText.lastPageWarnings.join(', ');if(/\.pdf$/i.test(item.name)&&!/уведомлен|notification/i.test(item.name)&&extractText.lastPageWarnings?.length)status+='; OCR на приложението е отложен за документален анализ';if(text.trim())documentTexts.push({source:item.name,text:text.slice(0,150000)});
     // Distinguish cadastral context: neighbours and former IDs are evidence, not project parcels.
     const contextualIds=[];
