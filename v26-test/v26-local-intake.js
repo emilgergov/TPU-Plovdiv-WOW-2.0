@@ -51,13 +51,13 @@ async function extractText(data,name,options={}){
     const part=String(item.str||'');
     const next=pdfItems[index+1];
     if(!next)return part;
-    if(item.hasEOL)return part+'\\n';
-    if(item.hasSpace||/\\s$/.test(part)||/^\\s/.test(String(next.str||'')))return part;
+    if(item.hasEOL)return part+'\n';
+    if(item.hasSpace||/\s$/.test(part)||/^\s/.test(String(next.str||'')))return part;
     const a=item.transform,b=next.transform;
     if(a&&b&&item.width!=null){
      const right=a[4]+Number(item.width),gap=b[4]-right;
      const size=Math.max(1,Math.abs(a[0])||Math.abs(a[3])||10);
-     if(Math.abs(a[5]-b[5])>size*0.55)return part+'\\n';
+     if(Math.abs(a[5]-b[5])>size*0.55)return part+'\n';
      return part+(gap>size*0.22?' ':'');
     }
     return part+' ';
