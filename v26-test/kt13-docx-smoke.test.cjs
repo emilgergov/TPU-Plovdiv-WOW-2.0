@@ -12,7 +12,7 @@ w.fetch=async path=>{
  const bytes=fs.readFileSync(full);
  return {ok:true,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)};
 };
-const context=vm.createContext({window:w,document:w.document,DOMParser:w.DOMParser,XMLSerializer:w.XMLSerializer,TextDecoder,TextEncoder,Blob:w.Blob,fetch:w.fetch,console});
+const context=vm.createContext({window:w,document:w.document,DOMParser:w.DOMParser,XMLSerializer:w.XMLSerializer,TextDecoder,TextEncoder,Blob,fetch:w.fetch,console});
 for(const name of ['v26-expert-draft.js','v26-template-word.js','v26-expert-word.js'])
  vm.runInContext(fs.readFileSync('v26-test/'+name,'utf8'),context,{filename:name});
 function paragraphTexts(xml){
