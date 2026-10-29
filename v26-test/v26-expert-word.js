@@ -63,7 +63,7 @@ async function make(draft){
   paragraph(doc,'VI. КОНСТАТАЦИИ ЗА ВЪЗДЕЙСТВИЯТА',{heading:true}),
   ...impacts.map(x=>paragraph(doc,x)),
   paragraph(doc,'VII. ПРИЛОЖЕНИЯ',{heading:true}),
-  paragraph(doc,'Приложение №1 — ГИС анализ (самостоятелен PDF).'),
+  paragraph(doc,'Приложение №1 — ГИС анализ (самостоятелен PDF). Приложение №2 — Нормативни и документални референции (самостоятелен PDF, когато е изготвен).'),
   paragraph(doc,'Проект за експертна проверка и подписване; не представлява издаден административен акт.')
  ];
  body.replaceChildren(...blocks,...signature.map(p=>p.cloneNode(true)),sect.cloneNode(true));
