@@ -295,6 +295,7 @@ async function make(results,roles,register){
  for(const [label,blob] of [['експертен',expertWord],['класически',classicWord]]){
   if(blob.size<100||new TextDecoder().decode(await blob.slice(0,2).arrayBuffer())!=='PK')throw Error('КТ13: невалиден '+label+' DOCX.');
  }
+ if(classicWord===expertWord)throw Error('КТ14: очакват се два отделни Word проекта.');
  z.file('01_Proekt_na_stanovishte_Klasicheski.docx',classicWord);
  z.file('02_Proekt_na_stanovishte_Eksperten.docx',expertWord);
  await ensurePDF();
