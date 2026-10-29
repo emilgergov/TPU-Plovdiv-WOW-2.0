@@ -230,9 +230,9 @@ async function process(file){
   }
   // Same substantive claim in DOC and PDF is one claim, not two
   // independent corroborations. Keep both filenames in the inventory.
-  const duplicateEvidence=new Set(dossierDocuments.flatMap(d=>(d.facts||[]).map(f=>f.key+'|'+String(f.value||'').replace(/\\s+/g,' ').trim().toLocaleLowerCase('bg'))));
+  const duplicateEvidence=new Set(dossierDocuments.flatMap(d=>(d.facts||[]).map(f=>f.key+'|'+String(f.value||'').replace(/\s+/g,' ').trim().toLocaleLowerCase('bg'))));
   for(let i=factualSnippets.length-1;i>=0;i--){
-   const fact=factualSnippets[i],fingerprint=fact.key+'|'+String(fact.value||'').replace(/\\s+/g,' ').trim().toLocaleLowerCase('bg');
+   const fact=factualSnippets[i],fingerprint=fact.key+'|'+String(fact.value||'').replace(/\s+/g,' ').trim().toLocaleLowerCase('bg');
    if(duplicateEvidence.has(fingerprint))factualSnippets.splice(i,1);
   }
   const dates=[...new Set(referenceMatches.map(x=>x.date))];
