@@ -76,6 +76,14 @@ function getConfirmedMetadata(){
  const auto=autoEvidence();
  if(!caseFields.subject.value.trim()&&auto.subject)result.subject=auto.subject.replace(/^Относно:\s*/i,'').trim();
  if(!result.parcelIds)result.parcelIds=auto.ids;
+ // Registration data are taken only from explicit incoming-reference matches.
+ // Ambiguous or multiple numbers are not silently chosen.
+ if(!caseFields.incomingReference.value.trim()){
+  const ctx=window.V26WorkingContext||{};
+  const references=(ctx.documents||[]).flatMap(d=>(d.references||[]).filter(x=>x.number&&x.date).map(x=>({number:String(x.number).trim(),date:String(x.date).trim()})));
+  const distinct=[...new Map(references.map(x=>[x.number+'|'+x.date,x])).values()];
+  if(distinct.length===1)result.incomingReference='Вх. № '+distinct[0].number+' / '+distinct[0].date+' (за експертно потвърждение)';
+ }
  return result;
 }
 document.addEventListener('v26:dossier-loaded',event=>{
