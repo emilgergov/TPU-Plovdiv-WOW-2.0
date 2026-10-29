@@ -36,7 +36,12 @@ async function make(scenario,paragraphs,metadata){
   const p=ps[MAP[scenario][i]],runs=nodes(p,'r');
   if(!runs.length||nodes(p,'drawing').length||nodes(p,'fldChar').length)throw Error('Защитен или сложен абзац; редакцията е спряна.');
   const texts=nodes(p,'t');if(!texts.length)throw Error('Липсва текстово поле.');
-  texts[0].textContent=String(paragraphs[i]);texts[0].setAttribute('xml:space','preserve');
+  const value=String(paragraphs[i]).trim();
+  // The source templates have four distinct administrative sentences.
+  // Do not replace them with raw excerpts or generic missing-data notes.
+  if(!value.startsWith(labels[i]))throw Error('Абзац '+(i+1)+' трябва да започва с „'+labels[i]+'“ според образец '+scenario+'.');
+  if(/Няма данни в преписката|ПРОЕКТ, за проверка|Източник:/i.test(value))throw Error('Абзац '+(i+1)+' съдържа техническа бележка вместо проверен административен текст.');
+  texts[0].textContent=value;texts[0].setAttribute('xml:space','preserve');
   for(const t of texts.slice(1))t.textContent='';
  }
  // Protect the administrative conclusion and parcel/recipient sections from stale sample facts.
