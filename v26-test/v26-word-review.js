@@ -132,7 +132,7 @@ function getWorkingDraft(){
   const value=String(f.value||'').trim();
   if(value&&!/Няма данни в преписката|Източник:/i.test(value))return formatVerifiedParagraph(value,i,'A');
   const source=(window.V26WorkingContext?.characterization?.sections||[]).find(x=>x.key===['construction','electricity','water_supply','wastewater'][i]);
-  const excerpts=(source?.sources||[]).filter(x=>String(x.excerpt||'').trim()).slice(0,2).map(x=>String(x.excerpt).replace(/\\s*\\(Източник:[^)]*\\)/g,'').trim());
+  const excerpts=(source?.sources||[]).filter(x=>String(x.excerpt||'').trim()).slice(0,2).map(x=>String(x.excerpt).replace(/\s*\(Източник:[^)]*\)/g,'').trim());
   if(excerpts.length)return formatVerifiedParagraph(excerpts.join(' '),i,'A')+' [ОТКЪС ОТ ПРЕПИСКАТА — ЗА СВЕРЯВАНЕ]';
   return formatVerifiedParagraph('[ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва потвърдено описание]',i,'A');
  });
