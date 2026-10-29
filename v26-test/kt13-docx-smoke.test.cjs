@@ -28,7 +28,7 @@ async function run(scenario){
  const originalDoc=new w.DOMParser().parseFromString(new TextDecoder().decode(sourceZip['word/document.xml']),'application/xml');
  const body=originalDoc.getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','body')[0];
  const signature=[...body.children].filter(p=>p.localName==='p'&&/електронен\s+подпис|електронно\s+подпис|подписал|подпис\s*:/i.test([...p.getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','t')].map(t=>t.textContent).join('')));
- assert(signature.length>=2,'Institutional template must provide two signature paragraphs');
+ // Source templates need not contain literal signature labels: slots are generated explicitly.
  const paragraphs=scenario==='А'?['С реализацията на инвестиционното предложение','Електроснабдяването е описано','Водоснабдяването е описано','Отпадъчните води са описани']:['С реализацията на инвестиционното предложение','Електроснабдяването е описано','Водозахранването е описано','Отпадъчните води са описани'];
  const metadata={recipient:'Тестов адресат',address:'Тестов адрес',subject:'Тестово инвестиционно предложение',incomingReference:'вх. № 123',salutation:'Уважаеми госпожи и господа,',parcelIds:'36676.129.457',legalParagraphs:Array(7).fill('Експертно потвърден правен текст за теста.'),procedureFinding:'Експертно потвърдена процедура.',impactFindings:Array(5).fill('Експертно потвърдено въздействие.')};
  const draft=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{}});
@@ -36,6 +36,9 @@ async function run(scenario){
  const out=fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
  const xml=new TextDecoder().decode(out['word/document.xml']);
  const texts=paragraphTexts(xml).join(' ');
+ const expertPs=[...new w.DOMParser().parseFromString(xml,'application/xml').getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','p')].map(p=>p.textContent);
+ assert(expertPs[0].includes('Място за електронен подпис — вътрешно съгласуване'),'Expert: opening blank signature slot missing');
+ assert(expertPs[expertPs.length-1].includes('Място за електронен подпис — окончателно подписване'),'Expert: closing blank signature slot missing');
  for(const value of [metadata.recipient,metadata.subject,'36676.129.457','Приложение №1 — ГИС анализ'])assert(texts.includes(value),'Missing expert content: '+value);
  for(const key of Object.keys(sourceZip).filter(x=>x!=='word/document.xml'))assert.deepEqual(out[key],sourceZip[key],'Institutional DOCX part changed: '+key);
  // The classic renderer is tested against the same draft; do not allow silent
@@ -43,6 +46,9 @@ async function run(scenario){
  const classic=await w.V26TemplateWord.make(draft.scenario,draft.characterization,draft.metadata);
  const classicZip=fflate.unzipSync(new Uint8Array(await classic.arrayBuffer()));
  const classicText=paragraphTexts(new TextDecoder().decode(classicZip['word/document.xml'])).join(' ');
+ const classicPs=[...new w.DOMParser().parseFromString(new TextDecoder().decode(classicZip['word/document.xml']),'application/xml').getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','p')].map(p=>p.textContent);
+ assert(classicPs[0].includes('Място за електронен подпис — вътрешно съгласуване'),'Classic: opening blank signature slot missing');
+ assert(classicPs[classicPs.length-1].includes('Място за електронен подпис — окончателно подписване'),'Classic: closing blank signature slot missing');
  for(const value of [metadata.recipient,metadata.subject,'36676.129.457'])assert(classicText.includes(value),'Classic Word missing: '+value);
  console.log('Expert + classic DOCX scenario '+scenario+': PASS');
 }
