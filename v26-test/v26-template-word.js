@@ -126,6 +126,7 @@ async function make(scenario,paragraphs,metadata){
  const first=Array.from(body.childNodes).find(n=>n.nodeType===1&&n.localName==='p');
  if(!first)throw Error('Липсва начало на документа за полето за съгласуване.');
  body.insertBefore(makeSlot('Място за електронен подпис — вътрешно съгласуване'),first);
+ body.insertBefore(makeSlot('РАБОТЕН ПРОЕКТ — ЗА ЕКСПЕРТНА ПРОВЕРКА. НЕ Е ИЗДАДЕН АДМИНИСТРАТИВЕН АКТ.'),first);
  const section=Array.from(body.childNodes).find(n=>n.nodeType===1&&n.localName==='sectPr');
  if(!section)throw Error('Липсва крайна секция за поле за подпис.');
  body.insertBefore(makeSlot('Място за електронен подпис — окончателно подписване'),section);
