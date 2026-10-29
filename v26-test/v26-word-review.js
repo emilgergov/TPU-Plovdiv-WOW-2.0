@@ -64,6 +64,10 @@ document.addEventListener('v26:dossier-loaded',event=>{
  for(const f of fields)f.value='';
  for(const f of Object.values(caseFields))f.value='';for(const f of legalFields)f.value='';for(const f of impactFields)f.value='';if(procedureField)procedureField.value='';
  const draft=event.detail?.context?.characterization;
+ const dossierSubject=window.V26SubjectContext;
+ if(caseFields.subject&&dossierSubject?.confirmed&&String(dossierSubject.wordHeading||dossierSubject.title||'').trim())caseFields.subject.value=String(dossierSubject.wordHeading||dossierSubject.title).replace(/^Относно:\s*/i,'').trim();
+ const knownIds=(document.getElementById('ids')?.value||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
+ if(caseFields.parcelIds&&knownIds.length)caseFields.parcelIds.value=[...new Set(knownIds.map(id=>id.split('.').slice(0,3).join('.')))].join(', ');
  const topics=[['construction','Строителни дейности'],['electricity','Електрозахранване'],['water_supply','Водоснабдяване'],['wastewater','Отпадъчни води']];
  const box=document.getElementById('v26WordReview');if(!box)return;
  box.querySelectorAll('.v26-evidence-suggestion').forEach(el=>el.remove());
