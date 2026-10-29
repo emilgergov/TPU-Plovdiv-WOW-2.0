@@ -83,6 +83,12 @@ async function make(scenario,paragraphs,metadata){
   }
   for(const warning of (evidence.warnings||[]).slice(0,15))addParagraph('Предупреждение: '+String(warning.kind||'неуточнено')+'; документ: '+String(warning.file||'неизвестен'));
  }
+ // Preserve original template package parts: the generated proposal only edits document.xml.
+ const protectedParts=Object.keys(zip).filter(name=>name!=='word/document.xml');
+ const protectedSnapshot=protectedParts.map(name=>[name,zip[name]]);
+ for(const [name,bytes] of protectedSnapshot){
+  if(!bytes || zip[name]!==bytes)throw Error('Променена е защитена част от образеца: '+name);
+ }
  zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
  return new Blob([root.fflate.zipSync(zip,{level:6})],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
 }
