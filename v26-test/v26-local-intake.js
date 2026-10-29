@@ -184,7 +184,7 @@ async function process(file){
 
      subjects.push({title,source:item.name,evidence:title?'Автоматично извлечен откъс от текст':'Текст е прочетен; заглавието не е надеждно установено',activities,sections:foundSections});
     }
-    if(isNotice){for(const entry of contextualIds){if(entry.role!=='mentioned')continue;const line=entry.excerpt;const explicit=/(?:предмет|местоположение|инвестиционно\s+предложение|предвижда\s+се|ще\s+се\s+изгради|площадка\s+на|в\s+(?:поземлен\s+)?имот|ПИ\s*(?:№|с\s+идентификатор)?)/i.test(line);if(explicit)leading.add(entry.id)}}
+    if(isNotice){for(const entry of contextualIds){if(entry.role!=='mentioned')continue;const line=entry.excerpt;const idsOnLine=[...new Set(normalizedIds(line))];const siteContext=/(?:местоположение|площадка|предмет\s+на\s+(?:инвестиционното\s+)?предложение|предвижда\s+се\s+в\s+(?:поземлен\s+)?имот)/i.test(line);const negative=/(?:съсед|граничи|предишен|стар\s+идентификатор|прилежащи\s+имоти)/i.test(line);if(siteContext&&!negative&&idsOnLine.length===1)leading.add(entry.id)}}
    }catch(err){status='неуспешно извличане: '+err.message}
   }
   // Extract only text-supported, traceable claims; never infer facts from filenames.
