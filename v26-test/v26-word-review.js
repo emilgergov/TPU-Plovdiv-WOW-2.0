@@ -122,7 +122,7 @@ document.addEventListener('v26:dossier-loaded',event=>{
  });
 });
 document.addEventListener('v26:subject-confirmed',()=>{const subject=autoEvidence().subject;if(subject&&caseFields.subject)caseFields.subject.value=String(subject).replace(/^Относно:\s*/i,'').trim();});
-document.addEventListener('v26:gis-invalidated',()=>{if(confirmed)confirmed.checked=false;for(const f of fields)f.value='';for(const f of Object.values(caseFields))f.value='';});
+document.addEventListener('v26:gis-invalidated',()=>{if(confirmed)confirmed.checked=false; /* Preserve dossier-derived descriptions and the confirmed subject across GIS recalculation. */ });
 document.addEventListener('v26:full-reset',()=>{if(confirmed)confirmed.checked=false;for(const f of fields)f.value='';for(const f of Object.values(caseFields))f.value='';for(const f of legalFields)f.value='';for(const f of impactFields)f.value='';if(procedureField)procedureField.value='';document.querySelectorAll('.v26-evidence-suggestion').forEach(el=>el.remove());});
 window.V26WordReview=Object.freeze({getConfirmedParagraphs,getConfirmedMetadata});
 })();
