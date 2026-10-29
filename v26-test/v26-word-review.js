@@ -31,7 +31,11 @@ function autoEvidence(){
  const paragraphs=topics.map((key,i)=>{
   const section=sections.find(s=>s.key===key);
   const verified=(section?.sources||[]).filter(s=>['verified','corroborated'].includes(s.status)&&s.excerpt);
-  return verified.length?verified.map(s=>String(s.excerpt)+' (Източник: '+s.file+')').join(' '):note;
+  if(verified.length)return verified.map(s=>String(s.excerpt)+' (Източник: '+s.file+')').join(' ');
+  // Raw dossier excerpts remain explicitly subject to expert review.
+  const review=(section?.sources||[]).filter(s=>s.status==='source_excerpt_not_verified'&&String(s.excerpt||'').trim());
+  if(review.length)return review.slice(0,3).map(s=>String(s.excerpt).trim()+' (Източник: '+s.file+'; ЗА ЕКСПЕРТНА ПРОВЕРКА)').join(' ');
+  return note;
  });
  const ids=(document.getElementById('ids')?.value||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  const subject=window.V26SubjectContext;
