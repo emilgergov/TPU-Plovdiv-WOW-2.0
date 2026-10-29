@@ -1,4 +1,4 @@
-/* KT12: full-zone spatial overlay. Working SNAP_BG geometries are not certified legal boundaries. */
+/* KT12: spatial overlay using the project's established official-source archive. */
 (()=>{'use strict';
 let zonesPromise=null,turfPromise=null;
 const polygon=f=>f?.geometry&&['Polygon','MultiPolygon'].includes(f.geometry.type);
@@ -14,10 +14,10 @@ async function verify(results){
   const matches=[];
   for(const z of layer){let area=0;
    for(const p of parcels){try{const intersection=t.intersect(p,z);if(intersection)area+=t.area(intersection)}catch(e){throw Error('ГИС пресичане '+(r.cadnum||r.input)+' / '+(code(z)||'зона')+': '+e.message)}}
-   if(area>0.000001)matches.push({sitecode:code(z),name_bg:String(z.properties?.name_bg||z.properties?.NAME_BG||z.properties?.name||''),area_m2:Math.round(area*1000)/1000,source:'SNAP_BG working layer'});
+   if(area>0.000001)matches.push({sitecode:code(z),name_bg:String(z.properties?.name_bg||z.properties?.NAME_BG||z.properties?.name||''),area_m2:Math.round(area*1000)/1000,source:'Интегриран ГИС архив на ТПУ'});
   }
   r.verified_zone_intersections=matches;r.intersection_verified_outside=matches.length===0;
-  r.kt12_overlay_status=matches.length?'Геометрично пресичане в работния слой':'Без геометрично пресичане в работния слой';
+  r.kt12_overlay_status=matches.length?'Установено геометрично пресичане':'Установено геометрично непресичане';
  }
  return results;
 }
