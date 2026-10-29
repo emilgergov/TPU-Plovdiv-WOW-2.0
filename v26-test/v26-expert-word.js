@@ -28,11 +28,10 @@ async function make(draft){
  if(doc.getElementsByTagName('parsererror').length)throw Error('КТ13: невалиден Word XML.');
  const body=all(doc,'body')[0];if(!body)throw Error('КТ13: липсва Word body.');
  const source=Array.from(body.children);
- const signatureIndices=source.map((p,i)=>p.localName==='p'&&/електронен\s+подпис|електронно\s+подпис|подписал|подпис\s*:/i.test(textOf(p))?i:-1).filter(i=>i>=0);
- if(signatureIndices.length<2)throw Error('КТ13: образецът не съдържа две удостоверени полета за електронен подпис.');
- // Keep the entire original signature region, including titles, names and spacing.
- const signatureStart=signatureIndices[0];
- const signature=source.slice(signatureStart).filter(p=>p.localName!=='sectPr');
+ // Two unsigned internal workflow slots: one before the draft and one after it.
+ // Do not copy names or apparent signatures from the source template.
+ const signatureIndices=[];
+ const signature=[];
  const sect=source.find(x=>x.localName==='sectPr');
  if(!sect)throw Error('КТ13: липсва секционна настройка с институционалния колонтитул.');
  const rels=zip['word/_rels/document.xml.rels'];
@@ -42,6 +41,7 @@ async function make(draft){
  const legal=m.legalParagraphs||[],impacts=m.impactFindings||[];
  if(legal.length<(scenario==='A'?5:7)||legal.some(x=>!x)||!m.procedureFinding||impacts.length!==5||impacts.some(x=>!x))throw Error('КТ13: липсват проверени фактически, правни или въздействени констатации.');
  const blocks=[
+  paragraph(doc,'Място за електронен подпис — вътрешно съгласуване'),
   paragraph(doc,'ПРОЕКТ НА СТАНОВИЩЕ — ЕКСПЕРТЕН ВАРИАНТ',{heading:true}),
   paragraph(doc,m.recipient,{bold:true}),paragraph(doc,m.address),
   paragraph(doc,'Относно: '+m.subject,{bold:true}),
@@ -66,7 +66,7 @@ async function make(draft){
   paragraph(doc,'Приложение №1 — ГИС анализ (самостоятелен PDF). Приложение №2 — Нормативни и документални референции (самостоятелен PDF, когато е изготвен).'),
   paragraph(doc,'Проект за експертна проверка и подписване; не представлява издаден административен акт.')
  ];
- body.replaceChildren(...blocks,...signature.map(p=>p.cloneNode(true)),sect.cloneNode(true));
+ body.replaceChildren(...blocks,paragraph(doc,'Място за електронен подпис — окончателно подписване'),sect.cloneNode(true));
  const serialized=new XMLSerializer().serializeToString(doc);
  if((serialized.match(/подпис/gi)||[]).length<2)throw Error('КТ13: липсват две полета за подпис в експертния документ.');
  zip['word/document.xml']=new TextEncoder().encode(serialized);
