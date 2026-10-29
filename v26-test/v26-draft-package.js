@@ -187,6 +187,8 @@ function gisPdf(results,options={}){
   content.push({text:'Картографски материал — архивни имотни контури (общ изглед)',style:'sub'});
   content.push({svg:drawing,width:480,margin:[0,4,0,8]});
  }else if(!options.mapSvg)content.push({text:'Картографски материал: Недостатъчни данни за заключение — няма налична имотна геометрия.',bold:true});
+ const verifiedLocation=String(options.verifiedCaseMetadata?.location||'').trim();
+ if(verifiedLocation)content.push({text:'Местоположение на имотите: '+verifiedLocation,margin:[0,5,0,7]});
  content.push({text:'ГИС данни по имоти — обща таблица',style:'sub'});
  content.push({table:{headerRows:1,widths:[112,72,82,82,'*'],body:[
   ['Кадастрален №','Площ, кв.м','Зона','Пресичане','Статус'],
@@ -199,7 +201,7 @@ function gisPdf(results,options={}){
    const names=[...new Set(overlays.map(z=>String(z.name_bg||z.name||'').trim()).filter(Boolean))];
    const zoneText=zones.length?zones.join(', ')+(names.length?' · '+names.join('; '):''):'Не е отчетена зона в имотния резултат';
    const intersection=zones.length?'АРХИВНО ПРЕСИЧАНЕ (ГИС справка)':has?'Не е отчетено пресичане в имотния резултат':'Няма геометрия';
-   return [id,Number.isFinite(area)&&area>0?area.toLocaleString('bg-BG',{maximumFractionDigits:3})+' (арх.)':'Не е налична',zoneText,intersection,has?'ГИС геометрия налична':'Липсва геометрия'];
+   return [id,Number.isFinite(area)&&area>0?area.toLocaleString('bg-BG',{maximumFractionDigits:3})+' (архивна ГИС площ)':'Не е налична',zoneText,intersection,has?'ГИС геометрия налична':'Липсва геометрия'];
   })
  ]},layout:'lightHorizontalLines'});
  content.push({text:'Таблицата възпроизвежда резултата от извършения ГИС анализ на работния набор; не изисква повторна проверка на пресичането. Произходът на геометрията и правната актуалност на режимите са отделни въпроси.',margin:[0,10,0,0]});
@@ -228,6 +230,7 @@ function normativePdf(results,register){
  const resolvedTitle=String(subject?.title||review?.subject||review?.title||dossier?.subject?.title||dossier?.subject_title||'').trim();
  const confirmed=!!(subject?.confirmed&&resolvedTitle);
  const subjectDisplay=resolvedTitle||'Не е установен в обработените материали — за експертна проверка.';
+ const verifiedLocation=String(review?.location||'').trim();
  const relevant=records.filter(r=>{const title=String(r.title||'');const code=String(r.zone_code||r.sitecode||'');const mentioned=[...title.matchAll(/BG\d{7}/g)].map(m=>m[0]);return title&&/^https:\/\//.test(String(r.source||''))&&(!code||zoneMap.has(code))&&(!mentioned.length||mentioned.every(z=>zoneMap.has(z)))&&(/биологичното разнообразие|съвместимост|защитена зона|заповед/i.test(title+' '+String(r.purpose||'')));});
  const legalGroups=new Map();
  for(const r of relevant){
@@ -242,6 +245,7 @@ function normativePdf(results,register){
  const content=[
   {text:'I. Предмет и фактическа основа',style:'sub'},
   {text:'Предмет на инвестиционното предложение: '+(subjectDisplay)},
+  ...(verifiedLocation?[{text:'Местоположение на имотите: '+verifiedLocation}]:[]),
   {text:'Обхват по кадастрални идентификатори: '+(ids.join(', ')||'Не е установен.')},
   ...(confirmed&&subject.activities?.length?[{text:'Предвидени дейности (обобщение): '+subject.activities.slice(0,4).map(a=>String(a).replace(/\s+/g,' ').trim()).join('; ').slice(0,320)+(subject.activities.join('; ').length>320?'…':'')}]:[]),
   {text:'II. Пространствена относимост',style:'sub'},
