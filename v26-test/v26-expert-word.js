@@ -40,28 +40,34 @@ async function make(draft){
  if(!m.recipient||!m.address||!m.subject||!m.incomingReference||!m.salutation)throw Error('КТ13: липсват потвърдени административни реквизити.');
  const legal=(m.legalParagraphs||[]).slice(0,scenario==='A'?5:7),impacts=m.impactFindings||[];
  if(legal.length<(scenario==='A'?5:7)||legal.some(x=>!x)||!m.procedureFinding||impacts.length!==5||impacts.some(x=>!x))throw Error('КТ13: липсват проверени фактически, правни или въздействени констатации.');
+ const isPending=x=>/^\[ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(String(x||'').trim());
+ const subject=String(m.subject).replace(/^(?:инвестиционно предложение\s*)+/i,'').replace(/^[„“"\s]+|[„“"\s]+$/g,'').trim();
+ const confirmed=xs=>xs.filter(x=>!isPending(x));
  const blocks=[
   paragraph(doc,'Място за електронен подпис — вътрешно съгласуване'),
-  paragraph(doc,'ПРОЕКТ НА СТАНОВИЩЕ — ЕКСПЕРТЕН ВАРИАНТ',{heading:true}),
+  paragraph(doc,'РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ — НЕ Е АДМИНИСТРАТИВЕН АКТ',{heading:true}),
   paragraph(doc,m.recipient,{bold:true}),paragraph(doc,m.address),
-  paragraph(doc,'Относно: '+m.subject,{bold:true}),
+  paragraph(doc,'Относно: инвестиционно предложение „'+subject+'“',{bold:true}),
   paragraph(doc,'Преписка: '+m.incomingReference),
   paragraph(doc,m.salutation),
   paragraph(doc,'I. ПРЕДМЕТ И ИМОТЕН ОБХВАТ',{heading:true}),
-  paragraph(doc,'Предмет: '+m.subject),
+  paragraph(doc,'Предмет: '+subject),
   paragraph(doc,'Поземлени имоти: '+draft.parcels.map(p=>p.id+' ('+(p.role==='leading'?'предмет на ИП':'съпътстващ')+')').join('; ')),
   ...(m.location?[paragraph(doc,'Местоположение: '+m.location)]:[]),
   paragraph(doc,'II. ПРОСТРАНСТВЕН АНАЛИЗ',{heading:true}),
   paragraph(doc,draft.scenario==='Б'?'По наличните ГИС данни е установено пространствено пресичане със защитена зона: '+draft.zones.join(', ')+'.':'По наличните ГИС данни не е установено пресичане на потвърдените имоти със защитена зона.'),
   paragraph(doc,'Пространствените резултати и картографската основа са представени в Приложение №1.'),
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
-  ...draft.characterization.map(x=>paragraph(doc,x)),
+  ...confirmed(draft.characterization).map(x=>paragraph(doc,x)),
+  ...(draft.characterization.some(isPending)?[paragraph(doc,'Описанието на техническите параметри не е изцяло потвърдено по преписката; необходимо е сверяване с приложените документи.')]:[]),
   paragraph(doc,'IV. ФАКТИЧЕСКИ И ПРАВНИ КОНСТАТАЦИИ',{heading:true}),
-  ...legal.map(x=>paragraph(doc,x)),
+  ...confirmed(legal).map(x=>paragraph(doc,x)),
+  ...(legal.some(isPending)?[paragraph(doc,'Правните основания и индивидуалните констатации подлежат на експертна проверка. Не е формиран окончателен правен извод.')]:[]),
   paragraph(doc,'V. ПРОЦЕДУРНА ПРЕЦЕНКА',{heading:true}),
-  paragraph(doc,m.procedureFinding),
+  paragraph(doc,isPending(m.procedureFinding)?'Приложимата процедура не е потвърдена; изисква се преценка от компетентен експерт.':m.procedureFinding),
   paragraph(doc,'VI. КОНСТАТАЦИИ ЗА ВЪЗДЕЙСТВИЯТА',{heading:true}),
-  ...impacts.map(x=>paragraph(doc,x)),
+  ...confirmed(impacts).map(x=>paragraph(doc,x)),
+  ...(impacts.some(isPending)?[paragraph(doc,'Не е изготвена окончателна оценка на въздействията. Изводите се попълват след проверка на приложимите режими и доказателствата.')]:[]),
   paragraph(doc,'VII. ПРИЛОЖЕНИЯ',{heading:true}),
   paragraph(doc,'Приложение №1 — ГИС анализ (самостоятелен PDF). Приложение №2 — Нормативни и документални референции (самостоятелен PDF, когато е изготвен).'),
   paragraph(doc,'Проект за експертна проверка и подписване; не представлява издаден административен акт.')
