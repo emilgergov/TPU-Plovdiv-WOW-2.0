@@ -127,13 +127,14 @@ document.addEventListener('v26:full-reset',()=>{if(confirmed)confirmed.checked=f
 function getWorkingDraft(){
  refreshVerifiedFields();
  const auto=autoEvidence();
- const subject=String(caseFields.subject?.value||auto.subject||'').replace(/^Относно:\s*/i,'').trim();
+ const subject=String(caseFields.subject?.value||auto.subject||'').replace(/^Относно:\s*/i,'').replace(/\s+—\s+ПИ с идентификатор[\s\S]*$/i,'').replace(/\s+—\s+поземлени имоти с идентификатори[\s\S]*$/i,'').trim();
  const paragraphs=fields.map((f,i)=>{
   const value=String(f.value||'').trim();
   if(value&&!/Няма данни в преписката|Източник:/i.test(value))return formatVerifiedParagraph(value,i,'A');
   const source=(window.V26WorkingContext?.characterization?.sections||[]).find(x=>x.key===['construction','electricity','water_supply','wastewater'][i]);
-  const excerpts=(source?.sources||[]).filter(x=>String(x.excerpt||'').trim()).slice(0,2).map(x=>String(x.excerpt).replace(/\s*\(Източник:[^)]*\)/g,'').trim());
-  if(excerpts.length)return formatVerifiedParagraph(excerpts.join(' '),i,'A')+' [ОТКЪС ОТ ПРЕПИСКАТА — ЗА СВЕРЯВАНЕ]';
+  const excerpts=(source?.sources||[]).filter(x=>String(x.excerpt||'').trim()).map(x=>String(x.excerpt).replace(/\\s*\\(Източник:[^)]*\\)/g,'').trim()).filter(Boolean);
+  const unique=[...new Set(excerpts)];
+  if(unique.length)return formatVerifiedParagraph(unique[0],i,'A')+' [ОТКЪС ОТ ПРЕПИСКАТА — ЗА СВЕРЯВАНЕ]';
   return formatVerifiedParagraph('[ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва потвърдено описание]',i,'A');
  });
  const metadata=getConfirmedMetadata();
