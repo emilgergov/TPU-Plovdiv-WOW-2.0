@@ -47,13 +47,13 @@ function formatVerifiedParagraph(raw,i,scenario){
  const prefix=(templateStarts[scenario==='B'?'B':'A']||templateStarts.A)[i];
  if(value.startsWith(prefix))return value;
  // Only confirmed dossier excerpts may be adapted to the institutional template.
- return prefix+' '+value.replace(/^[\\s:;,.–—-]+/,'').replace(/[\\s]+$/,'');
+ return prefix+' '+value.replace(/^[\s:;,.–—-]+/,'').replace(/[\s]+$/,'');
 }
-function getConfirmedParagraphs(){
+function getConfirmedParagraphs(scenario='A'){
  // No invented or generic fallback may enter an administrative document.
  // The four paragraphs must be individually reviewed and confirmed.
  const auto=autoEvidence();
- const values=fields.map((f,i)=>{const typed=f.value.trim();if(typed)return typed;const verified=auto.paragraphs[i];return verified&&verified!=='Няма данни в преписката.'&&!/Източник:/i.test(verified)?formatVerifiedParagraph(verified,i,'A'):'';});
+ const values=fields.map((f,i)=>{const typed=f.value.trim();if(typed)return formatVerifiedParagraph(typed,i,scenario);const verified=auto.paragraphs[i];return verified&&verified!=='Няма данни в преписката.'&&!/Източник:/i.test(verified)?formatVerifiedParagraph(verified,i,scenario):'';});
  const missing=values.map((v,i)=>v?null:labels[i]).filter(Boolean);
  if(missing.length){
   const panel=document.getElementById('v26WordReview');if(panel){panel.hidden=false;panel.open=true;panel.scrollIntoView?.({block:'nearest'});}
