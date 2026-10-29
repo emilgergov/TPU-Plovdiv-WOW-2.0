@@ -27,14 +27,14 @@ function autoEvidence(){
  const ctx=window.V26WorkingContext||{};
  const sections=ctx.characterization?.sections||[];
  const topics=['construction','electricity','water_supply','wastewater'];
- const note='ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва проверено описание в преписката.';
+ const note='Няма данни в преписката.';
  const paragraphs=topics.map((key,i)=>{
   const section=sections.find(s=>s.key===key);
   const verified=(section?.sources||[]).filter(s=>['verified','corroborated'].includes(s.status)&&s.excerpt);
   if(verified.length)return verified.map(s=>String(s.excerpt)+' (Източник: '+s.file+')').join(' ');
   // Raw dossier excerpts remain explicitly subject to expert review.
   const review=(section?.sources||[]).filter(s=>s.status==='source_excerpt_not_verified'&&String(s.excerpt||'').trim());
-  if(review.length)return review.slice(0,3).map(s=>String(s.excerpt).trim()+' (Източник: '+s.file+'; ЗА ЕКСПЕРТНА ПРОВЕРКА)').join(' ');
+  if(review.length)return review.slice(0,3).map(s=>String(s.excerpt).trim()+' (Източник: '+s.file+')').join(' ');
   return note;
  });
  const ids=(document.getElementById('ids')?.value||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
@@ -42,7 +42,7 @@ function autoEvidence(){
  return {paragraphs,ids:[...new Set(ids)].join(', '),subject:subject?.confirmed?(subject.wordHeading||subject.title):null};
 }
 function getConfirmedParagraphs(){
- const fallback='ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва достатъчно потвърдена информация от преписката.';
+ const fallback='Няма данни в преписката.';
  const auto=autoEvidence();
  return fields.map((f,i)=>{
   const manual=f.value.trim();
@@ -50,7 +50,7 @@ function getConfirmedParagraphs(){
   const extracted=auto.paragraphs[i];
   // Source excerpts are suggestions, never expert-confirmed paragraphs.
   // Do not silently copy raw dossier text into an official Word proposal.
-  if(extracted&&!extracted.includes('ЗА ЕКСПЕРТНА ПРОВЕРКА'))return extracted;
+  if(extracted&&!extracted.includes('Няма данни в преписката'))return extracted;
   // The subject may be confirmed after dossier-loaded: derive a safe
   // description at generation time rather than depending on event order.
   if(i===0&&auto.subject){
