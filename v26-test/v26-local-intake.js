@@ -142,7 +142,12 @@ async function process(file){
      const clean=text.replace(/\s+/g,' ').trim();
      const match=clean.match(/(?:относно|предмет(?:\s+на\s+(?:инвестиционното\s+)?предложение)?|наименование\s+на\s+(?:инвестиционното\s+)?предложение)\s*[:：–-]\s*(.{15,450}?)(?=\s+(?:възложител|местоположение|адрес|имот\s+с|приложения|описание\s+на)|$)/i);
      const rawTitle=match?match[1].trim():'';
-     const candidateTitle=rawTitle.replace(/^[\s„“\"'«»—–\-:;,]+|[\s„“\"'«»—–\-:;,]+$/g,'').trim();
+     // Recover a descriptive project heading from the populated summary when the
+     // document uses a nonstandard subject label. Never treat parcel IDs as a title.
+     const summaryHeading=clean.match(/(?:резюме\s+на\s+(?:инвестиционното\s+)?предложение|описание\s+на\s+(?:инвестиционното\s+)?предложение)\s*[:：–-]?\s*(.{20,240}?)(?=\s+(?:[2-9]\.\s|местоположение|възложител|приложения)|$)/i);
+     const activityHeading=clean.match(/(?:предвижда\s+се|предлага\s+се|инвестиционното\s+предложение\s+(?:предвижда|включва))\s+(.{20,190}?)(?=[.;]|$)/i);
+     const fallbackHeading=summaryHeading?.[1]||activityHeading?.[1]||'';
+     const candidateTitle=(rawTitle||fallbackHeading).replace(/^[\s„“\"'«»—–\-:;,]+|[\s„“\"'«»—–\-:;,]+$/g,'').trim();
      const title=/[\p{L}]{3,}/u.test(candidateTitle)&&candidateTitle.replace(/[^\p{L}\p{N}]/gu,'').length>=12&&!/^(?:ПИ|поземлен\s+имот)\s+(?:с\s+)?идентификатор(?:\s|$)/i.test(candidateTitle)?candidateTitle:'';
      const sections=[
       ['summary',/1\.\s*Резюме на предложението\s*:/i],
