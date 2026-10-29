@@ -38,7 +38,7 @@ async function make(draft){
  if(!rels||!Object.keys(zip).some(x=>/^word\/header\d*\.xml$/.test(x))||!Object.keys(zip).some(x=>/^word\/footer\d*\.xml$/.test(x))||!Object.keys(zip).some(x=>/^word\/media\//.test(x)))throw Error('КТ13: липсва лого, хедър или футер на институционалния образец.');
  const m=draft.metadata;
  if(!m.recipient||!m.address||!m.subject||!m.incomingReference||!m.salutation)throw Error('КТ13: липсват потвърдени административни реквизити.');
- const legal=m.legalParagraphs||[],impacts=m.impactFindings||[];
+ const legal=(m.legalParagraphs||[]).slice(0,scenario==='A'?5:7),impacts=m.impactFindings||[];
  if(legal.length<(scenario==='A'?5:7)||legal.some(x=>!x)||!m.procedureFinding||impacts.length!==5||impacts.some(x=>!x))throw Error('КТ13: липсват проверени фактически, правни или въздействени констатации.');
  const blocks=[
   paragraph(doc,'Място за електронен подпис — вътрешно съгласуване'),
