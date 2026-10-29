@@ -208,9 +208,9 @@ function words(s){return v26EditIds(s).ids};let v26ZipLookupMode=false;let v26Zi
     const opts=[['','Непотвърден'],['leading','Водещ'],['ancillary','Съпътстващ']];
     for(const [v,t] of opts){const o=document.createElement('option');o.value=v;o.textContent=t;select.appendChild(o)}
     // Candidate information is shown as a hint, never preselected as confirmed.
-    if(v26EarlyGisStarted&&confirmedRoles?.[id])select.value=confirmedRoles[id];line.appendChild(select);const hint=document.createElement('small');hint.textContent=c.leading_candidates.includes(id)?' (кандидат за водещ)':c.ancillary_candidates.includes(id)?' (кандидат за съпътстващ)':'';line.appendChild(hint);host.appendChild(line);
+    if(v26EarlyGisStarted&&confirmedRoles?.[id])select.value=confirmedRoles[id];else if(c.leading_candidates.length===1&&c.leading_candidates[0]===id){select.value='leading';roleButton.style.display='';}line.appendChild(select);const hint=document.createElement('small');hint.textContent=c.leading_candidates.includes(id)?' (кандидат за водещ)':c.ancillary_candidates.includes(id)?' (кандидат за съпътстващ)':'';line.appendChild(hint);host.appendChild(line);
   }
-  $('roleReview').style.display=caseParcels.length?'block':'none';$('roleStatus').textContent='Имотен обхват: '+caseParcels.length+' открити имота. Ролите са предложени автоматично; редакцията е по желание.';
+  $('roleReview').style.display=caseParcels.length?'block':'none';$('roleStatus').textContent='Имотен обхват: '+caseParcels.length+' открити имота. '+(c.leading_candidates.length===1?'Един кандидат за водещ е предложен, но не е потвърден. Проверете и натиснете „Приложи промени“.':'Няма еднозначно предложение за водещ имот. Изберете и потвърдете преди ГИС.');
 }
 $('confirmRoles').onclick=()=>{const roles={};const selects=[...$('roleRows').querySelectorAll('select')];if(!selects.length){$('roleStatus').textContent='Няма намерени имоти за потвърждаване. Първо използвайте „Намери имотите“.';return;}
   for(const s of selects){if(s.value)roles[s.dataset.cadnum]=s.value}
