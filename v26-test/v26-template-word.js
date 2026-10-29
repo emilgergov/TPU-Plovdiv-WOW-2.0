@@ -72,6 +72,16 @@ async function make(scenario,paragraphs,metadata){
  const used=new Set([...MAP[scenario],...legalIndices,...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])]);
  if(impactIndices.some(i=>used.has(i)))throw Error('Конфликт между полета на образеца — генерирането е спряно за защита на правния текст.');
  for(let i=0;i<5;i++)replaceParagraph(impactIndices[i],String(metadata.impactFindings[i]));
+ // Remove stale example identifiers only from explicitly writable paragraphs.
+ for(let i=0;i<ps.length;i++){
+  if(!writable(i))continue;
+  const p=ps[i],current=nodes(p,'t').map(t=>t.textContent||'').join('');
+  if(!/\b\d{5}\.\d+\.\d+\b/.test(current))continue;
+  if(/подпис/i.test(current))continue;
+  for(const t of nodes(p,'t')){
+   t.textContent=(t.textContent||'').replace(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g,id=>parcelIds.includes(id)?id:parcelIds.join(', '));
+  }
+ }
  // The confirmed parcel list is the single source of truth for the proposal.
  // Unknown sample IDs mean an unmapped template paragraph, not an unconfirmed parcel.
  const unmatched=nodes(xml,'t').flatMap(t=>(t.textContent||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[]).filter(id=>!parcelIds.includes(id));
