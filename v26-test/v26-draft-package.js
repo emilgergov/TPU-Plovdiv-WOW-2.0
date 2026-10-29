@@ -58,7 +58,7 @@ function docx(zip,ids,roles,results,includeAnnex2,unifiedContext){
  const determination=scenarioFromGIS(results,roles);
  const scenario=determination.scenario||'НЕОПРЕДЕЛЕН';
  const subject=window.V26SubjectContext;
- const lines=['ТПУ Пловдив — РАБОТЕН ПРОЕКТ на предложение за становище','Сценарий '+scenario+' — '+(zones.length?'установено пресичане с зона в работния ГИС набор':'не е отчетено пресичане в работния ГИС набор'),'Не е издадено становище. Не представлява правно заключение.','Предмет на ИП: '+(subject?.confirmed?subject.title:'Няма данни в преписката'),'Заглавие за предложението: '+(subject?.confirmed?(subject.wordHeading||subject.title):'Няма данни в преписката'),'Дейности: '+(subject?.confirmed?(subject.activities.join('; ')||'Няма данни в преписката'):'Няма данни в преписката'),'Имотни идентификатори: '+ids.join(', '),'Експертно потвърдени роли: '+ids.map(id=>id+' — '+(roles[id]==='leading'?'водещ':'съпътстващ')).join('; '),'ГИС резултат — зони: '+(zones.join(', ')||'няма отчетени в работния набор'),'Източник на пространствените данни: работен архивен ГИС набор. Актуална правна проверка: Неустановено.','Нормативна преценка: Приложимостта на конкретните режими към заявените дейности не е оценена.','Приложение №1: ГИС анализ (PDF) — задължително.',includeAnnex2?'Приложение №2: нормативни референции (PDF) — приложено по избор.':'Приложение №2: не е заявено (незадължително).'];
+ const lines=['ТПУ Пловдив — РАБОТЕН ПРОЕКТ на предложение за становище','Сценарий '+scenario+' — '+(zones.length?'установено пресичане с зона в работния ГИС набор':'не е отчетено пресичане в работния ГИС набор'),'Не е издадено становище. Не представлява правно заключение.','Предмет на ИП: '+(subject?.confirmed?subject.title:'Няма данни в преписката'),'Заглавие за предложението: '+(subject?.confirmed?(subject.wordHeading||subject.title):'Няма данни в преписката'),'Дейности: '+(subject?.confirmed?(subject.activities.join('; ')||'Няма данни в преписката'):'Няма данни в преписката'),'Имотни идентификатори: '+ids.join(', '),'Експертно потвърдени роли: '+ids.map(id=>id+' — '+(roles[id]==='leading'?'водещ':'съпътстващ')).join('; '),'ГИС резултат — зони: '+(zones.join(', ')||'няма отчетени в работния набор'),'Източник на пространствените данни: работен архивен ГИС набор. Актуална правна проверка: Неустановено.','Нормативна преценка: Приложимостта на конкретните режими към заявените дейности не е оценена.','Приложение №1 — ГИС анализ (PDF) — задължително.',includeAnnex2?'Приложение №2 — Нормативни и документални референции (PDF) — приложено по избор.':'Приложение №2: не е заявено (незадължително).'];
 
  const shared=unifiedContext?.commonEvidence;
  if(shared)lines.push('Единни доказателствени констатации: '+(shared.findings||[]).length+' · предупреждения: '+(shared.warnings||[]).length+'; всички изискват експертна проверка.');
@@ -258,7 +258,7 @@ function normativePdf(results,register){
   {text:applicable.length?'Посочените архивни нормативни референции подлежат на експертна съпоставка с конкретните дейности.':'Не се формулира окончателен правен извод без проверени приложими режимни разпоредби.'},
   {text:'Документът е проект за експертна проверка, а не административен акт.',italics:true,fontSize:9}
  ];
- const def=pdfDef('Приложение №2 — нормативен и документален анализ',content);
+ const def=pdfDef('Приложение №2 — Нормативни и документални референции',content);
  // Compact only Annex 2; leave the approved GIS Annex 1 layout untouched.
  def.pageMargins=[42,24,42,24];
  def.defaultStyle={...def.defaultStyle,fontSize:8.5,lineHeight:1.0};
@@ -296,8 +296,8 @@ async function make(results,roles,register){
  z.file('01_Proekt_na_stanovishte_Klasicheski.docx',classicWord);
  z.file('02_Proekt_na_stanovishte_Eksperten.docx',expertWord);
  await ensurePDF();
- const pdf1=await pdfBlob(gisPdf(results,register));if(pdf1.size<100||await pdf1.slice(0,4).text()!=='%PDF')throw Error('Приложение №1 не е валиден PDF.');z.file('03_Prilozhenie_1_GIS.pdf',pdf1);
- if(includeAnnex2){const pdf2=await pdfBlob(normativePdf(results,register));if(pdf2.size<100||await pdf2.slice(0,4).text()!=='%PDF')throw Error('Приложение №2 не е валиден PDF.');z.file('04_Prilozhenie_2_Normativno.pdf',pdf2);}
+ const pdf1=await pdfBlob(gisPdf(results,register));if(pdf1.size<100||await pdf1.slice(0,4).text()!=='%PDF')throw Error('Приложение №1 не е валиден PDF.');z.file('03_Prilozhenie_1_GIS_analiz.pdf',pdf1);
+ if(includeAnnex2){const pdf2=await pdfBlob(normativePdf(results,register));if(pdf2.size<100||await pdf2.slice(0,4).text()!=='%PDF')throw Error('Приложение №2 не е валиден PDF.');z.file('04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf',pdf2);}
  const evidenceLines=['РАБОТЕН ПАКЕТ — НЕ Е ОФИЦИАЛНО СТАНОВИЩЕ.','Съдържа два отделни DOCX проекта (класически и експертен), задължителното PDF приложение №1; приложение №2 се включва само по избор.','Правната приложимост и изводите подлежат на експертна проверка.','','ТЕХНИЧЕСКА ПРОСЛЕДИМОСТ — САМО ЗА ВЪТРЕШНА ПРОВЕРКА'];
  if(dossierEvidence){
   evidenceLines.push('Сценарий (ГИС): '+String(determination.scenario||'неопределен'));
