@@ -229,22 +229,31 @@ function normativePdf(results,register){
  const confirmed=!!(subject?.confirmed&&resolvedTitle);
  const subjectDisplay=resolvedTitle||'Не е установен в обработените материали — за експертна проверка.';
  const relevant=records.filter(r=>{const title=String(r.title||'');const code=String(r.zone_code||r.sitecode||'');const mentioned=[...title.matchAll(/BG\d{7}/g)].map(m=>m[0]);return title&&/^https:\/\//.test(String(r.source||''))&&(!code||zoneMap.has(code))&&(!mentioned.length||mentioned.every(z=>zoneMap.has(z)))&&(/биологичното разнообразие|съвместимост|защитена зона|заповед/i.test(title+' '+String(r.purpose||'')));});
- const seenNorms=new Set();const applicable=relevant.filter(r=>{const title=String(r.title||'').replace(/\s*\([^)]*\)/g,'').replace(/\s*[—–-]\s*чл\..*$/i,'').trim().toLocaleLowerCase('bg');const key=String(r.zone_code||r.sitecode||'')+'|'+(title.includes('биологичното разнообразие')?'збр':title.includes('оценка за съвместимост')?'ос':title);if(seenNorms.has(key))return false;seenNorms.add(key);return true;}).slice(0,7);
+ const legalGroups=new Map();
+ for(const r of relevant){
+  const title=String(r.title||'').toLocaleLowerCase('bg');
+  const code=String(r.zone_code||r.sitecode||'')||([...String(r.title||'').matchAll(/BG\d{7}/g)][0]?.[0]||'');
+  const group=title.includes('биологичното разнообразие')?'Закон за биологичното разнообразие':title.includes('оценка за съвместимост')?'Наредба за оценка за съвместимост':code&&zoneMap.has(code)?'Зона '+code:String(r.title||'').trim();
+  const key=group+'|'+code;
+  if(!legalGroups.has(key))legalGroups.set(key,{title:group,source:r.source,ids:[]});
+  const item=legalGroups.get(key);if(r.id&&!item.ids.includes(r.id))item.ids.push(r.id);
+ }
+ const applicable=[...legalGroups.values()].slice(0,5);
  const content=[
   {text:'I. Предмет и фактическа основа',style:'sub'},
   {text:'Предмет на инвестиционното предложение: '+(subjectDisplay)},
   {text:'Обхват по кадастрални идентификатори: '+(ids.join(', ')||'Не е установен.')},
-  ...(confirmed&&subject.activities?.length?[{text:'Предвидени дейности: '+subject.activities.join('; ')}]:[]),
+  ...(confirmed&&subject.activities?.length?[{text:'Предвидени дейности (обобщение): '+subject.activities.slice(0,4).map(a=>String(a).replace(/\s+/g,' ').trim()).join('; ').slice(0,320)+(subject.activities.join('; ').length>320?'…':'')}]:[]),
   {text:'II. Пространствена относимост',style:'sub'},
   {text:'Пространствените резултати са представени в самостоятелното Приложение №1 (ГИС анализ). Настоящият документ използва резултатите му, без да ги замества.'},
   {text:zones.length?'Отчетени защитени зони: '+zones.map(z=>z.code+(z.name?' — '+z.name:'')).join('; '):'В предоставените ГИС резултати няма установен код на пресечена защитена зона.'},
   {text:'III. Нормативни и документални основания',style:'sub'},
   {text:'При оценката на инвестиционното предложение се съобразяват относимите нормативни основания от интегрирания архив. По чл. 31, ал. 1 от Закона за биологичното разнообразие се разглежда съвместимостта с предмета и целите на опазване на защитените зони, когато нормата е приложима към конкретния случай. Пространственото пресичане само по себе си не доказва нарушение на режим.'},
-  ...applicable.map(r=>({text:[r.title||'Нормативен акт',r.article||r.provision||r.clause,r.id?'архив '+r.id:''].filter(Boolean).join(' — '),link:String(r.source),color:'#165c86',fontSize:9})),
+  ...applicable.map(r=>({text:r.title+(r.ids.length?' — архив '+r.ids.join(', '):''),link:String(r.source),color:'#165c86',fontSize:9})),
   ...(applicable.length?[]:[{text:'В интегрирания нормативен архив няма относима референция за този обхват.'}]),
   {text:'IV. Приложимост към инвестиционното предложение',style:'sub'},
   {text:resolvedTitle?'За предложение „'+resolvedTitle+'“ относимостта на посочените основания се разглежда спрямо описаните дейности и пространствените резултати от Приложение №1. Режимите на конкретна зона се преценяват отделно; настоящата справка не установява автоматично допустимост или забрана.':'Предметът и дейностите подлежат на потвърждение преди индивидуална преценка за приложимост на режимите.'},
-  {text:'Конкретните дейности се съпоставят с приложимите ограничения и процедурни изисквания; описанието им не доказва нарушение.'},
+
   ...zones.map(z=>({text:'Защитена зона '+z.code+(z.name?' „'+z.name+'“':'')+': установената пространствена връзка изисква съпоставка на конкретните дейности със заповедите и приложимите режими за тази зона. При липса на проверена режимна разпоредба не се прави извод за забрана.'})),
   {text:'V. Експертен извод',style:'sub'},
   {text:zones.length?'Налице е пространствена относимост към посочените защитени зони според Приложение №1. Само от този факт не следва извод за допустимост или недопустимост на предложението.':'От предоставените ГИС резултати не се установява пресичане със защитена зона. Това не отменя проверката на останалите приложими нормативни изисквания.'},
