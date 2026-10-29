@@ -112,7 +112,7 @@ async function process(file){
  }
  // Prioritize notifications and machine-readable files before slower scanned attachments.
  list.sort((a,b)=>{
-  const rank=x=>/уведомлен|notification/i.test(x.name)?0:/\.(txt|csv|json|md|docx)$/i.test(x.name)?1:/\.pdf$/i.test(x.name)?2:3;
+  const rank=x=>/уведомлен|uvedomlen|notification/i.test(x.name)?0:/\.(txt|csv|json|md|docx)$/i.test(x.name)?1:/\.pdf$/i.test(x.name)?2:3;
   return rank(a)-rank(b);
  });
  const docs=[],all=new Set(),leading=new Set(),other=new Set(),subjects=[],documentTexts=[];let earlyGisSent=false;const dossierParcelEvidence=[];const startedAt=performance.now();
@@ -124,7 +124,7 @@ async function process(file){
    try{
     const unpacked=await readEntry(bytes,v,item);
     if(unpacked.byteLength!==item.size)throw Error('Несъответствие в ZIP размер.');
-    extractText.lastOcrPages=0;extractText.lastOcrError='';extractText.lastPageWarnings=[];text=await withDeadline(extractText(unpacked,item.name,{allowOcr:/уведомлен|notification/i.test(item.name)||!/\.pdf$/i.test(item.name)||(!leading.size&&!all.size)}),90000,'Прочит на документ '+item.name);
+    extractText.lastOcrPages=0;extractText.lastOcrError='';extractText.lastPageWarnings=[];text=await withDeadline(extractText(unpacked,item.name,{allowOcr:/уведомлен|uvedomlen|notification/i.test(item.name)||(!leading.size&&!all.size&&/\.pdf$/i.test(item.name))}),90000,'Прочит на документ '+item.name);
     status=text.trim()?(extractText.lastOcrPages?'OCR: '+extractText.lastOcrPages+' сканирани страници; експертна проверка':'текстът е прочетен'):(extractText.lastOcrError?'OCR неуспешен: '+extractText.lastOcrError:'няма извлекаем текст (възможно сканиран документ)');if(extractText.lastPageWarnings?.length)status+='; ПРОВЕРКА: '+extractText.lastPageWarnings.join(', ');if(/\.pdf$/i.test(item.name)&&!/уведомлен|notification/i.test(item.name)&&extractText.lastPageWarnings?.length)status+='; OCR на приложението е отложен за документален анализ';if(text.trim())documentTexts.push({source:item.name,text:text.slice(0,150000)});
     // Distinguish cadastral context: neighbours and former IDs are evidence, not project parcels.
     const contextualIds=[];
@@ -140,7 +140,9 @@ async function process(file){
     // The filled notification's introductory statement is authoritative for the proposed site.
     // Latin filenames such as Uvedomlenie_OVOS must also be recognized as notifications.
     const noticeFile=/уведомлен|uvedomlen|notification/i.test(item.name);
-    const introductory=text.replace(/\s+/g,' ').match(/(?:Уведомяваме\s+Ви,?\s+че|следното\s+инвестиционно\s+предложение\s*:)\s*(.{0,650}?)(?=Характеристика\s+на\s+инвестиционното\s+предложение|1\.\s*Резюме|$)/i);
+    const cleanNoticeText=text.replace(/\s+/g,' ').trim();
+    const noticeMatch=cleanNoticeText.match(/Уведомяваме\s+Ви,?\s+че\s+.{0,200}?\s+има\s+следното\s+инвестиционно\s+предложение\s*:\s*([\s\S]{20,650}?)(?=\s+(?:I\.|І\.|1\.|Характеристика\s+на\s+инвестиционното\s+предложение)|$)/i);
+    const introductory=noticeMatch||cleanNoticeText.match(/(?:Уведомяваме\s+Ви,?\s+че|следното\s+инвестиционно\s+предложение\s*:)\s*(.{0,650}?)(?=Характеристика\s+на\s+инвестиционното\s+предложение|1\.\s*Резюме|$)/i);
     const directNoticeIds=introductory?[...introductory[1].matchAll(/(?:ПИ\s+с\s+(?:ИД|идентификатор)|поземлен\s+имот\s+с\s+идентификатор)\s*[:№]?\s*(\d{5}\.\d+\.\d+)/gi)].map(x=>x[1]):[];
     if(noticeFile&&directNoticeIds.length===1)leading.add(directNoticeIds[0]);
     const isNotice=/уведомлен|uvedomlen/i.test(item.name+' '+text.slice(0,800))||(/инвестиционно\s+предложение|предмет\s+на\s+ИП/i.test(text.slice(0,3000))&&/(?:^|[^\p{L}])(?:ПИ|поземлен\s+имот)(?!\p{L})/iu.test(text));
