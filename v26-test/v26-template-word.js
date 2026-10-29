@@ -58,6 +58,8 @@ async function make(scenario,paragraphs,metadata){
  metadata.subject=String(metadata.subject||'').replace(/„{2,}/g,'„').replace(/“{2,}/g,'“').replace(/\s+/g,' ').replace(/\bи\s+зграждането\b/gi,'изграждането').replace(/\bСк\s+лад\b/g,'Склад').replace(/\bпро\s+мишлени\b/gi,'промишлени').replace(/\s*[„“]\s*/g,' ').replace(/\s+/g,' ').trim();
  const parcelIds=String(metadata.parcelIds||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  if(!parcelIds.length)throw Error('Липсват потвърдени кадастрални идентификатори.');
+ const location=String(metadata.location||'').trim();
+ const parcelDescription='имоти '+parcelIds.join(', ')+(location?' с местоположение '+location:'');
  if(scenario==='A'){
   replaceParagraph(6,metadata.recipient);replaceParagraph(7,metadata.address);
   replaceParagraph(10,'Относно: '+metadata.subject+' — '+parcelDescription);replaceParagraph(13,metadata.salutation);
