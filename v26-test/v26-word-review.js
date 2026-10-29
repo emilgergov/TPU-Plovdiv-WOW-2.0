@@ -39,7 +39,20 @@ function autoEvidence(){
 }
 function getConfirmedParagraphs(){
  const fallback='ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва достатъчно потвърдена информация от преписката.';
- const auto=autoEvidence();return fields.map((f,i)=>f.value.trim()||auto.paragraphs[i]||fallback);
+ const auto=autoEvidence();
+ return fields.map((f,i)=>{
+  const manual=f.value.trim();
+  if(manual)return manual;
+  const extracted=auto.paragraphs[i];
+  if(extracted&&!extracted.startsWith('ЗА ЕКСПЕРТНА ПРОВЕРКА'))return extracted;
+  // The subject may be confirmed after dossier-loaded: derive a safe
+  // description at generation time rather than depending on event order.
+  if(i===0&&auto.subject){
+   const heading=String(auto.subject).replace(/^Относно:\s*/i,'').trim();
+   if(heading)return 'Предмет на инвестиционното предложение (потвърден от експерта): '+heading.replace(/[.\s]+$/,'')+'. Конкретните строителни дейности подлежат на проверка по преписката.';
+  }
+  return extracted||fallback;
+ });
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 function getConfirmedMetadata(){
