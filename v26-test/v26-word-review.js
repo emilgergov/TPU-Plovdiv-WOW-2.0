@@ -30,10 +30,10 @@ function autoEvidence(){
  const note='ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва проверено описание в преписката.';
  const paragraphs=topics.map((key,i)=>{
   const section=sections.find(s=>s.key===key);
-  const verified=(section?.sources||[]).filter(s=>s.status==='verified'&&s.excerpt);
+  const verified=(section?.sources||[]).filter(s=>['verified','corroborated'].includes(s.status)&&s.excerpt);
   return verified.length?verified.map(s=>String(s.excerpt)+' (Източник: '+s.file+')').join(' '):note;
  });
- const ids=(document.getElementById('ids')?.value||'').match(/\\b\\d{5}\\.\\d+\\.\\d+(?:\\.\\d+){0,2}\\b/g)||[];
+ const ids=(document.getElementById('ids')?.value||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  const subject=window.V26SubjectContext;
  return {paragraphs,ids:[...new Set(ids)].join(', '),subject:subject?.confirmed?(subject.wordHeading||subject.title):null};
 }
@@ -67,7 +67,7 @@ document.addEventListener('v26:dossier-loaded',event=>{
  const dossierSubject=window.V26SubjectContext;
  const verifiedSections=draft?.sections||[];
  const topicKeys=['construction','electricity','water_supply','wastewater'];
- topicKeys.forEach((key,i)=>{const sources=(verifiedSections.find(section=>section.key===key)?.sources||[]).filter(source=>source.status==='verified'&&String(source.excerpt||'').trim());if(sources.length&&fields[i])fields[i].value=sources.slice(0,3).map(source=>String(source.excerpt).trim()).join(' ');});
+ topicKeys.forEach((key,i)=>{const sources=(verifiedSections.find(section=>section.key===key)?.sources||[]).filter(source=>['verified','corroborated'].includes(source.status)&&String(source.excerpt||'').trim());if(sources.length&&fields[i])fields[i].value=sources.slice(0,3).map(source=>String(source.excerpt).trim()).join(' ');});
  if(!fields[0]?.value.trim()&&dossierSubject?.confirmed){const heading=String(dossierSubject.wordHeading||dossierSubject.title||'').trim();if(heading)fields[0].value='С реализацията на инвестиционното предложение се предвижда: '+heading.replace(/^Относно:\s*/i,'').replace(/[.\s]+$/,'')+'.';}
  if(caseFields.subject&&dossierSubject?.confirmed&&String(dossierSubject.wordHeading||dossierSubject.title||'').trim())caseFields.subject.value=String(dossierSubject.wordHeading||dossierSubject.title).replace(/^Относно:\s*/i,'').trim();
  const knownIds=(document.getElementById('ids')?.value||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
