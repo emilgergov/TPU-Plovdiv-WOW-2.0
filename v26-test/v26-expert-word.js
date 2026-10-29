@@ -40,18 +40,18 @@ async function make(draft){
  if(!m.recipient||!m.address||!m.subject||!m.incomingReference||!m.salutation)throw Error('КТ13: липсват потвърдени административни реквизити.');
  const legal=(m.legalParagraphs||[]).slice(0,scenario==='A'?5:7),impacts=m.impactFindings||[];
  if(legal.length<(scenario==='A'?5:7)||legal.some(x=>!x)||!m.procedureFinding||impacts.length!==5||impacts.some(x=>!x))throw Error('КТ13: липсват проверени фактически, правни или въздействени констатации.');
- const isPending=x=>/^\[ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(String(x||'').trim());
- const subject=String(m.subject).replace(/^(?:инвестиционно предложение\s*)+/i,'').replace(/^[„“"\s]+|[„“"\s]+$/g,'').trim();
+ const isPending=x=>/\[ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(String(x||''));
+ const subject=String(m.subject).replace(/^Относно:\s*/i,'').replace(/^(?:инвестиционно предложение\s*)+/i,'').replace(/^[„“"\s]+|[„“"\s]+$/g,'').replace(/\s+/g,' ').trim();
  const confirmed=xs=>xs.filter(x=>!isPending(x));
  const blocks=[
   paragraph(doc,'Място за електронен подпис — вътрешно съгласуване'),
   paragraph(doc,'РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ — НЕ Е АДМИНИСТРАТИВЕН АКТ',{heading:true}),
   paragraph(doc,m.recipient,{bold:true}),paragraph(doc,m.address),
-  paragraph(doc,'Относно: инвестиционно предложение „'+subject+'“',{bold:true}),
+  paragraph(doc,'Относно: '+subject,{bold:true}),
   paragraph(doc,'Преписка: '+m.incomingReference),
   paragraph(doc,m.salutation),
   paragraph(doc,'I. ПРЕДМЕТ И ИМОТЕН ОБХВАТ',{heading:true}),
-  paragraph(doc,'Предмет: '+subject),
+  paragraph(doc,'Инвестиционно предложение: '+subject),
   paragraph(doc,'Поземлени имоти: '+draft.parcels.map(p=>p.id+' ('+(p.role==='leading'?'предмет на ИП':'съпътстващ')+')').join('; ')),
   ...(m.location?[paragraph(doc,'Местоположение: '+m.location)]:[]),
   paragraph(doc,'II. ПРОСТРАНСТВЕН АНАЛИЗ',{heading:true}),
