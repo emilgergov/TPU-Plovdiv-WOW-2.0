@@ -58,15 +58,15 @@ function docx(zip,ids,roles,results,includeAnnex2,unifiedContext){
  const determination=scenarioFromGIS(results,roles);
  const scenario=determination.scenario||'НЕОПРЕДЕЛЕН';
  const subject=window.V26SubjectContext;
- const lines=['ТПУ Пловдив — РАБОТЕН ПРОЕКТ на предложение за становище','Сценарий '+scenario+' — '+(zones.length?'установено пресичане с зона в работния ГИС набор':'не е отчетено пресичане в работния ГИС набор'),'Не е издадено становище. Не представлява правно заключение.','Предмет на ИП: '+(subject?.confirmed?subject.title:'ПРЕДСТОИ потвърждение'),'Заглавие за предложението: '+(subject?.confirmed?(subject.wordHeading||subject.title):'ПРЕДСТОИ потвърждение'),'Дейности: '+(subject?.confirmed?(subject.activities.join('; ')||'ПРЕДСТОИ уточнение'):'ПРЕДСТОИ уточнение'),'Имотни идентификатори: '+ids.join(', '),'Експертно потвърдени роли: '+ids.map(id=>id+' — '+(roles[id]==='leading'?'водещ':'съпътстващ')).join('; '),'ГИС резултат — зони: '+(zones.join(', ')||'няма отчетени в работния набор'),'Източник на пространствените данни: работен архивен ГИС набор. Актуална правна проверка: Неустановено.','Нормативна преценка: Приложимостта на конкретните режими към заявените дейности не е оценена.','Приложение №1: ГИС анализ (PDF) — задължително.',includeAnnex2?'Приложение №2: нормативни референции (PDF) — приложено по избор.':'Приложение №2: не е заявено (незадължително).'];
+ const lines=['ТПУ Пловдив — РАБОТЕН ПРОЕКТ на предложение за становище','Сценарий '+scenario+' — '+(zones.length?'установено пресичане с зона в работния ГИС набор':'не е отчетено пресичане в работния ГИС набор'),'Не е издадено становище. Не представлява правно заключение.','Предмет на ИП: '+(subject?.confirmed?subject.title:'Няма данни в преписката'),'Заглавие за предложението: '+(subject?.confirmed?(subject.wordHeading||subject.title):'Няма данни в преписката'),'Дейности: '+(subject?.confirmed?(subject.activities.join('; ')||'Няма данни в преписката'):'Няма данни в преписката'),'Имотни идентификатори: '+ids.join(', '),'Експертно потвърдени роли: '+ids.map(id=>id+' — '+(roles[id]==='leading'?'водещ':'съпътстващ')).join('; '),'ГИС резултат — зони: '+(zones.join(', ')||'няма отчетени в работния набор'),'Източник на пространствените данни: работен архивен ГИС набор. Актуална правна проверка: Неустановено.','Нормативна преценка: Приложимостта на конкретните режими към заявените дейности не е оценена.','Приложение №1: ГИС анализ (PDF) — задължително.',includeAnnex2?'Приложение №2: нормативни референции (PDF) — приложено по избор.':'Приложение №2: не е заявено (незадължително).'];
 
  const shared=unifiedContext?.commonEvidence;
  if(shared)lines.push('Единни доказателствени констатации: '+(shared.findings||[]).length+' · предупреждения: '+(shared.warnings||[]).length+'; всички изискват експертна проверка.');
- for(const f of (unifiedContext?.commonEvidence?.findings||[]).slice(0,20))lines.push('Доказателствен запис: '+readableKind(f.key)+' · статус '+readableStatus(f.status)+' · източници '+(f.evidence||[]).slice(0,5).map(e=>String(e.file||'неизвестен документ')+' ('+String(e.date||'дата предстои')+')').join('; ')+' · правна приложимост: ПРЕДСТОИ');
+ for(const f of (unifiedContext?.commonEvidence?.findings||[]).slice(0,20))lines.push('Доказателствен запис: '+readableKind(f.key)+' · статус '+readableStatus(f.status)+' · източници '+(f.evidence||[]).slice(0,5).map(e=>String(e.file||'неизвестен документ')+' ('+String(e.date||'дата не е посочена')+')').join('; ')+' · правна приложимост: няма данни');
  const evidence=unifiedContext?.characterization;
  for(const section of evidence?.sections||[]){
   lines.push('Доказателствена тема: '+section.title+' — Приложимостта не е оценена.');
-  for(const src of (section.sources||[]).slice(0,3))lines.push('Източник: '+src.file+' · '+(src.date||'дата ПРЕДСТОИ')+' · '+src.excerpt.slice(0,300));
+  for(const src of (section.sources||[]).slice(0,3))lines.push('Източник: '+src.file+' · '+(src.date||'дата не е посочена')+' · '+src.excerpt.slice(0,300));
  }
  for(const p of evidence?.normalized?.paragraphs||[])lines.push('ПРОЕКТ, за проверка: '+p.text+' · източник '+p.source);
  const paragraphs=lines.map(t=>'<w:p><w:r><w:t xml:space="preserve">'+X(t)+'</w:t></w:r></w:p>').join('');
@@ -142,7 +142,7 @@ function gisPdf(results,options={}){
    const collect=c=>{if(Array.isArray(c)&&typeof c[0]==='number'&&typeof c[1]==='number'){if(Number.isFinite(c[0])&&Number.isFinite(c[1]))pts.push(c)}else if(Array.isArray(c))c.forEach(collect)};
    polygons.forEach(f=>collect(f.geometry.coordinates));
 
-   if(!pts.length){cards.push({stack:[{text:'Поземлен имот '+id,bold:true,fontSize:10},{text:'Липсва имотна геометрия · ПРЕДСТОИ',fontSize:9}],margin:[0,4,0,8]});continue}
+   if(!pts.length){cards.push({stack:[{text:'Поземлен имот '+id,bold:true,fontSize:10},{text:'Липсва имотна геометрия',fontSize:9}],margin:[0,4,0,8]});continue}
    const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
    const spanX=Math.max(maxX-minX,1e-10),spanY=Math.max(maxY-minY,1e-10),scale=Math.min(680/spanX,390/spanY);
    const dx=(740-spanX*scale)/2,dy=(450-spanY*scale)/2;
@@ -157,7 +157,7 @@ function gisPdf(results,options={}){
     }
    }
    const svg='<svg xmlns="http://www.w3.org/2000/svg" width="740" height="450" viewBox="0 0 740 450"><rect width="740" height="450" fill="#e8f2ed"/>'+shapes.join('')+'<text x="370" y="430" text-anchor="middle" font-size="17" fill="#183c30">'+E(id)+'</text></svg>';
-   cards.push({stack:[{text:'Поземлен имот '+id,bold:true,fontSize:10,margin:[0,0,0,4]},{svg,width:235,margin:[0,0,0,4]},{text:'Архивна имотна геометрия · правен режим: ПРЕДСТОИ',fontSize:8,color:'#526a5e'}],margin:[0,4,0,8]});
+   cards.push({stack:[{text:'Поземлен имот '+id,bold:true,fontSize:10,margin:[0,0,0,4]},{svg,width:235,margin:[0,0,0,4]},{text:'Имотна геометрия от интегрирания ГИС архив',fontSize:8,color:'#526a5e'}],margin:[0,4,0,8]});
   }
   for(let i=0;i<cards.length;i+=2){
    const row={columns:[{width:'49%',...cards[i]},{width:'49%',...(cards[i+1]||{text:''})}],columnGap:10,margin:[0,3,0,8]};
@@ -197,13 +197,13 @@ function gisPdf(results,options={}){
    const zones=[...new Set(overlays.map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z)))];
    const names=[...new Set(overlays.map(z=>String(z.name_bg||z.name||'').trim()).filter(Boolean))];
    const verifiedCodes=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z));
-    const zoneText=verifiedCodes.length?verifiedCodes.join(', '):r.intersection_verified_outside===true?'Няма пресечена защитена зона':zones.length?zones.join(', ')+(names.length?' · '+names.join('; '):''):'ПРЕДСТОИ';
+    const zoneText=verifiedCodes.length?verifiedCodes.join(', '):r.intersection_verified_outside===true?'Няма пресечена защитена зона':zones.length?zones.join(', ')+(names.length?' · '+names.join('; '):''):'Няма данни';
    const verifiedZones=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z));
-    const intersection=verifiedZones.length?'УСТАНОВЕНО ПРЕСИЧАНЕ':r.intersection_verified_outside===true?'НЯМА ПРЕСИЧАНЕ':has?'ПРЕДСТОИ':'ПРЕДСТОИ';
+    const intersection=verifiedZones.length?'УСТАНОВЕНО ПРЕСИЧАНЕ':r.intersection_verified_outside===true?'НЯМА ПРЕСИЧАНЕ':has?'Няма данни':'Няма данни';
    return [id,Number.isFinite(area)&&area>0?area.toLocaleString('bg-BG',{maximumFractionDigits:3})+' (архивна ГИС площ)':'Не е налична',zoneText,intersection,has?'ГИС геометрия налична':'Липсва геометрия'];
   })
  ]},layout:'lightHorizontalLines'});
- content.push({text:'Пресичанията са изчислени по интегрирания ГИС архив на ТПУ. „ПРЕДСТОИ“ обозначава липсващи данни.',margin:[0,10,0,0]});
+ content.push({text:'Пресичанията са изчислени по интегрирания ГИС архив на ТПУ. „Няма данни“ обозначава липсващи сведения.',margin:[0,10,0,0]});
  return pdfDef('Приложение №1 — ГИС анализ',content);
 }
 function visitForLabel(coords,out){if(Array.isArray(coords)&&typeof coords[0]==='number'&&typeof coords[1]==='number'){if(Number.isFinite(coords[0])&&Number.isFinite(coords[1]))out.push(coords)}else if(Array.isArray(coords))coords.forEach(x=>visitForLabel(x,out))}
@@ -244,7 +244,7 @@ function normativePdf(results,register){
   ...(confirmed&&subject.activities?.length?[{text:'Предвидени дейности (обобщение): '+subject.activities.slice(0,4).map(a=>String(a).replace(/\s+/g,' ').trim()).join('; ').slice(0,320)+(subject.activities.join('; ').length>320?'…':'')}]:[]),
   {text:'II. Пространствена относимост',style:'sub'},
   {text:'Пространствените резултати са представени в самостоятелното Приложение №1 (ГИС анализ). Настоящият документ използва резултатите му, без да ги замества.'},
-  {text:zones.length?'Отчетени защитени зони: '+zones.map(z=>z.code+(z.name?' — '+z.name:'')).join('; '):results.every(r=>r.intersection_verified_outside===true)?'ГИС анализът установява отсъствие на пресичане със защитени зони.':'ПРЕДСТОИ — липсват данни за пространствен извод.'},
+  {text:zones.length?'Отчетени защитени зони: '+zones.map(z=>z.code+(z.name?' — '+z.name:'')).join('; '):results.every(r=>r.intersection_verified_outside===true)?'ГИС анализът установява отсъствие на пресичане със защитени зони.':'Няма данни за пространствен извод.'},
   {text:'III. Нормативни и документални основания',style:'sub'},
   {text:'При оценката на инвестиционното предложение се съобразяват относимите нормативни основания от интегрирания архив. По чл. 31, ал. 1 от Закона за биологичното разнообразие се разглежда съвместимостта с предмета и целите на опазване на защитените зони, когато нормата е приложима към конкретния случай. Пространственото пресичане само по себе си не доказва нарушение на режим.'},
   ...applicable.map(r=>({text:r.title+(r.ids.length?' — архив '+r.ids.join(', '):''),link:String(r.source),color:'#165c86',fontSize:9})),
@@ -254,7 +254,7 @@ function normativePdf(results,register){
 
   ...zones.map(z=>({text:'Защитена зона '+z.code+(z.name?' „'+z.name+'“':'')+': пространственото пресичане е установено в Приложение №1. Приложимостта на конкретните режими се преценява спрямо заявените дейности.'})),
   {text:'V. Експертен извод',style:'sub'},
-  {text:zones.length?'ГИС анализът установява пресичане с изброените защитени зони. Самото пресичане не определя автоматично допустимостта на инвестиционното предложение.':results.every(r=>r.intersection_verified_outside===true)?'ГИС анализът установява отсъствие на пресичане със защитени зони.':'ПРЕДСТОИ — липсват данни за пространствен извод.'},
+  {text:zones.length?'ГИС анализът установява пресичане с изброените защитени зони. Самото пресичане не определя автоматично допустимостта на инвестиционното предложение.':results.every(r=>r.intersection_verified_outside===true)?'ГИС анализът установява отсъствие на пресичане със защитени зони.':'Няма данни за пространствен извод.'},
   {text:applicable.length?'Посочените архивни нормативни референции подлежат на експертна съпоставка с конкретните дейности.':'Не се формулира окончателен правен извод без проверени приложими режимни разпоредби.'},
   {text:'Документът е проект за експертна проверка, а не административен акт.',italics:true,fontSize:9}
  ];
@@ -292,7 +292,7 @@ async function make(results,roles,register){
  const evidenceLines=['РАБОТЕН ПАКЕТ — НЕ Е ОФИЦИАЛНО СТАНОВИЩЕ.','Съдържа DOCX проект и задължителното PDF приложение №1; приложение №2 се включва само по избор.','Правната приложимост и изводите подлежат на експертна проверка.','','ТЕХНИЧЕСКА ПРОСЛЕДИМОСТ — САМО ЗА ВЪТРЕШНА ПРОВЕРКА'];
  if(dossierEvidence){
   evidenceLines.push('Сценарий (ГИС): '+String(determination.scenario||'неопределен'));
-  evidenceLines.push('Пространствен статус (ГИС): '+(determination.scenario==='Б'?'Установено пресичане: '+determination.zones.join(', '):determination.scenario==='А'?'Установено непресичане':'ПРЕДСТОИ'));
+  evidenceLines.push('Пространствен статус (ГИС): '+(determination.scenario==='Б'?'Установено пресичане: '+determination.zones.join(', '):determination.scenario==='А'?'Установено непресичане':'Няма данни'));
   for(const item of (dossierEvidence.findings||[]).slice(0,20)){
    const sources=(item.evidence||[]).slice(0,5).map(e=>String(e.file||'неизвестен документ')+' ('+String(e.date||'дата неустановена')+')').join('; ');
    evidenceLines.push('Запис: '+String(item.key||'')+'; статус: '+String(item.status||'непотвърден')+'; източници: '+sources);
