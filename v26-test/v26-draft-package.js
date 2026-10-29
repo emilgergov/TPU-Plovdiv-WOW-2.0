@@ -275,7 +275,9 @@ async function make(results,roles,register){
  // The completed GIS calculation is the shared spatial determination for every generated document.
  if(!determination.scenario)throw Error('Не е доказано, че всички водещи имоти са извън Натура 2000. Сценарий А не се допуска по подразбиране.');
  register={...register,spatialDetermination:determination};
- const includeAnnex2=register?.includeAnnex2===true;const paragraphs=register?.verifiedCharacterizationParagraphs; if(!window.V26TemplateWord?.make)throw Error('Липсва модулът за оригиналните Word образци.');const caseMetadata={...(register?.verifiedCaseMetadata||{})};
+ const includeAnnex2=register?.includeAnnex2===true;
+ const paragraphPrefixes=(determination.scenario==='Б'||determination.scenario==='B')?['С реализацията','Електроснабдяването','Водозахранването','Отпадъчните води']:['С реализацията','Електроснабдяването','Водоснабдяването','Отпадъчните води'];
+ const paragraphs=Array.isArray(register?.verifiedCharacterizationParagraphs)?register.verifiedCharacterizationParagraphs.map((p,i)=>{const value=String(p||'').trim();if(!value)return value;if(i===2&&/^(Водоснабдяването|Водозахранването)/.test(value))return value.replace(/^(Водоснабдяването|Водозахранването)/,paragraphPrefixes[i]);return value;}):register?.verifiedCharacterizationParagraphs; if(!window.V26TemplateWord?.make)throw Error('Липсва модулът за оригиналните Word образци.');const caseMetadata={...(register?.verifiedCaseMetadata||{})};
  // Confirmed parcel roles and resolved GIS results are the authoritative input for the working draft.
  // Never require a second, manually retyped copy of cadastral identifiers.
  const confirmedIds=results.map(r=>String(r.input||r.cadnum||'').trim()).filter(id=>/^\d{5}\.\d+\.\d+(?:\.\d+){0,2}$/.test(id));
