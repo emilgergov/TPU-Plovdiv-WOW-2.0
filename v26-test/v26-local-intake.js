@@ -198,13 +198,22 @@ async function process(file){
    ['access',/транспортен достъп|пътен достъп|подход към имота/i],
    ['construction',/застрояване|строителство|изграждане|реконструкция|монтаж|монтиране|оранжери|съоръжени|производствена дейност/i]
   ];
+  // Keep headings and blank form guidance out of Word evidence.
+  // Multiple themes may be present in the same source sentence.
+  const instructionOnly=/^(?:посочете|опишете|представете|да се посочи|информация за|данни за|описание на|включително|например|при необходимост|съгласно изискванията|попълва се)\b/i;
+  const seenFacts=new Set();
   for(const line of lines){
-   if(line.length<20||line.length>900)continue;
-   for(const [key,re] of factPatterns)if(re.test(line)){
+   if(line.length<20||line.length>900||instructionOnly.test(line))continue;
+   const matches=factPatterns.filter(([,re])=>re.test(line)).map(([key])=>key);
+   if(!matches.length)continue;
+   for(const key of matches){
+    const fingerprint=key+'|'+line.toLocaleLowerCase('bg');
+    if(seenFacts.has(fingerprint))continue;
+    seenFacts.add(fingerprint);
     factualSnippets.push({key,value:line.slice(0,700),source:item.name,kind:'source_excerpt',requires_semantic_review:true});
-    break;
+    if(factualSnippets.length>=80)break;
    }
-   if(factualSnippets.length>=60)break;
+   if(factualSnippets.length>=80)break;
   }
   const wastewaterClaims=[];
   for(const fact of factualSnippets){
