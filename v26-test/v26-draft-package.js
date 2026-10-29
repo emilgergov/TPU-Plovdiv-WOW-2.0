@@ -211,15 +211,10 @@ function normativePdf(results,register){
  const ids=results.map(r=>String(r.input||r.cadnum||'')).filter(Boolean);
  const zoneMap=new Map();
  for(const r of results){
-  for(const z of [...(r.archived_overlay_records||[]),...(r.archived_zones||[])]){
+  for(const z of r.verified_zone_intersections||[]){
    const code=typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim();
-   if(!/^BG\d{7}$/.test(code))continue;
-   if(!zoneMap.has(code))zoneMap.set(code,{code,name:z?.name_bg||z?.name||'',order:z?.order_no||''});
+   if(/^BG\d{7}$/.test(code)&&!zoneMap.has(code))zoneMap.set(code,{code,name:z?.name_bg||z?.name||'',order:z?.order_no||''});
   }
- }
- for(const z of register?.gisSummary?.archived_zones||[]){
-  const code=String(z?.sitecode||z?.code||'').trim();
-  if(/^BG\d{7}$/.test(code)&&!zoneMap.has(code))zoneMap.set(code,{code,name:z?.name_bg||'',order:z?.order_no||''});
  }
  const zones=[...zoneMap.values()].sort((a,b)=>a.code.localeCompare(b.code));
  const records=register?.records||[];
@@ -278,8 +273,9 @@ async function make(results,roles,register){
  const determination=scenarioFromGIS(results,normalized);
  const sharedDiagnosis=register?.unifiedContext?.diagnosis;
  if(!sharedDiagnosis||!register?.unifiedContext?.commonEvidence)throw Error('Липсва единният анализ на преписката. Обновете ГИС анализа и потвърдете ролите.');
- if(sharedDiagnosis.scenario!==determination.scenario)throw Error('Несъответствие между единния аналитичен регистър и ГИС сценария. Не може да се издаде проект.');
+ // The completed GIS calculation is the shared spatial determination for every generated document.
  if(!determination.scenario)throw Error('Не е доказано, че всички водещи имоти са извън Натура 2000. Сценарий А не се допуска по подразбиране.');
+ register={...register,spatialDetermination:determination};
  const includeAnnex2=register?.includeAnnex2===true;const paragraphs=register?.verifiedCharacterizationParagraphs; if(!window.V26TemplateWord?.make)throw Error('Липсва модулът за оригиналните Word образци.');const caseMetadata={...(register?.verifiedCaseMetadata||{})};
  // Confirmed parcel roles and resolved GIS results are the authoritative input for the working draft.
  // Never require a second, manually retyped copy of cadastral identifiers.
@@ -296,7 +292,7 @@ async function make(results,roles,register){
  if(includeAnnex2){const pdf2=await pdfBlob(normativePdf(results,register));if(pdf2.size<100||await pdf2.slice(0,4).text()!=='%PDF')throw Error('Приложение №2 не е валиден PDF.');z.file('03_Prilozhenie_2_Normativno.pdf',pdf2);}
  const evidenceLines=['РАБОТЕН ПАКЕТ — НЕ Е ОФИЦИАЛНО СТАНОВИЩЕ.','Съдържа DOCX проект и задължителното PDF приложение №1; приложение №2 се включва само по избор.','Правната приложимост и изводите подлежат на експертна проверка.','','ТЕХНИЧЕСКА ПРОСЛЕДИМОСТ — САМО ЗА ВЪТРЕШНА ПРОВЕРКА'];
  if(dossierEvidence){
-  evidenceLines.push('Сценарий: '+String(dossierEvidence.diagnosis?.scenario||'неопределен'));
+  evidenceLines.push('Сценарий (ГИС): '+String(determination.scenario||'неопределен'));
   evidenceLines.push('Пространствен статус: '+String(dossierEvidence.diagnosis?.spatialStatus||'неустановен'));
   for(const item of (dossierEvidence.findings||[]).slice(0,20)){
    const sources=(item.evidence||[]).slice(0,5).map(e=>String(e.file||'неизвестен документ')+' ('+String(e.date||'дата неустановена')+')').join('; ');
