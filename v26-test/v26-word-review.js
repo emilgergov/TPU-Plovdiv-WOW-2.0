@@ -45,7 +45,14 @@ function autoEvidence(){
 function getConfirmedParagraphs(){
  // No invented or generic fallback may enter an administrative document.
  // The four paragraphs must be individually reviewed and confirmed.
- return fields.map(f=>f.value.trim());
+ const auto=autoEvidence();
+ const values=fields.map((f,i)=>f.value.trim()||((auto.paragraphs[i]&&auto.paragraphs[i]!=='Няма данни в преписката.'&&!/Източник:/i.test(auto.paragraphs[i]))?auto.paragraphs[i]:''));
+ const missing=values.map((v,i)=>v?null:labels[i]).filter(Boolean);
+ if(missing.length){
+  const panel=document.getElementById('v26WordReview');if(panel){panel.hidden=false;panel.open=true;panel.scrollIntoView?.({block:'nearest'});}
+  throw Error('За Word липсват проверени описания: '+missing.join(', ')+'. Отворен е разделът за експертна проверка.');
+ }
+ return values;
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 function getConfirmedMetadata(){
