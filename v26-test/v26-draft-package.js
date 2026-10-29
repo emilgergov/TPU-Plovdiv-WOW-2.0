@@ -229,7 +229,7 @@ function normativePdf(results,register){
  const review=register?.verifiedCaseMetadata||null;
  const resolvedTitle=String(subject?.title||review?.subject||review?.title||dossier?.subject?.title||dossier?.subject_title||'').trim();
  const confirmed=!!(subject?.confirmed&&resolvedTitle);
- const subjectDisplay=resolvedTitle||'Не е установен в обработените материали — за експертна проверка.';
+ const subjectDisplay=(resolvedTitle||'Не е установен в обработените материали — за експертна проверка.').replace(/\bи\s+зграждането\b/gi,'изграждането').replace(/\bСк\s+лад\b/g,'Склад').replace(/\bпро\s+мишлени\b/gi,'промишлени').replace(/\s*[„“]\s*/g,' ').replace(/\s+/g,' ').trim();
  const verifiedLocation=String(review?.location||'').trim();
  const relevant=records.filter(r=>{const title=String(r.title||'');const code=String(r.zone_code||r.sitecode||'');const mentioned=[...title.matchAll(/BG\d{7}/g)].map(m=>m[0]);return title&&/^https:\/\//.test(String(r.source||''))&&(!code||zoneMap.has(code))&&(!mentioned.length||mentioned.every(z=>zoneMap.has(z)))&&(/биологичното разнообразие|съвместимост|защитена зона|заповед/i.test(title+' '+String(r.purpose||'')));});
  const legalGroups=new Map();
