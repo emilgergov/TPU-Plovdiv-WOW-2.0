@@ -54,7 +54,7 @@ function refreshVerifiedFields(){
  for(let i=0;i<fields.length;i++){
   if(!fields[i].value.trim()&&auto.paragraphs[i]&&auto.paragraphs[i]!=='Няма данни в преписката.'&&!/Източник:/i.test(auto.paragraphs[i]))fields[i].value=formatVerifiedParagraph(auto.paragraphs[i],i,'A');
  }
- if(caseFields.subject&&!caseFields.subject.value.trim()&&auto.subject)caseFields.subject.value=auto.subject.replace(/^Относно:\\s*/i,'').trim();
+ if(caseFields.subject&&!caseFields.subject.value.trim()&&auto.subject)caseFields.subject.value=auto.subject.replace(/^Относно:\s*/i,'').trim();
  if(caseFields.parcelIds&&!caseFields.parcelIds.value.trim()&&auto.ids)caseFields.parcelIds.value=auto.ids;
 }
 function getConfirmedParagraphs(scenario='A'){
@@ -121,6 +121,7 @@ document.addEventListener('v26:dossier-loaded',event=>{
   fields[i].parentNode.append(wrapper);
  });
 });
+document.addEventListener('v26:subject-confirmed',()=>{const subject=autoEvidence().subject;if(subject&&caseFields.subject)caseFields.subject.value=String(subject).replace(/^Относно:\s*/i,'').trim();});
 document.addEventListener('v26:gis-invalidated',()=>{if(confirmed)confirmed.checked=false;for(const f of fields)f.value='';for(const f of Object.values(caseFields))f.value='';});
 document.addEventListener('v26:full-reset',()=>{if(confirmed)confirmed.checked=false;for(const f of fields)f.value='';for(const f of Object.values(caseFields))f.value='';for(const f of legalFields)f.value='';for(const f of impactFields)f.value='';if(procedureField)procedureField.value='';document.querySelectorAll('.v26-evidence-suggestion').forEach(el=>el.remove());});
 window.V26WordReview=Object.freeze({getConfirmedParagraphs,getConfirmedMetadata});
