@@ -32,7 +32,7 @@ function autoEvidence(){
  const paragraphs=topics.map((key,i)=>{
   const section=sections.find(s=>s.key===key);
   const verified=(section?.sources||[]).filter(s=>['verified','corroborated'].includes(s.status)&&s.excerpt);
-  if(verified.length)return verified.map(s=>String(s.excerpt)+' (Източник: '+s.file+')').join(' ');
+  if(verified.length)return verified.slice(0,3).map(s=>String(s.excerpt).trim()).join(' ');
   // Raw dossier excerpts remain explicitly subject to expert review.
   const review=(section?.sources||[]).filter(s=>s.status==='source_excerpt_not_verified'&&String(s.excerpt||'').trim());
   if(review.length)return review.slice(0,3).map(s=>String(s.excerpt).trim()+' (Източник: '+s.file+')').join(' ');
@@ -49,7 +49,16 @@ function formatVerifiedParagraph(raw,i,scenario){
  // Only confirmed dossier excerpts may be adapted to the institutional template.
  return prefix+' '+value.replace(/^[\s:;,.–—-]+/,'').replace(/[\s]+$/,'');
 }
+function refreshVerifiedFields(){
+ const auto=autoEvidence();
+ for(let i=0;i<fields.length;i++){
+  if(!fields[i].value.trim()&&auto.paragraphs[i]&&auto.paragraphs[i]!=='Няма данни в преписката.'&&!/Източник:/i.test(auto.paragraphs[i]))fields[i].value=formatVerifiedParagraph(auto.paragraphs[i],i,'A');
+ }
+ if(caseFields.subject&&!caseFields.subject.value.trim()&&auto.subject)caseFields.subject.value=auto.subject.replace(/^Относно:\\s*/i,'').trim();
+ if(caseFields.parcelIds&&!caseFields.parcelIds.value.trim()&&auto.ids)caseFields.parcelIds.value=auto.ids;
+}
 function getConfirmedParagraphs(scenario='A'){
+ refreshVerifiedFields();
  // No invented or generic fallback may enter an administrative document.
  // The four paragraphs must be individually reviewed and confirmed.
  const auto=autoEvidence();
@@ -63,6 +72,7 @@ function getConfirmedParagraphs(scenario='A'){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 function getConfirmedMetadata(){
+ refreshVerifiedFields();
  // Working proposal: unresolved fields remain explicit review notes in DOCX.
  if(Object.keys(caseFields).length!==7)throw Error('Формулярът за административни данни не е зареден.');
  const result=Object.fromEntries(Object.entries(caseFields).map(([k,v])=>[k,v.value.trim()]));
