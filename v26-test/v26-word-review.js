@@ -8,7 +8,7 @@ function mount(){
  const box=document.createElement('details');box.id='v26WordReview';box.style.cssText='margin:12px 0;padding:12px;border:1px solid #82998a;border-radius:8px';
  const summary=document.createElement('summary');summary.textContent='Проверка на съдържанието и данните за Word предложението';box.append(summary);
  const hint=document.createElement('p');hint.textContent='Попълнете само доказани обстоятелства от преписката. Прегледът е задължителен преди Word. Празни или непотвърдени абзаци блокират генерирането.';box.append(hint);
- fields=labels.map(label=>{const wrap=document.createElement('div');wrap.style.margin='8px 0';const title=document.createElement('label');title.textContent=label;title.style.display='block';const area=document.createElement('textarea');area.rows=3;area.placeholder='Образец А: '+templateStarts.A[fields.length]+'… | Образец Б: '+templateStarts.B[fields.length]+'…';area.style.cssText='display:block;width:100%;box-sizing:border-box';area.addEventListener('input',()=>{confirmed.checked=false});wrap.append(title,area);box.append(wrap);return area});
+ fields=labels.map((label,i)=>{const wrap=document.createElement('div');wrap.style.margin='8px 0';const title=document.createElement('label');title.textContent=label;title.style.display='block';const area=document.createElement('textarea');area.rows=3;area.placeholder='Образец А: '+templateStarts.A[i]+'… | Образец Б: '+templateStarts.B[i]+'…';area.style.cssText='display:block;width:100%;box-sizing:border-box';area.addEventListener('input',()=>{confirmed.checked=false});wrap.append(title,area);box.append(wrap);return area});
  const caseTitle=document.createElement('h4');caseTitle.textContent='Променливи данни за Word — потвърждение';box.append(caseTitle);
  for(const [key,label] of [['recipient','Адресат'],['address','Адрес'],['subject','Предмет на ИП'],['incomingReference','Входящ номер и дата'],['salutation','Обръщение'],['parcelIds','Кадастрални идентификатори на имотите'],['location','Местоположение (населено място, община, област; само потвърдени данни)']]){
   const wrap=document.createElement('div');wrap.style.margin='6px 0';const caption=document.createElement('label');caption.textContent=label;caption.style.display='block';const input=document.createElement('input');input.type='text';input.style.cssText='width:100%;box-sizing:border-box';input.addEventListener('input',()=>{confirmed.checked=false});caseFields[key]=input;wrap.append(caption,input);box.append(wrap);
@@ -43,24 +43,9 @@ function autoEvidence(){
  return {paragraphs,ids:[...new Set(ids)].join(', '),subject:subject?.confirmed?(subject.wordHeading||subject.title):null};
 }
 function getConfirmedParagraphs(){
- const fallback='Няма данни в преписката.';
- const auto=autoEvidence();
- return fields.map((f,i)=>{
-  const manual=f.value.trim();
-  if(manual)return manual;
-  const extracted=auto.paragraphs[i];
-  // Source excerpts are suggestions, never expert-confirmed paragraphs.
-  // Do not silently copy raw dossier text into an official Word proposal.
-  // Do not insert raw dossier excerpts into the official template.
-  // They remain visible as review suggestions, not finished administrative prose.
-  // The subject may be confirmed after dossier-loaded: derive a safe
-  // description at generation time rather than depending on event order.
-  if(i===0&&auto.subject){
-   const heading=String(auto.subject).replace(/^Относно:\s*/i,'').trim();
-   if(heading)return 'Предмет на инвестиционното предложение (потвърден от експерта): '+heading.replace(/[.\s]+$/,'')+'. Конкретните строителни дейности подлежат на проверка по преписката.';
-  }
-  return fallback;
- });
+ // No invented or generic fallback may enter an administrative document.
+ // The four paragraphs must be individually reviewed and confirmed.
+ return fields.map(f=>f.value.trim());
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 function getConfirmedMetadata(){
