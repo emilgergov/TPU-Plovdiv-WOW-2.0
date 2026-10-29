@@ -68,7 +68,7 @@ function getConfirmedMetadata(){
  result.legalParagraphs=legalFields.map(f=>f.value.trim());
  result.procedureFinding=procedureField?.value.trim()||'';
  result.impactFindings=impactFields.map(f=>f.value.trim());
- const note='ПРЕДСТОИ';
+ const note='Няма данни в преписката';
  result.legalParagraphs=result.legalParagraphs.map(v=>v||note);
  result.impactFindings=result.impactFindings.map(v=>v||note);
  result.procedureFinding=result.procedureFinding||note;
