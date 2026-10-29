@@ -68,7 +68,7 @@ function getConfirmedMetadata(){
  result.legalParagraphs=legalFields.map(f=>f.value.trim());
  result.procedureFinding=procedureField?.value.trim()||'';
  result.impactFindings=impactFields.map(f=>f.value.trim());
- const note='ЗА ЕКСПЕРТНА ПРОВЕРКА — не е установено от преписката.';
+ const note='ПРЕДСТОИ';
  result.legalParagraphs=result.legalParagraphs.map(v=>v||note);
  result.impactFindings=result.impactFindings.map(v=>v||note);
  result.procedureFinding=result.procedureFinding||note;
@@ -82,7 +82,7 @@ function getConfirmedMetadata(){
   const ctx=window.V26WorkingContext||{};
   const references=(ctx.documents||[]).flatMap(d=>(d.references||[]).filter(x=>x.number&&x.date).map(x=>({number:String(x.number).trim(),date:String(x.date).trim()})));
   const distinct=[...new Map(references.map(x=>[x.number+'|'+x.date,x])).values()];
-  if(distinct.length===1)result.incomingReference='Вх. № '+distinct[0].number+' / '+distinct[0].date+' (за експертно потвърждение)';
+  if(distinct.length===1)result.incomingReference='Вх. № '+distinct[0].number+' / '+distinct[0].date;
  }
  return result;
 }
