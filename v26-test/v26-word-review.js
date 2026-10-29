@@ -42,11 +42,18 @@ function autoEvidence(){
  const subject=window.V26SubjectContext;
  return {paragraphs,ids:[...new Set(ids)].join(', '),subject:subject?.confirmed?(subject.wordHeading||subject.title):null};
 }
+function formatVerifiedParagraph(raw,i,scenario){
+ const value=String(raw||'').trim();if(!value)return '';
+ const prefix=(templateStarts[scenario==='B'?'B':'A']||templateStarts.A)[i];
+ if(value.startsWith(prefix))return value;
+ // Only confirmed dossier excerpts may be adapted to the institutional template.
+ return prefix+' '+value.replace(/^[\\s:;,.–—-]+/,'').replace(/[\\s]+$/,'');
+}
 function getConfirmedParagraphs(){
  // No invented or generic fallback may enter an administrative document.
  // The four paragraphs must be individually reviewed and confirmed.
  const auto=autoEvidence();
- const values=fields.map((f,i)=>f.value.trim()||((auto.paragraphs[i]&&auto.paragraphs[i]!=='Няма данни в преписката.'&&!/Източник:/i.test(auto.paragraphs[i]))?auto.paragraphs[i]:''));
+ const values=fields.map((f,i)=>{const typed=f.value.trim();if(typed)return typed;const verified=auto.paragraphs[i];return verified&&verified!=='Няма данни в преписката.'&&!/Източник:/i.test(verified)?formatVerifiedParagraph(verified,i,'A'):'';});
  const missing=values.map((v,i)=>v?null:labels[i]).filter(Boolean);
  if(missing.length){
   const panel=document.getElementById('v26WordReview');if(panel){panel.hidden=false;panel.open=true;panel.scrollIntoView?.({block:'nearest'});}
@@ -88,7 +95,7 @@ document.addEventListener('v26:dossier-loaded',event=>{
  const dossierSubject=window.V26SubjectContext;
  const verifiedSections=draft?.sections||[];
  const topicKeys=['construction','electricity','water_supply','wastewater'];
- topicKeys.forEach((key,i)=>{const sources=(verifiedSections.find(section=>section.key===key)?.sources||[]).filter(source=>['verified','corroborated'].includes(source.status)&&String(source.excerpt||'').trim());if(sources.length&&fields[i])fields[i].value=sources.slice(0,3).map(source=>String(source.excerpt).trim()).join(' ');});
+ topicKeys.forEach((key,i)=>{const sources=(verifiedSections.find(section=>section.key===key)?.sources||[]).filter(source=>['verified','corroborated'].includes(source.status)&&String(source.excerpt||'').trim());if(sources.length&&fields[i])fields[i].value=formatVerifiedParagraph(sources.slice(0,3).map(source=>String(source.excerpt).trim()).join(' '),i,'A');});
  if(!fields[0]?.value.trim()&&dossierSubject?.confirmed){const heading=String(dossierSubject.wordHeading||dossierSubject.title||'').trim();if(heading)fields[0].value='С реализацията на инвестиционното предложение се предвижда: '+heading.replace(/^Относно:\s*/i,'').replace(/[.\s]+$/,'')+'.';}
  if(caseFields.subject&&dossierSubject?.confirmed&&String(dossierSubject.wordHeading||dossierSubject.title||'').trim())caseFields.subject.value=String(dossierSubject.wordHeading||dossierSubject.title).replace(/^Относно:\s*/i,'').trim();
  const knownIds=(document.getElementById('ids')?.value||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
