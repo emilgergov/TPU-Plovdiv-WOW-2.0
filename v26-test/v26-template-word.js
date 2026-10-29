@@ -59,7 +59,7 @@ async function make(scenario,paragraphs,metadata){
  const parcelIds=String(metadata.parcelIds||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  if(!parcelIds.length)throw Error('Липсват потвърдени кадастрални идентификатори.');
  const location=String(metadata.location||'').trim();
- const parcelDescription='имоти '+parcelIds.join(', ')+(location?' с местоположение '+location:'');
+ const parcelDescription=(parcelIds.length===1?'поземлен имот с идентификатор ':'поземлени имоти с идентификатори ')+parcelIds.join(', ')+(location?', находящ'+(parcelIds.length===1?' се':'и се')+' в '+location:'');
  if(scenario==='A'){
   replaceParagraph(6,metadata.recipient);replaceParagraph(7,metadata.address);
   replaceParagraph(10,'Относно: '+metadata.subject+' — '+parcelDescription);replaceParagraph(13,metadata.salutation);
