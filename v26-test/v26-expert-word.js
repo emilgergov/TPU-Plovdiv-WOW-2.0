@@ -28,7 +28,7 @@ async function make(draft){
  if(doc.getElementsByTagName('parsererror').length)throw Error('КТ13: невалиден Word XML.');
  const body=all(doc,'body')[0];if(!body)throw Error('КТ13: липсва Word body.');
  const source=Array.from(body.children);
- const signatureIndices=source.map((p,i)=>p.localName==='p'&&/електронен\\s+подпис|електронно\\s+подпис|подписал|подпис\\s*:/i.test(textOf(p))?i:-1).filter(i=>i>=0);
+ const signatureIndices=source.map((p,i)=>p.localName==='p'&&/електронен\s+подпис|електронно\s+подпис|подписал|подпис\s*:/i.test(textOf(p))?i:-1).filter(i=>i>=0);
  if(signatureIndices.length<2)throw Error('КТ13: образецът не съдържа две удостоверени полета за електронен подпис.');
  // Keep the entire original signature region, including titles, names and spacing.
  const signatureStart=signatureIndices[0];
