@@ -29,7 +29,8 @@ const pkg=read('v26-draft-package.js'),html=read('index.html'),word=read('v26-ex
 for(const token of ['V26ExpertDraft?.build','V26ExpertWord.make','V26TemplateWord.make','01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_Prilozhenie_1_GIS_analiz.pdf','04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf'])assert(pkg.includes(token),'ZIP integration missing: '+token);
 for(const token of ['v26-expert-draft.js','v26-expert-word.js','v26-draft-package.js','Приложение №1 — ГИС анализ','Приложение №2 — Нормативни и документални референции'])assert(html.includes(token),'UI integration missing: '+token);
 for(const token of ['header','footer','media','signatureIndices','Приложение №1 — ГИС анализ'])assert(word.includes(token),'DOCX invariant missing: '+token);
-assert(word.includes('signature.map(p=>p.cloneNode(true))'),'Original signature paragraphs must be preserved');
+assert(word.includes("paragraph(doc,'Място за електронен подпис — вътрешно съгласуване')"),'Expert opening signature slot missing');
+assert(word.includes("paragraph(doc,'Място за електронен подпис — окончателно подписване')"),'Expert closing signature slot missing');
 assert(word.includes('sect.cloneNode(true)'),'Original section/header/footer references must be preserved');
 assert(pkg.includes("if(includeAnnex2){"),'Annex 2 must remain optional');
 assert(pkg.includes("await window.V26ExpertWord.make(expertDraft)")&&pkg.includes("window.V26TemplateWord.make(expertDraft.scenario,expertDraft.characterization,expertDraft.metadata)"),'Both Word documents must use the same expert draft');
