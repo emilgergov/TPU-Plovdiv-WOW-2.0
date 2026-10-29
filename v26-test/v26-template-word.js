@@ -26,7 +26,10 @@ async function make(scenario,paragraphs,metadata){
  // Preflight original template: mandatory highlighted text must not be editable.
  const plannedEditable=new Set([...MAP[scenario],...(scenario==='A'?[22,23,24,25,31,26,27,28,29,30,6,7,10,13,16,17]:[20,21,22,23,24,25,31,26,27,28,29,30,5,6,7,9,11,12,14,15])]);
  const mandatory=ps.map((p,i)=>({p,i})).filter(({p})=>nodes(p,'shd').some(n=>/^(?:ffff00|fff2cc|ffeb9c|ffff99)$/i.test(n.getAttributeNS(NS,'fill')||n.getAttribute('w:fill')||n.getAttribute('fill')||''))||nodes(p,'highlight').some(n=>/yellow/i.test(n.getAttributeNS(NS,'val')||n.getAttribute('w:val')||n.getAttribute('val')||'')));
- for(const {i} of mandatory)if(plannedEditable.has(i))throw Error('Задължителен жълт блок попада в променливо поле: '+(i+1));
+ const mandatoryIndices=new Set(mandatory.map(x=>x.i));
+ for(const i of MAP[scenario])if(mandatoryIndices.has(i))throw Error('Задължителен жълт блок съвпада с характеристиката на ИП: '+(i+1));
+ // Mandatory highlighted paragraphs are immutable; case details are carried by other editable fields.
+ const writable=(index)=>!mandatoryIndices.has(index);
  for(let i=0;i<4;i++){
   const p=ps[MAP[scenario][i]],runs=nodes(p,'r');
   if(!runs.length||nodes(p,'drawing').length||nodes(p,'fldChar').length)throw Error('Защитен или сложен абзац; редакцията е спряна.');
@@ -42,6 +45,7 @@ async function make(scenario,paragraphs,metadata){
  const required=['recipient','address','subject','incomingReference','salutation','legalParagraphs'];
  if(!metadata||required.some(k=>k!=='legalParagraphs'&&!String(metadata[k]||'').trim()))throw Error('Липсват потвърдени адресат, адрес, предмет, входящ номер или обръщение.');
  const replaceParagraph=(index,value)=>{
+  if(!writable(index))return;
   const p=ps[index],texts=nodes(p,'t');if(!texts.length)throw Error('Липсва променливо текстово поле.');
   if(nodes(p,'drawing').length||nodes(p,'fldChar').length)throw Error('Променливото поле съдържа защитен елемент.');
   texts[0].textContent=value;texts[0].setAttribute('xml:space','preserve');for(const t of texts.slice(1))t.textContent='';
@@ -73,7 +77,7 @@ async function make(scenario,paragraphs,metadata){
  const unmatched=nodes(xml,'t').flatMap(t=>(t.textContent||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[]).filter(id=>!parcelIds.includes(id));
  if(unmatched.length)throw Error('Останал е примерен идентификатор в образеца: '+[...new Set(unmatched)].join(', ')+'. Поправете полето на образеца, без повторно потвърждаване на имотите.');
  // Protect template paragraphs that are not explicitly approved for case-specific replacement.
- const editableIndices=new Set([...MAP[scenario],...legalIndices,...impactIndices,...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])]);
+ const editableIndices=new Set([...MAP[scenario],...legalIndices,...impactIndices,...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])].filter(writable));
  // The two signature slots must remain present and untouched in the template body.
  const signatureCandidates=ps.map((p,i)=>({i,text:nodes(p,'t').map(t=>t.textContent).join('')})).filter(x=>/електронен\s+подпис|електронно\s+подпис|подписал|подпис\s*:/i.test(x.text));
  for(const item of signatureCandidates){if(editableIndices.has(item.i))throw Error('Поле за подпис попада сред редактираните абзаци: '+(item.i+1));}
