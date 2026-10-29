@@ -28,8 +28,11 @@ async function make(draft){
  if(doc.getElementsByTagName('parsererror').length)throw Error('КТ13: невалиден Word XML.');
  const body=all(doc,'body')[0];if(!body)throw Error('КТ13: липсва Word body.');
  const source=Array.from(body.children);
- const signature=source.filter(p=>p.localName==='p'&&/електронен\s+подпис|електронно\s+подпис|подписал|подпис\s*:/i.test(textOf(p)));
- if(signature.length<2)throw Error('КТ13: образецът не съдържа две удостоверени полета за електронен подпис.');
+ const signatureIndices=source.map((p,i)=>p.localName==='p'&&/електронен\\s+подпис|електронно\\s+подпис|подписал|подпис\\s*:/i.test(textOf(p))?i:-1).filter(i=>i>=0);
+ if(signatureIndices.length<2)throw Error('КТ13: образецът не съдържа две удостоверени полета за електронен подпис.');
+ // Keep the entire original signature region, including titles, names and spacing.
+ const signatureStart=signatureIndices[0];
+ const signature=source.slice(signatureStart).filter(p=>p.localName!=='sectPr');
  const sect=source.find(x=>x.localName==='sectPr');
  if(!sect)throw Error('КТ13: липсва секционна настройка с институционалния колонтитул.');
  const rels=zip['word/_rels/document.xml.rels'];
