@@ -68,11 +68,11 @@ function getConfirmedMetadata(){
  result.legalParagraphs=legalFields.map(f=>f.value.trim());
  result.procedureFinding=procedureField?.value.trim()||'';
  result.impactFindings=impactFields.map(f=>f.value.trim());
- const note='Няма данни в преписката';
- result.legalParagraphs=result.legalParagraphs.map(v=>v||note);
- result.impactFindings=result.impactFindings.map(v=>v||note);
- result.procedureFinding=result.procedureFinding||note;
- for(const k of ['recipient','address','subject','incomingReference','salutation'])result[k]=result[k]||note;
+ // Missing evidence must not be converted into repeated administrative prose.
+ // Keep the fields empty so the original-template preflight can stop generation
+ // and identify what needs expert confirmation.
+ result.legalParagraphs=result.legalParagraphs.map(v=>v.trim());
+ result.impactFindings=result.impactFindings.map(v=>v.trim());
  const auto=autoEvidence();
  if(!caseFields.subject.value.trim()&&auto.subject)result.subject=auto.subject.replace(/^Относно:\s*/i,'').trim();
  if(!result.parcelIds)result.parcelIds=auto.ids;
