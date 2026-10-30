@@ -14,7 +14,28 @@ function paragraph(doc,value,{bold=false,heading=false}={}){
  if(bold||heading)rPr.appendChild(ns(doc,'b'));r.appendChild(rPr);
  const t=ns(doc,'t');t.setAttribute('xml:space','preserve');t.textContent=String(value);r.appendChild(t);p.appendChild(r);return p;
 }
-async function make(draft){
+
+async function renderOverview(svg){
+ if(!svg||!svg.includes('<svg'))throw Error('КТ15.6: липсва обзорна ГИС карта.');
+ const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
+ try{
+  const img=new Image();
+  await new Promise((ok,no)=>{img.onload=ok;img.onerror=()=>no(Error('Невалидна ГИС карта.'));img.src=url;});
+  const canvas=document.createElement('canvas');canvas.width=1100;canvas.height=680;
+  const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,1100,680);
+  const ratio=Math.min(1060/img.width,640/img.height);
+  ctx.drawImage(img,(1100-img.width*ratio)/2,(680-img.height*ratio)/2,img.width*ratio,img.height*ratio);
+  const blob=await new Promise((ok,no)=>canvas.toBlob(b=>b?ok(b):no(Error('Неуспешно PNG преобразуване.')),'image/png'));
+  return new Uint8Array(await blob.arrayBuffer());
+ }finally{URL.revokeObjectURL(url)}
+}
+function mapParagraph(doc){
+ const xml='<w:p xmlns:w="'+NS+'" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:r><w:drawing><wp:inline><wp:extent cx="5181600" cy="3202996"/><wp:docPr id="91" name="Обзорна ГИС карта"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="91" name="gis-overview.png"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdV26Map"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="5181600" cy="3202996"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>';
+ const parsed=new DOMParser().parseFromString(xml,'application/xml');
+ if(parsed.getElementsByTagName('parsererror').length)throw Error('Невалиден DrawingML.');
+ return doc.importNode(parsed.documentElement,true);
+}
+async function make(draft,overviewSvg){
  if(draft?.schema!=='KT13_EXPERT_DRAFT_V1')throw Error('КТ13: липсва провереният експертен проект.');
  const scenario=draft.scenario==='А'?'A':'B';
  if(!root.fflate?.unzipSync||!root.fflate?.zipSync)throw Error('КТ13: ZIP библиотеката не е заредена.');
@@ -34,6 +55,7 @@ async function make(draft){
  if(!sect)throw Error('КТ13: липсва секционна настройка с институционалния колонтитул.');
  const rels=zip['word/_rels/document.xml.rels'];
  if(!rels||!Object.keys(zip).some(x=>/^word\/header\d*\.xml$/.test(x))||!Object.keys(zip).some(x=>/^word\/footer\d*\.xml$/.test(x))||!Object.keys(zip).some(x=>/^word\/media\//.test(x)))throw Error('КТ13: липсва лого, хедър или футер на институционалния образец.');
+ const mapBytes=await renderOverview(overviewSvg);
  const m=draft.metadata;
  if(!m.recipient||!m.address||!m.subject||!m.incomingReference||!m.salutation)throw Error('КТ13: липсват потвърдени административни реквизити.');
  const legal=(m.legalParagraphs||[]).slice(0,scenario==='A'?5:7),impacts=m.impactFindings||[];
@@ -61,8 +83,9 @@ async function make(draft){
   ...(m.location?[paragraph(doc,'Местоположение: '+m.location)]:[]),
   paragraph(doc,'II. ПРОСТРАНСТВЕН АНАЛИЗ',{heading:true}),
   paragraph(doc,'В съответствие с принципа за пространствено онагледяване на инвестиционните предложения, отразен в приложение №3 към чл. 10, ал. 2, част Б, т. 3 от Наредбата за оценка за съвместимост, в настоящия експертен проект е включено обзорно картографско извлечение от извършения ГИС анализ.'),
+  mapParagraph(doc),
   paragraph(doc,'Фигура 1. Пространствено положение на имотите спрямо защитените зони от мрежата „Натура 2000“.',{bold:true}),
-  paragraph(doc,'Източник: ГИС анализ на инвестиционното предложение.'),
+  paragraph(doc,'Източник: ГИС анализ, Приложение №1.'),
   paragraph(doc,draft.scenario==='Б'?'По наличните ГИС данни е установено пространствено пресичане със защитена зона: '+draft.zones.join(', ')+'.':'По наличните ГИС данни не е установено пресичане на потвърдените имоти със защитена зона.'),
   paragraph(doc,'Приложение №1 — ГИС анализ представя пространствените резултати, картографската основа и имотния обхват.'),
   paragraph(doc,'Обхват на анализа: '+draft.parcels.length+' потвърдени поземлени имота; '+draft.parcels.filter(p=>p.role==='leading').length+' с роля „предмет на ИП“ и '+draft.parcels.filter(p=>p.role==='ancillary').length+' съпътстващи.'),
@@ -92,6 +115,20 @@ async function make(draft){
  body.replaceChildren(...blocks,paragraph(doc,'Място за електронен подпис — окончателно подписване'),sect.cloneNode(true));
  const serialized=new XMLSerializer().serializeToString(doc);
  if((serialized.match(/подпис/gi)||[]).length<2)throw Error('КТ13: липсват две полета за подпис в експертния документ.');
+
+ const relDoc=new DOMParser().parseFromString(new TextDecoder().decode(rels),'application/xml');
+ const relRoot=relDoc.documentElement,relNS='http://schemas.openxmlformats.org/package/2006/relationships';
+ if(Array.from(relRoot.children).some(x=>x.getAttribute('Id')==='rIdV26Map'))throw Error('Конфликт на Word relationship.');
+ const rel=relDoc.createElementNS(relNS,'Relationship');
+ rel.setAttribute('Id','rIdV26Map');rel.setAttribute('Type','http://schemas.openxmlformats.org/officeDocument/2006/relationships/image');rel.setAttribute('Target','media/v26-gis-overview.png');relRoot.appendChild(rel);
+ zip['word/_rels/document.xml.rels']=new TextEncoder().encode(new XMLSerializer().serializeToString(relDoc));
+ const typesDoc=new DOMParser().parseFromString(new TextDecoder().decode(zip['[Content_Types].xml']),'application/xml');
+ const typesRoot=typesDoc.documentElement,typesNS='http://schemas.openxmlformats.org/package/2006/content-types';
+ if(!Array.from(typesRoot.children).some(x=>x.getAttribute('Extension')==='png')){
+  const t=typesDoc.createElementNS(typesNS,'Default');t.setAttribute('Extension','png');t.setAttribute('ContentType','image/png');typesRoot.appendChild(t);
+ }
+ zip['[Content_Types].xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(typesDoc));
+ zip['word/media/v26-gis-overview.png']=mapBytes;
  zip['word/document.xml']=new TextEncoder().encode(serialized);
  return new Blob([root.fflate.zipSync(zip,{level:6})],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
 }
