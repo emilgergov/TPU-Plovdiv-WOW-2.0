@@ -235,8 +235,9 @@ function normativePdf(results,register){
  const confirmed=!!(subject?.confirmed&&resolvedTitle);
  const subjectDisplay=(resolvedTitle||'Предметът не е установен в обработените материали.').replace(/идентификатор(?:\s*идентификатор)+/gi,'идентификатор').replace(/\bи\s+зграждането\b/gi,'изграждането').replace(/\bСк\s+лад\b/g,'Склад').replace(/\bпро\s+мишлени\b/gi,'промишлени').replace(/\s*[„“]\s*/g,' ').replace(/\s+/g,' ').trim();
  const verifiedLocation=String(review?.location||'').trim();
- const verifiedSettlement=verifiedPlaceLabel(review?.settlement);
+ const verifiedSettlement=verifiedPlaceLabel(review?.settlement)||(()=>{const places=[...new Set(results.map(r=>verifiedPlaceLabel(r.settlement||r.settlement_name)).filter(Boolean))];return places.length===1?places[0]:''})();
  const verifiedLandArea=String(review?.landArea||'').trim();
+ const parcelLocalities=[...new Map(results.map(r=>[String(r.input||r.cadnum||''),String(r.locality||'').trim()]).filter(([id,place])=>id&&place)).entries()];
  const relevant=records.filter(r=>{const title=String(r.title||'');const code=String(r.zone_code||r.sitecode||'');const mentioned=[...title.matchAll(/BG\d{7}/g)].map(m=>m[0]);return title&&/^https:\/\//.test(String(r.source||''))&&(!code||zoneMap.has(code))&&(!mentioned.length||mentioned.every(z=>zoneMap.has(z)))&&(/биологичното разнообразие|съвместимост|защитена зона|заповед/i.test(title+' '+String(r.purpose||'')));});
  const legalGroups=new Map();
  for(const r of relevant){
@@ -254,6 +255,7 @@ function normativePdf(results,register){
   ...(verifiedLocation?[{text:'Местоположение на имотите: '+verifiedLocation}]:[]),
   ...(verifiedSettlement?[{text:'Населено място: '+verifiedSettlement}]:[]),
   ...(verifiedLandArea?[{text:'Землище: '+verifiedLandArea}]:[]),
+  ...parcelLocalities.map(([id,place])=>({text:'Поземлен имот '+id+' — местност '+place})), 
   {text:'Обхват по кадастрални идентификатори: '+(ids.join('; ')||'Не е установен.')},
   ...(confirmed&&subject.activities?.length?[{text:'Предвидени дейности:',bold:true,margin:[0,4,0,2]},...subject.activities.map(a=>String(a).replace(/\s+/g,' ').replace(/^\s*[;:,.]+\s*/,'').trim()).filter(Boolean).map(a=>({text:'• '+a,margin:[8,0,0,2]}))]:[]),
   {text:'II. Пространствена относимост',style:'sub'},
