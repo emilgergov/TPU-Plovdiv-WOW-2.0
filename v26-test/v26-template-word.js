@@ -78,7 +78,7 @@ async function make(scenario,paragraphs,metadata){
  // KT15.3: The legal conclusions are fixed text of the original A/B template.
  // Only the four IP-characterization paragraphs and case-specific fields are edited.
  // Fixed procedure and impact findings remain in the original template.
- const sampleIndex=scenario==='A'?31:21;
+ const sampleIndex=31;
  const editableIndices=new Set([...MAP[scenario],sampleIndex,...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])].filter(i=>i===sampleIndex||writable(i)));
  // Confirmed template exception: paragraph 32 has a mistakenly mandatory-marked sample parcel ID.
  // Replace only that ID; preserve all surrounding legal text and its runs.
