@@ -141,7 +141,7 @@ function getWorkingDraft(){
   const source=(window.V26WorkingContext?.characterization?.sections||[]).find(x=>x.key===['construction','electricity','water_supply','wastewater'][i]);
   const excerpts=(source?.sources||[]).filter(x=>String(x.excerpt||'').trim()).map(x=>String(x.excerpt).replace(/\s*\(Източник:[^)]*\)/g,'').trim()).filter(Boolean);
   const unique=[...new Set(excerpts)];
-  if(unique.length)return unique[0]+' [ОТКЪС ОТ ПРЕПИСКАТА — ЗА СВЕРЯВАНЕ]';
+  if(unique.length)return unique[0]+' (извлечено от преписката; необходима е експертна проверка на съдържанието)';
   return '[ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва потвърдено описание]';
  });
  const metadata=getConfirmedMetadata({allowIncomplete:true});
