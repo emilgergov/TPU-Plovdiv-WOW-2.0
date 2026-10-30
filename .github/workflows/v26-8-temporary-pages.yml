@@ -17,7 +17,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     environment:
-      name: github-pages
+      name: wow-recovery-preview
       url: ${{ steps.deployment.outputs.page_url }}v26-test/index.html
     steps:
       - uses: actions/checkout@v4
