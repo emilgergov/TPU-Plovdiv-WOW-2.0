@@ -40,5 +40,30 @@ assert.equal(unified([{...base,intersection_verified_outside:true}],{}).readines
  assert.equal(String.fromCharCode(...bytes.slice(0,2)),'PK');
  assert.equal(String.fromCharCode(...bytes.slice(-22,-18)),String.fromCharCode(0x50,0x4b,0x05,0x06));
  const count=bytes[bytes.length-14]+256*bytes[bytes.length-13];assert.equal(count,2);
+ const full=context.zipWriter();
+ const entries=[
+  ['01_Proekt_na_stanovishte_Klasicheski.docx','PK'+('A'.repeat(120))],
+  ['02_Proekt_na_stanovishte_Eksperten.docx','PK'+('B'.repeat(120))],
+  ['03_Prilozhenie_1_GIS_analiz.pdf','%PDF-1.4'+('C'.repeat(120))],
+  ['04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf','%PDF-1.4'+('D'.repeat(120))],
+  ['README_BG.txt','Проверка на пълния пакет']
+ ];
+ for(const [name,data] of entries)full.file(name,new Blob([data]));
+ const fullBlob=await full.generateAsync();
+ const buf=new Uint8Array(await fullBlob.arrayBuffer());
+ const view=new DataView(buf.buffer,buf.byteOffset,buf.byteLength);
+ const decoder=new TextDecoder();
+ const files=new Map();
+ let pos=0;
+ while(pos+30<=buf.length&&view.getUint32(pos,true)===0x04034b50){
+  const length=view.getUint32(pos+18,true),nameLength=view.getUint16(pos+26,true),extraLength=view.getUint16(pos+28,true);
+  const name=decoder.decode(buf.slice(pos+30,pos+30+nameLength));
+  const start=pos+30+nameLength+extraLength;
+  files.set(name,decoder.decode(buf.slice(start,start+length)));
+  pos=start+length;
+ }
+ assert.equal(files.size,5,'All four documents and README must be present');
+ for(const [name,data] of entries)assert.equal(files.get(name),data,'ZIP payload mismatch: '+name);
+ assert.equal(view.getUint16(buf.length-12,true),5,'ZIP central directory must list all files');
  console.log('PASS: scenarios A/B/unresolved, leading-role safety, archive-null safety, ZIP container (16 assertions)');
 })().catch(e=>{console.error(e);process.exitCode=1});
