@@ -134,7 +134,7 @@ document.addEventListener('v26:full-reset',()=>{if(confirmed)confirmed.checked=f
 function getWorkingDraft(){
  refreshVerifiedFields();
  const auto=autoEvidence();
- const subject=String(caseFields.subject?.value||auto.subject||'').replace(/^Относно:\s*/i,'').replace(/\s+—\s+ПИ с идентификатор[\s\S]*$/i,'').replace(/\s+—\s+поземлени имоти с идентификатори[\s\S]*$/i,'').trim();
+ const subject=String(caseFields.subject?.value||auto.subject||'').replace(/^Относно:\s*/i,'').replace(/идентификатор(?:\s*идентификатор)+/gi,'идентификатор').replace(/\s+—\s+ПИ с идентификатор[\s\S]*$/i,'').replace(/\s+—\s+поземлени имоти с идентификатори[\s\S]*$/i,'').trim();
  const paragraphs=fields.map((f,i)=>{
   const value=String(f.value||'').trim();
   if(value&&!/Няма данни в преписката|Източник:/i.test(value))return value; // Preserve unreviewed text verbatim in the working draft; never manufacture template wording.
