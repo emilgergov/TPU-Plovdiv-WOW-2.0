@@ -71,6 +71,18 @@ function getConfirmedParagraphs(scenario='A'){
  return values;
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
+function validateCaseMetadata(result){
+ const required=[['recipient','Адресат'],['address','Адрес'],['subject','Предмет на ИП'],['incomingReference','Входящ номер и дата'],['salutation','Обръщение'],['parcelIds','Имотни идентификатори']];
+ const missing=required.filter(([key])=>!String(result[key]||'').trim()).map(([,label])=>label);
+ if(missing.length)throw Error('За Word липсват потвърдени административни данни: '+missing.join(', ')+'.');
+ const ids=String(result.parcelIds).match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
+ if(!ids.length)throw Error('Не са въведени валидни кадастрални идентификатори.');
+ const unique=[...new Set(ids.map(id=>id.split('.').slice(0,3).join('.')))];
+ const unexpected=String(result.parcelIds).replace(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g,'').replace(/[\s,;]+/g,'');
+ if(unexpected)throw Error('Полето за имоти съдържа неразпознат текст; коригирайте го преди Word.');
+ result.parcelIds=unique.join(', ');
+ return result;
+}
 function getConfirmedMetadata(){
  refreshVerifiedFields();
  // Working proposal: unresolved fields remain explicit review notes in DOCX.
@@ -95,7 +107,7 @@ function getConfirmedMetadata(){
   const distinct=[...new Map(references.map(x=>[x.number+'|'+x.date,x])).values()];
   if(distinct.length===1)result.incomingReference='Вх. № '+distinct[0].number+' / '+distinct[0].date;
  }
- return result;
+ return validateCaseMetadata(result);
 }
 document.addEventListener('v26:dossier-loaded',event=>{
  if(confirmed)confirmed.checked=false;
