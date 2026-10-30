@@ -62,7 +62,7 @@ async function make(scenario,paragraphs,metadata){
  // Normalize quoted dossier titles without changing the substantive subject.
  const normalizedSubject=String(metadata.subject||'').replace(/\s+/g,' ').replace(/\bи\s+зграждането\b/gi,'изграждането').replace(/\bСк\s+лад\b/g,'Склад').replace(/\bпро\s+мишлени\b/gi,'промишлени').replace(/„{2,}/g,'„').replace(/“{2,}/g,'“').replace(/\s+([,.;:])/g,'$1').trim();
  metadata={...metadata,subject:normalizedSubject};
- const parcelIds=String(metadata.parcelIds||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
+ const parcelIds=[...new Set((String(metadata.parcelIds||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[]).map(id=>id.split('.').slice(0,3).join('.')))];
  if(!parcelIds.length)throw Error('Липсват потвърдени кадастрални идентификатори.');
  const location=String(metadata.location||'').trim();
  const parcelDescription=(parcelIds.length===1?'поземлен имот с идентификатор ':'поземлени имоти с идентификатори ')+parcelIds.join(', ')+(location?', находящ'+(parcelIds.length===1?' се':'и се')+' в '+location:'');
