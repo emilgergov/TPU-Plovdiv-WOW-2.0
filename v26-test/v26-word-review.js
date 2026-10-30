@@ -146,7 +146,10 @@ function getWorkingDraft(){
  });
  const metadata=getConfirmedMetadata({allowIncomplete:true});
  metadata.subject=subject||'[ЗА ЕКСПЕРТНА ПРОВЕРКА — предмет на ИП]';
- for(const key of ['recipient','address','incomingReference','salutation'])if(!metadata[key])metadata[key]='[ЗА ЕКСПЕРТНА ПРОВЕРКА — '+key+']';
+ if(!metadata.recipient)metadata.recipient='ДО ВЪЗЛОЖИТЕЛЯ НА ИНВЕСТИЦИОННОТО ПРЕДЛОЖЕНИЕ';
+ if(!metadata.address)metadata.address='Адрес за кореспонденция: [ЗА ПОПЪЛВАНЕ]';
+ if(!metadata.incomingReference)metadata.incomingReference='Вх. № ОВОС-9999 / ДАТА-99.99.9999 г.';
+ if(!metadata.salutation)metadata.salutation='УВАЖАЕМИ ГОСПОЖИ И ГОСПОДА,';
  metadata.legalParagraphs=Array.from({length:7},(_,i)=>metadata.legalParagraphs?.[i]||'[ЗА ЕКСПЕРТНА ПРОВЕРКА — правна констатация '+(i+1)+']');
  metadata.procedureFinding=metadata.procedureFinding||'[ЗА ЕКСПЕРТНА ПРОВЕРКА — процедурна преценка]';
  metadata.impactFindings=Array.from({length:5},(_,i)=>metadata.impactFindings?.[i]||'[ЗА ЕКСПЕРТНА ПРОВЕРКА — въздействие '+(i+1)+']');
