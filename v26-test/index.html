@@ -235,7 +235,7 @@ function reviewRoles(d){
     if(v26EarlyGisStarted&&confirmedRoles?.[id])select.value=confirmedRoles[id];else select.value=(c.leading_candidates.includes(id)||resolved?.id===id)?'leading':'ancillary';line.appendChild(select);const hint=document.createElement('small');hint.textContent=c.leading_candidates.includes(id)?' (кандидат за водещ)':c.ancillary_candidates.includes(id)?' (кандидат за съпътстващ)':'';line.appendChild(hint);host.appendChild(line);
   }
   $('roleReview').style.display=caseParcels.length?'block':'none';$('roleStatus').textContent='Имотен обхват: '+caseParcels.length+' открити имота. '+(resolved?'Автоматично определен водещ: '+resolved.id+'. Стартиране на ГИС.':'Не е установен водещ имот от извлечените сведения — необходима е проверка на прочита.');
-  if(resolved){confirmedRoles=Object.fromEntries(caseParcels.map(id=>[id,(c.leading_candidates.includes(id)||resolved.id===id)?'leading':'ancillary']));v26ContextState.roles={...confirmedRoles};v26UpdateContext();v26RefreshSubjectHeading();$('ids').value=resolved.id;v26SetLookupMode(false);$('run').click();}
+  if(resolved){confirmedRoles=Object.fromEntries(caseParcels.map(id=>[id,(c.leading_candidates.includes(id)||resolved.id===id)?'leading':'ancillary']));v26ContextState.roles={...confirmedRoles};v26UpdateContext();v26RefreshSubjectHeading();$('ids').value=caseParcels.filter(id=>confirmedRoles[id]==='leading').join('\n');v26SetLookupMode(false);$('run').click();}
 }
 $('confirmRoles').onclick=()=>{const roles={};const selects=[...$('roleRows').querySelectorAll('select')];if(!selects.length){$('roleStatus').textContent='Няма намерени имоти за потвърждаване. Първо използвайте „Намери имотите“.';return;}
   for(const s of selects){if(s.value)roles[s.dataset.cadnum]=s.value}
