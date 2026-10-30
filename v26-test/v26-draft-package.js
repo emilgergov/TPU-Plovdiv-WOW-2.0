@@ -224,6 +224,9 @@ function normativePdf(results,register){
   }
  }
  const zones=[...zoneMap.values()].sort((a,b)=>a.code.localeCompare(b.code));
+ const gisEvidence=results.map(r=>{const id=String(r.input||r.cadnum||'');const verified=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z:String(z?.sitecode||z?.code||'')).filter(z=>/^BG\d{7}$/.test(z));const overlays=[...(r.archived_overlay_records||[]),...(r.archived_zones||[])];const archived=overlays.map(z=>typeof z==='string'?z:String(z?.sitecode||z?.code||'')).filter(z=>/^BG\d{7}$/.test(z));return {id,codes:[...new Set([...verified,...archived])],outside:r.intersection_verified_outside===true};});
+ const gisZoneCodes=[...new Set(gisEvidence.flatMap(x=>x.codes))];
+ const gisSummary=gisEvidence.map(x=>'Имот '+x.id+': '+(x.codes.length?'отчетена зона '+x.codes.join(', '):x.outside?'без пресичане със защитена зона':'пространственият резултат изисква сверяване с ГИС анализа')).join('; ')+'.';
  const records=register?.records||[];
  const dossier=register?.dossierReferences;
  const subject=window.V26SubjectContext;
@@ -255,7 +258,7 @@ function normativePdf(results,register){
   ...(confirmed&&subject.activities?.length?[{text:'Предвидени дейности:',bold:true,margin:[0,4,0,2]},...subject.activities.map(a=>String(a).replace(/\s+/g,' ').replace(/^\s*[;:,.]+\s*/,'').trim()).filter(Boolean).map(a=>({text:'• '+a,margin:[8,0,0,2]}))]:[]),
   {text:'II. Пространствена относимост',style:'sub'},
   {text:'Пространствените резултати са представени в самостоятелния документ „ТПУ Пловдив — ГИС анализ“. Настоящият документ използва резултатите му, без да ги замества.'},
-  {text:zones.length?'Отчетени защитени зони: '+zones.map(z=>z.code+(z.name?' — '+z.name:'')).join('; '):results.every(r=>r.intersection_verified_outside===true)?'ГИС анализът установява отсъствие на пресичане със защитени зони.':'Няма данни за пространствен извод.'},
+  {text:'Пространствен резултат по имоти: '+gisSummary},
   {text:'III. Нормативни и документални основания',style:'sub'},
   {text:'Проверени нормативни разпоредби: чл. 31, ал. 1 от ЗБР — оценка за съвместимост при възможно значително отрицателно въздействие; чл. 31, ал. 4 от ЗБР — връзка с процедурите по ЗООС, когато са приложими; чл. 2, ал. 1, т. 1 от Наредбата за ОС — обхват на инвестиционните предложения. Конкретната процедура и режимите на зоната се определят след индивидуална проверка.',fontSize:8},
   {text:'При оценката на инвестиционното предложение се съобразяват относимите нормативни основания от интегрирания архив. По чл. 31, ал. 1 от Закона за биологичното разнообразие се разглежда съвместимостта с предмета и целите на опазване на защитените зони, когато нормата е приложима към конкретния случай. Пространственото пресичане само по себе си не доказва нарушение на режим.'},
@@ -266,9 +269,9 @@ function normativePdf(results,register){
 
   ...zones.map(z=>({text:'Защитена зона '+z.code+(z.name?' „'+z.name+'“':'')+': пространственото пресичане е установено в документа „ТПУ Пловдив — ГИС анализ“. Приложимостта на конкретните режими се преценява спрямо заявените дейности.'})),
   {text:'V. Експертен извод',style:'sub'},
-  {text:zones.length?'ГИС анализът установява пресичане с изброените защитени зони. Самото пресичане не определя автоматично допустимостта на инвестиционното предложение.':results.every(r=>r.intersection_verified_outside===true)?'ГИС анализът установява отсъствие на пресичане със защитени зони.':'Няма данни за пространствен извод.'},
+  {text:gisZoneCodes.length?'За посочените имоти са отчетени защитени зони: '+gisZoneCodes.join(', ')+'. Пространствените резултати не определят автоматично допустимостта на ИП.':gisEvidence.every(x=>x.outside)?'Не е установено пресичане със защитени зони.':'Пространственият резултат се сверява с документа „ТПУ Пловдив — ГИС анализ“.'},
   {text:applicable.length?'Посочените архивни нормативни референции подлежат на експертна съпоставка с конкретните дейности.':'Не се формулира окончателен правен извод без проверени приложими режимни разпоредби.'},
-  {text:'Документът е проект за експертна проверка, а не административен акт.',italics:true,fontSize:9}
+  {text:'Документът е проект за експертна проверка, а не административен акт.',italics:true,fontSize:8,margin:[0,0,0,0]}
  ];
  const def=pdfDef('Нормативни и документални референции',content);
  // Compact only Annex 2; leave the approved GIS Annex 1 layout untouched.
