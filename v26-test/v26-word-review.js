@@ -32,7 +32,7 @@ function autoEvidence(){
  const paragraphs=topics.map((key,i)=>{
   const section=sections.find(s=>s.key===key);
   const verified=(section?.sources||[]).filter(s=>['verified','corroborated'].includes(s.status)&&s.excerpt);
-  if(verified.length)return verified.slice(0,3).map(s=>String(s.excerpt).trim()).join(' ');
+  if(verified.length)return verified.slice(0,3).map(s=>String(s.excerpt).trim()).join(' '); // Evidence only; never directly insert into Word.
   // Raw dossier excerpts remain explicitly subject to expert review.
   const review=(section?.sources||[]).filter(s=>s.status==='source_excerpt_not_verified'&&String(s.excerpt||'').trim());
   if(review.length)return review.slice(0,3).map(s=>String(s.excerpt).trim()+' (Източник: '+s.file+')').join(' ');
@@ -52,7 +52,7 @@ function formatVerifiedParagraph(raw,i,scenario){
 function refreshVerifiedFields(){
  const auto=autoEvidence();
  for(let i=0;i<fields.length;i++){
-  if(!fields[i].value.trim()&&auto.paragraphs[i]&&auto.paragraphs[i]!=='Няма данни в преписката.'&&!/Източник:/i.test(auto.paragraphs[i]))fields[i].value=formatVerifiedParagraph(auto.paragraphs[i],i,'A');
+  // Source excerpts must be reviewed and rewritten as complete administrative sentences; no silent auto-fill.
  }
  if(caseFields.subject&&!caseFields.subject.value.trim()&&auto.subject)caseFields.subject.value=auto.subject.replace(/^Относно:\s*/i,'').trim();
  if(caseFields.parcelIds&&!caseFields.parcelIds.value.trim()&&auto.ids)caseFields.parcelIds.value=auto.ids;
@@ -62,7 +62,7 @@ function getConfirmedParagraphs(scenario='A'){
  // No invented or generic fallback may enter an administrative document.
  // The four paragraphs must be individually reviewed and confirmed.
  const auto=autoEvidence();
- const values=fields.map((f,i)=>{const typed=f.value.trim();if(typed)return formatVerifiedParagraph(typed,i,scenario);const verified=auto.paragraphs[i];return verified&&verified!=='Няма данни в преписката.'&&!/Източник:/i.test(verified)?formatVerifiedParagraph(verified,i,scenario):'';});
+ const values=fields.map((f,i)=>{const typed=f.value.trim();return typed?formatVerifiedParagraph(typed,i,scenario):'';});
  const missing=values.map((v,i)=>v?null:labels[i]).filter(Boolean);
  if(missing.length){
   const panel=document.getElementById('v26WordReview');if(panel){panel.hidden=false;panel.open=true;panel.scrollIntoView?.({block:'nearest'});}
@@ -105,7 +105,7 @@ document.addEventListener('v26:dossier-loaded',event=>{
  const dossierSubject=window.V26SubjectContext;
  const verifiedSections=draft?.sections||[];
  const topicKeys=['construction','electricity','water_supply','wastewater'];
- topicKeys.forEach((key,i)=>{const sources=(verifiedSections.find(section=>section.key===key)?.sources||[]).filter(source=>['verified','corroborated'].includes(source.status)&&String(source.excerpt||'').trim());if(sources.length&&fields[i])fields[i].value=formatVerifiedParagraph(sources.slice(0,3).map(source=>String(source.excerpt).trim()).join(' '),i,'A');});
+ topicKeys.forEach((key,i)=>{const sources=(verifiedSections.find(section=>section.key===key)?.sources||[]).filter(source=>['verified','corroborated'].includes(source.status)&&String(source.excerpt||'').trim());// Even verified excerpts are not finished Word prose; display their sources for expert review instead.});
  // A confirmed title is not evidence of construction details; do not fabricate a construction paragraph.
  if(caseFields.subject&&dossierSubject?.confirmed&&String(dossierSubject.wordHeading||dossierSubject.title||'').trim())caseFields.subject.value=String(dossierSubject.wordHeading||dossierSubject.title).replace(/^Относно:\s*/i,'').trim();
  const knownIds=(document.getElementById('ids')?.value||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
