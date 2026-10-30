@@ -1,0 +1,38 @@
+name: V26.8 temporary public visual test
+on:
+  push:
+    branches:
+      - work/v26-8-word-content-20261030
+    paths:
+      - '.github/workflows/v26-8-temporary-pages.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}v26-test/index.html
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Verify test page and normative data
+        run: |
+          test -s v26-test/index.html
+          test -s v26-test/v26-draft-package.js
+          test -s v26-test/data/normative-archive-register.json
+          test -s v26-test/normative/sources.json
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+      - name: Deploy V26.8 for user-approved temporary visual test
+        id: deployment
+        uses: actions/deploy-pages@v4
