@@ -1,0 +1,50 @@
+name: KT15.6 GitHub Pages visual preview
+on:
+  push:
+    paths:
+      - '.github/workflows/kt15-6-pages-preview.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Publish isolated KT15.6 overlay without replacing main module
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin work/v26-9-kt15-document-content-20261030:refs/remotes/origin/kt15-source
+          mkdir -p v26-test/kt15-6
+          git diff --name-only --diff-filter=ACMR main...origin/kt15-source -- v26-test/ > /tmp/kt15-changes.txt
+          python3 - <<'PY'
+          import subprocess,pathlib,re
+          root=pathlib.Path('v26-test/kt15-6')
+          changes=[x.strip() for x in pathlib.Path('/tmp/kt15-changes.txt').read_text().splitlines() if x.strip()]
+          for path in changes:
+              rel=path.removeprefix('v26-test/')
+              if rel=='index.html': continue
+              dst=root/rel
+              dst.parent.mkdir(parents=True,exist_ok=True)
+              dst.write_bytes(subprocess.check_output(['git','show','origin/kt15-source:'+path]))
+          html=subprocess.check_output(['git','show','origin/kt15-source:v26-test/index.html']).decode()
+          html=html.replace('<head>','<head><base href="../">',1)
+          for path in changes:
+              rel=path.removeprefix('v26-test/')
+              if rel.endswith('.js') or rel.endswith('.css'):
+                  html=re.sub(r'(?P<q>["\'])'+re.escape(rel)+r'(?P<suffix>\?[^"\']*)?(?P=q)',lambda m:m.group('q')+'kt15-6/'+rel+(m.group('suffix') or '')+m.group('q'),html)
+          (root/'index.html').write_text(html)
+          print('Overlay files:',len(changes))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v26-test/kt15-6
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish isolated KT15.6 visual test on GitHub Pages"
+            git push origin HEAD:main
+          fi
