@@ -7,6 +7,7 @@ on:
       - '.github/workflows/v26-8-temporary-pages.yml'
       - 'v26-test/**'
   workflow_dispatch:
+# Fresh deployment run after GitHub Pages transient failure; avoid rerunning old artifacts.
 permissions:
   contents: read
   pages: write
