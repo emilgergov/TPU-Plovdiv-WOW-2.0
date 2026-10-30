@@ -74,9 +74,11 @@ function validateCaseMetadata(result){
  if(missing.length)throw Error('За Word липсват потвърдени административни данни: '+missing.join(', ')+'.');
  const ids=String(result.parcelIds).match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  if(!ids.length)throw Error('Не са въведени валидни кадастрални идентификатори.');
- const unique=[...new Set(ids.map(id=>id.split('.').slice(0,3).join('.')))];
+ const originalIdentifiers=[...new Set(ids)];
+ const unique=[...new Set(originalIdentifiers.map(id=>id.split('.').slice(0,3).join('.')))];
  const unexpected=String(result.parcelIds).replace(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g,'').replace(/[\s,;]+/g,'');
  if(unexpected)throw Error('Полето за имоти съдържа неразпознат текст; коригирайте го преди Word.');
+ result.originalCadastralIdentifiers=originalIdentifiers.join(', '); // Preserve source-level building/unit identifiers for traceability; GIS uses parcel IDs.
  result.parcelIds=unique.join(', ');
  return result;
 }
