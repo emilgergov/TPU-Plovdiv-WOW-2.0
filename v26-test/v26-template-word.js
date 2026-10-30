@@ -93,7 +93,7 @@ async function make(scenario,paragraphs,metadata){
  }
  // The confirmed parcel list is the single source of truth for the proposal.
  // Unknown sample IDs mean an unmapped template paragraph, not an unconfirmed parcel.
- const unmatched=nodes(xml,'t').flatMap(t=>(t.textContent||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[]).filter(id=>!parcelIds.includes(id));
+ const unmatched=ps.flatMap((p,i)=>nodes(p,'t').map(t=>t.textContent||'').join('').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)?.filter(id=>!parcelIds.includes(id)).map(id=>id+' (абзац '+(i+1)+')')||[]);
  if(unmatched.length)throw Error('Останал е примерен идентификатор в образеца: '+[...new Set(unmatched)].join(', ')+'. Поправете полето на образеца, без повторно потвърждаване на имотите.');
  // Protect template paragraphs that are not explicitly approved for case-specific replacement.
  
