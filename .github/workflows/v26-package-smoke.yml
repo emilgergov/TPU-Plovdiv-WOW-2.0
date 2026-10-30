@@ -29,3 +29,5 @@ jobs:
         run: node v26-test/tests/v26-8-annex-contract.cjs
       - name: Render and parse real PDF1 and PDF2
         run: node v26-test/tests/v26-8-real-pdf.cjs
+      - name: Generate and inspect complete real ZIP packages for A and B
+        run: node v26-test/tests/v26-8-full-real-zip.cjs
