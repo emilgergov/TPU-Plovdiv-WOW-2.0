@@ -58,9 +58,7 @@ async function make(scenario,paragraphs,metadata){
   texts[0].textContent=value;texts[0].setAttribute('xml:space','preserve');for(const t of texts.slice(1))t.textContent='';
  };
  const legalIndices=scenario==='A'?[22,23,24,25,31]:[20,21,22,23,24,25,31];
- if(!Array.isArray(metadata.legalParagraphs)||metadata.legalParagraphs.length<legalIndices.length||metadata.legalParagraphs.slice(0,legalIndices.length).some(x=>!String(x).trim()))throw Error('Не са потвърдени всички фактически и правни констатации.');
- const unreviewed=/Няма данни в преписката|ЗА ЕКСПЕРТНА ПРОВЕРКА|Източник:|необходима е експертна проверка|\[ОТКЪС|\[ЗА ПРОВЕРКА/i;
- if(metadata.legalParagraphs.slice(0,legalIndices.length).some(x=>unreviewed.test(String(x))))throw Error('Правните констатации съдържат непроверен текст; класическият Word не се генерира.');
+ 
  // Normalize quoted dossier titles without changing the substantive subject.
  const normalizedSubject=String(metadata.subject||'').replace(/\s+/g,' ').replace(/\bи\s+зграждането\b/gi,'изграждането').replace(/\bСк\s+лад\b/g,'Склад').replace(/\bпро\s+мишлени\b/gi,'промишлени').replace(/„{2,}/g,'„').replace(/“{2,}/g,'“').replace(/\s+([,.;:])/g,'$1').trim();
  metadata={...metadata,subject:normalizedSubject};
@@ -77,7 +75,8 @@ async function make(scenario,paragraphs,metadata){
   replaceParagraph(9,'Относно: '+metadata.subject+' — '+parcelDescription);replaceParagraph(11,metadata.salutation);replaceParagraph(12,'');
   replaceParagraph(14,'Във връзка с уведомление '+metadata.incomingReference+' за '+metadata.subject+', '+parcelDescription+'.');
  }
- legalIndices.forEach((index,i)=>replaceParagraph(index,String(metadata.legalParagraphs[i])));
+ // KT15.3: The legal conclusions are fixed text of the original A/B template.
+ // Only the four IP-characterization paragraphs and case-specific fields are edited.
  // The procedure statement and five impact findings are case-specific, never reusable sample findings.
  if(!String(metadata.procedureFinding||'').trim())throw Error('Липсва проверена констатация за приложимата процедура по Наредбата за ОС.');
  if(!Array.isArray(metadata.impactFindings)||metadata.impactFindings.length!==5||metadata.impactFindings.some(v=>!String(v).trim()))throw Error('Липсват петте проверени констатации за въздействията.');
@@ -103,7 +102,7 @@ async function make(scenario,paragraphs,metadata){
  const unmatched=nodes(xml,'t').flatMap(t=>(t.textContent||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[]).filter(id=>!parcelIds.includes(id));
  if(unmatched.length)throw Error('Останал е примерен идентификатор в образеца: '+[...new Set(unmatched)].join(', ')+'. Поправете полето на образеца, без повторно потвърждаване на имотите.');
  // Protect template paragraphs that are not explicitly approved for case-specific replacement.
- const editableIndices=new Set([...MAP[scenario],...legalIndices,...impactIndices.filter(i=>!mandatoryIndices.has(i)),...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])].filter(writable));
+ const editableIndices=new Set([...MAP[scenario],...impactIndices.filter(i=>!mandatoryIndices.has(i)),...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])].filter(writable));
  // The two signature slots must remain present and untouched in the template body.
  const signatureCandidates=ps.map((p,i)=>({i,text:nodes(p,'t').map(t=>t.textContent).join('')})).filter(x=>/електронен\s+подпис|електронно\s+подпис|подписал|подпис\s*:/i.test(x.text));
  for(const item of signatureCandidates){if(editableIndices.has(item.i))throw Error('Поле за подпис попада сред редактираните абзаци: '+(item.i+1));}
