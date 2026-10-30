@@ -25,3 +25,5 @@ jobs:
         run: node v26-test/tests/document-smoke.cjs
       - name: Test original Word A/B templates
         run: node v26-test/tests/word-real-templates.cjs
+      - name: Test PDF1 and PDF2 V26.8 evidence and settlement contracts
+        run: node v26-test/tests/v26-8-annex-contract.cjs
