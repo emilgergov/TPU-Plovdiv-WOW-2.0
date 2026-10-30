@@ -124,7 +124,7 @@ document.addEventListener('v26:dossier-loaded',event=>{
   const section=draft?.sections?.find(x=>x.key===key);if(!section?.sources?.length||!fields[i])return;
   const wrapper=document.createElement('div');wrapper.className='v26-evidence-suggestion';wrapper.style.cssText='font-size:0.9em;margin:3px 0 10px;padding:7px;border-left:3px solid #819d89';
   const evidenceDetails=document.createElement('details');const title=document.createElement('summary');title.textContent='Покажи източници от преписката ('+Math.min(section.sources.length,3)+')';evidenceDetails.append(title);wrapper.append(evidenceDetails);
-  section.sources.slice(0,3).forEach(source=>{const p=document.createElement('p');p.textContent=source.file+' · '+(source.date||'дата неустановена')+': '+source.excerpt.slice(0,380);evidenceDetails.append(p)});
+  section.sources.slice(0,3).forEach(source=>{const p=document.createElement('p');p.textContent=source.file+' · '+(source.date||'дата неустановена')+': '+String(source.excerpt||'').slice(0,380).replace(/\s+\S*$/,'').trim();evidenceDetails.append(p)});
   fields[i].parentNode.append(wrapper);
  });
 });
