@@ -197,7 +197,7 @@ function gisPdf(results,options={}){
    const zones=[...new Set(overlays.map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z)))];
    const names=[...new Set(overlays.map(z=>String(z.name_bg||z.name||'').trim()).filter(Boolean))];
    const verifiedCodes=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z));
-    const zoneText=verifiedCodes.length?verifiedCodes.join(', '):r.intersection_verified_outside===true?'Няма пресечена защитена зона':zones.length?zones.join(', ')+(names.length?' · '+names.join('; '):''):'Няма данни';
+    const zoneText=verifiedCodes.length?verifiedCodes.join(', '):r.intersection_verified_outside===true?'Няма пресечена защитена зона':zones.length?'Архивни сведения (непотвърдено пресичане): '+zones.join(', '):'Няма потвърдени данни';
    const verifiedZones=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z));
     const intersection=verifiedZones.length?'УСТАНОВЕНО ПРЕСИЧАНЕ':r.intersection_verified_outside===true?'НЯМА ПРЕСИЧАНЕ':has?'Няма данни':'Няма данни';
    return [id,Number.isFinite(area)&&area>0?area.toLocaleString('bg-BG',{maximumFractionDigits:3})+' (архивна ГИС площ)':'Не е налична',zoneText,intersection,has?'ГИС геометрия налична':'Липсва геометрия'];
@@ -232,10 +232,10 @@ function normativePdf(results,register){
   const code=String(r.zone_code||r.sitecode||'')||([...String(r.title||'').matchAll(/BG\d{7}/g)][0]?.[0]||'');
   const group=title.includes('биологичното разнообразие')?'Закон за биологичното разнообразие':title.includes('оценка за съвместимост')?'Наредба за оценка за съвместимост':code&&zoneMap.has(code)?'Зона '+code:String(r.title||'').trim();
   const key=group+'|'+code;
-  if(!legalGroups.has(key))legalGroups.set(key,{title:group,source:r.source,ids:[]});
-  const item=legalGroups.get(key);if(r.id&&!item.ids.includes(r.id))item.ids.push(r.id);
+  if(!legalGroups.has(key))legalGroups.set(key,{title:group,sources:[],ids:[]});
+  const item=legalGroups.get(key);if(r.id&&!item.ids.includes(r.id))item.ids.push(r.id);if(r.source&&!item.sources.includes(r.source))item.sources.push(r.source);
  }
- const applicable=[...legalGroups.values()].slice(0,5);
+ const applicable=[...legalGroups.values()]; // Do not silently omit applicable archival references.
  const content=[
   {text:'I. Предмет и фактическа основа',style:'sub'},
   {text:'Предмет на инвестиционното предложение: '+(subjectDisplay)},
@@ -247,7 +247,7 @@ function normativePdf(results,register){
   {text:zones.length?'Отчетени защитени зони: '+zones.map(z=>z.code+(z.name?' — '+z.name:'')).join('; '):results.every(r=>r.intersection_verified_outside===true)?'ГИС анализът установява отсъствие на пресичане със защитени зони.':'Няма данни за пространствен извод.'},
   {text:'III. Нормативни и документални основания',style:'sub'},
   {text:'При оценката на инвестиционното предложение се съобразяват относимите нормативни основания от интегрирания архив. По чл. 31, ал. 1 от Закона за биологичното разнообразие се разглежда съвместимостта с предмета и целите на опазване на защитените зони, когато нормата е приложима към конкретния случай. Пространственото пресичане само по себе си не доказва нарушение на режим.'},
-  ...applicable.map(r=>({text:r.title+(r.ids.length?' — архив '+r.ids.join(', '):''),link:String(r.source),color:'#165c86',fontSize:9})),
+  ...applicable.flatMap(r=>[{text:r.title+(r.ids.length?' — архив '+r.ids.join(', '):''),bold:true,fontSize:9},...r.sources.map(source=>({text:source,link:String(source),color:'#165c86',fontSize:8}))]),
   ...(applicable.length?[]:[{text:'В интегрирания нормативен архив няма относима референция за този обхват.'}]),
   {text:'IV. Приложимост към инвестиционното предложение',style:'sub'},
   {text:resolvedTitle?'За предложение „'+resolvedTitle+'“ относимостта на посочените основания се разглежда спрямо описаните дейности и пространствените резултати от Приложение №1. Режимите на конкретна зона се преценяват отделно; настоящата справка не установява автоматично допустимост или забрана.':'Предметът и дейностите подлежат на потвърждение преди индивидуална преценка за приложимост на режимите.'},
