@@ -191,7 +191,7 @@ function gisPdf(results,options={}){
   content.push({svg:drawing,width:480,margin:[0,4,0,8]});
  }else if(!options.mapSvg)content.push({text:'Картографски материал: Недостатъчни данни за заключение — няма налична имотна геометрия.',bold:true});
  const verifiedLocation=String(options.verifiedCaseMetadata?.location||'').trim();
- const verifiedSettlement=verifiedPlaceLabel(options.verifiedCaseMetadata?.settlement);
+ const verifiedSettlement=verifiedPlaceLabel(options.verifiedCaseMetadata?.settlement)||(()=>{const values=[...new Set(results.map(r=>verifiedPlaceLabel(r.settlement||r.settlement_name||'')).filter(Boolean))];return values.length===1?values[0]:''})();
  const verifiedLandArea=String(options.verifiedCaseMetadata?.landArea||'').trim();
  if(verifiedLocation)content.push({text:'Местоположение на имотите: '+verifiedLocation,margin:[0,5,0,7]});
  if(verifiedSettlement)content.push({text:'Населено място: '+verifiedSettlement});
