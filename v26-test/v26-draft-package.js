@@ -254,7 +254,7 @@ function normativePdf(results,register){
   ...(verifiedLocation?[{text:'Местоположение на имотите: '+verifiedLocation}]:[]),
   ...(verifiedSettlement?[{text:'Населено място: '+verifiedSettlement}]:[]),
   ...(verifiedLandArea?[{text:'Землище: '+verifiedLandArea}]:[]),
-  {text:'Обхват по кадастрални идентификатори: '+(ids.map(id=>id+(id==='36676.129.457'?' — с. Катуница':id==='47295.27.259'?' — с. Марково':'')).join('; ')||'Не е установен.')},
+  {text:'Обхват по кадастрални идентификатори: '+(ids.join('; ')||'Не е установен.')},
   ...(confirmed&&subject.activities?.length?[{text:'Предвидени дейности:',bold:true,margin:[0,4,0,2]},...subject.activities.map(a=>String(a).replace(/\s+/g,' ').replace(/^\s*[;:,.]+\s*/,'').trim()).filter(Boolean).map(a=>({text:'• '+a,margin:[8,0,0,2]}))]:[]),
   {text:'II. Пространствена относимост',style:'sub'},
   {text:'Пространствените резултати са представени в самостоятелния документ „ТПУ Пловдив — ГИС анализ“. Настоящият документ използва резултатите му, без да ги замества.'},
