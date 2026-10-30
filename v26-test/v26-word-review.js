@@ -83,7 +83,7 @@ function validateCaseMetadata(result){
  result.parcelIds=unique.join(', ');
  return result;
 }
-function getConfirmedMetadata(){
+function getConfirmedMetadata({allowIncomplete=false}={}){
  refreshVerifiedFields();
  // Working proposal: unresolved fields remain explicit review notes in DOCX.
  if(Object.keys(caseFields).length!==7)throw Error('Формулярът за административни данни не е зареден.');
@@ -107,7 +107,7 @@ function getConfirmedMetadata(){
   const distinct=[...new Map(references.map(x=>[x.number+'|'+x.date,x])).values()];
   if(distinct.length===1)result.incomingReference='Вх. № '+distinct[0].number+' / '+distinct[0].date;
  }
- return validateCaseMetadata(result);
+ return allowIncomplete?result:validateCaseMetadata(result);
 }
 document.addEventListener('v26:dossier-loaded',event=>{
  if(confirmed)confirmed.checked=false;
@@ -149,7 +149,7 @@ function getWorkingDraft(){
   if(unique.length)return unique[0]+' [ОТКЪС ОТ ПРЕПИСКАТА — ЗА СВЕРЯВАНЕ]';
   return formatVerifiedParagraph('[ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва потвърдено описание]',i,'A');
  });
- const metadata=getConfirmedMetadata();
+ const metadata=getConfirmedMetadata({allowIncomplete:true});
  metadata.subject=subject||'[ЗА ЕКСПЕРТНА ПРОВЕРКА — предмет на ИП]';
  for(const key of ['recipient','address','incomingReference','salutation'])if(!metadata[key])metadata[key]='[ЗА ЕКСПЕРТНА ПРОВЕРКА — '+key+']';
  metadata.legalParagraphs=Array.from({length:7},(_,i)=>metadata.legalParagraphs?.[i]||'[ЗА ЕКСПЕРТНА ПРОВЕРКА — правна констатация '+(i+1)+']');
