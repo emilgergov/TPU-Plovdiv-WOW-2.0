@@ -52,6 +52,9 @@ async function make(draft){
   paragraph(doc,'Относно: '+subject,{bold:true}),
   ...(isPending(m.incomingReference)?[]:[paragraph(doc,'Преписка: '+m.incomingReference)]),
   ...(isPending(m.salutation)?[]:[paragraph(doc,m.salutation)]),
+  paragraph(doc,'ЕКСПЕРТНА АНАЛИТИЧНА СПРАВКА',{heading:true}),
+  paragraph(doc,'Основа: потвърден имотен обхват, резултат от ГИС анализа и налични документи по преписката.'),
+  paragraph(doc,'Статус: проект за експертен преглед; не замества официално становище или административен акт.'),
   paragraph(doc,'I. ПРЕДМЕТ И ИМОТЕН ОБХВАТ',{heading:true}),
   paragraph(doc,'Предмет на ИП: '+subject),
   paragraph(doc,'Поземлени имоти: '+draft.parcels.map(p=>p.id+' ('+(p.role==='leading'?'предмет на ИП':'съпътстващ')+')').join('; ')),
@@ -64,6 +67,9 @@ async function make(draft){
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
   ...confirmed(draft.characterization).map(x=>paragraph(doc,x)),
 
+  paragraph(doc,'КОНТРОЛ НА ДОКАЗАТЕЛСТВАТА',{heading:true}),
+  paragraph(doc,'Пространствените изводи произтичат от ГИС резултата. Документалните и правните изводи подлежат на самостоятелна проверка по приложимите първични източници.'),
+  ...(draft.evidence.warningsCount?[paragraph(doc,'Внимание: при обработката на преписката са отчетени '+draft.evidence.warningsCount+' предупреждения. Те следва да се прегледат преди използване на документа.')]:[]),
   paragraph(doc,'IV. ФАКТИЧЕСКИ И ПРАВНИ КОНСТАТАЦИИ',{heading:true}),
   ...confirmed(legal).map(x=>paragraph(doc,x)),
 
