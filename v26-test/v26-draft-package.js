@@ -210,10 +210,10 @@ function gisPdf(results,options={}){
     const zoneText=verifiedCodes.length?verifiedCodes.join(', '):r.intersection_verified_outside===true?'Няма пресечена защитена зона':zones.length?'Архивни сведения (непотвърдено пресичане): '+zones.join(', '):'Няма потвърдени данни';
    const verifiedZones=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z));
     const intersection=verifiedZones.length?'УСТАНОВЕНО ПРЕСИЧАНЕ':r.intersection_verified_outside===true?'НЯМА ПРЕСИЧАНЕ':has?'Няма данни':'Няма данни';
-   return [id,Number.isFinite(area)&&area>0?area.toLocaleString('bg-BG',{maximumFractionDigits:3})+' (архивна ГИС площ)':'Не е налична',zoneText,intersection,has?'ГИС геометрия налична':'Липсва геометрия'];
+   return [id,'Не е удостоверена по актуални кадастрални данни',zoneText,intersection,has?'ГИС геометрия налична':'Липсва геометрия'];
   })
  ]},layout:'lightHorizontalLines'});
- content.push({text:'Пресичанията са изчислени по интегрирания ГИС архив на ТПУ. „Няма данни“ обозначава липсващи сведения.',margin:[0,10,0,0]});
+ content.push({text:'Само изрично потвърдените пространствени пресичания са обозначени като установени. Архивните сведения не са доказателство за актуално пресичане.',margin:[0,10,0,0]});
  return pdfDef('Приложение №1 — ГИС анализ',content);
 }
 function visitForLabel(coords,out){if(Array.isArray(coords)&&typeof coords[0]==='number'&&typeof coords[1]==='number'){if(Number.isFinite(coords[0])&&Number.isFinite(coords[1]))out.push(coords)}else if(Array.isArray(coords))coords.forEach(x=>visitForLabel(x,out))}
