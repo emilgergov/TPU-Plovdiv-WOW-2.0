@@ -77,14 +77,7 @@ async function make(scenario,paragraphs,metadata){
  }
  // KT15.3: The legal conclusions are fixed text of the original A/B template.
  // Only the four IP-characterization paragraphs and case-specific fields are edited.
- // The procedure statement and five impact findings are case-specific, never reusable sample findings.
- if(!String(metadata.procedureFinding||'').trim())throw Error('Липсва проверена констатация за приложимата процедура по Наредбата за ОС.');
- if(!Array.isArray(metadata.impactFindings)||metadata.impactFindings.length!==5||metadata.impactFindings.some(v=>!String(v).trim()))throw Error('Липсват петте проверени констатации за въздействията.');
- replaceParagraph(scenario==='A'?17:15,metadata.procedureFinding);
- const impactIndices=[26,27,28,29,30];
- const used=new Set([...MAP[scenario],...legalIndices,...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])]);
- if(impactIndices.some(i=>used.has(i)))throw Error('Конфликт между полета на образеца — генерирането е спряно за защита на правния текст.');
- for(let i=0;i<5;i++)if(!mandatoryIndices.has(impactIndices[i]))replaceParagraph(impactIndices[i],String(metadata.impactFindings[i]));
+ // Fixed procedure and impact findings remain in the original template.
  // Remove stale example identifiers only from explicitly writable paragraphs.
  for(let i=0;i<ps.length;i++){
   if(!writable(i))continue;
@@ -102,7 +95,7 @@ async function make(scenario,paragraphs,metadata){
  const unmatched=nodes(xml,'t').flatMap(t=>(t.textContent||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[]).filter(id=>!parcelIds.includes(id));
  if(unmatched.length)throw Error('Останал е примерен идентификатор в образеца: '+[...new Set(unmatched)].join(', ')+'. Поправете полето на образеца, без повторно потвърждаване на имотите.');
  // Protect template paragraphs that are not explicitly approved for case-specific replacement.
- const editableIndices=new Set([...MAP[scenario],...impactIndices.filter(i=>!mandatoryIndices.has(i)),...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])].filter(writable));
+ const editableIndices=new Set([...MAP[scenario],...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])].filter(writable));
  // The two signature slots must remain present and untouched in the template body.
  const signatureCandidates=ps.map((p,i)=>({i,text:nodes(p,'t').map(t=>t.textContent).join('')})).filter(x=>/електронен\s+подпис|електронно\s+подпис|подписал|подпис\s*:/i.test(x.text));
  for(const item of signatureCandidates){if(editableIndices.has(item.i))throw Error('Поле за подпис попада сред редактираните абзаци: '+(item.i+1));}
