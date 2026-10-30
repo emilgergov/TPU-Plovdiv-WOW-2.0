@@ -78,9 +78,10 @@ async function make(scenario,paragraphs,metadata){
  // KT15.3: The legal conclusions are fixed text of the original A/B template.
  // Only the four IP-characterization paragraphs and case-specific fields are edited.
  // Fixed procedure and impact findings remain in the original template.
- // Remove stale example identifiers only from explicitly writable paragraphs.
+ const editableIndices=new Set([...MAP[scenario],...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])].filter(writable));
+ // Remove stale example identifiers only from explicitly editable case fields.
  for(let i=0;i<ps.length;i++){
-  if(!writable(i))continue;
+  if(!editableIndices.has(i))continue;
   const p=ps[i],current=nodes(p,'t').map(t=>t.textContent||'').join('');
   if(!/\b\d{5}\.\d+\.\d+\b/.test(current))continue;
   if(/подпис/i.test(current))continue;
@@ -95,7 +96,7 @@ async function make(scenario,paragraphs,metadata){
  const unmatched=nodes(xml,'t').flatMap(t=>(t.textContent||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[]).filter(id=>!parcelIds.includes(id));
  if(unmatched.length)throw Error('Останал е примерен идентификатор в образеца: '+[...new Set(unmatched)].join(', ')+'. Поправете полето на образеца, без повторно потвърждаване на имотите.');
  // Protect template paragraphs that are not explicitly approved for case-specific replacement.
- const editableIndices=new Set([...MAP[scenario],...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])].filter(writable));
+ 
  // The two signature slots must remain present and untouched in the template body.
  const signatureCandidates=ps.map((p,i)=>({i,text:nodes(p,'t').map(t=>t.textContent).join('')})).filter(x=>/електронен\s+подпис|електронно\s+подпис|подписал|подпис\s*:/i.test(x.text));
  for(const item of signatureCandidates){if(editableIndices.has(item.i))throw Error('Поле за подпис попада сред редактираните абзаци: '+(item.i+1));}
