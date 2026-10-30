@@ -121,7 +121,7 @@ async function ensurePDF(){
 }
 function pdfBlob(def){if(window.V26OfflinePDF?.generate)return window.V26OfflinePDF.generate(def);return new Promise((resolve,reject)=>{try{window.pdfMake.createPdf(def).getBlob(b=>{if(!b||b.size<100)reject(Error('PDF файлът е празен или невалиден.'));else resolve(b)})}catch(e){reject(e)}})}
 function pdfDef(title,content){
- return {pageSize:'A4',pageMargins:[42,50,42,50],defaultStyle:{font:'Roboto',fontSize:10},styles:{heading:{fontSize:16,bold:true,margin:[0,0,0,14]},sub:{fontSize:12,bold:true,margin:[0,12,0,6]}},content:[{text:'ТПУ Пловдив — '+title,style:'heading'},{text:'РАБОТЕН СПРАВОЧЕН ДОКУМЕНТ. Не удостоверява актуални граници, режими или правни заключения.',bold:true,margin:[0,0,0,14]},...content]};
+ return {pageSize:'A4',pageMargins:[42,50,42,50],defaultStyle:{font:'Roboto',fontSize:10},styles:{heading:{fontSize:16,bold:true,margin:[0,0,0,14]},sub:{fontSize:12,bold:true,margin:[0,12,0,6]}},content:[{text:'ТПУ Пловдив — '+title,style:'heading'},...content]};
 }
 function verifiedPlaceLabel(value){
  const text=String(value||'').trim().replace(/\s+/g,' ');
@@ -130,7 +130,7 @@ function verifiedPlaceLabel(value){
  return /^(?:гр\.|град|с\.|село)\s+/i.test(text)?text:'';
 }
 function gisPdf(results,options={}){
- const content=[{text:'Източник: архивна регионална кадастрална геобаза на РИОСВ – Пловдив (02.10.2026 г.). Технически идентификатор: RIOSV_PLOVDIV_KAIS_CADASTRE_REGIONAL_02_10_2026.gdb.',margin:[0,0,0,8]}];
+ const content=[{text:'Източник на геометрията: регионална ГИС база на РИОСВ – Пловдив, 02.10.2026 г.',margin:[0,0,0,8]}];
  if(options.mapSvg&&String(options.mapSvg).includes('<svg')){
   const clean=options.mapSvg;
   const contentMap={svg:clean,width:510,margin:[0,5,0,10]};
@@ -199,7 +199,7 @@ function gisPdf(results,options={}){
  for(const r of results){const place=verifiedPlaceLabel(r.settlement||r.settlement_name||'');const locality=String(r.locality||'').trim();if(place||locality)content.push({text:'Имот '+String(r.input||r.cadnum||'')+' — '+[place,locality?'местност '+locality:''].filter(Boolean).join(', '),fontSize:9,margin:[0,2,0,2]});}
  content.push({text:'ГИС данни по имоти — обща таблица',style:'sub'});
  content.push({table:{headerRows:1,widths:[112,72,82,82,'*'],body:[
-  ['Кадастрален №','Площ, кв.м','Зона','Пресичане','Статус'],
+  ['Кадастрален №','ГИС площ, кв.м','Зона','Пресичане','Статус'],
   ...results.map(r=>{
    const id=String(r.input||r.cadnum||'');
    const has=!!r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));
@@ -211,10 +211,10 @@ function gisPdf(results,options={}){
     const zoneText=verifiedCodes.length?verifiedCodes.join(', '):r.intersection_verified_outside===true?'Няма пресечена защитена зона':zones.length?'Архивни сведения (непотвърдено пресичане): '+zones.join(', '):'Няма потвърдени данни';
    const verifiedZones=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG\d{7}$/.test(z));
     const intersection=verifiedZones.length?'УСТАНОВЕНО ПРЕСИЧАНЕ':r.intersection_verified_outside===true?'НЯМА ПРЕСИЧАНЕ':has?'Няма данни':'Няма данни';
-   return [id,'Не е удостоверена по актуални кадастрални данни',zoneText,intersection,has?'ГИС геометрия налична':'Липсва геометрия'];
+   return [id,Number.isFinite(area)&&area>0?area.toLocaleString('bg-BG',{maximumFractionDigits:3})+' (ГИС)':'Няма площ',zoneText,intersection,has?'ГИС геометрия налична':'Липсва геометрия'];
   })
  ]},layout:'lightHorizontalLines'});
- content.push({text:'Само изрично потвърдените пространствени пресичания са обозначени като установени. Архивните сведения не са доказателство за актуално пресичане.',margin:[0,10,0,0]});
+ content.push({text:'Посочените площи са изчислени от ГИС геометрията и не заместват актуалната кадастрална площ. Пресичанията са пространствен резултат, а не самостоятелна правна оценка.',margin:[0,10,0,0]});
  return pdfDef('ГИС анализ',content);
 }
 function visitForLabel(coords,out){if(Array.isArray(coords)&&typeof coords[0]==='number'&&typeof coords[1]==='number'){if(Number.isFinite(coords[0])&&Number.isFinite(coords[1]))out.push(coords)}else if(Array.isArray(coords))coords.forEach(x=>visitForLabel(x,out))}
