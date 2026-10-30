@@ -130,6 +130,7 @@ function verifiedPlaceLabel(value){
  return /^(?:гр\.|град|с\.|село)\s+/i.test(text)?text:'';
 }
 function gisPdf(results,options={}){
+ if(results.length>1)options={...options,mapSvg:null};
  const content=[{text:'Източник на геометрията: регионална ГИС база на РИОСВ – Пловдив, 02.10.2026 г.',margin:[0,0,0,8]}];
  if(options.mapSvg&&String(options.mapSvg).includes('<svg')){
   const clean=options.mapSvg;
@@ -139,7 +140,7 @@ function gisPdf(results,options={}){
   content.push({text:'Картата възпроизвежда видимите слоеве в браузъра: имот, граници на защитени зони и етикети. Пространственото заключение и площите на пресичане са изчислени по интегрирания ГИС архив на ТПУ; правният режим се разглежда отделно.',fontSize:9,margin:[0,0,0,10]});
  }
  if(results.length>1){
-  content.push({text:'Индивидуални карти по имоти',style:'sub',pageBreak:'before'});
+  content.push({text:'Индивидуални карти по имоти',style:'sub'});
   const cards=[];
   for(const r of results){
    const id=String(r.input||r.cadnum||'');
@@ -162,6 +163,8 @@ function gisPdf(results,options={}){
      if(d)shapes.push('<path d="'+d+'" fill="#e8c47e" fill-rule="evenodd" fill-opacity=".55" stroke="#a66b12" stroke-width="2"/>');
     }
    }
+   const overlapPolygons=(r.overlap_geojson?.features||[]).filter(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));
+   for(const f of overlapPolygons){const polys=f.geometry.type==='Polygon'?[f.geometry.coordinates]:f.geometry.coordinates;for(const poly of polys){const rings=poly.map(ring=>ring.filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1])));const d=rings.filter(ring=>ring.length>=3).map(ring=>ring.map((p,i)=>(i?'L':'M')+(dx+(p[0]-minX)*scale).toFixed(2)+' '+(450-dy-(p[1]-minY)*scale).toFixed(2)).join(' ')+' Z').join(' ');if(d)shapes.push('<path d="'+d+'" fill="#dc7b39" fill-rule="evenodd" fill-opacity=".58" stroke="#9d4a19" stroke-width="2"/>')}}
    const svg='<svg xmlns="http://www.w3.org/2000/svg" width="740" height="450" viewBox="0 0 740 450"><rect width="740" height="450" fill="#e8f2ed"/>'+shapes.join('')+'<text x="370" y="430" text-anchor="middle" font-size="17" fill="#183c30">'+E(id)+'</text></svg>';
    cards.push({stack:[{text:'Поземлен имот '+id,bold:true,fontSize:10,margin:[0,0,0,4]},{svg,width:235,margin:[0,0,0,4]},{text:'Имотна геометрия от интегрирания ГИС архив',fontSize:8,color:'#526a5e'}],margin:[0,4,0,8]});
   }
@@ -171,25 +174,6 @@ function gisPdf(results,options={}){
    content.push(row);
   }
  }
- const features=[],points=[];
- function visit(coords){if(Array.isArray(coords)&&typeof coords[0]==='number'&&typeof coords[1]==='number'){if(Number.isFinite(coords[0])&&Number.isFinite(coords[1]))points.push(coords)}else if(Array.isArray(coords))coords.forEach(visit)}
- results.forEach((r,i)=>{const fs=(r.geojson?.features||[]).filter(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type));for(const f of fs){features.push({f,i});visit(f.geometry.coordinates)}});
- if(points.length&&!options.mapSvg){
-  const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
-  const scale=Math.min(600/Math.max(maxX-minX,1e-9),330/Math.max(maxY-minY,1e-9));
-  const shapes=[];
-  for(const {f,i} of features){const g=f.geometry,polys=g.type==='Polygon'?[g.coordinates]:g.coordinates;
-   for(const poly of polys)for(const ring of poly){const pts=ring.filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1]));if(pts.length<3)continue;
-    shapes.push('<polygon points="'+pts.map(p=>(35+(p[0]-minX)*scale).toFixed(2)+','+(365-(p[1]-minY)*scale).toFixed(2)).join(' ')+'" fill="#b5d8c8" fill-opacity=".65" stroke="#176749" stroke-width="1.6"/>');
-   }
-   const pp=[];visitForLabel(g.coordinates,pp);
-   if(pp.length){const x=pp.reduce((n,p)=>n+p[0],0)/pp.length,y=pp.reduce((n,p)=>n+p[1],0)/pp.length;
-    shapes.push('<text x="'+(35+(x-minX)*scale).toFixed(2)+'" y="'+(365-(y-minY)*scale).toFixed(2)+'" font-size="13" text-anchor="middle" fill="#123e2b">'+E(String(results[i].input||results[i].cadnum))+'</text>')}
-  }
-  const drawing='<svg xmlns="http://www.w3.org/2000/svg" width="700" height="410" viewBox="0 0 700 410">'+shapes.join('')+'</svg>';
-  content.push({text:'Обща карта на анализираните имоти',style:'sub'});
-  content.push({svg:drawing,width:480,margin:[0,4,0,8]});
- }else if(!options.mapSvg)content.push({text:'Картографски материал: Недостатъчни данни за заключение — няма налична имотна геометрия.',bold:true});
  const verifiedLocation=String(options.verifiedCaseMetadata?.location||'').trim();
  const verifiedSettlement=verifiedPlaceLabel(options.verifiedCaseMetadata?.settlement)||(()=>{const values=[...new Set(results.map(r=>verifiedPlaceLabel(r.settlement||r.settlement_name||'')).filter(Boolean))];return values.length===1?values[0]:''})();
  const verifiedLandArea=String(options.verifiedCaseMetadata?.landArea||'').trim();
