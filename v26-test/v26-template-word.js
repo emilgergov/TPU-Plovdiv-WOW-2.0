@@ -78,11 +78,12 @@ async function make(scenario,paragraphs,metadata){
  // KT15.3: The legal conclusions are fixed text of the original A/B template.
  // Only the four IP-characterization paragraphs and case-specific fields are edited.
  // Fixed procedure and impact findings remain in the original template.
- const sampleIndex=31;
- const editableIndices=new Set([...MAP[scenario],sampleIndex,...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])].filter(i=>i===sampleIndex||writable(i)));
+ const sampleIndices=scenario==='A'?[31]:[21,31];
+ const editableIndices=new Set([...MAP[scenario],...sampleIndices,...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])].filter(i=>sampleIndices.includes(i)||writable(i)));
  // Confirmed template exception: paragraph 32 has a mistakenly mandatory-marked sample parcel ID.
  // Replace only that ID; preserve all surrounding legal text and its runs.
 
+ for(const sampleIndex of sampleIndices){
  const sampleParagraph=ps[sampleIndex],sampleTexts=nodes(sampleParagraph,'t');
  const sampleText=sampleTexts.map(t=>t.textContent||'').join('');
  const sampleId=scenario==='A'?'00702.516.432':'02974.10.159',sampleAt=sampleText.indexOf(sampleId);
@@ -99,6 +100,7 @@ async function make(scenario,paragraphs,metadata){
    t.setAttribute('xml:space','preserve');
   }
   offset=to;
+ }
  }
  // Remove stale example identifiers only from explicitly editable case fields.
  for(let i=0;i<ps.length;i++){
