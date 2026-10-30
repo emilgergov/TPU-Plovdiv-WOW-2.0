@@ -51,9 +51,7 @@ function formatVerifiedParagraph(raw,i,scenario){
 }
 function refreshVerifiedFields(){
  const auto=autoEvidence();
- for(let i=0;i<fields.length;i++){
-  // Source excerpts must be reviewed and rewritten as complete administrative sentences; no silent auto-fill.
- }
+ // Source excerpts remain review-only; no silent auto-fill of Word paragraphs.
  if(caseFields.subject&&!caseFields.subject.value.trim()&&auto.subject)caseFields.subject.value=auto.subject.replace(/^Относно:\s*/i,'').trim();
  if(caseFields.parcelIds&&!caseFields.parcelIds.value.trim()&&auto.ids)caseFields.parcelIds.value=auto.ids;
 }
@@ -61,7 +59,6 @@ function getConfirmedParagraphs(scenario='A'){
  refreshVerifiedFields();
  // No invented or generic fallback may enter an administrative document.
  // The four paragraphs must be individually reviewed and confirmed.
- const auto=autoEvidence();
  const values=fields.map((f,i)=>{const typed=f.value.trim();return typed?formatVerifiedParagraph(typed,i,scenario):'';});
  const missing=values.map((v,i)=>v?null:labels[i]).filter(Boolean);
  if(missing.length){
