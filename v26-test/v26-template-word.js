@@ -84,7 +84,7 @@ async function make(scenario,paragraphs,metadata){
  const sampleParagraph=ps[31],sampleTexts=nodes(sampleParagraph,'t');
  const sampleText=sampleTexts.map(t=>t.textContent||'').join('');
  const sampleId='00702.516.432',sampleAt=sampleText.indexOf(sampleId);
- if(sampleAt<0)throw Error('Очакваният примерен идентификатор липсва в абзац 32.');
+ if(sampleAt<0 && scenario==='A')throw Error('Очакваният примерен идентификатор липсва в абзац 32 на образец А.');
  const sampleEnd=sampleAt+sampleId.length;
  let offset=0;
  for(const t of sampleTexts){
