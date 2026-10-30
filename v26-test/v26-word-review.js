@@ -40,7 +40,7 @@ function autoEvidence(){
  });
  const ids=(document.getElementById('ids')?.value||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  const subject=window.V26SubjectContext;
- return {paragraphs,ids:[...new Set(ids)].join(', '),subject:subject?.confirmed?(subject.wordHeading||subject.title):null};
+ return {paragraphs,ids:[...new Set(ids.map(id=>id.split('.').slice(0,3).join('.')))].join(', '),subject:subject?.confirmed?(subject.wordHeading||subject.title):null};
 }
 function formatVerifiedParagraph(raw,i,scenario){
  const value=String(raw||'').trim();if(!value)return '';
