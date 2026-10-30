@@ -17,7 +17,7 @@ function sharedDiagnosis(intake,roles,gis){
  const outside=complete&&leading.every(r=>r.intersection_verified_outside===true);
  let scenario=null,spatialStatus='нерешено';
  if(current.length){scenario='Б';spatialStatus='доказано'}
- else if(archived.length){scenario='Б';spatialStatus='установено архивно пресичане; актуалният правен статус не е потвърден'}
+ else if(archived.length){spatialStatus='архивно сведение за зона; пространственото пресичане не е потвърдено'}
  else if(outside){scenario='А';spatialStatus='доказано'}
  facts.push({kind:'GIS',claim:scenario?'Сценарий '+scenario:'Сценарият не е установен',source:'ГИС анализ на водещите имоти',status:spatialStatus,verifiedOutside:outside,archivedIntersections:archived.length,currentIntersections:current.length});
  return Object.freeze({scenario,spatialStatus,leadingParcels:leading.map(r=>r.cadnum),facts,requiresExpertReview:true,legalStatusOfArchivedIntersections:'нерешено'});

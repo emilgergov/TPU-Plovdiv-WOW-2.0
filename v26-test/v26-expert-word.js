@@ -30,8 +30,6 @@ async function make(draft){
  const source=Array.from(body.children);
  // Two unsigned internal workflow slots: one before the draft and one after it.
  // Do not copy names or apparent signatures from the source template.
- const signatureIndices=[];
- const signature=[];
  const sect=source.find(x=>x.localName==='sectPr');
  if(!sect)throw Error('КТ13: липсва секционна настройка с институционалния колонтитул.');
  const rels=zip['word/_rels/document.xml.rels'];
@@ -41,6 +39,10 @@ async function make(draft){
  const legal=(m.legalParagraphs||[]).slice(0,scenario==='A'?5:7),impacts=m.impactFindings||[];
  if(legal.length<(scenario==='A'?5:7)||legal.some(x=>!x)||!m.procedureFinding||impacts.length!==5||impacts.some(x=>!x))throw Error('КТ13: липсват проверени фактически, правни или въздействени констатации.');
  const isPending=x=>/\[ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(String(x||''));
+ const pendingRequired=[m.recipient,m.address,m.subject,m.incomingReference,m.salutation,...legal,m.procedureFinding,...impacts];
+ const reviewPending=pendingRequired.some(isPending);
+ if(!Array.isArray(draft.parcels)||!draft.parcels.length||draft.parcels.some(p=>!/^\d{5}\.\d+\.\d+$/.test(String(p.id||''))))throw Error('КТ13: невалиден или липсващ имотен обхват.');
+ if(!Array.isArray(draft.characterization)||draft.characterization.length!==4||draft.characterization.some(x=>!String(x||'').trim()))throw Error('КТ13: четирите характеристики трябва да бъдат редактирани и потвърдени.');
  const subject=String(m.subject).replace(/^Относно:\s*/i,'').replace(/^(?:инвестиционно предложение\s*)+/i,'').replace(/^[„“"\s]+|[„“"\s]+$/g,'').replace(/\s+/g,' ').trim();
  const confirmed=xs=>xs.filter(x=>!isPending(x));
  const blocks=[
@@ -56,20 +58,20 @@ async function make(draft){
   ...(m.location?[paragraph(doc,'Местоположение: '+m.location)]:[]),
   paragraph(doc,'II. ПРОСТРАНСТВЕН АНАЛИЗ',{heading:true}),
   paragraph(doc,draft.scenario==='Б'?'По наличните ГИС данни е установено пространствено пресичане със защитена зона: '+draft.zones.join(', ')+'.':'По наличните ГИС данни не е установено пресичане на потвърдените имоти със защитена зона.'),
-  paragraph(doc,'Пространствените резултати и картографската основа са представени в Приложение №1.'),
+  paragraph(doc,'Приложение №1 — ГИС анализ представя пространствените резултати, картографската основа и имотния обхват.'),
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
   ...confirmed(draft.characterization).map(x=>paragraph(doc,x)),
-  ...(draft.characterization.some(isPending)?[paragraph(doc,'Описанието на техническите параметри не е изцяло потвърдено по преписката; необходимо е сверяване с приложените документи.')]:[]),
+
   paragraph(doc,'IV. ФАКТИЧЕСКИ И ПРАВНИ КОНСТАТАЦИИ',{heading:true}),
   ...confirmed(legal).map(x=>paragraph(doc,x)),
-  ...(legal.some(isPending)?[paragraph(doc,'Правните основания и индивидуалните констатации подлежат на експертна проверка. Не е формиран окончателен правен извод.')]:[]),
+
   paragraph(doc,'V. ПРОЦЕДУРНА ПРЕЦЕНКА',{heading:true}),
   paragraph(doc,isPending(m.procedureFinding)?'Приложимата процедура не е потвърдена; изисква се преценка от компетентен експерт.':m.procedureFinding),
   paragraph(doc,'VI. КОНСТАТАЦИИ ЗА ВЪЗДЕЙСТВИЯТА',{heading:true}),
   ...confirmed(impacts).map(x=>paragraph(doc,x)),
   ...(impacts.some(isPending)?[paragraph(doc,'Не е изготвена окончателна оценка на въздействията. Изводите се попълват след проверка на приложимите режими и доказателствата.')]:[]),
   paragraph(doc,'VII. ПРИЛОЖЕНИЯ',{heading:true}),
-  paragraph(doc,'Приложение №1 — ГИС анализ (самостоятелен PDF). Приложение №2 — Нормативни и документални референции (самостоятелен PDF, когато е изготвен).'),
+  paragraph(doc,'Приложение №1 — ГИС анализ (самостоятелен PDF); Приложение №2 — Нормативни и документални референции (самостоятелен PDF, когато е изготвен).'),
   paragraph(doc,'НЕОБХОДИМА Е ЕКСПЕРТНА ПРОВЕРКА НА ПРЕПИСКАТА, ПРАВНИТЕ ОСНОВАНИЯ И ИЗВОДИТЕ. Документът не представлява издаден административен акт.')
  ];
  body.replaceChildren(...blocks,paragraph(doc,'Място за електронен подпис — окончателно подписване'),sect.cloneNode(true));

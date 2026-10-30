@@ -20,8 +20,14 @@ jobs:
       - name: Test GIS scenarios and ZIP package writer
         run: node v26-test/tests/package-smoke.cjs
       - name: Install document test dependencies
-        run: npm install --no-save --no-package-lock jszip fflate jsdom@26
+        run: npm install --no-save --no-package-lock jszip fflate jsdom@26 pdfmake@0.2.20 pdf-parse@1.1.1
       - name: Test document package A/B routing and optional PDF2
         run: node v26-test/tests/document-smoke.cjs
       - name: Test original Word A/B templates
         run: node v26-test/tests/word-real-templates.cjs
+      - name: Test PDF1 and PDF2 V26.8 evidence and settlement contracts
+        run: node v26-test/tests/v26-8-annex-contract.cjs
+      - name: Render and parse real PDF1 and PDF2
+        run: node v26-test/tests/v26-8-real-pdf.cjs
+      - name: Generate and inspect complete real ZIP packages for A and B
+        run: node v26-test/tests/v26-8-full-real-zip.cjs
