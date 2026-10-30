@@ -78,13 +78,14 @@ async function make(scenario,paragraphs,metadata){
  // KT15.3: The legal conclusions are fixed text of the original A/B template.
  // Only the four IP-characterization paragraphs and case-specific fields are edited.
  // Fixed procedure and impact findings remain in the original template.
- const editableIndices=new Set([...MAP[scenario],31,...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])].filter(i=>i===31||writable(i)));
+ const editableIndices=new Set([...MAP[scenario],sampleIndex,...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])].filter(i=>i===sampleIndex||writable(i)));
  // Confirmed template exception: paragraph 32 has a mistakenly mandatory-marked sample parcel ID.
  // Replace only that ID; preserve all surrounding legal text and its runs.
- const sampleParagraph=ps[31],sampleTexts=nodes(sampleParagraph,'t');
+ const sampleIndex=scenario==='A'?31:21;
+ const sampleParagraph=ps[sampleIndex],sampleTexts=nodes(sampleParagraph,'t');
  const sampleText=sampleTexts.map(t=>t.textContent||'').join('');
- const sampleId='00702.516.432',sampleAt=sampleText.indexOf(sampleId);
- if(sampleAt<0 && scenario==='A')throw Error('Очакваният примерен идентификатор липсва в абзац 32 на образец А.');
+ const sampleId=scenario==='A'?'00702.516.432':'02974.10.159',sampleAt=sampleText.indexOf(sampleId);
+ if(sampleAt<0)throw Error('Очакваният примерен идентификатор липсва в образец '+scenario+'.');
  const sampleEnd=sampleAt+sampleId.length;
  let offset=0;
  for(const t of sampleTexts){
