@@ -130,7 +130,6 @@ function verifiedPlaceLabel(value){
  return /^(?:гр\.|град|с\.|село)\s+/i.test(text)?text:'';
 }
 function gisPdf(results,options={}){
- if(results.length>1)options={...options,mapSvg:null};
  const content=[{text:'Източник на геометрията: регионална ГИС база на РИОСВ – Пловдив, 02.10.2026 г.',margin:[0,0,0,8]}];
  if(options.mapSvg&&String(options.mapSvg).includes('<svg')){
   const clean=options.mapSvg;
