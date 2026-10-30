@@ -196,6 +196,7 @@ function gisPdf(results,options={}){
  if(verifiedLocation)content.push({text:'Местоположение на имотите: '+verifiedLocation,margin:[0,5,0,7]});
  if(verifiedSettlement)content.push({text:'Населено място: '+verifiedSettlement});
  if(verifiedLandArea)content.push({text:'Землище: '+verifiedLandArea});
+ for(const r of results){const place=verifiedPlaceLabel(r.settlement||r.settlement_name||'');const locality=String(r.locality||'').trim();if(place||locality)content.push({text:'Имот '+String(r.input||r.cadnum||'')+' — '+[place,locality?'местност '+locality:''].filter(Boolean).join(', '),fontSize:9,margin:[0,2,0,2]});}
  content.push({text:'ГИС данни по имоти — обща таблица',style:'sub'});
  content.push({table:{headerRows:1,widths:[112,72,82,82,'*'],body:[
   ['Кадастрален №','Площ, кв.м','Зона','Пресичане','Статус'],
