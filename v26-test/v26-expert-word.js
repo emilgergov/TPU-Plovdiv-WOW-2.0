@@ -16,6 +16,7 @@ function paragraph(doc,value,{bold=false,heading=false}={}){
 }
 
 async function renderOverview(svg){
+ if(svg instanceof Uint8Array&&svg.length>64&&svg[0]===137&&svg[1]===80&&svg[2]===78&&svg[3]===71)return svg;
  if(!svg||!svg.includes('<svg'))throw Error('КТ15.6: липсва обзорна ГИС карта.');
  const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
  try{
