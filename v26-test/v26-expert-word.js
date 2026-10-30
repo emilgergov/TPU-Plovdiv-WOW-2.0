@@ -59,6 +59,8 @@ async function make(draft){
   paragraph(doc,'II. ПРОСТРАНСТВЕН АНАЛИЗ',{heading:true}),
   paragraph(doc,draft.scenario==='Б'?'По наличните ГИС данни е установено пространствено пресичане със защитена зона: '+draft.zones.join(', ')+'.':'По наличните ГИС данни не е установено пресичане на потвърдените имоти със защитена зона.'),
   paragraph(doc,'Приложение №1 — ГИС анализ представя пространствените резултати, картографската основа и имотния обхват.'),
+  paragraph(doc,'Обхват на анализа: '+draft.parcels.length+' потвърдени поземлени имота; '+draft.parcels.filter(p=>p.role==='leading').length+' с роля „предмет на ИП“ и '+draft.parcels.filter(p=>p.role==='ancillary').length+' съпътстващи.'),
+  paragraph(doc,'Проверка на източниците: '+draft.evidence.findingsCount+' документални констатации и '+draft.evidence.warningsCount+' предупреждения от обработката на преписката. Тези показатели не заместват експертна проверка.'),
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
   ...confirmed(draft.characterization).map(x=>paragraph(doc,x)),
 
