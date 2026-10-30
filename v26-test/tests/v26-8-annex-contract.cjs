@@ -26,7 +26,7 @@ const b=normativePdf([{...base,verified_zone_intersections:['BG0002057']}],{veri
 ]});
 const body=textOf(b);
 assert.match(body,/с\. Марково/);
-assert.match(body,/https:\\/\\/example.org\\/legal-1/);
-assert.match(body,/https:\\/\\/example.org\\/legal-2/);
+assert(body.includes('https://example.org/legal-1'));
+assert(body.includes('https://example.org/legal-2'));
 for(let i=0;i<6;i++)assert(body.includes('https://example.org/zone-'+i),'Documentary reference omitted: '+i);
 console.log('PASS: GIS verified-vs-archival zone, city/village labels, land area and all PDF2 sources');
