@@ -123,6 +123,12 @@ function pdfBlob(def){if(window.V26OfflinePDF?.generate)return window.V26Offline
 function pdfDef(title,content){
  return {pageSize:'A4',pageMargins:[42,50,42,50],defaultStyle:{font:'Roboto',fontSize:10},styles:{heading:{fontSize:16,bold:true,margin:[0,0,0,14]},sub:{fontSize:12,bold:true,margin:[0,12,0,6]}},content:[{text:'ТПУ Пловдив — '+title,style:'heading'},{text:'РАБОТЕН СПРАВОЧЕН ДОКУМЕНТ. Не удостоверява актуални граници, режими или правни заключения.',bold:true,margin:[0,0,0,14]},...content]};
 }
+function verifiedPlaceLabel(value){
+ const text=String(value||'').trim().replace(/\s+/g,' ');
+ if(!text)return '';
+ // Never guess whether a settlement is a city or village from a cadastral number or a bare name.
+ return /^(?:гр\.|град|с\.|село)\s+/i.test(text)?text:'';
+}
 function gisPdf(results,options={}){
  const content=[{text:'Източник: архивна регионална кадастрална геобаза на РИОСВ – Пловдив (02.10.2026 г.). Технически идентификатор: RIOSV_PLOVDIV_KAIS_CADASTRE_REGIONAL_02_10_2026.gdb.',margin:[0,0,0,8]}];
  if(options.mapSvg&&String(options.mapSvg).includes('<svg')){
@@ -185,7 +191,7 @@ function gisPdf(results,options={}){
   content.push({svg:drawing,width:480,margin:[0,4,0,8]});
  }else if(!options.mapSvg)content.push({text:'Картографски материал: Недостатъчни данни за заключение — няма налична имотна геометрия.',bold:true});
  const verifiedLocation=String(options.verifiedCaseMetadata?.location||'').trim();
- const verifiedSettlement=String(options.verifiedCaseMetadata?.settlement||'').trim();
+ const verifiedSettlement=verifiedPlaceLabel(options.verifiedCaseMetadata?.settlement);
  const verifiedLandArea=String(options.verifiedCaseMetadata?.landArea||'').trim();
  if(verifiedLocation)content.push({text:'Местоположение на имотите: '+verifiedLocation,margin:[0,5,0,7]});
  if(verifiedSettlement)content.push({text:'Населено място: '+verifiedSettlement});
@@ -229,7 +235,7 @@ function normativePdf(results,register){
  const confirmed=!!(subject?.confirmed&&resolvedTitle);
  const subjectDisplay=(resolvedTitle||'Не е установен в обработените материали — за експертна проверка.').replace(/\bи\s+зграждането\b/gi,'изграждането').replace(/\bСк\s+лад\b/g,'Склад').replace(/\bпро\s+мишлени\b/gi,'промишлени').replace(/\s*[„“]\s*/g,' ').replace(/\s+/g,' ').trim();
  const verifiedLocation=String(review?.location||'').trim();
- const verifiedSettlement=String(review?.settlement||'').trim();
+ const verifiedSettlement=verifiedPlaceLabel(review?.settlement);
  const verifiedLandArea=String(review?.landArea||'').trim();
  const relevant=records.filter(r=>{const title=String(r.title||'');const code=String(r.zone_code||r.sitecode||'');const mentioned=[...title.matchAll(/BG\d{7}/g)].map(m=>m[0]);return title&&/^https:\/\//.test(String(r.source||''))&&(!code||zoneMap.has(code))&&(!mentioned.length||mentioned.every(z=>zoneMap.has(z)))&&(/биологичното разнообразие|съвместимост|защитена зона|заповед/i.test(title+' '+String(r.purpose||'')));});
  const legalGroups=new Map();
@@ -295,7 +301,7 @@ async function make(results,roles,register){
   if(!caseMetadata.location){const gisLocation=results.map(x=>x.location).filter(x=>typeof x==='string'&&x.trim());if(gisLocation.length===1)caseMetadata.location=gisLocation[0].trim();}
   // Only explicit verified GIS metadata may supply a settlement/land area; never infer a city/village from parcel ID.
   for(const [key,sourceKeys] of [['settlement',['settlement','settlement_name']],['landArea',['landArea','land_area']]]){
-   if(!caseMetadata[key]){const values=[...new Set(results.map(x=>sourceKeys.map(k=>x[k]).find(v=>typeof v==='string'&&v.trim())).filter(Boolean).map(x=>x.trim()))];if(values.length===1)caseMetadata[key]=values[0];}
+   if(!caseMetadata[key]){const values=[...new Set(results.map(x=>sourceKeys.map(k=>x[k]).find(v=>typeof v==='string'&&v.trim())).filter(Boolean).map(x=>x.trim()))];if(values.length===1&&(key!=='settlement'||verifiedPlaceLabel(values[0])))caseMetadata[key]=values[0];}
   }
   register={...register,verifiedCaseMetadata:caseMetadata};
  const dossierEvidence=register?.unifiedContext?.commonEvidence||null;
