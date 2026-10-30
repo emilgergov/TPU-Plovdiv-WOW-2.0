@@ -5,6 +5,7 @@ on:
       - work/v26-8-word-content-20261030
     paths:
       - '.github/workflows/v26-8-temporary-pages.yml'
+      - 'v26-test/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -27,6 +28,7 @@ jobs:
         run: |
           test -s v26-test/index.html
           test -s v26-test/v26-draft-package.js
+          test -s v26-test/v26-kt12-overlay.js
           test -s v26-test/data/normative-archive-register.json
           test -s v26-test/normative/sources.json
       - uses: actions/configure-pages@v5
