@@ -145,7 +145,7 @@ function getWorkingDraft(){
   const excerpts=(source?.sources||[]).filter(x=>String(x.excerpt||'').trim()).map(x=>String(x.excerpt).replace(/\s*\(Източник:[^)]*\)/g,'').trim()).filter(Boolean);
   const unique=[...new Set(excerpts)];
   if(unique.length)return unique[0]+' [ОТКЪС ОТ ПРЕПИСКАТА — ЗА СВЕРЯВАНЕ]';
-  return formatVerifiedParagraph('[ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва потвърдено описание]',i,'A');
+  return '[ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва потвърдено описание]';
  });
  const metadata=getConfirmedMetadata({allowIncomplete:true});
  metadata.subject=subject||'[ЗА ЕКСПЕРТНА ПРОВЕРКА — предмет на ИП]';
