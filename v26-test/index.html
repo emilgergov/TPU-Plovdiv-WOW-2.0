@@ -405,7 +405,7 @@ function populateSubject(d){
  const readable=unreadableNotice.length===0;
  const subjectReady=!!(c?.title&&String(c.title).trim()&&extracted.length&&readable&&!conflict&&!v26Semantic?.needs_review);
  $('v26ActivitiesPreview').textContent='Извлечени дейности: '+extracted.length+'. '+(subjectReady?'Автоматично подготвени предмет и заглавие — за експертно одобрение.':!readable?'Част от преписката не е надеждно прочетена — проверете посочените файлове.':conflict||v26Semantic?.needs_review?'Прочетени са противоречиви или неотносими сведения — проверете източниците.':'Не е извлечена достатъчно относима информация от уведомлението — проверете разчитането.');
- $('v26SemanticReview').textContent=(v26Semantic?.flags||[]).map(f=>'• '+f.label+'\n  Източници: '+f.sources.join(', ')).join('\n')+(v26Semantic?.location?.length?'\nМестоположение (за проверка): '+v26Semantic.location.join(', '):'\nМестоположение: ПРЕДСТОИ проверка');
+ $('v26SemanticReview').textContent=(v26Semantic?.flags||[]).map(f=>'• '+f.label+'\n  Източници: '+f.sources.join(', ')).join('\n')+(v26Semantic?.location?.length?'\nМестоположение (за проверка): '+v26Semantic.location.join(', '):'\nМестоположение: няма потвърдени данни в преписката');
  subjectSource.dataset.source=c?.source||'Източникът не е установен';
  subjectSource.textContent='Източник: '+subjectSource.dataset.source;
  $('v26SubjectEditor').style.display='block';
