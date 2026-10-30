@@ -50,7 +50,7 @@ function drawSVG(ctx,svg,x,y,w){
 async function generate(def){
  const pages=[];let canvas,ctx,y;
  function start(){canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.fillStyle='#183b2d';ctx.font='bold 24px Arial';ctx.fillText('ТПУ Пловдив · справочно приложение',M,48);ctx.strokeStyle='#c4d9ce';ctx.beginPath();ctx.moveTo(M,65);ctx.lineTo(W-M,65);ctx.stroke();y=95}
- function finish(){ctx.font='18px Arial';ctx.fillStyle='#667';ctx.fillText('Работен документ · актуални правни изводи: ПРЕДСТОИ',M,H-45);pages.push(canvas.toDataURL('image/jpeg',0.90))}
+ function finish(){ctx.font='18px Arial';ctx.fillStyle='#667';ctx.fillText('ТПУ Пловдив · ГИС справка · източниците и ограниченията са посочени в документа',M,H-45);pages.push(canvas.toDataURL('image/jpeg',0.90))}
  start();
  for(const item of def.content||[]){
   // Respect explicit per-parcel page boundaries in the shared PDF generator.
