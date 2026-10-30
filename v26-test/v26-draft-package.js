@@ -233,10 +233,11 @@ function normativePdf(results,register){
  const review=register?.verifiedCaseMetadata||null;
  const resolvedTitle=String(subject?.title||review?.subject||review?.title||dossier?.subject?.title||dossier?.subject_title||'').trim();
  const confirmed=!!(subject?.confirmed&&resolvedTitle);
- const subjectDisplay=(resolvedTitle||'Не е установен в обработените материали — за експертна проверка.').replace(/\bи\s+зграждането\b/gi,'изграждането').replace(/\bСк\s+лад\b/g,'Склад').replace(/\bпро\s+мишлени\b/gi,'промишлени').replace(/\s*[„“]\s*/g,' ').replace(/\s+/g,' ').trim();
+ const subjectDisplay=(resolvedTitle||'Предметът не е установен в обработените материали.').replace(/идентификатор(?:\s*идентификатор)+/gi,'идентификатор').replace(/\bи\s+зграждането\b/gi,'изграждането').replace(/\bСк\s+лад\b/g,'Склад').replace(/\bпро\s+мишлени\b/gi,'промишлени').replace(/\s*[„“]\s*/g,' ').replace(/\s+/g,' ').trim();
  const verifiedLocation=String(review?.location||'').trim();
- const verifiedSettlement=verifiedPlaceLabel(review?.settlement);
+ const verifiedSettlement=verifiedPlaceLabel(review?.settlement)||(()=>{const places=[...new Set(results.map(r=>verifiedPlaceLabel(r.settlement||r.settlement_name)).filter(Boolean))];return places.length===1?places[0]:''})();
  const verifiedLandArea=String(review?.landArea||'').trim();
+ const parcelLocalities=[...new Map(results.map(r=>[String(r.input||r.cadnum||''),String(r.locality||'').trim()]).filter(([id,place])=>id&&place)).entries()];
  const relevant=records.filter(r=>{const title=String(r.title||'');const code=String(r.zone_code||r.sitecode||'');const mentioned=[...title.matchAll(/BG\d{7}/g)].map(m=>m[0]);return title&&/^https:\/\//.test(String(r.source||''))&&(!code||zoneMap.has(code))&&(!mentioned.length||mentioned.every(z=>zoneMap.has(z)))&&(/биологичното разнообразие|съвместимост|защитена зона|заповед/i.test(title+' '+String(r.purpose||'')));});
  const legalGroups=new Map();
  for(const r of relevant){
@@ -254,13 +255,15 @@ function normativePdf(results,register){
   ...(verifiedLocation?[{text:'Местоположение на имотите: '+verifiedLocation}]:[]),
   ...(verifiedSettlement?[{text:'Населено място: '+verifiedSettlement}]:[]),
   ...(verifiedLandArea?[{text:'Землище: '+verifiedLandArea}]:[]),
-  {text:'Обхват по кадастрални идентификатори: '+(ids.map(id=>id+(id==='36676.129.457'?' — с. Катуница':id==='47295.27.259'?' — с. Марково':'')).join('; ')||'Не е установен.')},
+  ...parcelLocalities.map(([id,place])=>({text:'Поземлен имот '+id+' — местност '+place})), 
+  {text:'Обхват по кадастрални идентификатори: '+(ids.join('; ')||'Не е установен.')},
   ...(confirmed&&subject.activities?.length?[{text:'Предвидени дейности:',bold:true,margin:[0,4,0,2]},...subject.activities.map(a=>String(a).replace(/\s+/g,' ').replace(/^\s*[;:,.]+\s*/,'').trim()).filter(Boolean).map(a=>({text:'• '+a,margin:[8,0,0,2]}))]:[]),
   {text:'II. Пространствена относимост',style:'sub'},
   {text:'Пространствените резултати са представени в самостоятелния документ „ТПУ Пловдив — ГИС анализ“. Настоящият документ използва резултатите му, без да ги замества.'},
   {text:'Пространствен резултат по имоти: '+gisSummary},
   {text:'III. Нормативни и документални основания',style:'sub'},
-  {text:'Проверени нормативни разпоредби: чл. 31, ал. 1 от ЗБР — оценка за съвместимост при възможно значително отрицателно въздействие; чл. 31, ал. 4 от ЗБР — връзка с процедурите по ЗООС, когато са приложими; чл. 2, ал. 1, т. 1 от Наредбата за ОС — обхват на инвестиционните предложения. Конкретната процедура и режимите на зоната се определят след индивидуална проверка.',fontSize:8},
+  {text:'Нормативните основания по-долу са справочни. За конкретната преписка се използват само разпоредби с проследим първичен източник и проверен обхват; приложимостта се преценява индивидуално.',fontSize:8},
+  ...records.filter(r=>r.revision_verified===true&&r.verified===true&&r.verified_scope&&r.article&&/^https:\/\//.test(String(r.source||''))&&(!r.zone_code||zoneMap.has(r.zone_code))).map(r=>({text:String(r.title||'Нормативен акт')+' — '+String(r.article)+'; обхват: '+String(r.verified_scope)+'; източник: '+String(r.source),fontSize:8})),
   {text:'Пространственото пресичане само по себе си не доказва нарушение на режим.'},
   ...applicable.flatMap(r=>[{text:r.title,bold:true,fontSize:9},...r.sources.map(source=>{let label;try{const u=new URL(String(source));label=u.hostname.replace(/^www\./,'')+(u.pathname.toLowerCase().includes('protectedsite')?' / страница на защитената зона':' / нормативен документ')}catch(_){label='Официален източник'}return {text:label,link:String(source),color:'#165c86',fontSize:8,decoration:'underline'};})]),
   ...(applicable.length?[]:[{text:'В интегрирания нормативен архив няма относима референция за този обхват.'}]),
@@ -300,7 +303,9 @@ async function make(results,roles,register){
  // Never require a second, manually retyped copy of cadastral identifiers.
  const confirmedIds=results.map(r=>String(r.input||r.cadnum||'').trim()).filter(id=>/^\d{5}\.\d+\.\d+(?:\.\d+){0,2}$/.test(id));
  if(confirmedIds.length!==results.length)throw Error('Липсва валиден кадастрален идентификатор в потвърдената ГИС справка.');
- caseMetadata.parcelIds=[...new Set(confirmedIds)].join(', ');
+ const dossierOriginalIds=String(caseMetadata.originalCadastralIdentifiers||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
+ caseMetadata.originalCadastralIdentifiers=[...new Set([...dossierOriginalIds,...confirmedIds])].join(', ');
+ caseMetadata.parcelIds=[...new Set(confirmedIds.map(id=>id.split('.').slice(0,3).join('.')))].join(', ');
   // The dossier's confirmed parcel location is shared by Word and both annexes.
   if(!caseMetadata.location){const gisLocation=results.map(x=>x.location).filter(x=>typeof x==='string'&&x.trim());if(gisLocation.length===1)caseMetadata.location=gisLocation[0].trim();}
   // Only explicit verified GIS metadata may supply a settlement/land area; never infer a city/village from parcel ID.
@@ -312,9 +317,9 @@ async function make(results,roles,register){
  const expertDraft=window.V26ExpertDraft?.build({results,roles:normalized,determination,metadata:caseMetadata,paragraphs,evidence:dossierEvidence});
  if(!expertDraft)throw Error('КТ13: липсва единният експертен проект.');
  if(!window.V26ExpertWord?.make)throw Error('КТ13: липсва генераторът за експертния Word.');
- const expertWord=await window.V26ExpertWord.make(expertDraft);
+ const expertWord=await window.V26ExpertWord.make(expertDraft,register.mapSvg);
  const prefixes=expertDraft.scenario==='Б'?['С реализацията','Електроснабдяването','Водозахранването','Отпадъчните води']:['С реализацията','Електроснабдяването','Водоснабдяването','Отпадъчните води'];
- const classicParagraphs=expertDraft.characterization.map((value,i)=>value.startsWith(prefixes[i])?value:prefixes[i]+' — '+value);
+ const classicParagraphs=expertDraft.characterization.map((value,i)=>{const text=String(value||'').trim();if(!text)return text;return text.startsWith(prefixes[i])?text:prefixes[i]+' — '+text;});
  const classicWord=await window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata);
  for(const [label,blob] of [['експертен',expertWord],['класически',classicWord]]){
   if(blob.size<100||new TextDecoder().decode(await blob.slice(0,2).arrayBuffer())!=='PK')throw Error('КТ13: невалиден '+label+' DOCX.');
@@ -326,6 +331,8 @@ async function make(results,roles,register){
  const pdf1=await pdfBlob(gisPdf(results,register));if(pdf1.size<100||await pdf1.slice(0,4).text()!=='%PDF')throw Error('Приложение №1 не е валиден PDF.');z.file('03_Prilozhenie_1_GIS_analiz.pdf',pdf1);
  if(includeAnnex2){const pdf2=await pdfBlob(normativePdf(results,register));if(pdf2.size<100||await pdf2.slice(0,4).text()!=='%PDF')throw Error('Приложение №2 не е валиден PDF.');z.file('04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf',pdf2);}
  const evidenceLines=['РАБОТЕН ПАКЕТ — НЕ Е ОФИЦИАЛНО СТАНОВИЩЕ.','ВНИМАНИЕ: Полетата [ЗА ЕКСПЕРТНА ПРОВЕРКА] са незавършени и изискват проверка от компетентен експерт преди подписване или изпращане.','Съдържа два отделни DOCX проекта (класически и експертен), задължителното PDF приложение №1; приложение №2 се включва само по избор.','Правната приложимост и изводите подлежат на експертна проверка.','','ТЕХНИЧЕСКА ПРОСЛЕДИМОСТ — САМО ЗА ВЪТРЕШНА ПРОВЕРКА'];
+ if(caseMetadata.originalCadastralIdentifiers)evidenceLines.push('Оригинални кадастрални идентификатори: '+caseMetadata.originalCadastralIdentifiers);
+ if(caseMetadata.parcelIds)evidenceLines.push('Поземлени имоти за ГИС: '+caseMetadata.parcelIds);
  if(dossierEvidence){
   evidenceLines.push('Сценарий (ГИС): '+String(determination.scenario||'неопределен'));
   evidenceLines.push('Пространствен статус (ГИС): '+(determination.scenario==='Б'?'Установено пресичане: '+determination.zones.join(', '):determination.scenario==='А'?'Установено непресичане':'Няма данни'));

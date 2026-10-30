@@ -15,7 +15,8 @@ const metadata={recipient:'Тестов адресат',address:'Тестов а
 const names=['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_Prilozhenie_1_GIS_analiz.pdf','04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf','README_BG.txt'];
 async function run(scenario,annex2){
  const parcel={input:id,cadnum:id,status:'Намерен',geojson,area_m2_source:450,...(scenario==='Б'?{verified_zone_intersections:['BG0002057']}:{intersection_verified_outside:true})};
- const register={includeAnnex2:annex2,unifiedContext:{commonEvidence:{findings:[],warnings:[]}},verifiedCaseMetadata:metadata,verifiedCharacterizationParagraphs:['С реализацията на инвестиционното предложение','Електроснабдяването е описано','Водоснабдяването е описано','Отпадъчните води са описани'],records:[{id:'Z1',title:'Тестова заповед BG0002057',zone_code:'BG0002057',source:'https://example.org/zone'}]};
+ const mapPng=new Uint8Array(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/aN0AAAAASUVORK5CYII=','base64'));
+ const register={mapSvg:mapPng,includeAnnex2:annex2,unifiedContext:{commonEvidence:{findings:[],warnings:[]}},verifiedCaseMetadata:metadata,verifiedCharacterizationParagraphs:['С реализацията на инвестиционното предложение','Електроснабдяването е описано','Водоснабдяването е описано','Отпадъчните води са описани'],records:[{id:'Z1',title:'Тестова заповед BG0002057',zone_code:'BG0002057',source:'https://example.org/zone'}]};
  const blob=await w.V26DraftPackage.make([parcel],{[id]:'leading'},register);
  const zip=await JSZip.loadAsync(await blob.arrayBuffer());
  const expected=annex2?names:names.filter(n=>!n.startsWith('04_'));
@@ -28,6 +29,7 @@ async function run(scenario,annex2){
    assert(xml.includes(id),'DOCX parcel missing: '+name);
    assert(xml.includes('Тестов адресат'),'DOCX recipient missing: '+name);
    assert(doc.file('word/styles.xml'),'Original template styles missing');
+   if(name.includes('Eksperten')){assert(doc.file('word/media/v26-gis-overview.png'),'Expert Word map image missing');const rels=await doc.file('word/_rels/document.xml.rels').async('string');assert(rels.includes('rIdV26Map'),'Expert Word map relationship missing');assert(xml.includes('rIdV26Map'),'Expert Word image reference missing');}
   }else if(name.endsWith('.pdf')){
    assert.equal(bytes.subarray(0,5).toString(),'%PDF-');
    const parsed=await pdfParse(bytes);

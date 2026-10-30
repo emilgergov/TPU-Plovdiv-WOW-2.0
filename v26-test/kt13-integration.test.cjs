@@ -33,7 +33,7 @@ assert(word.includes("paragraph(doc,'Място за електронен под
 assert(word.includes("paragraph(doc,'Място за електронен подпис — окончателно подписване')"),'Expert closing signature slot missing');
 assert(word.includes('sect.cloneNode(true)'),'Original section/header/footer references must be preserved');
 assert(pkg.includes("if(includeAnnex2){"),'Annex 2 must remain optional');
-assert(pkg.includes("await window.V26ExpertWord.make(expertDraft)")&&pkg.includes("window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata)"),'Both Word documents must use the same expert draft');
+assert(pkg.includes("await window.V26ExpertWord.make(expertDraft,register.mapSvg)")&&pkg.includes("window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata)"),'Both Word documents must use the same expert draft and expert Word must receive GIS map');
 for(const name of ['v26-expert-draft.js','v26-expert-word.js','v26-draft-package.js','v26-template-word.js','v26-word-review.js'])new vm.Script(read(name),{filename:name});
 const review=read('v26-word-review.js');
 assert(review.includes('function autoEvidence()'),'Evidence-derived Word descriptions must remain available');

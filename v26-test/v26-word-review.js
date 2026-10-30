@@ -40,7 +40,7 @@ function autoEvidence(){
  });
  const ids=(document.getElementById('ids')?.value||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  const subject=window.V26SubjectContext;
- return {paragraphs,ids:[...new Set(ids)].join(', '),subject:subject?.confirmed?(subject.wordHeading||subject.title):null};
+ return {paragraphs,ids:[...new Set(ids.map(id=>id.split('.').slice(0,3).join('.')))].join(', '),subject:subject?.confirmed?(subject.wordHeading||subject.title):null};
 }
 function formatVerifiedParagraph(raw,i,scenario){
  const value=String(raw||'').trim();if(!value)return '';
@@ -74,9 +74,11 @@ function validateCaseMetadata(result){
  if(missing.length)throw Error('За Word липсват потвърдени административни данни: '+missing.join(', ')+'.');
  const ids=String(result.parcelIds).match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  if(!ids.length)throw Error('Не са въведени валидни кадастрални идентификатори.');
- const unique=[...new Set(ids.map(id=>id.split('.').slice(0,3).join('.')))];
+ const originalIdentifiers=[...new Set(ids)];
+ const unique=[...new Set(originalIdentifiers.map(id=>id.split('.').slice(0,3).join('.')))];
  const unexpected=String(result.parcelIds).replace(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g,'').replace(/[\s,;]+/g,'');
  if(unexpected)throw Error('Полето за имоти съдържа неразпознат текст; коригирайте го преди Word.');
+ result.originalCadastralIdentifiers=originalIdentifiers.join(', '); // Preserve source-level building/unit identifiers for traceability; GIS uses parcel IDs.
  result.parcelIds=unique.join(', ');
  return result;
 }
@@ -96,6 +98,15 @@ function getConfirmedMetadata({allowIncomplete=false}={}){
  const auto=autoEvidence();
  if(!caseFields.subject.value.trim()&&auto.subject)result.subject=auto.subject.replace(/^Относно:\s*/i,'').trim();
  if(!result.parcelIds)result.parcelIds=auto.ids;
+ // Validate and normalize even working metadata, while retaining original object IDs.
+ if(result.parcelIds){
+  const rawIds=String(result.parcelIds).match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
+  const remainder=String(result.parcelIds).replace(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g,'').replace(/[\s,;]+/g,'');
+  if(rawIds.length&&!remainder){
+   result.originalCadastralIdentifiers=[...new Set(rawIds)].join(', ');
+   result.parcelIds=[...new Set(rawIds.map(id=>id.split('.').slice(0,3).join('.')))].join(', ');
+  }
+ }
  // Registration data are taken only from explicit incoming-reference matches.
  // Ambiguous or multiple numbers are not silently chosen.
  if(!caseFields.incomingReference.value.trim()){
@@ -124,7 +135,7 @@ document.addEventListener('v26:dossier-loaded',event=>{
   const section=draft?.sections?.find(x=>x.key===key);if(!section?.sources?.length||!fields[i])return;
   const wrapper=document.createElement('div');wrapper.className='v26-evidence-suggestion';wrapper.style.cssText='font-size:0.9em;margin:3px 0 10px;padding:7px;border-left:3px solid #819d89';
   const evidenceDetails=document.createElement('details');const title=document.createElement('summary');title.textContent='Покажи източници от преписката ('+Math.min(section.sources.length,3)+')';evidenceDetails.append(title);wrapper.append(evidenceDetails);
-  section.sources.slice(0,3).forEach(source=>{const p=document.createElement('p');p.textContent=source.file+' · '+(source.date||'дата неустановена')+': '+source.excerpt.slice(0,380);evidenceDetails.append(p)});
+  section.sources.slice(0,3).forEach(source=>{const p=document.createElement('p');p.textContent=source.file+' · '+(source.date||'дата неустановена')+': '+String(source.excerpt||'').slice(0,380).replace(/\s+\S*$/,'').trim();evidenceDetails.append(p)});
   fields[i].parentNode.append(wrapper);
  });
 });
@@ -134,14 +145,14 @@ document.addEventListener('v26:full-reset',()=>{if(confirmed)confirmed.checked=f
 function getWorkingDraft(){
  refreshVerifiedFields();
  const auto=autoEvidence();
- const subject=String(caseFields.subject?.value||auto.subject||'').replace(/^Относно:\s*/i,'').replace(/\s+—\s+ПИ с идентификатор[\s\S]*$/i,'').replace(/\s+—\s+поземлени имоти с идентификатори[\s\S]*$/i,'').trim();
+ const subject=String(caseFields.subject?.value||auto.subject||'').replace(/^Относно:\s*/i,'').replace(/идентификатор(?:\s*идентификатор)+/gi,'идентификатор').replace(/\s+—\s+ПИ с идентификатор[\s\S]*$/i,'').replace(/\s+—\s+поземлени имоти с идентификатори[\s\S]*$/i,'').trim();
  const paragraphs=fields.map((f,i)=>{
   const value=String(f.value||'').trim();
   if(value&&!/Няма данни в преписката|Източник:/i.test(value))return value; // Preserve unreviewed text verbatim in the working draft; never manufacture template wording.
   const source=(window.V26WorkingContext?.characterization?.sections||[]).find(x=>x.key===['construction','electricity','water_supply','wastewater'][i]);
   const excerpts=(source?.sources||[]).filter(x=>String(x.excerpt||'').trim()).map(x=>String(x.excerpt).replace(/\s*\(Източник:[^)]*\)/g,'').trim()).filter(Boolean);
   const unique=[...new Set(excerpts)];
-  if(unique.length)return unique[0]+' [ОТКЪС ОТ ПРЕПИСКАТА — ЗА СВЕРЯВАНЕ]';
+  if(unique.length)return 'В преписката са налични сведения по този въпрос, които следва да бъдат проверени и обобщени от експерта преди включване в предложението.';
   return '[ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва потвърдено описание]';
  });
  const metadata=getConfirmedMetadata({allowIncomplete:true});

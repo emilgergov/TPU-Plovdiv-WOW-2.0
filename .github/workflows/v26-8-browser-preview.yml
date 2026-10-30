@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - work/v26-8-word-content-20261030
+      - work/v26-9-kt15-document-content-20261030
     paths:
       - 'v26-test/**'
       - '.github/workflows/v26-8-browser-preview.yml'

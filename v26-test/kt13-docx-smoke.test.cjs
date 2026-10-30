@@ -32,7 +32,8 @@ async function run(scenario){
  const paragraphs=scenario==='А'?['С реализацията на инвестиционното предложение','Електроснабдяването е описано','Водоснабдяването е описано','Отпадъчните води са описани']:['С реализацията на инвестиционното предложение','Електроснабдяването е описано','Водозахранването е описано','Отпадъчните води са описани'];
  const metadata={recipient:'Тестов адресат',address:'Тестов адрес',subject:'Тестово инвестиционно предложение',incomingReference:'вх. № 123',salutation:'Уважаеми госпожи и господа,',parcelIds:'36676.129.457',legalParagraphs:Array(7).fill('Експертно потвърден правен текст за теста.'),procedureFinding:'Експертно потвърдена процедура.',impactFindings:Array(5).fill('Експертно потвърдено въздействие.')};
  const draft=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{}});
- const blob=await w.V26ExpertWord.make(draft);
+ const mapPng=new Uint8Array(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/aN0AAAAASUVORK5CYII=','base64'));
+ const blob=await w.V26ExpertWord.make(draft,mapPng);
  const out=fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
  const xml=new TextDecoder().decode(out['word/document.xml']);
  const texts=paragraphTexts(xml).join(' ');
@@ -40,7 +41,9 @@ async function run(scenario){
  assert(expertPs[0].includes('Място за електронен подпис — вътрешно съгласуване'),'Expert: opening blank signature slot missing');
  assert(expertPs[expertPs.length-1].includes('Място за електронен подпис — окончателно подписване'),'Expert: closing blank signature slot missing');
  for(const value of [metadata.recipient,metadata.subject,'36676.129.457','Приложение №1 — ГИС анализ'])assert(texts.includes(value),'Missing expert content: '+value);
- for(const key of Object.keys(sourceZip).filter(x=>x!=='word/document.xml'))assert.deepEqual(out[key],sourceZip[key],'Institutional DOCX part changed: '+key);
+ assert(out['word/media/v26-gis-overview.png'],'Expert GIS image missing');
+ assert(xml.includes('rIdV26Map'),'Expert GIS image reference missing');
+ for(const key of Object.keys(sourceZip).filter(x=>!['word/document.xml','word/_rels/document.xml.rels','[Content_Types].xml'].includes(x)))assert.deepEqual(out[key],sourceZip[key],'Institutional DOCX part changed: '+key);
  // The classic renderer is tested against the same draft; do not allow silent
  // divergence between expert and template-based outputs.
  const classic=await w.V26TemplateWord.make(draft.scenario,draft.characterization,draft.metadata);
