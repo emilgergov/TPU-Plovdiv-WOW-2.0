@@ -41,7 +41,7 @@ async function make(draft){
  const isPending=x=>/\[ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(String(x||''));
  const pendingRequired=[m.recipient,m.address,m.subject,m.incomingReference,m.salutation,...legal,m.procedureFinding,...impacts];
  if(pendingRequired.some(isPending))throw Error('КТ13: има непотвърдени реквизити или правни констатации; експертният Word не се генерира.');
- if(!Array.isArray(draft.parcels)||!draft.parcels.length||draft.parcels.some(p=>!/^\\d{5}\\.\\d+\\.\\d+$/.test(String(p.id||''))))throw Error('КТ13: невалиден или липсващ имотен обхват.');
+ if(!Array.isArray(draft.parcels)||!draft.parcels.length||draft.parcels.some(p=>!/^\d{5}\.\d+\.\d+$/.test(String(p.id||''))))throw Error('КТ13: невалиден или липсващ имотен обхват.');
  if(!Array.isArray(draft.characterization)||draft.characterization.length!==4||draft.characterization.some(x=>!String(x||'').trim()||isPending(x)||/ОТКЪС ОТ ПРЕПИСКАТА|ЗА СВЕРЯВАНЕ/i.test(x)))throw Error('КТ13: четирите характеристики трябва да бъдат редактирани и потвърдени.');
  const subject=String(m.subject).replace(/^Относно:\s*/i,'').replace(/^(?:инвестиционно предложение\s*)+/i,'').replace(/^[„“"\s]+|[„“"\s]+$/g,'').replace(/\s+/g,' ').trim();
  const confirmed=xs=>xs.filter(x=>!isPending(x));
