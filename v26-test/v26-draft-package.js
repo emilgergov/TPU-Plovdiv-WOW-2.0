@@ -130,16 +130,17 @@ function verifiedPlaceLabel(value){
  return /^(?:гр\.|град|с\.|село)\s+/i.test(text)?text:'';
 }
 function gisPdf(results,options={}){
+ if(results.length>1)options={...options,mapSvg:null};
  const content=[{text:'Източник на геометрията: регионална ГИС база на РИОСВ – Пловдив, 02.10.2026 г.',margin:[0,0,0,8]}];
  if(options.mapSvg&&String(options.mapSvg).includes('<svg')){
   const clean=options.mapSvg;
   const contentMap={svg:clean,width:510,margin:[0,5,0,10]};
-  content.push({text:'Картографски материал — одобрена ГИС карта (избран мащаб и изглед)',style:'sub'});
+  content.push({text:'Карта на анализираните имоти',style:'sub'});
   content.push(contentMap);
   content.push({text:'Картата възпроизвежда видимите слоеве в браузъра: имот, граници на защитени зони и етикети. Пространственото заключение и площите на пресичане са изчислени по интегрирания ГИС архив на ТПУ; правният режим се разглежда отделно.',fontSize:9,margin:[0,0,0,10]});
  }
  if(results.length>1){
-  content.push({text:'Индивидуални картни изгледи по имоти · до 4 карти на страница',style:'sub',pageBreak:'before'});
+  content.push({text:'Индивидуални карти по имоти',style:'sub',pageBreak:'before'});
   const cards=[];
   for(const r of results){
    const id=String(r.input||r.cadnum||'');
@@ -187,7 +188,7 @@ function gisPdf(results,options={}){
     shapes.push('<text x="'+(35+(x-minX)*scale).toFixed(2)+'" y="'+(365-(y-minY)*scale).toFixed(2)+'" font-size="13" text-anchor="middle" fill="#123e2b">'+E(String(results[i].input||results[i].cadnum))+'</text>')}
   }
   const drawing='<svg xmlns="http://www.w3.org/2000/svg" width="700" height="410" viewBox="0 0 700 410">'+shapes.join('')+'</svg>';
-  content.push({text:'Картографски материал — архивни имотни контури (общ изглед)',style:'sub'});
+  content.push({text:'Обща карта на анализираните имоти',style:'sub'});
   content.push({svg:drawing,width:480,margin:[0,4,0,8]});
  }else if(!options.mapSvg)content.push({text:'Картографски материал: Недостатъчни данни за заключение — няма налична имотна геометрия.',bold:true});
  const verifiedLocation=String(options.verifiedCaseMetadata?.location||'').trim();
