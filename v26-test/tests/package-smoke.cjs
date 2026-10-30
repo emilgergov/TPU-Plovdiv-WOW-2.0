@@ -21,13 +21,13 @@ const base={input:'36498.8.101',cadnum:'36498.8.101',status:'Намерен',geo
 const roles={'36498.8.101':'leading'};
 const diagnosis=results=>context.scenarioFromGIS(results,roles);
 assert.equal(diagnosis([{...base,verified_zone_intersections:['BG0001493']}]).scenario,'Б');
-assert.equal(diagnosis([{...base,archived_zones:[null,{code:'BG0001493'}]}]).scenario,'Б');
+assert.equal(diagnosis([{...base,archived_zones:[null,{code:'BG0001493'}]}]).scenario,null);
 assert.equal(diagnosis([{...base,intersection_verified_outside:true}]).scenario,'А');
 assert.equal(diagnosis([base]).scenario,null);
 assert.throws(()=>diagnosis([{...base,status:'Ненамерен'}]),/геометрия/);
 assert.throws(()=>context.scenarioFromGIS([base],{}),/водещ/);
 assert.equal(unified([{...base,verified_zone_intersections:['BG0001493']}]).diagnosis.scenario,'Б');
-assert.equal(unified([{...base,archived_zones:[null,{code:'BG0001493'}]}]).diagnosis.scenario,'Б');
+assert.equal(unified([{...base,archived_zones:[null,{code:'BG0001493'}]}]).diagnosis.scenario,null);
 assert.equal(unified([{...base,intersection_verified_outside:true}]).diagnosis.scenario,'А');
 assert.equal(unified([base]).readiness.word,false);
 assert.equal(unified([{...base,intersection_verified_outside:true}],roles,false).readiness.word,false);
