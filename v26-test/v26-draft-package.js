@@ -185,7 +185,11 @@ function gisPdf(results,options={}){
   content.push({svg:drawing,width:480,margin:[0,4,0,8]});
  }else if(!options.mapSvg)content.push({text:'Картографски материал: Недостатъчни данни за заключение — няма налична имотна геометрия.',bold:true});
  const verifiedLocation=String(options.verifiedCaseMetadata?.location||'').trim();
+ const verifiedSettlement=String(options.verifiedCaseMetadata?.settlement||'').trim();
+ const verifiedLandArea=String(options.verifiedCaseMetadata?.landArea||'').trim();
  if(verifiedLocation)content.push({text:'Местоположение на имотите: '+verifiedLocation,margin:[0,5,0,7]});
+ if(verifiedSettlement)content.push({text:'Населено място: '+verifiedSettlement});
+ if(verifiedLandArea)content.push({text:'Землище: '+verifiedLandArea});
  content.push({text:'ГИС данни по имоти — обща таблица',style:'sub'});
  content.push({table:{headerRows:1,widths:[112,72,82,82,'*'],body:[
   ['Кадастрален №','Площ, кв.м','Зона','Пресичане','Статус'],
@@ -225,6 +229,8 @@ function normativePdf(results,register){
  const confirmed=!!(subject?.confirmed&&resolvedTitle);
  const subjectDisplay=(resolvedTitle||'Не е установен в обработените материали — за експертна проверка.').replace(/\bи\s+зграждането\b/gi,'изграждането').replace(/\bСк\s+лад\b/g,'Склад').replace(/\bпро\s+мишлени\b/gi,'промишлени').replace(/\s*[„“]\s*/g,' ').replace(/\s+/g,' ').trim();
  const verifiedLocation=String(review?.location||'').trim();
+ const verifiedSettlement=String(review?.settlement||'').trim();
+ const verifiedLandArea=String(review?.landArea||'').trim();
  const relevant=records.filter(r=>{const title=String(r.title||'');const code=String(r.zone_code||r.sitecode||'');const mentioned=[...title.matchAll(/BG\d{7}/g)].map(m=>m[0]);return title&&/^https:\/\//.test(String(r.source||''))&&(!code||zoneMap.has(code))&&(!mentioned.length||mentioned.every(z=>zoneMap.has(z)))&&(/биологичното разнообразие|съвместимост|защитена зона|заповед/i.test(title+' '+String(r.purpose||'')));});
  const legalGroups=new Map();
  for(const r of relevant){
@@ -240,6 +246,8 @@ function normativePdf(results,register){
   {text:'I. Предмет и фактическа основа',style:'sub'},
   {text:'Предмет на инвестиционното предложение: '+(subjectDisplay)},
   ...(verifiedLocation?[{text:'Местоположение на имотите: '+verifiedLocation}]:[]),
+  ...(verifiedSettlement?[{text:'Населено място: '+verifiedSettlement}]:[]),
+  ...(verifiedLandArea?[{text:'Землище: '+verifiedLandArea}]:[]),
   {text:'Обхват по кадастрални идентификатори: '+(ids.join(', ')||'Не е установен.')},
   ...(confirmed&&subject.activities?.length?[{text:'Предвидени дейности (обобщение): '+subject.activities.slice(0,4).map(a=>String(a).replace(/\s+/g,' ').trim()).join('; ').slice(0,320)+(subject.activities.join('; ').length>320?'…':'')}]:[]),
   {text:'II. Пространствена относимост',style:'sub'},
@@ -285,6 +293,10 @@ async function make(results,roles,register){
  caseMetadata.parcelIds=[...new Set(confirmedIds)].join(', ');
   // The dossier's confirmed parcel location is shared by Word and both annexes.
   if(!caseMetadata.location){const gisLocation=results.map(x=>x.location).filter(x=>typeof x==='string'&&x.trim());if(gisLocation.length===1)caseMetadata.location=gisLocation[0].trim();}
+  // Only explicit verified GIS metadata may supply a settlement/land area; never infer a city/village from parcel ID.
+  for(const [key,sourceKeys] of [['settlement',['settlement','settlement_name']],['landArea',['landArea','land_area']]]){
+   if(!caseMetadata[key]){const values=[...new Set(results.map(x=>sourceKeys.map(k=>x[k]).find(v=>typeof v==='string'&&v.trim())).filter(Boolean).map(x=>x.trim()))];if(values.length===1)caseMetadata[key]=values[0];}
+  }
   register={...register,verifiedCaseMetadata:caseMetadata};
  const dossierEvidence=register?.unifiedContext?.commonEvidence||null;
  const expertDraft=window.V26ExpertDraft?.build({results,roles:normalized,determination,metadata:caseMetadata,paragraphs,evidence:dossierEvidence});
