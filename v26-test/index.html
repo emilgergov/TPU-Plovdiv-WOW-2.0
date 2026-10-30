@@ -377,8 +377,8 @@ function v26CleanSubjectHeading(){
  const ids=[...new Set([...locationIds,...words($('ids').value)])];
  const primary=confirmedRoles?Object.keys(confirmedRoles).filter(id=>confirmedRoles[id]==='leading'):[];
  const chosen=primary.length?primary:ids;
- const displayedRaw=primary.length?raw.replace(/\s*[—–-]?\s*ПИ\s+с\s+идентификатор\s+\d{5}\.\d+\.\d+.*$/i,'').trim():raw;
- const pieces=chosen.length?['ПИ с идентификатор'+(chosen.length>1?'и':'')+' '+chosen.join(', ')]:[];
+ const displayedRaw=primary.length?raw.replace(/(?:\s*[,;—–-]?\s*(?:в\s+)?ПИ\s+с\s+идентификатор\s+\d{5}\.\d+\.\d+)(?:\s*[,;—–-]?\s*\d{5}\.\d+\.\d+)*\s*$/i,'').trim():raw;
+ const pieces=chosen.length?[(chosen.length===1?'ПИ с идентификатор ':'ПИ с идентификатори ')+chosen.join(', ')]:[];
  const matched=found.filter(x=>chosen.includes(x.cadnum));
  const settlements=[...new Set(matched.map(x=>x.settlement).filter(Boolean))];
  const localities=[...new Set(matched.map(x=>x.locality).filter(Boolean))];
