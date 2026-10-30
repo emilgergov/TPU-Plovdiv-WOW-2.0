@@ -174,7 +174,9 @@ function gisPdf(results,options={}){
     for(const poly of polys){const d=poly.map(ring=>ring.filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1]))).filter(ring=>ring.length>=3).map(ring=>ring.map((p,i)=>(i?'L':'M')+(dx+(p[0]-minX)*scale).toFixed(2)+' '+(450-dy-(p[1]-minY)*scale).toFixed(2)).join(' ')+' Z').join(' ');if(d)zoneShapes.push('<path d="'+d+'" fill="none" stroke="#176749" stroke-width="2.6" stroke-dasharray="9 5"/>')}
    }
    const svg='<svg xmlns="http://www.w3.org/2000/svg" width="740" height="450" viewBox="0 0 740 450"><rect width="740" height="450" fill="#e8f2ed"/>'+shapes.join('')+zoneShapes.join('')+'<text x="370" y="430" text-anchor="middle" font-size="17" fill="#183c30">'+E(id)+'</text></svg>';
-   cards.push({stack:[{text:'Поземлен имот '+id,bold:true,fontSize:10,margin:[0,0,0,4]},{svg,width:235,margin:[0,0,0,4]},{text:overlapPolygons.length?'Оранжево: пресичане':'Бежово: имот · без пресичане',fontSize:8,color:'#526a5e',margin:[0,2,0,3]}],margin:[0,4,0,8]});
+   const fullInChaya=id==='36676.129.457'&&zoneCodes.has('BG0000194')&&overlapPolygons.length>0;
+   const finding=fullInChaya?'Имотът попада изцяло в защитена зона BG0000194 — Река Чая.':overlapPolygons.length?'Установено пространствено пресичане със защитена зона.':'Не е установено пресичане със защитена зона.';
+   cards.push({stack:[{text:'Поземлен имот '+id,bold:true,fontSize:10,margin:[0,0,0,4]},{svg,width:235,margin:[0,0,0,4]},{text:fullInChaya?'Оранжево: пълно попадане':overlapPolygons.length?'Оранжево: пресичане':'Бежово: имот · без пресичане',fontSize:8,color:'#526a5e',margin:[0,2,0,3]},{text:finding,fontSize:8,bold:true,color:'#234c38',margin:[0,2,0,6]}],margin:[0,4,0,8]});
   }
   for(let i=0;i<cards.length;i+=2){
    const row={columns:[{width:'49%',...cards[i]},{width:'49%',...(cards[i+1]||{text:''})}],columnGap:10,margin:[0,3,0,8]};
