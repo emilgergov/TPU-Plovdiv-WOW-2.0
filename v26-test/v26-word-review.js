@@ -115,9 +115,7 @@ document.addEventListener('v26:dossier-loaded',event=>{
  for(const f of Object.values(caseFields))f.value='';for(const f of legalFields)f.value='';for(const f of impactFields)f.value='';if(procedureField)procedureField.value='';
  const draft=event.detail?.context?.characterization;
  const dossierSubject=window.V26SubjectContext;
- const verifiedSections=draft?.sections||[];
- const topicKeys=['construction','electricity','water_supply','wastewater'];
- topicKeys.forEach((key,i)=>{const sources=(verifiedSections.find(section=>section.key===key)?.sources||[]).filter(source=>['verified','corroborated'].includes(source.status)&&String(source.excerpt||'').trim());// Even verified excerpts are not finished Word prose; display their sources for expert review instead.});
+ // Evidence is displayed in the source review panels below; never copied into administrative prose automatically.
  // A confirmed title is not evidence of construction details; do not fabricate a construction paragraph.
  if(caseFields.subject&&dossierSubject?.confirmed&&String(dossierSubject.wordHeading||dossierSubject.title||'').trim())caseFields.subject.value=String(dossierSubject.wordHeading||dossierSubject.title).replace(/^Относно:\s*/i,'').trim();
  const knownIds=(document.getElementById('ids')?.value||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
