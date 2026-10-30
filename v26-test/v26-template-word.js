@@ -40,7 +40,7 @@ async function make(scenario,paragraphs,metadata){
   // The source templates have four distinct administrative sentences.
   // Do not replace them with raw excerpts or generic missing-data notes.
   if(!value.startsWith(labels[i]))throw Error('Абзац '+(i+1)+' трябва да започва с „'+labels[i]+'“ според образец '+scenario+'.');
-  if(/Няма данни в преписката|ПРОЕКТ, за проверка|Източник:/i.test(value))throw Error('Абзац '+(i+1)+' съдържа техническа бележка вместо проверен административен текст.');
+  if(/Няма данни в преписката|ПРОЕКТ, за проверка|Източник:|ЗА ЕКСПЕРТНА ПРОВЕРКА|извлечено от преписката|необходима е експертна проверка/i.test(value))throw Error('Абзац '+(i+1)+' съдържа техническа бележка вместо проверен административен текст.');
   texts[0].textContent=value;texts[0].setAttribute('xml:space','preserve');
   for(const t of texts.slice(1))t.textContent='';
  }
