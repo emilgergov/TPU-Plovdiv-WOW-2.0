@@ -258,7 +258,7 @@ function normativePdf(results,register){
   {text:zones.length?'Отчетени защитени зони: '+zones.map(z=>z.code+(z.name?' — '+z.name:'')).join('; '):results.every(r=>r.intersection_verified_outside===true)?'ГИС анализът установява отсъствие на пресичане със защитени зони.':'Няма данни за пространствен извод.'},
   {text:'III. Нормативни и документални основания',style:'sub'},
   {text:'При оценката на инвестиционното предложение се съобразяват относимите нормативни основания от интегрирания архив. По чл. 31, ал. 1 от Закона за биологичното разнообразие се разглежда съвместимостта с предмета и целите на опазване на защитените зони, когато нормата е приложима към конкретния случай. Пространственото пресичане само по себе си не доказва нарушение на режим.'},
-  ...applicable.flatMap(r=>[{text:r.title+(r.ids.length?' — архив '+r.ids.join(', '):''),bold:true,fontSize:9},...r.sources.map(source=>{let label;try{const u=new URL(String(source));label=u.hostname.replace(/^www\./,'')+(u.pathname.toLowerCase().includes('protectedsite')?' / страница на защитената зона':' / нормативен документ')}catch(_){label='Официален източник'}return {text:label,link:String(source),color:'#165c86',fontSize:8,decoration:'underline'};})]),
+  ...applicable.flatMap(r=>[{text:r.title,bold:true,fontSize:9},...r.sources.map(source=>{let label;try{const u=new URL(String(source));label=u.hostname.replace(/^www\./,'')+(u.pathname.toLowerCase().includes('protectedsite')?' / страница на защитената зона':' / нормативен документ')}catch(_){label='Официален източник'}return {text:label,link:String(source),color:'#165c86',fontSize:8,decoration:'underline'};})]),
   ...(applicable.length?[]:[{text:'В интегрирания нормативен архив няма относима референция за този обхват.'}]),
   {text:'IV. Приложимост към инвестиционното предложение',style:'sub'},
   {text:resolvedTitle?'За предложение „'+resolvedTitle+'“ относимостта на посочените основания се разглежда спрямо описаните дейности и пространствените резултати от документа „ТПУ Пловдив — ГИС анализ“. Режимите на конкретна зона се преценяват отделно; настоящата справка не установява автоматично допустимост или забрана.':'Предметът и дейностите подлежат на потвърждение преди индивидуална преценка за приложимост на режимите.'},
@@ -271,9 +271,9 @@ function normativePdf(results,register){
  ];
  const def=pdfDef('Нормативни и документални референции',content);
  // Compact only Annex 2; leave the approved GIS Annex 1 layout untouched.
- def.pageMargins=[42,20,42,20];
- def.defaultStyle={...def.defaultStyle,fontSize:8.1,lineHeight:0.98};
- def.styles={...def.styles,heading:{...def.styles.heading,fontSize:12.5,margin:[0,0,0,4]},sub:{...def.styles.sub,fontSize:9.2,margin:[0,3,0,1]}};
+ def.pageMargins=[42,16,42,16];
+ def.defaultStyle={...def.defaultStyle,fontSize:7.9,lineHeight:0.97};
+ def.styles={...def.styles,heading:{...def.styles.heading,fontSize:12.5,margin:[0,0,0,4]},sub:{...def.styles.sub,fontSize:9,margin:[0,2,0,1]}};
  // Avoid splitting the short expert conclusion onto an otherwise blank second page.
  const conclusionIndex=def.content.findIndex(x=>x?.text==='V. Експертен извод');
  if(conclusionIndex>=0){for(let i=conclusionIndex;i<def.content.length;i++)if(def.content[i]&&typeof def.content[i]==='object')def.content[i].fontSize=def.content[i].fontSize||8;}
