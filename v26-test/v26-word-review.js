@@ -98,6 +98,15 @@ function getConfirmedMetadata({allowIncomplete=false}={}){
  const auto=autoEvidence();
  if(!caseFields.subject.value.trim()&&auto.subject)result.subject=auto.subject.replace(/^Относно:\s*/i,'').trim();
  if(!result.parcelIds)result.parcelIds=auto.ids;
+ // Validate and normalize even working metadata, while retaining original object IDs.
+ if(result.parcelIds){
+  const rawIds=String(result.parcelIds).match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
+  const remainder=String(result.parcelIds).replace(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g,'').replace(/[\s,;]+/g,'');
+  if(rawIds.length&&!remainder){
+   result.originalCadastralIdentifiers=[...new Set(rawIds)].join(', ');
+   result.parcelIds=[...new Set(rawIds.map(id=>id.split('.').slice(0,3).join('.')))].join(', ');
+  }
+ }
  // Registration data are taken only from explicit incoming-reference matches.
  // Ambiguous or multiple numbers are not silently chosen.
  if(!caseFields.incomingReference.value.trim()){
