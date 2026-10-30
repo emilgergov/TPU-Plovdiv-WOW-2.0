@@ -313,7 +313,9 @@ async function make(results,roles,register){
  if(!expertDraft)throw Error('КТ13: липсва единният експертен проект.');
  if(!window.V26ExpertWord?.make)throw Error('КТ13: липсва генераторът за експертния Word.');
  const expertWord=await window.V26ExpertWord.make(expertDraft);
- const classicWord=await window.V26TemplateWord.make(expertDraft.scenario,expertDraft.characterization,expertDraft.metadata);
+ const prefixes=expertDraft.scenario==='Б'?['С реализацията','Електроснабдяването','Водозахранването','Отпадъчните води']:['С реализацията','Електроснабдяването','Водоснабдяването','Отпадъчните води'];
+ const classicParagraphs=expertDraft.characterization.map((value,i)=>value.startsWith(prefixes[i])?value:prefixes[i]+' — '+value);
+ const classicWord=await window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata);
  for(const [label,blob] of [['експертен',expertWord],['класически',classicWord]]){
   if(blob.size<100||new TextDecoder().decode(await blob.slice(0,2).arrayBuffer())!=='PK')throw Error('КТ13: невалиден '+label+' DOCX.');
  }
