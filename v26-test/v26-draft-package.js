@@ -215,7 +215,7 @@ function gisPdf(results,options={}){
   })
  ]},layout:'lightHorizontalLines'});
  content.push({text:'Само изрично потвърдените пространствени пресичания са обозначени като установени. Архивните сведения не са доказателство за актуално пресичане.',margin:[0,10,0,0]});
- return pdfDef('Приложение №1 — ГИС анализ',content);
+ return pdfDef('ГИС анализ',content);
 }
 function visitForLabel(coords,out){if(Array.isArray(coords)&&typeof coords[0]==='number'&&typeof coords[1]==='number'){if(Number.isFinite(coords[0])&&Number.isFinite(coords[1]))out.push(coords)}else if(Array.isArray(coords))coords.forEach(x=>visitForLabel(x,out))}
 function normativePdf(results,register){
