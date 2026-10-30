@@ -47,7 +47,7 @@ function formatVerifiedParagraph(raw,i,scenario){
  const prefix=(templateStarts[scenario==='B'?'B':'A']||templateStarts.A)[i];
  if(value.startsWith(prefix))return value;
  // Only confirmed dossier excerpts may be adapted to the institutional template.
- return prefix+' '+value.replace(/^[\s:;,.–—-]+/,'').replace(/[\s]+$/,'');
+ throw Error('Текстът за „'+labels[i]+'“ не започва с изискваното начало „'+prefix+'“. Редактирайте цялото изречение според образец '+scenario+'; автоматично слепване на откъс от преписката е забранено.');
 }
 function refreshVerifiedFields(){
  const auto=autoEvidence();
@@ -106,7 +106,7 @@ document.addEventListener('v26:dossier-loaded',event=>{
  const verifiedSections=draft?.sections||[];
  const topicKeys=['construction','electricity','water_supply','wastewater'];
  topicKeys.forEach((key,i)=>{const sources=(verifiedSections.find(section=>section.key===key)?.sources||[]).filter(source=>['verified','corroborated'].includes(source.status)&&String(source.excerpt||'').trim());if(sources.length&&fields[i])fields[i].value=formatVerifiedParagraph(sources.slice(0,3).map(source=>String(source.excerpt).trim()).join(' '),i,'A');});
- if(!fields[0]?.value.trim()&&dossierSubject?.confirmed){const heading=String(dossierSubject.wordHeading||dossierSubject.title||'').trim();if(heading)fields[0].value='С реализацията на инвестиционното предложение се предвижда: '+heading.replace(/^Относно:\s*/i,'').replace(/[.\s]+$/,'')+'.';}
+ // A confirmed title is not evidence of construction details; do not fabricate a construction paragraph.
  if(caseFields.subject&&dossierSubject?.confirmed&&String(dossierSubject.wordHeading||dossierSubject.title||'').trim())caseFields.subject.value=String(dossierSubject.wordHeading||dossierSubject.title).replace(/^Относно:\s*/i,'').trim();
  const knownIds=(document.getElementById('ids')?.value||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  if(caseFields.parcelIds&&knownIds.length)caseFields.parcelIds.value=[...new Set(knownIds.map(id=>id.split('.').slice(0,3).join('.')))].join(', ');
@@ -130,11 +130,11 @@ function getWorkingDraft(){
  const subject=String(caseFields.subject?.value||auto.subject||'').replace(/^Относно:\s*/i,'').replace(/\s+—\s+ПИ с идентификатор[\s\S]*$/i,'').replace(/\s+—\s+поземлени имоти с идентификатори[\s\S]*$/i,'').trim();
  const paragraphs=fields.map((f,i)=>{
   const value=String(f.value||'').trim();
-  if(value&&!/Няма данни в преписката|Източник:/i.test(value))return formatVerifiedParagraph(value,i,'A');
+  if(value&&!/Няма данни в преписката|Източник:/i.test(value))return value; // Preserve unreviewed text verbatim in the working draft; never manufacture template wording.
   const source=(window.V26WorkingContext?.characterization?.sections||[]).find(x=>x.key===['construction','electricity','water_supply','wastewater'][i]);
   const excerpts=(source?.sources||[]).filter(x=>String(x.excerpt||'').trim()).map(x=>String(x.excerpt).replace(/\s*\(Източник:[^)]*\)/g,'').trim()).filter(Boolean);
   const unique=[...new Set(excerpts)];
-  if(unique.length)return formatVerifiedParagraph(unique[0],i,'A')+' [ОТКЪС ОТ ПРЕПИСКАТА — ЗА СВЕРЯВАНЕ]';
+  if(unique.length)return unique[0]+' [ОТКЪС ОТ ПРЕПИСКАТА — ЗА СВЕРЯВАНЕ]';
   return formatVerifiedParagraph('[ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва потвърдено описание]',i,'A');
  });
  const metadata=getConfirmedMetadata();
