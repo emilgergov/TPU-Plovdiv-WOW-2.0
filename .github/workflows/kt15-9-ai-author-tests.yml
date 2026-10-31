@@ -15,6 +15,7 @@ on:
       - 'v26-test/kt15-6/tests/kt20-orchestrator.test.cjs'
       - 'v26-test/kt15-6/tests/kt20-7-real-container-integration.test.cjs'
       - 'v26-test/kt15-6/tests/kt20-8-real-browser-wiring.test.cjs'
+      - 'v26-test/kt15-6/tests/kt20-9-chromium-runtime.test.cjs'
       - 'v26-test/kt15-6/tests/kt20-1-browser-word-bridge.test.cjs'
       - 'v26-test/kt15-6/tests/kt20-3-ai-review-ui.test.cjs'
       - 'v26-test/kt15-6/v26-author-bridge.js'
@@ -56,3 +57,22 @@ jobs:
           node v26-test/kt15-6/tests/kt20-3-ai-review-ui.test.cjs
           node v26-test/kt15-6/tests/kt20-4-author-bridge.test.cjs
           node v26-test/kt15-6/tests/kt20-5-invisible-author-pipeline.test.cjs
+
+  browser-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated Chromium test runner
+        run: |
+          cd v26-test/kt15-6
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Execute real browser runtime smoke
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v26-kt20-9-http.log 2>&1 &
+          sleep 2
+          node v26-test/kt15-6/tests/kt20-9-chromium-runtime.test.cjs
