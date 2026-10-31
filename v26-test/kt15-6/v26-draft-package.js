@@ -279,7 +279,7 @@ function normativePdf(results,register){
  ];
  const def=pdfDef('Нормативни и документални референции',content);
  // Compact only Annex 2; leave the approved GIS Annex 1 layout untouched.
- def.pageMargins=[42,8,42,8];
+ def.pageMargins=[26,8,26,8];
  def.defaultStyle={...def.defaultStyle,fontSize:7.7,lineHeight:0.89};
  def.styles={...def.styles,heading:{...def.styles.heading,fontSize:12.5,margin:[0,0,0,4]},sub:{...def.styles.sub,fontSize:9,margin:[0,2,0,1]}};
  // Avoid splitting the short expert conclusion onto an otherwise blank second page.
