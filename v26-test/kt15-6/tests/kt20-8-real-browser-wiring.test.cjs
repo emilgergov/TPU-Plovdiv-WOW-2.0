@@ -26,7 +26,7 @@ assert(pkg.includes('authored.expert.text'),'AI expert prose mapping missing');
 assert(pkg.includes("if(includeAnnex2)"),'Optional PDF2 policy changed');
 assert(pkg.includes('z.file('),'ZIP entries missing');
 assert(expert.includes('authoredText'),'Expert author prose not consumed');
-assert(classic.includes('window.V26TemplateWord'),'Original classic Word generator not exported');
+assert(classic.includes('root.V26TemplateWord=Object.freeze({make,templatePaths})'),'Original classic Word generator not exported');
 assert(bridge.includes('confirmedParcelIds'),'Parcel binding missing');
 new Function(pkg);new Function(expert);new Function(classic);new Function(bridge);
 console.log('PASS KT20.8: real browser Word/PDF/ZIP wiring and invisible AI bridge contracts');
