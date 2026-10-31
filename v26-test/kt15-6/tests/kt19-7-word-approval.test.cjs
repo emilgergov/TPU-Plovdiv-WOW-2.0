@@ -1,7 +1,7 @@
 'use strict';
 const assert=require('node:assert/strict');
 const contract=require('../v26-ai-author-contract.js');
-const {prepareWordPayload,mapToWordSlots}=require('../v26-word-author-approval.cjs');
+const {prepareWordPayload,mapToWordSlots,releaseToBrowser}=require('../v26-word-author-approval.cjs');
 const request=contract.prepareRequest({dossierId:'EXAMPLE-1',editorialBrief:{schema:'KT15_8_EDITORIAL_BRIEF_V1',subject:'Складове и офиси'},gis:{confirmed:true,source:'GIS',findings:[{parcel:'56784.13.102',result:'outside'}]},normative:{confirmed:true,source:'Registry',references:[{act:'ЗБР'}]}});
 const draft={schema:'KT15_9_AI_AUTHOR_DRAFT_V1',classical:{construction:'Строителство',electricity:'Електрозахранване',water_supply:'Водоснабдяване',wastewater:'Отпадъчни води'},expert:{text:'Самостоятелен мотивиран експертен проект'},claims:[{text:'Примерен факт',source:'Примерна преписка',verified:true}],requiresReview:false,editorialTitle:{subject:'Изграждане на складове и офиси',heading:'Изграждане на складове и офиси в ПИ 56784.13.102, гр. Пловдив'}};
 assert.equal(prepareWordPayload(request,draft,{}).ready,false);
@@ -18,4 +18,9 @@ assert.equal(slots.classical.templatePolicy,'PRESERVE_ORIGINAL_A_B');
 assert.equal(slots.expert.reasonedText,draft.expert.text);
 assert.equal(slots.expert.overviewMapPolicy,'USE_CONFIRMED_GIS_MAP_ONLY');
 assert.throws(()=>mapToWordSlots({ready:false}),/Unapproved/);
+const browserPayload=releaseToBrowser(request,draft,{approved:true,dossierId:'EXAMPLE-1',reviewer:'Expert'},['56784.13.102']);
+assert.equal(browserPayload.ready,true);
+assert.deepEqual(browserPayload.confirmedParcelIds,['56784.13.102']);
+assert.equal(releaseToBrowser(request,draft,{approved:false},['56784.13.102']).ready,false);
+assert.equal(releaseToBrowser(request,draft,{approved:true,dossierId:'EXAMPLE-1',reviewer:'Expert'},[]).ready,false);
 console.log('PASS KT19.7: separate Word payload and approval gate');
