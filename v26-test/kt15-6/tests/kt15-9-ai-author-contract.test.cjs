@@ -13,4 +13,8 @@ const check=author.validateDraft(request,complete);
 assert.equal(check.valid,true);
 assert.equal(check.readyForWord,false);
 assert.equal(author.validateDraft(request,{...complete,claims:[{text:'Факт',source:'',verified:false}]}).valid,false);
+const edited={...complete,editorialTitle:{subject:'Изграждане на складове за промишлени стоки и офиси',heading:'Изграждане на складове за промишлени стоки и офиси в ПИ 56784.13.102, гр. Пловдив'}};
+assert.equal(author.validateDraft(request,edited).valid,true);
+assert.equal(author.validateDraft(request,{...edited,editorialTitle:{...edited.editorialTitle,heading:edited.editorialTitle.heading+' и ПИ 56784.13.102'}}).valid,false,'duplicate parcel IDs rejected');
+assert.equal(author.validateDraft(request,{...edited,editorialTitle:{subject:'Складове',heading:'Несвързано заглавие'}}).valid,false,'subject must occur in heading');
 console.log('PASS KT15.9 AI author contract: source, GIS, legal and human approval gates');
