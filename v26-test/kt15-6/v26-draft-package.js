@@ -265,14 +265,12 @@ function normativePdf(results,register){
   {text:'Нормативните основания са извлечени от интегрирания нормативен архив на ТПУ Пловдив, приет за актуален до следващото му планово обновяване. Приложимостта към конкретната преписка се преценява от експерт.',fontSize:8},
   ...records.filter(r=>r.verified===true&&r.article&&r.verified_scope&&/^https:\/\//.test(String(r.source||''))&&(!r.zone_code||zoneMap.has(r.zone_code))).map(r=>({
    stack:[
-    {text:String(r.title||'Нормативен акт')+' — '+String(r.article),bold:true,fontSize:8},
-    {text:'Обхват: '+String(r.verified_scope),fontSize:7.5},
-    {text:'Източник: интегриран нормативен архив на ТПУ Пловдив',fontSize:7.5,italics:true},
-    {text:'Официален източник: МОСВ · '+String(r.id||''),link:String(r.source),color:'#165c86',fontSize:7.5,decoration:'underline'}
-   ],margin:[0,1,0,3],unbreakable:true
+    {text:String(r.title||'Нормативен акт')+' · '+String(r.article),bold:true,fontSize:8},
+    {text:'Предмет: '+String(r.purpose||r.verified_scope)+' · Източник: МОСВ ('+String(r.id||'архив')+')',link:String(r.source),color:'#165c86',fontSize:7.6}
+   ],margin:[0,1,0,2],unbreakable:true
   })),
-  {text:'Посочването на разпоредба не установява автоматично приложимостта ѝ към конкретното инвестиционно предложение.',fontSize:7.8},
-  ...(records.some(r=>r.verified===true&&r.article&&r.verified_scope)?[]:[{text:'НЯМА ДАННИ за конкретни проверени нормативни разпоредби в наличния архив.',fontSize:8}]),
+  ...(records.some(r=>r.verified===true&&r.article&&r.verified_scope)?[]:[{text:'НЯМА ДАННИ за конкретни разпоредби в интегрирания архив.',fontSize:8}]),
+  {text:'Нормативните цитати са справочни; преценката за приложимост се извършва от експерт.',fontSize:7.8},
   {text:'IV. Приложимост към инвестиционното предложение',style:'sub'},
   {text:resolvedTitle?'За предложение „'+resolvedTitle+'“ относимостта на посочените основания се разглежда спрямо описаните дейности и пространствените резултати от документа „ТПУ Пловдив — ГИС анализ“. Режимите на конкретна зона се преценяват отделно; настоящата справка не установява автоматично допустимост или забрана.':'Предметът и дейностите подлежат на потвърждение преди индивидуална преценка за приложимост на режимите.'},
 
@@ -284,8 +282,8 @@ function normativePdf(results,register){
  ];
  const def=pdfDef('Нормативни и документални референции',content);
  // Compact only Annex 2; leave the approved GIS Annex 1 layout untouched.
- def.pageMargins=[42,16,42,16];
- def.defaultStyle={...def.defaultStyle,fontSize:7.9,lineHeight:0.97};
+ def.pageMargins=[42,12,42,12];
+ def.defaultStyle={...def.defaultStyle,fontSize:7.7,lineHeight:0.94};
  def.styles={...def.styles,heading:{...def.styles.heading,fontSize:12.5,margin:[0,0,0,4]},sub:{...def.styles.sub,fontSize:9,margin:[0,2,0,1]}};
  // Avoid splitting the short expert conclusion onto an otherwise blank second page.
  const conclusionIndex=def.content.findIndex(x=>x?.text==='V. Експертен извод');
