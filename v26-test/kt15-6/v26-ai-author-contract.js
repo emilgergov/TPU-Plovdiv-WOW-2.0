@@ -6,9 +6,9 @@ function prepareRequest(input){
  const x=input||{},e=x.editorialBrief||{},gis=x.gis||{},norm=x.normative||{};
  const issues=[];
  if(e.schema!=='KT15_8_EDITORIAL_BRIEF_V1')issues.push('Липсва редакционна основа от ZIP преписката');
- if(!x.dossierId)issues.push('Липсва идентификатор на преписката');
- if(!gis.confirmed)issues.push('ГИС резултатът не е потвърден');
- if(!norm.confirmed)issues.push('Нормативният анализ не е потвърден');
+ if(!clean(x.dossierId))issues.push('Липсва идентификатор на преписката');
+ if(gis.confirmed!==true||!clean(gis.source)||!Array.isArray(gis.findings)||!gis.findings.length)issues.push('Липсва потвърден ГИС резултат с източник и констатации');
+ if(norm.confirmed!==true||!clean(norm.source)||!Array.isArray(norm.references)||!norm.references.length)issues.push('Липсва потвърден нормативен анализ с източник и референции');
  return {schema:'KT15_9_AI_AUTHOR_REQUEST_V1',ready:issues.length===0,issues,
   dossierId:clean(x.dossierId),subject:clean(e.subject),editorialBrief:e,
   gis:{confirmed:gis.confirmed===true,parcels:gis.parcels||[],findings:gis.findings||[],source:clean(gis.source)},
