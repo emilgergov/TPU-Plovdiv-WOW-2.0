@@ -11,8 +11,8 @@ vm.runInContext(source.slice(start,end)+';globalThis.heading=v26EditorialHeading
 const heading=context.heading;
 const subject='Изграждане на складове за промишлени стоки и офиси в ПИ 56784.13.102, гр. Пловдив';
 const result=heading(subject,['ПИ с идентификатор 56784.13.102','гр. Пловдив','община Пловдив','област Пловдив','община Пловдив'],[]);
-assert.equal((result.match(/56784\\.13\\.102/g)||[]).length,1,'parcel must appear once');
-assert.equal((result.match(/гр\\. Пловдив/g)||[]).length,1,'settlement must appear once');
+assert.equal((result.match(/56784\.13\.102/g)||[]).length,1,'parcel must appear once');
+assert.equal((result.match(/гр\. Пловдив/g)||[]).length,1,'settlement must appear once');
 assert.equal((result.match(/община Пловдив/g)||[]).length,1,'municipality must appear once');
 assert(result.includes('област Пловдив'));
 const plain=heading('Изграждане на складове за промишлени стоки и офиси',['ПИ с идентификатор 56784.13.102','гр. Пловдив'],[]);
