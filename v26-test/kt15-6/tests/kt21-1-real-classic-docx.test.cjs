@@ -12,7 +12,7 @@ const path=require('node:path');
   await page.goto('http://127.0.0.1:8765/v26-test/kt15-6/index.html',{waitUntil:'domcontentloaded'});
   await page.addScriptTag({path:path.join(path.dirname(require.resolve('fflate')),'../umd/index.js')});
   const result=await page.evaluate(async()=>{
-   const paragraphs=['Изграждане на складове и офиси.','Електрозахранване от мрежата.','Водоснабдяване от обществената мрежа.','Отпадъчни води към водоплътно съоръжение.'];
+   const paragraphs=['С реализацията на инвестиционното предложение се предвижда изграждане на складове и офиси.','Електроснабдяването ще се осъществява от електроразпределителната мрежа.','Водоснабдяването ще се осъществява от обществената водоснабдителна мрежа.','Отпадъчните води ще се отвеждат към водоплътно съоръжение.'];
    try{
     const blob=await window.V26TemplateWord.make('A',paragraphs,{subject:'Изграждане на складове и офиси',recipient:'Примерен възложител',address:'гр. Пловдив',incomingReference:'ОВОС-9999 / 99.99.9999',salutation:'Уважаеми господине'});
     const bytes=new Uint8Array(await blob.arrayBuffer());
