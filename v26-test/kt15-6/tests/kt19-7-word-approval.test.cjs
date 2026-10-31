@@ -1,0 +1,15 @@
+'use strict';
+const assert=require('node:assert/strict');
+const contract=require('../v26-ai-author-contract.js');
+const {prepareWordPayload}=require('../v26-word-author-approval.cjs');
+const request=contract.prepareRequest({dossierId:'EXAMPLE-1',editorialBrief:{schema:'KT15_8_EDITORIAL_BRIEF_V1',subject:'Складове и офиси'},gis:{confirmed:true,source:'GIS',findings:[{parcel:'56784.13.102',result:'outside'}]},normative:{confirmed:true,source:'Registry',references:[{act:'ЗБР'}]}});
+const draft={schema:'KT15_9_AI_AUTHOR_DRAFT_V1',classical:{construction:'Строителство',electricity:'Електрозахранване',water_supply:'Водоснабдяване',wastewater:'Отпадъчни води'},expert:{text:'Самостоятелен мотивиран експертен проект'},claims:[{text:'Примерен факт',source:'Примерна преписка',verified:true}],requiresReview:false,editorialTitle:{subject:'Изграждане на складове и офиси',heading:'Изграждане на складове и офиси в ПИ 56784.13.102, гр. Пловдив'}};
+assert.equal(prepareWordPayload(request,draft,{}).ready,false);
+assert.equal(prepareWordPayload(request,draft,{approved:true,dossierId:'WRONG',reviewer:'Expert'}).ready,false);
+const result=prepareWordPayload(request,draft,{approved:true,dossierId:'EXAMPLE-1',reviewer:'Expert'});
+assert.equal(result.ready,true);
+assert.equal(result.classical.construction,'Строителство');
+assert.equal(result.expert.text,draft.expert.text);
+assert.equal(result.heading,draft.editorialTitle.heading);
+assert.equal(prepareWordPayload(request,{...draft,requiresReview:true},{approved:true,dossierId:'EXAMPLE-1',reviewer:'Expert'}).ready,false);
+console.log('PASS KT19.7: separate Word payload and approval gate');
