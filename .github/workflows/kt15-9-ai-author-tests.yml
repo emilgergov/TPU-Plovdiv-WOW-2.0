@@ -17,6 +17,8 @@ on:
       - 'v26-test/kt15-6/tests/kt20-3-ai-review-ui.test.cjs'
       - 'v26-test/kt15-6/v26-author-bridge.js'
       - 'v26-test/kt15-6/tests/kt20-4-author-bridge.test.cjs'
+      - 'v26-test/kt15-6/v26-invisible-author-pipeline.cjs'
+      - 'v26-test/kt15-6/tests/kt20-5-invisible-author-pipeline.test.cjs'
       - 'v26-test/kt15-6/index.html'
       - 'v26-test/kt15-6/v26-draft-package.js'
       - 'v26-test/kt15-6/v26-expert-word.js'
@@ -49,3 +51,4 @@ jobs:
           node v26-test/kt15-6/tests/kt20-1-browser-word-bridge.test.cjs
           node v26-test/kt15-6/tests/kt20-3-ai-review-ui.test.cjs
           node v26-test/kt15-6/tests/kt20-4-author-bridge.test.cjs
+          node v26-test/kt15-6/tests/kt20-5-invisible-author-pipeline.test.cjs
