@@ -9,6 +9,8 @@ on:
       - 'v26-test/kt15-6/v26-ai-author-gateway.cjs'
       - 'v26-test/kt15-6/v26-ai-provider.cjs'
       - 'v26-test/kt15-6/v26-ai-server.cjs'
+      - 'v26-test/kt15-6/v26-word-author-approval.cjs'
+      - 'v26-test/kt15-6/tests/kt19-7-word-approval.test.cjs'
       - 'v26-test/kt15-6/tests/kt19-6-provider.test.cjs'
       - 'v26-test/kt15-6/tests/kt19-5-gateway.test.cjs'
       - '.github/workflows/kt15-9-ai-author-tests.yml'
@@ -30,3 +32,4 @@ jobs:
           node v26-test/kt15-6/tests/kt19-heading.test.cjs
           node v26-test/kt15-6/tests/kt19-5-gateway.test.cjs
           node v26-test/kt15-6/tests/kt19-6-provider.test.cjs
+          node v26-test/kt15-6/tests/kt19-7-word-approval.test.cjs
