@@ -267,7 +267,7 @@ function normativePdf(results,register){
    stack:[
     {text:String(r.title||'Нормативен акт')+' · '+String(r.article),bold:true,fontSize:8},
     {text:'Предмет: '+String(r.purpose||r.verified_scope)+' · Източник: МОСВ ('+String(r.id||'архив')+')',link:String(r.source),color:'#165c86',fontSize:7.6}
-   ],margin:[0,1,0,2],unbreakable:true
+   ],margin:[0,1,0,2],unbreakable:false
   })),
   ...(records.some(r=>r.verified===true&&r.article&&r.verified_scope)?[]:[{text:'НЯМА ДАННИ за конкретни разпоредби в интегрирания архив.',fontSize:8}]),
   {text:'Нормативните цитати са справочни; преценката за приложимост се извършва от експерт.',fontSize:7.8},
