@@ -14,6 +14,7 @@ on:
       - 'v26-test/kt15-6/v26-kt20-orchestrator.cjs'
       - 'v26-test/kt15-6/tests/kt20-orchestrator.test.cjs'
       - 'v26-test/kt15-6/tests/kt20-7-real-container-integration.test.cjs'
+      - 'v26-test/kt15-6/tests/kt20-8-real-browser-wiring.test.cjs'
       - 'v26-test/kt15-6/tests/kt20-1-browser-word-bridge.test.cjs'
       - 'v26-test/kt15-6/tests/kt20-3-ai-review-ui.test.cjs'
       - 'v26-test/kt15-6/v26-author-bridge.js'
@@ -50,6 +51,7 @@ jobs:
           node v26-test/kt15-6/tests/kt19-9-final-package.test.cjs
           node v26-test/kt15-6/tests/kt20-orchestrator.test.cjs
           node v26-test/kt15-6/tests/kt20-7-real-container-integration.test.cjs
+          node v26-test/kt15-6/tests/kt20-8-real-browser-wiring.test.cjs
           node v26-test/kt15-6/tests/kt20-1-browser-word-bridge.test.cjs
           node v26-test/kt15-6/tests/kt20-3-ai-review-ui.test.cjs
           node v26-test/kt15-6/tests/kt20-4-author-bridge.test.cjs
