@@ -57,6 +57,39 @@ function brief(subjectCandidates){
   expert:{style:'Свързано експертно изложение с отделна аргументация, без механично повтаряне на четирите абзаца.',sections:descriptions},
   checks,readyForWord:false};
 }
-const api=Object.freeze({prepare,brief});root.V26EditorialAnalysis=api;
+/* Controlled prose for independently verified, explicitly approved case facts.
+   This does not claim to perform generative expert/legal reasoning. */
+function composeApproved(input){
+ const data=input||{}, facts=Array.isArray(data.facts)?data.facts:[];
+ const allowed=new Set(TOPICS), selected=Object.fromEntries(TOPICS.map(t=>[t,[]]));
+ const blocked=[];
+ for(const fact of facts){
+  if(!fact||!allowed.has(fact.topic))continue;
+  const value=clean(fact.approvedText),source=clean(fact.source);
+  if(fact.verified!==true||fact.approved!==true||!source||!value){
+   blocked.push({topic:fact.topic,reason:'Липсва изрично потвърждение, проверен източник или одобрен текст'});continue;
+  }
+  if(/\[|\]|ПРЕДСТОИ|НЯМА ДАННИ/i.test(value)){
+   blocked.push({topic:fact.topic,reason:'Недопустим заместител вместо фактическо изложение'});continue;
+  }
+  if(!selected[fact.topic].some(x=>norm(x.text)===norm(value)))selected[fact.topic].push({text:value,source});
+ }
+ const join=items=>items.map(x=>x.text.replace(/[;,.\s]+$/,'')).join('. ')+(items.length?'.':'');
+ const para=topic=>join(selected[topic]);
+ const classical={
+  construction:para('construction'),
+  electricity:para('electricity'),
+  waterSupply:para('water_supply'),
+  wastewater:para('wastewater')
+ };
+ const expertSections=TOPICS.filter(t=>selected[t].length).map(topic=>({
+  topic,heading:LABELS[topic],text:para(topic),sources:[...new Set(selected[topic].map(x=>x.source))]
+ }));
+ const complete=Object.values(classical).every(Boolean);
+ return {schema:'KT15_8_APPROVED_PROSE_V1',classical,expertSections,blocked,
+  complete,readyForWord:complete&&blocked.length===0,
+  warning:'Текстът е съставен само от изрично одобрени формулировки; не представлява автоматична експертна или правна преценка.'};
+}
+const api=Object.freeze({prepare,brief,composeApproved});root.V26EditorialAnalysis=api;
 if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
