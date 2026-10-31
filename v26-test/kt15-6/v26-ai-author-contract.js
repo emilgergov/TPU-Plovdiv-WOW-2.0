@@ -25,7 +25,7 @@ function editorialTitleReview(request,draft){
  const subject=clean(title.subject),heading=clean(title.heading);
  if(!subject||!heading)issues.push('Непълен редактиран предмет или заглавие');
  if(subject&&heading&&!heading.includes(subject))issues.push('Заглавието не съдържа редактирания предмет');
- const parcelIds=heading.match(/\\b\\d{5}\\.\\d+\\.\\d+\\b/g)||[];
+ const parcelIds=heading.match(/\b\d{5}\.\d+\.\d+\b/g)||[];
  if(new Set(parcelIds).size!==parcelIds.length)issues.push('Повторен кадастрален идентификатор в заглавието');
  const original=clean(request&&request.subject);
  if(original&&subject&&original!==subject&&subject.length<8)issues.push('Редактираният предмет е необосновано кратък');
