@@ -14,7 +14,7 @@ const path=require('node:path');
   const result=await page.evaluate(async()=>{
    const paragraphs=['С реализацията на инвестиционното предложение се предвижда изграждане на складове и офиси.','Електроснабдяването ще се осъществява от електроразпределителната мрежа.','Водоснабдяването ще се осъществява от обществената водоснабдителна мрежа.','Отпадъчните води ще се отвеждат към водоплътно съоръжение.'];
    try{
-    const blob=await window.V26TemplateWord.make('A',paragraphs,{subject:'Изграждане на складове и офиси',recipient:'Примерен възложител',address:'гр. Пловдив',incomingReference:'ОВОС-9999 / 99.99.9999',salutation:'Уважаеми господине'});
+    const blob=await window.V26TemplateWord.make('A',paragraphs,{subject:'Изграждане на складове и офиси',recipient:'Примерен възложител',address:'гр. Пловдив',incomingReference:'ОВОС-9999 / 99.99.9999',salutation:'Уважаеми господине',parcelIds:'56784.13.102',location:'гр. Пловдив, община Пловдив, област Пловдив'});
     const bytes=new Uint8Array(await blob.arrayBuffer());
     const entries=window.fflate.unzipSync(bytes);
     const xml=new TextDecoder().decode(entries['word/document.xml']||new Uint8Array());
