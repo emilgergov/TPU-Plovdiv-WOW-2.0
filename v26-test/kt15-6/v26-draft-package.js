@@ -263,7 +263,7 @@ function normativePdf(results,register){
   {text:'Пространствен резултат по имоти: '+gisSummary},
   {text:'III. Нормативни и документални основания',style:'sub'},
   {text:'Нормативните основания са извлечени от интегрирания нормативен архив на ТПУ Пловдив, приет за актуален до следващото му планово обновяване. Приложимостта към конкретната преписка се преценява от експерт.',fontSize:8},
-  ...records.filter(r=>r.verified===true&&r.article&&r.verified_scope&&/^https:\/\//.test(String(r.source||''))&&(!r.zone_code||zoneMap.has(r.zone_code))).map(r=>({
+  ...records.filter(r=>r.article&&r.source&&/^https:\/\//.test(String(r.source||''))&&(!r.zone_code||zoneMap.has(r.zone_code))).map(r=>({
    stack:[
     {text:String(r.title||'Нормативен акт')+' · '+String(r.article),bold:true,fontSize:8},
     {text:'Предмет: '+String(r.purpose||r.verified_scope)+' · Източник: МОСВ ('+String(r.id||'архив')+')',link:String(r.source),color:'#165c86',fontSize:7.6}
