@@ -1,0 +1,22 @@
+name: KT15.9 AI author contract tests
+on:
+  push:
+    paths:
+      - 'v26-test/kt15-6/v26-ai-author-*.js'
+      - 'v26-test/kt15-6/tests/kt15-9-*.test.cjs'
+      - '.github/workflows/kt15-9-ai-author-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  author-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate expert author input, output and prompt
+        run: |
+          node v26-test/kt15-6/tests/kt15-9-ai-author-contract.test.cjs
+          node v26-test/kt15-6/tests/kt15-9-ai-author-prompt.test.cjs
