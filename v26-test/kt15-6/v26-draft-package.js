@@ -315,10 +315,21 @@ async function make(results,roles,register){
   }
   register={...register,verifiedCaseMetadata:caseMetadata};
  const dossierEvidence=register?.unifiedContext?.commonEvidence||null;
+ // KT20.1: optional expert-approved AI payload enters the EXISTING real browser renderers.
+ // The default V26 path is unchanged until the approval flow supplies this payload.
+ const authored=register?.approvedAuthorPayload||null;
+ if(authored){
+  if(authored.ready!==true||authored.schema!=='KT19_7_WORD_PAYLOAD_V1'||authored.dossierId!==register?.dossierId)throw Error('КТ20.1: несъответстващ или неодобрен AI проект.');
+  const aiSections=['construction','electricity','water_supply','wastewater'].map(key=>String(authored.classical?.[key]||'').trim());
+  if(aiSections.some(x=>!x)||!String(authored.expert?.text||'').trim())throw Error('КТ20.1: непълен одобрен AI текст.');
+  paragraphs.splice(0,paragraphs.length,...aiSections);
+  caseMetadata.subject=String(authored.heading||'').trim();
+  if(!caseMetadata.subject)throw Error('КТ20.1: липсва редактирано заглавие.');
+ }
  const expertDraft=window.V26ExpertDraft?.build({results,roles:normalized,determination,metadata:caseMetadata,paragraphs,evidence:dossierEvidence});
  if(!expertDraft)throw Error('КТ13: липсва единният експертен проект.');
  if(!window.V26ExpertWord?.make)throw Error('КТ13: липсва генераторът за експертния Word.');
- const expertWord=await window.V26ExpertWord.make(expertDraft,register.mapSvg);
+ const expertWord=await window.V26ExpertWord.make(authored?{...expertDraft,authoredText:String(authored.expert.text)}:expertDraft,register.mapSvg);
  const prefixes=expertDraft.scenario==='Б'?['С реализацията','Електроснабдяването','Водозахранването','Отпадъчните води']:['С реализацията','Електроснабдяването','Водоснабдяването','Отпадъчните води'];
  const classicParagraphs=expertDraft.characterization.map((value,i)=>{const text=String(value||'').trim();if(!text)return text;return text.startsWith(prefixes[i])?text:prefixes[i]+' — '+text;});
  const classicWord=await window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata);
