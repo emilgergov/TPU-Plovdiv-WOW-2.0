@@ -18,10 +18,25 @@ function prepareRequest(input){
    expert:'Напиши самостоятелно, последователно, мотивирано експертно изложение, съобразено с конкретната преписка; не дублирай приложенията.',
    constraints:['Не измисляй факти, правни основания или ГИС резултати.','Отделяй заявени от установени факти.','При противоречие изисквай проверка.','Всяко конкретно твърдение да има източник.','При липса на данни маркирай въпрос за експертна проверка, а не дописвай предположение.']}};
 }
+function editorialTitleReview(request,draft){
+ const issues=[];
+ const title=draft&&draft.editorialTitle;
+ if(!title)return {present:false,valid:true,issues}; // Backward-compatible with existing drafts.
+ const subject=clean(title.subject),heading=clean(title.heading);
+ if(!subject||!heading)issues.push('Непълен редактиран предмет или заглавие');
+ if(subject&&heading&&!heading.includes(subject))issues.push('Заглавието не съдържа редактирания предмет');
+ const parcelIds=heading.match(/\\b\\d{5}\\.\\d+\\.\\d+\\b/g)||[];
+ if(new Set(parcelIds).size!==parcelIds.length)issues.push('Повторен кадастрален идентификатор в заглавието');
+ const original=clean(request&&request.subject);
+ if(original&&subject&&original!==subject&&subject.length<8)issues.push('Редактираният предмет е необосновано кратък');
+ return {present:true,valid:issues.length===0,issues};
+}
 function validateDraft(request,draft){
  const issues=[];
  if(!request||request.ready!==true)issues.push('Непотвърдена входна фактическа основа');
  if(!draft||draft.schema!=='KT15_9_AI_AUTHOR_DRAFT_V1')issues.push('Невалиден формат на AI проекта');
+ const editorial=editorialTitleReview(request,draft);
+ issues.push(...editorial.issues);
  const paragraphs=draft&&draft.classical||{};
  for(const topic of TOPICS)if(!clean(paragraphs[topic]))issues.push('Липсва класически абзац: '+topic);
  if(!clean(draft&&draft.expert&&draft.expert.text))issues.push('Липсва самостоятелен експертен текст');
@@ -32,6 +47,6 @@ function validateDraft(request,draft){
  return {schema:'KT15_9_AI_AUTHOR_VALIDATION_V1',valid:issues.length===0,issues,
   readyForWord:false,reason:'Дори технически валиден AI проект изисква изрично експертно одобрение преди генериране на Word.'};
 }
-const api=Object.freeze({prepareRequest,validateDraft});root.V26AIAuthorContract=api;
+const api=Object.freeze({prepareRequest,validateDraft,editorialTitleReview});root.V26AIAuthorContract=api;
 if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
