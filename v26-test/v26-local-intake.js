@@ -212,7 +212,30 @@ async function process(file){
       }
      }
 
-     subjects.push({title,source:item.name,evidence:title?'Автоматично извлечен откъс от текст':'Текст е прочетен; заглавието не е надеждно установено',activities,sections:foundSections});
+     // KT15.8: additive evidence for Word characterization; never assert excerpts as verified facts.
+     const infrastructure=[];
+     const infrastructureRules=[
+      ['electricity',/електрозахранван|електроснабдяван|електрическ[а-я]* мреж|кабелно трасе|трафопост/i],
+      ['water_supply',/водоснабдяван|водопровод|водоизточник|сондаж|кладенец/i],
+      ['wastewater',/отпадъчн[а-я]* вод|канализац|заустван|изгребна яма|водоплътн/i],
+      ['access',/транспортен достъп|пътен достъп|подход към|пътна връзка|улиц[а-я]* мреж/i]
+     ];
+     const evidenceSections=foundSections.filter(x=>['summary','processes','related','resources','wastewater'].includes(x.key));
+     for(const section of evidenceSections){
+      const chunks=section.text.split(/(?<=[.!?;])\\s+/).map(x=>x.trim());
+      for(const chunk of chunks){
+       if(chunk.length<22||chunk.length>350||/[.…]{3,}|_{3,}/.test(chunk))continue;
+       if(/^(посочва се|опишете|описание на|характеристика на|съгласно приложение|информация за)/i.test(chunk))continue;
+       for(const [topic,re] of infrastructureRules){
+        if(re.test(chunk)&&!infrastructure.some(x=>x.topic===topic&&x.text===chunk)){
+         infrastructure.push({topic,text:chunk,source:item.name,section:section.key,verified:false,review_required:true});
+        }
+       }
+       if(infrastructure.length>=20)break;
+      }
+      if(infrastructure.length>=20)break;
+     }
+     subjects.push({title,source:item.name,evidence:title?'Автоматично извлечен откъс от текст':'Текст е прочетен; заглавието не е надеждно установено',activities,sections:foundSections,infrastructure});
     }
     if(isNotice){for(const entry of contextualIds){if(entry.role!=='mentioned')continue;const line=entry.excerpt;const idsOnLine=[...new Set(normalizedIds(line))];const siteContext=/(?:местоположение|площадка|предмет\s+на\s+(?:инвестиционното\s+)?предложение|предвижда\s+се\s+в\s+(?:поземлен\s+)?имот)/i.test(line);const negative=/(?:съсед|граничи|предишен|стар\s+идентификатор|прилежащи\s+имоти)/i.test(line);if(siteContext&&!negative&&idsOnLine.length===1)leading.add(entry.id)}}
    }catch(err){status='неуспешно извличане: '+err.message}
