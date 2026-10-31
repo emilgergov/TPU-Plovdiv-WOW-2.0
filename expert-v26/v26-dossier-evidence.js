@@ -21,7 +21,7 @@ function analyze(documents){
    const key=String(f.key).trim(),scope=String(f.scope||'proposal').trim();
    const group=JSON.stringify([scope,key]);
    if(!groups.has(group))groups.set(group,[]);
-   groups.get(group).push({scope,key,value:String(f.value).trim(),date,document:id,file:doc.file,reference:f.reference||null});
+   groups.get(group).push({scope,key,value:String(f.value).trim(),date,document:id,file:doc.file,reference:f.reference||null, supersedes:f.supersedes||null, verified:f.verified===true});
   }
  }
  const findings=[];
@@ -35,6 +35,8 @@ function analyze(documents){
     status='unresolved_missing_date';selected=null;
    }else if(sorted.some(e=>e.date===newest.date&&e.value!==newest.value)){
     status='unresolved_same_date';selected=null;
+   }else if(sorted.some(e=>e.value!==newest.value)&&!sorted.some(e=>e.verified&&e.value===newest.value)||!newest.verified){
+    status='unresolved_unverified_change';selected=null;
    }else status='latest_documented_fact';
   }
   findings.push({scope:evidence[0].scope,key:evidence[0].key,status,selected,evidence:sorted,conflict:values.size>1});
@@ -47,9 +49,9 @@ function characterize(analysis){
   if(f.key!=='wastewater_solution'||!f.selected)continue;
   const e=f.selected;
   const wording=e.value==='sewer'?'Предвидено е отвеждане към канализационната мрежа.':e.value==='tank'?'Предвидено е събиране във водоплътно съоръжение.':null;
-  if(wording)paragraphs.push({topic:'Отпадъчни води',text:wording,source:e.file,date:e.date,excerpt:e.reference||'',review:true});
+  if(wording)paragraphs.push({topic:'Отпадъчни води',text:wording,source:e.file,date:e.date,excerpt:e.reference||'',review:!e.verified});
  }
- return {paragraphs,requiresReview:!!(analysis&&analysis.requiresReview)||paragraphs.length>0};
+ return {paragraphs,requiresReview:!!(analysis&&analysis.requiresReview)||paragraphs.some(p=>p.review)};
 }
 function evidenceDraft(documents,analysis){
  const topics={water_supply:'Водоснабдяване',wastewater:'Отпадъчни води',electricity:'Електрозахранване',access:'Транспортен достъп',construction:'Строителни дейности'};

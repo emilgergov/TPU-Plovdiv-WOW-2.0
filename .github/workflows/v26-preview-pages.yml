@@ -1,0 +1,101 @@
+name: Publish isolated V26 browser preview
+on:
+  workflow_dispatch:
+  push:
+    branches: [work/v26-auto-word-evidence-20261028]
+    paths:
+      - 'expert-v26/**'
+      - '.github/workflows/v26-preview-pages.yml'
+permissions:
+  contents: write
+concurrency:
+  group: v26-preview-publish-main
+  cancel-in-progress: false
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: source
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: public
+          persist-credentials: true
+      - name: Check V26 JavaScript and published geometry
+        run: |
+          node --check source/expert-v26/v26-browser-gis.js
+          node --check source/expert-v26/v26-word-review.js
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('public/expert-v26/gis-data')
+          manifest=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+          assert manifest['status']=='PASS_COUNT_BY_PREFIX'
+          assert manifest['parcel_geometry']==917418
+          assert manifest['overlap_records_expected']==181154
+          assert manifest['shards']==258
+          for prefix in ('36','47'):
+            assert (root/f'parcelgeom_{prefix}.json.gz').is_file()
+          shards=list(root.glob('*.json.gz'))
+          assert len(shards)==258, f'Incomplete GIS dataset: {len(shards)}/258 shards'
+          import gzip
+          for prefix,cadnum in [('36','36676.129.457'),('47','47295.27.259')]:
+            with gzip.open(root/f'parcelgeom_{prefix}.json.gz','rt',encoding='utf-8') as f:
+              records=json.load(f)
+            assert any(row[0]==cadnum and isinstance(row[1],dict) and row[1].get('type') in ('Polygon','MultiPolygon') for row in records), f'Missing test geometry: {cadnum}'
+          print('Complete GIS package verified: 258 shards; both real test parcel geometries found')
+          PY
+      - name: Publish isolated folder without changing existing WOW
+        run: |
+          mkdir -p public/v26-test
+          rsync -a --exclude='gis-data/' source/expert-v26/ public/v26-test/
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('public/v26-test/v26-full-gis-bridge.js')
+          s=p.read_text(encoding='utf-8').replace("api.openHosted('./gis-data')", "api.openHosted('../expert-v26/gis-data')")
+          p.write_text(s,encoding='utf-8')
+          PY
+          # Frozen V26.4 checkpoint: copy the accepted functional build only once.
+          if [ ! -f public/v26-4/CHECKPOINT_V26_4_BG.txt ]; then
+            mkdir -p public/v26-4
+            rsync -a public/v26-test/ public/v26-4/
+            cat > public/v26-4/CHECKPOINT_V26_4_BG.txt <<'EOF'
+          ТПУ Пловдив — Експертен анализ V26.4
+          КОНТРОЛНА ТОЧКА · 28.10.2026
+          База: публикувана стабилна V26.3 + функционално проверен работен ZIP пакет (Word + Приложение №1 PDF + Приложение №2 PDF).
+          ВЪТРЕШНИ БЕЛЕЖКИ ЗА ПРОДЪЛЖЕНИЕ:
+          1. Функционалността на генерирането е проверена с примерната ZIP преписка и два кадастрални идентификатора. Това не е потвърждение на окончателната правна или аналитична редакция.
+          2. Да се възстанови и интегрира вече проверената единна аналитична логика за стъпка 4 (PDF №2) и стъпка 5 (Word предложение), без да се започва анализът отначало. Да се проследят предходните проверени материали и решения.
+          ОСТАВА: довършване на аналитичното съдържание и оформлението на PDF №2 и Word; правните изводи изискват официална проверка. ГИС и PDF №1 не се променят.
+          Не презаписвайте тази контролна версия при следващи тестове.
+          EOF
+          fi
+          test -s public/v26-4/index.html
+          test -s public/v26-4/CHECKPOINT_V26_4_BG.txt
+          test -s public/v26-test/index.html
+          test -s public/expert-v26/gis-data/manifest.json
+          test "$(find public/expert-v26/gis-data -name '*.json.gz' | wc -l)" -eq 258
+          cd public
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add v26-test v26-4
+          if git diff --cached --quiet; then echo 'No preview changes'; exit 0; fi
+          git commit -m 'Update isolated V26 preview (keep WOW unchanged)'
+          # Rebase only the isolated preview update onto the latest main if another publisher won the race.
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              echo 'Preview publication conflict; aborting without touching WOW files'
+              git rebase --abort || true
+              exit 1
+            fi
+            if git push origin HEAD:main; then
+              echo 'Isolated V26 preview published successfully'
+              exit 0
+            fi
+            sleep 3
+          done
+          echo 'Preview publication failed after 4 safe attempts'
+          exit 1
