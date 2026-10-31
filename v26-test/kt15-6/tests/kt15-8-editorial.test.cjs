@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict');
+const {prepare}=require('../v26-editorial-analysis.js');
+const sample=[{title:'Складове за промишлени стоки и офиси',source:'Уведомление.docx',activities:['Предвижда се изграждане на складове за промишлени стоки и офиси.'],infrastructure:[{topic:'electricity',text:'Предвижда се присъединяване към електроразпределителната мрежа.',source:'Уведомление.docx'},{topic:'electricity',text:'Предвижда се присъединяване към електроразпределителната мрежа.',source:'Техническо описание.pdf'}]}];
+const result=prepare(sample);
+assert.equal(result.readyForWord,false);
+assert.equal(result.subject,'Складове за промишлени стоки и офиси');
+assert.equal(result.editorialPlan.find(x=>x.topic==='electricity').facts.length,1);
+assert.equal(result.editorialPlan.find(x=>x.topic==='electricity').facts[0].sources.length,2);
+assert.equal(result.editorialPlan.find(x=>x.topic==='wastewater').facts.length,0);
+assert(result.review.some(x=>x.topic==='wastewater'&&x.reason==='НЯМА ДАННИ'));
+assert(result.findings.every(x=>x.reviewRequired));
+console.log('KT15.8 editorial evidence: PASS (no unverified Word text)');
