@@ -81,7 +81,8 @@ async function extractText(data,name,options={}){
  return '';
 }
 function semanticReview(subjects,documents){
- const main=subjects.find(x=>x.title)||subjects[0]||null;
+ const ranked=subjects.filter(x=>x&&x.title).map((x,i)=>{const notice=/уведомлен|uvedomlen|notification/i.test(x.source||'');const title=String(x.title||'').trim();const looksLikeLocation=/^(?:местоположение|поземлен имот|ПИ\\s|имот с идентификатор)/i.test(title);const template=/^(?:резюме|описание на инвестиционно предложение|предмет на инвестиционно предложение)$/i.test(title);return {x,i,score:(notice?10:0)+(x.evidence?1:0)-(looksLikeLocation?20:0)-(template?20:0)};}).sort((a,b)=>b.score-a.score||a.i-b.i);
+ const main=ranked[0]?.x||subjects[0]||null;
  const notices=subjects.flatMap(x=>x.sections||[]);
  const full=documents.filter(x=>x.text).map(x=>({source:x.source,text:x.text}));
  const pick=(re)=>full.filter(x=>re.test(x.text)).map(x=>x.source);
