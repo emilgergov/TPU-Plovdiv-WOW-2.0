@@ -19,6 +19,7 @@ on:
       - 'v26-test/kt15-6/tests/kt21-1-real-classic-docx.test.cjs'
       - 'v26-test/kt15-6/tests/kt21-2-real-expert-docx.test.cjs'
       - 'v26-test/kt15-6/tests/kt21-3-final-zip-contract.test.cjs'
+      - 'v26-test/kt15-6/tests/kt21-4-complete-browser-package.test.cjs'
       - 'v26-test/kt15-6/tests/kt20-1-browser-word-bridge.test.cjs'
       - 'v26-test/kt15-6/tests/kt20-3-ai-review-ui.test.cjs'
       - 'v26-test/kt15-6/v26-author-bridge.js'
@@ -82,3 +83,4 @@ jobs:
           node v26-test/kt15-6/tests/kt20-9-chromium-runtime.test.cjs
           node v26-test/kt15-6/tests/kt21-1-real-classic-docx.test.cjs
           node v26-test/kt15-6/tests/kt21-2-real-expert-docx.test.cjs
+          node v26-test/kt15-6/tests/kt21-4-complete-browser-package.test.cjs
