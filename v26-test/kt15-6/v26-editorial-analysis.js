@@ -32,6 +32,31 @@ function prepare(subjectCandidates){
  const editorialPlan=TOPICS.map(topic=>({topic,heading:LABELS[topic],facts:byTopic[topic].map(f=>({text:f.text,sources:f.sources,verified:f.verified})),requiresReview:byTopic[topic].some(f=>f.reviewRequired)||!byTopic[topic].length}));
  return {schema:'KT15_8_EDITORIAL_EVIDENCE_V1',subject:candidates.find(x=>clean(x.title))?.title||'',findings,editorialPlan,review,readyForWord:false,reason:'Необходима е съдържателна редакция и експертно потвърждение; откъсите не са готов административен текст.'};
 }
-const api=Object.freeze({prepare});root.V26EditorialAnalysis=api;
+/* A source-aware editorial brief, not a substitute for semantic AI or expert approval.
+   Explicitly distinguishes reported project intentions from established facts. */
+function brief(subjectCandidates){
+ const prepared=prepare(subjectCandidates);
+ const title=clean(prepared.subject);
+ const topics=prepared.editorialPlan;
+ const descriptions=topics.map(section=>{
+  const entries=section.facts;
+  const sources=[...new Set(entries.flatMap(e=>e.sources))];
+  const note=entries.length===0?'НЯМА ДАННИ':entries.length>1?'Няколко сведения — необходима е смислова съпоставка':'Едно извлечено сведение — необходима е проверка в документа';
+  return {topic:section.topic,heading:section.heading,
+   reported:entries.map(e=>({excerpt:e.text,sources:e.sources,verified:e.verified})),
+   sources,editorialNote:note,approvedText:null};
+ });
+ const checks=[
+  ...prepared.review.map(r=>({topic:r.topic,issue:r.reason,sources:r.sources})),
+  ...prepared.findings.filter(f=>!f.verified).map(f=>({topic:f.topic,issue:'Непотвърден извлечен откъс',sources:f.sources}))
+ ];
+ return {schema:'KT15_8_EDITORIAL_BRIEF_V1',
+  subject:title||'[ЗА ЕКСПЕРТНА ПРОВЕРКА — предмет на ИП]',
+  purpose:'Основа за самостоятелно професионално редактиране, не готов текст за Word.',
+  classical:{style:'Кратък, каноничен административен стил; четири абзаца, само проверени факти.',paragraphs:null},
+  expert:{style:'Свързано експертно изложение с отделна аргументация, без механично повтаряне на четирите абзаца.',sections:descriptions},
+  checks,readyForWord:false};
+}
+const api=Object.freeze({prepare,brief});root.V26EditorialAnalysis=api;
 if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
