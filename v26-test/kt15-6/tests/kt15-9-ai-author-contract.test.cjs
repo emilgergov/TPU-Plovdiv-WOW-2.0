@@ -1,0 +1,15 @@
+'use strict';
+const assert=require('node:assert/strict');
+const author=require('../v26-ai-author-contract.js');
+const missing=author.prepareRequest({});
+assert.equal(missing.ready,false);
+assert(missing.issues.length>=3);
+const request=author.prepareRequest({dossierId:'case-1',editorialBrief:{schema:'KT15_8_EDITORIAL_BRIEF_V1',subject:'Тестово ИП',expert:{sections:[]}},gis:{confirmed:true,findings:[]},normative:{confirmed:true,references:[]}});
+assert.equal(request.ready,true);
+assert.equal(author.validateDraft(request,{}).valid,false);
+const complete={schema:'KT15_9_AI_AUTHOR_DRAFT_V1',classical:{construction:'Дейности.',electricity:'Електро.',water_supply:'Вода.',wastewater:'Отпадъчни води.'},expert:{text:'Мотивиран експертен проект.'},claims:[{text:'Факт',source:'Уведомление',verified:true}],requiresReview:false};
+const check=author.validateDraft(request,complete);
+assert.equal(check.valid,true);
+assert.equal(check.readyForWord,false);
+assert.equal(author.validateDraft(request,{...complete,claims:[{text:'Факт',source:'',verified:false}]}).valid,false);
+console.log('PASS KT15.9 AI author contract: source, GIS, legal and human approval gates');
