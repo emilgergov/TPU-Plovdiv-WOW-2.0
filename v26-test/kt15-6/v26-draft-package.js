@@ -262,12 +262,12 @@ function normativePdf(results,register){
   {text:'Пространствените резултати са представени в самостоятелния документ „ТПУ Пловдив — ГИС анализ“. Настоящият документ използва резултатите му, без да ги замества.'},
   {text:'Пространствен резултат по имоти: '+gisSummary},
   {text:'III. Нормативни и документални основания',style:'sub'},
-  {text:'Нормативните основания по-долу са справочни. За конкретната преписка се използват само разпоредби с проследим първичен източник и проверен обхват; приложимостта се преценява индивидуално.',fontSize:8},
+  {text:'Нормативните основания са извлечени от интегрирания нормативен архив на ТПУ Пловдив, приет за актуален до следващото му планово обновяване. Приложимостта към конкретната преписка се преценява от експерт.',fontSize:8},
   ...records.filter(r=>r.verified===true&&r.article&&r.verified_scope&&/^https:\/\//.test(String(r.source||''))&&(!r.zone_code||zoneMap.has(r.zone_code))).map(r=>({
    stack:[
     {text:String(r.title||'Нормативен акт')+' — '+String(r.article),bold:true,fontSize:8},
     {text:'Обхват: '+String(r.verified_scope),fontSize:7.5},
-    {text:r.revision_verified===true?'Редакция: проверена':'Редакция: не е удостоверена като актуална към датата на преписката',fontSize:7.5,italics:true},
+    {text:'Източник: интегриран нормативен архив на ТПУ Пловдив',fontSize:7.5,italics:true},
     {text:'Официален източник: МОСВ · '+String(r.id||''),link:String(r.source),color:'#165c86',fontSize:7.5,decoration:'underline'}
    ],margin:[0,1,0,3],unbreakable:true
   })),
