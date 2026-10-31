@@ -18,7 +18,7 @@ const path=require('node:path');
     const bytes=new Uint8Array(await blob.arrayBuffer());
     const entries=window.fflate.unzipSync(bytes);
     const xml=new TextDecoder().decode(entries['word/document.xml']||new Uint8Array());
-    return {ok:true,size:bytes.length,zip:bytes[0]===80&&bytes[1]===75,document:!!entries['word/document.xml'],header:Object.keys(entries).some(k=>/^word\\/header/.test(k)),footer:Object.keys(entries).some(k=>/^word\\/footer/.test(k)),hasContent:paragraphs.some(p=>xml.includes(p))};
+    return {ok:true,size:bytes.length,zip:bytes[0]===80&&bytes[1]===75,document:!!entries['word/document.xml'],header:Object.keys(entries).some(k=>k.startsWith('word/header')),footer:Object.keys(entries).some(k=>k.startsWith('word/footer')),hasContent:paragraphs.some(p=>xml.includes(p))};
    }catch(e){return {ok:false,error:String(e.message||e)}}
   });
   assert(result.ok,JSON.stringify(result));
