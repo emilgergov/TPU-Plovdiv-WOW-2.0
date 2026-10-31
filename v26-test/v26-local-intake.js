@@ -80,6 +80,27 @@ async function extractText(data,name,options={}){
  }
  return '';
 }
+// KT19: editorial de-duplication of the subject/location heading; never alters evidence.
+function v26EditorialHeading(subject,location,missing){
+ const tidy=x=>String(x||'').replace(/\\s+/g,' ').trim().replace(/^[,;:–—\\s]+|[,;:–—\\s]+$/g,'');
+ const norm=x=>tidy(x).toLocaleLowerCase('bg').replace(/[„“\"'«»]/g,'').replace(/\\s*[-–—]\\s*/g,' ').replace(/\\s+/g,' ');
+ const original=tidy(subject);
+ const seen=new Set(),pieces=[];
+ for(const raw of location||[]){
+  const piece=tidy(raw);if(!piece)continue;
+  const key=norm(piece);if(seen.has(key))continue;
+  seen.add(key);
+  // Do not append location information already explicitly present in the subject.
+  if(norm(original).includes(key))continue;
+  // A bare parcel identifier already in the subject is not repeated with a different prefix.
+  const parcel=piece.match(/\\b\\d{5}\\.\\d+\\.\\d+\\b/);
+  if(parcel&&original.includes(parcel[0]))continue;
+  pieces.push(piece);
+ }
+ const suffix=pieces.length?' — '+pieces.join(', '):'';
+ const review=(missing||[]).length?' [ЗА ПОТВЪРЖДЕНИЕ: '+missing.join(', ')+']':'';
+ return original?'„'+original+'“'+suffix+review:'';
+}
 function semanticReview(subjects,documents){
  const ranked=subjects.filter(x=>x&&x.title).map((x,i)=>{const notice=/уведомлен|uvedomlen|notification/i.test(x.source||'');const title=String(x.title||'').trim();const looksLikeLocation=/^(?:местоположение|поземлен имот|ПИ\\s|имот с идентификатор)/i.test(title);const template=/^(?:резюме|описание на инвестиционно предложение|предмет на инвестиционно предложение)$/i.test(title);return {x,i,score:(notice?10:0)+(x.evidence?1:0)-(looksLikeLocation?20:0)-(template?20:0)};}).sort((a,b)=>b.score-a.score||a.i-b.i);
  const main=ranked[0]?.x||subjects[0]||null;
@@ -110,7 +131,7 @@ function semanticReview(subjects,documents){
  const test=[[/сондаж|кладенец/i,'сондажен кладенец'],[/кабелно трасе/i,'подземно кабелно трасе'],[/площадка за измиване/i,'площадка за измиване'],[/водопроводна връзка/i,'водопроводна връзка']];
  for(const [re,label] of test)if(full.some(x=>re.test(x.text)))ancillary.push(label);
  const title=main?.title||'';
- const heading=title?'„'+title+'“'+(locPieces.length?' — '+locPieces.join(', '):'')+(missing.length?' [ЗА ПОТВЪРЖДЕНИЕ: '+missing.join(', ')+']':''):'';
+ const heading=v26EditorialHeading(title,locPieces,missing);
  return {flags,location:locPieces,location_sources:[...new Set(locEvidence)],missing,ancillary,heading,needs_review:flags.some(x=>x.kind==='conflict')||missing.length>0,source:main?.source||''};
 }
 async function process(file){
