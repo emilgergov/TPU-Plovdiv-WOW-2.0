@@ -10,4 +10,16 @@ function prepareWordPayload(request,draft,approval){
   classical:{...draft.classical},expert:{text:draft.expert.text},
   claims:draft.claims,approvedBy:approval.reviewer.trim()};
 }
-module.exports={prepareWordPayload};
+function mapToWordSlots(payload){
+ if(!payload||payload.ready!==true||payload.schema!=='KT19_7_WORD_PAYLOAD_V1')throw Error('Unapproved Word payload');
+ const common=Object.freeze({subject:payload.subject,heading:payload.heading,dossierId:payload.dossierId});
+ return Object.freeze({
+  classical:Object.freeze({...common,characteristic:Object.freeze({
+   construction:payload.classical.construction,electricity:payload.classical.electricity,
+   water_supply:payload.classical.water_supply,wastewater:payload.classical.wastewater
+  }),templatePolicy:'PRESERVE_ORIGINAL_A_B'}),
+  expert:Object.freeze({...common,reasonedText:payload.expert.text,overviewMapPolicy:'USE_CONFIRMED_GIS_MAP_ONLY'}),
+  review:Object.freeze({approvedBy:payload.approvedBy,claims:payload.claims})
+ });
+}
+module.exports={prepareWordPayload,mapToWordSlots};
