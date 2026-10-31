@@ -6,6 +6,8 @@ on:
       - 'v26-test/kt15-6/tests/kt15-9-*.test.cjs'
       - 'v26-test/kt15-6/tests/kt19-heading.test.cjs'
       - 'v26-test/v26-local-intake.js'
+      - 'v26-test/kt15-6/v26-ai-author-gateway.cjs'
+      - 'v26-test/kt15-6/tests/kt19-5-gateway.test.cjs'
       - '.github/workflows/kt15-9-ai-author-tests.yml'
   workflow_dispatch:
 permissions:
@@ -23,3 +25,4 @@ jobs:
           node v26-test/kt15-6/tests/kt15-9-ai-author-contract.test.cjs
           node v26-test/kt15-6/tests/kt15-9-ai-author-prompt.test.cjs
           node v26-test/kt15-6/tests/kt19-heading.test.cjs
+          node v26-test/kt15-6/tests/kt19-5-gateway.test.cjs
