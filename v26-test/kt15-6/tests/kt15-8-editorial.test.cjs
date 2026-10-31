@@ -10,3 +10,13 @@ assert.equal(result.editorialPlan.find(x=>x.topic==='wastewater').facts.length,0
 assert(result.review.some(x=>x.topic==='wastewater'&&x.reason==='НЯМА ДАННИ'));
 assert(result.findings.every(x=>x.reviewRequired));
 console.log('KT15.8 editorial evidence: PASS (no unverified Word text)');
+
+const {brief}=require('../v26-editorial-analysis.js');
+const editorial=brief(sample);
+assert.equal(editorial.readyForWord,false);
+assert.equal(editorial.classical.paragraphs,null);
+assert.equal(editorial.expert.sections.find(x=>x.topic==='electricity').reported.length,1);
+assert.equal(editorial.expert.sections.find(x=>x.topic==='electricity').reported[0].sources.length,2);
+assert.equal(editorial.expert.sections.find(x=>x.topic==='water_supply').approvedText,null);
+assert(editorial.checks.some(x=>x.issue==='Непотвърден извлечен откъс'));
+console.log('KT15.8 editorial brief: PASS (source-traceable, no fabricated prose)');
