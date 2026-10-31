@@ -82,8 +82,8 @@ async function extractText(data,name,options={}){
 }
 // KT19: editorial de-duplication of the subject/location heading; never alters evidence.
 function v26EditorialHeading(subject,location,missing){
- const tidy=x=>String(x||'').replace(/\\s+/g,' ').trim().replace(/^[,;:–—\\s]+|[,;:–—\\s]+$/g,'');
- const norm=x=>tidy(x).toLocaleLowerCase('bg').replace(/[„“\"'«»]/g,'').replace(/\\s*[-–—]\\s*/g,' ').replace(/\\s+/g,' ');
+ const tidy=x=>String(x||'').replace(/\s+/g,' ').trim().replace(/^[,;:–—\s]+|[,;:–—\s]+$/g,'');
+ const norm=x=>tidy(x).toLocaleLowerCase('bg').replace(/[„“\"'«»]/g,'').replace(/\s*[-–—]\s*/g,' ').replace(/\s+/g,' ');
  const original=tidy(subject);
  const seen=new Set(),pieces=[];
  for(const raw of location||[]){
@@ -93,7 +93,7 @@ function v26EditorialHeading(subject,location,missing){
   // Do not append location information already explicitly present in the subject.
   if(norm(original).includes(key))continue;
   // A bare parcel identifier already in the subject is not repeated with a different prefix.
-  const parcel=piece.match(/\\b\\d{5}\\.\\d+\\.\\d+\\b/);
+  const parcel=piece.match(/\b\d{5}\.\d+\.\d+\b/);
   if(parcel&&original.includes(parcel[0]))continue;
   pieces.push(piece);
  }
