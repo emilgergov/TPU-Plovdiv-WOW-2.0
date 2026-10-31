@@ -1,0 +1,14 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const {resolve}=require('../v26-author-bridge.js');
+assert.equal(resolve(null,'X',['56784.13.102']),null);
+const draft={ready:true,schema:'KT19_7_WORD_PAYLOAD_V1',dossierId:'X',confirmedParcelIds:['56784.13.102'],subject:'Складове',heading:'Складове в ПИ 56784.13.102',classical:{construction:'Сгради',electricity:'Мрежа',water_supply:'Вода',wastewater:'Отвеждане'},expert:{text:'Мотивиран анализ'},claims:[{text:'Проверен факт',source:'Примерна преписка',verified:true}]};
+assert.equal(resolve(draft,'X',['56784.13.102']),draft);
+assert.throws(()=>resolve(draft,'Y',['56784.13.102']),/преписка/);
+assert.throws(()=>resolve(draft,'X',['56784.13.103']),/имоти/);
+assert.throws(()=>resolve({...draft,claims:[{text:'Без източник'}]},'X',['56784.13.102']),/непроверени/);
+const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+assert(html.includes('v26-author-bridge.js?v=kt20-4'));
+assert(html.includes('approvedAuthorPayload:window.V26AuthorBridge.resolve('));
+assert(!html.includes('id="v26AiReview"'));
+console.log('PASS KT20.4: invisible validated AI bridge and unchanged fallback');
