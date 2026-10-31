@@ -1,0 +1,16 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const base=path.resolve(__dirname,'..');
+const pkg=fs.readFileSync(path.join(base,'v26-draft-package.js'),'utf8');
+const word=fs.readFileSync(path.join(base,'v26-expert-word.js'),'utf8');
+assert(pkg.includes('register?.approvedAuthorPayload||null'));
+assert(pkg.includes("authored.dossierId!==register?.dossierId"));
+assert(pkg.includes("paragraphs.splice(0,paragraphs.length,...aiSections)"));
+assert(pkg.includes("window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata)"));
+assert(pkg.includes("window.V26ExpertWord.make(authored?"));
+assert(word.includes("draft.authoredText?"));
+assert(word.includes("АВТОРСКИ ЕКСПЕРТЕН АНАЛИЗ"));
+new Function(pkg);new Function(word);
+console.log('PASS KT20.1: real browser DOCX generator adapter syntax and integration anchors');
