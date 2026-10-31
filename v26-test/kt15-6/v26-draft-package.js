@@ -264,7 +264,7 @@ function normativePdf(results,register){
   {text:'III. Нормативни и документални основания',style:'sub'},
   {text:'Нормативните основания са извлечени от интегрирания нормативен архив на ТПУ Пловдив, приет за актуален до следващото му планово обновяване. Приложимостта към конкретната преписка се преценява от експерт.',fontSize:8},
   ...records.filter(r=>r.article&&r.source).map(r=>({
-   text:String(r.title||'Нормативен акт')+' — '+String(r.article)+'; '+String(r.purpose||r.verified_scope||'')+'; МОСВ: '+String(r.source),margin:[0,1,0,2],unbreakable:false
+   text:String(r.title||'Нормативен акт')+' — '+String(r.article)+'; '+String(r.purpose||r.verified_scope||'')+'; Източник: МОСВ ('+String(r.id||'архив')+')',margin:[0,1,0,2],unbreakable:false
   })),
   ...(records.some(r=>r.verified===true&&r.article&&r.verified_scope)?[]:[{text:'НЯМА ДАННИ за конкретни разпоредби в интегрирания архив.',fontSize:8}]),
   {text:'Нормативните цитати са справочни; преценката за приложимост се извършва от експерт.',fontSize:7.8},
