@@ -76,6 +76,7 @@ async function make(draft,overviewSvg){
   ...(isPending(m.incomingReference)?[]:[paragraph(doc,'Преписка: '+m.incomingReference)]),
   ...(isPending(m.salutation)?[]:[paragraph(doc,m.salutation)]),
   paragraph(doc,'ЕКСПЕРТНА АНАЛИТИЧНА СПРАВКА',{heading:true}),
+  ...(draft.authoredText?[paragraph(doc,'АВТОРСКИ ЕКСПЕРТЕН АНАЛИЗ',{heading:true}),...String(draft.authoredText).split(/\\n\\s*\\n/).map(t=>t.trim()).filter(Boolean).map(t=>paragraph(doc,t))]:[]),
   paragraph(doc,'Основа: потвърден имотен обхват, резултат от ГИС анализа и налични документи по преписката.'),
   paragraph(doc,'Статус: проект за експертен преглед; не замества официално становище или административен акт.'),
   paragraph(doc,'I. ПРЕДМЕТ И ИМОТЕН ОБХВАТ',{heading:true}),
