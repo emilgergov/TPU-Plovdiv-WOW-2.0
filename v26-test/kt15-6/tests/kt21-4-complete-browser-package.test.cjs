@@ -1,11 +1,14 @@
 'use strict';
 const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
+const path=require('node:path');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  try{
   const page=await browser.newPage();
   await page.goto('http://127.0.0.1:8765/v26-test/kt15-6/index.html');
+  // GitHub Pages can load the ZIP UMD dependency separately; reproduce that in Chromium.
+  await page.addScriptTag({path:path.join(path.dirname(require.resolve('fflate')),'../umd/index.js')});
   const outcome=await page.evaluate(async()=>{
    const id='99999.999.9999';
    const result={input:id,status:'Намерен',intersection_verified_outside:true,verified_zone_intersections:[],geojson:{features:[{geometry:{type:'Polygon',coordinates:[[[24,42],[25,42],[25,43],[24,42]]]}}]}};
