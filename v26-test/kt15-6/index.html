@@ -372,11 +372,11 @@ function v26NormalizeTitle(t){return String(t||'').replace(/идентифика
 function v26EditorialClean(t){
  let x=v26NormalizeTitle(t);
  // OCR may concatenate a complete word with a truncated second copy.
- x=x.replace(/идентификатор(?:\\s*(?:идентификатор|ентификатор|нтификатор|тификатор|ификатор|фикатор|икатор|катор|атор|тор))+/gi,'идентификатор');
- x=x.replace(/идентификатор(?:\\s*идентификато\\s*р)+/gi,'идентификатор');
- return x.replace(/\\s+([,.;:])/g,'$1').replace(/,\\s*(?=\\S)/g,', ').replace(/\\s+/g,' ').trim();
+ x=x.replace(/идентификатор(?:\s*(?:идентификатор|ентификатор|нтификатор|тификатор|ификатор|фикатор|икатор|катор|атор|тор))+/gi,'идентификатор');
+ x=x.replace(/идентификатор(?:\s*идентификато\s*р)+/gi,'идентификатор');
+ return x.replace(/\s+([,.;:])/g,'$1').replace(/,\s*(?=\S)/g,', ').replace(/\s+/g,' ').trim();
 }
-function v26EditorialInvalid(t){return /идентификатор(?:\\s*(?:идентификатор|ентификатор|нтификатор|тификатор|ификатор|фикатор|икатор|катор|атор|тор))/i.test(String(t||''));}
+function v26EditorialInvalid(t){return /идентификатор(?:\s*(?:идентификатор|ентификатор|нтификатор|тификатор|ификатор|фикатор|икатор|катор|атор|тор))/i.test(String(t||''));}
 function v26CleanQuotedTitle(t){return v26EditorialClean(t).replace(/^[\s.,„“"'«»]+/g,'').replace(/[\s.,„“"'«»]+$/g,'').replace(/[„“"'«»]+\s*(?=Склад\b)/g,'„').replace(/\s+/g,' ').trim()}
 function v26CleanSubjectHeading(){
  const raw=v26CleanQuotedTitle(v26CaseTitle||subjectTitle.value).replace(/^Относно:\s*/i,'').replace(/^Уведомление за инвестиционно предложение\s*\(ИП\)\s*:\s*/i,'').replace(/^[„"']|[“"']$/g,'').trim();
