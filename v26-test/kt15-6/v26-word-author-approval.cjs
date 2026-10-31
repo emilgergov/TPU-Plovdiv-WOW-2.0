@@ -22,4 +22,13 @@ function mapToWordSlots(payload){
   review:Object.freeze({approvedBy:payload.approvedBy,claims:payload.claims})
  });
 }
-module.exports={prepareWordPayload,mapToWordSlots};
+function releaseToBrowser(request,draft,approval,parcelIds){
+ const payload=prepareWordPayload(request,draft,approval);
+ if(!payload.ready)return payload;
+ const ids=[...new Set((parcelIds||[]).map(x=>String(x).trim()).filter(Boolean))].sort();
+ if(!ids.length)return {ready:false,issues:['Confirmed parcel IDs required']};
+ const gisIds=[...new Set((request.gis.parcels||[]).map(x=>String(typeof x==='string'?x:(x.id||x.cadnum||x.parcel||'')).trim()).filter(Boolean))].sort();
+ if(gisIds.length&&(gisIds.length!==ids.length||gisIds.some((x,i)=>x!==ids[i])))return {ready:false,issues:['Parcel mismatch with GIS evidence']};
+ return {...payload,confirmedParcelIds:ids};
+}
+module.exports={prepareWordPayload,mapToWordSlots,releaseToBrowser};
