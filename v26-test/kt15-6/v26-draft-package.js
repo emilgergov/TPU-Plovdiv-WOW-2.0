@@ -263,10 +263,16 @@ function normativePdf(results,register){
   {text:'Пространствен резултат по имоти: '+gisSummary},
   {text:'III. Нормативни и документални основания',style:'sub'},
   {text:'Нормативните основания по-долу са справочни. За конкретната преписка се използват само разпоредби с проследим първичен източник и проверен обхват; приложимостта се преценява индивидуално.',fontSize:8},
-  ...records.filter(r=>r.revision_verified===true&&r.verified===true&&r.verified_scope&&r.article&&/^https:\/\//.test(String(r.source||''))&&(!r.zone_code||zoneMap.has(r.zone_code))).map(r=>({text:String(r.title||'Нормативен акт')+' — '+String(r.article)+'; обхват: '+String(r.verified_scope)+'; източник: '+String(r.source),fontSize:8})),
-  {text:'Пространственото пресичане само по себе си не доказва нарушение на режим.'},
-  ...applicable.flatMap(r=>[{text:r.title,bold:true,fontSize:9},...r.sources.map(source=>{let label;try{const u=new URL(String(source));label=u.hostname.replace(/^www\./,'')+(u.pathname.toLowerCase().includes('protectedsite')?' / страница на защитената зона':' / нормативен документ')}catch(_){label='Официален източник'}return {text:label,link:String(source),color:'#165c86',fontSize:8,decoration:'underline'};})]),
-  ...(applicable.length?[]:[{text:'В интегрирания нормативен архив няма относима референция за този обхват.'}]),
+  ...records.filter(r=>r.verified===true&&r.article&&r.verified_scope&&/^https:\/\//.test(String(r.source||''))&&(!r.zone_code||zoneMap.has(r.zone_code))).map(r=>({
+   stack:[
+    {text:String(r.title||'Нормативен акт')+' — '+String(r.article),bold:true,fontSize:8},
+    {text:'Обхват: '+String(r.verified_scope),fontSize:7.5},
+    {text:r.revision_verified===true?'Редакция: проверена':'Редакция: не е удостоверена като актуална към датата на преписката',fontSize:7.5,italics:true},
+    {text:'Официален източник: МОСВ · '+String(r.id||''),link:String(r.source),color:'#165c86',fontSize:7.5,decoration:'underline'}
+   ],margin:[0,1,0,3],unbreakable:true
+  })),
+  {text:'Посочването на разпоредба не установява автоматично приложимостта ѝ към конкретното инвестиционно предложение.',fontSize:7.8},
+  ...(records.some(r=>r.verified===true&&r.article&&r.verified_scope)?[]:[{text:'НЯМА ДАННИ за конкретни проверени нормативни разпоредби в наличния архив.',fontSize:8}]),
   {text:'IV. Приложимост към инвестиционното предложение',style:'sub'},
   {text:resolvedTitle?'За предложение „'+resolvedTitle+'“ относимостта на посочените основания се разглежда спрямо описаните дейности и пространствените резултати от документа „ТПУ Пловдив — ГИС анализ“. Режимите на конкретна зона се преценяват отделно; настоящата справка не установява автоматично допустимост или забрана.':'Предметът и дейностите подлежат на потвърждение преди индивидуална преценка за приложимост на режимите.'},
 
