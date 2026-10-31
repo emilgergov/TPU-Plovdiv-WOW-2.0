@@ -10,7 +10,7 @@ const path=require('node:path');
  try{
   const page=await browser.newPage();
   await page.goto('http://127.0.0.1:8765/v26-test/kt15-6/index.html',{waitUntil:'domcontentloaded'});
-  await page.addScriptTag({path:require.resolve('fflate/umd')});
+  await page.addScriptTag({path:path.join(path.dirname(require.resolve('fflate')),'../umd/index.js')});
   const result=await page.evaluate(async()=>{
    const paragraphs=['Изграждане на складове и офиси.','Електрозахранване от мрежата.','Водоснабдяване от обществената мрежа.','Отпадъчни води към водоплътно съоръжение.'];
    try{
