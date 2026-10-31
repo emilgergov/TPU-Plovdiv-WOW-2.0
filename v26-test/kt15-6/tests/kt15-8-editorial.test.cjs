@@ -20,3 +20,15 @@ assert.equal(editorial.expert.sections.find(x=>x.topic==='electricity').reported
 assert.equal(editorial.expert.sections.find(x=>x.topic==='water_supply').approvedText,null);
 assert(editorial.checks.some(x=>x.issue==='Непотвърден извлечен откъс'));
 console.log('KT15.8 editorial brief: PASS (source-traceable, no fabricated prose)');
+
+const {composeApproved}=require('../v26-editorial-analysis.js');
+const valid=['construction','electricity','water_supply','wastewater'].map(topic=>({topic,approvedText:'Потвърдено описание на дейността и условията по преписката',source:'Уведомление.docx',verified:true,approved:true}));
+const ready=composeApproved({facts:valid});
+assert.equal(ready.readyForWord,true);
+assert.equal(ready.expertSections.length,4);
+assert.equal(ready.classical.waterSupply.includes('Потвърдено'),true);
+const unsafe=composeApproved({facts:[...valid,{topic:'access',approvedText:'Неизяснен достъп',source:'Уведомление.docx',verified:false,approved:true}]});
+assert.equal(unsafe.readyForWord,false);
+assert.equal(unsafe.blocked.length,1);
+assert.equal(composeApproved({facts:valid.slice(0,2)}).readyForWord,false);
+console.log('KT15.8 approved prose: PASS (four required paragraphs, strict approval gate)');
