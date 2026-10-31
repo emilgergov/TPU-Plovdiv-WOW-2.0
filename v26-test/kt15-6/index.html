@@ -385,12 +385,18 @@ function v26CleanSubjectHeading(){
  const ids=[...new Set([...locationIds,...words($('ids').value)])];
  const primary=confirmedRoles?Object.keys(confirmedRoles).filter(id=>confirmedRoles[id]==='leading'):[];
  const chosen=primary.length?primary:ids;
- const displayedRaw=primary.length?raw.replace(/(?:\s*[,;—–-]?\s*(?:в\s+)?ПИ\s+с\s+идентификатор\s+\d{5}\.\d+\.\d+)(?:\s*[,;—–-]?\s*\d{5}\.\d+\.\d+)*\s*$/i,'').trim():raw;
+ // Remove an already appended cadastral/location tail only when its ID is present earlier.
+ const duplicateTail=/\\s*[—–-]\\s*ПИ\\s+с\\s+идентификатор\\s+(\\d{5}\\.\\d+\\.\\d+)(?:\\s*,\\s*(?:гр\\.\\s*[^,]+|местност\\s+[^,]+))*\\s*$/i;
+ const tailMatch=raw.match(duplicateTail);
+ const cleanRaw=tailMatch&&raw.slice(0,tailMatch.index).includes(tailMatch[1])?raw.slice(0,tailMatch.index).trim():raw;
+ const displayedRaw=cleanRaw;
  // Append only facts missing from the extracted subject; never repeat the leading parcel or location.
  const pieces=[];
  const normalizedSubject=displayedRaw.toLocaleLowerCase('bg-BG').replace(/[„“"'«»]/g,'').replace(/\s+/g,' ');
  const mentionedIds=new Set(displayedRaw.match(/\b\d{5}\.\d+\.\d+\b/g)||[]);
  const missingIds=chosen.filter(id=>!mentionedIds.has(id));
+ // The original dossier text already names the leading parcel: do not append another location block.
+ if(primary.length&&primary.every(id=>mentionedIds.has(id)))return displayedRaw?'„'+v26CleanQuotedTitle(displayedRaw)+'“':'Предмет на инвестиционното предложение — ЗА ЕКСПЕРТНО УТОЧНЯВАНЕ';
  if(missingIds.length)pieces.push((missingIds.length===1?'ПИ с идентификатор ':'ПИ с идентификатори ')+missingIds.join(', '));
  const matched=found.filter(x=>chosen.includes(x.cadnum));
  const settlements=[...new Set(matched.map(x=>x.settlement).filter(Boolean))];
