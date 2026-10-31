@@ -11,6 +11,8 @@ on:
       - 'v26-test/kt15-6/v26-ai-server.cjs'
       - 'v26-test/kt15-6/v26-word-author-approval.cjs'
       - 'v26-test/kt15-6/v26-final-package.cjs'
+      - 'v26-test/kt15-6/v26-kt20-orchestrator.cjs'
+      - 'v26-test/kt15-6/tests/kt20-orchestrator.test.cjs'
       - 'v26-test/kt15-6/tests/kt19-9-final-package.test.cjs'
       - 'v26-test/kt15-6/tests/kt19-7-word-approval.test.cjs'
       - 'v26-test/kt15-6/tests/kt19-6-provider.test.cjs'
@@ -36,3 +38,4 @@ jobs:
           node v26-test/kt15-6/tests/kt19-6-provider.test.cjs
           node v26-test/kt15-6/tests/kt19-7-word-approval.test.cjs
           node v26-test/kt15-6/tests/kt19-9-final-package.test.cjs
+          node v26-test/kt15-6/tests/kt20-orchestrator.test.cjs
