@@ -52,6 +52,15 @@ jobs:
           test -s v26-test/v27-preview/index.html
           python3 - <<'PY'
           from pathlib import Path
+          import re
+          html=Path('v26-test/v27-preview/index.html').read_text()
+          inline=re.search(r'<script>(.*?)</script>',html,re.S)
+          assert inline, 'Missing inline controller'
+          Path('/tmp/v27-inline-controller.js').write_text(inline.group(1))
+          PY
+          node --check /tmp/v27-inline-controller.js
+          python3 - <<'PY'
+          from pathlib import Path
           h=Path('v26-test/v27-preview/index.html').read_text()
           assert 'id="casefile" type="file"' in h
           assert 'zipInput.onchange=()=>{setZip(zipInput.files[0]);' in h
