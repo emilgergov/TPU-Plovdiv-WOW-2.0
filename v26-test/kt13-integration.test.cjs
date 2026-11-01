@@ -42,6 +42,8 @@ assert(review.includes("panel.hidden=false;panel.open=true"),'Missing evidence m
 assert(html.includes("window.V26WordReview.getWorkingDraft()"),'Working ZIP must use evidence-derived draft');
 assert(html.indexOf("window.V26WordReview.getWorkingDraft()")<html.indexOf("if(!window.confirm('Да се създаде РАБОТЕН ZIP"),'Working draft must be assembled before ZIP confirmation');
 assert(html.includes('ГИС анализ · PDF')&&html.includes('Нормативни референции · PDF')&&html.includes('Изготви проектите · Word'),'KT14 short UI labels must be retained');
+assert(pkg.includes('const zones=results.flatMap'),'GIS scenarios must consider every parcel, not only leading parcel');
+assert(pkg.includes('results.every(r=>r.intersection_verified_outside===true)'),'Scenario A requires verified outside status for every parcel');
 assert(pkg.includes("classicWord===expertWord"),'ZIP must reject identical Word outputs');
 assert(word.includes("slice(0,scenario==='A'?5:7)"),'Expert Word must select 5/7 legal findings from GIS scenario');
 assert(pkg.includes("paragraphPrefixes"),'Word scenario paragraph prefixes must be normalized before packaging');
