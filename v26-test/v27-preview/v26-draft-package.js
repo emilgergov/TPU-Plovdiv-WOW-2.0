@@ -225,7 +225,7 @@ function gisPdf(results,options={}){
    return [id,Number.isFinite(area)&&area>0?area.toLocaleString('bg-BG',{maximumFractionDigits:3})+' (ГИС)':'Няма площ',zoneText,intersection,has?'ГИС геометрия налична':'Липсва геометрия'];
   })
  ]},layout:'lightHorizontalLines'});
- content.push({text:'Посочените площи са изчислени от ГИС геометрията и не заместват актуалната кадастрална площ. Пресичанията са пространствен резултат, а не самостоятелна правна оценка.',margin:[0,10,0,0]});
+ content.push({text:'Посочените площи са изчислени от ГИС геометрията и не заместват актуалната кадастрална площ. Пресичанията са пространствен резултат, а не самостоятелна правна оценка.',fontSize:8,margin:[0,3,0,0]});
  return pdfDef('ГИС анализ',content);
 }
 function visitForLabel(coords,out){if(Array.isArray(coords)&&typeof coords[0]==='number'&&typeof coords[1]==='number'){if(Number.isFinite(coords[0])&&Number.isFinite(coords[1]))out.push(coords)}else if(Array.isArray(coords))coords.forEach(x=>visitForLabel(x,out))}
