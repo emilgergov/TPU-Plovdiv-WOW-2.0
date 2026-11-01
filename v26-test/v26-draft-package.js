@@ -312,7 +312,7 @@ async function make(results,roles,register){
  const expertDraft=window.V26ExpertDraft?.build({results,roles:normalized,determination,metadata:caseMetadata,paragraphs,evidence:dossierEvidence,aiDraft:register?.v27AiDraft||''});
  if(!expertDraft)throw Error('КТ13: липсва единният експертен проект.');
  if(!window.V26ExpertWord?.make)throw Error('КТ13: липсва генераторът за експертния Word.');
- const expertWord=await window.V26ExpertWord.make(expertDraft);
+ const expertWord=await window.V26ExpertWord.make(expertDraft,{mapSvg:register?.mapSvg||null});
  const prefixes=expertDraft.scenario==='Б'?['С реализацията','Електроснабдяването','Водозахранването','Отпадъчните води']:['С реализацията','Електроснабдяването','Водоснабдяването','Отпадъчните води'];
  const classicParagraphs=expertDraft.characterization.map((value,i)=>value.startsWith(prefixes[i])?value:prefixes[i]+' — '+value);
  const classicWord=await window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata);
