@@ -6,6 +6,11 @@ on:
     paths:
       - 'cloudflare/ai-author-v27/src/worker.js'
       - 'cloudflare/ai-author-v27/test/**'
+      - 'v26-test/v27-ai-*.js'
+      - 'v26-test/v26-expert-draft.js'
+      - 'v26-test/v26-expert-word.js'
+      - 'v26-test/v26-draft-package.js'
+      - 'v26-test/index.html'
       - '.github/workflows/test-ai-author-v27.yml'
 permissions:
   contents: read
