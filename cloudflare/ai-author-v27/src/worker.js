@@ -4,7 +4,7 @@ const headers = { "Content-Type":"application/json; charset=utf-8", "Cache-Contr
 const ALLOWED_ORIGIN="https://emilgergov.github.io";
 const reply = (body,status=200,origin="") => new Response(JSON.stringify(body),{status,headers:{...headers,...(origin===ALLOWED_ORIGIN?{"Access-Control-Allow-Origin":ALLOWED_ORIGIN,"Vary":"Origin"}:{})}});
 
-const MAX_BYTES = 24000;
+const MAX_BYTES = 36000;
 const allowed = new Set(["classic","expert"]);
 const text = (value,max=3000) => typeof value === "string" ? value.slice(0,max).trim() : "";
 function validate(input) {
@@ -19,7 +19,7 @@ function validate(input) {
     investor:text(f.investor,250), procedure:text(f.procedure,100),
     gisFindings:text(f.gisFindings,3000), legalReferences:text(f.legalReferences,3000),
     evidenceNotes:text(f.evidenceNotes,1500), registration:text(f.registration,150),
-    dossierExcerpts:Array.isArray(f.dossierExcerpts)?f.dossierExcerpts.slice(0,12).map(d=>({file:text(d.file,180),excerpt:text(d.excerpt,900)})):[],
+    dossierExcerpts:Array.isArray(f.dossierExcerpts)?f.dossierExcerpts.slice(0,25).map(d=>({file:text(d.file,180),excerpt:text(d.excerpt,1400)})):[],
     dossierDocuments:Array.isArray(f.dossierDocuments)?f.dossierDocuments.slice(0,18).map(d=>({file:text(d.file,180),type:text(d.type,80),references:Array.isArray(d.references)?d.references.slice(0,5).map(x=>text(x,220)):[]})):[],
     legalSources:Array.isArray(f.legalSources)?f.legalSources.slice(0,12).map(d=>({title:text(d.title,180),source:text(d.source,200),id:text(d.id,80)})):[]
   }};
@@ -41,7 +41,7 @@ async function handleAuthor(request,env) {
   let input;
   try {input=validate(JSON.parse(raw))} catch {}
   if(!input) return reply({error:"Invalid structured facts; expected mode, facts.subject and facts.parcelIds"},400);
-  const system=`You are a Bulgarian environmental administrative drafting assistant. Generate only a DRAFT for expert verification. Use ONLY provided facts, readable dossier excerpts, source inventory, GIS findings and legal references. A document title or URL alone does not prove the content of a legal provision. Distinguish verified GIS findings from unverified excerpts. Write case-specific substantive text in the four sections; never duplicate sections or add commentary about the AI. Never invent cadastral, geographic, legal or registration details. Mark missing required data as НЯМА ДАННИ. Do not confuse защитени зони with защитени територии. Keep the GIS findings and references distinct. Return clear Bulgarian administrative prose, not HTML. In expert mode, format your answer in exactly four sections using these standalone labels in this order: [[CHARACTERIZATION]], [[LEGAL]], [[PROCEDURE]], [[IMPACTS]]. Each section contains only proposed wording for that part of the expert document. Do not add an introduction or conclusion. Never invent citations, cadastral data or findings; mark unsupported information as НЯМА ДАННИ. ${input.mode==="classic"?"Use restrained canonical administrative style, preserving the supplied facts.":"Write a well-reasoned expert project with clear factual and legal reasoning, without claiming independent verification."}`;
+  const system=`You are a Bulgarian environmental administrative drafting assistant. Generate only a DRAFT for expert verification. Use ONLY provided facts, readable dossier excerpts, source inventory, GIS findings and legal references. A document title or URL alone does not prove the content of a legal provision. Distinguish verified GIS findings from unverified excerpts. Write case-specific substantive text in the four sections; never duplicate sections or add commentary about the AI. CHARACTERIZATION must synthesize actual dossier facts on construction, utilities, water and wastewater when supported, not generic boilerplate. LEGAL must distinguish named legal sources from verified article-level legal provisions; do not claim an article applies unless its text is provided. PROCEDURE must explain the evidence and missing conditions for procedural classification, not guess. IMPACTS must address the actual proposal and the verified GIS relationship, and distinguish potential effects from an assessed conclusion. Avoid generic claims that no normative references were supplied when legalSources is nonempty. Do not invent the name of a nearest zone. Never invent cadastral, geographic, legal or registration details. Mark missing required data as НЯМА ДАННИ. Do not confuse защитени зони with защитени територии. Keep the GIS findings and references distinct. Return clear Bulgarian administrative prose, not HTML. In expert mode, format your answer in exactly four sections using these standalone labels in this order: [[CHARACTERIZATION]], [[LEGAL]], [[PROCEDURE]], [[IMPACTS]]. Each section contains only proposed wording for that part of the expert document. Do not add an introduction or conclusion. Never invent citations, cadastral data or findings; mark unsupported information as НЯМА ДАННИ. ${input.mode==="classic"?"Use restrained canonical administrative style, preserving the supplied facts.":"Write a well-reasoned expert project with clear factual and legal reasoning, without claiming independent verification."}`;
   const controller=new AbortController();
   const timeout=setTimeout(()=>controller.abort(),25000);
   try {
