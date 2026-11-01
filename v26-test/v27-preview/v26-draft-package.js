@@ -319,9 +319,18 @@ async function make(results,roles,register){
  if(!window.V26ExpertWord?.make)throw Error('КТ13: липсва генераторът за експертния Word.');
  const overviewMap=results.length>1?(window.V27MultiParcelMap?.build(results,register?.zoneFeatures||[])||null):(register?.mapSvg||null);
  if(!overviewMap)throw Error('Липсва обзорната ГИС карта за експертния Word. Изпълнете картографския анализ преди създаване на пакета.');
- const expertWord=await window.V26ExpertWord.make(expertDraft,{mapSvg:overviewMap});
+ if(register?.v27Package&&!String(register.v27AiDraft||'').trim())throw Error('V27.2: липсва AI авторски текст; експертният Word не може да се замени със стандартен.');
+ const expertWord=await window.V26ExpertWord.make(expertDraft,{mapSvg:overviewMap,requireAiAuthor:Boolean(register?.v27Package)});
  const prefixes=expertDraft.scenario==='Б'?['С реализацията','Електроснабдяването','Водозахранването','Отпадъчните води']:['С реализацията','Електроснабдяването','Водоснабдяването','Отпадъчните води'];
  const classicParagraphs=expertDraft.characterization.map((value,i)=>value.startsWith(prefixes[i])?value:prefixes[i]+' — '+value);
+ // AI supports the characterization only; preserve the canonical A/B template and its four fields.
+ if(register?.v27Package){
+  const ai=String(register.v27AiDraft||'');
+  const match=ai.match(/\[\[CHARACTERIZATION\]\]([\s\S]*?)\[\[LEGAL\]\]/);
+  const characterization=match?.[1]?.trim()||'';
+  if(!characterization)throw Error('V27.2: липсва AI характеристика за класическия Word.');
+  classicParagraphs[0]+=' '+characterization;
+ }
  const classicWord=await window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata);
  for(const [label,blob] of [['експертен',expertWord],['класически',classicWord]]){
   if(blob.size<100||new TextDecoder().decode(await blob.slice(0,2).arrayBuffer())!=='PK')throw Error('КТ13: невалиден '+label+' DOCX.');
@@ -330,8 +339,8 @@ async function make(results,roles,register){
  z.file('01_Proekt_na_stanovishte_Klasicheski.docx',classicWord);
  z.file('02_Proekt_na_stanovishte_Eksperten.docx',expertWord);
  await ensurePDF();
- const pdf1=await pdfBlob(gisPdf(results,register));if(pdf1.size<100||await pdf1.slice(0,4).text()!=='%PDF')throw Error('Приложение №1 не е валиден PDF.');z.file('03_Prilozhenie_1_GIS_analiz.pdf',pdf1);
- if(includeAnnex2){const pdf2=await pdfBlob(normativePdf(results,register));if(pdf2.size<100||await pdf2.slice(0,4).text()!=='%PDF')throw Error('Приложение №2 не е валиден PDF.');z.file('04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf',pdf2);}
+ const pdf1=await pdfBlob(gisPdf(results,register));if(pdf1.size<100||await pdf1.slice(0,4).text()!=='%PDF')throw Error('ГИС анализът не е валиден PDF.');z.file('03_GIS_analiz.pdf',pdf1);
+ if(includeAnnex2){const pdf2=await pdfBlob(normativePdf(results,register));if(pdf2.size<100||await pdf2.slice(0,4).text()!=='%PDF')throw Error('Нормативните и документалните референции не са валиден PDF.');z.file('04_Normativni_i_dokumentalni_referencii.pdf',pdf2);}
  const evidenceLines=['РАБОТЕН ПАКЕТ — НЕ Е ОФИЦИАЛНО СТАНОВИЩЕ.','ВНИМАНИЕ: Полетата [ЗА ЕКСПЕРТНА ПРОВЕРКА] са незавършени и изискват проверка от компетентен експерт преди подписване или изпращане.','Съдържа два отделни DOCX проекта (класически и експертен), задължителното PDF приложение №1; приложение №2 е задължително във V27.1 и опционално в наследения V26 маршрут.','Правната приложимост и изводите подлежат на експертна проверка.','','ТЕХНИЧЕСКА ПРОСЛЕДИМОСТ — САМО ЗА ВЪТРЕШНА ПРОВЕРКА'];
  if(dossierEvidence){
   evidenceLines.push('Сценарий (ГИС): '+String(determination.scenario||'неопределен'));
@@ -342,8 +351,21 @@ async function make(results,roles,register){
   }
   for(const warning of (dossierEvidence.warnings||[]).slice(0,15))evidenceLines.push('Предупреждение: '+String(warning.kind||'неуточнено')+'; документ: '+String(warning.file||'неизвестен'));
  }
+ if(register?.v27Package){
+  const aiText=String(register.v27AiDraft||'').trim();
+  if(!aiText)throw Error('V27.2: липсва проверен AI текст за произхода на експертния Word.');
+  if(!globalThis.crypto?.subtle)throw Error('V27.2: браузърът не поддържа проверим SHA-256 за AI текста.');
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(aiText));
+  const sha256=Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,'0')).join('');
+  evidenceLines.push('','V27.2 — ПРОИЗХОД НА ЕКСПЕРТНИЯ ПРОЕКТ');
+  evidenceLines.push('Режим: AI автор — задължителен за експертния Word.');
+  evidenceLines.push('Контрол: четири AI раздела са валидирани преди генериране на DOCX.');
+  evidenceLines.push('SHA-256 на AI авторския текст: '+sha256);
+  evidenceLines.push('Момент на пакетиране (UTC): '+new Date().toISOString());
+  evidenceLines.push('Забележка: този запис удостоверява вложения AI текст, но сам по себе си не доказва сигурност на външните услуги.');
+ }
  z.file('README_BG.txt',evidenceLines.join('\n')+'\n');
- const packageFiles=['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_Prilozhenie_1_GIS_analiz.pdf',...(includeAnnex2?['04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf']:[]),'README_BG.txt'];
+ const packageFiles=['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_GIS_analiz.pdf',...(includeAnnex2?['04_Normativni_i_dokumentalni_referencii.pdf']:[]),'README_BG.txt'];
  const actualFiles=z.names();
  if(actualFiles.length!==packageFiles.length||packageFiles.some(name=>!actualFiles.includes(name)))throw Error('V27.1: ZIP пакетът има неочакван състав.');
  const packageBlob=await z.generateAsync({type:'blob'});if(packageBlob.size<300||new TextDecoder().decode(await packageBlob.slice(0,2).arrayBuffer())!=='PK')throw Error('Неуспешно пакетиране в ZIP.');return packageBlob;

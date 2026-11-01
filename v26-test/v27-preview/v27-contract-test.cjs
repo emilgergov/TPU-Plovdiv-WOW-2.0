@@ -35,7 +35,7 @@ const packageSource=fs.readFileSync(__dirname+'/v26-draft-package.js','utf8');
 const wordSource=fs.readFileSync(__dirname+'/v26-expert-word.js','utf8');
 const indexSource=fs.readFileSync(__dirname+'/index.html','utf8');
 assert.match(packageSource,/aiDraft:register\?\.v27AiDraft\|\|''/);
-assert.match(packageSource,/V26ExpertWord\.make\(expertDraft,\{mapSvg:overviewMap\}\)/);
+assert.match(packageSource,/V26ExpertWord\.make\(expertDraft,\{mapSvg:overviewMap,requireAiAuthor:Boolean\(register\?\.v27Package\)\}\)/);
 assert.match(packageSource,/V26TemplateWord\.make\(expertDraft\.scenario,classicParagraphs,expertDraft\.metadata\)/);
 assert.match(wordSource,/const aiSections=/);
 assert.match(wordSource,/aiProposal\('CHARACTERIZATION'\)/);
