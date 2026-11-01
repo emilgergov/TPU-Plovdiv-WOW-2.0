@@ -8,7 +8,7 @@ function inspect({draft,subject,parcelIds=[],gis,legal,evidence}={}){
  for(const id of ids)if(!body.includes(id))issues.push({code:'MISSING_PARCEL',severity:'review',detail:id});
  const found=[...new Set(body.match(/\b\d{5}\.\d+\.\d+\b/g)||[])];
  for(const id of found)if(!ids.includes(id))issues.push({code:'UNKNOWN_PARCEL',severity:'block',detail:id});
- if(/идентификаторентификатор|(?:\b\S+\b)(?:\s+\1){2,}/iu.test(body))issues.push({code:'MALFORMED_TEXT',severity:'review'});
+ if(/идентификаторентификатор|(\b\S+\b)(?:\s+\1){2,}/iu.test(body))issues.push({code:'MALFORMED_TEXT',severity:'review'});
  if(gis?.scenario==='REVIEW'||gis?.allVerified!==true)issues.push({code:'GIS_NOT_VERIFIED',severity:'block'});
  if(gis?.scenario==='B'&&/не\s+(?:попада|пресича)\s+(?:в|със)\s+защитен[иа]/iu.test(body))issues.push({code:'POSSIBLE_GIS_CONTRADICTION',severity:'review'});
  if(gis?.scenario==='A'&&/пресича\s+защитен[иа]\s+зон/iu.test(body))issues.push({code:'POSSIBLE_GIS_CONTRADICTION',severity:'review'});
