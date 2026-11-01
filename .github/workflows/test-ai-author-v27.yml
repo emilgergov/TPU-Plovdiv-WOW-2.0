@@ -1,0 +1,21 @@
+name: Test AI Author V27 (no secrets, no paid API)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/ai-author-v27/src/worker.js'
+      - 'cloudflare/ai-author-v27/test/**'
+      - '.github/workflows/test-ai-author-v27.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run isolated AI Author tests
+        run: node cloudflare/ai-author-v27/test/author-smoke.mjs
