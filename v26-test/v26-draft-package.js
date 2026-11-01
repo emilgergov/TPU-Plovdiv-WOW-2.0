@@ -325,7 +325,7 @@ async function make(results,roles,register){
  const classicParagraphs=expertDraft.characterization.map((value,i)=>value.startsWith(prefixes[i])?value:prefixes[i]+' — '+value);
  // AI supports the characterization only; preserve the canonical A/B template and its four fields.
  if(register?.v27Package){
-  const ai=String(expertDraft.aiDraft||'');
+  const ai=String(register.v27AiDraft||'');
   const match=ai.match(/\[\[CHARACTERIZATION\]\]([\s\S]*?)\[\[LEGAL\]\]/);
   const characterization=match?.[1]?.trim()||'';
   if(!characterization)throw Error('V27.2: липсва AI характеристика за класическия Word.');
