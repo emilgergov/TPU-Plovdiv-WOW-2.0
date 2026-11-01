@@ -388,7 +388,17 @@ function v26CleanSubjectHeading(){
  // Keep descriptive subject text; strip the location tail once, not individual words.
  let description=raw.replace(/\s*(?:[,;—–-]\s*)?(?:в\s+)?(?:ПИ|поземлен имот|имот)\s+(?:с\s+)?(?:идентификатор(?:ентификатор|ентификатор)?|ИД)\s*\d{5}\.\d+\.\d+[\s\S]*$/i,'').trim();
  description=description.replace(/\s*(?:[,;—–-]\s*)?(?:местоположение|местност|населено място|община|област)\s*[:\-]?\s*[^,;]*$/i,'').trim();
- description=clean(description||raw);
+ description=clean(description||raw)
+  .replace(/идентификатор(?:ентификатор|идентификатор)+/gi,'идентификатор')
+  .replace(/\s*,\s*/g,', ').replace(/\s+/g,' ').trim();
+ // Strip the first cadastral reference and all following location/land-use descriptors.
+ const firstId=description.search(/\b\d{5}\.\d+\.\d+\b/);
+ if(firstId>=0){
+  const prefix=description.slice(0,firstId).replace(/(?:\s|[,;])*?(?:(?:в|на)\s+)?(?:ПИ|поземлен имот|имот)?\s*(?:с\s+)?(?:идентификатор)+\s*$/i,'').replace(/[,;\s]+$/,'').trim();
+  if(prefix.length>=12)description=clean(prefix);
+ }
+ // Ensure a single, canonical parcel/location suffix; source title remains available separately.
+
  const pieces=[];
  if(chosen.length)pieces.push('ПИ с идентификатор'+(chosen.length>1?'и':'')+' '+chosen.join(', '));
  const matched=found.filter(x=>chosen.includes(x.cadnum));
