@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');const ctx={};
+for(const name of ['v27-verified-context.js','v27-expert-evidence.js'])vm.runInNewContext(fs.readFileSync(__dirname+'/'+name,'utf8'),ctx);
+const poly={features:[{geometry:{type:'Polygon'}}]};
+const results=[{input:'56784.13.102',status:'Намерен',geojson:poly,intersection_verified_outside:true}];
+const roles={'56784.13.102':'leading'};
+const evidence={facts:[{id:'D001F001',kind:'water_supply',value:'Водоснабдяване от мрежа',file:'notification.txt',quote:'Водоснабдяване от мрежа',status:'source_matched'},{id:'D001F002',kind:'electricity',value:'Неустановено',file:'notice',status:'unverified'}]};
+const legacyPayload={mode:'expert',facts:{subject:'Стар предмет',parcelIds:['56784.13.102'],gisFindings:'old'}};
+const result=ctx.V27ExpertEvidence.build({legacyPayload,results,roles,normativeRegister:{records:[{id:'L1',title:'Закон',source:'https://example.org'}]},evidence,confirmedSubject:'Потвърден предмет'});
+assert.equal(result.facts.subject,'Потвърден предмет');
+assert.equal(result.facts.verifiedContext.scenario,'A');
+assert.equal(result.facts.verifiedContext.documentFacts.length,1);
+assert.equal(result.facts.legalSources[0].verification,'catalog_only');
+assert.throws(()=>ctx.V27ExpertEvidence.build({legacyPayload,results:[{...results[0],intersection_verified_outside:false}],roles,evidence,confirmedSubject:'Потвърден'}),/GIS requires expert review/);
+console.log('V27.1 P7 expert evidence payload: PASS');

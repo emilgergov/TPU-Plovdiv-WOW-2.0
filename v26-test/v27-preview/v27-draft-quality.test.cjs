@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');const ctx={};
+vm.runInNewContext(fs.readFileSync(__dirname+'/v27-draft-quality.js','utf8'),ctx);
+const inspect=ctx.V27DraftQuality.inspect,ids=['56784.13.102','56784.13.105'];
+const base={draft:'Предмет: имоти '+ids.join(', '),subject:'Склад',parcelIds:ids,gis:{scenario:'A',allVerified:true},legal:{sources:[]},evidence:{facts:[]}};
+assert.equal(inspect(base).accepted,true);
+assert.equal(inspect({...base,draft:base.draft+' и 56784.13.999'}).accepted,false);
+assert.equal(inspect({...base,gis:{scenario:'REVIEW',allVerified:false}}).accepted,false);
+assert.ok(inspect({...base,draft:base.draft+' на основание чл. 2'}).issues.some(i=>i.code==='UNVERIFIED_ARTICLE_CITATION'));
+assert.ok(inspect({...base,evidence:{facts:[{kind:'water_supply',value:'мрежа',status:'source_matched'},{kind:'water_supply',value:'кладенец',status:'source_matched'}]}}).issues.some(i=>i.code==='CONFLICTING_SOURCE_FACTS'));
+console.log('V27.1 P8 draft quality gate: PASS');

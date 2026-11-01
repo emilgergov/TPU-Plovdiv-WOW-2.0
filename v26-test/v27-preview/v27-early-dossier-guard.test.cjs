@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const bridge=fs.readFileSync(__dirname+'/v27-early-subject-bridge.js','utf8');
+const html=fs.readFileSync(__dirname+'/index.html','utf8');
+assert.match(bridge,/V27DossierBatches\.prepare\(preview\)/);
+assert.match(bridge,/V27DossierBatches\.toRequests\(prepared\)/);
+assert.match(bridge,/!prepared\.complete\|\|batches\.requests\.length!==1/);
+assert.match(bridge,/evidence\.facts\.length>80/);
+assert.match(bridge,/evidence\.documents\.some\(d=>d\.length>5000\)/);
+assert.match(bridge,/\.length===20\)/);
+assert.match(bridge,/Не се изпращат частични сведения/);
+assert.ok(html.includes('src="v27-dossier-batches.js?'));
+assert.ok(html.indexOf('src="v27-dossier-batches.js?')<html.indexOf('src="v27-early-subject-bridge.js?'));
+console.log('V27.1 P3 early AI incomplete dossier fail-closed contract PASS');
