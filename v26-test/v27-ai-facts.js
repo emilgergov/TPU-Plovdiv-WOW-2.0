@@ -2,7 +2,6 @@
    No API keys, tokens or outbound requests in the public WOW application. */
 (function(root){'use strict';
 const str=(x,n=1500)=>typeof x==='string'?x.trim().slice(0,n):'';
-const clean=(x)=>str(x,45).replace(/\.\d+$/,'');
 function build({results,roles,workingDraft,subject,procedure}={}){
  if(!Array.isArray(results)||!results.length)throw Error('V27: липсва завършен ГИС анализ.');
  if(!roles||typeof roles!=='object')throw Error('V27: липсват потвърдени роли.');
