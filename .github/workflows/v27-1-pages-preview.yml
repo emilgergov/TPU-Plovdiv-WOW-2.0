@@ -1,0 +1,57 @@
+name: V27.1 isolated public browser preview
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/v27-1-pages-preview.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: v27-preview-publish
+  cancel-in-progress: false
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Build V27.1 overlay without changing stable module
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin planning/WOW-V27-1-AI-END-TO-END:refs/remotes/origin/v27-preview-source
+          mkdir -p v26-test/v27-preview
+          git diff --name-only --diff-filter=ACMR main...origin/v27-preview-source -- v26-test/ > /tmp/v27-preview-changes
+          python3 - <<'PY'
+          import pathlib,subprocess,re
+          base=pathlib.Path('v26-test/v27-preview')
+          changes=[s for s in pathlib.Path('/tmp/v27-preview-changes').read_text().splitlines() if s]
+          for path in changes:
+              rel=path.removeprefix('v26-test/')
+              if rel=='index.html':continue
+              dst=base/rel
+              dst.parent.mkdir(parents=True,exist_ok=True)
+              dst.write_bytes(subprocess.check_output(['git','show','origin/v27-preview-source:'+path]))
+          html=subprocess.check_output(['git','show','origin/v27-preview-source:v26-test/index.html']).decode('utf-8')
+          if '<head>' not in html:raise SystemExit('Missing head in test page')
+          html=html.replace('<head>','<head><base href="../">',1)
+          for path in changes:
+              rel=path.removeprefix('v26-test/')
+              if rel.endswith(('.js','.css')):
+                  html=re.sub(r'(?P<q>["\'])'+re.escape(rel)+r'(?P<suffix>\?[^"\']*)?(?P=q)',lambda m:m.group('q')+'v27-preview/'+rel+(m.group('suffix') or '')+m.group('q'),html)
+          (base/'index.html').write_text(html,encoding='utf-8')
+          assert 'v27-preview/v27-early-subject-bridge.js' in html
+          assert 'v27-preview/v26-draft-package.js' in html
+          print('Preview overlay files:',len(changes))
+          PY
+          test -s v26-test/v27-preview/index.html
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v26-test/v27-preview
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish isolated V27.1 browser preview; preserve stable expert module"
+            git push origin HEAD:main
+          fi
