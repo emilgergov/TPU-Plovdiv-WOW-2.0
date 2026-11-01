@@ -89,7 +89,10 @@ async function make(draft,options={}){
   }
   return out;
  })();
- const aiProposal=key=>aiSections[key]?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
+ // Do not let an AI narrative override the GIS determination or assert unverified procedural exemptions.
+ const unsupportedAi=x=>/(?:не е приложима процедура|не подлежи на процедура|не се изисква оценка|не попадат в границите на защитени зони или територии|намалява вероятността за задължително|малко вероятно|не показва наличие на рискове)/i.test(x);
+ const safeAi=key=>aiSections[key]&&!unsupportedAi(aiSections[key]);
+ const aiProposal=key=>safeAi(key)?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
 
  const mapBytes=options.mapPngBytes?.byteLength?Uint8Array.from(options.mapPngBytes):(options.mapSvg?await mapPng(options.mapSvg):null);
  const blocks=[
@@ -113,12 +116,12 @@ async function make(draft,options={}){
   ...(aiSections.CHARACTERIZATION?aiProposal('CHARACTERIZATION'):confirmed(draft.characterization).map(x=>paragraph(doc,x))),
 
   paragraph(doc,'IV. ФАКТИЧЕСКИ И ПРАВНИ КОНСТАТАЦИИ',{heading:true}),
-  ...(aiSections.LEGAL?aiProposal('LEGAL'):confirmed(legal).map(x=>paragraph(doc,x))),
+  ...(safeAi('LEGAL')?aiProposal('LEGAL'):[paragraph(doc,'Правните основания и приложимата процедура подлежат на експертна проверка по нормативния архив и документите в преписката.')]),
 
   paragraph(doc,'V. ПРОЦЕДУРНА ПРЕЦЕНКА',{heading:true}),
-  ...(aiSections.PROCEDURE?aiProposal('PROCEDURE'):[paragraph(doc,isPending(m.procedureFinding)?'Приложимата процедура не е потвърдена; изисква се преценка от компетентен експерт.':m.procedureFinding)]),
+  ...(safeAi('PROCEDURE')?aiProposal('PROCEDURE'):[paragraph(doc,'Приложимата процедура се определя след проверка на характеристиките на ИП и относимите правни основания; липсата на пространствено пресичане сама по себе си не освобождава от процедурна преценка.')]),
   paragraph(doc,'VI. КОНСТАТАЦИИ ЗА ВЪЗДЕЙСТВИЯТА',{heading:true}),
-  ...(aiSections.IMPACTS?aiProposal('IMPACTS'):confirmed(impacts).map(x=>paragraph(doc,x))),
+  ...(safeAi('IMPACTS')?aiProposal('IMPACTS'):[paragraph(doc,'От ГИС анализа е установен единствено пространственият статус на имотите спрямо защитените зони. Извод за вероятност, характер и значимост на въздействията изисква отделна експертна оценка на дейностите и доказателствата.')]),
   ...(!aiSections.IMPACTS&&impacts.some(isPending)?[paragraph(doc,'Не е изготвена окончателна оценка на въздействията. Изводите се попълват след проверка на приложимите режими и доказателствата.')]:[]),
   ...(draft.aiDraft&&!Object.keys(aiSections).length?[paragraph(doc,'AI текстът не е структуриран по раздели — изисква се проверка на формата.')]:[]),
   paragraph(doc,'VII. СЪПЪТСТВАЩИ ДОКУМЕНТИ',{heading:true}),
