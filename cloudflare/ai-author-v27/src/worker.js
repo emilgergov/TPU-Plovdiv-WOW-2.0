@@ -1,3 +1,4 @@
+import {handleEarlySubject} from './early-subject.js';
 // TPU Plovdiv AI Author V27 — isolated test-only authoring gateway.
 // Never send an OpenAI key to the browser. Authorization is fail-closed.
 const headers = { "Content-Type":"application/json; charset=utf-8", "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff", "Access-Control-Allow-Origin":"null" };
@@ -64,10 +65,11 @@ export default {
  async fetch(request,env) {
   const url=new URL(request.url);
   const origin=request.headers.get("Origin")||"";
-  if(request.method==="OPTIONS" && url.pathname==="/author") {
+  if(request.method==="OPTIONS" && (url.pathname==="/author" || url.pathname==="/subject")) {
    if(origin!==ALLOWED_ORIGIN) return new Response(null,{status:403});
    return new Response(null,{status:204,headers:{"Access-Control-Allow-Origin":ALLOWED_ORIGIN,"Access-Control-Allow-Methods":"POST","Access-Control-Allow-Headers":"Authorization, Content-Type","Access-Control-Max-Age":"600","Vary":"Origin"}});
   }
+  if(origin===ALLOWED_ORIGIN && url.pathname==="/subject" && request.method==="POST") return handleEarlySubject(request,env);
   if(origin===ALLOWED_ORIGIN && url.pathname==="/author" && request.method==="POST") {
    // Return the same authenticated response with exact-origin CORS, never wildcard.
    const response=await handleAuthor(request,env);
