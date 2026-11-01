@@ -1,0 +1,37 @@
+/* V27 automated contract checks; runs in GitHub Actions, no dossier upload. */
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const root={};root.window=root;
+for(const file of ['v27-ai-facts.js','v26-expert-draft.js']){
+ vm.runInNewContext(fs.readFileSync(__dirname+'/'+file,'utf8'),root,{filename:file});
+}
+const id='56784.13.102';
+const results=[{input:id,cadnum:id,status:'Намерен',geojson:{features:[{geometry:{type:'Polygon'}}]},verified_zone_intersections:[],location:'Пловдив'}];
+const roles={[id]:'leading'};
+const metadata={subject:'Складове и офиси',location:'гр. Пловдив',parcelIds:id};
+const workingDraft={metadata};
+const payload=root.V27AIFacts.build({results,roles,workingDraft,subject:metadata.subject});
+assert.equal(payload.mode,'expert');
+assert.equal(payload.facts.subject,metadata.subject);
+assert.equal(payload.facts.parcelIds[0],id);
+assert.equal(payload.facts.legalReferences.includes('НЯМА ДАННИ'),true);
+assert.throws(()=>root.V27AIFacts.build({results,roles:{},workingDraft}),/роля/);
+assert.throws(()=>root.V27AIFacts.build({results:[{...results[0],geojson:{features:[]}}],roles,workingDraft}),/геометрия/);
+assert.throws(()=>root.V27AIFacts.build({results,roles,workingDraft:{metadata:{}},subject:''}),/предмет/);
+const base={results,roles,determination:{scenario:'А',zones:[]},metadata,paragraphs:['описание 1','описание 2','описание 3','описание 4'],evidence:{findings:[],warnings:[]}};
+const withAI=root.V26ExpertDraft.build({...base,aiDraft:'ПРОВЕРКА AI ТЕКСТ'});
+const withoutAI=root.V26ExpertDraft.build({...base,aiDraft:''});
+assert.equal(withAI.aiDraft,'ПРОВЕРКА AI ТЕКСТ');
+assert.equal(withoutAI.aiDraft,'');
+assert.equal(withAI.reviewRequired,true);
+assert.equal(withAI.parcels[0].id,id);
+assert.throws(()=>root.V26ExpertDraft.build({...base,roles:{}}),/роля/);
+const packageSource=fs.readFileSync(__dirname+'/v26-draft-package.js','utf8');
+const wordSource=fs.readFileSync(__dirname+'/v26-expert-word.js','utf8');
+const indexSource=fs.readFileSync(__dirname+'/index.html','utf8');
+assert.match(packageSource,/aiDraft:register\?\.v27AiDraft\|\|''/);
+assert.match(packageSource,/V26ExpertWord\.make\(expertDraft\)/);
+assert.match(packageSource,/V26TemplateWord\.make\(expertDraft\.scenario,classicParagraphs,expertDraft\.metadata\)/);
+assert.match(wordSource,/draft\.aiDraft\?/);
+assert.match(indexSource,/V27AIAuthor\.generate\(payload,token\)/);
+assert.match(indexSource,/v27AiDraft,mapSvg/);
+console.log('V27 contract checks PASS: adapter, role/geometry gates, AI draft propagation, classic separation (static).');
