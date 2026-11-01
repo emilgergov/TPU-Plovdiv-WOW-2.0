@@ -25,6 +25,7 @@ on:
       - 'v26-test/v27-draft-quality.test.cjs'
       - 'v26-test/v27-contract-test.cjs'
       - 'v26-test/v27-zip-manifest.test.cjs'
+      - 'v26-test/v27-zip-binary.test.cjs'
       - 'v26-test/v26-draft-package.js'
       - 'v26-test/v27-early-subject-bridge.js'
       - 'v26-test/index.html'
@@ -57,5 +58,6 @@ jobs:
           node v26-test/v27-draft-quality.test.cjs
           node v26-test/v27-contract-test.cjs
           node v26-test/v27-zip-manifest.test.cjs
+          node v26-test/v27-zip-binary.test.cjs
           node cloudflare/ai-author-v27/test/provenance-contract.cjs
           node cloudflare/ai-author-v27/test/v27-1-e2e-mock.cjs
