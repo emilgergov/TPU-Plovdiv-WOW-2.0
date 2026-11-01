@@ -1,6 +1,11 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const src=fs.readFileSync(__dirname+'/v26-draft-package.js','utf8');
 assert.ok(src.includes('if(includeAnnex2){const pdf2='),'existing optional PDF2 behavior must remain');
+assert.ok(src.includes('register?.v27Package===true||register?.includeAnnex2===true'),'V27 requires PDF2 without changing V26 API');
+const html=fs.readFileSync(__dirname+'/index.html','utf8');
+assert.ok(html.includes('v27Package:true}'),'V27 route must request five-file package');
+assert.ok(html.includes('const includeAnnex2=true;'),'V27 must include PDF2');
+assert.ok(!html.includes('Да се включи ли и Приложение №2 (по избор)?'),'V27 must not prompt for optional PDF2');
 assert.ok(src.includes('const actualFiles=z.names()'),'ZIP manifest must be inspected');
 assert.ok(src.includes('actualFiles.length!==packageFiles.length'),'ZIP must reject missing or extra files');
 const code=src.slice(src.indexOf('function zipWriter(){'),src.indexOf('function scenarioFromGIS('));
