@@ -12,7 +12,7 @@ function build({results,roles,determination,metadata,paragraphs,evidence,aiDraft
   if(!/^\d{5}\.\d+\.\d+$/.test(id))throw Error('КТ13: непотвърден идентификатор: '+id);
   const role=roles?.[id];
   if(!['leading','ancillary'].includes(role))throw Error('КТ13: непотвърдена роля: '+id);
-  return {id,role};
+  return {id,role,location:clean(r.location||r.settlement||'')};
  });
  if(!parcels.some(p=>p.role==='leading'))throw Error('КТ13: няма потвърден водещ имот.');
  const characterization=Array.isArray(paragraphs)?paragraphs.map(clean):[];
