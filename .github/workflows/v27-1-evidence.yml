@@ -12,6 +12,8 @@ on:
       - 'v26-test/v27-early-subject.test.cjs'
       - 'v26-test/v27-early-server.test.cjs'
       - 'v26-test/v27-early-integration.test.cjs'
+      - 'v26-test/v27-multi-parcel-map.js'
+      - 'v26-test/v27-multi-parcel-map.test.cjs'
       - 'v26-test/v27-verified-context.js'
       - 'v26-test/v27-verified-context.test.cjs'
       - 'v26-test/v27-expert-evidence.js'
@@ -45,6 +47,7 @@ jobs:
           node v26-test/v27-early-subject.test.cjs
           node v26-test/v27-early-server.test.cjs
           node v26-test/v27-early-integration.test.cjs
+          node v26-test/v27-multi-parcel-map.test.cjs
           node v26-test/v27-verified-context.test.cjs
           node v26-test/v27-expert-evidence.test.cjs
           node v26-test/v27-expert-integration.test.cjs
