@@ -39,7 +39,7 @@ async function run(scenario){
  const expertPs=[...new w.DOMParser().parseFromString(xml,'application/xml').getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','p')].map(p=>p.textContent);
  assert(expertPs[0].includes('Място за електронен подпис — вътрешно съгласуване'),'Expert: opening blank signature slot missing');
  assert(expertPs[expertPs.length-1].includes('Място за електронен подпис — окончателно подписване'),'Expert: closing blank signature slot missing');
- for(const value of [metadata.recipient,metadata.subject,'36676.129.457','Приложение №1 — ГИС анализ'])assert(texts.includes(value),'Missing expert content: '+value);
+ for(const value of [metadata.recipient,metadata.subject,'36676.129.457','Картографското извлечение от ГИС анализа'])assert(texts.includes(value),'Missing expert content: '+value);
  for(const key of Object.keys(sourceZip).filter(x=>x!=='word/document.xml'))assert.deepEqual(out[key],sourceZip[key],'Institutional DOCX part changed: '+key);
  // The classic renderer is tested against the same draft; do not allow silent
  // divergence between expert and template-based outputs.
