@@ -1,6 +1,6 @@
 name: V27.1 isolated public browser preview
 # Restore V27.1 controller syntax and block broken preview deployments.
-# Refresh isolated preview with V27.2 classic and expert AI Word integration.
+# Refresh isolated preview with V27.3 optional AI subject correction button; preserve V27.2 stable.
 on:
   push:
     branches: [main]
@@ -24,7 +24,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin planning/WOW-V27-1-AI-END-TO-END:refs/remotes/origin/v27-preview-source
+          git fetch origin planning/WOW-V27.3-CONTENT-ONLY:refs/remotes/origin/v27-preview-source
           mkdir -p v26-test/v27-preview
           git diff --name-only --diff-filter=ACMR main...origin/v27-preview-source -- v26-test/ > /tmp/v27-preview-changes
           python3 - <<'PY'
