@@ -20,13 +20,13 @@ function buildEvidence(preview){
 async function suggest({token,preview,parcelIds,epochAtStart}){
  const evidence=buildEvidence(preview);
  const matched=evidence.facts.filter(f=>f.status==='source_matched');
- if(!matched.length)throw Error('Няма четими документални откъси за AI редакция.');
+ const draftOnly=!matched.length;
  // The subject editor is an assisted draft, not a claim of exhaustive dossier analysis.
  // Send only source-matched quotations; unreadable documents remain explicitly disclosed.
  const input=root.V27EarlySubject.requestFromCase({evidence,parcelIds,existingTitle:get('v26SubjectTitle')?.value||'',existingSubject:get('v26WordHeading')?.value||''});
  const limited=[];let chars=0;
  for(const f of input.facts){const cost=JSON.stringify(f).length;if(limited.length>=35||chars+cost>17000)break;limited.push(f);chars+=cost;}
- if(!limited.length)throw Error('Не са намерени подходящи документални откъси.');
+ if(draftOnly){input.facts=[];input.requirements.push('Edit the existing subject text only; no documentary evidence is available','Do not invent facts or claim documentary verification');}
  input.facts=limited;
  const limitedIds=new Set(limited.map(f=>f.id));
  input.conflicts=(input.conflicts||[]).filter(c=>(c.values||[]).some(v=>v.some(id=>limitedIds.has(id))));
@@ -38,16 +38,16 @@ async function suggest({token,preview,parcelIds,epochAtStart}){
   const response=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(input),signal:controller.signal,cache:'no-store'});
   const data=await response.json();
   if(!response.ok)throw Error('AI анализът не е достъпен ('+response.status+').');
-  const check=root.V27EarlySubject.validateSuggestion(data,{parcelIds,evidence});
+  const check=root.V27EarlySubject.validateSuggestion(data,{parcelIds,evidence,allowDraftOnly:draftOnly});
   if(!check.accepted)throw Error('AI предложението не премина проверката: '+check.issues.join(', '));
-  if(epoch!==epochAtStart||root.V26ArchiveTextPreview!==preview||parcels().join(',')!==parcelIds.join(','))return false;
+  if(epoch!==epochAtStart||parcels().join(',')!==parcelIds.join(','))return false;
   const heading=get('v26WordHeading'),title=get('v26SubjectTitle'),status=get('v26SubjectStatus');
   if(!heading||!title||!get('v26SubjectEditor')||get('v26SubjectEditor').style.display==='none')return false;
   if(root.V26SubjectContext?.confirmed||get('v26SubjectConfirm')?.disabled)return false;
   if((get('v26WordHeading')?.value||'')!==input.existingSubject||(get('v26SubjectTitle')?.value||'')!==input.existingTitle)return false;
   heading.value=check.subject;heading.dispatchEvent(new Event('input',{bubbles:true}));
   title.value=check.title;title.dispatchEvent(new Event('input',{bubbles:true}));
-  if(status){status.style.display='block';status.textContent='AI предложи предмет и заглавие по '+limited.length+' проверени откъса. '+(missing.length?'Непрочетени документи: '+missing.join(', ')+'. ':'')+(excluded?'Необхванати откъси: '+excluded+'. ':'')+'Проверете спрямо цялата преписка преди потвърждение.';}
+  if(status){status.style.display='block';status.textContent=(draftOnly?'AI редактира алгоритмичния проект без документални откъси. ':'AI предложи предмет и заглавие по '+limited.length+' проверени откъса. ')+(missing.length?'Непрочетени документи: '+missing.join(', ')+'. ':'')+(excluded?'Необхванати откъси: '+excluded+'. ':'')+'Проверете спрямо цялата преписка преди потвърждение.';}
   get('v26SubjectEditor').open=true;
   return true;
  }finally{clearTimeout(timer);if(activeController===controller)activeController=null}
@@ -61,10 +61,10 @@ async function run(){
   if(status){status.style.display='block';status.textContent='Четене на документалния текст за AI корекция…';}
   try{preview=await root.V26ReadDossierTextForAI()||root.V26ArchiveTextPreview;}catch(e){if(status){status.style.display='block';status.textContent='Неуспешно извличане на текст: '+e.message;}return;}
  }
- if(!preview?.files?.length){if(status){status.style.display='block';status.textContent='Няма извлечени документи за AI редакция. Можете да редактирате ръчно.';}return;}
+ if(!preview?.files?.length)preview={files:[]};
  if(!get('v26SubjectEditor')||get('v26SubjectEditor').style.display==='none'||root.V26SubjectContext?.confirmed){return;}
  if(!root.V27CaseEvidence||!root.V27DossierBatches||!root.V27EarlySubject){if(status){status.style.display='block';status.textContent='AI помощникът не е зареден. Можете да редактирате предмета ръчно.';}return;}
- if(!root.confirm('Да се изпратят извлечени откъси от преписката към AI за корекция на предмета и заглавието? Използвайте само разрешени за обработване данни.'))return;
+ if(!root.confirm('Да се изпрати предложеният предмет'+(preview.files.length?' и извлечените документални откъси':'')+' към AI за редакция? Използвайте само разрешени за обработване данни.'))return;
  const token=root.prompt('Временен токен за AI достъп (не се запазва):');
  if(!token?.trim())return;
  active=true;const current=epoch,button=get('v27SubjectAiCorrect');
