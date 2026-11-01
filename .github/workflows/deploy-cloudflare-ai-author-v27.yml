@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'cloudflare/ai-author-v27/**'
+      - '.github/workflows/deploy-cloudflare-ai-author-v27.yml'
 permissions:
   contents: read
 jobs:
@@ -33,7 +34,7 @@ jobs:
           check "Worker routes" "https://api.cloudflare.com/client/v4/zones?per_page=1"
           check "Worker subdomain" "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/subdomain"
       - name: Deploy isolated Cloudflare Worker
-        if: ${{ github.event_name == 'workflow_dispatch' }} # Deploy only when explicitly launched
+        if: ${{ true }} # Deploy isolated V27 only; no WOW site changes
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
