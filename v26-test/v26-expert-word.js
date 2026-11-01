@@ -57,7 +57,7 @@ async function make(draft){
   }
   return out;
  })();
- const aiProposal=key=>aiSections[key]?[paragraph(doc,'AI редакционно предложение — за експертна проверка:',{bold:true}),...aiSections[key].split(/\\n\\s*\\n/).filter(Boolean).slice(0,5).map(x=>paragraph(doc,x))]:[];
+ const aiProposal=key=>aiSections[key]?aiSections[key].split(/\\n\\s*\\n/).filter(Boolean).slice(0,5).map(x=>paragraph(doc,x)):[];
  const blocks=[
   paragraph(doc,'Място за електронен подпис — вътрешно съгласуване'),
   paragraph(doc,'РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ — НЕ Е АДМИНИСТРАТИВЕН АКТ',{heading:true}),
@@ -71,7 +71,7 @@ async function make(draft){
   ...(m.location?[paragraph(doc,'Местоположение: '+m.location)]:[]),
   paragraph(doc,'II. ПРОСТРАНСТВЕН АНАЛИЗ',{heading:true}),
   paragraph(doc,draft.scenario==='Б'?'По наличните ГИС данни е установено пространствено пресичане със защитена зона: '+draft.zones.join(', ')+'.':'По наличните ГИС данни не е установено пресичане на потвърдените имоти със защитена зона.'),
-  paragraph(doc,'Приложение №1 — ГИС анализ представя пространствените резултати, картографската основа и имотния обхват.'),
+  paragraph(doc,'Картографското извлечение от ГИС анализа представя пространствените резултати и имотния обхват; пълният ГИС анализ е в самостоятелен PDF.'),
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
   ...confirmed(draft.characterization).map(x=>paragraph(doc,x)),...aiProposal('CHARACTERIZATION'),
 
@@ -83,9 +83,9 @@ async function make(draft){
   paragraph(doc,'VI. КОНСТАТАЦИИ ЗА ВЪЗДЕЙСТВИЯТА',{heading:true}),
   ...confirmed(impacts).map(x=>paragraph(doc,x)),...aiProposal('IMPACTS'),
   ...(impacts.some(isPending)?[paragraph(doc,'Не е изготвена окончателна оценка на въздействията. Изводите се попълват след проверка на приложимите режими и доказателствата.')]:[]),
-  ...(draft.aiDraft&&!Object.keys(aiSections).length?[paragraph(doc,'AI-ПОДПОМОГНАТА ЧЕРНОВА — ЗА ЕКСПЕРТНА ПРОВЕРКА',{heading:true}),...draft.aiDraft.split(/\n\s*\n/).filter(Boolean).slice(0,24).map(x=>paragraph(doc,x))]:[]),
-  paragraph(doc,'VII. ПРИЛОЖЕНИЯ',{heading:true}),
-  paragraph(doc,'Приложение №1 — ГИС анализ (самостоятелен PDF); Приложение №2 — Нормативни и документални референции (самостоятелен PDF, когато е изготвен).'),
+  ...(draft.aiDraft&&!Object.keys(aiSections).length?[paragraph(doc,'AI текстът не е структуриран — необходима е експертна проверка на формата',{heading:true}),...draft.aiDraft.split(/\n\s*\n/).filter(Boolean).slice(0,24).map(x=>paragraph(doc,x))]:[]),
+  paragraph(doc,'VII. СЪПЪТСТВАЩИ ДОКУМЕНТИ',{heading:true}),
+  paragraph(doc,'ГИС анализ (самостоятелен PDF); Нормативни и документални референции (самостоятелен PDF, когато е изготвен).'),
   paragraph(doc,'НЕОБХОДИМА Е ЕКСПЕРТНА ПРОВЕРКА НА ПРЕПИСКАТА, ПРАВНИТЕ ОСНОВАНИЯ И ИЗВОДИТЕ. Документът не представлява издаден административен акт.')
  ];
  body.replaceChildren(...blocks,paragraph(doc,'Място за електронен подпис — окончателно подписване'),sect.cloneNode(true));
