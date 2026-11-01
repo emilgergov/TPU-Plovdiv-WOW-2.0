@@ -84,7 +84,7 @@ readButton.onclick=async()=>{
 };
 
 async function inspect(file){
- const token=++generation;delete window.V26ArchiveInventory;delete window.V26ArchiveTextPreview;selectedArchive=file;readButton.style.display='none';preview.textContent='';
+ const token=++generation;delete window.V26ArchiveInventory;delete window.V26ArchiveTextPreview;selectedArchive=file;document.dispatchEvent(new Event('v26:archive-changed'));readButton.style.display='none';preview.textContent='';
  if(!file||!file.name.toLowerCase().endsWith('.zip'))return;
  output.style.display='block';output.textContent='Четене на ZIP каталога в браузъра…';
  try{
