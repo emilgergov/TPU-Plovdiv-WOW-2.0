@@ -11,7 +11,12 @@ async function generate(payload,token){
   const data=await response.json();
   if(!response.ok)throw Error('V27: AI услугата върна HTTP '+response.status+(data.providerStatus?' / '+data.providerStatus:''));
   if(data.reviewRequired!==true||typeof data.draft!=='string'||!data.draft.trim())throw Error('V27: невалиден AI отговор.');
-  return data.draft.trim().slice(0,9000);
+  const draft=data.draft.trim();
+  if(draft.length>9000)throw Error('V27.2: AI текстът надвишава допустимия обем; документът не се генерира от съкратен текст.');
+  const required=['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'];
+  const headings=[...draft.matchAll(/^\\s*\\[\\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\\]\\]\\s*$/gm)].map(x=>x[1]);
+  if(headings.length!==4||required.some((key,i)=>headings[i]!==key))throw Error('V27.2: AI отговорът няма четирите раздела в правилния ред.');
+  return draft;
  }finally{clearTimeout(timer)}
 }
 root.V27AIAuthor=Object.freeze({generate});
