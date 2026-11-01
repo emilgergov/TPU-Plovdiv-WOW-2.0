@@ -308,7 +308,7 @@ function kt21NearestZones(parcel,features){
  function intersects(a,b,c,d){const cross=(p,q,r)=>(q[0]-p[0])*(r[1]-p[1])-(q[1]-p[1])*(r[0]-p[0]);return cross(a,b,c)*cross(a,b,d)<0&&cross(c,d,a)*cross(c,d,b)<0}
  function inside(p,ring){let yes=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const a=ring[i],b=ring[j];if((a[1]>p[1])!==(b[1]>p[1])&&p[0]<(b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0])yes=!yes}return yes}
  let best=null;
- for(const f of features){const code=String(f.properties?.SITECODE||f.properties?.sitecode||'');const name=String(f.properties?.NAME_BG||f.properties?.name_bg||f.properties?.SITENAME||'').trim();if(!/^BG\\d{7}$/.test(code)||!name)continue;
+ for(const f of features){const code=String(f.properties?.SITECODE||f.properties?.sitecode||'');const name=String(f.properties?.NAME_BG||f.properties?.name_bg||f.properties?.SITENAME||'').trim();if(!/^BG\d{7}$/.test(code)||!name)continue;
   const zRings=kt21Rings(f.geometry).filter(a=>a?.length>=3),zSeg=segments(zRings);if(!zSeg.length)continue;
   let min=Infinity;
   for(const [a,b] of aSeg){for(const [c,d] of zSeg){if(intersects(a,b,c,d)){min=0;break}min=Math.min(min,pointSeg(a,c,d),pointSeg(b,c,d),pointSeg(c,a,b),pointSeg(d,a,b))}if(min===0)break}
