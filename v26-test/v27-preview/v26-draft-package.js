@@ -248,9 +248,9 @@ function normativePdf(results,register){
  const review=register?.verifiedCaseMetadata||null;
  const resolvedTitle=String(subject?.title||review?.subject||review?.title||dossier?.subject?.title||dossier?.subject_title||'').trim();
  const confirmed=!!(subject?.confirmed&&resolvedTitle);
- const cleanSubject=(value)=>String(value||'').replace(/\\bи\\s+зграждането\\b/gi,'изграждането').replace(/\\bСк\\s+лад\\b/g,'Склад').replace(/\\bпро\\s+мишлени\\b/gi,'промишлени').replace(/\\s*[„“]\\s*/g,' ').replace(/\\s+/g,' ').trim().replace(/[\s,;:.–-]+$/,'').trim();
+ const cleanSubject=(value)=>String(value||'').replace(/\bи\s+зграждането\b/gi,'изграждането').replace(/\bСк\s+лад\b/g,'Склад').replace(/\bпро\s+мишлени\b/gi,'промишлени').replace(/\s*[„“]\s*/g,' ').replace(/\s+/g,' ').trim().replace(/[\s,;:.–-]+$/,'').trim();
  const subjectDisplay=cleanSubject(resolvedTitle)||'НЯМА ДАННИ — за експертна проверка.';
- const subjectCore=cleanSubject(subjectDisplay.split(/\\s+в\\s+ПИ\\s+(?:с\\s+)?идентификатор(?:\\s+№)?\\s+\\d{5}\\.\\d+\\.\\d+/i)[0]);
+ const subjectCore=cleanSubject(subjectDisplay.split(/\s+в\s+ПИ\s+(?:с\s+)?идентификатор(?:\s+№)?\s+\d{5}\.\d+\.\d+/i)[0]);
  const verifiedLocation=String(review?.location||'').trim();
  const verifiedSettlement=verifiedPlaceLabel(review?.settlement);
  const verifiedLandArea=String(review?.landArea||'').trim();
