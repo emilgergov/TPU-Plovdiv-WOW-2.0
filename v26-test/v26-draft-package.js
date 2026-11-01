@@ -46,11 +46,11 @@ function zipWriter(){
 function scenarioFromGIS(results,roles){
  const leading=results.filter(r=>(roles[r.input]||roles[r.cadnum])==='leading');
  if(!leading.length)throw Error('Няма потвърден водещ имот.');
- if(leading.some(r=>r.status!=='Намерен'||!r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type))))throw Error('Липсва действителна геометрия за водещ имот.');
- const zones=leading.flatMap(r=>r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG[0-9]{7}$/.test(z));
- if(zones.length)return {scenario:'Б',basis:'потвърдени пространствени пресичания',zones:[...new Set(zones)]};
- if(leading.every(r=>r.intersection_verified_outside===true))return {scenario:'А',basis:'потвърдено отсъствие на пресичания',zones:[]};
- return {scenario:null,basis:'непотвърдено пространствено пресичане или отсъствие',zones:[]};
+ if(results.some(r=>r.status!=='Намерен'||!r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type))))throw Error('Липсва действителна геометрия за потвърден имот.');
+ const zones=results.flatMap(r=>r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z.trim():String(z?.sitecode||z?.code||'').trim()).filter(z=>/^BG[0-9]{7}$/.test(z));
+ if(zones.length)return {scenario:'Б',basis:'потвърдени пространствени пресичания за всички имоти',zones:[...new Set(zones)]};
+ if(results.every(r=>r.intersection_verified_outside===true))return {scenario:'А',basis:'потвърдено отсъствие на пресичания за всички имоти',zones:[]};
+ return {scenario:null,basis:'непотвърдено пространствено пресичане или отсъствие за някой от имотите',zones:[]};
 }
 function docx(zip,ids,roles,results,includeAnnex2,unifiedContext){
  const d=zipWriter();
