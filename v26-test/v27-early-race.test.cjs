@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const bridge=fs.readFileSync(__dirname+'/v27-early-subject-bridge.js','utf8');
+const archive=fs.readFileSync(__dirname+'/v26-browser-zip-inventory.js','utf8');
+assert.match(bridge,/activeController\.abort\(\)/);
+assert.match(bridge,/root\.V26ArchiveTextPreview!==preview/);
+assert.match(bridge,/parcels\(\)\.join\(','\)!==parcelIds\.join\(','\)/);
+assert.match(bridge,/input\.existingSubject/);
+assert.match(bridge,/input\.existingTitle/);
+assert.match(bridge,/addEventListener\('v26:archive-changed',invalidate\)/);
+assert.match(bridge,/addEventListener\('input',invalidate\)/);
+assert.match(archive,/dispatchEvent\(new Event\('v26:archive-changed'\)\)/);
+console.log('V27.1 P4 stale ZIP and manual edit invalidation: PASS');
