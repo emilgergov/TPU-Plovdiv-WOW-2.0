@@ -32,10 +32,15 @@ async function run(scenario){
  const paragraphs=scenario==='А'?['С реализацията на инвестиционното предложение','Електроснабдяването е описано','Водоснабдяването е описано','Отпадъчните води са описани']:['С реализацията на инвестиционното предложение','Електроснабдяването е описано','Водозахранването е описано','Отпадъчните води са описани'];
  const metadata={recipient:'Тестов адресат',address:'Тестов адрес',subject:'Тестово инвестиционно предложение',incomingReference:'вх. № 123',salutation:'Уважаеми госпожи и господа,',parcelIds:'36676.129.457',legalParagraphs:Array(7).fill('Експертно потвърден правен текст за теста.'),procedureFinding:'Експертно потвърдена процедура.',impactFindings:Array(5).fill('Експертно потвърдено въздействие.')};
  const draft=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{}});
- const blob=await w.V26ExpertWord.make(draft);
+ const aiDraft=['[[CHARACTERIZATION]]','Конкретна характеристика на тестов склад и офиси.','[[LEGAL]]','Конкретна правна преценка по тестовите материали.','[[PROCEDURE]]','Конкретна процедурна преценка по тестовите материали.','[[IMPACTS]]','Конкретни въздействия на тестовия склад.'].join('\\n');
+ const enriched=w.V26ExpertDraft.build({results:[{input:'36676.129.457',location:'гр. Пловдив, община Пловдив, област Пловдив'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft});
+ const blob=await w.V26ExpertWord.make(enriched);
  const out=fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
  const xml=new TextDecoder().decode(out['word/document.xml']);
  const texts=paragraphTexts(xml).join(' ');
+ for(const phrase of ['Конкретна характеристика на тестов склад','Конкретна правна преценка','Конкретна процедурна преценка','Конкретни въздействия','гр. Пловдив, община Пловдив'])assert(texts.includes(phrase),'AI section or parcel location not integrated: '+phrase);
+ assert(!texts.includes('[[CHARACTERIZATION]]'),'AI section markers leaked into Word');
+ assert(!texts.includes('Експертно потвърден правен текст за теста.'),'Generic legal boilerplate duplicated AI text');
  const expertPs=[...new w.DOMParser().parseFromString(xml,'application/xml').getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','p')].map(p=>p.textContent);
  assert(expertPs[0].includes('Място за електронен подпис — вътрешно съгласуване'),'Expert: opening blank signature slot missing');
  assert(expertPs[expertPs.length-1].includes('Място за електронен подпис — окончателно подписване'),'Expert: closing blank signature slot missing');
