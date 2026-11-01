@@ -391,7 +391,7 @@ function v26CleanSubjectHeading(){
   .replace(/(?:[,;\s]+|\s+[—–-]\s*)*(?:(?:в|на)\s+)?(?:ПИ|поземлен имот|имот)?\s*(?:с\s+)?(?:идентификатор|идентификато|ИД)\s*$/i,'')
   .replace(/\s*(?:[,;—–-]\s*)?(?:местоположение|местност|населено място|община|област)\s*[:\-]?\s*[^,;]*$/i,'')
   .replace(/\s*,\s*/g,', ').replace(/\s+/g,' ').replace(/[,;\s]+$/,'').trim();
- description=v26CleanQuotedTitle(description);
+ description=v26CleanQuotedTitle(description).replace(/\s*[—–-]\s*$/,'').trim();
  const locationText=(v26Semantic?.location||[]).join(' ');
  const locationIds=locationText.match(/\b\d{5}\.\d+\.\d+\b/g)||[];
  const ids=[...new Set([...locationIds,...words($('ids').value)])];
@@ -419,7 +419,7 @@ function populateSubject(d){
  const unreadable=(d.files||[]).filter(x=>/няма извлекаем текст|неуспешно извличане|OCR неуспешен|ПРОВЕРКА:/i.test(String(x.status||'')));
  const extracted=(c?.activities||[]).filter(Boolean);
  subjectTitle.value=v26NormalizeTitle(c?.title);v26CaseTitle=subjectTitle.value;
- wordHeading.dataset.edited='';wordHeading.value=v26NormalizeTitle(v26CleanSubjectHeading());
+ wordHeading.dataset.edited='';wordHeading.value=v26CleanSubjectHeading();
  subjectActivities.value=extracted.join('\n');
  const unreadableNotice=unreadable.filter(x=>/уведомлен/i.test(String(x.name||x.file||x.filename||'')));
  const readable=unreadableNotice.length===0;
