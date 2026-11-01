@@ -17,9 +17,9 @@ async function run(scenario,annex2){
  const parcel={input:id,cadnum:id,status:'Намерен',geojson,area_m2_source:450,...(scenario==='Б'?{verified_zone_intersections:['BG0002057']}:{intersection_verified_outside:true})};
  const register={mapSvg:'<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="white"/></svg>',includeAnnex2:annex2,unifiedContext:{commonEvidence:{findings:[],warnings:[]}},verifiedCaseMetadata:metadata,verifiedCharacterizationParagraphs:['С реализацията на инвестиционното предложение','Електроснабдяването е описано','Водоснабдяването е описано','Отпадъчните води са описани'],records:[{id:'Z1',title:'Тестова заповед BG0002057',zone_code:'BG0002057',source:'https://example.org/zone'}]};
  const originalMake=w.V26ExpertWord.make;
- w.V26ExpertWord.make=async(draft,options)=>originalMake(draft,{...options,mapPngBytes:new Uint8Array(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lZkAAAAASUVORK5CYII=','base64'))});
+ w.V26ExpertWord=Object.freeze({make:async(draft,options)=>originalMake(draft,{...options,mapPngBytes:new Uint8Array(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lZkAAAAASUVORK5CYII=','base64'))})});
  const blob=await w.V26DraftPackage.make([parcel],{[id]:'leading'},register);
- w.V26ExpertWord.make=originalMake;
+ w.V26ExpertWord=Object.freeze({make:originalMake});
  const zip=await JSZip.loadAsync(await blob.arrayBuffer());
  const expected=annex2?names:names.filter(n=>!n.startsWith('04_'));
  assert.deepEqual(Object.keys(zip.files).sort(),expected.slice().sort(),'ZIP contents');
