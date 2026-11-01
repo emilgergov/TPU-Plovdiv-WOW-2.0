@@ -44,24 +44,24 @@ async function suggest({token,preview,parcelIds,epochAtStart}){
 async function run(){
  if(active)return;
  const preview=root.V26ArchiveTextPreview,ids=parcels();
- if(!preview?.files?.length||!ids.length||!get('v26SubjectEditor')||get('v26SubjectEditor').style.display==='none')return;
- const key=(preview.archive||'')+'|'+ids.join(',');
- if(key===completedKey)return;
- completedKey=key;
- if(!root.confirm('V27.1: Да се използва ли AI за ранно предложение за предмет и заглавие? Извлечени откъси от преписката ще бъдат изпратени към външната AI услуга. Само за разрешени за обработване данни. Отказът запазва досегашния маршрут.'))return;
+ const status=get('v26SubjectStatus');
+ if(!preview?.files?.length||!ids.length){if(status){status.style.display='block';status.textContent='За AI корекция е необходима прочетена ZIP преписка с извлечени имоти.';}return;}
+ if(!get('v26SubjectEditor')||get('v26SubjectEditor').style.display==='none'||root.V26SubjectContext?.confirmed){return;}
+ if(!root.V27CaseEvidence||!root.V27DossierBatches||!root.V27EarlySubject){if(status){status.style.display='block';status.textContent='AI помощникът не е зареден. Можете да редактирате предмета ръчно.';}return;}
+ if(!root.confirm('Да се изпратят извлечени откъси от преписката към AI за корекция на предмета и заглавието? Използвайте само разрешени за обработване данни.'))return;
  const token=root.prompt('Временен токен за AI достъп (не се запазва):');
  if(!token?.trim())return;
- active=true;const current=epoch;
+ active=true;const current=epoch,button=get('v27SubjectAiCorrect');
+ if(button)button.disabled=true;
+ if(status){status.style.display='block';status.textContent='AI подготвя предложение за предмет и заглавие…';}
  try{await suggest({token:token.trim(),preview,parcelIds:ids,epochAtStart:current})}
- catch(e){const status=get('v26SubjectStatus');if(status){status.style.display='block';status.textContent='Ранният AI анализ не е приложен: '+e.message+' Досегашният маршрут остава активен.';}}
- finally{active=false}
+ catch(e){if(status){status.style.display='block';status.textContent='AI корекцията не е приложена: '+e.message+' Можете да редактирате текста ръчно и да го потвърдите.';}}
+ finally{active=false;if(button)button.disabled=false;}
 }
-document.addEventListener('v26:archive-text-preview',()=>{invalidate();setTimeout(run,300)});
 document.addEventListener('v26:archive-changed',invalidate);
-for(const id of ['v26WordHeading','v26SubjectTitle'])get(id)?.addEventListener('input',invalidate);
 document.addEventListener('v26:full-reset',invalidate);
 get('ids')?.addEventListener('input',invalidate);
-const editor=get('v26SubjectEditor');
-if(editor&&typeof MutationObserver!=='undefined'){new MutationObserver(()=>{if(editor.style.display!=='none')setTimeout(run,200)}).observe(editor,{attributes:true,attributeFilter:['style']});}
+for(const id of ['v26WordHeading','v26SubjectTitle'])get(id)?.addEventListener('input',invalidate);
+get('v27SubjectAiCorrect')?.addEventListener('click',run);
 root.V27EarlySubjectBridge=Object.freeze({run});
 })(typeof window!=='undefined'?window:globalThis);
