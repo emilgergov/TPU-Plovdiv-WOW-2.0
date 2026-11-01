@@ -6,6 +6,8 @@ on:
     paths:
       - 'v26-test/v27-case-evidence.js'
       - 'v26-test/v27-case-evidence.test.cjs'
+      - 'v26-test/v27-dossier-batches.js'
+      - 'v26-test/v27-dossier-batches.test.cjs'
       - '.github/workflows/v27-1-evidence.yml'
   workflow_dispatch:
 jobs:
@@ -17,4 +19,6 @@ jobs:
         with:
           node-version: '22'
       - name: Test source grounding and conflict detection
-        run: node v26-test/v27-case-evidence.test.cjs
+        run: |
+          node v26-test/v27-case-evidence.test.cjs
+          node v26-test/v27-dossier-batches.test.cjs
