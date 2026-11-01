@@ -25,6 +25,10 @@ function build({results,roles,determination,metadata,paragraphs,evidence,aiDraft
   if(cadastralDup)data.subject=data.subject.slice(0,cadastralDup.index).trim();
  }
  if(data.parcelIds&&data.parcelIds!==parcels.map(p=>p.id).join(', '))throw Error('КТ13: несъответствие между Word и ГИС идентификаторите.');
+ data.parcelIds=parcels.map(p=>p.id).join(', ');
+ if(!data.recipient)data.recipient='Адресат: [ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва установен възложител в преписката]';
+ if(!data.address)data.address='Адрес за кореспонденция: [ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва адрес в преписката]';
+ if(!data.incomingReference)data.incomingReference='[ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва входящ номер и дата]';
  const zones=Object.freeze((determination.zones||[]).map(z=>clean(typeof z==='string'?z:z?.code||z?.sitecode||z?.zone_code)).filter(Boolean));
  if(scenario==='Б'&&!zones.length)throw Error('КТ13: сценарий Б без посочена защитена зона.');
  return Object.freeze({
