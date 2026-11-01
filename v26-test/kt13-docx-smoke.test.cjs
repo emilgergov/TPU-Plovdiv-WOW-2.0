@@ -34,8 +34,26 @@ async function run(scenario){
  const draft=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{}});
  const aiDraft=['[[CHARACTERIZATION]]','Конкретна характеристика на тестов склад и офиси.','[[LEGAL]]','Конкретна правна преценка по тестовите материали.','[[PROCEDURE]]','Конкретна процедурна преценка по тестовите материали.','[[IMPACTS]]','Конкретни въздействия на тестовия склад.'].join('\n');
  const enriched=w.V26ExpertDraft.build({results:[{input:'36676.129.457',location:'гр. Пловдив, община Пловдив, област Пловдив'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft});
- const blob=await w.V26ExpertWord.make(enriched);
+ const svg='<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="white"/></svg>';
+ const mapPngBytes=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lZkAAAAASUVORK5CYII=','base64');
+ const StubImage=class{set src(value){this.onload?.()}};
+ const stubUrl={createObjectURL:()=> 'blob:test-map',revokeObjectURL:()=>{}};
+ const realCreate=w.document.createElement.bind(w.document);
+ w.document.createElement=function(name,...args){
+  if(name==='canvas')return {width:0,height:0,getContext:()=>({fillRect(){},drawImage(){},set fillStyle(value){}}),toBlob:cb=>cb(new Blob([mapPngBytes],{type:'image/png'}))};
+  return realCreate(name,...args);
+ };
+ context.Image=StubImage;context.URL=stubUrl;
+ const blob=await w.V26ExpertWord.make(enriched,{mapSvg:svg});
+ w.document.createElement=realCreate;
+
  const out=fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
+ assert(out['word/media/v27-gis-overview.png'],'Actual embedded GIS PNG missing');
+ assert.deepEqual(Buffer.from(out['word/media/v27-gis-overview.png']),mapPngBytes,'GIS PNG bytes changed');
+ const rels=new TextDecoder().decode(out['word/_rels/document.xml.rels']);
+ assert(rels.includes('rIdV27GISMap')&&rels.includes('media/v27-gis-overview.png'),'DOCX GIS image relationship missing');
+ const contentTypes=new TextDecoder().decode(out['[Content_Types].xml']);
+ assert(contentTypes.includes('image/png'),'DOCX PNG content type missing');
  const xml=new TextDecoder().decode(out['word/document.xml']);
  const texts=paragraphTexts(xml).join(' ');
  for(const phrase of ['Конкретна характеристика на тестов склад','Конкретна правна преценка','Конкретна процедурна преценка','Конкретни въздействия','гр. Пловдив, община Пловдив'])assert(texts.includes(phrase),'AI section or parcel location not integrated: '+phrase);
