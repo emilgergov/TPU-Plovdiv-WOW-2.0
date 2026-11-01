@@ -41,6 +41,44 @@ jobs:
           if (!result.success) process.exit(1);
           NODE
           [[ "$status" == "200" || "$status" == "201" ]] || exit 1
+      - name: Activate newest uploaded Worker version
+        shell: bash
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+        run: |
+          set -euo pipefail
+          versions="$(mktemp)"
+          response="$(mktemp)"
+          payload="$(mktemp)"
+          trap 'rm -f "$versions" "$response" "$payload"' EXIT
+          status="$(curl -sS --max-time 30 -o "$versions" -w '%{http_code}' \
+            -H "Authorization: Bearer $CF_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/tpu-plovdiv-ai-author-v27/versions?per_page=5")"
+          echo "Versions HTTP status: $status"
+          node - "$versions" "$payload" <<'NODE'
+          const fs=require('fs');
+          const d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          if(!d.success){console.error('Versions errors:',JSON.stringify(d.errors));process.exit(1)}
+          const a=Array.isArray(d.result)?d.result:(d.result?.items||[]);
+          const v=a.find(x=>x.id||x.version_id);
+          if(!v){console.error('No version returned');process.exit(1)}
+          const id=v.id||v.version_id;
+          fs.writeFileSync(process.argv[3],JSON.stringify({strategy:'percentage',versions:[{version_id:id,percentage:100}]}));
+          console.log('Activating uploaded version');
+          NODE
+          status="$(curl -sS --max-time 30 -o "$response" -w '%{http_code}' \
+            -X POST "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/tpu-plovdiv-ai-author-v27/deployments" \
+            -H "Authorization: Bearer $CF_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary "@$payload")"
+          echo "Activation HTTP status: $status"
+          node - "$response" <<'NODE'
+          const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          console.log('Activation success:',d.success);
+          for(const e of d.errors||[])console.error('Activation error:',e.code,e.message);
+          if(!d.success)process.exit(1);
+          NODE
       - name: Verify public health endpoint
         shell: bash
         run: |
