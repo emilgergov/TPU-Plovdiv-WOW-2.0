@@ -40,6 +40,10 @@ async function run(scenario){
  // V27.2: fail closed on incomplete AI output, even when legacy metadata is available.
  const incomplete=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft:'[[CHARACTERIZATION]]\\nСамо един AI раздел.'});
  await assert.rejects(()=>w.V26ExpertWord.make(incomplete,{mapPngBytes:new Uint8Array(mapPngBytes),requireAiAuthor:true}),/задължителни раздели/);
+ const duplicate=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft:aiDraft+'\\n[[LEGAL]]\\nПовторен раздел.'});
+ await assert.rejects(()=>w.V26ExpertWord.make(duplicate,{mapPngBytes:new Uint8Array(mapPngBytes),requireAiAuthor:true}),/правилния ред/);
+ const reordered=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft:'[[LEGAL]]\\nПраво.\\n[[CHARACTERIZATION]]\\nФакти.\\n[[PROCEDURE]]\\nПроцедура.\\n[[IMPACTS]]\\nЕфекти.'});
+ await assert.rejects(()=>w.V26ExpertWord.make(reordered,{mapPngBytes:new Uint8Array(mapPngBytes),requireAiAuthor:true}),/правилния ред/);
  const out=fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
  assert(out['word/media/v27-gis-overview.png'],`Actual embedded GIS PNG missing; DOCX media: ${Object.keys(out).filter(k=>k.includes('media/')).join(', ')}`);
  assert.deepEqual(Buffer.from(out['word/media/v27-gis-overview.png']),mapPngBytes,'GIS PNG bytes changed');
