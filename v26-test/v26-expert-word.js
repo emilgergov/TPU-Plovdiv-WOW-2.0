@@ -45,6 +45,19 @@ async function make(draft){
  if(!Array.isArray(draft.characterization)||draft.characterization.length!==4||draft.characterization.some(x=>!String(x||'').trim()))throw Error('КТ13: четирите характеристики трябва да бъдат редактирани и потвърдени.');
  const subject=String(m.subject).replace(/^Относно:\s*/i,'').replace(/^(?:инвестиционно предложение\s*)+/i,'').replace(/^[„“"\s]+|[„“"\s]+$/g,'').replace(/\s+/g,' ').trim();
  const confirmed=xs=>xs.filter(x=>!isPending(x));
+ const aiSections=(()=>{
+  const out={};const raw=String(draft.aiDraft||'');
+  const allowed=new Set(['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS']);
+  const re=/^\\s*\\[\\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\\]\\]\\s*$/gm;
+  const matches=[...raw.matchAll(re)];
+  for(let i=0;i<matches.length;i++){
+   const key=matches[i][1],start=matches[i].index+matches[i][0].length,end=i+1<matches.length?matches[i+1].index:raw.length;
+   const value=raw.slice(start,end).trim().slice(0,2400);
+   if(allowed.has(key)&&value&&!out[key]&&!/\\[\\[(?:CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\\]\\]/.test(value))out[key]=value;
+  }
+  return out;
+ })();
+ const aiProposal=key=>aiSections[key]?[paragraph(doc,'AI редакционно предложение — за експертна проверка:',{bold:true}),...aiSections[key].split(/\\n\\s*\\n/).filter(Boolean).slice(0,5).map(x=>paragraph(doc,x))]:[];
  const blocks=[
   paragraph(doc,'Място за електронен подпис — вътрешно съгласуване'),
   paragraph(doc,'РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ — НЕ Е АДМИНИСТРАТИВЕН АКТ',{heading:true}),
@@ -60,17 +73,17 @@ async function make(draft){
   paragraph(doc,draft.scenario==='Б'?'По наличните ГИС данни е установено пространствено пресичане със защитена зона: '+draft.zones.join(', ')+'.':'По наличните ГИС данни не е установено пресичане на потвърдените имоти със защитена зона.'),
   paragraph(doc,'Приложение №1 — ГИС анализ представя пространствените резултати, картографската основа и имотния обхват.'),
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
-  ...confirmed(draft.characterization).map(x=>paragraph(doc,x)),
+  ...confirmed(draft.characterization).map(x=>paragraph(doc,x)),...aiProposal('CHARACTERIZATION'),
 
   paragraph(doc,'IV. ФАКТИЧЕСКИ И ПРАВНИ КОНСТАТАЦИИ',{heading:true}),
-  ...confirmed(legal).map(x=>paragraph(doc,x)),
+  ...confirmed(legal).map(x=>paragraph(doc,x)),...aiProposal('LEGAL'),
 
   paragraph(doc,'V. ПРОЦЕДУРНА ПРЕЦЕНКА',{heading:true}),
-  paragraph(doc,isPending(m.procedureFinding)?'Приложимата процедура не е потвърдена; изисква се преценка от компетентен експерт.':m.procedureFinding),
+  paragraph(doc,isPending(m.procedureFinding)?'Приложимата процедура не е потвърдена; изисква се преценка от компетентен експерт.':m.procedureFinding),...aiProposal('PROCEDURE'),
   paragraph(doc,'VI. КОНСТАТАЦИИ ЗА ВЪЗДЕЙСТВИЯТА',{heading:true}),
-  ...confirmed(impacts).map(x=>paragraph(doc,x)),
+  ...confirmed(impacts).map(x=>paragraph(doc,x)),...aiProposal('IMPACTS'),
   ...(impacts.some(isPending)?[paragraph(doc,'Не е изготвена окончателна оценка на въздействията. Изводите се попълват след проверка на приложимите режими и доказателствата.')]:[]),
-  ...(draft.aiDraft?[paragraph(doc,'AI-ПОДПОМОГНАТА ЧЕРНОВА — ЗА ЕКСПЕРТНА ПРОВЕРКА',{heading:true}),...draft.aiDraft.split(/\n\s*\n/).filter(Boolean).slice(0,24).map(x=>paragraph(doc,x))]:[]),
+  ...(draft.aiDraft&&!Object.keys(aiSections).length?[paragraph(doc,'AI-ПОДПОМОГНАТА ЧЕРНОВА — ЗА ЕКСПЕРТНА ПРОВЕРКА',{heading:true}),...draft.aiDraft.split(/\n\s*\n/).filter(Boolean).slice(0,24).map(x=>paragraph(doc,x))]:[]),
   paragraph(doc,'VII. ПРИЛОЖЕНИЯ',{heading:true}),
   paragraph(doc,'Приложение №1 — ГИС анализ (самостоятелен PDF); Приложение №2 — Нормативни и документални референции (самостоятелен PDF, когато е изготвен).'),
   paragraph(doc,'НЕОБХОДИМА Е ЕКСПЕРТНА ПРОВЕРКА НА ПРЕПИСКАТА, ПРАВНИТЕ ОСНОВАНИЯ И ИЗВОДИТЕ. Документът не представлява издаден административен акт.')
