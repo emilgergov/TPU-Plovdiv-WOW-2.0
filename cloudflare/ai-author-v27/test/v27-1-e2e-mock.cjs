@@ -35,5 +35,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
  assert.ok(screen.includes('V27DraftQuality.inspect('));
  assert.ok(screen.includes('window.V26DraftPackage.make('));
  assert.ok(screen.includes('v27AiDraft=proposedDraft'));
- console.log('V27.1 P10 mock: three parcels, provenance, auth, AI success/failure, fallback integration PASS');
+ assert.ok(screen.includes("if(!v27AiDraft.trim())throw Error('V27.2:"),'V27.2 must fail closed when no AI draft');
+ assert.ok(!screen.includes('Продължаваме със стандартния ZIP.'),'Silent AI fallback must be removed');
+ console.log('V27.1 P10 mock: three parcels, provenance, auth, AI success/failure, fail-closed AI integration PASS');
 })().catch(e=>{console.error(e);process.exitCode=1});
