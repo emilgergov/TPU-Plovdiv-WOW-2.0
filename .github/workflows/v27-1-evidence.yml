@@ -13,6 +13,7 @@ on:
       - 'v26-test/v27-early-server.test.cjs'
       - 'v26-test/v27-early-integration.test.cjs'
       - 'v26-test/v27-early-race.test.cjs'
+      - 'v26-test/v27-early-dossier-guard.test.cjs'
       - 'v26-test/v26-browser-zip-inventory.js'
       - 'v26-test/v27-multi-parcel-map.js'
       - 'v26-test/v27-multi-parcel-map.test.cjs'
@@ -53,6 +54,7 @@ jobs:
           node v26-test/v27-early-server.test.cjs
           node v26-test/v27-early-integration.test.cjs
           node v26-test/v27-early-race.test.cjs
+          node v26-test/v27-early-dossier-guard.test.cjs
           node v26-test/v27-multi-parcel-map.test.cjs
           node v26-test/v27-verified-context.test.cjs
           node v26-test/v27-expert-evidence.test.cjs
