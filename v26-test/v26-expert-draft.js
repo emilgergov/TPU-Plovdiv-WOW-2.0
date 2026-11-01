@@ -18,6 +18,12 @@ function build({results,roles,determination,metadata,paragraphs,evidence,aiDraft
  const characterization=Array.isArray(paragraphs)?paragraphs.map(clean):[];
  if(characterization.length!==4||characterization.some(x=>!x))throw Error('КТ13: липсват четирите експертно потвърдени описания.');
  const data=Object.fromEntries(Object.entries(metadata||{}).map(([k,v])=>[k,Array.isArray(v)?Object.freeze(v.map(clean)):clean(v)]));
+ // Shared, case-specific title normalization for both Word renderers.
+ if(data.subject){
+  data.subject=data.subject.replace(/^Относно:\s*/i,'').replace(/^(?:инвестиционно предложение\s*)+/i,'').replace(/\bи\s+зграждането\b/gi,'изграждането').replace(/\bСк\s+лад\b/g,'Склад').replace(/\bпро\s+мишлени\b/gi,'промишлени').replace(/\s*[„“]\s*/g,' ').replace(/\s+/g,' ').replace(/[\s,;:.–-]+$/,'').trim();
+  const cadastralDup=data.subject.match(/\bв\s+ПИ\s+(?:с\s+)?идентификатор(?:\s+№)?\s+\d{5}\.\d+\.\d+/i);
+  if(cadastralDup)data.subject=data.subject.slice(0,cadastralDup.index).trim();
+ }
  if(data.parcelIds&&data.parcelIds!==parcels.map(p=>p.id).join(', '))throw Error('КТ13: несъответствие между Word и ГИС идентификаторите.');
  const zones=Object.freeze((determination.zones||[]).map(z=>clean(typeof z==='string'?z:z?.code||z?.sitecode||z?.zone_code)).filter(Boolean));
  if(scenario==='Б'&&!zones.length)throw Error('КТ13: сценарий Б без посочена защитена зона.');
