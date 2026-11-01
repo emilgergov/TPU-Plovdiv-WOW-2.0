@@ -21,6 +21,11 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
  const good=await worker.fetch(req('mock-access',{mode:'expert',facts}),env);
  assert.equal(good.status,200);assert.equal((await good.json()).reviewRequired,true);
  assert.equal(calls,1);
+ const dualEnv={...env,AI_AUTHOR_PASSWORD_V27:'legacy-access'};
+ assert.equal((await worker.fetch(req('mock-access',{mode:'expert',facts}),dualEnv)).status,200,'new token must work alongside legacy token');
+ assert.equal((await worker.fetch(req('legacy-access',{mode:'expert',facts}),dualEnv)).status,200,'legacy token remains valid');
+ assert.equal((await worker.fetch(req('invalid-access',{mode:'expert',facts}),dualEnv)).status,401,'unknown token must be rejected');
+ assert.equal(calls,3);
  const sent=JSON.parse(seen.input[1].content);
  assert.equal(sent.verifiedContext.parcels.length,3);
  assert.equal(sent.verifiedContext.scenario,'A');
@@ -30,7 +35,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
  const failed=await worker.fetch(req('mock-access',{mode:'expert',facts}),env);
  assert.equal(failed.status,502);
  assert.equal((await failed.json()).error,'AI provider request failed');
- assert.equal(calls,2);
+ assert.equal(calls,4);
  const screen=fs.readFileSync(__dirname+'/../../../v26-test/index.html','utf8');
  assert.ok(screen.includes('V27DraftQuality.inspect('));
  assert.ok(screen.includes('window.V26DraftPackage.make('));
