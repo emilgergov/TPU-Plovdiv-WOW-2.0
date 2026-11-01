@@ -9,19 +9,30 @@ function parcels(){return [...new Set((get('ids')?.value||'').match(/\b\d{5}\.\d
 function buildEvidence(preview){
  const docs=(preview?.files||[]).map(f=>{
   const body=typeof f.text==='string'?f.text:'';
-  const parts=body.split(/[\r\n]+|(?<=[.!?])\s+/).map(x=>x.trim()).filter(x=>x.length>=20).slice(0,20);
-  return {file:f.path||f.file,text:body,error:f.error,facts:parts.map(value=>({kind:'other',value:value.slice(0,1000),quote:value}))};
+  // Preserve original source quotations; do not pass truncated excerpts as verified quotations.
+  const parts=body.split(/[\\r\\n]+|(?<=[.!?])\\s+/).map(x=>x.trim()).filter(x=>x.length>=20&&x.length<=1000);
+  const priority=/инвестицион|предложени|предвижда|изграждан|строител|склад|офис|имот|идентификатор|местност|землище|адрес|обект|производствен|водоснабд|електрозахран|отпадъчн|възложител/i;
+  const ranked=parts.map((value,i)=>({value,i,score:(priority.test(value)?3:0)+( /\\b\\d{5}\\.\\d+\\.\\d+\\b/.test(value)?3:0)})).sort((a,b)=>b.score-a.score||a.i-b.i).slice(0,16).sort((a,b)=>a.i-b.i);
+  return {file:f.path||f.file,text:body,error:f.error,facts:ranked.map(({value})=>({kind:'other',value,quote:value}))};
  });
  return root.V27CaseEvidence.create({documents:docs});
 }
 async function suggest({token,preview,parcelIds,epochAtStart}){
- const prepared=root.V27DossierBatches.prepare(preview);
- const batches=root.V27DossierBatches.toRequests(prepared);
- if(!prepared.complete||batches.requests.length!==1)throw Error('Преписката е непълна или надвишава обхвата на еднократния AI анализ. Не се изпращат частични сведения; използвайте досегашния маршрут до внедряване на поетапната обработка.');
  const evidence=buildEvidence(preview);
- if(evidence.facts.length>80||evidence.documents.some(d=>d.length>5000)||evidence.documents.some(d=>evidence.facts.filter(f=>f.documentId===d.id).length===20))throw Error('Някои документи са твърде обемни за надеждно еднократно извличане. AI предложението се пропуска, без да се губи преписката.');
+ const matched=evidence.facts.filter(f=>f.status==='source_matched');
+ if(!matched.length)throw Error('Няма четими документални откъси за AI редакция.');
+ // The subject editor is an assisted draft, not a claim of exhaustive dossier analysis.
+ // Send only source-matched quotations; unreadable documents remain explicitly disclosed.
  const input=root.V27EarlySubject.requestFromCase({evidence,parcelIds,existingTitle:get('v26SubjectTitle')?.value||'',existingSubject:get('v26WordHeading')?.value||''});
- if(!input.facts.length)throw Error('Няма достатъчно четим документален текст за ранния AI анализ.');
+ const limited=[];let chars=0;
+ for(const f of input.facts){const cost=JSON.stringify(f).length;if(limited.length>=35||chars+cost>17000)break;limited.push(f);chars+=cost;}
+ if(!limited.length)throw Error('Не са намерени подходящи документални откъси.');
+ input.facts=limited;
+ const limitedIds=new Set(limited.map(f=>f.id));
+ input.conflicts=(input.conflicts||[]).filter(c=>(c.values||[]).some(v=>v.some(id=>limitedIds.has(id))));
+ const excluded=matched.length-limited.length;
+ const missing=evidence.documents.filter(d=>!d.readable).map(d=>d.file);
+ input.unreadable=[...new Set([...(input.unreadable||[]),...missing])];
  const controller=new AbortController();activeController=controller;const timer=setTimeout(()=>controller.abort(),35000);
  try{
   const response=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(input),signal:controller.signal,cache:'no-store'});
@@ -36,7 +47,7 @@ async function suggest({token,preview,parcelIds,epochAtStart}){
   if((get('v26WordHeading')?.value||'')!==input.existingSubject||(get('v26SubjectTitle')?.value||'')!==input.existingTitle)return false;
   heading.value=check.subject;heading.dispatchEvent(new Event('input',{bubbles:true}));
   title.value=check.title;title.dispatchEvent(new Event('input',{bubbles:true}));
-  if(status){status.style.display='block';status.textContent='AI предложи предмет и заглавие въз основа на документални откъси. Проверете и потвърдете. AI не взема административно решение.';}
+  if(status){status.style.display='block';status.textContent='AI предложи предмет и заглавие по '+limited.length+' проверени откъса. '+(missing.length?'Непрочетени документи: '+missing.join(', ')+'. ':'')+(excluded?'Необхванати откъси: '+excluded+'. ':'')+'Проверете спрямо цялата преписка преди потвърждение.';}
   get('v26SubjectEditor').open=true;
   return true;
  }finally{clearTimeout(timer);if(activeController===controller)activeController=null}
