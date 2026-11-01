@@ -10,7 +10,7 @@ const u16=(v,p)=>v.getUint16(p,true),u32=(v,p)=>v.getUint32(p,true);
 let generation=0;
 let selectedArchive=null;
 const readButton=document.createElement('button');
-readButton.type='button';readButton.className='secondary';readButton.textContent='Прочети TXT/JSON от архива';
+readButton.type='button';readButton.className='secondary';readButton.textContent='Прочети TXT/JSON от архива повторно';
 readButton.style.display='none';(document.getElementById('v26LocalIndexHost')||output).append(readButton);
 const preview=document.createElement('div');preview.className='hint';preview.style.whiteSpace='pre-wrap';readButton.after(preview);
 async function entryText(file,e){
@@ -67,6 +67,8 @@ async function inspect(file){
  if(token!==generation)return;
  readButton.style.display='inline-block';window.V26ArchiveInventory={archive:file.name,archive_bytes:file.size,entries,files,source:'browser-central-directory',verified_at:new Date().toISOString()};document.dispatchEvent(new CustomEvent('v26:archive-inventory',{detail:window.V26ArchiveInventory}));
  output.textContent='ZIP проверен локално: '+entries+' файла; '+gis+' възможни ГИС файла. Архивът не е качван. Това е проверка на съдържанието, не ГИС анализ.';
+ // Automatically extract supported local text evidence for V27; no upload occurs here.
+ await readButton.onclick();
  }catch(e){if(token===generation){delete window.V26ArchiveInventory;readButton.style.display='none';output.textContent='ZIP каталог: '+e.message}}
 }
 input.addEventListener('change',()=>inspect(input.files?.[0]));
