@@ -67,7 +67,7 @@ async function entryText(file,e){
  if(/\.pdf$/i.test(e.path))return pdfText(bytes);
  return new TextDecoder('utf-8').decode(bytes);
 }
-readButton.onclick=async()=>{
+async function readDossierText(){
  const inv=window.V26ArchiveInventory;if(!inv||!selectedArchive)return;
  readButton.disabled=true;preview.textContent='Четене на текстови файлове…';
  const chosen=inv.files.filter(f=>/\.(txt|json|csv|md|docx|pdf)$/i.test(f.path)&&f.size_bytes<=2097152).slice(0,35);
@@ -81,7 +81,10 @@ readButton.onclick=async()=>{
  document.dispatchEvent(new CustomEvent('v26:archive-text-preview',{detail:report}));
  preview.textContent='Прочетени: '+files.filter(f=>!f.error).length+'/'+chosen.length+' файла. Съдържанието е за работен проект.\n'+files.map(f=>f.path+' — '+(f.error||'прочетен')).join('\n');
  readButton.disabled=false;
-};
+ return report;
+}
+readButton.onclick=readDossierText;
+window.V26ReadDossierTextForAI=readDossierText;
 
 async function inspect(file){
  const token=++generation;delete window.V26ArchiveInventory;delete window.V26ArchiveTextPreview;selectedArchive=file;document.dispatchEvent(new Event('v26:archive-changed'));readButton.style.display='none';preview.textContent='';
