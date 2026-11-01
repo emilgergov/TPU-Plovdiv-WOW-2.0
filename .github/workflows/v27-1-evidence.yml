@@ -27,6 +27,7 @@ on:
       - 'cloudflare/ai-author-v27/src/early-subject.js'
       - 'cloudflare/ai-author-v27/src/worker.js'
       - 'cloudflare/ai-author-v27/test/provenance-contract.cjs'
+      - 'cloudflare/ai-author-v27/test/v27-1-e2e-mock.cjs'
       - '.github/workflows/v27-1-evidence.yml'
   workflow_dispatch:
 jobs:
@@ -51,3 +52,4 @@ jobs:
           node v26-test/v27-contract-test.cjs
           node v26-test/v27-zip-manifest.test.cjs
           node cloudflare/ai-author-v27/test/provenance-contract.cjs
+          node cloudflare/ai-author-v27/test/v27-1-e2e-mock.cjs
