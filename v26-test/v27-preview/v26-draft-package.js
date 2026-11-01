@@ -248,7 +248,7 @@ function normativePdf(results,register){
  const review=register?.verifiedCaseMetadata||null;
  const resolvedTitle=String(subject?.title||review?.subject||review?.title||dossier?.subject?.title||dossier?.subject_title||'').trim();
  const confirmed=!!(subject?.confirmed&&resolvedTitle);
- const subjectDisplay=(resolvedTitle||'Не е установен в обработените материали — за експертна проверка.').replace(/\bи\s+зграждането\b/gi,'изграждането').replace(/\bСк\s+лад\b/g,'Склад').replace(/\bпро\s+мишлени\b/gi,'промишлени').replace(/\s*[„“]\s*/g,' ').replace(/\s+/g,' ').trim();
+ const subjectDisplay=(resolvedTitle||'НЯМА ДАННИ — за експертна проверка.').replace(/\bи\s+зграждането\b/gi,'изграждането').replace(/\bСк\s+лад\b/g,'Склад').replace(/\bпро\s+мишлени\b/gi,'промишлени').replace(/\s*[„“]\s*/g,' ').replace(/\s+/g,' ').trim();
  const verifiedLocation=String(review?.location||'').trim();
  const verifiedSettlement=verifiedPlaceLabel(review?.settlement);
  const verifiedLandArea=String(review?.landArea||'').trim();
@@ -277,9 +277,9 @@ function normativePdf(results,register){
   {text:'III. Нормативни и документални основания',style:'sub'},
   {text:'Проверени нормативни разпоредби: чл. 31, ал. 1 от ЗБР — оценка за съвместимост при възможно значително отрицателно въздействие; чл. 31, ал. 4 от ЗБР — връзка с процедурите по ЗООС, когато са приложими; чл. 2, ал. 1, т. 1 от Наредбата за ОС — обхват на инвестиционните предложения. Конкретната процедура и режимите на зоната се определят след индивидуална проверка.',fontSize:8},
   {text:'Пространственото пресичане само по себе си не доказва нарушение на режим.'},
-  ...applicable.flatMap(r=>[{text:r.title,bold:true,fontSize:9},...r.sources.map(source=>{let label;try{const u=new URL(String(source));label=u.hostname.replace(/^www\./,'')+(u.pathname.toLowerCase().includes('protectedsite')?' / страница на защитената зона':' / нормативен документ')}catch(_){label='Официален източник'}return {text:label,link:String(source),color:'#165c86',fontSize:8,decoration:'underline'};})]),
+  ...applicable.flatMap(r=>[{text:r.title,bold:true,fontSize:9},...r.sources.map((source,i)=>{let label;try{const u=new URL(String(source));label=u.hostname.replace(/^www\./,'')+' — '+(u.pathname.split('/').filter(Boolean).slice(-2).join('/')||'начална страница')+' ('+(i+1)+')'}catch(_){label='Архивна референция '+(i+1)}return {text:label,link:String(source),color:'#165c86',fontSize:8,decoration:'underline'};})]),
   ...(applicable.length?[]:[{text:'В интегрирания нормативен архив няма относима референция за този обхват.'}]),
-  {text:'IV. Приложимост към инвестиционното предложение',style:'sub'},
+  {text:'IV. Приложимост към инвестиционното предложение',style:'sub',pageBreak:'before'},
   {text:resolvedTitle?'За предложение „'+resolvedTitle+'“ относимостта на посочените основания се разглежда спрямо описаните дейности и пространствените резултати от документа „ТПУ Пловдив — ГИС анализ“. Режимите на конкретна зона се преценяват отделно; настоящата справка не установява автоматично допустимост или забрана.':'Предметът и дейностите подлежат на потвърждение преди индивидуална преценка за приложимост на режимите.'},
 
   ...zones.map(z=>({text:'Защитена зона '+z.code+(z.name?' „'+z.name+'“':'')+': пространственото пресичане е установено в документа „ТПУ Пловдив — ГИС анализ“. Приложимостта на конкретните режими се преценява спрямо заявените дейности.'})),
