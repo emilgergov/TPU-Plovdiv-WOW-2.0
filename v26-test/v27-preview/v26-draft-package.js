@@ -134,8 +134,10 @@ function verifiedPlaceLabel(value){
  // Never guess whether a settlement is a city or village from a cadastral number or a bare name.
  return /^(?:гр\.|град|с\.|село)\s+/i.test(text)?text:'';
 }
+function pdfLocality(value){return String(value||'').trim().toLocaleLowerCase('bg-BG').replace(/(^|[\s-])([а-я])/g,(_,a,b)=>a+b).replace(/^([а-я])/,c=>c.toLocaleUpperCase('bg-BG')).replace(/\s*-\s*/g,' - ');}
 function gisPdf(results,options={}){
  if(results.length>1)options={...options,mapSvg:null};
+ const leadingId=String(options.leadingParcelId||options.leadingParcel||options.verifiedCaseMetadata?.leadingParcelId||'').trim();
  const content=[{text:'Източник на геометрията: регионална ГИС база на РИОСВ – Пловдив, 02.10.2026 г.',margin:[0,0,0,8]}];
  if(options.mapSvg&&String(options.mapSvg).includes('<svg')){
   const clean=options.mapSvg;
@@ -178,10 +180,10 @@ function gisPdf(results,options={}){
     const polys=f.geometry.type==='Polygon'?[f.geometry.coordinates]:f.geometry.coordinates;
     for(const poly of polys){const d=poly.map(ring=>ring.filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1]))).filter(ring=>ring.length>=3).map(ring=>ring.map((p,i)=>(i?'L':'M')+(dx+(p[0]-minX)*scale).toFixed(2)+' '+(450-dy-(p[1]-minY)*scale).toFixed(2)).join(' ')+' Z').join(' ');if(d)zoneShapes.push('<path d="'+d+'" fill="none" stroke="#176749" stroke-width="2.6" stroke-dasharray="9 5"/>')}
    }
-   const svg='<svg xmlns="http://www.w3.org/2000/svg" width="740" height="450" viewBox="0 0 740 450"><rect width="740" height="450" fill="#e8f2ed"/>'+shapes.join('')+zoneShapes.join('')+'<text x="370" y="430" text-anchor="middle" font-size="17" fill="#183c30">'+E(id)+'</text></svg>';
+   const svg='<svg xmlns="http://www.w3.org/2000/svg" width="740" height="450" viewBox="0 0 740 450"><rect width="740" height="450" fill="#e8f2ed"/>'+shapes.join('')+zoneShapes.join('')+'<rect x="250" y="403" width="240" height="35" rx="6" fill="#ffffff" fill-opacity=".92"/><text x="370" y="427" text-anchor="middle" font-size="23" font-weight="bold" fill="#183c30">'+E(id)+'</text></svg>';
    const fullInChaya=id==='36676.129.457'&&zoneCodes.has('BG0000194')&&overlapPolygons.length>0;
    const finding=fullInChaya?'Имотът попада изцяло в защитена зона BG0000194 — Река Чая.':overlapPolygons.length?'Установено пространствено пресичане със защитена зона.':'Не е установено пресичане със защитена зона.';
-   cards.push({stack:[{text:'Поземлен имот '+id,bold:true,fontSize:10,margin:[0,0,0,4]},{svg,width:235,margin:[0,0,0,4]},{text:fullInChaya?'Оранжево: пълно попадане':overlapPolygons.length?'Оранжево: пресичане':'Бежово: имот · без пресичане',fontSize:8,color:'#526a5e',margin:[0,2,0,3]}],margin:[0,4,0,8]});
+   cards.push({stack:[{text:'Поземлен имот '+id+(leadingId?(id===leadingId?' · водещ':' · съпътстващ'):''),bold:true,fontSize:10,margin:[0,0,0,4]},{svg,width:235,margin:[0,0,0,4]},{text:fullInChaya?'Оранжево: пълно попадане':overlapPolygons.length?'Оранжево: пресичане':'Бежово: имот · без пресичане',fontSize:8,color:'#526a5e',margin:[0,2,0,3]}],margin:[0,4,0,8]});
   }
   for(let i=0;i<cards.length;i+=2){
    const row={columns:[{width:'49%',...cards[i]},{width:'49%',...(cards[i+1]||{text:''})}],columnGap:10,margin:[0,3,0,8]};
@@ -196,8 +198,16 @@ function gisPdf(results,options={}){
  const verifiedLandArea=String(options.verifiedCaseMetadata?.landArea||'').trim();
  if(verifiedLocation)content.push({text:'Местоположение на имотите: '+verifiedLocation,margin:[0,5,0,7]});
  if(verifiedSettlement)content.push({text:'Населено място: '+verifiedSettlement});
+ if(results.some(r=>r.intersection_verified_outside===true)){
+  for(const r of results){if(r.intersection_verified_outside!==true)continue;
+   const nearest=r.nearest_verified_zone||r.nearestZoneVerified;
+   const code=String(nearest?.sitecode||nearest?.code||'');
+   const name=String(nearest?.name_bg||nearest?.name||'').trim();
+   if(/^BG\d{7}$/.test(code)&&name)content.push({text:'Най-близка защитена зона до имот '+String(r.input||r.cadnum||'')+': '+code+' — '+name,fontSize:9});
+  }
+ }
  if(verifiedLandArea)content.push({text:'Землище: '+verifiedLandArea});
- for(const r of results){const place=verifiedPlaceLabel(r.settlement||r.settlement_name||'');const locality=String(r.locality||'').trim();if(place||locality)content.push({text:'Имот '+String(r.input||r.cadnum||'')+' — '+[place,locality?'местност '+locality:''].filter(Boolean).join(', '),fontSize:9,margin:[0,2,0,2]});}
+ for(const r of results){const place=verifiedPlaceLabel(r.settlement||r.settlement_name||'');const locality=pdfLocality(r.locality);if(place||locality)content.push({text:'Имот '+String(r.input||r.cadnum||'')+' — '+[place,locality?'местност '+locality:''].filter(Boolean).join(', '),fontSize:9,margin:[0,2,0,2]});}
  content.push({text:'ГИС данни по имоти — обща таблица',style:'sub'});
  content.push({table:{headerRows:1,widths:[112,72,82,82,'*'],body:[
   ['Кадастрален №','ГИС площ, кв.м','Зона','Пресичане','Статус'],
