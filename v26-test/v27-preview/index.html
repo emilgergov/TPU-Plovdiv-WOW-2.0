@@ -406,7 +406,13 @@ function v26CleanSubjectHeading(){
  if(localities.length===1)pieces.push('местност '+localities[0].toLocaleLowerCase('bg-BG').replace(/^./,ch=>ch.toLocaleUpperCase('bg-BG')).replace(/\s*-\s*/g,' - '));
  return (description?'„'+description+'“':'Предмет на инвестиционното предложение — ЗА ЕКСПЕРТНО УТОЧНЯВАНЕ')+(pieces.length?' в '+pieces.join(', '):'');
 }
-function v26RefreshSubjectHeading(){if(wordHeading.dataset.edited==='1'||window.V26SubjectContext)return;wordHeading.value=v26CleanSubjectHeading();invalidateSubject()}
+function v27FormatSubjectLocality(value){
+ return String(value||'').replace(/(местност\s+)([А-ЯЁ][А-ЯЁ\s-]{3,})(?=\s*$|[,;])/gu,(all,label,name)=>{
+  const normalized=name.trim().toLocaleLowerCase('bg-BG').replace(/^./u,c=>c.toLocaleUpperCase('bg-BG')).replace(/\s*[-–—]\s*/g,' - ');
+  return label+normalized;
+ });
+}
+function v26RefreshSubjectHeading(){if(wordHeading.dataset.edited==='1'||window.V26SubjectContext)return;wordHeading.value=v27FormatSubjectLocality(v26CleanSubjectHeading());invalidateSubject()}
 function populateSubject(d){
  v26Semantic=d.semantic_review||null;
  const candidates=(d.subject_candidates||[]);
