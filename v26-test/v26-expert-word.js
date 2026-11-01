@@ -14,7 +14,40 @@ function paragraph(doc,value,{bold=false,heading=false}={}){
  if(bold||heading)rPr.appendChild(ns(doc,'b'));r.appendChild(rPr);
  const t=ns(doc,'t');t.setAttribute('xml:space','preserve');t.textContent=String(value);r.appendChild(t);p.appendChild(r);return p;
 }
-async function make(draft){
+async function mapPng(svg){
+ if(typeof svg!=='string'||!svg.includes('<svg')||typeof document==='undefined')return null;
+ const img=new Image(),url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
+ try{
+  await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(Error('Неуспешно растеризиране на ГИС картата.'));img.src=url;});
+  const canvas=document.createElement('canvas');canvas.width=1100;canvas.height=715;
+  const ctx=canvas.getContext('2d');if(!ctx)throw Error('Липсва графичен контекст за картата.');
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);
+  const blob=await new Promise((resolve,reject)=>canvas.toBlob(x=>x?resolve(x):reject(Error('PNG картата не е създадена.')),'image/png'));
+  return new Uint8Array(await blob.arrayBuffer());
+ }finally{URL.revokeObjectURL(url);}
+}
+function mapParagraph(doc){
+ const p=ns(doc,'p'),r=ns(doc,'r'),drawing=ns(doc,'drawing');
+ const wp='http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing';
+ const a='http://schemas.openxmlformats.org/drawingml/2006/main';
+ const pic='http://schemas.openxmlformats.org/drawingml/2006/picture';
+ const rel='http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+ const el=(parent,uri,name,attrs={})=>{const node=doc.createElementNS(uri,name);for(const [k,v] of Object.entries(attrs))node.setAttribute(k,String(v));parent.appendChild(node);return node;};
+ const inline=el(drawing,wp,'wp:inline',{distT:0,distB:0,distL:0,distR:0});
+ el(inline,wp,'wp:extent',{cx:5486400,cy:3566160});
+ el(inline,wp,'wp:docPr',{id:927,name:'ГИС обзорна карта'});
+ const graphic=el(inline,a,'a:graphic'),data=el(graphic,a,'a:graphicData',{uri:pic});
+ const picture=el(data,pic,'pic:pic'),nv=el(picture,pic,'pic:nvPicPr');
+ el(nv,pic,'pic:cNvPr',{id:0,name:'gis-overview.png'});el(nv,pic,'pic:cNvPicPr');
+ const fill=el(picture,pic,'pic:blipFill');
+ const blip=el(fill,a,'a:blip');blip.setAttributeNS(rel,'r:embed','rIdV27GISMap');
+ const stretch=el(fill,a,'a:stretch');el(stretch,a,'a:fillRect');
+ const sp=el(picture,pic,'pic:spPr'),xf=el(sp,a,'a:xfrm');
+ el(xf,a,'a:off',{x:0,y:0});el(xf,a,'a:ext',{cx:5486400,cy:3566160});
+ const geom=el(sp,a,'a:prstGeom',{prst:'rect'});el(geom,a,'a:avLst');
+ r.appendChild(drawing);p.appendChild(r);return p;
+}
+async function make(draft,options={}){
  if(draft?.schema!=='KT13_EXPERT_DRAFT_V1')throw Error('КТ13: липсва провереният експертен проект.');
  const scenario=draft.scenario==='А'?'A':'B';
  if(!root.fflate?.unzipSync||!root.fflate?.zipSync)throw Error('КТ13: ZIP библиотеката не е заредена.');
@@ -58,6 +91,7 @@ async function make(draft){
  })();
  const aiProposal=key=>aiSections[key]?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
 
+ const mapBytes=options.mapSvg?await mapPng(options.mapSvg):null;
  const blocks=[
   paragraph(doc,'Място за електронен подпис — вътрешно съгласуване'),
   paragraph(doc,'РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ — НЕ Е АДМИНИСТРАТИВЕН АКТ',{heading:true}),
@@ -72,6 +106,7 @@ async function make(draft){
   paragraph(doc,'II. ПРОСТРАНСТВЕН АНАЛИЗ',{heading:true}),
   paragraph(doc,draft.scenario==='Б'?'По наличните ГИС данни е установено пространствено пресичане със защитена зона: '+draft.zones.join(', ')+'.':'По наличните ГИС данни не е установено пресичане на потвърдените имоти със защитена зона.'),
   paragraph(doc,'В съответствие с принципа за пространствено онагледяване на инвестиционните предложения, отразен в приложение №3 към чл. 10, ал. 2, част Б, т. 3 от Наредбата за оценка за съвместимост, в настоящия експертен проект е включено обзорно картографско извлечение от извършения ГИС анализ.'),
+  ...(mapBytes?[mapParagraph(doc)]:[]),
   paragraph(doc,'Фигура 1. Пространствено положение на имотите спрямо защитените зони от мрежата „Натура 2000“. Източник: ГИС анализ.'),
   paragraph(doc,'Картографското извлечение от ГИС анализа представя пространствените резултати и имотния обхват; пълният ГИС анализ е в самостоятелен PDF.'),
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
@@ -93,6 +128,23 @@ async function make(draft){
  body.replaceChildren(...blocks,paragraph(doc,'Място за електронен подпис — окончателно подписване'),sect.cloneNode(true));
  const serialized=new XMLSerializer().serializeToString(doc);
  if((serialized.match(/подпис/gi)||[]).length<2)throw Error('КТ13: липсват две полета за подпис в експертния документ.');
+ if(mapBytes){
+  const relPath='word/_rels/document.xml.rels',relsDoc=new DOMParser().parseFromString(new TextDecoder().decode(zip[relPath]),'application/xml');
+  const relRoot=relsDoc.documentElement,relNS='http://schemas.openxmlformats.org/package/2006/relationships';
+  const existing=Array.from(relRoot.children).find(x=>x.getAttribute('Id')==='rIdV27GISMap');
+  if(existing)throw Error('Дублирана ГИС връзка в Word.');
+  const relationship=relsDoc.createElementNS(relNS,'Relationship');
+  for(const [k,v] of Object.entries({Id:'rIdV27GISMap',Type:'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image',Target:'media/v27-gis-overview.png'}))relationship.setAttribute(k,v);
+  relRoot.appendChild(relationship);
+  zip[relPath]=new TextEncoder().encode(new XMLSerializer().serializeToString(relsDoc));
+  const ctPath='[Content_Types].xml',ctDoc=new DOMParser().parseFromString(new TextDecoder().decode(zip[ctPath]),'application/xml');
+  const ctNS='http://schemas.openxmlformats.org/package/2006/content-types';
+  if(!Array.from(ctDoc.documentElement.children).some(x=>x.getAttribute('Extension')==='png')){
+   const def=ctDoc.createElementNS(ctNS,'Default');def.setAttribute('Extension','png');def.setAttribute('ContentType','image/png');ctDoc.documentElement.appendChild(def);
+   zip[ctPath]=new TextEncoder().encode(new XMLSerializer().serializeToString(ctDoc));
+  }
+  zip['word/media/v27-gis-overview.png']=mapBytes;
+ }
  zip['word/document.xml']=new TextEncoder().encode(serialized);
  return new Blob([root.fflate.zipSync(zip,{level:6})],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
 }
