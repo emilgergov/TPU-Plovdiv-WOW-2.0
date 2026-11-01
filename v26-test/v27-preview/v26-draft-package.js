@@ -203,7 +203,7 @@ function gisPdf(results,options={}){
    const nearest=r.nearest_verified_zone||r.nearestZoneVerified;
    const code=String(nearest?.sitecode||nearest?.code||'');
    const name=String(nearest?.name_bg||nearest?.name||'').trim();
-   if(/^BG\d{7}$/.test(code)&&name)content.push({text:'Най-близка защитена зона до имот '+String(r.input||r.cadnum||'')+': '+code+' — '+name,fontSize:9});
+   content.push({text:'Най-близка защитена зона до имот '+String(r.input||r.cadnum||'')+': '+(/^BG\d{7}$/.test(code)&&name?code+' — '+name:'НЯМА ДАННИ (не е изчислено потвърдено разстояние)'),fontSize:9});
   }
  }
  if(verifiedLandArea)content.push({text:'Землище: '+verifiedLandArea});
