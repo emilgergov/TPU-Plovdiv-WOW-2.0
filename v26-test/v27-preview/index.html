@@ -403,7 +403,7 @@ function v26CleanSubjectHeading(){
  const settlements=[...new Set(matched.map(x=>x.settlement).filter(Boolean))];
  const localities=[...new Set(matched.map(x=>x.locality).filter(Boolean))];
  if(settlements.length===1)pieces.push('населено място '+settlements[0]);
- if(localities.length===1)pieces.push('местност '+localities[0]);
+ if(localities.length===1)pieces.push('местност '+localities[0].toLocaleLowerCase('bg-BG').replace(/^./,ch=>ch.toLocaleUpperCase('bg-BG')).replace(/\s*-\s*/g,' - '));
  return (description?'„'+description+'“':'Предмет на инвестиционното предложение — ЗА ЕКСПЕРТНО УТОЧНЯВАНЕ')+(pieces.length?' в '+pieces.join(', '):'');
 }
 function v26RefreshSubjectHeading(){if(wordHeading.dataset.edited==='1'||window.V26SubjectContext)return;wordHeading.value=v26CleanSubjectHeading();invalidateSubject()}
