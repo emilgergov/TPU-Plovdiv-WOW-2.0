@@ -29,6 +29,6 @@ vm.runInContext(zip+make,ctx);
  const bytes=Buffer.from(await blob.arrayBuffer()),names=ids.map(id=>Buffer.from(id));
  assert.equal(bytes.readUInt32LE(bytes.length-22),0x06054b50);
  assert.equal(bytes.readUInt16LE(bytes.length-12),5);
- for(const filename of ['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_Prilozhenie_1_GIS_analiz.pdf','04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf','README_BG.txt'])assert.ok(bytes.includes(Buffer.from(filename)),filename);
+ for(const filename of ['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_GIS_analiz.pdf','04_Normativni_i_dokumentalni_referencii.pdf','README_BG.txt'])assert.ok(bytes.includes(Buffer.from(filename)),filename);
  console.log('V27.1 P10 make() integration: 3 parcels, 2 Word, 2 PDF, README, ZIP PASS (mock document renderers)');
 })().catch(e=>{console.error(e);process.exitCode=1});
