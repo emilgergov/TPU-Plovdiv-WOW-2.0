@@ -38,7 +38,7 @@ async function run(scenario){
  const blob=await w.V26ExpertWord.make(enriched,{mapPngBytes:new Uint8Array(mapPngBytes)});
 
  const out=fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
- assert(out['word/media/v27-gis-overview.png'],'Actual embedded GIS PNG missing');
+ assert(out['word/media/v27-gis-overview.png'],`Actual embedded GIS PNG missing; DOCX media: ${Object.keys(out).filter(k=>k.includes('media/')).join(', ')}`);
  assert.deepEqual(Buffer.from(out['word/media/v27-gis-overview.png']),mapPngBytes,'GIS PNG bytes changed');
  const rels=new TextDecoder().decode(out['word/_rels/document.xml.rels']);
  assert(rels.includes('rIdV27GISMap')&&rels.includes('media/v27-gis-overview.png'),'DOCX GIS image relationship missing');
