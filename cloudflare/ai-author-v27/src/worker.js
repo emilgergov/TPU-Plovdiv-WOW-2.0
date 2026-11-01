@@ -29,10 +29,10 @@ async function handleAuthor(request,env) {
   if(url.pathname!=="/author") return reply({error:"Not found"},404);
   if(request.method!=="POST") return reply({error:"Method not allowed"},405);
   // No paid calls until a separate access token is configured and supplied.
-  const accessPassword=env.AI_AUTHOR_PASSWORD_V27 || env.AI_AUTHOR_ACCESS_TOKEN;
-  if(!env.OPENAI_API_KEY || !accessPassword) return reply({error:"Authoring not enabled: access control is not configured"},503);
+  const accessTokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN].filter(v=>typeof v==="string" && v.length>0);
+  if(!env.OPENAI_API_KEY || !accessTokens.length) return reply({error:"Authoring not enabled: access control is not configured"},503);
   const auth=request.headers.get("Authorization")||"";
-  if(auth!==`Bearer ${accessPassword}`) return reply({error:"Unauthorized"},401);
+  if(!accessTokens.some(token=>auth===`Bearer ${token}`)) return reply({error:"Unauthorized"},401);
   const length=Number(request.headers.get("content-length")||0);
   if(length>MAX_BYTES) return reply({error:"Payload too large"},413);
   let raw;
