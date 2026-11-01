@@ -17,7 +17,7 @@ function build({results,roles,workingDraft,subject,procedure}={}){
  const meta=workingDraft?.metadata||{};
  const title=str(subject||meta.subject||meta.title||meta.heading,1000);
  if(!title)throw Error('V27: липсва потвърден предмет на ИП.');
- const gis=parcels.map(p=>p.id+' ('+p.role+'), '+p.location+': '+(p.zones.length?'установени пресичания: '+p.zones.join(', '):'няма потвърдени кодове за пресичане')).join('; ');
+ const gis=parcels.map(p=>p.id+' ('+p.role+'), '+p.location+': '+(p.zones.length?'отчетени кодове на зони: '+p.zones.join(', '):'няма структурирани кодове на зони в този вход; проверете ГИС PDF')).join('; ');
  return {mode:'expert',facts:{subject:title,parcelIds:parcels.map(p=>p.id),location:str(meta.location,500)||'НЯМА ДАННИ',investor:str(meta.investor||meta.applicant,250)||'НЯМА ДАННИ',procedure:str(procedure||meta.procedure,100)||'НЯМА ДАННИ',gisFindings:gis.slice(0,3000),legalReferences:'НЯМА ДАННИ — изисква се проверена нормативна справка',evidenceNotes:'ГИС данните са извлечени от текущата потвърдена справка; всички изводи подлежат на експертна проверка.',registration:str(meta.registration||meta.incomingNumber,150)||'НЯМА ДАННИ'}};
 }
 root.V27AIFacts=Object.freeze({build});
