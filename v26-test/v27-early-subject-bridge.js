@@ -54,9 +54,14 @@ async function suggest({token,preview,parcelIds,epochAtStart}){
 }
 async function run(){
  if(active)return;
- const preview=root.V26ArchiveTextPreview,ids=parcels();
+ let preview=root.V26ArchiveTextPreview;const ids=parcels();
  const status=get('v26SubjectStatus');
- if(!preview?.files?.length||!ids.length){if(status){status.style.display='block';status.textContent='За AI корекция е необходима прочетена ZIP преписка с извлечени имоти.';}return;}
+ if(!ids.length){if(status){status.style.display='block';status.textContent='За AI корекция са необходими извлечени имоти.';}return;}
+ if(!preview?.files?.some(f=>typeof f.text==='string'&&f.text.trim())&&typeof root.V26ReadDossierTextForAI==='function'){
+  if(status){status.style.display='block';status.textContent='Четене на документалния текст за AI корекция…';}
+  try{preview=await root.V26ReadDossierTextForAI()||root.V26ArchiveTextPreview;}catch(e){if(status){status.style.display='block';status.textContent='Неуспешно извличане на текст: '+e.message;}return;}
+ }
+ if(!preview?.files?.length){if(status){status.style.display='block';status.textContent='Няма извлечени документи за AI редакция. Можете да редактирате ръчно.';}return;}
  if(!get('v26SubjectEditor')||get('v26SubjectEditor').style.display==='none'||root.V26SubjectContext?.confirmed){return;}
  if(!root.V27CaseEvidence||!root.V27DossierBatches||!root.V27EarlySubject){if(status){status.style.display='block';status.textContent='AI помощникът не е зареден. Можете да редактирате предмета ръчно.';}return;}
  if(!root.confirm('Да се изпратят извлечени откъси от преписката към AI за корекция на предмета и заглавието? Използвайте само разрешени за обработване данни.'))return;
