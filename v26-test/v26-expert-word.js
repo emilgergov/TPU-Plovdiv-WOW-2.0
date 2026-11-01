@@ -71,6 +71,7 @@ async function make(draft){
   ...(m.location?[paragraph(doc,'Местоположение: '+m.location)]:[]),
   paragraph(doc,'II. ПРОСТРАНСТВЕН АНАЛИЗ',{heading:true}),
   paragraph(doc,draft.scenario==='Б'?'По наличните ГИС данни е установено пространствено пресичане със защитена зона: '+draft.zones.join(', ')+'.':'По наличните ГИС данни не е установено пресичане на потвърдените имоти със защитена зона.'),
+  paragraph(doc,'Фигура 1. Пространствено положение на имотите спрямо защитените зони от мрежата „Натура 2000“. Източник: ГИС анализ.'),
   paragraph(doc,'Картографското извлечение от ГИС анализа представя пространствените резултати и имотния обхват; пълният ГИС анализ е в самостоятелен PDF.'),
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
   ...(aiSections.CHARACTERIZATION?aiProposal('CHARACTERIZATION'):confirmed(draft.characterization).map(x=>paragraph(doc,x))),
