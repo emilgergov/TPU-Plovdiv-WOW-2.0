@@ -26,9 +26,10 @@ async function handleAuthor(request,env) {
   if(url.pathname!=="/author") return reply({error:"Not found"},404);
   if(request.method!=="POST") return reply({error:"Method not allowed"},405);
   // No paid calls until a separate access token is configured and supplied.
-  if(!env.OPENAI_API_KEY || !env.AI_AUTHOR_ACCESS_TOKEN) return reply({error:"Authoring not enabled: access control is not configured"},503);
+  const accessPassword=env.AI_AUTHOR_PASSWORD_V27 || env.AI_AUTHOR_ACCESS_TOKEN;
+  if(!env.OPENAI_API_KEY || !accessPassword) return reply({error:"Authoring not enabled: access control is not configured"},503);
   const auth=request.headers.get("Authorization")||"";
-  if(auth!==`Bearer ${env.AI_AUTHOR_ACCESS_TOKEN}`) return reply({error:"Unauthorized"},401);
+  if(auth!==`Bearer ${accessPassword}`) return reply({error:"Unauthorized"},401);
   const length=Number(request.headers.get("content-length")||0);
   if(length>MAX_BYTES) return reply({error:"Payload too large"},413);
   let raw;
@@ -72,7 +73,7 @@ export default {
   }
 
   if(request.method==="GET" && (url.pathname==="/" || url.pathname==="/health")) {
-   return reply({service:"TPU Plovdiv AI Author V27",status:"online",apiKeyConfigured:Boolean(env.OPENAI_API_KEY),aiGenerationEnabled:Boolean(env.OPENAI_API_KEY && env.AI_AUTHOR_ACCESS_TOKEN)});
+   return reply({service:"TPU Plovdiv AI Author V27",status:"online",apiKeyConfigured:Boolean(env.OPENAI_API_KEY),aiGenerationEnabled:Boolean(env.OPENAI_API_KEY && (env.AI_AUTHOR_PASSWORD_V27 || env.AI_AUTHOR_ACCESS_TOKEN))});
   }
   return handleAuthor(request,env);
  }
