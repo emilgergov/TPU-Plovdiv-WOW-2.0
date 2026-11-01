@@ -14,7 +14,7 @@ function validateSuggestion(candidate,caseInput={}){
  if(ids.some(id=>!subject.includes(id)))issues.push('MISSING_PARCEL_IN_SUBJECT');
  const claimed=[...new Set([...title.matchAll(idPattern),...subject.matchAll(idPattern)].map(x=>x[0]))];
  if(claimed.some(id=>!ids.includes(id)))issues.push('UNCONFIRMED_PARCEL');
- if(!citations.length||citations.some(id=>!allowed.has(id)))issues.push('UNVERIFIED_EVIDENCE_REFERENCE');
+ if((!caseInput.allowDraftOnly&&!citations.length)||citations.some(id=>!allowed.has(id)))issues.push('UNVERIFIED_EVIDENCE_REFERENCE');
  if(/идентификаторентификатор|писио|proposal¬/i.test(title+' '+subject))issues.push('MALFORMED_TEXT');
  return Object.freeze({accepted:issues.length===0,issues,title,subject,evidenceIds:citations,reviewRequired:true});
 }
