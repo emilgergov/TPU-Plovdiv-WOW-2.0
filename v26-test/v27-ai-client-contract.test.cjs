@@ -30,7 +30,7 @@ vm.runInContext(source,context);
  await assert.rejects(()=>client.generate(payload,'test-token'),/надвишава допустимия обем/);
  body={reviewRequired:true,draft:'[[LEGAL]]\\nПраво.\\n[[CHARACTERIZATION]]\\nФакти.\\n[[PROCEDURE]]\\nПроцедура.\\n[[IMPACTS]]\\nЕфекти.'};
  await assert.rejects(()=>client.generate(payload,'test-token'),/правилния ред/);
- body={reviewRequired:true,draft:goodDraft+'\\n[[LEGAL]]\\nПовторение.'};
+  body={reviewRequired:true,draft:goodDraft+String.fromCharCode(10)+'[[LEGAL]]'+String.fromCharCode(10)+'Повторение.'};
  await assert.rejects(()=>client.generate(payload,'test-token'),/правилния ред/);
  const count=calls.length;
  await assert.rejects(()=>client.generate(payload,''),/токен/);
