@@ -378,27 +378,25 @@ function v26RepairSubjectOCR(t){
 }
 function v26CleanQuotedTitle(t){return v26NormalizeTitle(t).replace(/^[\s.,„“"'«»]+/g,'').replace(/[\s.,„“"'«»]+$/g,'').replace(/[„“"'«»]+\s*(?=Склад\b)/g,'„').replace(/\s+/g,' ').trim()}
 function v26CleanSubjectHeading(){
- const clean=v26CleanQuotedTitle;
- const raw=clean(v26CaseTitle||subjectTitle.value).replace(/^Относно:\s*/i,'').replace(/^Уведомление за инвестиционно предложение\s*\(ИП\)\s*:\s*/i,'').trim();
+ const raw=v26CleanQuotedTitle(v26CaseTitle||subjectTitle.value)
+  .replace(/^Относно:\s*/i,'')
+  .replace(/^Уведомление за инвестиционно предложение\s*\(ИП\)\s*:\s*/i,'')
+  .replace(/идентификатор(?:идентификатор|ентификатор)+/gi,'идентификатор')
+  .replace(/\s*,\s*/g,', ').replace(/\s+/g,' ').trim();
+ const cadastral=/\b\d{5}\.\d+\.\d+\b/;
+ // Location is reconstructed from confirmed parcels; never preserve a second copy from OCR.
+ const first=raw.search(cadastral);
+ let description=first<0?raw:raw.slice(0,first);
+ description=description
+  .replace(/(?:[,;\s]+|\s+[—–-]\s*)*(?:(?:в|на)\s+)?(?:ПИ|поземлен имот|имот)?\s*(?:с\s+)?(?:идентификатор|идентификато|ИД)\s*$/i,'')
+  .replace(/\s*(?:[,;—–-]\s*)?(?:местоположение|местност|населено място|община|област)\s*[:\-]?\s*[^,;]*$/i,'')
+  .replace(/\s*,\s*/g,', ').replace(/\s+/g,' ').replace(/[,;\s]+$/,'').trim();
+ description=v26CleanQuotedTitle(description);
  const locationText=(v26Semantic?.location||[]).join(' ');
  const locationIds=locationText.match(/\b\d{5}\.\d+\.\d+\b/g)||[];
  const ids=[...new Set([...locationIds,...words($('ids').value)])];
  const primary=confirmedRoles?Object.keys(confirmedRoles).filter(id=>confirmedRoles[id]==='leading'):[];
  const chosen=primary.length?primary:ids;
- // Keep descriptive subject text; strip the location tail once, not individual words.
- let description=raw.replace(/\s*(?:[,;—–-]\s*)?(?:в\s+)?(?:ПИ|поземлен имот|имот)\s+(?:с\s+)?(?:идентификатор(?:ентификатор|ентификатор)?|ИД)\s*\d{5}\.\d+\.\d+[\s\S]*$/i,'').trim();
- description=description.replace(/\s*(?:[,;—–-]\s*)?(?:местоположение|местност|населено място|община|област)\s*[:\-]?\s*[^,;]*$/i,'').trim();
- description=clean(description||raw)
-  .replace(/идентификатор(?:ентификатор|идентификатор)+/gi,'идентификатор')
-  .replace(/\s*,\s*/g,', ').replace(/\s+/g,' ').trim();
- // Strip the first cadastral reference and all following location/land-use descriptors.
- const firstId=description.search(/\b\d{5}\.\d+\.\d+\b/);
- if(firstId>=0){
-  const prefix=description.slice(0,firstId).replace(/(?:\s|[,;])*?(?:(?:в|на)\s+)?(?:ПИ|поземлен имот|имот)?\s*(?:с\s+)?(?:идентификатор)+\s*$/i,'').replace(/[,;\s]+$/,'').trim();
-  if(prefix.length>=12)description=clean(prefix);
- }
- // Ensure a single, canonical parcel/location suffix; source title remains available separately.
-
  const pieces=[];
  if(chosen.length)pieces.push('ПИ с идентификатор'+(chosen.length>1?'и':'')+' '+chosen.join(', '));
  const matched=found.filter(x=>chosen.includes(x.cadnum));
@@ -406,9 +404,7 @@ function v26CleanSubjectHeading(){
  const localities=[...new Set(matched.map(x=>x.locality).filter(Boolean))];
  if(settlements.length===1)pieces.push('населено място '+settlements[0]);
  if(localities.length===1)pieces.push('местност '+localities[0]);
- const normalized=description.toLocaleLowerCase('bg');
- const unique=pieces.filter((piece,i)=>!pieces.slice(0,i).includes(piece)&&!normalized.includes(piece.toLocaleLowerCase('bg')));
- return (description?'„'+description+'“':'Предмет на инвестиционното предложение — ЗА ЕКСПЕРТНО УТОЧНЯВАНЕ')+(unique.length?' — '+unique.join(', '):'');
+ return (description?'„'+description+'“':'Предмет на инвестиционното предложение — ЗА ЕКСПЕРТНО УТОЧНЯВАНЕ')+(pieces.length?' — '+pieces.join(', '):'');
 }
 function v26RefreshSubjectHeading(){if(wordHeading.dataset.edited==='1'||window.V26SubjectContext)return;wordHeading.value=v26CleanSubjectHeading();invalidateSubject()}
 function populateSubject(d){
