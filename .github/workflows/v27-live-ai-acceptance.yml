@@ -1,0 +1,52 @@
+name: V27.2 Live AI acceptance (synthetic only)
+on:
+  push:
+    paths:
+      - '.github/workflows/v27-live-ai-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm synthetic-only live test gate
+        run: |
+          echo 'Live AI request is manual only; no paid calls on push.'
+  live-ai:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      AI_AUTHOR_ACCESS_TOKEN: ${{ secrets.AI_AUTHOR_ACCESS_TOKEN }}
+    steps:
+      - name: Check configured token without revealing it
+        shell: bash
+        run: |
+          if [[ -z "$AI_AUTHOR_ACCESS_TOKEN" ]]; then
+            echo "::error::GitHub secret AI_AUTHOR_ACCESS_TOKEN is not configured. No AI request sent."
+            exit 1
+          fi
+      - name: Request exactly one synthetic expert draft and validate provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload='{"mode":"expert","facts":{"subject":"Синтетичен тест: изграждане на малък склад за инвентар; без реален възложител или преписка","parcelIds":["99999.999.9999"],"location":"НЯМА ДАННИ","gisFindings":"Няма извършена реална ГИС проверка; не се правят заключения за защитени зони.","legalReferences":"Няма проверени нормативни разпоредби.","evidenceNotes":"Само несекретни измислени данни за проверка на AI автора."}}'
+          status="$(curl --silent --show-error --max-time 45 -o /tmp/v27-ai-response.json -w '%{http_code}' -X POST 'https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/author' -H "Authorization: Bearer $AI_AUTHOR_ACCESS_TOKEN" -H 'Content-Type: application/json' --data "$payload")"
+          echo "AI endpoint HTTP: $status"
+          if [[ "$status" != "200" ]]; then
+            node -e 'const d=require("/tmp/v27-ai-response.json"); console.error("Provider status:",d.providerStatus||"none");'
+            exit 1
+          fi
+          node - <<'NODE'
+          const fs=require('node:fs'),crypto=require('node:crypto');
+          const d=JSON.parse(fs.readFileSync('/tmp/v27-ai-response.json','utf8'));
+          if(d.reviewRequired!==true||d.mode!=='expert'||typeof d.draft!=='string')throw Error('Invalid author response');
+          const draft=d.draft.trim(),required=['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'];
+          const sections=[...draft.matchAll(/^\s*\[\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\]\]\s*$/gm)].map(x=>x[1]);
+          if(draft.length>9000||sections.length!==4||required.some((x,i)=>sections[i]!==x))throw Error('AI output section contract failed');
+          if(!required.every(x=>draft.split('[['+x+']]')[1]?.trim()))throw Error('Empty AI section');
+          console.log('Real AI author response PASS; sections:',sections.join(','),'characters:',draft.length,'SHA256:',crypto.createHash('sha256').update(draft).digest('hex'));
+          console.log('Draft content intentionally excluded from CI logs and artifacts.');
+          NODE
+
