@@ -36,9 +36,9 @@ async function suggest({token,preview,parcelIds,epochAtStart}){
  const controller=new AbortController();activeController=controller;const timer=setTimeout(()=>controller.abort(),35000);
  try{
   const payload={mode:'classic',facts:{subject:input.existingSubject,parcelIds,location:input.location||'',evidenceNotes:'Редакция само на предоставения предмет на ИП; без добавяне на нови факти.',dossierExcerpts:limited.slice(0,25).map(f=>({file:f.file||'',excerpt:f.quote||f.value||''}))}};
-  const response=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(payload),signal:controller.signal,cache:'no-store'});
-  const data=await response.json();
-  if(!response.ok)throw Error('AI анализът не е достъпен ('+response.status+').');
+  let response;try{response=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(payload),signal:controller.signal,cache:'no-store'});}catch(e){throw Error('Мрежова/CORS грешка към /author: '+(e?.message||String(e))+'. Проверете OPTIONS заявката в браузъра.');}
+  let data;try{data=await response.json();}catch{throw Error('AI услугата върна невалиден JSON (HTTP '+response.status+').');}
+  if(!response.ok)throw Error('AI /author HTTP '+response.status+(data?.error?': '+data.error:'')+'.');
   const section=String(data.draft||'').match(/\[\[CHARACTERIZATION\]\]([\s\S]*?)\[\[LEGAL\]\]/);
   if(!section)throw Error('AI услугата не върна очаквания раздел за характеристика.');
   const candidate=section[1].trim().replace(/\s+/g,' ');
