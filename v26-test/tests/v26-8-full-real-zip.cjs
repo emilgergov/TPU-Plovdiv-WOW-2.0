@@ -31,13 +31,14 @@ async function run(scenario,annex2,v27=false){
    assert(xml.includes(id),'DOCX parcel missing: '+name);
    assert(xml.includes('Тестов адресат'),'DOCX recipient missing: '+name);
    assert(doc.file('word/styles.xml'),'Original template styles missing');
+   if(v27&&name.includes('Eksperten')){for(const phrase of ['Описание.','Правна част.','Процедура.','Въздействия.'])assert(xml.includes(phrase),'Missing AI section in DOCX: '+phrase);}
    if(name.includes('Eksperten')){assert(doc.file('word/media/v27-gis-overview.png'),'Expert Word must embed GIS map');assert(xml.includes('rIdV27GISMap'),'GIS image must be referenced in expert Word');}
   }else if(name.endsWith('.pdf')){
    assert.equal(bytes.subarray(0,5).toString(),'%PDF-');
    const parsed=await pdfParse(bytes);
    assert(parsed.numpages>=1);
    assert(parsed.text.includes(id),'PDF parcel missing: '+name);
-  }else assert(bytes.toString('utf8').includes('РАБОТЕН ПАКЕТ'));
+  }else {const readme=bytes.toString('utf8');assert(readme.includes('РАБОТЕН ПАКЕТ'));if(v27){assert(readme.includes('SHA-256 на AI авторския текст: '));assert(readme.includes('Режим: AI автор'));}}
  }
  console.log('PASS full real ZIP scenario '+scenario+', PDF2 '+annex2+': '+expected.length+' files');
 }
