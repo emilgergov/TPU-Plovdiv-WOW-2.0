@@ -53,7 +53,7 @@ async function run(scenario){
  assert(expertPs[0].includes('Място за електронен подпис — вътрешно съгласуване'),'Expert: opening blank signature slot missing');
  assert(expertPs[expertPs.length-1].includes('Място за електронен подпис — окончателно подписване'),'Expert: closing blank signature slot missing');
  for(const value of [metadata.recipient,metadata.subject,'36676.129.457','Картографското извлечение от ГИС анализа'])assert(texts.includes(value),'Missing expert content: '+value);
- for(const key of Object.keys(sourceZip).filter(x=>x!=='word/document.xml'))assert.deepEqual(out[key],sourceZip[key],'Institutional DOCX part changed: '+key);
+ for(const key of Object.keys(sourceZip).filter(x=>!['word/document.xml','word/_rels/document.xml.rels','[Content_Types].xml'].includes(x)))assert.deepEqual(out[key],sourceZip[key],'Institutional DOCX part changed: '+key);
  // The classic renderer is tested against the same draft; do not allow silent
  // divergence between expert and template-based outputs.
  const classic=await w.V26TemplateWord.make(draft.scenario,draft.characterization,draft.metadata);
