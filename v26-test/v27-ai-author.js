@@ -14,7 +14,7 @@ async function generate(payload,token){
   const draft=data.draft.trim();
   if(draft.length>9000)throw Error('V27.2: AI текстът надвишава допустимия обем; документът не се генерира от съкратен текст.');
   const required=['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'];
-  const headings=[...draft.matchAll(/^\\s*\\[\\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\\]\\]\\s*$/gm)].map(x=>x[1]);
+  const headings=[...draft.matchAll(/^\s*\[\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\]\]\s*$/gm)].map(x=>x[1]);
   if(headings.length!==4||required.some((key,i)=>headings[i]!==key))throw Error('V27.2: AI отговорът няма четирите раздела в правилния ред.');
   return draft;
  }finally{clearTimeout(timer)}
