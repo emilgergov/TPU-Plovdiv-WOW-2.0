@@ -44,7 +44,7 @@ assert(html.indexOf("window.V26WordReview.getWorkingDraft()")<html.indexOf("if(!
 assert(html.includes('ГИС анализ · PDF')&&html.includes('Нормативни референции · PDF')&&html.includes('Изготви проектите · Word'),'KT14 short UI labels must be retained');
 assert(pkg.includes('const zones=results.flatMap'),'GIS scenarios must consider every parcel, not only leading parcel');
 assert(pkg.includes('results.every(r=>r.intersection_verified_outside===true)'),'Scenario A requires verified outside status for every parcel');
-assert(pkg.includes('V26ExpertWord.make(expertDraft,{mapSvg:register?.mapSvg||null})'),'GIS map must reach expert Word generator');
+assert(pkg.includes('V26ExpertWord.make(expertDraft,{mapSvg:overviewMap})')&&pkg.includes('if(!overviewMap)throw Error'),'GIS map must reach expert Word generator');
 assert(word.includes('word/media/v27-gis-overview.png')&&word.includes('mapParagraph(doc)'),'Expert Word must package an actual embedded map image');
 assert(pkg.includes("classicWord===expertWord"),'ZIP must reject identical Word outputs');
 assert(word.includes("slice(0,scenario==='A'?5:7)"),'Expert Word must select 5/7 legal findings from GIS scenario');
