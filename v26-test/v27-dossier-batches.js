@@ -8,14 +8,14 @@ function prepare(preview,{chunkChars=5000,maxTotalChars=400000}={}){
  for(let i=0;i<source.length;i++){
   const f=source[i],file=tidy(f.path||f.file||'Документ '+(i+1)).slice(0,220),content=typeof f.text==='string'?f.text:'';
   const error=tidy(f.error||'');
-  if(error||!content.trim()){manifest.push({file,status:'unreadable',reason:error||'Няма извлекаем текст',characters:0,chunks:0});continue;}
+  if(error||!content.trim()){manifest.push({file,documentIndex:i,status:'unreadable',reason:error||'Няма извлекаем текст',characters:0,chunks:0});continue;}
+  if(total+content.length>maxTotalChars){manifest.push({file,documentIndex:i,status:'over_budget',reason:'Лимит на общия текст; необходимо е отделно обработване',characters:content.length,chunks:0});continue;}
   total+=content.length;
-  if(total>maxTotalChars){manifest.push({file,status:'over_budget',reason:'Лимит на общия текст; необходимо е отделно обработване',characters:content.length,chunks:0});continue;}
   let chunks=0;
   for(let pos=0;pos<content.length;pos+=chunkChars){
-   batches.push({file,part:++chunks,start:pos,end:Math.min(pos+chunkChars,content.length),text:content.slice(pos,pos+chunkChars)});
+   batches.push({file,documentIndex:i,part:++chunks,start:pos,end:Math.min(pos+chunkChars,content.length),text:content.slice(pos,pos+chunkChars)});
   }
-  manifest.push({file,status:'prepared',characters:content.length,chunks});
+  manifest.push({file,documentIndex:i,status:'prepared',characters:content.length,chunks});
  }
  const omitted=manifest.filter(x=>x.status!=='prepared');
  return Object.freeze({schema:'V27_DOSSIER_BATCHES_V1',manifest,batches,complete:omitted.length===0,omittedCount:omitted.length,sourceCount:source.length});
