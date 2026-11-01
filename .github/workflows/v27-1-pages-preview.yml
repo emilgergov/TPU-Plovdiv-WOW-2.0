@@ -1,4 +1,5 @@
 name: V27.1 isolated public browser preview
+# Refresh isolated preview after native ZIP selector correction.
 on:
   push:
     branches: [main]
