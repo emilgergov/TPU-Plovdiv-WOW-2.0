@@ -16,6 +16,7 @@ function zipWriter(){
  function u32(a,o,v){u16(a,o,v&65535);u16(a,o+2,Math.floor(v/65536))}
  const api={
   file(name,data){entries.push({name:String(name),data});return api},
+  names(){return entries.map(e=>e.name)},
   folder(prefix){return {file(name,data){api.file(prefix+'/'+name,data);return this}}},
   async generateAsync(){
    if(entries.length===5&&entries.some(e=>String(e.name).endsWith('.docx'))){
@@ -343,7 +344,8 @@ async function make(results,roles,register){
  }
  z.file('README_BG.txt',evidenceLines.join('\n')+'\n');
  const packageFiles=['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_Prilozhenie_1_GIS_analiz.pdf','04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf','README_BG.txt'];
- if(z.__count!==undefined&&z.__count!==5)throw Error('V27.1: ZIP пакетът трябва да съдържа точно пет файла.');
+ const actualFiles=z.names();
+ if(actualFiles.length!==packageFiles.length||packageFiles.some(name=>!actualFiles.includes(name)))throw Error('V27.1: ZIP пакетът трябва да съдържа точно петте задължителни файла.');
  const packageBlob=await z.generateAsync({type:'blob'});if(packageBlob.size<300||new TextDecoder().decode(await packageBlob.slice(0,2).arrayBuffer())!=='PK')throw Error('Неуспешно пакетиране в ZIP.');return packageBlob;
 }
 async function standalonePDF(results,kind,register){if(!results?.length)throw Error('Първо изпълнете ГИС справката.');if(kind!==2&&!results.some(r=>r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type))))throw Error('Липсва имотна геометрия за PDF №1. Заредете архивната геометрия и изпълнете справката отново.');await ensurePDF();return pdfBlob(kind===2?normativePdf(results,register):gisPdf(results,register))}
