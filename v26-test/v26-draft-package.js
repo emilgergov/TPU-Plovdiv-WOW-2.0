@@ -323,6 +323,14 @@ async function make(results,roles,register){
  const expertWord=await window.V26ExpertWord.make(expertDraft,{mapSvg:overviewMap,requireAiAuthor:Boolean(register?.v27Package)});
  const prefixes=expertDraft.scenario==='Б'?['С реализацията','Електроснабдяването','Водозахранването','Отпадъчните води']:['С реализацията','Електроснабдяването','Водоснабдяването','Отпадъчните води'];
  const classicParagraphs=expertDraft.characterization.map((value,i)=>value.startsWith(prefixes[i])?value:prefixes[i]+' — '+value);
+ // AI supports the characterization only; preserve the canonical A/B template and its four fields.
+ if(register?.v27Package){
+  const ai=String(expertDraft.aiDraft||'');
+  const match=ai.match(/\[\[CHARACTERIZATION\]\]([\s\S]*?)\[\[LEGAL\]\]/);
+  const characterization=match?.[1]?.trim()||'';
+  if(!characterization)throw Error('V27.2: липсва AI характеристика за класическия Word.');
+  classicParagraphs[0]+=' '+characterization;
+ }
  const classicWord=await window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata);
  for(const [label,blob] of [['експертен',expertWord],['класически',classicWord]]){
   if(blob.size<100||new TextDecoder().decode(await blob.slice(0,2).arrayBuffer())!=='PK')throw Error('КТ13: невалиден '+label+' DOCX.');
