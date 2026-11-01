@@ -13,15 +13,15 @@ for(const name of ['v26-expert-draft.js','v26-template-word.js','v26-expert-word
 const id='36676.129.457',geojson={type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Polygon',coordinates:[[[1,1],[2,1],[2,2],[1,2],[1,1]]]},properties:{}}]};
 const metadata={recipient:'Тестов адресат',address:'Тестов адрес',subject:'Тестово инвестиционно предложение',incomingReference:'вх. № 123',salutation:'Уважаеми госпожи и господа,',settlement:'с. Марково',landArea:'землище Марково',legalParagraphs:Array(7).fill('Експертно потвърден тестов текст.'),procedureFinding:'Тестова процедура.',impactFindings:Array(5).fill('Тестово въздействие.')};
 const names=['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_GIS_analiz.pdf','04_Normativni_i_dokumentalni_referencii.pdf','README_BG.txt'];
-async function run(scenario,annex2){
+async function run(scenario,annex2,v27=false){
  const parcel={input:id,cadnum:id,status:'Намерен',geojson,area_m2_source:450,...(scenario==='Б'?{verified_zone_intersections:['BG0002057']}:{intersection_verified_outside:true})};
- const register={mapSvg:'<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="white"/></svg>',includeAnnex2:annex2,unifiedContext:{commonEvidence:{findings:[],warnings:[]}},verifiedCaseMetadata:metadata,verifiedCharacterizationParagraphs:['С реализацията на инвестиционното предложение','Електроснабдяването е описано','Водоснабдяването е описано','Отпадъчните води са описани'],records:[{id:'Z1',title:'Тестова заповед BG0002057',zone_code:'BG0002057',source:'https://example.org/zone'}]};
+ const register={...(v27?{v27Package:true,v27AiDraft:'[[CHARACTERIZATION]]\nОписание.\n[[LEGAL]]\nПравна част.\n[[PROCEDURE]]\nПроцедура.\n[[IMPACTS]]\nВъздействия.'}:{}),mapSvg:'<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="white"/></svg>',includeAnnex2:annex2,unifiedContext:{commonEvidence:{findings:[],warnings:[]}},verifiedCaseMetadata:metadata,verifiedCharacterizationParagraphs:['С реализацията на инвестиционното предложение','Електроснабдяването е описано','Водоснабдяването е описано','Отпадъчните води са описани'],records:[{id:'Z1',title:'Тестова заповед BG0002057',zone_code:'BG0002057',source:'https://example.org/zone'}]};
  const originalMake=w.V26ExpertWord.make;
  w.V26ExpertWord=Object.freeze({make:async(draft,options)=>originalMake(draft,{...options,mapPngBytes:new Uint8Array(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lZkAAAAASUVORK5CYII=','base64'))})});
  const blob=await w.V26DraftPackage.make([parcel],{[id]:'leading'},register);
  w.V26ExpertWord=Object.freeze({make:originalMake});
  const zip=await JSZip.loadAsync(await blob.arrayBuffer());
- const expected=annex2?names:names.filter(n=>!n.startsWith('04_'));
+ const expected=(annex2||v27)?names:names.filter(n=>!n.startsWith('04_'));
  assert.deepEqual(Object.keys(zip.files).sort(),expected.slice().sort(),'ZIP contents');
  for(const name of expected){
   const bytes=await zip.file(name).async('nodebuffer');
@@ -41,4 +41,4 @@ async function run(scenario,annex2){
  }
  console.log('PASS full real ZIP scenario '+scenario+', PDF2 '+annex2+': '+expected.length+' files');
 }
-(async()=>{await run('А',false);await run('Б',true)})().catch(e=>{console.error(e);process.exitCode=1});
+(async()=>{await run('А',false);await run('Б',true);await run('А',true,true);await run('Б',true,true)})().catch(e=>{console.error(e);process.exitCode=1});
