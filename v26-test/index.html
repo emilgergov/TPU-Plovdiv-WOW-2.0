@@ -447,7 +447,17 @@ if(window.V27AIFacts?.build&&window.V27AIAuthor?.generate&&window.confirm('V27: 
   try{
    const payload=window.V27AIFacts.build({results:found,roles:confirmedRoles,workingDraft,subject:window.V26SubjectContext?.subject||workingDraft.metadata?.subject||subjectTitle.value,archivePreview:window.V26ArchiveTextPreview,normativeRegister:window.V26NormativeRegister,workingContext:window.V26WorkingContext});
    setStatus('V27: генериране на AI чернова за експертна проверка…');
-   v27AiDraft=await window.V27AIAuthor.generate(payload,token);
+   let expertPayload=payload;
+   if(window.V27ExpertEvidence?.build&&window.V27CaseEvidence?.create&&window.V27VerifiedContext?.gis){
+    const documents=(window.V26ArchiveTextPreview?.files||[]).map(f=>{
+     const body=typeof f.text==='string'?f.text:'';
+     const excerpts=body.split(/[\\r\\n]+|(?<=[.!?])\\s+/).map(x=>x.trim()).filter(x=>x.length>=20).slice(0,20);
+     return {file:f.path||f.file,text:body,error:f.error,facts:excerpts.map(value=>({kind:'dossier_excerpt',value:value.slice(0,1000),quote:value}))};
+    });
+    const evidence=window.V27CaseEvidence.create({documents});
+    expertPayload=window.V27ExpertEvidence.build({legacyPayload:payload,results:found,roles:confirmedRoles,normativeRegister:window.V26NormativeRegister,evidence,confirmedSubject:window.V26SubjectContext?.wordHeading||window.V26SubjectContext?.title||payload.facts.subject});
+   }
+   v27AiDraft=await window.V27AIAuthor.generate(expertPayload,token);
   }catch(error){v27AiFailure=String(error?.message||error);setStatus('V27: AI не е достъпен ('+v27AiFailure+'). Продължаваме със стандартния ZIP.');}
  }
 }
@@ -456,4 +466,5 @@ const blob=await window.V26DraftPackage.make(found,confirmedRoles,{...(window.V2
 <script src="v27-ai-facts.js?v=v27-facts-1"></script>
 <script src="v27-ai-author.js?v=v27-author-1"></script>
 <script src="v26-draft-package.js?v=kt13-5"></script><script src="v26-annex2-browser.js?v=report-20261027-a"></script>
+<script src="v27-verified-context.js?v=v27-1-p5p6"></script><script src="v27-expert-evidence.js?v=v27-1-p7"></script>
 <script src="v27-early-subject-bridge.js?v=v27-1-p4"></script></body></html>
