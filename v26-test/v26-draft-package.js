@@ -331,8 +331,8 @@ async function make(results,roles,register){
  z.file('01_Proekt_na_stanovishte_Klasicheski.docx',classicWord);
  z.file('02_Proekt_na_stanovishte_Eksperten.docx',expertWord);
  await ensurePDF();
- const pdf1=await pdfBlob(gisPdf(results,register));if(pdf1.size<100||await pdf1.slice(0,4).text()!=='%PDF')throw Error('Приложение №1 не е валиден PDF.');z.file('03_Prilozhenie_1_GIS_analiz.pdf',pdf1);
- if(includeAnnex2){const pdf2=await pdfBlob(normativePdf(results,register));if(pdf2.size<100||await pdf2.slice(0,4).text()!=='%PDF')throw Error('Приложение №2 не е валиден PDF.');z.file('04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf',pdf2);}
+ const pdf1=await pdfBlob(gisPdf(results,register));if(pdf1.size<100||await pdf1.slice(0,4).text()!=='%PDF')throw Error('ГИС анализът не е валиден PDF.');z.file('03_GIS_analiz.pdf',pdf1);
+ if(includeAnnex2){const pdf2=await pdfBlob(normativePdf(results,register));if(pdf2.size<100||await pdf2.slice(0,4).text()!=='%PDF')throw Error('Нормативните и документалните референции не са валиден PDF.');z.file('04_Normativni_i_dokumentalni_referencii.pdf',pdf2);}
  const evidenceLines=['РАБОТЕН ПАКЕТ — НЕ Е ОФИЦИАЛНО СТАНОВИЩЕ.','ВНИМАНИЕ: Полетата [ЗА ЕКСПЕРТНА ПРОВЕРКА] са незавършени и изискват проверка от компетентен експерт преди подписване или изпращане.','Съдържа два отделни DOCX проекта (класически и експертен), задължителното PDF приложение №1; приложение №2 е задължително във V27.1 и опционално в наследения V26 маршрут.','Правната приложимост и изводите подлежат на експертна проверка.','','ТЕХНИЧЕСКА ПРОСЛЕДИМОСТ — САМО ЗА ВЪТРЕШНА ПРОВЕРКА'];
  if(dossierEvidence){
   evidenceLines.push('Сценарий (ГИС): '+String(determination.scenario||'неопределен'));
@@ -357,7 +357,7 @@ async function make(results,roles,register){
   evidenceLines.push('Забележка: този запис удостоверява вложения AI текст, но сам по себе си не доказва сигурност на външните услуги.');
  }
  z.file('README_BG.txt',evidenceLines.join('\n')+'\n');
- const packageFiles=['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_Prilozhenie_1_GIS_analiz.pdf',...(includeAnnex2?['04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf']:[]),'README_BG.txt'];
+ const packageFiles=['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_GIS_analiz.pdf',...(includeAnnex2?['04_Normativni_i_dokumentalni_referencii.pdf']:[]),'README_BG.txt'];
  const actualFiles=z.names();
  if(actualFiles.length!==packageFiles.length||packageFiles.some(name=>!actualFiles.includes(name)))throw Error('V27.1: ZIP пакетът има неочакван състав.');
  const packageBlob=await z.generateAsync({type:'blob'});if(packageBlob.size<300||new TextDecoder().decode(await packageBlob.slice(0,2).arrayBuffer())!=='PK')throw Error('Неуспешно пакетиране в ZIP.');return packageBlob;
