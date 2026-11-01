@@ -34,18 +34,8 @@ async function run(scenario){
  const draft=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{}});
  const aiDraft=['[[CHARACTERIZATION]]','Конкретна характеристика на тестов склад и офиси.','[[LEGAL]]','Конкретна правна преценка по тестовите материали.','[[PROCEDURE]]','Конкретна процедурна преценка по тестовите материали.','[[IMPACTS]]','Конкретни въздействия на тестовия склад.'].join('\n');
  const enriched=w.V26ExpertDraft.build({results:[{input:'36676.129.457',location:'гр. Пловдив, община Пловдив, област Пловдив'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft});
- const svg='<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="white"/></svg>';
  const mapPngBytes=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lZkAAAAASUVORK5CYII=','base64');
- const StubImage=class{set src(value){this.onload?.()}};
- const stubUrl={createObjectURL:()=> 'blob:test-map',revokeObjectURL:()=>{}};
- const realCreate=w.document.createElement.bind(w.document);
- w.document.createElement=function(name,...args){
-  if(name==='canvas')return {width:0,height:0,getContext:()=>({fillRect(){},drawImage(){},set fillStyle(value){}}),toBlob:cb=>cb(new Blob([mapPngBytes],{type:'image/png'}))};
-  return realCreate(name,...args);
- };
- context.Image=StubImage;context.URL=stubUrl;
- const blob=await w.V26ExpertWord.make(enriched,{mapSvg:svg});
- w.document.createElement=realCreate;
+ const blob=await w.V26ExpertWord.make(enriched,{mapPngBytes:new Uint8Array(mapPngBytes)});
 
  const out=fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
  assert(out['word/media/v27-gis-overview.png'],'Actual embedded GIS PNG missing');
