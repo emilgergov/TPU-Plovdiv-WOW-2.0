@@ -113,6 +113,19 @@ async function make(scenario,paragraphs,metadata){
   const currentText=nodes(ps[i],'t').map(t=>t.textContent).join('');
   if(originalText!==currentText)throw Error('Променен е фиксиран текст от образеца: абзац '+(i+1));
  }
+ // KT23: fixed template text is immutable, but yellow authoring marks are not part of the final administrative draft.
+ // Remove only yellow shading/highlighting in document body; preserve text, run styling, logos and original templates.
+ const yellow=/^(?:ffff00|fff2cc|ffeb9c|ffff99|yellow)$/i;
+ for(const p of ps){
+  for(const n of [...nodes(p,'highlight')]){
+   const v=n.getAttributeNS(NS,'val')||n.getAttribute('w:val')||n.getAttribute('val')||'';
+   if(yellow.test(v))n.parentNode.removeChild(n);
+  }
+  for(const n of [...nodes(p,'shd')]){
+   const v=n.getAttributeNS(NS,'fill')||n.getAttribute('w:fill')||n.getAttribute('fill')||'';
+   if(yellow.test(v))n.parentNode.removeChild(n);
+  }
+ }
  // Technical provenance belongs in the ZIP README, never after the official signatures.
  // Preserve original template package parts: the generated proposal only edits document.xml.
  const protectedParts=Object.keys(zip).filter(name=>name!=='word/document.xml');
