@@ -1,7 +1,9 @@
 // TPU Plovdiv AI Author V27 — isolated test-only authoring gateway.
 // Never send an OpenAI key to the browser. Authorization is fail-closed.
 const headers = { "Content-Type":"application/json; charset=utf-8", "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff", "Access-Control-Allow-Origin":"null" };
-const reply = (body,status=200) => new Response(JSON.stringify(body),{status,headers});
+const ALLOWED_ORIGIN="https://emilgergov.github.io";
+const reply = (body,status=200,origin="") => new Response(JSON.stringify(body),{status,headers:{...headers,...(origin===ALLOWED_ORIGIN?{"Access-Control-Allow-Origin":ALLOWED_ORIGIN,"Vary":"Origin"}:{})}});
+
 const MAX_BYTES = 16000;
 const allowed = new Set(["classic","expert"]);
 const text = (value,max=3000) => typeof value === "string" ? value.slice(0,max).trim() : "";
@@ -19,12 +21,8 @@ function validate(input) {
     evidenceNotes:text(f.evidenceNotes,1500), registration:text(f.registration,150)
   }};
 }
-export default {
- async fetch(request,env) {
+async function handleAuthor(request,env) {
   const url=new URL(request.url);
-  if(request.method==="GET" && (url.pathname==="/" || url.pathname==="/health")) {
-   return reply({service:"TPU Plovdiv AI Author V27",status:"online",apiKeyConfigured:Boolean(env.OPENAI_API_KEY),aiGenerationEnabled:Boolean(env.OPENAI_API_KEY && env.AI_AUTHOR_ACCESS_TOKEN)});
-  }
   if(url.pathname!=="/author") return reply({error:"Not found"},404);
   if(request.method!=="POST") return reply({error:"Method not allowed"},405);
   // No paid calls until a separate access token is configured and supplied.
@@ -56,5 +54,26 @@ export default {
    return reply({mode:input.mode,draft:output,reviewRequired:true,source:"user-supplied structured test facts"});
   } catch {return reply({error:"AI request timed out or failed"},504)}
   finally {clearTimeout(timeout)}
+}
+
+export default {
+ async fetch(request,env) {
+  const url=new URL(request.url);
+  const origin=request.headers.get("Origin")||"";
+  if(request.method==="OPTIONS" && url.pathname==="/author") {
+   if(origin!==ALLOWED_ORIGIN) return new Response(null,{status:403});
+   return new Response(null,{status:204,headers:{"Access-Control-Allow-Origin":ALLOWED_ORIGIN,"Access-Control-Allow-Methods":"POST","Access-Control-Allow-Headers":"Authorization, Content-Type","Access-Control-Max-Age":"600","Vary":"Origin"}});
+  }
+  if(origin===ALLOWED_ORIGIN && url.pathname==="/author" && request.method==="POST") {
+   // Return the same authenticated response with exact-origin CORS, never wildcard.
+   const response=await handleAuthor(request,env);
+   const h=new Headers(response.headers);h.set("Access-Control-Allow-Origin",ALLOWED_ORIGIN);h.set("Vary","Origin");
+   return new Response(response.body,{status:response.status,headers:h});
+  }
+
+  if(request.method==="GET" && (url.pathname==="/" || url.pathname==="/health")) {
+   return reply({service:"TPU Plovdiv AI Author V27",status:"online",apiKeyConfigured:Boolean(env.OPENAI_API_KEY),aiGenerationEnabled:Boolean(env.OPENAI_API_KEY && env.AI_AUTHOR_ACCESS_TOKEN)});
+  }
+  return handleAuthor(request,env);
  }
 };
