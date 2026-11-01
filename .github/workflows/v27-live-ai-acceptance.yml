@@ -1,8 +1,20 @@
 name: V27.2 Live AI acceptance (synthetic only)
 on:
+  push:
+    paths:
+      - '.github/workflows/v27-live-ai-acceptance.yml'
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm synthetic-only live test gate
+        run: |
+          echo 'Live AI request is manual only; no paid calls on push.'
   live-ai:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     env:
@@ -37,3 +49,4 @@ jobs:
           console.log('Real AI author response PASS; sections:',sections.join(','),'characters:',draft.length,'SHA256:',crypto.createHash('sha256').update(draft).digest('hex'));
           console.log('Draft content intentionally excluded from CI logs and artifacts.');
           NODE
+
