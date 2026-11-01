@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs');
 const html=fs.readFileSync(__dirname+'/index.html','utf8');
 for(const name of ['v27-case-evidence.js','v27-verified-context.js','v27-expert-evidence.js'])assert.ok(html.includes('src="'+name+'?'),name+' missing');
-const p=html.indexOf('window.V27ExpertEvidence.build('),g=html.indexOf('v27AiDraft=await window.V27AIAuthor.generate(expertPayload,token)');
+const p=html.indexOf('window.V27ExpertEvidence.build('),g=html.indexOf('const proposedDraft=await window.V27AIAuthor.generate(expertPayload,token)');
 assert.ok(p>0&&g>p,'verified payload must precede AI call');
 assert.ok(html.includes('window.V27CaseEvidence.create({documents})'));
 assert.ok(html.includes('V27DraftQuality.inspect('));
