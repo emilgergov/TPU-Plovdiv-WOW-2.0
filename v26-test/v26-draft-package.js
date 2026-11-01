@@ -319,7 +319,8 @@ async function make(results,roles,register){
  if(!window.V26ExpertWord?.make)throw Error('КТ13: липсва генераторът за експертния Word.');
  const overviewMap=results.length>1?(window.V27MultiParcelMap?.build(results,register?.zoneFeatures||[])||null):(register?.mapSvg||null);
  if(!overviewMap)throw Error('Липсва обзорната ГИС карта за експертния Word. Изпълнете картографския анализ преди създаване на пакета.');
- const expertWord=await window.V26ExpertWord.make(expertDraft,{mapSvg:overviewMap});
+ if(register?.v27Package&&!String(register.v27AiDraft||'').trim())throw Error('V27.2: липсва AI авторски текст; експертният Word не може да се замени със стандартен.');
+ const expertWord=await window.V26ExpertWord.make(expertDraft,{mapSvg:overviewMap,requireAiAuthor:Boolean(register?.v27Package)});
  const prefixes=expertDraft.scenario==='Б'?['С реализацията','Електроснабдяването','Водозахранването','Отпадъчните води']:['С реализацията','Електроснабдяването','Водоснабдяването','Отпадъчните води'];
  const classicParagraphs=expertDraft.characterization.map((value,i)=>value.startsWith(prefixes[i])?value:prefixes[i]+' — '+value);
  const classicWord=await window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata);
