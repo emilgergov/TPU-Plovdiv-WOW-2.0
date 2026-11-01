@@ -1,0 +1,39 @@
+/* V27.1 P10: mock author E2E contract, no network, secrets or paid calls. */
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+(async()=>{
+ const source=fs.readFileSync(__dirname+'/../src/worker.js','utf8');
+ const script=source.replace(/^import \{handleEarlySubject\} from '\.\/early-subject\.js';\s*/,"const handleEarlySubject=async()=>new Response('{}');\n").replace('export default {','globalThis.__worker = {');
+ const context=vm.createContext({Response,Request,Headers,URL,AbortController,setTimeout,clearTimeout,console,fetch:async()=>{throw Error('unexpected provider request')}});
+ vm.runInContext(script,context,{filename:'worker.js'});
+ const worker=context.__worker,origin='https://emilgergov.github.io';
+ const env={OPENAI_API_KEY:'mock-key',AI_AUTHOR_ACCESS_TOKEN:'mock-access'};
+ let calls=0,seen=null,providerStatus=200;
+ context.fetch=async(url,options)=>{
+  assert.equal(url,'https://api.openai.com/v1/responses');calls++;
+  seen=JSON.parse(options.body);
+  assert.equal(seen.store,false);
+  return new Response(providerStatus===200?JSON.stringify({output:[{content:[{type:'output_text',text:'[[CHARACTERIZATION]]\\nТестов проект\\n[[LEGAL]]\\nНЯМА ДАННИ\\n[[PROCEDURE]]\\nЗа проверка\\n[[IMPACTS]]\\nЗа проверка'}]}]}):'provider unavailable',{status:providerStatus});
+ };
+ const facts={subject:'Складова сграда',parcelIds:['56784.13.102','56784.13.105','56784.13.106'],gisFindings:'Имотите са извън защитени зони',legalSources:[{id:'law1',title:'Тестов нормативен текст',verification:'article_verified',version:'2026',provisionText:'Тестов проверен член'}],verifiedContext:{scenario:'A',parcels:['56784.13.102','56784.13.105','56784.13.106'].map(id=>({id,role:id.endsWith('102')?'leading':'accompanying',classification:'outside',zones:[]})),documentFacts:[{id:'doc1',kind:'subject',value:'Складова сграда',file:'test.txt'}],legalVerification:[{id:'law1',status:'article_verified'}]}};
+ const req=(auth,body)=>new Request('https://example.test/author',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...(auth?{Authorization:'Bearer '+auth}:{})},body:JSON.stringify(body)});
+ assert.equal((await worker.fetch(req('',{mode:'expert',facts}),env)).status,401);
+ assert.equal(calls,0);
+ const good=await worker.fetch(req('mock-access',{mode:'expert',facts}),env);
+ assert.equal(good.status,200);assert.equal((await good.json()).reviewRequired,true);
+ assert.equal(calls,1);
+ const sent=JSON.parse(seen.input[1].content);
+ assert.equal(sent.verifiedContext.parcels.length,3);
+ assert.equal(sent.verifiedContext.scenario,'A');
+ assert.equal(sent.legalSources[0].provisionText,'Тестов проверен член');
+ assert.equal(sent.verifiedContext.documentFacts[0].file,'test.txt');
+ providerStatus=503;
+ const failed=await worker.fetch(req('mock-access',{mode:'expert',facts}),env);
+ assert.equal(failed.status,502);
+ assert.equal((await failed.json()).error,'AI provider request failed');
+ assert.equal(calls,2);
+ const screen=fs.readFileSync(__dirname+'/../../../v26-test/index.html','utf8');
+ assert.ok(screen.includes('V27DraftQuality.inspect('));
+ assert.ok(screen.includes('window.V26DraftPackage.make('));
+ assert.ok(screen.includes('v27AiDraft=proposedDraft'));
+ console.log('V27.1 P10 mock: three parcels, provenance, auth, AI success/failure, fallback integration PASS');
+})().catch(e=>{console.error(e);process.exitCode=1});
