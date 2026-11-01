@@ -33,7 +33,17 @@ try{
     assert.equal(data.reviewRequired,true);
     assert.match(data.draft,/ПРОЕКТ/);
   }
-  assert.equal(calls,2);
+  const origin='https://emilgergov.github.io';
+  const preflight=await worker.fetch(new Request(url,{method:'OPTIONS',headers:{Origin:origin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'authorization,content-type'}}),env);
+  assert.equal(preflight.status,204);
+  assert.equal(preflight.headers.get('Access-Control-Allow-Origin'),origin);
+  const deniedPreflight=await worker.fetch(new Request(url,{method:'OPTIONS',headers:{Origin:'https://untrusted.example'}}),env);
+  assert.equal(deniedPreflight.status,403);
+  const browserRequest=new Request(url,{method:'POST',headers:{Origin:origin,Authorization:'Bearer test-access-token','Content-Type':'application/json'},body:JSON.stringify({mode:'expert',facts})});
+  const browserResponse=await worker.fetch(browserRequest,env);
+  assert.equal(browserResponse.status,200);
+  assert.equal(browserResponse.headers.get('Access-Control-Allow-Origin'),origin);
+  assert.equal(calls,3);
   console.log('PASS: health, unauthorized access, invalid input, classic and expert AI drafting (mock provider).');
   console.log('No real OpenAI API calls made; live generation still requires separate verification.');
 } finally {globalThis.fetch=savedFetch}
