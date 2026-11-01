@@ -378,20 +378,27 @@ function v26RepairSubjectOCR(t){
 }
 function v26CleanQuotedTitle(t){return v26NormalizeTitle(t).replace(/^[\s.,„“"'«»]+/g,'').replace(/[\s.,„“"'«»]+$/g,'').replace(/[„“"'«»]+\s*(?=Склад\b)/g,'„').replace(/\s+/g,' ').trim()}
 function v26CleanSubjectHeading(){
- const raw=v26CleanQuotedTitle(v26CaseTitle||subjectTitle.value).replace(/^Относно:\s*/i,'').replace(/^Уведомление за инвестиционно предложение\s*\(ИП\)\s*:\s*/i,'').replace(/^[„"']|[“"']$/g,'').trim();
+ const clean=v26CleanQuotedTitle;
+ const raw=clean(v26CaseTitle||subjectTitle.value).replace(/^Относно:\s*/i,'').replace(/^Уведомление за инвестиционно предложение\s*\(ИП\)\s*:\s*/i,'').trim();
  const locationText=(v26Semantic?.location||[]).join(' ');
  const locationIds=locationText.match(/\b\d{5}\.\d+\.\d+\b/g)||[];
  const ids=[...new Set([...locationIds,...words($('ids').value)])];
  const primary=confirmedRoles?Object.keys(confirmedRoles).filter(id=>confirmedRoles[id]==='leading'):[];
  const chosen=primary.length?primary:ids;
- const displayedRaw=primary.length?raw.replace(/\s*[—–-]?\s*ПИ\s+с\s+идентификатор\s+\d{5}\.\d+\.\d+.*$/i,'').trim():raw;
- const pieces=chosen.length?['ПИ с идентификатор'+(chosen.length>1?'и':'')+' '+chosen.join(', ')]:[];
+ // Keep descriptive subject text; strip the location tail once, not individual words.
+ let description=raw.replace(/\s*(?:[,;—–-]\s*)?(?:в\s+)?(?:ПИ|поземлен имот|имот)\s+(?:с\s+)?(?:идентификатор(?:ентификатор|ентификатор)?|ИД)\s*\d{5}\.\d+\.\d+[\s\S]*$/i,'').trim();
+ description=description.replace(/\s*(?:[,;—–-]\s*)?(?:местоположение|местност|населено място|община|област)\s*[:\-]?\s*[^,;]*$/i,'').trim();
+ description=clean(description||raw);
+ const pieces=[];
+ if(chosen.length)pieces.push('ПИ с идентификатор'+(chosen.length>1?'и':'')+' '+chosen.join(', '));
  const matched=found.filter(x=>chosen.includes(x.cadnum));
  const settlements=[...new Set(matched.map(x=>x.settlement).filter(Boolean))];
  const localities=[...new Set(matched.map(x=>x.locality).filter(Boolean))];
  if(settlements.length===1)pieces.push('населено място '+settlements[0]);
  if(localities.length===1)pieces.push('местност '+localities[0]);
- return (displayedRaw?'„'+v26CleanQuotedTitle(displayedRaw)+'“':'Предмет на инвестиционното предложение — ЗА ЕКСПЕРТНО УТОЧНЯВАНЕ')+(pieces.length?' — '+pieces.join(', '):'');
+ const normalized=description.toLocaleLowerCase('bg');
+ const unique=pieces.filter((piece,i)=>!pieces.slice(0,i).includes(piece)&&!normalized.includes(piece.toLocaleLowerCase('bg')));
+ return (description?'„'+description+'“':'Предмет на инвестиционното предложение — ЗА ЕКСПЕРТНО УТОЧНЯВАНЕ')+(unique.length?' — '+unique.join(', '):'');
 }
 function v26RefreshSubjectHeading(){if(wordHeading.dataset.edited==='1'||window.V26SubjectContext)return;wordHeading.value=v26CleanSubjectHeading();invalidateSubject()}
 function populateSubject(d){
