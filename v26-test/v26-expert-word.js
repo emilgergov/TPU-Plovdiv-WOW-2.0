@@ -91,7 +91,7 @@ async function make(draft,options={}){
  })();
  // Do not let an AI narrative override the GIS determination or assert unverified procedural exemptions.
  const unsupportedAi=x=>/(?:не е приложима процедура|не подлежи на процедура|не се изисква оценка|не попадат в границите на защитени зони или територии|намалява вероятността за задължително|малко вероятно|не показва наличие на рискове)/i.test(x);
- const safeAi=key=>aiSections[key]&&!unsupportedAi(aiSections[key]);
+ const safeAi=key=>aiSections[key]&&!unsupportedAi(aiSections[key])&&!/защитени територии|BG[0-9]{7}|не се налага|не се изисква|не подлежи|няма вероятност|липсват въздействия|липсват рискове|не оказва въздействие/i.test(aiSections[key]);
  const aiProposal=key=>safeAi(key)?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
 
  const mapBytes=options.mapPngBytes?.byteLength?Uint8Array.from(options.mapPngBytes):(options.mapSvg?await mapPng(options.mapSvg):null);
