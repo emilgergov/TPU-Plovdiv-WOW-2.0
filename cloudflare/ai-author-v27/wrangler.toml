@@ -2,3 +2,4 @@ name = "tpu-plovdiv-ai-author-v27"
 main = "src/worker.js"
 compatibility_date = "2026-10-01"
 workers_dev = true
+account_id = "90df5489417e4b53179a852c446aeed1"
