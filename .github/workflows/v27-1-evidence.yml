@@ -16,6 +16,7 @@ on:
       - 'v26-test/v27-verified-context.test.cjs'
       - 'v26-test/v27-expert-evidence.js'
       - 'v26-test/v27-expert-evidence.test.cjs'
+      - 'v26-test/v27-expert-integration.test.cjs'
       - 'v26-test/v27-early-subject-bridge.js'
       - 'v26-test/index.html'
       - 'cloudflare/ai-author-v27/src/early-subject.js'
@@ -39,3 +40,4 @@ jobs:
           node v26-test/v27-early-integration.test.cjs
           node v26-test/v27-verified-context.test.cjs
           node v26-test/v27-expert-evidence.test.cjs
+          node v26-test/v27-expert-integration.test.cjs
