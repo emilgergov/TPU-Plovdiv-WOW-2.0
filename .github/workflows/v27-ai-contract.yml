@@ -19,6 +19,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Check live Worker health and authentication boundary (no paid request)
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev"
+          health="$(curl --fail --silent --show-error --retry 2 --max-time 15 "$base/health")"
+          HEALTH_JSON="$health" node -e 'const d=JSON.parse(process.env.HEALTH_JSON);if(d.status!=="online"||d.service!=="TPU Plovdiv AI Author V27")process.exit(1);console.log("Worker online; AI configured:",Boolean(d.aiGenerationEnabled));'
+          status="$(curl --silent --show-error --max-time 15 -o /dev/null -w '%{http_code}' -X POST "$base/author" -H 'Content-Type: application/json' --data '{"mode":"expert","facts":{"subject":"Synthetic test only","parcelIds":["99999.999.9999"]}}')"
+          echo "Unauthenticated endpoint HTTP: $status"
+          [[ "$status" == "401" || "$status" == "503" ]] || exit 1
       - name: V27 AI author data contract
         run: |
           node v26-test/v27-contract-test.cjs
