@@ -36,10 +36,35 @@ async function docxText(bytes){
  const paragraphs=Array.from(doc.getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','p'));
  return paragraphs.map(p=>Array.from(p.getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','t')).map(t=>t.textContent).join('')).filter(Boolean).join('\n');
 }
+let pdfJsPromise=null;
+async function pdfText(bytes){
+ if(!pdfJsPromise)pdfJsPromise=(async()=>{
+  if(!window.pdfjsLib){
+   const script=document.createElement('script');
+   script.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+   script.crossOrigin='anonymous';
+   await new Promise((resolve,reject)=>{script.onload=resolve;script.onerror=()=>reject(Error('PDF четецът не може да се зареди.'));document.head.appendChild(script)});
+  }
+  if(!window.pdfjsLib?.getDocument)throw Error('PDF четецът не е наличен.');
+  return window.pdfjsLib;
+ })();
+ const lib=await pdfJsPromise;
+ const task=lib.getDocument({data:bytes,disableWorker:true,useSystemFonts:true});
+ const pdf=await task.promise,lines=[];
+ try{
+  for(let pageNo=1;pageNo<=Math.min(pdf.numPages,70);pageNo++){
+   const page=await pdf.getPage(pageNo),content=await page.getTextContent();
+   const text=content.items.map(x=>x.str||'').join(' ').trim();
+   if(text)lines.push('[Страница '+pageNo+'] '+text);
+  }
+ }finally{await pdf.destroy()}
+ if(!lines.length)throw Error('PDF без извлекаем текст (вероятно сканиран).');
+ return lines.join('\n');
+}
 async function entryText(file,e){
  const bytes=await entryBytes(file,e);
  if(/\.docx$/i.test(e.path))return docxText(bytes);
- if(/\.pdf$/i.test(e.path))throw Error('PDF текстът не е извлечен — изисква отделен PDF четец.');
+ if(/\.pdf$/i.test(e.path))return pdfText(bytes);
  return new TextDecoder('utf-8').decode(bytes);
 }
 readButton.onclick=async()=>{
