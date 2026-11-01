@@ -1,7 +1,7 @@
 /* V27.1 P4 — opt-in early AI integration, no changes to existing GIS or document generators.
    Activated only when ZIP preview and parcel IDs are ready. The existing confirmation remains mandatory. */
 (function(root){'use strict';
-const ENDPOINT='https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/subject';
+const ENDPOINT='https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/author';
 const get=id=>document.getElementById(id);
 let epoch=0,active=false,completedKey='',activeController=null;
 const invalidate=()=>{epoch++;completedKey='';if(activeController)activeController.abort();};
@@ -35,19 +35,23 @@ async function suggest({token,preview,parcelIds,epochAtStart}){
  input.unreadable=[...new Set([...(input.unreadable||[]),...missing])];
  const controller=new AbortController();activeController=controller;const timer=setTimeout(()=>controller.abort(),35000);
  try{
-  const response=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(input),signal:controller.signal,cache:'no-store'});
+  const payload={mode:'classic',facts:{subject:input.existingSubject,parcelIds,location:input.location||'',evidenceNotes:'Редакция само на предоставения предмет на ИП; без добавяне на нови факти.',dossierExcerpts:limited.slice(0,25).map(f=>({file:f.file||'',excerpt:f.quote||f.value||''}))}};
+  const response=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(payload),signal:controller.signal,cache:'no-store'});
   const data=await response.json();
   if(!response.ok)throw Error('AI анализът не е достъпен ('+response.status+').');
-  const check=root.V27EarlySubject.validateSuggestion(data,{parcelIds,evidence,allowDraftOnly:draftOnly});
-  if(!check.accepted)throw Error('AI предложението не премина проверката: '+check.issues.join(', '));
+  const section=String(data.draft||'').match(/\[\[CHARACTERIZATION\]\]([\s\S]*?)\[\[LEGAL\]\]/);
+  if(!section)throw Error('AI услугата не върна очаквания раздел за характеристика.');
+  const candidate=section[1].trim().replace(/\s+/g,' ');
+  const check=root.V27EarlySubject.validateSuggestion({title:input.existingTitle||input.existingSubject.slice(0,200),subject:candidate,evidenceIds:[]},{parcelIds,evidence,allowDraftOnly:true});
+  if(!check.accepted)throw Error('AI текстът не е приложен автоматично: '+check.issues.join(', '));
   if(epoch!==epochAtStart||parcels().join(',')!==parcelIds.join(','))return false;
   const heading=get('v26WordHeading'),title=get('v26SubjectTitle'),status=get('v26SubjectStatus');
   if(!heading||!title||!get('v26SubjectEditor')||get('v26SubjectEditor').style.display==='none')return false;
   if(root.V26SubjectContext?.confirmed||get('v26SubjectConfirm')?.disabled)return false;
   if((get('v26WordHeading')?.value||'')!==input.existingSubject||(get('v26SubjectTitle')?.value||'')!==input.existingTitle)return false;
   heading.value=check.subject;heading.dispatchEvent(new Event('input',{bubbles:true}));
-  title.value=check.title;title.dispatchEvent(new Event('input',{bubbles:true}));
-  if(status){status.style.display='block';status.textContent=(draftOnly?'AI редактира алгоритмичния проект без документални откъси. ':'AI предложи предмет и заглавие по '+limited.length+' проверени откъса. ')+(missing.length?'Непрочетени документи: '+missing.join(', ')+'. ':'')+(excluded?'Необхванати откъси: '+excluded+'. ':'')+'Проверете спрямо цялата преписка преди потвърждение.';}
+  /* Keep the existing title: /author does not generate a verified replacement title. */
+  if(status){status.style.display='block';status.textContent=(draftOnly?'AI предложи характеристика чрез съществуващия /author; проверете дали е подходяща за предмет на ИП. ':'AI предложи предмет и заглавие по '+limited.length+' проверени откъса. ')+(missing.length?'Непрочетени документи: '+missing.join(', ')+'. ':'')+(excluded?'Необхванати откъси: '+excluded+'. ':'')+'Проверете спрямо цялата преписка преди потвърждение.';}
   get('v26SubjectEditor').open=true;
   return true;
  }finally{clearTimeout(timer);if(activeController===controller)activeController=null}
