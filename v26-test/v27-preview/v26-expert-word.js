@@ -101,9 +101,9 @@ async function make(draft,options={}){
  const blocks=[
   paragraph(doc,'Място за електронен подпис — вътрешно съгласуване'),
   paragraph(doc,'РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ — НЕ Е АДМИНИСТРАТИВЕН АКТ',{heading:true}),
-  ...(isPending(m.recipient)?[]:[paragraph(doc,m.recipient,{bold:true})]),...(isPending(m.address)?[]:[paragraph(doc,m.address)]),
+  paragraph(doc,m.recipient,{bold:true}),paragraph(doc,m.address),
   paragraph(doc,'Относно: '+subject,{bold:true}),
-  ...(isPending(m.incomingReference)?[]:[paragraph(doc,'Преписка: '+m.incomingReference)]),
+  paragraph(doc,'Преписка: '+m.incomingReference),
   ...(isPending(m.salutation)?[]:[paragraph(doc,m.salutation)]),
   paragraph(doc,'I. ПРЕДМЕТ И ИМОТЕН ОБХВАТ',{heading:true}),
   paragraph(doc,'Предмет на ИП: '+subject),
