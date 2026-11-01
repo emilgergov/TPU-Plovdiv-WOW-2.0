@@ -8,6 +8,8 @@ on:
       - 'v26-test/v27-case-evidence.test.cjs'
       - 'v26-test/v27-dossier-batches.js'
       - 'v26-test/v27-dossier-batches.test.cjs'
+      - 'v26-test/v27-early-subject.js'
+      - 'v26-test/v27-early-subject.test.cjs'
       - '.github/workflows/v27-1-evidence.yml'
   workflow_dispatch:
 jobs:
@@ -22,3 +24,4 @@ jobs:
         run: |
           node v26-test/v27-case-evidence.test.cjs
           node v26-test/v27-dossier-batches.test.cjs
+          node v26-test/v27-early-subject.test.cjs
