@@ -475,4 +475,22 @@ const blob=await window.V26DraftPackage.make(found,confirmedRoles,{...(window.V2
 <script src="v27-preview/v27-multi-parcel-map.js?v=v27-1-p5"></script><script src="v27-preview/v26-draft-package.js?v=kt13-5"></script><script src="v26-annex2-browser.js?v=report-20261027-a"></script>
 <script src="v27-preview/v27-verified-context.js?v=v27-1-p5p6"></script><script src="v27-preview/v27-expert-evidence.js?v=v27-1-p7"></script>
 <script src="v27-preview/v27-draft-quality.js?v=v27-1-p8"></script>
-<script src="v27-preview/v27-early-subject-bridge.js?v=v27-1-p4"></script></body></html>
+<script src="v27-preview/v27-early-subject-bridge.js?v=v27-1-p4"></script><script>
+/* V27.1 intake diagnostics: visible feedback even if the main inline controller fails. */
+(function(){
+  function status(message){var el=document.getElementById('intakeResult');if(el){el.style.display='block';el.textContent=message;}}
+  window.addEventListener('error',function(e){if(e&&e.message)status('Грешка в интерфейса: '+e.message);});
+  window.addEventListener('unhandledrejection',function(e){status('Грешка при обработка: '+String(e.reason&&e.reason.message||e.reason||'неизвестна'));});
+  window.addEventListener('DOMContentLoaded',function(){
+    var input=document.getElementById('casefile'),button=document.getElementById('extract');
+    if(!input||!button)return;
+    input.addEventListener('change',function(){if(input.files&&input.files[0])status('Избран архив: '+input.files[0].name+'. Готов за обработка.');});
+    button.addEventListener('click',function(){
+      var file=input.files&&input.files[0];
+      if(!file){status('Няма избран ZIP архив. Първо изберете файл в стъпка 1.');return;}
+      if(typeof window.V26LocalIntake==='undefined'||typeof window.V26LocalIntake.process!=='function'){status('Грешка: модулът за обработка на ZIP не е зареден.');return;}
+      status('Команда за обработка на '+file.name+' е подадена.');
+    },true);
+  });
+})();
+</script></body></html>
