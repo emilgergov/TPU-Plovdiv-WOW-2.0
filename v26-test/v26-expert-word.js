@@ -113,7 +113,7 @@ async function make(draft,options={}){
   paragraph(doc,'Фигура 1. Пространствено положение на имотите спрямо защитените зони от мрежата „Натура 2000“. Източник: ГИС анализ.'),
   paragraph(doc,'Картографското извлечение от ГИС анализа представя пространствените резултати и имотния обхват; пълният ГИС анализ е в самостоятелен PDF.'),
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
-  ...(aiSections.CHARACTERIZATION?aiProposal('CHARACTERIZATION'):confirmed(draft.characterization).map(x=>paragraph(doc,x))),
+  ...confirmed(draft.characterization).map(x=>paragraph(doc,x)),
 
   paragraph(doc,'IV. ФАКТИЧЕСКИ И ПРАВНИ КОНСТАТАЦИИ',{heading:true}),
   ...(safeAi('LEGAL')?aiProposal('LEGAL'):[paragraph(doc,'Правните основания и приложимата процедура подлежат на експертна проверка по нормативния архив и документите в преписката.')]),
