@@ -17,5 +17,6 @@ for(const id of ids)assert.ok(overlay.includes(id));
 assert.equal(ctx.window.V27MultiParcelMap.build([...results,{input:'missing'}]),null);
 const html=fs.readFileSync(__dirname+'/index.html','utf8'),pkg=fs.readFileSync(__dirname+'/v26-draft-package.js','utf8');
 assert.ok(html.includes('src="v27-multi-parcel-map.js?'));
+assert.ok(html.includes('zoneFeatures:zoneFeatures.filter('),'browser must pass loaded zone geometries to package');
 assert.ok(pkg.includes('window.V27MultiParcelMap?.build(results,register?.zoneFeatures||[])'));
 console.log('P5 multi-parcel expert Word map: 3/3 geometries, fail-closed, no false zone claims PASS');
