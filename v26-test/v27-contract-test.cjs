@@ -17,6 +17,9 @@ assert.equal(payload.facts.legalReferences.includes('НЯМА ДАННИ'),true)
 const rich=root.V27AIFacts.build({results,roles,workingDraft,subject:metadata.subject,archivePreview:{files:[{path:'case.txt',text:'Предвижда се склад за промишлени стоки.'}]},normativeRegister:{records:[{id:'law-1',title:'Закон за опазване на околната среда',source:'МОСВ'}]}});
 assert.equal(rich.facts.dossierExcerpts[0].file,'case.txt');
 assert.match(rich.facts.legalReferences,/Закон за опазване/);
+assert.match(root.V27AIFacts.build({results:[{...results[0],intersection_verified_outside:true}],roles,workingDraft,subject:metadata.subject}).facts.gisFindings,/потвърдено отсъствие/);
+assert.match(payload.facts.gisFindings,/пространственият резултат не е потвърден/);
+assert(!payload.facts.gisFindings.includes('потвърдено отсъствие'));
 assert.throws(()=>root.V27AIFacts.build({results,roles:{},workingDraft}),/роля/);
 assert.throws(()=>root.V27AIFacts.build({results:[{...results[0],geojson:{features:[]}}],roles,workingDraft}),/геометрия/);
 assert.throws(()=>root.V27AIFacts.build({results,roles,workingDraft:{metadata:{}},subject:''}),/предмет/);
