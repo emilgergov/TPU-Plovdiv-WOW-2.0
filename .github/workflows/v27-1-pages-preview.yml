@@ -1,5 +1,5 @@
 name: V27.1 isolated public browser preview
-# Publish independent ZIP intake diagnostic panel.
+# Restore V27.1 controller syntax and block broken preview deployments.
 # Refresh isolated preview after native ZIP selector correction.
 on:
   push:
