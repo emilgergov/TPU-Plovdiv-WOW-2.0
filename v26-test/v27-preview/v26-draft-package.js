@@ -248,7 +248,9 @@ function normativePdf(results,register){
  const review=register?.verifiedCaseMetadata||null;
  const resolvedTitle=String(subject?.title||review?.subject||review?.title||dossier?.subject?.title||dossier?.subject_title||'').trim();
  const confirmed=!!(subject?.confirmed&&resolvedTitle);
- const subjectDisplay=(resolvedTitle||'НЯМА ДАННИ — за експертна проверка.').replace(/\bи\s+зграждането\b/gi,'изграждането').replace(/\bСк\s+лад\b/g,'Склад').replace(/\bпро\s+мишлени\b/gi,'промишлени').replace(/\s*[„“]\s*/g,' ').replace(/\s+/g,' ').trim();
+ const cleanSubject=(value)=>String(value||'').replace(/\\bи\\s+зграждането\\b/gi,'изграждането').replace(/\\bСк\\s+лад\\b/g,'Склад').replace(/\\bпро\\s+мишлени\\b/gi,'промишлени').replace(/\\s*[„“]\\s*/g,' ').replace(/\\s+/g,' ').trim().replace(/[\s,;:.–-]+$/,'').trim();
+ const subjectDisplay=cleanSubject(resolvedTitle)||'НЯМА ДАННИ — за експертна проверка.';
+ const subjectCore=cleanSubject(subjectDisplay.split(/\\s+в\\s+ПИ\\s+(?:с\\s+)?идентификатор(?:\\s+№)?\\s+\\d{5}\\.\\d+\\.\\d+/i)[0]);
  const verifiedLocation=String(review?.location||'').trim();
  const verifiedSettlement=verifiedPlaceLabel(review?.settlement);
  const verifiedLandArea=String(review?.landArea||'').trim();
@@ -280,7 +282,7 @@ function normativePdf(results,register){
   ...applicable.flatMap(r=>[{text:r.title,bold:true,fontSize:9},...r.sources.map((source,i)=>{let label;try{const u=new URL(String(source));label=u.hostname.replace(/^www\./,'')+' — '+(u.pathname.split('/').filter(Boolean).slice(-2).join('/')||'начална страница')+' ('+(i+1)+')'}catch(_){label='Архивна референция '+(i+1)}return {text:label,link:String(source),color:'#165c86',fontSize:8,decoration:'underline'};})]),
   ...(applicable.length?[]:[{text:'В интегрирания нормативен архив няма относима референция за този обхват.'}]),
   {text:'IV. Приложимост към инвестиционното предложение',style:'sub',pageBreak:'before'},
-  {text:resolvedTitle?'За предложение „'+resolvedTitle+'“ относимостта на посочените основания се разглежда спрямо описаните дейности и пространствените резултати от документа „ТПУ Пловдив — ГИС анализ“. Режимите на конкретна зона се преценяват отделно; настоящата справка не установява автоматично допустимост или забрана.':'Предметът и дейностите подлежат на потвърждение преди индивидуална преценка за приложимост на режимите.'},
+  {text:resolvedTitle?'За предложение „'+subjectCore+'“ относимостта на посочените основания се разглежда спрямо описаните дейности и пространствените резултати от документа „ТПУ Пловдив — ГИС анализ“. Режимите на конкретна зона се преценяват отделно; настоящата справка не установява автоматично допустимост или забрана.':'Предметът и дейностите подлежат на потвърждение преди индивидуална преценка за приложимост на режимите.'},
 
   ...zones.map(z=>({text:'Защитена зона '+z.code+(z.name?' „'+z.name+'“':'')+': пространственото пресичане е установено в документа „ТПУ Пловдив — ГИС анализ“. Приложимостта на конкретните режими се преценява спрямо заявените дейности.'})),
   {text:'V. Експертен извод',style:'sub'},
