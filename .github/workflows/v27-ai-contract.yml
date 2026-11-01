@@ -1,0 +1,22 @@
+name: V27 AI Author contract
+on:
+  push:
+    paths:
+      - 'v26-test/v27-*.js'
+      - 'v26-test/v27-contract-test.cjs'
+      - 'v26-test/v26-expert-draft.js'
+      - 'v26-test/v26-expert-word.js'
+      - 'v26-test/v26-draft-package.js'
+      - 'v26-test/index.html'
+      - '.github/workflows/v27-ai-contract.yml'
+  workflow_dispatch:
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: V27 AI author data contract
+        run: node v26-test/v27-contract-test.cjs
