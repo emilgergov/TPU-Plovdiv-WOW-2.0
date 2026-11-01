@@ -33,6 +33,26 @@ try{
     assert.equal(data.reviewRequired,true);
     assert.match(data.draft,/ПРОЕКТ/);
   }
+  // Verify public expert module wiring without invoking a paid provider.
+  const {readFileSync}=await import('node:fs');
+  const {Script,createContext}=await import('node:vm');
+  const root=new URL('../../../v26-test/',import.meta.url);
+  const screen=readFileSync(new URL('index.html',root),'utf8');
+  const packageCode=readFileSync(new URL('v26-draft-package.js',root),'utf8');
+  const expertCode=readFileSync(new URL('v26-expert-word.js',root),'utf8');
+  for(const fragment of ['V27AIFacts.build','V27AIAuthor.generate','v27AiDraft,'])assert.ok(screen.includes(fragment),'missing screen integration: '+fragment);
+  assert.ok(packageCode.includes('aiDraft:register?.v27AiDraft'));
+  assert.ok(expertCode.includes('draft.aiDraft'));
+  const sandbox={window:{}};
+  createContext(sandbox);
+  for(const file of ['v27-ai-facts.js','v26-expert-draft.js'])new Script(readFileSync(new URL(file,root),'utf8')).runInContext(sandbox);
+  const verified=[{input:'40717.28.4',status:'Намерен',geojson:{features:[{geometry:{type:'Polygon'}}]}}];
+  const roles={'40717.28.4':'leading'};
+  const payload=sandbox.window.V27AIFacts.build({results:verified,roles,workingDraft:{metadata:{subject:'Тестово предложение'}}});
+  assert.equal(payload.facts.parcelIds[0],'40717.28.4');
+  assert.throws(()=>sandbox.window.V27AIFacts.build({results:verified,roles:{},workingDraft:{metadata:{subject:'Тест'}}}));
+  const draft=sandbox.window.V26ExpertDraft.build({results:verified,roles,determination:{scenario:'А'},metadata:{parcelIds:'40717.28.4'},paragraphs:['a','b','c','d'],aiDraft:'Тестов AI текст'});
+  assert.equal(draft.aiDraft,'Тестов AI текст');
   const origin='https://emilgergov.github.io';
   const preflight=await worker.fetch(new Request(url,{method:'OPTIONS',headers:{Origin:origin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'authorization,content-type'}}),env);
   assert.equal(preflight.status,204);
