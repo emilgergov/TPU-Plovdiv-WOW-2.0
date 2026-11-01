@@ -31,6 +31,7 @@ async function run(scenario,annex2,v27=false){
    assert(xml.includes(id),'DOCX parcel missing: '+name);
    assert(xml.includes('Тестов адресат'),'DOCX recipient missing: '+name);
    assert(doc.file('word/styles.xml'),'Original template styles missing');
+   if(v27&&name.includes('Klasicheski'))assert(xml.includes('Описание.'),'Classic Word must include AI-supported characterization');
    if(v27&&name.includes('Eksperten')){for(const phrase of ['Описание.','Правна част.','Процедура.','Въздействия.'])assert(xml.includes(phrase),'Missing AI section in DOCX: '+phrase);}
    if(name.includes('Eksperten')){assert(doc.file('word/media/v27-gis-overview.png'),'Expert Word must embed GIS map');assert(xml.includes('rIdV27GISMap'),'GIS image must be referenced in expert Word');}
   }else if(name.endsWith('.pdf')){
