@@ -1,6 +1,10 @@
 name: Deploy Cloudflare AI Author V27
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/ai-author-v27/**'
 permissions:
   contents: read
 jobs:
