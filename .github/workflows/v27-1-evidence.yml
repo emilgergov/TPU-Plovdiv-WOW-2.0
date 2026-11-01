@@ -20,6 +20,8 @@ on:
       - 'v26-test/v27-draft-quality.js'
       - 'v26-test/v27-draft-quality.test.cjs'
       - 'v26-test/v27-contract-test.cjs'
+      - 'v26-test/v27-zip-manifest.test.cjs'
+      - 'v26-test/v26-draft-package.js'
       - 'v26-test/v27-early-subject-bridge.js'
       - 'v26-test/index.html'
       - 'cloudflare/ai-author-v27/src/early-subject.js'
@@ -46,3 +48,4 @@ jobs:
           node v26-test/v27-expert-integration.test.cjs
           node v26-test/v27-draft-quality.test.cjs
           node v26-test/v27-contract-test.cjs
+          node v26-test/v27-zip-manifest.test.cjs
