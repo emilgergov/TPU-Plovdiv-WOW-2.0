@@ -325,6 +325,18 @@ async function make(results,roles,register){
    if(!caseMetadata[key]){const values=[...new Set(results.map(x=>sourceKeys.map(k=>x[k]).find(v=>typeof v==='string'&&v.trim())).filter(Boolean).map(x=>x.trim()))];if(values.length===1&&(key!=='settlement'||verifiedPlaceLabel(values[0])))caseMetadata[key]=values[0];}
   }
   register={...register,verifiedCaseMetadata:caseMetadata};
+ // KT23/2: Legal findings are evidence-bound; never turn dossier observations into legal conclusions.
+ const legalCount=determination.scenario==='Б'?7:5;
+ const reviewFinding=i=>'[ЗА ЕКСПЕРТНА ПРОВЕРКА — правна констатация '+(i+1)+': приложимостта се установява по преписката и нормативния архив]';
+ const suppliedLegal=Array.isArray(caseMetadata.legalParagraphs)?caseMetadata.legalParagraphs:[];
+ const legalSources=Array.isArray(caseMetadata.legalFindingSources)?caseMetadata.legalFindingSources:[];
+ caseMetadata.legalParagraphs=Array.from({length:legalCount},(_,i)=>{
+  const value=String(suppliedLegal[i]||'').trim(),source=String(legalSources[i]||'').trim();
+  return value&&source&&source!=='НЯМА ДАННИ'&&source!=='Няма данни'?value:reviewFinding(i);
+ });
+ if(!caseMetadata.procedureFinding)caseMetadata.procedureFinding='[ЗА ЕКСПЕРТНА ПРОВЕРКА — приложима процедура]';
+ if(!Array.isArray(caseMetadata.impactFindings)||caseMetadata.impactFindings.length!==5)caseMetadata.impactFindings=Array.from({length:5},(_,i)=>'[ЗА ЕКСПЕРТНА ПРОВЕРКА — въздействие '+(i+1)+']');
+ register={...register,verifiedCaseMetadata:caseMetadata};
  const dossierEvidence=register?.unifiedContext?.commonEvidence||null;
  const expertDraft=window.V26ExpertDraft?.build({results,roles:normalized,determination,metadata:caseMetadata,paragraphs,evidence:dossierEvidence,aiDraft:register?.v27AiDraft||''});
  if(!expertDraft)throw Error('КТ13: липсва единният експертен проект.');
