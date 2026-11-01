@@ -19,7 +19,7 @@ async function suggest({token,preview,parcelIds,epochAtStart}){
  const batches=root.V27DossierBatches.toRequests(prepared);
  if(!prepared.complete||batches.requests.length!==1)throw Error('Преписката е непълна или надвишава обхвата на еднократния AI анализ. Не се изпращат частични сведения; използвайте досегашния маршрут до внедряване на поетапната обработка.');
  const evidence=buildEvidence(preview);
- if(evidence.facts.length>80||evidence.documents.some(d=>d.length>5000))throw Error('Някои документи са твърде обемни за надеждно еднократно извличане. AI предложението се пропуска, без да се губи преписката.');
+ if(evidence.facts.length>80||evidence.documents.some(d=>d.length>5000)||evidence.documents.some(d=>evidence.facts.filter(f=>f.documentId===d.id).length===20))throw Error('Някои документи са твърде обемни за надеждно еднократно извличане. AI предложението се пропуска, без да се губи преписката.');
  const input=root.V27EarlySubject.requestFromCase({evidence,parcelIds,existingTitle:get('v26SubjectTitle')?.value||'',existingSubject:get('v26WordHeading')?.value||''});
  if(!input.facts.length)throw Error('Няма достатъчно четим документален текст за ранния AI анализ.');
  const controller=new AbortController();activeController=controller;const timer=setTimeout(()=>controller.abort(),35000);
