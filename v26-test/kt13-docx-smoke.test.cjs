@@ -34,7 +34,9 @@ async function run(scenario){
  const draft=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{}});
  const aiDraft=['[[CHARACTERIZATION]]','Конкретна характеристика на тестов склад и офиси.','[[LEGAL]]','Конкретна правна преценка по тестовите материали.','[[PROCEDURE]]','Конкретна процедурна преценка по тестовите материали.','[[IMPACTS]]','Конкретни въздействия на тестовия склад.'].join('\n');
  const enriched=w.V26ExpertDraft.build({results:[{input:'36676.129.457',location:'гр. Пловдив, община Пловдив, област Пловдив'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft});
- const blob=await w.V26ExpertWord.make(enriched);
+ const sampleMap='<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="white"/><path d="M20 20 L280 20 L280 180 L20 180 Z" fill="none" stroke="black"/></svg>';
+ const originalMap=w.V26ExpertWord.make;
+ const blob=await originalMap(enriched);
  const out=fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
  const xml=new TextDecoder().decode(out['word/document.xml']);
  const texts=paragraphTexts(xml).join(' ');
