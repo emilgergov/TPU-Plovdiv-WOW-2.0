@@ -331,7 +331,7 @@ async function make(results,roles,register){
  z.file('02_Proekt_na_stanovishte_Eksperten.docx',expertWord);
  await ensurePDF();
  const pdf1=await pdfBlob(gisPdf(results,register));if(pdf1.size<100||await pdf1.slice(0,4).text()!=='%PDF')throw Error('Приложение №1 не е валиден PDF.');z.file('03_Prilozhenie_1_GIS_analiz.pdf',pdf1);
- {const pdf2=await pdfBlob(normativePdf(results,register));if(pdf2.size<100||await pdf2.slice(0,4).text()!=='%PDF')throw Error('Приложение №2 не е валиден PDF.');z.file('04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf',pdf2);}
+ if(includeAnnex2){const pdf2=await pdfBlob(normativePdf(results,register));if(pdf2.size<100||await pdf2.slice(0,4).text()!=='%PDF')throw Error('Приложение №2 не е валиден PDF.');z.file('04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf',pdf2);}
  const evidenceLines=['РАБОТЕН ПАКЕТ — НЕ Е ОФИЦИАЛНО СТАНОВИЩЕ.','ВНИМАНИЕ: Полетата [ЗА ЕКСПЕРТНА ПРОВЕРКА] са незавършени и изискват проверка от компетентен експерт преди подписване или изпращане.','Съдържа два отделни DOCX проекта (класически и експертен), задължителното PDF приложение №1; приложение №2 се включва само по избор.','Правната приложимост и изводите подлежат на експертна проверка.','','ТЕХНИЧЕСКА ПРОСЛЕДИМОСТ — САМО ЗА ВЪТРЕШНА ПРОВЕРКА'];
  if(dossierEvidence){
   evidenceLines.push('Сценарий (ГИС): '+String(determination.scenario||'неопределен'));
@@ -343,9 +343,9 @@ async function make(results,roles,register){
   for(const warning of (dossierEvidence.warnings||[]).slice(0,15))evidenceLines.push('Предупреждение: '+String(warning.kind||'неуточнено')+'; документ: '+String(warning.file||'неизвестен'));
  }
  z.file('README_BG.txt',evidenceLines.join('\n')+'\n');
- const packageFiles=['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_Prilozhenie_1_GIS_analiz.pdf','04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf','README_BG.txt'];
+ const packageFiles=['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_Prilozhenie_1_GIS_analiz.pdf',...(includeAnnex2?['04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf']:[]),'README_BG.txt'];
  const actualFiles=z.names();
- if(actualFiles.length!==packageFiles.length||packageFiles.some(name=>!actualFiles.includes(name)))throw Error('V27.1: ZIP пакетът трябва да съдържа точно петте задължителни файла.');
+ if(actualFiles.length!==packageFiles.length||packageFiles.some(name=>!actualFiles.includes(name)))throw Error('V27.1: ZIP пакетът има неочакван състав.');
  const packageBlob=await z.generateAsync({type:'blob'});if(packageBlob.size<300||new TextDecoder().decode(await packageBlob.slice(0,2).arrayBuffer())!=='PK')throw Error('Неуспешно пакетиране в ZIP.');return packageBlob;
 }
 async function standalonePDF(results,kind,register){if(!results?.length)throw Error('Първо изпълнете ГИС справката.');if(kind!==2&&!results.some(r=>r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type))))throw Error('Липсва имотна геометрия за PDF №1. Заредете архивната геометрия и изпълнете справката отново.');await ensurePDF();return pdfBlob(kind===2?normativePdf(results,register):gisPdf(results,register))}
