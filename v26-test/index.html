@@ -447,21 +447,21 @@ if(window.V27AIFacts?.build&&window.V27AIAuthor?.generate&&window.confirm('V27: 
   try{
    const payload=window.V27AIFacts.build({results:found,roles:confirmedRoles,workingDraft,subject:window.V26SubjectContext?.subject||workingDraft.metadata?.subject||subjectTitle.value,archivePreview:window.V26ArchiveTextPreview,normativeRegister:window.V26NormativeRegister,workingContext:window.V26WorkingContext});
    setStatus('V27: генериране на AI чернова за експертна проверка…');
-   let expertPayload=payload;
+   let expertPayload=payload,qualityEvidence=null;
    if(window.V27ExpertEvidence?.build&&window.V27CaseEvidence?.create&&window.V27VerifiedContext?.gis){
     const documents=(window.V26ArchiveTextPreview?.files||[]).map(f=>{
      const body=typeof f.text==='string'?f.text:'';
      const excerpts=body.split(/[\\r\\n]+|(?<=[.!?])\\s+/).map(x=>x.trim()).filter(x=>x.length>=20).slice(0,20);
      return {file:f.path||f.file,text:body,error:f.error,facts:excerpts.map(value=>({kind:'dossier_excerpt',value:value.slice(0,1000),quote:value}))};
     });
-    const evidence=window.V27CaseEvidence.create({documents});
+    const evidence=window.V27CaseEvidence.create({documents});qualityEvidence=evidence;
     expertPayload=window.V27ExpertEvidence.build({legacyPayload:payload,results:found,roles:confirmedRoles,normativeRegister:window.V26NormativeRegister,evidence,confirmedSubject:window.V26SubjectContext?.wordHeading||window.V26SubjectContext?.title||payload.facts.subject});
    }
    const proposedDraft=await window.V27AIAuthor.generate(expertPayload,token);
    if(!window.V27DraftQuality?.inspect)throw Error('Липсва задължителният контрол на AI текста.');
    const spatial=window.V27VerifiedContext.gis(found,confirmedRoles);
    const law=window.V27VerifiedContext.legal(window.V26NormativeRegister);
-   const checked=window.V27DraftQuality.inspect({draft:proposedDraft,subject:expertPayload.facts.subject,parcelIds:expertPayload.facts.parcelIds,gis:spatial,legal:law,evidence:typeof evidence==='undefined'?null:evidence});
+   const checked=window.V27DraftQuality.inspect({draft:proposedDraft,subject:expertPayload.facts.subject,parcelIds:expertPayload.facts.parcelIds,gis:spatial,legal:law,evidence:qualityEvidence});
    if(!checked.accepted)throw Error('AI текстът е отхвърлен от контрола: '+checked.issues.filter(i=>i.severity==='block').map(i=>i.code+(i.detail?' ('+i.detail+')':'')).join(', '));
    if(checked.issues.length)setStatus('V27: AI чернова с '+checked.issues.length+' предупреждения за експертна проверка.');
    v27AiDraft=proposedDraft;
