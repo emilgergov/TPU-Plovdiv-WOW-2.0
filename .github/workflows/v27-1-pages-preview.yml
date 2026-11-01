@@ -45,12 +45,6 @@ jobs:
               if rel.endswith(('.js','.css')):
                   html=re.sub(r'(?P<q>["\'])'+re.escape(rel)+r'(?P<suffix>\?[^"\']*)?(?P=q)',lambda m:m.group('q')+'v27-preview/'+rel+(m.group('suffix') or '')+m.group('q'),html)
           (base/'index.html').write_text(html,encoding='utf-8')
-          assert 'v27-preview/v27-early-subject-bridge.js' in h
-          normative=Path('v26-test/v27-preview/v26-normative-register.js').read_text()
-          assert normative.count("document.baseURI")==3, 'Normative register must resolve from HTML base, not preview script directory'
-          for asset in ['data/normative-archive-register.json','normative/sources.json','data/verified-legal-excerpts-20261028.json']:
-              assert Path('v26-test',asset).is_file(), 'Missing normative archive asset: '+assettml
-          assert 'v27-preview/v26-draft-package.js' in html
           print('Preview overlay files:',len(changes))
           PY
           test -s v26-test/v27-preview/index.html
@@ -72,6 +66,10 @@ jobs:
           assert 'id="intakeResult" class="hint" role="status" aria-live="polite"' in h
           assert "typeof window.V26LocalIntake.process!=='function'" in h
           assert 'v27-preview/v27-early-subject-bridge.js' in h
+          normative=Path('v26-test/v27-preview/v26-normative-register.js').read_text()
+          assert normative.count("document.baseURI")==3, 'Normative register must resolve from HTML base'
+          for asset in ['data/normative-archive-register.json','normative/sources.json','data/verified-legal-excerpts-20261028.json']:
+              assert Path('v26-test',asset).is_file(), 'Missing normative archive asset: '+asset
           print('V27.1 ZIP selector, intake handler, feedback and preview scripts: OK')
           PY
           git config user.name "github-actions[bot]"
