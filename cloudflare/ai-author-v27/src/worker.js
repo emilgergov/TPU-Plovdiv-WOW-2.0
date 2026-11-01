@@ -22,7 +22,13 @@ function validate(input) {
     evidenceNotes:text(f.evidenceNotes,1500), registration:text(f.registration,150),
     dossierExcerpts:Array.isArray(f.dossierExcerpts)?f.dossierExcerpts.slice(0,25).map(d=>({file:text(d.file,180),excerpt:text(d.excerpt,1400)})):[],
     dossierDocuments:Array.isArray(f.dossierDocuments)?f.dossierDocuments.slice(0,18).map(d=>({file:text(d.file,180),type:text(d.type,80),references:Array.isArray(d.references)?d.references.slice(0,5).map(x=>text(x,220)):[]})):[],
-    legalSources:Array.isArray(f.legalSources)?f.legalSources.slice(0,12).map(d=>({title:text(d.title,180),source:text(d.source,200),id:text(d.id,80)})):[]
+    legalSources:Array.isArray(f.legalSources)?f.legalSources.slice(0,12).map(d=>({title:text(d.title,180),source:text(d.source,200),id:text(d.id,80),verification:d.verification==="article_verified"?"article_verified":"catalog_only",version:text(d.version,100),provisionText:d.verification==="article_verified"?text(d.provisionText,1200):""})):[],
+    verifiedContext:f.verifiedContext&&Array.isArray(f.verifiedContext.parcels)?{
+      scenario:["A","B","REVIEW"].includes(f.verifiedContext.scenario)?f.verifiedContext.scenario:"REVIEW",
+      parcels:f.verifiedContext.parcels.slice(0,40).map(p=>({id:text(p.id,45),role:text(p.role,20),classification:text(p.classification,30),zones:Array.isArray(p.zones)?p.zones.slice(0,20).map(z=>text(z,80)):[]})),
+      documentFacts:Array.isArray(f.verifiedContext.documentFacts)?f.verifiedContext.documentFacts.slice(0,30).map(d=>({id:text(d.id,100),kind:text(d.kind,80),value:text(d.value,500),file:text(d.file,180),page:text(d.page,30)})):[],
+      legalVerification:Array.isArray(f.verifiedContext.legalVerification)?f.verifiedContext.legalVerification.slice(0,12).map(d=>({id:text(d.id,80),status:text(d.status,30)})):[]
+    }:null
   }};
 }
 async function handleAuthor(request,env) {
