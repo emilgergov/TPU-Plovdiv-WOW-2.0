@@ -15,7 +15,7 @@ vm.runInContext(source,context);
  const client=context.window.V27AIAuthor;
  assert.equal(await client.generate(payload,'test-token'),goodDraft);
  assert.equal(calls.length,1);
- assert.match(calls[0].url,/workers\\.dev\\/author$/);
+ assert.ok(calls[0].url.endsWith('.workers.dev/author'));
  assert.equal(calls[0].opts.method,'POST');
  assert.equal(calls[0].opts.headers.Authorization,'Bearer test-token');
  assert.equal(calls[0].opts.cache,'no-store');
