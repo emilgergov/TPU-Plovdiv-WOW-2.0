@@ -13,8 +13,8 @@ const readButton=document.createElement('button');
 readButton.type='button';readButton.className='secondary';readButton.textContent='Прочети TXT/JSON от архива повторно';
 readButton.style.display='none';(document.getElementById('v26LocalIndexHost')||output).append(readButton);
 const preview=document.createElement('div');preview.className='hint';preview.style.whiteSpace='pre-wrap';readButton.after(preview);
-async function entryText(file,e){
- if(e.size_bytes>262144||e.compressed_bytes>524288)throw Error('Файлът е твърде голям.');
+async function entryBytes(file,e){
+ if(e.size_bytes>2097152||e.compressed_bytes>3145728)throw Error('Документът надхвърля лимита за текстово извличане.');
  const h=new DataView(await file.slice(e.local_header_offset,e.local_header_offset+30).arrayBuffer());
  if(h.byteLength!==30||u32(h,0)!==0x04034b50)throw Error('Невалидна ZIP заглавка.');
  const pos=e.local_header_offset+30+u16(h,26)+u16(h,28);
@@ -25,12 +25,27 @@ async function entryText(file,e){
  else if(e.compression===8&&typeof DecompressionStream!=='undefined')buffer=await new Response(blob.stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();
  else throw Error('Неподдържана компресия.');
  if(buffer.byteLength!==e.size_bytes)throw Error('Несъответствие в размера.');
- return new TextDecoder('utf-8').decode(buffer);
+ return new Uint8Array(buffer);
+}
+async function docxText(bytes){
+ if(!window.fflate?.unzipSync)throw Error('DOCX четецът не е зареден.');
+ const parts=window.fflate.unzipSync(bytes),xml=parts['word/document.xml'];
+ if(!xml)throw Error('DOCX без основен документ.');
+ const doc=new DOMParser().parseFromString(new TextDecoder().decode(xml),'application/xml');
+ if(doc.getElementsByTagName('parsererror').length)throw Error('Невалиден DOCX XML.');
+ const paragraphs=Array.from(doc.getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','p'));
+ return paragraphs.map(p=>Array.from(p.getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','t')).map(t=>t.textContent).join('')).filter(Boolean).join('\n');
+}
+async function entryText(file,e){
+ const bytes=await entryBytes(file,e);
+ if(/\.docx$/i.test(e.path))return docxText(bytes);
+ if(/\.pdf$/i.test(e.path))throw Error('PDF текстът не е извлечен — изисква отделен PDF четец.');
+ return new TextDecoder('utf-8').decode(bytes);
 }
 readButton.onclick=async()=>{
  const inv=window.V26ArchiveInventory;if(!inv||!selectedArchive)return;
  readButton.disabled=true;preview.textContent='Четене на текстови файлове…';
- const chosen=inv.files.filter(f=>/\.(txt|json|csv|md)$/i.test(f.path)&&f.size_bytes<=262144).slice(0,20);
+ const chosen=inv.files.filter(f=>/\.(txt|json|csv|md|docx|pdf)$/i.test(f.path)&&f.size_bytes<=2097152).slice(0,35);
  const files=[];
  for(const e of chosen){
   try{const t=await entryText(selectedArchive,e);files.push({path:e.path,text:t.slice(0,16000),truncated:t.length>16000});}
@@ -39,7 +54,7 @@ readButton.onclick=async()=>{
  const report={archive:inv.archive,files,verification:'CONTENT_PREVIEW_ONLY'};
  window.V26ArchiveTextPreview=report;
  document.dispatchEvent(new CustomEvent('v26:archive-text-preview',{detail:report}));
- preview.textContent='Прочетени: '+files.filter(f=>!f.error).length+'/'+chosen.length+' файла. Съдържанието НЕ е нормативно проверено.\n'+files.map(f=>f.path+' — '+(f.error||'прочетен')).join('\n');
+ preview.textContent='Прочетени: '+files.filter(f=>!f.error).length+'/'+chosen.length+' файла. Съдържанието е за работен проект.\n'+files.map(f=>f.path+' — '+(f.error||'прочетен')).join('\n');
  readButton.disabled=false;
 };
 
