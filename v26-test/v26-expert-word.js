@@ -143,7 +143,7 @@ async function make(draft,options={}){
    const def=ctDoc.createElementNS(ctNS,'Default');def.setAttribute('Extension','png');def.setAttribute('ContentType','image/png');ctDoc.documentElement.appendChild(def);
    zip[ctPath]=new TextEncoder().encode(new XMLSerializer().serializeToString(ctDoc));
   }
-  zip['word/media/v27-gis-overview.png']=mapBytes;
+  zip['word/media/v27-gis-overview.png']=new original.constructor(mapBytes);
  }
  zip['word/document.xml']=new TextEncoder().encode(serialized);
  return new Blob([root.fflate.zipSync(zip,{level:6})],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
