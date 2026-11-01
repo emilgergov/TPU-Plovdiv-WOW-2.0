@@ -198,7 +198,7 @@ function gisPdf(results,options={}){
  const verifiedLandArea=String(options.verifiedCaseMetadata?.landArea||'').trim();
  if(verifiedLocation)content.push({text:'Местоположение на имотите: '+verifiedLocation,margin:[0,5,0,7]});
  if(verifiedSettlement)content.push({text:'Населено място: '+verifiedSettlement});
- if(results.some(r=>r.intersection_verified_outside===true||(!(r.verified_zone_intersections||[]).length&&!!r.geojson?.features?.length))){
+ if(results.some(r=>r.nearest_verified_zone||r.nearestZoneVerified||r.intersection_verified_outside===true||!(r.verified_zone_intersections||[]).length)){
   for(const r of results){if(r.intersection_verified_outside!==true&&(r.verified_zone_intersections||[]).length)continue;
    const nearest=r.nearest_verified_zone||r.nearestZoneVerified;
    const code=String(nearest?.sitecode||nearest?.code||'');
