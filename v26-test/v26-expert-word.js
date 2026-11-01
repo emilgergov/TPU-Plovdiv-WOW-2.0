@@ -91,7 +91,7 @@ async function make(draft,options={}){
  })();
  const aiProposal=key=>aiSections[key]?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
 
- const mapBytes=ArrayBuffer.isView(options.mapPngBytes)?new Uint8Array(options.mapPngBytes):(options.mapSvg?await mapPng(options.mapSvg):null);
+ const mapBytes=options.mapPngBytes?.byteLength?Uint8Array.from(options.mapPngBytes):(options.mapSvg?await mapPng(options.mapSvg):null);
  const blocks=[
   paragraph(doc,'Място за електронен подпис — вътрешно съгласуване'),
   paragraph(doc,'РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ — НЕ Е АДМИНИСТРАТИВЕН АКТ',{heading:true}),
