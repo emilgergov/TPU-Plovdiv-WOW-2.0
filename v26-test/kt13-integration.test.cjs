@@ -33,7 +33,7 @@ assert(word.includes("paragraph(doc,'Място за електронен под
 assert(word.includes("paragraph(doc,'Място за електронен подпис — окончателно подписване')"),'Expert closing signature slot missing');
 assert(word.includes('sect.cloneNode(true)'),'Original section/header/footer references must be preserved');
 assert(pkg.includes("if(includeAnnex2){"),'Annex 2 must remain optional');
-assert(pkg.includes("await window.V26ExpertWord.make(expertDraft,{mapSvg:overviewMap})")&&pkg.includes("window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata)"),'Both Word documents must use the same expert draft');
+assert(pkg.includes("await window.V26ExpertWord.make(expertDraft,{mapSvg:overviewMap,requireAiAuthor:Boolean(register?.v27Package)})")&&pkg.includes("window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata)"),'Both Word documents must use the same expert draft');
 for(const name of ['v26-expert-draft.js','v26-expert-word.js','v26-draft-package.js','v26-template-word.js','v26-word-review.js'])new vm.Script(read(name),{filename:name});
 const review=read('v26-word-review.js');
 assert(review.includes('function autoEvidence()'),'Evidence-derived Word descriptions must remain available');
@@ -44,7 +44,7 @@ assert(html.indexOf("window.V26WordReview.getWorkingDraft()")<html.indexOf("if(!
 assert(html.includes('ГИС анализ · PDF')&&html.includes('Нормативни референции · PDF')&&html.includes('Изготви проектите · Word'),'KT14 short UI labels must be retained');
 assert(pkg.includes('const zones=results.flatMap'),'GIS scenarios must consider every parcel, not only leading parcel');
 assert(pkg.includes('results.every(r=>r.intersection_verified_outside===true)'),'Scenario A requires verified outside status for every parcel');
-assert(pkg.includes('V26ExpertWord.make(expertDraft,{mapSvg:overviewMap})')&&pkg.includes('if(!overviewMap)throw Error'),'GIS map must reach expert Word generator');
+assert(pkg.includes('V26ExpertWord.make(expertDraft,{mapSvg:overviewMap,requireAiAuthor:Boolean(register?.v27Package)})')&&pkg.includes('if(!overviewMap)throw Error'),'GIS map must reach expert Word generator');
 assert(word.includes('word/media/v27-gis-overview.png')&&word.includes('mapParagraph(doc)'),'Expert Word must package an actual embedded map image');
 assert(pkg.includes("classicWord===expertWord"),'ZIP must reject identical Word outputs');
 assert(word.includes("slice(0,scenario==='A'?5:7)"),'Expert Word must select 5/7 legal findings from GIS scenario');
