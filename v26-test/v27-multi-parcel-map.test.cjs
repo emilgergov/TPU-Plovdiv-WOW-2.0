@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const ctx=vm.createContext({window:{}});vm.runInContext(fs.readFileSync(__dirname+'/v27-multi-parcel-map.js','utf8'),ctx);
+const ids=['56784.13.102','56784.13.105','56784.13.106'];
+const results=ids.map((id,i)=>({input:id,geojson:{features:[{geometry:{type:'Polygon',coordinates:[[[i,0],[i+.5,0],[i+.5,.5],[i,.5],[i,0]]]}}]}}));
+const svg=ctx.window.V27MultiParcelMap.build(results);
+for(const id of ids)assert.ok(svg.includes(id));
+assert.equal((svg.match(/<path /g)||[]).length,3);
+assert.match(svg,/Без слой защитени зони/);
+assert.equal(ctx.window.V27MultiParcelMap.build([...results,{input:'missing'}]),null);
+const html=fs.readFileSync(__dirname+'/index.html','utf8'),pkg=fs.readFileSync(__dirname+'/v26-draft-package.js','utf8');
+assert.ok(html.includes('src="v27-multi-parcel-map.js?'));
+assert.ok(pkg.includes('window.V27MultiParcelMap?.build(results)'));
+console.log('P5 multi-parcel expert Word map: 3/3 geometries, fail-closed, no false zone claims PASS');
