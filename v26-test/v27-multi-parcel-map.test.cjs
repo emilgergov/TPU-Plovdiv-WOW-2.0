@@ -9,7 +9,9 @@ assert.match(svg,/Граници на защитени зони не са виз
 const withZone=results.map((r,i)=>i===0?{...r,verified_zone_intersections:['BG0000194']}:r);
 const zone={type:'Feature',properties:{SITECODE:'BG0000194'},geometry:{type:'Polygon',coordinates:[[[0,0],[1,0],[1,1],[0,1],[0,0]]]}};
 const overlay=ctx.window.V27MultiParcelMap.build(withZone,[zone]);
-assert.match(overlay,/Пунктир: проверени защитени зони/);
+assert.match(overlay,/Пунктир: граници от работния слой/);
+assert.match(overlay,/clip-path="url\(#v27-map-frame\)"/);
+assert.match(overlay,/<clipPath id="v27-map-frame">/);
 assert.match(overlay,/stroke-dasharray/);
 const unverified=ctx.window.V27MultiParcelMap.build(results,[zone]);
 assert.ok(!unverified.includes('stroke-dasharray'));
