@@ -1,0 +1,20 @@
+name: V27.1 Evidence Registry Tests
+on:
+  push:
+    branches:
+      - planning/WOW-V27-1-AI-END-TO-END
+    paths:
+      - 'v26-test/v27-case-evidence.js'
+      - 'v26-test/v27-case-evidence.test.cjs'
+      - '.github/workflows/v27-1-evidence.yml'
+  workflow_dispatch:
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test source grounding and conflict detection
+        run: node v26-test/v27-case-evidence.test.cjs
