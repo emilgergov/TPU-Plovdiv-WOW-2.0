@@ -15,8 +15,11 @@ const metadata={recipient:'Тестов адресат',address:'Тестов а
 const names=['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_Prilozhenie_1_GIS_analiz.pdf','04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf','README_BG.txt'];
 async function run(scenario,annex2){
  const parcel={input:id,cadnum:id,status:'Намерен',geojson,area_m2_source:450,...(scenario==='Б'?{verified_zone_intersections:['BG0002057']}:{intersection_verified_outside:true})};
- const register={includeAnnex2:annex2,unifiedContext:{commonEvidence:{findings:[],warnings:[]}},verifiedCaseMetadata:metadata,verifiedCharacterizationParagraphs:['С реализацията на инвестиционното предложение','Електроснабдяването е описано','Водоснабдяването е описано','Отпадъчните води са описани'],records:[{id:'Z1',title:'Тестова заповед BG0002057',zone_code:'BG0002057',source:'https://example.org/zone'}]};
+ const register={mapSvg:'<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="white"/></svg>',includeAnnex2:annex2,unifiedContext:{commonEvidence:{findings:[],warnings:[]}},verifiedCaseMetadata:metadata,verifiedCharacterizationParagraphs:['С реализацията на инвестиционното предложение','Електроснабдяването е описано','Водоснабдяването е описано','Отпадъчните води са описани'],records:[{id:'Z1',title:'Тестова заповед BG0002057',zone_code:'BG0002057',source:'https://example.org/zone'}]};
+ const originalMake=w.V26ExpertWord.make;
+ w.V26ExpertWord.make=async(draft,options)=>originalMake(draft,{...options,mapPngBytes:new Uint8Array(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lZkAAAAASUVORK5CYII=','base64'))});
  const blob=await w.V26DraftPackage.make([parcel],{[id]:'leading'},register);
+ w.V26ExpertWord.make=originalMake;
  const zip=await JSZip.loadAsync(await blob.arrayBuffer());
  const expected=annex2?names:names.filter(n=>!n.startsWith('04_'));
  assert.deepEqual(Object.keys(zip.files).sort(),expected.slice().sort(),'ZIP contents');
@@ -28,6 +31,7 @@ async function run(scenario,annex2){
    assert(xml.includes(id),'DOCX parcel missing: '+name);
    assert(xml.includes('Тестов адресат'),'DOCX recipient missing: '+name);
    assert(doc.file('word/styles.xml'),'Original template styles missing');
+   if(name.includes('Eksperten')){assert(doc.file('word/media/v27-gis-overview.png'),'Expert Word must embed GIS map');assert(xml.includes('rIdV27GISMap'),'GIS image must be referenced in expert Word');}
   }else if(name.endsWith('.pdf')){
    assert.equal(bytes.subarray(0,5).toString(),'%PDF-');
    const parsed=await pdfParse(bytes);
