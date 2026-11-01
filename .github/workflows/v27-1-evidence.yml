@@ -11,6 +11,9 @@ on:
       - 'v26-test/v27-early-subject.js'
       - 'v26-test/v27-early-subject.test.cjs'
       - 'v26-test/v27-early-server.test.cjs'
+      - 'v26-test/v27-early-integration.test.cjs'
+      - 'v26-test/v27-early-subject-bridge.js'
+      - 'v26-test/index.html'
       - 'cloudflare/ai-author-v27/src/early-subject.js'
       - 'cloudflare/ai-author-v27/src/worker.js'
       - '.github/workflows/v27-1-evidence.yml'
@@ -29,3 +32,4 @@ jobs:
           node v26-test/v27-dossier-batches.test.cjs
           node v26-test/v27-early-subject.test.cjs
           node v26-test/v27-early-server.test.cjs
+          node v26-test/v27-early-integration.test.cjs
