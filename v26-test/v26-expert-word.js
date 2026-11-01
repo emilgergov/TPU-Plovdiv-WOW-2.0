@@ -90,8 +90,10 @@ async function make(draft,options={}){
   return out;
  })();
  if(options.requireAiAuthor){
-  const missing=['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'].filter(key=>!aiSections[key]);
-  if(missing.length)throw Error('V27.2: AI авторът не е предоставил задължителни раздели: '+missing.join(', '));
+  const required=['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'];
+  const missing=required.filter(key=>!aiSections[key]);
+  const headings=[...String(draft.aiDraft||'').matchAll(/^\s*\[\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\]\]\s*$/gm)].map(x=>x[1]);
+  if(missing.length||headings.length!==4||required.some((key,i)=>headings[i]!==key))throw Error('V27.2: AI авторът не е предоставил задължителни раздели в правилния ред: '+missing.join(', '));
  }
  const aiProposal=key=>aiSections[key]?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
 
