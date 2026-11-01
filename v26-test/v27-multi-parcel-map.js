@@ -37,7 +37,7 @@ function build(results,zoneFeatures=[]){
   const p=project(item.rings[0][0]);
   return '<g>'+shapes+'<text x="'+(p[0]+5).toFixed(2)+'" y="'+(p[1]-7).toFixed(2)+'" font-size="13" fill="#173e31">'+esc(item.id)+'</text></g>';
  }).join('');
- return '<svg xmlns="http://www.w3.org/2000/svg" width="760" height="520" viewBox="0 0 760 520"><rect width="760" height="520" fill="#fff"/><text x="24" y="28" font-size="17" fill="#173e31">Обзорна карта на потвърдените имоти</text>'+zonePaths.join('')+paths+'<text x="24" y="504" font-size="11" fill="#444">Източник: потвърдена имотна геометрия от ГИС анализа. '+(zonePaths.length?'Пунктир: проверени защитени зони с налична геометрия.':'Граници на защитени зони не са визуализирани.')+'</text></svg>';
+ return '<svg xmlns="http://www.w3.org/2000/svg" width="760" height="520" viewBox="0 0 760 520"><rect width="760" height="520" fill="#fff"/><text x="24" y="28" font-size="17" fill="#173e31">Обзорна карта на потвърдените имоти</text>'+zonePaths.join('')+paths+'<text x="24" y="504" font-size="11" fill="#444">Източник: потвърдена имотна геометрия от ГИС анализа. '+(zonePaths.length?'Пунктир: граници от работния слой за зони с потвърдено пресичане.':'Граници на защитени зони не са визуализирани.')+'</text></svg>';
 }
 root.V27MultiParcelMap=Object.freeze({build});
 })(typeof window!=='undefined'?window:globalThis);
