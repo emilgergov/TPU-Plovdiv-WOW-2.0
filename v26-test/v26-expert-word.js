@@ -70,6 +70,7 @@ async function make(draft){
   paragraph(doc,'VI. КОНСТАТАЦИИ ЗА ВЪЗДЕЙСТВИЯТА',{heading:true}),
   ...confirmed(impacts).map(x=>paragraph(doc,x)),
   ...(impacts.some(isPending)?[paragraph(doc,'Не е изготвена окончателна оценка на въздействията. Изводите се попълват след проверка на приложимите режими и доказателствата.')]:[]),
+  ...(draft.aiDraft?[paragraph(doc,'AI-ПОДПОМОГНАТА ЧЕРНОВА — ЗА ЕКСПЕРТНА ПРОВЕРКА',{heading:true}),...draft.aiDraft.split(/\n\s*\n/).filter(Boolean).slice(0,24).map(x=>paragraph(doc,x))]:[]),
   paragraph(doc,'VII. ПРИЛОЖЕНИЯ',{heading:true}),
   paragraph(doc,'Приложение №1 — ГИС анализ (самостоятелен PDF); Приложение №2 — Нормативни и документални референции (самостоятелен PDF, когато е изготвен).'),
   paragraph(doc,'НЕОБХОДИМА Е ЕКСПЕРТНА ПРОВЕРКА НА ПРЕПИСКАТА, ПРАВНИТЕ ОСНОВАНИЯ И ИЗВОДИТЕ. Документът не представлява издаден административен акт.')
