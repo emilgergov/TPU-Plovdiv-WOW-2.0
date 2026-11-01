@@ -33,11 +33,11 @@ jobs:
           check "Worker routes" "https://api.cloudflare.com/client/v4/zones?per_page=1"
           check "Worker subdomain" "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/subdomain"
       - name: Deploy isolated Cloudflare Worker
-        if: ${{ false }} # Temporarily disabled until access checks identify missing permission
+        if: ${{ github.event_name == 'workflow_dispatch' }} # Deploy only when explicitly launched
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          accountId: "90df5489417e4b53179a852c446aeed1"
           workingDirectory: cloudflare/ai-author-v27
           wranglerVersion: "4.156.0"
           command: deploy
