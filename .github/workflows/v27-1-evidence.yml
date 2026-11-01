@@ -70,3 +70,12 @@ jobs:
           node v26-test/v27-document-consistency.test.cjs
           node cloudflare/ai-author-v27/test/provenance-contract.cjs
           node cloudflare/ai-author-v27/test/v27-1-e2e-mock.cjs
+
+      - name: Package isolated V27.1 visual-test candidate (no public deployment)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: WOW-V27-1-KT04-VISUAL-CANDIDATE
+          path: v26-test/
+          retention-days: 7
+          if-no-files-found: error
