@@ -46,18 +46,18 @@ async function make(draft){
  const subject=String(m.subject).replace(/^Относно:\s*/i,'').replace(/^(?:инвестиционно предложение\s*)+/i,'').replace(/^[„“"\s]+|[„“"\s]+$/g,'').replace(/\s+/g,' ').trim();
  const confirmed=xs=>xs.filter(x=>!isPending(x));
  const aiSections=(()=>{
-  const out={};const raw=String(draft.aiDraft||'');
-  const allowed=new Set(['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS']);
-  const re=/^\\s*\\[\\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\\]\\]\\s*$/gm;
+  const out={},raw=String(draft.aiDraft||'');
+  const re=/^\s*\[\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\]\]\s*$/gm;
   const matches=[...raw.matchAll(re)];
   for(let i=0;i<matches.length;i++){
    const key=matches[i][1],start=matches[i].index+matches[i][0].length,end=i+1<matches.length?matches[i+1].index:raw.length;
-   const value=raw.slice(start,end).trim().slice(0,2400);
-   if(allowed.has(key)&&value&&!out[key]&&!/\\[\\[(?:CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\\]\\]/.test(value))out[key]=value;
+   const value=raw.slice(start,end).trim().slice(0,3500);
+   if(value&&!out[key]&&!/\[\[(?:CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\]\]/.test(value))out[key]=value;
   }
   return out;
  })();
- const aiProposal=key=>aiSections[key]?aiSections[key].split(/\\n\\s*\\n/).filter(Boolean).slice(0,5).map(x=>paragraph(doc,x)):[];
+ const aiProposal=key=>aiSections[key]?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
+
  const blocks=[
   paragraph(doc,'Място за електронен подпис — вътрешно съгласуване'),
   paragraph(doc,'РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ — НЕ Е АДМИНИСТРАТИВЕН АКТ',{heading:true}),
@@ -73,17 +73,17 @@ async function make(draft){
   paragraph(doc,draft.scenario==='Б'?'По наличните ГИС данни е установено пространствено пресичане със защитена зона: '+draft.zones.join(', ')+'.':'По наличните ГИС данни не е установено пресичане на потвърдените имоти със защитена зона.'),
   paragraph(doc,'Картографското извлечение от ГИС анализа представя пространствените резултати и имотния обхват; пълният ГИС анализ е в самостоятелен PDF.'),
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
-  ...confirmed(draft.characterization).map(x=>paragraph(doc,x)),...aiProposal('CHARACTERIZATION'),
+  ...(aiSections.CHARACTERIZATION?aiProposal('CHARACTERIZATION'):confirmed(draft.characterization).map(x=>paragraph(doc,x))),
 
   paragraph(doc,'IV. ФАКТИЧЕСКИ И ПРАВНИ КОНСТАТАЦИИ',{heading:true}),
-  ...confirmed(legal).map(x=>paragraph(doc,x)),...aiProposal('LEGAL'),
+  ...(aiSections.LEGAL?aiProposal('LEGAL'):confirmed(legal).map(x=>paragraph(doc,x))),
 
   paragraph(doc,'V. ПРОЦЕДУРНА ПРЕЦЕНКА',{heading:true}),
-  paragraph(doc,isPending(m.procedureFinding)?'Приложимата процедура не е потвърдена; изисква се преценка от компетентен експерт.':m.procedureFinding),...aiProposal('PROCEDURE'),
+  ...(aiSections.PROCEDURE?aiProposal('PROCEDURE'):[paragraph(doc,isPending(m.procedureFinding)?'Приложимата процедура не е потвърдена; изисква се преценка от компетентен експерт.':m.procedureFinding)]),
   paragraph(doc,'VI. КОНСТАТАЦИИ ЗА ВЪЗДЕЙСТВИЯТА',{heading:true}),
-  ...confirmed(impacts).map(x=>paragraph(doc,x)),...aiProposal('IMPACTS'),
-  ...(impacts.some(isPending)?[paragraph(doc,'Не е изготвена окончателна оценка на въздействията. Изводите се попълват след проверка на приложимите режими и доказателствата.')]:[]),
-  ...(draft.aiDraft&&!Object.keys(aiSections).length?[paragraph(doc,'AI текстът не е структуриран — необходима е експертна проверка на формата',{heading:true}),...draft.aiDraft.split(/\n\s*\n/).filter(Boolean).slice(0,24).map(x=>paragraph(doc,x))]:[]),
+  ...(aiSections.IMPACTS?aiProposal('IMPACTS'):confirmed(impacts).map(x=>paragraph(doc,x))),
+  ...(!aiSections.IMPACTS&&impacts.some(isPending)?[paragraph(doc,'Не е изготвена окончателна оценка на въздействията. Изводите се попълват след проверка на приложимите режими и доказателствата.')]:[]),
+  ...(draft.aiDraft&&!Object.keys(aiSections).length?[paragraph(doc,'AI текстът не е структуриран по раздели — изисква се проверка на формата.')]:[]),
   paragraph(doc,'VII. СЪПЪТСТВАЩИ ДОКУМЕНТИ',{heading:true}),
   paragraph(doc,'ГИС анализ (самостоятелен PDF); Нормативни и документални референции (самостоятелен PDF, когато е изготвен).'),
   paragraph(doc,'НЕОБХОДИМА Е ЕКСПЕРТНА ПРОВЕРКА НА ПРЕПИСКАТА, ПРАВНИТЕ ОСНОВАНИЯ И ИЗВОДИТЕ. Документът не представлява издаден административен акт.')
