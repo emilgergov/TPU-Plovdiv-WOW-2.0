@@ -425,7 +425,7 @@ function populateSubject(d){
  const unreadable=(d.files||[]).filter(x=>/няма извлекаем текст|неуспешно извличане|OCR неуспешен|ПРОВЕРКА:/i.test(String(x.status||'')));
  const extracted=(c?.activities||[]).filter(Boolean);
  subjectTitle.value=v26NormalizeTitle(c?.title);v26CaseTitle=subjectTitle.value;
- wordHeading.dataset.edited='';wordHeading.value=v26CleanSubjectHeading();
+ wordHeading.dataset.edited='';wordHeading.value=v27FormatSubjectLocality(v26CleanSubjectHeading());
  subjectActivities.value=extracted.join('\n');
  const unreadableNotice=unreadable.filter(x=>/уведомлен/i.test(String(x.name||x.file||x.filename||'')));
  const readable=unreadableNotice.length===0;
