@@ -343,6 +343,19 @@ async function make(results,roles,register){
   }
   for(const warning of (dossierEvidence.warnings||[]).slice(0,15))evidenceLines.push('Предупреждение: '+String(warning.kind||'неуточнено')+'; документ: '+String(warning.file||'неизвестен'));
  }
+ if(register?.v27Package){
+  const aiText=String(register.v27AiDraft||'').trim();
+  if(!aiText)throw Error('V27.2: липсва проверен AI текст за произхода на експертния Word.');
+  if(!globalThis.crypto?.subtle)throw Error('V27.2: браузърът не поддържа проверим SHA-256 за AI текста.');
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(aiText));
+  const sha256=Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,'0')).join('');
+  evidenceLines.push('','V27.2 — ПРОИЗХОД НА ЕКСПЕРТНИЯ ПРОЕКТ');
+  evidenceLines.push('Режим: AI автор — задължителен за експертния Word.');
+  evidenceLines.push('Контрол: четири AI раздела са валидирани преди генериране на DOCX.');
+  evidenceLines.push('SHA-256 на AI авторския текст: '+sha256);
+  evidenceLines.push('Момент на пакетиране (UTC): '+new Date().toISOString());
+  evidenceLines.push('Забележка: този запис удостоверява вложения AI текст, но сам по себе си не доказва сигурност на външните услуги.');
+ }
  z.file('README_BG.txt',evidenceLines.join('\n')+'\n');
  const packageFiles=['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_Prilozhenie_1_GIS_analiz.pdf',...(includeAnnex2?['04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf']:[]),'README_BG.txt'];
  const actualFiles=z.names();
