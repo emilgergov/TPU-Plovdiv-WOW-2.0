@@ -4,6 +4,9 @@ for(const name of ['v27-case-evidence.js','v27-verified-context.js','v27-expert-
 const p=html.indexOf('window.V27ExpertEvidence.build('),g=html.indexOf('v27AiDraft=await window.V27AIAuthor.generate(expertPayload,token)');
 assert.ok(p>0&&g>p,'verified payload must precede AI call');
 assert.ok(html.includes('window.V27CaseEvidence.create({documents})'));
+assert.ok(html.includes('V27DraftQuality.inspect('));
+assert.ok(html.includes('if(!checked.accepted)throw Error('));
+assert.ok(html.includes('v27AiDraft=proposedDraft'));
 assert.ok(html.includes('v27AiDraft,mapSvg:snapshot'),'existing ZIP route retained');
 assert.ok(html.includes('window.V26DraftPackage.make('));
 console.log('V27.1 P7 final Word/ZIP AI integration contract: PASS');
