@@ -89,6 +89,10 @@ async function make(draft,options={}){
   }
   return out;
  })();
+ if(options.requireAiAuthor){
+  const missing=['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'].filter(key=>!aiSections[key]);
+  if(missing.length)throw Error('V27.2: AI авторът не е предоставил задължителни раздели: '+missing.join(', '));
+ }
  const aiProposal=key=>aiSections[key]?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
 
  const mapBytes=options.mapPngBytes?.byteLength?Uint8Array.from(options.mapPngBytes):(options.mapSvg?await mapPng(options.mapSvg):null);
