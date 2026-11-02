@@ -124,14 +124,21 @@ async function make(draft,options={}){
  const unresolvedEvidence=x=>/\[ЗА ЕКСПЕРТНА ПРОВЕРКА|\[ОТКЪС ОТ ПРЕПИСКАТА|\b(?:НЯМА ДАННИ|ПРЕДСТОИ)\b/i.test(x);
  const unsupportedLegalCitation=x=>/(?:чл\.|член)\s*(?:Х+|X+|\?+)|(?:ал\.|алинея)\s*(?:Х+|X+|\?+)/i.test(x);
  // KT02: article citations in AI narrative must match the immutable verified source inventory.
+ // KT02: do not infer legal authority from a coincidentally equal article number.
+ // A citation is accepted only when the verified act title is explicit in the AI paragraph.
  const hasUnverifiedArticle=x=>{
-  const cited=[...String(x).matchAll(/(?:чл\.|член)\s*(\d+[а-я]?)(?:\s*,?\s*ал\.\s*(\d+))?/gi)];
+  const narrative=String(x);
+  const cited=[...narrative.matchAll(/(?:чл\.|член)\s*(\d+[а-я]?)(?:\s*,?\s*ал\.\s*(\d+))?/gi)];
   if(!cited.length)return false;
+  const normalize=t=>String(t||'').toLocaleLowerCase('bg-BG').replace(/[„“"']/g,'').replace(/\s+/g,' ').trim();
+  const body=normalize(narrative);
   const sources=Array.isArray(draft.legalSources)?draft.legalSources:[];
   return cited.some(m=>!sources.some(s=>{
+   const act=normalize(s.title);
+   if(!act||!body.includes(act))return false;
    const article=String(s.article||'');
    const hit=article.match(/(?:чл\.|член)\s*(\d+[а-я]?)(?:\s*,?\s*ал\.\s*(\d+))?/i);
-   return hit&&hit[1]===m[1]&&(!m[2]||hit[2]===m[2]);
+   return hit&&hit[1].toLowerCase()===m[1].toLowerCase()&&(!m[2]||hit[2]===m[2]);
   }));
  };
  const safeAi=key=>Boolean(aiSections[key])&&!unsupportedAi(aiSections[key])&&!personalOpinion(aiSections[key])&&!vagueInvestorInstructions(aiSections[key])&&!unresolvedEvidence(aiSections[key])&&!unsupportedLegalCitation(aiSections[key])&&!hasUnverifiedArticle(aiSections[key])&&!/защитени територии|BG[0-9]{7}|не се налага|не се изисква|не подлежи|няма вероятност|липсват въздействия|липсват рискове|не оказва въздействие/i.test(aiSections[key]);
