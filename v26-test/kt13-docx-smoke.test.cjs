@@ -79,6 +79,16 @@ async function run(scenario){
  const texts=paragraphTexts(xml).join(' ');
  for(const phrase of ['Конкретна характеристика на тестов склад и офиси.','Конкретна правна преценка по тестовите материали.','Конкретна процедурна преценка по тестовите материали.','Конкретни въздействия','гр. Пловдив, община Пловдив'])assert(texts.includes(phrase),'AI section or parcel location not integrated: '+phrase);
  assert(texts.includes('Конкретна характеристика на тестов склад и офиси.'),'Validated AI characterization must be included in expert Word');
+
+ // KT24.3 E07/E08/E26: AI can repeat the same dossier paragraph with
+ // different whitespace or trailing punctuation; export it only once.
+ const repeatedAi=aiDraft.replace('Конкретна характеристика на тестов склад и офиси.','Конкретна характеристика на тестов склад и офиси.\\n\\n  Конкретна   характеристика на тестов склад и офиси!');
+ const repeatedBlob=await w.V26ExpertWord.make({...enriched,aiDraft:repeatedAi},{mapPngBytes:new Uint8Array(mapPngBytes)});
+ const repeatedZip=fflate.unzipSync(new Uint8Array(await repeatedBlob.arrayBuffer()));
+ const repeatedXml=new TextDecoder().decode(repeatedZip['word/document.xml']);
+ const repeatedParas=paragraphTexts(repeatedXml);
+ assert.equal(repeatedParas.filter(p=>p.includes('Конкретна характеристика на тестов склад и офиси')).length,1,'Expert AI characterization duplicated across paragraphs');
+
  assert(!/намалява риска|по-нисък риск|липса на значими въздействия/i.test(texts),'Unsupported GIS-to-impact inference leaked into Word');
  assert(!/(?:^|[\s,.;:])(?:считам|предлагам|по мое мнение|според мен)(?=[\s,.;:]|$)/im.test(texts),'Personal expert opinion leaked into authority draft');
  assert(texts.includes('Конкретна процедурна преценка'),'Safeguarded AI procedural assessment must be included in expert Word');
