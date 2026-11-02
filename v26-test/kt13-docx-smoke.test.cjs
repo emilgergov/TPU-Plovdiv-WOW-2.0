@@ -153,6 +153,15 @@ async function run(scenario){
  assert(!safeText.includes('Считаме, че')&&!safeText.includes('Според нас'),'First-person plural AI opinion leaked into authority Word');
  assert(safeText.includes('Правните основания се уточняват'),'Unsafe legal AI section must use evidence-limited fallback');
 
+ // KT24.3 E22-E23: vague instructions must not be presented as an actionable authority conclusion.
+ const vagueAiDraft=aiDraft.replace('За тестовия склад не са представени проверени правни основания за окончателно процедурно произнасяне.','Възложителят следва да предприеме необходимите действия.');
+ const vagueDraft=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft:vagueAiDraft});
+ const vagueBlob=await w.V26ExpertWord.make(vagueDraft,{mapPngBytes:new Uint8Array(mapPngBytes)});
+ const vagueZip=fflate.unzipSync(new Uint8Array(await vagueBlob.arrayBuffer()));
+ const vagueText=paragraphTexts(new TextDecoder().decode(vagueZip['word/document.xml'])).join(' ');
+ assert(!vagueText.includes('Възложителят следва да предприеме необходимите действия.'),'Generic investor instructions leaked into authority Word');
+ assert(vagueText.includes('Окончателният процедурен извод'),'Vague AI conclusion must use evidence-limited fallback');
+
  console.log('Expert + classic DOCX scenario '+scenario+': PASS');
 }
 (async()=>{await run('А');await run('Б')})().catch(e=>{console.error(e);process.exitCode=1});
