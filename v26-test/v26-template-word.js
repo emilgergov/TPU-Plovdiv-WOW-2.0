@@ -40,6 +40,18 @@ async function make(scenario,paragraphs,metadata){
   // The source templates have four distinct administrative sentences.
   // Do not replace them with raw excerpts or generic missing-data notes.
   if(!value.startsWith(labels[i]))throw Error('Абзац '+(i+1)+' трябва да започва с „'+labels[i]+'“ според образец '+scenario+'.');
+
+  // KT24.3 K06-K07: the classical A/B characterization retains the exact
+  // mandatory introduction, while AI may complete only verified dossier facts.
+  // Fail closed on raw excerpts, workflow notes, or repeated template openings.
+  if(i===0){
+   const intro='С реализацията на инвестиционното предложение';
+   if(!value.startsWith(intro))throw Error('Класическата характеристика трябва да запазва оригиналното начало.');
+   if(value.slice(intro.length).includes(intro))throw Error('Повторено начало в класическата характеристика.');
+  }
+  if(/\\[(?:ОТКЪС ОТ ПРЕПИСКАТА|ЗА ЕКСПЕРТНА ПРОВЕРКА|ПРЕДСТОИ)\\]|\\[\\[(?:CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS|CONCLUSION)\\]\\]/i.test(value))
+   throw Error('Технически маркер или непроверен откъс в класическата характеристика.');
+
   if(/Няма данни в преписката|ПРОЕКТ, за проверка|Източник:/i.test(value))throw Error('Абзац '+(i+1)+' съдържа техническа бележка вместо проверен административен текст.');
   texts[0].textContent=value;texts[0].setAttribute('xml:space','preserve');
   for(const t of texts.slice(1))t.textContent='';
