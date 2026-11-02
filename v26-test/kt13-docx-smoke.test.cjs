@@ -42,6 +42,21 @@ async function run(scenario){
  assert.deepEqual(Buffer.from(out['word/media/v27-gis-overview.png']),mapPngBytes,'GIS PNG bytes changed');
  const rels=new TextDecoder().decode(out['word/_rels/document.xml.rels']);
  assert(rels.includes('rIdV27GISMap')&&rels.includes('media/v27-gis-overview.png'),'DOCX GIS image relationship missing');
+
+ // KT24.3 E14: verify the map paragraph directly precedes its centered caption,
+ // and Word receives keepNext/keepLines to prevent a caption orphan.
+ const documentXml=new TextDecoder().decode(out['word/document.xml']);
+ const parsedDocument=new w.DOMParser().parseFromString(documentXml,'application/xml');
+ const wordNs='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+ const bodyParagraphs=[...parsedDocument.getElementsByTagNameNS(wordNs,'body')[0].children].filter(x=>x.localName==='p');
+ const mapIndex=bodyParagraphs.findIndex(p=>p.getElementsByTagNameNS('http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing','inline').length>0);
+ assert(mapIndex>=0&&mapIndex+1<bodyParagraphs.length,'Expert GIS map paragraph missing');
+ const mapPara=bodyParagraphs[mapIndex],captionPara=bodyParagraphs[mapIndex+1];
+ const paraText=p=>[...p.getElementsByTagNameNS(wordNs,'t')].map(t=>t.textContent).join('');
+ assert.equal(paraText(captionPara),'Фигура 1. Пространствено положение на имотите спрямо защитените зони от мрежата „Натура 2000“.','Figure 1 caption must immediately follow map');
+ assert(mapPara.getElementsByTagNameNS(wordNs,'keepNext').length>0&&mapPara.getElementsByTagNameNS(wordNs,'keepLines').length>0,'Map and caption must be kept together');
+ assert([...captionPara.getElementsByTagNameNS(wordNs,'jc')].some(j=>j.getAttributeNS(wordNs,'val')==='center'),'Figure 1 caption must be centered');
+
  const contentTypes=new TextDecoder().decode(out['[Content_Types].xml']);
  assert(contentTypes.includes('image/png'),'DOCX PNG content type missing');
  const xml=new TextDecoder().decode(out['word/document.xml']);
