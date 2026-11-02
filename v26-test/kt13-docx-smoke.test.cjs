@@ -54,8 +54,10 @@ async function run(scenario){
  assert(!texts.includes('[[CHARACTERIZATION]]'),'AI section markers leaked into Word');
  assert(!texts.includes('Експертно потвърден правен текст за теста.'),'Generic legal boilerplate duplicated AI text');
  const expertPs=[...new w.DOMParser().parseFromString(xml,'application/xml').getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','p')].map(p=>p.textContent);
- assert(expertPs[0].includes('Място за електронен подпис — вътрешно съгласуване'),'Expert: opening blank signature slot missing');
- assert(expertPs[expertPs.length-1].includes('Място за електронен подпис — окончателно подписване'),'Expert: closing blank signature slot missing');
+ // KT24.3: expert signature spaces are blank and carry no visible labels.
+ assert.equal(expertPs[0].trim(),'','Expert: opening signature space must be blank');
+ assert.equal(expertPs[expertPs.length-1].trim(),'','Expert: closing signature space must be blank');
+ assert(!/Място за електронен подпис|РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ — НЕ Е АДМИНИСТРАТИВЕН АКТ/.test(texts),'Expert: visible workflow labels leaked into document');
  for(const value of [metadata.recipient,metadata.subject,'36676.129.457','Картографското извлечение от ГИС анализа'])assert(texts.includes(value),'Missing expert content: '+value);
  for(const key of Object.keys(sourceZip).filter(x=>!['word/document.xml','word/_rels/document.xml.rels','[Content_Types].xml'].includes(x)))assert.deepEqual(out[key],sourceZip[key],'Institutional DOCX part changed: '+key);
  // The classic renderer is tested against the same draft; do not allow silent
