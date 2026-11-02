@@ -143,6 +143,16 @@ async function run(scenario){
  for(const part of Object.keys(sourceZip).filter(k=>!['word/document.xml','word/_rels/document.xml.rels','[Content_Types].xml'].includes(k)))assert.deepEqual(classicZip[part],sourceZip[part],'Classic original template part changed: '+part);
 
  for(const value of [metadata.recipient,metadata.subject,'36676.129.457'])assert(classicText.includes(value),'Classic Word missing: '+value);
+
+ // KT24.3 E20: first-person plural AI claims cannot enter an authority-issued draft.
+ const unsafeAiDraft=aiDraft.replace('Конкретна правна преценка по тестовите материали.','Считаме, че предложението е допустимо.').replace('Конкретна процедурна преценка по тестовите материали.','Според нас процедурата е приключена.');
+ const unsafeDraft=w.V26ExpertDraft.build({results:[{input:'36676.129.457',location:'гр. Пловдив, община Пловдив, област Пловдив'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft:unsafeAiDraft});
+ const safeBlob=await w.V26ExpertWord.make(unsafeDraft,{mapPngBytes:new Uint8Array(mapPngBytes)});
+ const safeZip=fflate.unzipSync(new Uint8Array(await safeBlob.arrayBuffer()));
+ const safeText=paragraphTexts(new TextDecoder().decode(safeZip['word/document.xml'])).join(' ');
+ assert(!safeText.includes('Считаме, че')&&!safeText.includes('Според нас'),'First-person plural AI opinion leaked into authority Word');
+ assert(safeText.includes('Правните основания се уточняват'),'Unsafe legal AI section must use evidence-limited fallback');
+
  console.log('Expert + classic DOCX scenario '+scenario+': PASS');
 }
 (async()=>{await run('А');await run('Б')})().catch(e=>{console.error(e);process.exitCode=1});
