@@ -50,7 +50,7 @@ async function make(scenario,paragraphs,metadata){
  if(!protectedTerritoryText.includes('защитени територии'))throw Error('Липсва отделната проверка за защитени територии по ЗЗТ.');
  // Case-specific identity, subject, and incoming reference must be supplied and reviewed.
  const required=['recipient','address','subject','incomingReference','salutation','legalParagraphs'];
- if(!metadata||required.some(k=>k!=='legalParagraphs'&&!String(metadata[k]||'').trim()))throw Error('Липсват потвърдени адресат, адрес, предмет, входящ номер или обръщение.');
+ if(!metadata||required.some(k=>!['legalParagraphs','recipient','address'].includes(k)&&!String(metadata[k]||'').trim()))throw Error('Липсват потвърдени предмет, входящ номер или обръщение.');
  const replaceParagraph=(index,value)=>{
   if(!writable(index))return;
   const p=ps[index],texts=nodes(p,'t');if(!texts.length)throw Error('Липсва променливо текстово поле.');
@@ -72,8 +72,10 @@ async function make(scenario,paragraphs,metadata){
   !/\[ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(String(metadata.incomingReference))
  )?String(metadata.incomingReference).replace(/^Преписка:\s*/i,'').replace(/^Вх\.\s*№\s*/i,'Вх. № '):'Вх. № ОВОС-ХХХХ / ХХ.ХХ.ХХХХ г.';
  // KT24.3: format only the two writable addressee fields; keep A/B template text intact.
- const recipientLine=/^До\s*:/i.test(String(metadata.recipient))?String(metadata.recipient):'До: '+String(metadata.recipient);
- const addressLine=/^Адрес\s*:/i.test(String(metadata.address))?String(metadata.address):'Адрес: '+String(metadata.address);
+ const recipientValue=String(metadata.recipient||'').trim()||'Възложителя: ХХХХХХХХХХХХХХ';
+ const addressValue=String(metadata.address||'').trim()||'ХХХХХХХХХХХХХХ';
+ const recipientLine=/^До\s*:/i.test(recipientValue)?recipientValue:'До: '+recipientValue;
+ const addressLine=/^Адрес\s*:/i.test(addressValue)?addressValue:'Адрес: '+addressValue;
  const parcelIds=String(metadata.parcelIds||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  if(!parcelIds.length)throw Error('Липсват потвърдени кадастрални идентификатори.');
  const location=String(metadata.location||'').trim();
