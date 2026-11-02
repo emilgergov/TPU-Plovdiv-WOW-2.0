@@ -48,6 +48,7 @@ async function run(scenario){
  const texts=paragraphTexts(xml).join(' ');
  for(const phrase of ['С реализацията на инвестиционното предложение','Конкретна правна преценка','Конкретна процедурна преценка','Конкретни въздействия','гр. Пловдив, община Пловдив'])assert(texts.includes(phrase),'AI section or parcel location not integrated: '+phrase);
  assert(!texts.includes('Конкретна характеристика на тестов склад'),'Unverified AI characterization must not replace confirmed dossier text');
+ assert(!/намалява риска|по-нисък риск|липса на значими въздействия/i.test(texts),'Unsupported GIS-to-impact inference leaked into Word');
  assert(!texts.includes('[[CHARACTERIZATION]]'),'AI section markers leaked into Word');
  assert(!texts.includes('Експертно потвърден правен текст за теста.'),'Generic legal boilerplate duplicated AI text');
  const expertPs=[...new w.DOMParser().parseFromString(xml,'application/xml').getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','p')].map(p=>p.textContent);
