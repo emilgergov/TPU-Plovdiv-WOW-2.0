@@ -51,6 +51,8 @@ async function run(scenario){
  assert(!/намалява риска|по-нисък риск|липса на значими въздействия/i.test(texts),'Unsupported GIS-to-impact inference leaked into Word');
  assert(texts.includes('Конкретна процедурна преценка'),'Safeguarded AI procedural assessment must be included in expert Word');
  assert(texts.includes('Конкретна правна преценка'),'Validated AI legal reasoning must be included in expert Word');
+ assert(texts.includes('VII. ЗАКЛЮЧЕНИЕ И УКАЗАНИЯ')&&texts.includes('VIII. СЪПЪТСТВАЩИ ДОКУМЕНТИ'),'Expert Word must include a separate conclusion section');
+ assert(texts.includes('Пространственият резултат от ГИС анализа сам по себе си не установява приложимата процедура'),'Conclusion must not infer a legal determination from GIS alone');
  assert(!texts.includes('[[CHARACTERIZATION]]'),'AI section markers leaked into Word');
  assert(!texts.includes('Експертно потвърден правен текст за теста.'),'Generic legal boilerplate duplicated AI text');
  const expertPs=[...new w.DOMParser().parseFromString(xml,'application/xml').getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','p')].map(p=>p.textContent);
