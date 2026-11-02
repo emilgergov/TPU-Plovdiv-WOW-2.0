@@ -116,7 +116,7 @@ async function make(draft,options={}){
  })();
  // Do not let an AI narrative override the GIS determination or assert unverified procedural exemptions.
  const unsupportedAi=x=>/(?:не е приложима процедура|не подлежи на процедура|не се изисква оценка|не попадат в границите на защитени зони или територии|намалява вероятността за задължително|малко вероятно|не показва наличие на рискове|намалява риска|намалява риск|по-нисък риск|нисък риск|незначителн(?:о|и|а) въздейств|без значим(?:о|и|а) въздейств|не се очаква въздейств|липса на значими въздействия|не поражда въздействия|извън защитени зони,? което)/i.test(x);
- const personalOpinion=x=>/(?:^|[\s,.;:])(?:считам|предлагам|по мое мнение|според мен)(?=[\s,.;:]|$)/im.test(x);
+ const personalOpinion=x=>/(?:^|[\s,.;:])(?:считам(?:е)?|предлагам(?:е)?|по мое мнение|по наше мнение|според мен|според нас|нашето становище е|считаме за целесъобразно)(?=[\s,.;:]|$)/im.test(x);
  const safeAi=key=>aiSections[key]&&!unsupportedAi(aiSections[key])&&!personalOpinion(aiSections[key])&&!/защитени територии|BG[0-9]{7}|не се налага|не се изисква|не подлежи|няма вероятност|липсват въздействия|липсват рискове|не оказва въздействие/i.test(aiSections[key]);
  const aiProposal=key=>safeAi(key)?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
 
