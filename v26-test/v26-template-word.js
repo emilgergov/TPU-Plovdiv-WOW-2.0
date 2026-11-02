@@ -85,7 +85,7 @@ async function make(scenario,paragraphs,metadata){
   replaceParagraph(10,'Относно: '+metadata.subject+' — '+parcelDescription);replaceParagraph(13,metadata.salutation);
   replaceParagraph(16,'Във връзка с уведомление '+incomingReference+' за '+metadata.subject+', '+parcelDescription+'.');
  }else{
-  replaceParagraph(5,recipientLine);replaceParagraph(6,'');replaceParagraph(7,metadata.address);
+  replaceParagraph(5,recipientLine);replaceParagraph(6,'');replaceParagraph(7,addressLine);
   replaceParagraph(9,'Относно: '+metadata.subject+' — '+parcelDescription);replaceParagraph(11,metadata.salutation);replaceParagraph(12,'');
   replaceParagraph(14,'Във връзка с уведомление '+incomingReference+' за '+metadata.subject+', '+parcelDescription+'.');
  }
