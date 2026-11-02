@@ -89,13 +89,10 @@ async function make(draft,options={}){
   }
   return out;
  })();
- if(options.requireAiAuthor){
-  const required=['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'];
-  const missing=required.filter(key=>!aiSections[key]);
-  const headings=[...String(draft.aiDraft||'').matchAll(/^\s*\[\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\]\]\s*$/gm)].map(x=>x[1]);
-  if(missing.length||headings.length!==4||required.some((key,i)=>headings[i]!==key))throw Error('V27.2: AI авторът не е предоставил задължителни раздели в правилния ред: '+missing.join(', '));
- }
- const aiProposal=key=>aiSections[key]?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
+ // Do not let an AI narrative override the GIS determination or assert unverified procedural exemptions.
+ const unsupportedAi=x=>/(?:не е приложима процедура|не подлежи на процедура|не се изисква оценка|не попадат в границите на защитени зони или територии|намалява вероятността за задължително|малко вероятно|не показва наличие на рискове)/i.test(x);
+ const safeAi=key=>aiSections[key]&&!unsupportedAi(aiSections[key])&&!/защитени територии|BG[0-9]{7}|не се налага|не се изисква|не подлежи|няма вероятност|липсват въздействия|липсват рискове|не оказва въздействие/i.test(aiSections[key]);
+ const aiProposal=key=>safeAi(key)?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
 
  const mapBytes=options.mapPngBytes?.byteLength?Uint8Array.from(options.mapPngBytes):(options.mapSvg?await mapPng(options.mapSvg):null);
  const blocks=[
@@ -116,15 +113,15 @@ async function make(draft,options={}){
   paragraph(doc,'Фигура 1. Пространствено положение на имотите спрямо защитените зони от мрежата „Натура 2000“. Източник: ГИС анализ.'),
   paragraph(doc,'Картографското извлечение от ГИС анализа представя пространствените резултати и имотния обхват; пълният ГИС анализ е в самостоятелен PDF.'),
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
-  ...(aiSections.CHARACTERIZATION?aiProposal('CHARACTERIZATION'):confirmed(draft.characterization).map(x=>paragraph(doc,x))),
+  ...confirmed(draft.characterization).map(x=>paragraph(doc,x)),
 
   paragraph(doc,'IV. ФАКТИЧЕСКИ И ПРАВНИ КОНСТАТАЦИИ',{heading:true}),
-  ...(aiSections.LEGAL?aiProposal('LEGAL'):confirmed(legal).map(x=>paragraph(doc,x))),
+  ...(safeAi('LEGAL')?aiProposal('LEGAL'):[paragraph(doc,'Правните основания и приложимата процедура подлежат на експертна проверка по нормативния архив и документите в преписката.')]),
 
   paragraph(doc,'V. ПРОЦЕДУРНА ПРЕЦЕНКА',{heading:true}),
-  ...(aiSections.PROCEDURE?aiProposal('PROCEDURE'):[paragraph(doc,isPending(m.procedureFinding)?'Приложимата процедура не е потвърдена; изисква се преценка от компетентен експерт.':m.procedureFinding)]),
+  ...(safeAi('PROCEDURE')?aiProposal('PROCEDURE'):[paragraph(doc,'Приложимата процедура се определя след проверка на характеристиките на ИП и относимите правни основания; липсата на пространствено пресичане сама по себе си не освобождава от процедурна преценка.')]),
   paragraph(doc,'VI. КОНСТАТАЦИИ ЗА ВЪЗДЕЙСТВИЯТА',{heading:true}),
-  ...(aiSections.IMPACTS?aiProposal('IMPACTS'):confirmed(impacts).map(x=>paragraph(doc,x))),
+  ...(safeAi('IMPACTS')?aiProposal('IMPACTS'):[paragraph(doc,'От ГИС анализа е установен единствено пространственият статус на имотите спрямо защитените зони. Извод за вероятност, характер и значимост на въздействията изисква отделна експертна оценка на дейностите и доказателствата.')]),
   ...(!aiSections.IMPACTS&&impacts.some(isPending)?[paragraph(doc,'Не е изготвена окончателна оценка на въздействията. Изводите се попълват след проверка на приложимите режими и доказателствата.')]:[]),
   ...(draft.aiDraft&&!Object.keys(aiSections).length?[paragraph(doc,'AI текстът не е структуриран по раздели — изисква се проверка на формата.')]:[]),
   paragraph(doc,'VII. СЪПЪТСТВАЩИ ДОКУМЕНТИ',{heading:true}),
