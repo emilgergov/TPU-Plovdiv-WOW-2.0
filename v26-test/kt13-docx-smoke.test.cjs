@@ -84,6 +84,17 @@ async function run(scenario){
  assert(!Object.keys(classicZip).some(k=>/^word\/media\/v27-gis-overview\.png$/.test(k)),'Classic Word must not embed the expert GIS map');
  assert(!classicText.includes('Фигура 1. Пространствено положение'),'Classic Word must not include the expert GIS figure caption');
  assert(!classicText.includes('VII. ЗАКЛЮЧЕНИЕ И УКАЗАНИЯ'),'Classic template must not inherit expert-only sections');
+
+ // KT24.3: compare original A/B normative and all five impact paragraphs byte-for-byte as visible text.
+ // The generated document inserts exactly one blank signature paragraph before template paragraph zero.
+ const NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+ const sourcePs=[...originalDoc.getElementsByTagNameNS(NS,'body')[0].children].filter(p=>p.localName==='p');
+ const generatedDoc=new w.DOMParser().parseFromString(new TextDecoder().decode(classicZip['word/document.xml']),'application/xml');
+ const generatedPs=[...generatedDoc.getElementsByTagNameNS(NS,'body')[0].children].filter(p=>p.localName==='p');
+ const pText=p=>[...p.getElementsByTagNameNS(NS,'t')].map(t=>t.textContent).join('');
+ const immutableIndices=[...(scenario==='А'?[22,23,24,25,31]:[20,21,22,23,24,25,31]),26,27,28,29,30];
+ for(const i of immutableIndices)assert.equal(pText(generatedPs[i+1]),pText(sourcePs[i]),'Classic '+scenario+': original normative/impact paragraph '+(i+1)+' must remain verbatim');
+
  for(const part of Object.keys(sourceZip).filter(k=>!['word/document.xml','word/_rels/document.xml.rels','[Content_Types].xml'].includes(k)))assert.deepEqual(classicZip[part],sourceZip[part],'Classic original template part changed: '+part);
 
  for(const value of [metadata.recipient,metadata.subject,'36676.129.457'])assert(classicText.includes(value),'Classic Word missing: '+value);
