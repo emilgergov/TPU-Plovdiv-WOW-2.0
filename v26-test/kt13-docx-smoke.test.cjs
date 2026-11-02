@@ -162,6 +162,14 @@ async function run(scenario){
  assert(!vagueText.includes('Възложителят следва да предприеме необходимите действия.'),'Generic investor instructions leaked into authority Word');
  assert(vagueText.includes('Окончателният процедурен извод'),'Vague AI conclusion must use evidence-limited fallback');
 
+ // Passive-voice generic instructions must be rejected by the same safeguard.
+ const passiveAiDraft=aiDraft.replace('За тестовия склад не са представени проверени правни основания за окончателно процедурно произнасяне.','За възложителя следва да бъдат предприети необходимите действия.');
+ const passiveBlob=await w.V26ExpertWord.make({...enriched,aiDraft:passiveAiDraft},{mapPngBytes:new Uint8Array(mapPngBytes)});
+ const passiveZip=fflate.unzipSync(new Uint8Array(await passiveBlob.arrayBuffer()));
+ const passiveText=paragraphTexts(new TextDecoder().decode(passiveZip['word/document.xml'])).join(' ');
+ assert(!passiveText.includes('За възложителя следва да бъдат предприети необходимите действия.'),'Passive-voice generic instructions leaked into authority Word');
+ assert(passiveText.includes('Окончателният процедурен извод'),'Passive-voice instruction must trigger evidence-limited fallback');
+
  console.log('Expert + classic DOCX scenario '+scenario+': PASS');
 }
 (async()=>{await run('А');await run('Б')})().catch(e=>{console.error(e);process.exitCode=1});
