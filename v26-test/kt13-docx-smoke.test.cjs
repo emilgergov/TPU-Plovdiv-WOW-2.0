@@ -241,6 +241,17 @@ async function run(scenario){
  const correctBlob=await w.V26ExpertWord.make(correctAct,{mapPngBytes:new Uint8Array(mapPngBytes)});
  const correctText=paragraphTexts(new TextDecoder().decode(fflate.unzipSync(new Uint8Array(await correctBlob.arrayBuffer()))['word/document.xml'])).join(' ');
  assert(correctText.includes(legalText),'Verified act and article incorrectly rejected from DOCX');
+ // Package 2: project-accepted archive citations remain usable without being
+ // mislabeled as independently revision-verified.
+ const acceptedSource={...legalSource,revisionVerified:false,projectRevisionAccepted:true};
+ const acceptedModel=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft:aiDraft.replace('Конкретна правна преценка по тестовите материали.',legalText),legalSources:[acceptedSource]});
+ assert.equal(acceptedModel.legalSources.length,1,'Project-accepted legal source lost during draft building');
+ assert.equal(acceptedModel.legalSources[0].projectRevisionAccepted,true,'Project acceptance provenance lost');
+ assert.equal(acceptedModel.legalSources[0].revisionVerified,false,'Project acceptance falsely marked independently verified');
+ const acceptedBlob=await w.V26ExpertWord.make(acceptedModel,{mapPngBytes:new Uint8Array(mapPngBytes)});
+ const acceptedText=paragraphTexts(new TextDecoder().decode(fflate.unzipSync(new Uint8Array(await acceptedBlob.arrayBuffer()))['word/document.xml'])).join(' ');
+ assert(acceptedText.includes(legalText),'Project-accepted act and article incorrectly rejected from DOCX');
+
 
  // KT24.3 E22-E23: vague instructions must not be presented as an actionable authority conclusion.
  const vagueAiDraft=aiDraft.replace('За тестовия склад не са представени проверени правни основания за окончателно процедурно произнасяне.','Възложителят следва да предприеме необходимите действия.');
