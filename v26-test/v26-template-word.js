@@ -49,7 +49,7 @@ async function make(scenario,paragraphs,metadata){
    if(!value.startsWith(intro))throw Error('Класическата характеристика трябва да запазва оригиналното начало.');
    if(value.slice(intro.length).includes(intro))throw Error('Повторено начало в класическата характеристика.');
   }
-  if(/\\[(?:ОТКЪС ОТ ПРЕПИСКАТА|ЗА ЕКСПЕРТНА ПРОВЕРКА|ПРЕДСТОИ)\\]|\\[\\[(?:CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS|CONCLUSION)\\]\\]/i.test(value))
+  if(/\[(?:ОТКЪС ОТ ПРЕПИСКАТА|ЗА ЕКСПЕРТНА ПРОВЕРКА|ПРЕДСТОИ)\]|\[\[(?:CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS|CONCLUSION)\]\]/i.test(value))
    throw Error('Технически маркер или непроверен откъс в класическата характеристика.');
 
   if(/Няма данни в преписката|ПРОЕКТ, за проверка|Източник:/i.test(value))throw Error('Абзац '+(i+1)+' съдържа техническа бележка вместо проверен административен текст.');
