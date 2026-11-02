@@ -59,9 +59,12 @@ async function make(scenario,paragraphs,metadata){
  };
  const legalIndices=scenario==='A'?[22,23,24,25,31]:[20,21,22,23,24,25,31];
  if(!Array.isArray(metadata.legalParagraphs)||metadata.legalParagraphs.length<legalIndices.length||metadata.legalParagraphs.slice(0,legalIndices.length).some(x=>!String(x).trim()))throw Error('Не са потвърдени всички фактически и правни констатации.');
- // Normalize quoted dossier titles without changing the substantive subject.
- const normalizedSubject=String(metadata.subject||'').replace(/\s+/g,' ').replace(/\bи\s+зграждането\b/gi,'изграждането').replace(/\bСк\s+лад\b/g,'Склад').replace(/\bпро\s+мишлени\b/gi,'промишлени').replace(/„{2,}/g,'„').replace(/“{2,}/g,'“').replace(/\s+([,.;:])/g,'$1').trim();
- metadata={...metadata,subject:normalizedSubject};
+ // KT24.3: the expert-confirmed subject is authoritative. Do not rewrite,
+ // spell-correct, normalize quotes or alter whitespace during DOCX generation.
+ // Editing belongs exclusively to the earlier optional subject-confirmation step.
+ const confirmedSubject=String(metadata.subject);
+ if(!confirmedSubject.trim())throw Error('Липсва потвърден предмет на инвестиционното предложение.');
+ metadata={...metadata,subject:confirmedSubject};
  const parcelIds=String(metadata.parcelIds||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  if(!parcelIds.length)throw Error('Липсват потвърдени кадастрални идентификатори.');
  const location=String(metadata.location||'').trim();
