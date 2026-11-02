@@ -62,5 +62,5 @@ assert.match(wordSource,/confirmed\(draft\.characterization\)/);
 assert.match(wordSource,/Правните основания се уточняват/);
 assert.match(wordSource,/Приложимата процедура се определя/);
 assert.match(indexSource,/V27AIAuthor\.generate\(payload,token\)/);
-assert.match(indexSource,/v27AiDraft,mapSvg/);
+assert.match(indexSource,/v27AiDraft,v27LegalSources,mapSvg/);
 console.log('V27 contract checks PASS: adapter, role/geometry gates, AI draft propagation, classic separation (static).');
