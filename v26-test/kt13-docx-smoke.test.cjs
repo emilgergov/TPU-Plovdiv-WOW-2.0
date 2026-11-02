@@ -236,6 +236,12 @@ async function run(scenario){
  assert(!wrongText.includes(legalText),'Matching article from a different act escaped DOCX gate');
  assert(wrongText.includes('Правните основания се уточняват'),'Wrong legal act did not trigger fallback');
 
+ // KT02: a correctly identified verified act and article must remain usable in DOCX.
+ const correctAct={...enriched,aiDraft:aiDraft.replace('Конкретна правна преценка по тестовите материали.',legalText),legalSources:[legalSource]};
+ const correctBlob=await w.V26ExpertWord.make(correctAct,{mapPngBytes:new Uint8Array(mapPngBytes)});
+ const correctText=paragraphTexts(new TextDecoder().decode(fflate.unzipSync(new Uint8Array(await correctBlob.arrayBuffer()))['word/document.xml'])).join(' ');
+ assert(correctText.includes(legalText),'Verified act and article incorrectly rejected from DOCX');
+
  // KT24.3 E22-E23: vague instructions must not be presented as an actionable authority conclusion.
  const vagueAiDraft=aiDraft.replace('За тестовия склад не са представени проверени правни основания за окончателно процедурно произнасяне.','Възложителят следва да предприеме необходимите действия.');
  const vagueDraft=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft:vagueAiDraft});
