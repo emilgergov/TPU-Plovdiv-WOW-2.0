@@ -10,7 +10,7 @@ function paragraph(doc,value,{bold=false,heading=false}={}){
  spacing.setAttributeNS(NS,'w:after',heading?'160':'110');pPr.appendChild(spacing);p.appendChild(pPr);
  const r=ns(doc,'r'),rPr=ns(doc,'rPr'),font=ns(doc,'rFonts');
  font.setAttributeNS(NS,'w:ascii','Verdana');font.setAttributeNS(NS,'w:hAnsi','Verdana');font.setAttributeNS(NS,'w:cs','Verdana');rPr.appendChild(font);
- const size=ns(doc,'sz');size.setAttributeNS(NS,'w:val',heading?'24':'20');rPr.appendChild(size);
+ const size=ns(doc,'sz');size.setAttributeNS(NS,'w:val','20');rPr.appendChild(size);
  if(bold||heading)rPr.appendChild(ns(doc,'b'));r.appendChild(rPr);
  const t=ns(doc,'t');t.setAttribute('xml:space','preserve');t.textContent=String(value);r.appendChild(t);p.appendChild(r);return p;
 }
