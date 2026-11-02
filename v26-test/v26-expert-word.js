@@ -119,6 +119,7 @@ async function make(draft,options={}){
  const safeAi=key=>aiSections[key]&&!unsupportedAi(aiSections[key])&&!/защитени територии|BG[0-9]{7}|не се налага|не се изисква|не подлежи|няма вероятност|липсват въздействия|липсват рискове|не оказва въздействие/i.test(aiSections[key]);
  const aiProposal=key=>safeAi(key)?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
 
+ if(draft.aiDraft&&!Object.keys(aiSections).length)throw Error('AI проектът не съдържа разпознаваеми раздели. Проверете AI отговора преди генериране на експертния Word.');
  const mapBytes=options.mapPngBytes?.byteLength?Uint8Array.from(options.mapPngBytes):(options.mapSvg?await mapPng(options.mapSvg):null);
  // KT24.3: signature areas are blank; no visible workflow or signature labels.
  const recipientValue=String(m.recipient||'').trim()||'Възложителя: ХХХХХХХХХХХХХХ';
