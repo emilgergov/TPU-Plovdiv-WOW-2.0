@@ -121,8 +121,8 @@ async function make(draft,options={}){
  const vagueInvestorInstructions=x=>/(?:(?:да\s+се\s+предприемат|да\s+бъдат\s+предприети)\s+необходимите\s+действия|(?:следва\s+)?да\s+предприеме\s+необходимите\s+действия|да\s+се\s+спазват\s+всички\s+приложими\s+изисквания|да\s+се\s+предприемат\s+съответните\s+мерки|да\s+се\s+изпълнят\s+необходимите\s+процедури)/i.test(x);
  // KT24.3 E15-E23: apply authority-voice, evidence and actionable-instruction
  // safeguards consistently to every AI section, not just the conclusion.
- const unresolvedEvidence=x=>/\\[ЗА ЕКСПЕРТНА ПРОВЕРКА|\\[ОТКЪС ОТ ПРЕПИСКАТА|\\b(?:НЯМА ДАННИ|ПРЕДСТОИ)\\b/i.test(x);
- const unsupportedLegalCitation=x=>/(?:чл\\.|член)\\s*(?:Х+|X+|\\?+)|(?:ал\\.|алинея)\\s*(?:Х+|X+|\\?+)/i.test(x);
+ const unresolvedEvidence=x=>/\[ЗА ЕКСПЕРТНА ПРОВЕРКА|\[ОТКЪС ОТ ПРЕПИСКАТА|\b(?:НЯМА ДАННИ|ПРЕДСТОИ)\b/i.test(x);
+ const unsupportedLegalCitation=x=>/(?:чл\.|член)\s*(?:Х+|X+|\?+)|(?:ал\.|алинея)\s*(?:Х+|X+|\?+)/i.test(x);
  const safeAi=key=>Boolean(aiSections[key])&&!unsupportedAi(aiSections[key])&&!personalOpinion(aiSections[key])&&!vagueInvestorInstructions(aiSections[key])&&!unresolvedEvidence(aiSections[key])&&!unsupportedLegalCitation(aiSections[key])&&!/защитени територии|BG[0-9]{7}|не се налага|не се изисква|не подлежи|няма вероятност|липсват въздействия|липсват рискове|не оказва въздействие/i.test(aiSections[key]);
  // KT24.3 E07/E08/E26: preserve the AI's verified wording, but remove repeated
  // paragraphs caused by overlapping dossier excerpts before DOCX serialization.
