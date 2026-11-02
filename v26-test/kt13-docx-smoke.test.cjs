@@ -41,6 +41,7 @@ async function run(scenario){
  // KT24.3 K08: duplicated AI sentences must not enter either classic template.
  const repeated='С реализацията на инвестиционното предложение се предвижда изграждане на тестов обект. Изграждането на обекта ще се извърши в границите на имота.';
  await assert.rejects(()=>w.V26TemplateWord.make(scenario,[repeated+' Изграждането на обекта ще се извърши в границите на имота.',...paragraphs.slice(1)],metadata),/Повторено изречение/);
+ await assert.rejects(()=>w.V26TemplateWord.make(scenario,[repeated+'   Изграждането   на обекта ще се извърши в границите на имота.',...paragraphs.slice(1)],metadata),/Повторено изречение/);
  const draft=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{}});
  const aiDraft=['[[CHARACTERIZATION]]','Конкретна характеристика на тестов склад и офиси.','[[LEGAL]]','Конкретна правна преценка по тестовите материали.','[[PROCEDURE]]','Конкретна процедурна преценка по тестовите материали.','[[IMPACTS]]','Конкретни въздействия на тестовия склад.','[[CONCLUSION]]','За тестовия склад не са представени проверени правни основания за окончателно процедурно произнасяне.'].join('\n');
  const enriched=w.V26ExpertDraft.build({results:[{input:'36676.129.457',location:'гр. Пловдив, община Пловдив, област Пловдив'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft});
