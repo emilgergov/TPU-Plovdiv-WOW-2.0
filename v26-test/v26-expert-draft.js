@@ -33,7 +33,7 @@ function build({results,roles,determination,metadata,paragraphs,evidence,aiDraft
   zones,metadata:Object.freeze(data),characterization:Object.freeze(characterization),
   evidence:Object.freeze({findingsCount:(evidence?.findings||[]).length,warningsCount:(evidence?.warnings||[]).length}),
   aiDraft:typeof aiDraft==='string'?aiDraft.trim().slice(0,9000):'',
-  legalSources:freezeList((Array.isArray(legalSources)?legalSources:[]).filter(x=>x&&(x.revisionVerified===true||x.projectRevisionAccepted===true)&&x.article&&x.verifiedScope&&x.title&&x.source).slice(0,12).map(x=>({id:clean(x.id),title:clean(x.title),source:clean(x.source),article:clean(x.article),verifiedScope:clean(x.verifiedScope),page:clean(x.page)}))),
+  legalSources:freezeList((Array.isArray(legalSources)?legalSources:[]).filter(x=>x&&(x.revisionVerified===true||x.projectRevisionAccepted===true)&&x.article&&x.verifiedScope&&x.title&&x.source).slice(0,12).map(x=>({id:clean(x.id),title:clean(x.title),source:clean(x.source),article:clean(x.article),verifiedScope:clean(x.verifiedScope),page:clean(x.page),revisionVerified:x.revisionVerified===true,projectRevisionAccepted:x.projectRevisionAccepted===true}))),
   reviewRequired:true
  });
 }
