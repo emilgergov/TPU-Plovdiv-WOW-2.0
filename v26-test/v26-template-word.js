@@ -89,15 +89,15 @@ async function make(scenario,paragraphs,metadata){
   replaceParagraph(9,'Относно: '+metadata.subject+' — '+parcelDescription);replaceParagraph(11,metadata.salutation);replaceParagraph(12,'');
   replaceParagraph(14,'Във връзка с уведомление '+incomingReference+' за '+metadata.subject+', '+parcelDescription+'.');
  }
- legalIndices.forEach((index,i)=>replaceParagraph(index,String(metadata.legalParagraphs[i])));
+ // KT24.3: preserve original A/B legal wording verbatim.
  // The procedure statement and five impact findings are case-specific, never reusable sample findings.
  if(!String(metadata.procedureFinding||'').trim())throw Error('Липсва проверена констатация за приложимата процедура по Наредбата за ОС.');
  if(!Array.isArray(metadata.impactFindings)||metadata.impactFindings.length!==5||metadata.impactFindings.some(v=>!String(v).trim()))throw Error('Липсват петте проверени констатации за въздействията.');
- replaceParagraph(scenario==='A'?17:15,metadata.procedureFinding);
+ // KT24.3: preserve original procedure wording verbatim.
  const impactIndices=[26,27,28,29,30];
  const used=new Set([...MAP[scenario],...legalIndices,...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])]);
  if(impactIndices.some(i=>used.has(i)))throw Error('Конфликт между полета на образеца — генерирането е спряно за защита на правния текст.');
- for(let i=0;i<5;i++)if(!mandatoryIndices.has(impactIndices[i]))replaceParagraph(impactIndices[i],String(metadata.impactFindings[i]));
+ // KT24.3: preserve all five original impact paragraphs verbatim.
  // Remove stale example identifiers only from explicitly writable paragraphs.
  for(let i=0;i<ps.length;i++){
   if(!writable(i))continue;
