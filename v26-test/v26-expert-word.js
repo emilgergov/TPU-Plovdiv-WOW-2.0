@@ -120,7 +120,18 @@ async function make(draft,options={}){
  // KT24.3 E22–E23: generic, unactionable investor instructions are not a defensible disposition.
  const vagueInvestorInstructions=x=>/(?:(?:да\s+се\s+предприемат|да\s+бъдат\s+предприети)\s+необходимите\s+действия|(?:следва\s+)?да\s+предприеме\s+необходимите\s+действия|да\s+се\s+спазват\s+всички\s+приложими\s+изисквания|да\s+се\s+предприемат\s+съответните\s+мерки|да\s+се\s+изпълнят\s+необходимите\s+процедури)/i.test(x);
  const safeAi=key=>aiSections[key]&&!unsupportedAi(aiSections[key])&&!personalOpinion(aiSections[key])&&!(key==='CONCLUSION'&&vagueInvestorInstructions(aiSections[key]))&&!/защитени територии|BG[0-9]{7}|не се налага|не се изисква|не подлежи|няма вероятност|липсват въздействия|липсват рискове|не оказва въздействие/i.test(aiSections[key]);
- const aiProposal=key=>safeAi(key)?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
+ // KT24.3 E07/E08/E26: preserve the AI's verified wording, but remove repeated
+ // paragraphs caused by overlapping dossier excerpts before DOCX serialization.
+ const aiProposal=key=>{
+  if(!safeAi(key))return [];
+  const seen=new Set();
+  return aiSections[key].split(/\n\s*\n/).map(x=>x.trim()).filter(x=>{
+   if(!x)return false;
+   const normalized=x.replace(/\s+/g,' ').replace(/[.!?]+$/,'').toLocaleLowerCase('bg-BG');
+   if(seen.has(normalized))return false;
+   seen.add(normalized);return true;
+  }).slice(0,7).map(x=>paragraph(doc,x));
+ };
 
  if(draft.aiDraft&&!Object.keys(aiSections).length)throw Error('AI проектът не съдържа разпознаваеми раздели. Проверете AI отговора преди генериране на експертния Word.');
  const mapBytes=options.mapPngBytes?.byteLength?Uint8Array.from(options.mapPngBytes):(options.mapSvg?await mapPng(options.mapSvg):null);
