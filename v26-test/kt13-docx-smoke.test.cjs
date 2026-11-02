@@ -82,7 +82,7 @@ async function run(scenario){
 
  // KT24.3 E07/E08/E26: AI can repeat the same dossier paragraph with
  // different whitespace or trailing punctuation; export it only once.
- const repeatedAi=aiDraft.replace('Конкретна характеристика на тестов склад и офиси.','Конкретна характеристика на тестов склад и офиси.\\n\\n  Конкретна   характеристика на тестов склад и офиси!');
+ const repeatedAi=aiDraft.replace('Конкретна характеристика на тестов склад и офиси.','Конкретна характеристика на тестов склад и офиси.\n\n  Конкретна   характеристика на тестов склад и офиси!');
  const repeatedBlob=await w.V26ExpertWord.make({...enriched,aiDraft:repeatedAi},{mapPngBytes:new Uint8Array(mapPngBytes)});
  const repeatedZip=fflate.unzipSync(new Uint8Array(await repeatedBlob.arrayBuffer()));
  const repeatedXml=new TextDecoder().decode(repeatedZip['word/document.xml']);
