@@ -125,12 +125,12 @@ async function make(draft,options={}){
  const unsupportedLegalCitation=x=>/(?:чл\.|член)\s*(?:Х+|X+|\?+)|(?:ал\.|алинея)\s*(?:Х+|X+|\?+)/i.test(x);
  // KT02: article citations in AI narrative must match the immutable verified source inventory.
  const hasUnverifiedArticle=x=>{
-  const cited=[...String(x).matchAll(/(?:чл\\.|член)\\s*(\\d+[а-я]?)(?:\\s*,?\\s*ал\\.\\s*(\\d+))?/gi)];
+  const cited=[...String(x).matchAll(/(?:чл\.|член)\s*(\d+[а-я]?)(?:\s*,?\s*ал\.\s*(\d+))?/gi)];
   if(!cited.length)return false;
   const sources=Array.isArray(draft.legalSources)?draft.legalSources:[];
   return cited.some(m=>!sources.some(s=>{
    const article=String(s.article||'');
-   const hit=article.match(/(?:чл\\.|член)\\s*(\\d+[а-я]?)(?:\\s*,?\\s*ал\\.\\s*(\\d+))?/i);
+   const hit=article.match(/(?:чл\.|член)\s*(\d+[а-я]?)(?:\s*,?\s*ал\.\s*(\d+))?/i);
    return hit&&hit[1]===m[1]&&(!m[2]||hit[2]===m[2]);
   }));
  };
