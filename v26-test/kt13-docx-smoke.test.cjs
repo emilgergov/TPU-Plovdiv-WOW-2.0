@@ -64,8 +64,10 @@ async function run(scenario){
  const classicZip=fflate.unzipSync(new Uint8Array(await classic.arrayBuffer()));
  const classicText=paragraphTexts(new TextDecoder().decode(classicZip['word/document.xml'])).join(' ');
  const classicPs=[...new w.DOMParser().parseFromString(new TextDecoder().decode(classicZip['word/document.xml']),'application/xml').getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','p')].map(p=>p.textContent);
- assert(classicPs[0].includes('Място за електронен подпис — вътрешно съгласуване'),'Classic: opening blank signature slot missing');
- assert(classicPs[classicPs.length-1].includes('Място за електронен подпис — окончателно подписване'),'Classic: closing blank signature slot missing');
+ // KT24.3: both classic signature slots are deliberately blank, with no visible labels.
+ assert.equal(classicPs[0].trim(),'','Classic: opening signature space must be blank');
+ assert.equal(classicPs[classicPs.length-1].trim(),'','Classic: closing signature space must be blank');
+ assert(!/Място за електронен подпис|РАБОТЕН ПРОЕКТ — ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(classicText),'Classic: visible workflow labels leaked into document');
  for(const value of [metadata.recipient,metadata.subject,'36676.129.457'])assert(classicText.includes(value),'Classic Word missing: '+value);
  console.log('Expert + classic DOCX scenario '+scenario+': PASS');
 }
