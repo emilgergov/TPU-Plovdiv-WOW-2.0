@@ -16,6 +16,26 @@ function paragraph(doc,value,{bold=false,heading=false,center=false}={}){
  if(bold||heading)rPr.appendChild(ns(doc,'b'));r.appendChild(rPr);
  const t=ns(doc,'t');t.setAttribute('xml:space','preserve');t.textContent=String(value);r.appendChild(t);p.appendChild(r);return p;
 }
+// KT24.3: style the confirmed quoted IP title and trailing location without changing any characters.
+function subjectParagraph(doc,prefix,subject){
+ const p=paragraph(doc,prefix+subject);
+ const match=/„[^“]+“/.exec(subject);
+ if(!match)return p; // Never guess boundaries when the expert has not supplied quotes.
+ const first=prefix+subject.slice(0,match.index),quoted=match[0],tail=subject.slice(match.index+quoted.length);
+ const runs=all(p,'r');if(!runs.length)return p;
+ const original=runs[0],makeRun=(value,bold,italic)=>{
+  const run=original.cloneNode(true),t=all(run,'t')[0],rPr=all(run,'rPr')[0];
+  if(!t||!rPr)return null;t.textContent=value;
+  if(bold)rPr.appendChild(ns(doc,'b'));
+  if(italic)rPr.appendChild(ns(doc,'i'));
+  return run;
+ };
+ p.removeChild(original);
+ for(const [value,bold,italic] of [[first,false,false],[quoted,true,true],[tail,false,true]]){
+  if(value){const run=makeRun(value,bold,italic);if(run)p.appendChild(run);}
+ }
+ return p;
+}
 async function mapPng(svg){
  if(typeof svg!=='string'||!svg.includes('<svg')||typeof document==='undefined')return null;
  const img=new Image(),url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
@@ -107,7 +127,7 @@ async function make(draft,options={}){
   paragraph(doc,''),
   paragraph(doc,'ПРОЕКТ НА СТАНОВИЩЕ',{heading:true}),
   paragraph(doc,/^До\s*:/i.test(recipientValue)?recipientValue:'До: '+recipientValue,{bold:true}),paragraph(doc,/^Адрес\s*:/i.test(addressValue)?addressValue:'Адрес: '+addressValue),
-  paragraph(doc,'Относно: '+subject,{bold:true}),
+  subjectParagraph(doc,'Относно: ',subject),
   paragraph(doc,(/\b\d{1,2}\.\d{1,2}\.\d{4}\b/.test(String(m.incomingReference||''))&&!/\[ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(String(m.incomingReference)))?String(m.incomingReference).replace(/^Преписка:\s*/i,'').replace(/^Вх\.\s*№\s*/i,'Вх. № '):'Вх. № ОВОС-ХХХХ / ХХ.ХХ.ХХХХ г.'),
   ...(isPending(m.salutation)?[]:[paragraph(doc,m.salutation)]),
   paragraph(doc,'I. ПРЕДМЕТ И ИМОТЕН ОБХВАТ',{heading:true}),
