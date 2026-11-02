@@ -131,7 +131,7 @@ async function make(draft,options={}){
   paragraph(doc,(/\b\d{1,2}\.\d{1,2}\.\d{4}\b/.test(String(m.incomingReference||''))&&!/\[ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(String(m.incomingReference)))?String(m.incomingReference).replace(/^Преписка:\s*/i,'').replace(/^Вх\.\s*№\s*/i,'Вх. № '):'Вх. № ОВОС-ХХХХ / ХХ.ХХ.ХХХХ г.'),
   ...(isPending(m.salutation)?[]:[paragraph(doc,m.salutation)]),
   paragraph(doc,'I. ПРЕДМЕТ И ИМОТЕН ОБХВАТ',{heading:true}),
-  paragraph(doc,'Предмет на ИП: '+subject),
+  subjectParagraph(doc,'Предмет на ИП: ',subject),
   paragraph(doc,'Поземлени имоти: '+draft.parcels.map(p=>p.id+(p.location?' — '+p.location:'')+' ('+(p.role==='leading'?'предмет на ИП':'съпътстващ')+')').join('; ')),
   ...(m.location?[paragraph(doc,'Местоположение: '+m.location)]:[]),
   paragraph(doc,'II. ПРОСТРАНСТВЕН АНАЛИЗ',{heading:true}),
