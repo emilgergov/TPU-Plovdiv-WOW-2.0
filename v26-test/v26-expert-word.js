@@ -106,7 +106,7 @@ async function make(draft,options={}){
   paragraph(doc,'ПРОЕКТ НА СТАНОВИЩЕ',{heading:true}),
   paragraph(doc,/^До\s*:/i.test(String(m.recipient))?m.recipient:'До: '+m.recipient,{bold:true}),paragraph(doc,/^Адрес\s*:/i.test(String(m.address))?m.address:'Адрес: '+m.address),
   paragraph(doc,'Относно: '+subject,{bold:true}),
-  paragraph(doc,'Преписка: '+m.incomingReference),
+  paragraph(doc,(/\b\d{1,2}\.\d{1,2}\.\d{4}\b/.test(String(m.incomingReference||''))&&!/\[ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(String(m.incomingReference)))?String(m.incomingReference).replace(/^Преписка:\s*/i,'').replace(/^Вх\.\s*№\s*/i,'Вх. № '):'Вх. № ОВОС-ХХХХ / ХХ.ХХ.ХХХХ г.'),
   ...(isPending(m.salutation)?[]:[paragraph(doc,m.salutation)]),
   paragraph(doc,'I. ПРЕДМЕТ И ИМОТЕН ОБХВАТ',{heading:true}),
   paragraph(doc,'Предмет на ИП: '+subject),
