@@ -53,6 +53,16 @@ async function make(scenario,paragraphs,metadata){
    throw Error('Технически маркер или непроверен откъс в класическата характеристика.');
 
   if(/Няма данни в преписката|ПРОЕКТ, за проверка|Източник:/i.test(value))throw Error('Абзац '+(i+1)+' съдържа техническа бележка вместо проверен административен текст.');
+  // KT24.3 K08: repeated complete sentences signal unedited AI/dossier
+  // concatenation. Reject the draft rather than silently changing facts.
+  const sentences=value.match(/[^.!?]+[.!?]+/g)||[];
+  const seenSentences=new Set();
+  for(const sentence of sentences){
+   const normalized=sentence.replace(/\\s+/g,' ').trim().toLocaleLowerCase('bg');
+   if(normalized.length<35)continue;
+   if(seenSentences.has(normalized))throw Error('Повторено изречение в класическата характеристика.');
+   seenSentences.add(normalized);
+  }
   texts[0].textContent=value;texts[0].setAttribute('xml:space','preserve');
   for(const t of texts.slice(1))t.textContent='';
  }
