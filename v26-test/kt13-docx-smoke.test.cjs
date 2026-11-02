@@ -81,6 +81,11 @@ async function run(scenario){
  assert.equal(classicPs[0].trim(),'','Classic: opening signature space must be blank');
  assert.equal(classicPs[classicPs.length-1].trim(),'','Classic: closing signature space must be blank');
  assert(!/Място за електронен подпис|РАБОТЕН ПРОЕКТ — ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(classicText),'Classic: visible workflow labels leaked into document');
+ assert(!Object.keys(classicZip).some(k=>/^word\/media\/v27-gis-overview\.png$/.test(k)),'Classic Word must not embed the expert GIS map');
+ assert(!classicText.includes('Фигура 1. Пространствено положение'),'Classic Word must not include the expert GIS figure caption');
+ assert(!classicText.includes('VII. ЗАКЛЮЧЕНИЕ И УКАЗАНИЯ'),'Classic template must not inherit expert-only sections');
+ for(const part of Object.keys(sourceZip).filter(k=>!['word/document.xml','word/_rels/document.xml.rels','[Content_Types].xml'].includes(k)))assert.deepEqual(classicZip[part],sourceZip[part],'Classic original template part changed: '+part);
+
  for(const value of [metadata.recipient,metadata.subject,'36676.129.457'])assert(classicText.includes(value),'Classic Word missing: '+value);
  console.log('Expert + classic DOCX scenario '+scenario+': PASS');
 }
