@@ -24,6 +24,11 @@ assert.equal(verified.facts.legalSources.length,1,'Verified article must reach A
 assert.equal(verified.facts.legalSources[0].article,'чл. 1');
 assert.equal(verified.facts.legalSources[0].verifiedScope,'Проверен обхват за теста');
 assert.equal(verified.facts.legalSources[0].revisionVerified,true);
+const accepted=root.V27AIFacts.build({results,roles,workingDraft,subject:metadata.subject,normativeRegister:{records:[{id:'project-1',title:'Проектно приет нормативен акт',source:'Интегриран архив',article:'чл. 2, ал. 1',verified_scope:'Проверен текст, приложимостта се преценява отделно',verified:true,revision_verified:false,project_revision_accepted:true}]}});
+assert.equal(accepted.facts.legalSources.length,1,'Project-accepted source should reach AI');
+assert.equal(accepted.facts.legalSources[0].revisionVerified,false,'Project acceptance must not masquerade as independent verification');
+assert.equal(accepted.facts.legalSources[0].projectRevisionAccepted,true);
+
 assert.match(root.V27AIFacts.build({results:[{...results[0],intersection_verified_outside:true}],roles,workingDraft,subject:metadata.subject}).facts.gisFindings,/потвърдено отсъствие/);
 assert.match(payload.facts.gisFindings,/пространственият резултат не е потвърден/);
 assert(!payload.facts.gisFindings.includes('потвърдено отсъствие'));
