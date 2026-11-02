@@ -81,7 +81,7 @@ async function make(draft,options={}){
  const reviewPending=pendingRequired.some(isPending);
  if(!Array.isArray(draft.parcels)||!draft.parcels.length||draft.parcels.some(p=>!/^\d{5}\.\d+\.\d+$/.test(String(p.id||''))))throw Error('КТ13: невалиден или липсващ имотен обхват.');
  if(!Array.isArray(draft.characterization)||draft.characterization.length!==4||draft.characterization.some(x=>!String(x||'').trim()))throw Error('КТ13: четирите характеристики трябва да бъдат редактирани и потвърдени.');
- const subject=String(m.subject).replace(/^Относно:\s*/i,'').replace(/^(?:инвестиционно предложение\s*)+/i,'').replace(/^[„“"\s]+|[„“"\s]+$/g,'').replace(/\s+/g,' ').trim();
+ const subject=String(m.subject); // KT24.3: confirmed subject must remain byte-for-byte unchanged in Word output.
  const confirmed=xs=>xs.filter(x=>!isPending(x));
  const aiSections=(()=>{
   const out={},raw=String(draft.aiDraft||'');
