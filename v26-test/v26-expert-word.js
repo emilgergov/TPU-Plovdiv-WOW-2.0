@@ -136,6 +136,7 @@ async function make(draft,options={}){
   return cited.some(m=>!sources.some(s=>{
    const act=normalize(s.title);
    if(!act||!body.includes(act))return false;
+   if(s.revisionVerified!==true&&s.projectRevisionAccepted!==true)return false;
    const article=String(s.article||'');
    const hit=article.match(/(?:чл\.|член)\s*(\d+[а-я]?)(?:\s*,?\s*ал\.\s*(\d+))?/i);
    return hit&&hit[1].toLowerCase()===m[1].toLowerCase()&&(!m[2]||hit[2]===m[2]);
