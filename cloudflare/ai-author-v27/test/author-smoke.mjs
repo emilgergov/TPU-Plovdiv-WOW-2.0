@@ -4,10 +4,12 @@ const source = await readFile(new URL('../src/worker.js', import.meta.url), 'utf
 const worker = (await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'))).default;
 const savedFetch=globalThis.fetch;
 let calls=0;
+let lastFacts=null;
 globalThis.fetch=async (_url,opts)=>{
   calls++;
   assert.equal(opts.headers.Authorization,'Bearer test-openai-key');
   const request=JSON.parse(opts.body);
+  lastFacts=request.input[1].content ? JSON.parse(request.input[1].content) : null;
   assert.equal(request.store,false);
   assert.equal(request.model,'gpt-4.1-mini');
   return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:'ПРОЕКТ — за експертна проверка'}]}]}),{status:200,headers:{'Content-Type':'application/json'}});
@@ -33,6 +35,17 @@ try{
     assert.equal(data.reviewRequired,true);
     assert.match(data.draft,/ПРОЕКТ/);
   }
+  const legalFacts={...facts,legalSources:[
+    {id:'verified-1',title:'Тестов нормативен източник',source:'Официален архив',article:'чл. 1',verifiedScope:'Проверен тестов обхват',page:'стр. 1',revisionVerified:true},
+    {id:'unverified-1',title:'Непотвърден източник',source:'Неустановен',article:'чл. 2',verifiedScope:'Тест',revisionVerified:false}
+  ]};
+  const legalResponse=await worker.fetch(post('test-access-token',{mode:'expert',facts:legalFacts}),env);
+  assert.equal(legalResponse.status,200);
+  assert.equal(lastFacts.legalSources.length,1);
+  assert.equal(lastFacts.legalSources[0].article,'чл. 1');
+  assert.equal(lastFacts.legalSources[0].verifiedScope,'Проверен тестов обхват');
+  assert.equal(lastFacts.legalSources[0].page,'стр. 1');
+  assert.equal(lastFacts.legalSources[0].revisionVerified,true);
   // Verify public expert module wiring without invoking a paid provider.
   const {readFileSync}=await import('node:fs');
   const {Script,createContext}=await import('node:vm');
@@ -63,7 +76,7 @@ try{
   const browserResponse=await worker.fetch(browserRequest,env);
   assert.equal(browserResponse.status,200);
   assert.equal(browserResponse.headers.get('Access-Control-Allow-Origin'),origin);
-  assert.equal(calls,3);
+  assert.equal(calls,4);
   console.log('PASS: health, unauthorized access, invalid input, classic and expert AI drafting (mock provider).');
   console.log('No real OpenAI API calls made; live generation still requires separate verification.');
 } finally {globalThis.fetch=savedFetch}
