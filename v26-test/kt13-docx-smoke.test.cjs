@@ -103,6 +103,14 @@ async function run(scenario){
  assert(subjectRuns.length>0,'Confirmed subject missing from expert run structure');
 
  for(const value of [metadata.recipient,metadata.subject,'36676.129.457','Картографското извлечение от ГИС анализа'])assert(texts.includes(value),'Missing expert content: '+value);
+
+ // KT24.3 E04/E05/E06: actual metadata, exact confirmed subject, and mandatory reference fallback.
+ for(const value of ['До: '+metadata.recipient,'Адрес: '+metadata.address,'Относно: ',metadata.subject,'Вх. № ОВОС-ХХХХ / ХХ.ХХ.ХХХХ г.'])
+  assert(texts.includes(value),'Expert administrative requisite missing: '+value);
+ const subjectParagraphs=bodyParagraphs.filter(p=>paraText(p).includes(metadata.subject));
+ assert(subjectParagraphs.length>=2,'Expert must reproduce confirmed subject in reference and subject section');
+ assert(subjectParagraphs.every(p=>paraText(p).includes(metadata.subject)),'Expert confirmed subject must remain unaltered');
+
  for(const key of Object.keys(sourceZip).filter(x=>!['word/document.xml','word/_rels/document.xml.rels','[Content_Types].xml'].includes(x)))assert.deepEqual(out[key],sourceZip[key],'Institutional DOCX part changed: '+key);
  // The classic renderer is tested against the same draft; do not allow silent
  // divergence between expert and template-based outputs.
