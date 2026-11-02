@@ -202,6 +202,22 @@ async function run(scenario){
  assert(!safeText.includes('Считаме, че')&&!safeText.includes('Според нас'),'First-person plural AI opinion leaked into authority Word');
  assert(safeText.includes('Правните основания се уточняват'),'Unsafe legal AI section must use evidence-limited fallback');
 
+ // KT24.3 E15-E23: enforce the same evidence and authority rules across
+ // legal, procedure and impacts sections, not only the final conclusion.
+ const sectionSafetyCases=[
+  {old:'Конкретна правна преценка по тестовите материали.',replacement:'Правното основание е чл. ХХ от приложимата наредба.',forbidden:'чл. ХХ',fallback:'Правните основания се уточняват'},
+  {old:'Конкретна процедурна преценка по тестовите материали.',replacement:'Възложителят следва да предприеме необходимите действия.',forbidden:'Възложителят следва да предприеме необходимите действия.',fallback:'Приложимата процедура се определя'},
+  {old:'Конкретни въздействия на тестовия склад.',replacement:'Според нас въздействията са допустими.',forbidden:'Според нас въздействията са допустими.',fallback:'От ГИС анализа е установен единствено'}
+ ];
+ for(const c of sectionSafetyCases){
+  const candidate={...enriched,aiDraft:aiDraft.replace(c.old,c.replacement)};
+  const result=await w.V26ExpertWord.make(candidate,{mapPngBytes:new Uint8Array(mapPngBytes)});
+  const resultZip=fflate.unzipSync(new Uint8Array(await result.arrayBuffer()));
+  const resultText=paragraphTexts(new TextDecoder().decode(resultZip['word/document.xml'])).join(' ');
+  assert(!resultText.includes(c.forbidden),'Unsafe AI section escaped evidence gate: '+c.forbidden);
+  assert(resultText.includes(c.fallback),'Unsafe AI section did not use explicit review fallback: '+c.fallback);
+ }
+
  // KT24.3 E22-E23: vague instructions must not be presented as an actionable authority conclusion.
  const vagueAiDraft=aiDraft.replace('За тестовия склад не са представени проверени правни основания за окончателно процедурно произнасяне.','Възложителят следва да предприеме необходимите действия.');
  const vagueDraft=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft:vagueAiDraft});
