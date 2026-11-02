@@ -55,6 +55,13 @@ async function run(scenario){
  assert(texts.includes('VII. ЗАКЛЮЧЕНИЕ И УКАЗАНИЯ')&&texts.includes('VIII. СЪПЪТСТВАЩИ ДОКУМЕНТИ'),'Expert Word must include a separate conclusion section');
  assert(texts.includes('За тестовия склад не са представени проверени правни основания'),'Evidence-aware AI conclusion must be rendered');
  assert(texts.includes('За тестовия склад не са представени проверени правни основания'),'Conclusion must preserve explicit absence of verified legal grounds');
+ // KT24.3 negative-path: unsafe AI conclusions must not become an administrative disposition.
+ const unsafeDraft=aiDraft.replace('За тестовия склад не са представени проверени правни основания за окончателно процедурно произнасяне.','Считам, че не се изисква оценка и предлагам разрешаване на инвестиционното предложение.');
+ const unsafeBlob=await w.V26ExpertWord.make({...enriched,aiDraft:unsafeDraft},{mapPngBytes:new Uint8Array(mapPngBytes)});
+ const unsafeZip=fflate.unzipSync(new Uint8Array(await unsafeBlob.arrayBuffer()));
+ const unsafeText=paragraphTexts(new TextDecoder().decode(unsafeZip['word/document.xml'])).join(' ');
+ assert(!unsafeText.includes('Считам, че не се изисква оценка'),'Unsupported AI conclusion must be rejected');
+ assert(unsafeText.includes('Окончателният процедурен извод и евентуалните указания'),'Rejected conclusion must fall back to evidence-gated text');
  assert(!texts.includes('[[CHARACTERIZATION]]'),'AI section markers leaked into Word');
  assert(!texts.includes('Експертно потвърден правен текст за теста.'),'Generic legal boilerplate duplicated AI text');
  const expertPs=[...new w.DOMParser().parseFromString(xml,'application/xml').getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','p')].map(p=>p.textContent);
