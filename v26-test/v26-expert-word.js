@@ -154,8 +154,7 @@ async function make(draft,options={}){
   ...(!aiSections.IMPACTS&&impacts.some(isPending)?[paragraph(doc,'Не е изготвена окончателна оценка на въздействията. Изводите се попълват след проверка на приложимите режими и доказателствата.')]:[]),
 
   paragraph(doc,'VII. СЪПЪТСТВАЩИ ДОКУМЕНТИ',{heading:true}),
-  paragraph(doc,'ГИС анализ (самостоятелен PDF); Нормативни и документални референции (самостоятелен PDF, когато е изготвен).'),
-  paragraph(doc,'НЕОБХОДИМА Е ЕКСПЕРТНА ПРОВЕРКА НА ПРЕПИСКАТА, ПРАВНИТЕ ОСНОВАНИЯ И ИЗВОДИТЕ. Документът не представлява издаден административен акт.')
+  paragraph(doc,'ГИС анализ (самостоятелен PDF); Нормативни и документални референции (самостоятелен PDF, когато е изготвен).')
  ];
  body.replaceChildren(...blocks,paragraph(doc,''),sect.cloneNode(true));
  const serialized=new XMLSerializer().serializeToString(doc);
