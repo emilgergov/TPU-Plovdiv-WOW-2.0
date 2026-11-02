@@ -154,6 +154,22 @@ async function run(scenario){
   const originalText=pText(sourcePs[i]);
   const expectedText=originalText.replace(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g,id=>id==='36676.129.457'?id:'36676.129.457');
   assert.equal(pText(generatedPs[i+1]),expectedText,'Classic '+scenario+': normative/impact paragraph '+(i+1)+' changed beyond confirmed cadastral ID substitution');
+  // KT24.3 K09-K12: immutable legal and impact paragraphs must retain the
+  // source template's paragraph/run structure and formatting. Only yellow
+  // authoring marks may be cleared; verified parcel IDs may be substituted.
+  const sourceP=sourcePs[i],outputP=generatedPs[i+1];
+  const structure=p=>[...p.children].map(n=>n.localName).join('|');
+  assert.equal(structure(outputP),structure(sourceP),'Classic '+scenario+': original paragraph structure changed at '+(i+1));
+  const runs=p=>[...p.getElementsByTagNameNS(NS,'r')];
+  const sourceRuns=runs(sourceP),outputRuns=runs(outputP);
+  assert.equal(outputRuns.length,sourceRuns.length,'Classic '+scenario+': original run count changed at '+(i+1));
+  const formatting=run=>{
+   const pr=[...run.children].find(n=>n.localName==='rPr');
+   return pr?[...pr.children].filter(n=>!['highlight','shd'].includes(n.localName)).map(n=>n.localName+':'+[...n.attributes].map(a=>a.name+'='+a.value).sort().join(',')).join('|'):'';
+  };
+  for(let j=0;j<sourceRuns.length;j++)
+   assert.equal(formatting(outputRuns[j]),formatting(sourceRuns[j]),'Classic '+scenario+': original run formatting changed at '+(i+1)+', run '+j);
+
  }
 
  for(const part of Object.keys(sourceZip).filter(k=>!['word/document.xml','word/_rels/document.xml.rels','[Content_Types].xml'].includes(k)))assert.deepEqual(classicZip[part],sourceZip[part],'Classic original template part changed: '+part);
