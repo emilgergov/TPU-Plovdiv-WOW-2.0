@@ -3,7 +3,7 @@
 (function(root){'use strict';
 const clean=x=>String(x==null?'':x).trim();
 const freezeList=xs=>Object.freeze(xs.map(x=>Object.freeze(x)));
-function build({results,roles,determination,metadata,paragraphs,evidence,aiDraft}){
+function build({results,roles,determination,metadata,paragraphs,evidence,aiDraft,legalSources}){
  if(!Array.isArray(results)||!results.length)throw Error('КТ13: липсват имоти от ГИС анализа.');
  if(!['А','Б','A','B'].includes(determination?.scenario))throw Error('КТ13: липсва доказан ГИС сценарий.');
  const scenario=determination.scenario==='A'?'А':determination.scenario==='B'?'Б':determination.scenario;
@@ -33,6 +33,7 @@ function build({results,roles,determination,metadata,paragraphs,evidence,aiDraft
   zones,metadata:Object.freeze(data),characterization:Object.freeze(characterization),
   evidence:Object.freeze({findingsCount:(evidence?.findings||[]).length,warningsCount:(evidence?.warnings||[]).length}),
   aiDraft:typeof aiDraft==='string'?aiDraft.trim().slice(0,9000):'',
+  legalSources:freezeList((Array.isArray(legalSources)?legalSources:[]).filter(x=>x&&x.revisionVerified===true&&x.article&&x.verifiedScope&&x.title&&x.source).slice(0,12).map(x=>({id:clean(x.id),title:clean(x.title),source:clean(x.source),article:clean(x.article),verifiedScope:clean(x.verifiedScope),page:clean(x.page)}))),
   reviewRequired:true
  });
 }
