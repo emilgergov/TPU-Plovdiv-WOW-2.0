@@ -21,7 +21,7 @@ function validate(input) {
     evidenceNotes:text(f.evidenceNotes,1500), registration:text(f.registration,150),
     dossierExcerpts:Array.isArray(f.dossierExcerpts)?f.dossierExcerpts.slice(0,25).map(d=>({file:text(d.file,180),excerpt:text(d.excerpt,1400)})):[],
     dossierDocuments:Array.isArray(f.dossierDocuments)?f.dossierDocuments.slice(0,18).map(d=>({file:text(d.file,180),type:text(d.type,80),references:Array.isArray(d.references)?d.references.slice(0,5).map(x=>text(x,220)):[]})):[],
-    legalSources:Array.isArray(f.legalSources)?f.legalSources.slice(0,12).map(d=>({title:text(d.title,180),source:text(d.source,200),id:text(d.id,80)})):[]
+    legalSources:Array.isArray(f.legalSources)?f.legalSources.slice(0,12).map(d=>({title:text(d.title,180),source:text(d.source,200),id:text(d.id,80),article:text(d.article,100),verifiedScope:text(d.verifiedScope,500),page:text(d.page,80),revisionVerified:d.revisionVerified===true})).filter(d=>d.title&&d.source&&d.article&&d.verifiedScope&&d.revisionVerified):[]
   }};
 }
 async function handleAuthor(request,env) {
