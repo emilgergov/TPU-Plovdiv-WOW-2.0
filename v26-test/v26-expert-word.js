@@ -105,12 +105,12 @@ async function make(draft,options={}){
  const confirmed=xs=>xs.filter(x=>!isPending(x));
  const aiSections=(()=>{
   const out={},raw=String(draft.aiDraft||'');
-  const re=/^\s*\[\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\]\]\s*$/gm;
+  const re=/^\s*\[\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS|CONCLUSION)\]\]\s*$/gm;
   const matches=[...raw.matchAll(re)];
   for(let i=0;i<matches.length;i++){
    const key=matches[i][1],start=matches[i].index+matches[i][0].length,end=i+1<matches.length?matches[i+1].index:raw.length;
    const value=raw.slice(start,end).trim().slice(0,3500);
-   if(value&&!out[key]&&!/\[\[(?:CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\]\]/.test(value))out[key]=value;
+   if(value&&!out[key]&&!/\[\[(?:CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS|CONCLUSION)\]\]/.test(value))out[key]=value;
   }
   return out;
  })();
@@ -155,7 +155,7 @@ async function make(draft,options={}){
   ...(!aiSections.IMPACTS&&impacts.some(isPending)?[paragraph(doc,'Не е изготвена окончателна оценка на въздействията. Изводите се попълват след проверка на приложимите режими и доказателствата.')]:[]),
 
   paragraph(doc,'VII. ЗАКЛЮЧЕНИЕ И УКАЗАНИЯ',{heading:true}),
-  paragraph(doc,'Окончателният процедурен извод и евентуалните указания към възложителя се формулират след проверка на приложимите конкретни нормативни основания и документите по преписката. Пространственият резултат от ГИС анализа сам по себе си не установява приложимата процедура и не обосновава административно произнасяне.'),
+  ...(safeAi('CONCLUSION')?aiProposal('CONCLUSION'):[paragraph(doc,'Окончателният процедурен извод и евентуалните указания към възложителя се формулират след проверка на приложимите конкретни нормативни основания и документите по преписката. Пространственият резултат от ГИС анализа сам по себе си не установява приложимата процедура и не обосновава административно произнасяне.')]),
   paragraph(doc,'VIII. СЪПЪТСТВАЩИ ДОКУМЕНТИ',{heading:true}),
   paragraph(doc,'ГИС анализ (самостоятелен PDF); Нормативни и документални референции (самостоятелен PDF, когато е изготвен).')
  ];
