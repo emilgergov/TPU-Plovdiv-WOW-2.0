@@ -241,6 +241,11 @@ async function run(scenario){
  const correctBlob=await w.V26ExpertWord.make(correctAct,{mapPngBytes:new Uint8Array(mapPngBytes)});
  const correctText=paragraphTexts(new TextDecoder().decode(fflate.unzipSync(new Uint8Array(await correctBlob.arrayBuffer()))['word/document.xml'])).join(' ');
  assert(correctText.includes(legalText),'Verified act and article incorrectly rejected from DOCX');
+ const unapprovedAct={...enriched,aiDraft:aiDraft.replace('Конкретна правна преценка по тестовите материали.',legalText),legalSources:[{...legalSource,revisionVerified:false,projectRevisionAccepted:false}]};
+ const unapprovedBlob=await w.V26ExpertWord.make(unapprovedAct,{mapPngBytes:new Uint8Array(mapPngBytes)});
+ const unapprovedText=paragraphTexts(new TextDecoder().decode(fflate.unzipSync(new Uint8Array(await unapprovedBlob.arrayBuffer()))['word/document.xml'])).join(' ');
+ assert(!unapprovedText.includes(legalText),'Unapproved legal source must not authorize a DOCX citation');
+
  // Package 2: project-accepted archive citations remain usable without being
  // mislabeled as independently revision-verified.
  const acceptedSource={...legalSource,revisionVerified:false,projectRevisionAccepted:true};
