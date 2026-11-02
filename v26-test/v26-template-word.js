@@ -71,16 +71,19 @@ async function make(scenario,paragraphs,metadata){
   /\b\d{1,2}\.\d{1,2}\.\d{4}\b/.test(String(metadata.incomingReference||'')) &&
   !/\[ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(String(metadata.incomingReference))
  )?String(metadata.incomingReference).replace(/^Преписка:\s*/i,'').replace(/^Вх\.\s*№\s*/i,'Вх. № '):'Вх. № ОВОС-ХХХХ / ХХ.ХХ.ХХХХ г.';
+ // KT24.3: format only the two writable addressee fields; keep A/B template text intact.
+ const recipientLine=/^До\s*:/i.test(String(metadata.recipient))?String(metadata.recipient):'До: '+String(metadata.recipient);
+ const addressLine=/^Адрес\s*:/i.test(String(metadata.address))?String(metadata.address):'Адрес: '+String(metadata.address);
  const parcelIds=String(metadata.parcelIds||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  if(!parcelIds.length)throw Error('Липсват потвърдени кадастрални идентификатори.');
  const location=String(metadata.location||'').trim();
  const parcelDescription=(parcelIds.length===1?'поземлен имот с идентификатор ':'поземлени имоти с идентификатори ')+parcelIds.join(', ')+(location?', находящ'+(parcelIds.length===1?' се':'и се')+' в '+location:'');
  if(scenario==='A'){
-  replaceParagraph(6,metadata.recipient);replaceParagraph(7,metadata.address);
+  replaceParagraph(6,recipientLine);replaceParagraph(7,addressLine);
   replaceParagraph(10,'Относно: '+metadata.subject+' — '+parcelDescription);replaceParagraph(13,metadata.salutation);
   replaceParagraph(16,'Във връзка с уведомление '+incomingReference+' за '+metadata.subject+', '+parcelDescription+'.');
  }else{
-  replaceParagraph(5,metadata.recipient);replaceParagraph(6,'');replaceParagraph(7,metadata.address);
+  replaceParagraph(5,recipientLine);replaceParagraph(6,'');replaceParagraph(7,metadata.address);
   replaceParagraph(9,'Относно: '+metadata.subject+' — '+parcelDescription);replaceParagraph(11,metadata.salutation);replaceParagraph(12,'');
   replaceParagraph(14,'Във връзка с уведомление '+incomingReference+' за '+metadata.subject+', '+parcelDescription+'.');
  }
