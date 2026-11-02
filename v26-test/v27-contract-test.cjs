@@ -38,15 +38,17 @@ assert.match(packageSource,/aiDraft:register\?\.v27AiDraft\|\|''/);
 assert.match(packageSource,/V26ExpertWord\.make\(expertDraft,\{mapSvg:overviewMap\}\)/);
 assert.match(packageSource,/V26TemplateWord\.make\(expertDraft\.scenario,classicParagraphs,expertDraft\.metadata\)/);
 assert.match(wordSource,/const aiSections=/);
-assert.match(wordSource,/aiProposal\('CHARACTERIZATION'\)/);
-assert.match(wordSource,/aiProposal\('LEGAL'\)/);
-assert.match(wordSource,/aiProposal\('PROCEDURE'\)/);
-assert.match(wordSource,/aiProposal\('IMPACTS'\)/);
+// KT24.3: the Word renderer must accept the AI draft, but must not
+// blindly substitute AI-generated legal/procedural conclusions for verified
+// dossier evidence. The generated DOCX is exercised by the real smoke tests.
 assert.match(wordSource,/const aiSections=/);
-assert.match(wordSource,/aiSections\.CHARACTERIZATION\?aiProposal/);
-assert.match(wordSource,/aiSections\.LEGAL\?aiProposal/);
-assert.match(wordSource,/aiSections\.PROCEDURE\?aiProposal/);
-assert.match(wordSource,/aiSections\.IMPACTS\?aiProposal/);
+assert.match(wordSource,/const unsupportedAi=/);
+assert.match(wordSource,/const safeAi=/);
+assert.match(wordSource,/const aiProposal=/);
+assert.match(wordSource,/safeAi\('IMPACTS'\)\?aiProposal\('IMPACTS'\)/);
+assert.match(wordSource,/confirmed\(draft\.characterization\)/);
+assert.match(wordSource,/Правните основания се уточняват/);
+assert.match(wordSource,/Приложимата процедура се определя/);
 assert.match(indexSource,/V27AIAuthor\.generate\(payload,token\)/);
 assert.match(indexSource,/v27AiDraft,mapSvg/);
 console.log('V27 contract checks PASS: adapter, role/geometry gates, AI draft propagation, classic separation (static).');
