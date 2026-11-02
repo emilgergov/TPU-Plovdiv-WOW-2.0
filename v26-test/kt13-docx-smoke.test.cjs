@@ -149,6 +149,13 @@ async function run(scenario){
 
  for(const value of [metadata.recipient,metadata.subject,'36676.129.457'])assert(classicText.includes(value),'Classic Word missing: '+value);
 
+ // KT24.3 K03-K04: assert both original A/B outputs carry dossier address,
+ // confirmed addressee, and the exact approved fallback for incomplete registration.
+ for(const value of ['До: '+metadata.recipient,'Адрес: '+metadata.address,'Вх. № ОВОС-ХХХХ / ХХ.ХХ.ХХХХ г.'])
+  assert(classicText.includes(value),'Classic '+scenario+': mandatory addressee/address/registration missing: '+value);
+ assert(classicText.includes('Относно: '+metadata.subject),'Classic '+scenario+': confirmed subject not reproduced in subject line');
+
+
  // KT24.3 E20: first-person plural AI claims cannot enter an authority-issued draft.
  const unsafeAiDraft=aiDraft.replace('Конкретна правна преценка по тестовите материали.','Считаме, че предложението е допустимо.').replace('Конкретна процедурна преценка по тестовите материали.','Според нас процедурата е приключена.');
  const unsafePluralDraft=w.V26ExpertDraft.build({results:[{input:'36676.129.457',location:'гр. Пловдив, община Пловдив, област Пловдив'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft:unsafeAiDraft});
