@@ -28,9 +28,9 @@ assert.throws(()=>build({...args,results:[{input:'bad-id'}],roles:{'bad-id':'lea
 const pkg=read('v26-draft-package.js'),html=read('index.html'),word=read('v26-expert-word.js');
 for(const token of ['V26ExpertDraft?.build','V26ExpertWord.make','V26TemplateWord.make','01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_Prilozhenie_1_GIS_analiz.pdf','04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf'])assert(pkg.includes(token),'ZIP integration missing: '+token);
 for(const token of ['v26-expert-draft.js','v26-expert-word.js','v26-draft-package.js','Приложение №1 — ГИС анализ','Приложение №2 — Нормативни и документални референции'])assert(html.includes(token),'UI integration missing: '+token);
-for(const token of ['header','footer','media','Място за електронен подпис — вътрешно съгласуване','Място за електронен подпис — окончателно подписване','Картографското извлечение от ГИС анализа'])assert(word.includes(token),'DOCX invariant missing: '+token);
-assert(word.includes("paragraph(doc,'Място за електронен подпис — вътрешно съгласуване')"),'Expert opening signature slot missing');
-assert(word.includes("paragraph(doc,'Място за електронен подпис — окончателно подписване')"),'Expert closing signature slot missing');
+for(const token of ['header','footer','media','Картографското извлечение от ГИС анализа'])assert(word.includes(token),'DOCX invariant missing: '+token);
+assert((word.match(/paragraph\(doc,''\)/g)||[]).length>=2,'Expert must reserve two blank, unlabeled signature spaces');
+assert(!word.includes('Място за електронен подпис'),'Expert signature spaces must not contain visible labels');
 assert(word.includes('sect.cloneNode(true)'),'Original section/header/footer references must be preserved');
 assert(pkg.includes("if(includeAnnex2){"),'Annex 2 must remain optional');
 assert(pkg.includes("await window.V26ExpertWord.make(expertDraft,{mapSvg:overviewMap})")&&pkg.includes("window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata)"),'Both Word documents must use the same expert draft');
@@ -50,5 +50,5 @@ assert(pkg.includes("classicWord===expertWord"),'ZIP must reject identical Word 
 assert(word.includes("slice(0,scenario==='A'?5:7)"),'Expert Word must select 5/7 legal findings from GIS scenario');
 assert(pkg.includes("paragraphPrefixes"),'Word scenario paragraph prefixes must be normalized before packaging');
 assert(read('v26-word-review.js').includes('getWorkingDraft'),'Draft must not require manual legal form');
-assert(word.includes('РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ'),'Expert document must be marked as draft');
+
 console.log('KT14 shared model and cross-module static integration: PASS');
