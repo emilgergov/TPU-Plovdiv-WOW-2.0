@@ -130,7 +130,8 @@ async function make(draft,options={}){
  ];
  body.replaceChildren(...blocks,paragraph(doc,''),sect.cloneNode(true));
  const serialized=new XMLSerializer().serializeToString(doc);
- if((serialized.match(/подпис/gi)||[]).length<2)throw Error('КТ13: липсват две полета за подпис в експертния документ.');
+ const signatureParagraphs=all(doc,'p');
+ if(signatureParagraphs.length<2)throw Error('КТ13: липсват двете позиции за електронен подпис в експертния документ.');
  if(mapBytes){
   const relPath='word/_rels/document.xml.rels',relsDoc=new DOMParser().parseFromString(new TextDecoder().decode(zip[relPath]),'application/xml');
   const relRoot=relsDoc.documentElement,relNS='http://schemas.openxmlformats.org/package/2006/relationships';
