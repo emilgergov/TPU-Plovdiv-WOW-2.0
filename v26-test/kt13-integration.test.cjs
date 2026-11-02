@@ -22,7 +22,7 @@ assert.equal(outside.scenario,'А');
 assert.equal(outside.zones.length,0);
 const zoneObject=build({...args,determination:{scenario:'Б',zones:[{code:'BG0000001',name:'Тестова зона'}]}});
 assert.equal(zoneObject.zones[0],'BG0000001');
-assert(read('v26-template-word.js').includes('metadata={...metadata,subject:normalizedSubject}'),'Classic Word must not mutate immutable shared metadata');
+assert(read('v26-template-word.js').includes('metadata={...metadata,subject:confirmedSubject}'),'Classic Word must preserve the expert-confirmed subject without mutating shared metadata');
 assert.throws(()=>build({...args,paragraphs:['','','','']}),/четирите/);
 assert.throws(()=>build({...args,results:[{input:'bad-id'}],roles:{'bad-id':'leading'},metadata:{...args.metadata,parcelIds:'bad-id'}}),/идентификатор/);
 const pkg=read('v26-draft-package.js'),html=read('index.html'),word=read('v26-expert-word.js');
