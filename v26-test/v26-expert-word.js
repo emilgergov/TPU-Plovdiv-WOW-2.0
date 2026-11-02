@@ -98,6 +98,7 @@ async function make(draft,options={}){
  // KT24.3: signature areas are blank; no visible workflow or signature labels.
  const blocks=[
   paragraph(doc,''),
+  paragraph(doc,'ПРОЕКТ НА СТАНОВИЩЕ',{heading:true}),
   paragraph(doc,m.recipient,{bold:true}),paragraph(doc,m.address),
   paragraph(doc,'Относно: '+subject,{bold:true}),
   paragraph(doc,'Преписка: '+m.incomingReference),
