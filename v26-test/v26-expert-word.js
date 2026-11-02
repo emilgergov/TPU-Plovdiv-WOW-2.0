@@ -95,9 +95,9 @@ async function make(draft,options={}){
  const aiProposal=key=>safeAi(key)?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
 
  const mapBytes=options.mapPngBytes?.byteLength?Uint8Array.from(options.mapPngBytes):(options.mapSvg?await mapPng(options.mapSvg):null);
+ // KT24.3: signature areas are blank; no visible workflow or signature labels.
  const blocks=[
-  paragraph(doc,'Място за електронен подпис — вътрешно съгласуване'),
-  paragraph(doc,'РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ — НЕ Е АДМИНИСТРАТИВЕН АКТ',{heading:true}),
+  paragraph(doc,''),
   paragraph(doc,m.recipient,{bold:true}),paragraph(doc,m.address),
   paragraph(doc,'Относно: '+subject,{bold:true}),
   paragraph(doc,'Преписка: '+m.incomingReference),
@@ -128,7 +128,7 @@ async function make(draft,options={}){
   paragraph(doc,'ГИС анализ (самостоятелен PDF); Нормативни и документални референции (самостоятелен PDF, когато е изготвен).'),
   paragraph(doc,'НЕОБХОДИМА Е ЕКСПЕРТНА ПРОВЕРКА НА ПРЕПИСКАТА, ПРАВНИТЕ ОСНОВАНИЯ И ИЗВОДИТЕ. Документът не представлява издаден административен акт.')
  ];
- body.replaceChildren(...blocks,paragraph(doc,'Място за електронен подпис — окончателно подписване'),sect.cloneNode(true));
+ body.replaceChildren(...blocks,paragraph(doc,''),sect.cloneNode(true));
  const serialized=new XMLSerializer().serializeToString(doc);
  if((serialized.match(/подпис/gi)||[]).length<2)throw Error('КТ13: липсват две полета за подпис в експертния документ.');
  if(mapBytes){
