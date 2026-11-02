@@ -218,6 +218,15 @@ async function run(scenario){
   assert(resultText.includes(c.fallback),'Unsafe AI section did not use explicit review fallback: '+c.fallback);
  }
 
+ // KT02: a plausible but unverified article number must not reach the expert Word.
+ const citationDraft=aiDraft.replace('Конкретна правна преценка по тестовите материали.','Съгласно чл. 31, ал. 1 от Закона за биологичното разнообразие се извършва преценка.');
+ const citationModel={...enriched,aiDraft:citationDraft,legalSources:[]};
+ const citationBlob=await w.V26ExpertWord.make(citationModel,{mapPngBytes:new Uint8Array(mapPngBytes)});
+ const citationZip=fflate.unzipSync(new Uint8Array(await citationBlob.arrayBuffer()));
+ const citationText=paragraphTexts(new TextDecoder().decode(citationZip['word/document.xml'])).join(' ');
+ assert(!citationText.includes('Съгласно чл. 31'),'Unverified AI legal article escaped DOCX gate');
+ assert(citationText.includes('Правните основания се уточняват'),'Unverified article did not trigger legal fallback');
+
  // KT24.3 E22-E23: vague instructions must not be presented as an actionable authority conclusion.
  const vagueAiDraft=aiDraft.replace('За тестовия склад не са представени проверени правни основания за окончателно процедурно произнасяне.','Възложителят следва да предприеме необходимите действия.');
  const vagueDraft=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft:vagueAiDraft});
