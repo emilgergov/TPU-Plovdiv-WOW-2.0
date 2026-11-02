@@ -73,7 +73,7 @@ async function make(draft,options={}){
  const rels=zip['word/_rels/document.xml.rels'];
  if(!rels||!Object.keys(zip).some(x=>/^word\/header\d*\.xml$/.test(x))||!Object.keys(zip).some(x=>/^word\/footer\d*\.xml$/.test(x))||!Object.keys(zip).some(x=>/^word\/media\//.test(x)))throw Error('КТ13: липсва лого, хедър или футер на институционалния образец.');
  const m=draft.metadata;
- if(!m.recipient||!m.address||!m.subject||!m.incomingReference||!m.salutation)throw Error('КТ13: липсват потвърдени административни реквизити.');
+ if(!m.subject||!m.incomingReference||!m.salutation)throw Error('КТ13: липсват потвърдени основни административни реквизити.');
  const legal=(m.legalParagraphs||[]).slice(0,scenario==='A'?5:7),impacts=m.impactFindings||[];
  if(legal.length<(scenario==='A'?5:7)||legal.some(x=>!x)||!m.procedureFinding||impacts.length!==5||impacts.some(x=>!x))throw Error('КТ13: липсват проверени фактически, правни или въздействени констатации.');
  const isPending=x=>/\[ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(String(x||''));
@@ -101,10 +101,12 @@ async function make(draft,options={}){
 
  const mapBytes=options.mapPngBytes?.byteLength?Uint8Array.from(options.mapPngBytes):(options.mapSvg?await mapPng(options.mapSvg):null);
  // KT24.3: signature areas are blank; no visible workflow or signature labels.
+ const recipientValue=String(m.recipient||'').trim()||'Възложителя: ХХХХХХХХХХХХХХ';
+ const addressValue=String(m.address||'').trim()||'ХХХХХХХХХХХХХХ';
  const blocks=[
   paragraph(doc,''),
   paragraph(doc,'ПРОЕКТ НА СТАНОВИЩЕ',{heading:true}),
-  paragraph(doc,/^До\s*:/i.test(String(m.recipient))?m.recipient:'До: '+m.recipient,{bold:true}),paragraph(doc,/^Адрес\s*:/i.test(String(m.address))?m.address:'Адрес: '+m.address),
+  paragraph(doc,/^До\s*:/i.test(recipientValue)?recipientValue:'До: '+recipientValue,{bold:true}),paragraph(doc,/^Адрес\s*:/i.test(addressValue)?addressValue:'Адрес: '+addressValue),
   paragraph(doc,'Относно: '+subject,{bold:true}),
   paragraph(doc,(/\b\d{1,2}\.\d{1,2}\.\d{4}\b/.test(String(m.incomingReference||''))&&!/\[ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(String(m.incomingReference)))?String(m.incomingReference).replace(/^Преписка:\s*/i,'').replace(/^Вх\.\s*№\s*/i,'Вх. № '):'Вх. № ОВОС-ХХХХ / ХХ.ХХ.ХХХХ г.'),
   ...(isPending(m.salutation)?[]:[paragraph(doc,m.salutation)]),
