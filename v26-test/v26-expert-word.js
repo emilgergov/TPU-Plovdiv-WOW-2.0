@@ -123,7 +123,18 @@ async function make(draft,options={}){
  // safeguards consistently to every AI section, not just the conclusion.
  const unresolvedEvidence=x=>/\[ЗА ЕКСПЕРТНА ПРОВЕРКА|\[ОТКЪС ОТ ПРЕПИСКАТА|\b(?:НЯМА ДАННИ|ПРЕДСТОИ)\b/i.test(x);
  const unsupportedLegalCitation=x=>/(?:чл\.|член)\s*(?:Х+|X+|\?+)|(?:ал\.|алинея)\s*(?:Х+|X+|\?+)/i.test(x);
- const safeAi=key=>Boolean(aiSections[key])&&!unsupportedAi(aiSections[key])&&!personalOpinion(aiSections[key])&&!vagueInvestorInstructions(aiSections[key])&&!unresolvedEvidence(aiSections[key])&&!unsupportedLegalCitation(aiSections[key])&&!/защитени територии|BG[0-9]{7}|не се налага|не се изисква|не подлежи|няма вероятност|липсват въздействия|липсват рискове|не оказва въздействие/i.test(aiSections[key]);
+ // KT02: article citations in AI narrative must match the immutable verified source inventory.
+ const hasUnverifiedArticle=x=>{
+  const cited=[...String(x).matchAll(/(?:чл\\.|член)\\s*(\\d+[а-я]?)(?:\\s*,?\\s*ал\\.\\s*(\\d+))?/gi)];
+  if(!cited.length)return false;
+  const sources=Array.isArray(draft.legalSources)?draft.legalSources:[];
+  return cited.some(m=>!sources.some(s=>{
+   const article=String(s.article||'');
+   const hit=article.match(/(?:чл\\.|член)\\s*(\\d+[а-я]?)(?:\\s*,?\\s*ал\\.\\s*(\\d+))?/i);
+   return hit&&hit[1]===m[1]&&(!m[2]||hit[2]===m[2]);
+  }));
+ };
+ const safeAi=key=>Boolean(aiSections[key])&&!unsupportedAi(aiSections[key])&&!personalOpinion(aiSections[key])&&!vagueInvestorInstructions(aiSections[key])&&!unresolvedEvidence(aiSections[key])&&!unsupportedLegalCitation(aiSections[key])&&!hasUnverifiedArticle(aiSections[key])&&!/защитени територии|BG[0-9]{7}|не се налага|не се изисква|не подлежи|няма вероятност|липсват въздействия|липсват рискове|не оказва въздействие/i.test(aiSections[key]);
  // KT24.3 E07/E08/E26: preserve the AI's verified wording, but remove repeated
  // paragraphs caused by overlapping dossier excerpts before DOCX serialization.
  const aiProposal=key=>{
