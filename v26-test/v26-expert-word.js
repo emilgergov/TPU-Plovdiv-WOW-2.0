@@ -5,9 +5,11 @@ const NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const ns=(doc,name)=>doc.createElementNS(NS,'w:'+name);
 const all=(node,name)=>Array.from(node.getElementsByTagNameNS(NS,name));
 const textOf=p=>all(p,'t').map(t=>t.textContent).join('');
-function paragraph(doc,value,{bold=false,heading=false}={}){
+function paragraph(doc,value,{bold=false,heading=false,center=false}={}){
  const p=ns(doc,'p'),pPr=ns(doc,'pPr'),spacing=ns(doc,'spacing');
- spacing.setAttributeNS(NS,'w:after',heading?'160':'110');pPr.appendChild(spacing);p.appendChild(pPr);
+ spacing.setAttributeNS(NS,'w:after',heading?'160':'110');pPr.appendChild(spacing);
+ if(center){const jc=ns(doc,'jc');jc.setAttributeNS(NS,'w:val','center');pPr.appendChild(jc);}
+ p.appendChild(pPr);
  const r=ns(doc,'r'),rPr=ns(doc,'rPr'),font=ns(doc,'rFonts');
  font.setAttributeNS(NS,'w:ascii','Verdana');font.setAttributeNS(NS,'w:hAnsi','Verdana');font.setAttributeNS(NS,'w:cs','Verdana');rPr.appendChild(font);
  const size=ns(doc,'sz');size.setAttributeNS(NS,'w:val','20');rPr.appendChild(size);
@@ -114,7 +116,7 @@ async function make(draft,options={}){
   paragraph(doc,draft.scenario==='Б'?'По наличните ГИС данни е установено пространствено пресичане със защитена зона: '+draft.zones.join(', ')+'.':'По наличните ГИС данни не е установено пресичане на потвърдените имоти със защитена зона.'),
   paragraph(doc,'В съответствие с принципа за пространствено онагледяване на инвестиционните предложения, отразен в приложение №3 към чл. 10, ал. 2, част Б, т. 3 от Наредбата за оценка за съвместимост, в настоящия експертен проект е включено обзорно картографско извлечение от извършения ГИС анализ.'),
   ...(mapBytes?[mapParagraph(doc)]:[]),
-  ...(mapBytes?[paragraph(doc,'Фигура 1. Пространствено положение на имотите спрямо защитените зони от мрежата „Натура 2000“.')]:[]),
+  ...(mapBytes?[paragraph(doc,'Фигура 1. Пространствено положение на имотите спрямо защитените зони от мрежата „Натура 2000“.',{center:true})]:[]),
   paragraph(doc,'Картографското извлечение от ГИС анализа представя пространствените резултати и имотния обхват; пълният ГИС анализ е в самостоятелен PDF.'),
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
   ...confirmed(draft.characterization).map(x=>paragraph(doc,String(x).replace(/\[ОТКЪС ОТ ПРЕПИСКАТА\s*[—-]\s*ЗА СВЕРЯВАНЕ\]/gi,'[ЗА ЕКСПЕРТНА ПРОВЕРКА — непълен откъс; необходимо е сверяване с оригиналната преписка]').replace(/^\s*[-–]\s*/,''))),
