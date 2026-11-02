@@ -309,7 +309,7 @@ async function make(results,roles,register){
   }
   register={...register,verifiedCaseMetadata:caseMetadata};
  const dossierEvidence=register?.unifiedContext?.commonEvidence||null;
- const expertDraft=window.V26ExpertDraft?.build({results,roles:normalized,determination,metadata:caseMetadata,paragraphs,evidence:dossierEvidence,aiDraft:register?.v27AiDraft||''});
+ const expertDraft=window.V26ExpertDraft?.build({results,roles:normalized,determination,metadata:caseMetadata,paragraphs,evidence:dossierEvidence,aiDraft:register?.v27AiDraft||'',legalSources:register?.v27LegalSources||[]});
  if(!expertDraft)throw Error('КТ13: липсва единният експертен проект.');
  if(!window.V26ExpertWord?.make)throw Error('КТ13: липсва генераторът за експертния Word.');
  const overviewMap=register?.mapSvg||null;
