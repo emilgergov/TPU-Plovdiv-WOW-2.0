@@ -53,6 +53,11 @@ async function run(scenario){
  assert(mapIndex>=0&&mapIndex+1<bodyParagraphs.length,'Expert GIS map paragraph missing');
  const mapPara=bodyParagraphs[mapIndex],captionPara=bodyParagraphs[mapIndex+1];
  const paraText=p=>[...p.getElementsByTagNameNS(wordNs,'t')].map(t=>t.textContent).join('');
+ // KT24.3 E03: the authority draft must have the exact approved title once.
+ const headings=bodyParagraphs.map(paraText).filter(t=>t==='ПРОЕКТ НА СТАНОВИЩЕ');
+ assert.equal(headings.length,1,'Expert Word must contain exactly one approved title ПРОЕКТ НА СТАНОВИЩЕ');
+ assert(!bodyParagraphs.some(p=>/РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ|НЕ Е АДМИНИСТРАТИВЕН АКТ/i.test(paraText(p))),'Prohibited draft banner must not appear');
+
  assert.equal(paraText(captionPara),'Фигура 1. Пространствено положение на имотите спрямо защитените зони от мрежата „Натура 2000“.','Figure 1 caption must immediately follow map');
  assert(mapPara.getElementsByTagNameNS(wordNs,'keepNext').length>0&&mapPara.getElementsByTagNameNS(wordNs,'keepLines').length>0,'Map and caption must be kept together');
  assert([...captionPara.getElementsByTagNameNS(wordNs,'jc')].some(j=>j.getAttributeNS(wordNs,'val')==='center'),'Figure 1 caption must be centered');
