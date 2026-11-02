@@ -21,6 +21,9 @@ assert.equal(rich.facts.legalSources.length,0,'Unverified legal record must not 
 const verified=root.V27AIFacts.build({results,roles,workingDraft,subject:metadata.subject,normativeRegister:{records:[{id:'law-2',title:'Проверена разпоредба за теста',source:'Официален архив',article:'чл. 1',verified_scope:'Проверен обхват за теста',verified:true,revision_verified:true}]}});
 assert.match(verified.facts.legalReferences,/Проверена разпоредба за теста/);
 assert.equal(verified.facts.legalSources.length,1,'Verified article must reach AI');
+assert.equal(verified.facts.legalSources[0].article,'чл. 1');
+assert.equal(verified.facts.legalSources[0].verifiedScope,'Проверен обхват за теста');
+assert.equal(verified.facts.legalSources[0].revisionVerified,true);
 assert.match(root.V27AIFacts.build({results:[{...results[0],intersection_verified_outside:true}],roles,workingDraft,subject:metadata.subject}).facts.gisFindings,/потвърдено отсъствие/);
 assert.match(payload.facts.gisFindings,/пространственият резултат не е потвърден/);
 assert(!payload.facts.gisFindings.includes('потвърдено отсъствие'));
