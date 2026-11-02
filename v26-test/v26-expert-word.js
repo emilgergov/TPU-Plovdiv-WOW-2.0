@@ -104,7 +104,7 @@ async function make(draft,options={}){
  const blocks=[
   paragraph(doc,''),
   paragraph(doc,'ПРОЕКТ НА СТАНОВИЩЕ',{heading:true}),
-  paragraph(doc,m.recipient,{bold:true}),paragraph(doc,m.address),
+  paragraph(doc,/^До\s*:/i.test(String(m.recipient))?m.recipient:'До: '+m.recipient,{bold:true}),paragraph(doc,/^Адрес\s*:/i.test(String(m.address))?m.address:'Адрес: '+m.address),
   paragraph(doc,'Относно: '+subject,{bold:true}),
   paragraph(doc,'Преписка: '+m.incomingReference),
   ...(isPending(m.salutation)?[]:[paragraph(doc,m.salutation)]),
