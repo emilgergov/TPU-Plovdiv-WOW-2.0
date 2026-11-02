@@ -84,6 +84,24 @@ async function run(scenario){
  assert.equal(expertPs[0].trim(),'','Expert: opening signature space must be blank');
  assert.equal(expertPs[expertPs.length-1].trim(),'','Expert: closing signature space must be blank');
  assert(!/Място за електронен подпис|РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ — НЕ Е АДМИНИСТРАТИВЕН АКТ/.test(texts),'Expert: visible workflow labels leaked into document');
+
+ // KT24.3 E25: audit visible expert runs for Verdana 10 and subject-only italics.
+ const visibleRuns=[...parsedDocument.getElementsByTagNameNS(wordNs,'body')[0].getElementsByTagNameNS(wordNs,'r')]
+  .filter(run=>[...run.getElementsByTagNameNS(wordNs,'t')].some(t=>t.textContent.trim()));
+ for(const run of visibleRuns){
+  const runText=[...run.getElementsByTagNameNS(wordNs,'t')].map(t=>t.textContent).join('');
+  const pr=run.getElementsByTagNameNS(wordNs,'rPr')[0];
+  assert(pr,'Expert text run lacks explicit styling: '+runText.slice(0,50));
+  const fonts=pr.getElementsByTagNameNS(wordNs,'rFonts')[0];
+  assert(fonts&&fonts.getAttributeNS(wordNs,'ascii')==='Verdana'&&fonts.getAttributeNS(wordNs,'hAnsi')==='Verdana','Expert run must use Verdana: '+runText.slice(0,50));
+  const sz=pr.getElementsByTagNameNS(wordNs,'sz')[0];
+  assert(sz&&sz.getAttributeNS(wordNs,'val')==='20','Expert run must use 10 pt: '+runText.slice(0,50));
+  const italic=pr.getElementsByTagNameNS(wordNs,'i')[0];
+  if(italic&&italic.getAttributeNS(wordNs,'val')!=='0')assert(metadata.subject.includes(runText),'Italics outside confirmed subject: '+runText.slice(0,50));
+ }
+ const subjectRuns=visibleRuns.filter(run=>[...run.getElementsByTagNameNS(wordNs,'t')].some(t=>t.textContent.includes('Тестово инвестиционно предложение')));
+ assert(subjectRuns.length>0,'Confirmed subject missing from expert run structure');
+
  for(const value of [metadata.recipient,metadata.subject,'36676.129.457','Картографското извлечение от ГИС анализа'])assert(texts.includes(value),'Missing expert content: '+value);
  for(const key of Object.keys(sourceZip).filter(x=>!['word/document.xml','word/_rels/document.xml.rels','[Content_Types].xml'].includes(x)))assert.deepEqual(out[key],sourceZip[key],'Institutional DOCX part changed: '+key);
  // The classic renderer is tested against the same draft; do not allow silent
