@@ -146,8 +146,8 @@ async function run(scenario){
 
  // KT24.3 E20: first-person plural AI claims cannot enter an authority-issued draft.
  const unsafeAiDraft=aiDraft.replace('Конкретна правна преценка по тестовите материали.','Считаме, че предложението е допустимо.').replace('Конкретна процедурна преценка по тестовите материали.','Според нас процедурата е приключена.');
- const unsafeDraft=w.V26ExpertDraft.build({results:[{input:'36676.129.457',location:'гр. Пловдив, община Пловдив, област Пловдив'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft:unsafeAiDraft});
- const safeBlob=await w.V26ExpertWord.make(unsafeDraft,{mapPngBytes:new Uint8Array(mapPngBytes)});
+ const unsafePluralDraft=w.V26ExpertDraft.build({results:[{input:'36676.129.457',location:'гр. Пловдив, община Пловдив, област Пловдив'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft:unsafeAiDraft});
+ const safeBlob=await w.V26ExpertWord.make(unsafePluralDraft,{mapPngBytes:new Uint8Array(mapPngBytes)});
  const safeZip=fflate.unzipSync(new Uint8Array(await safeBlob.arrayBuffer()));
  const safeText=paragraphTexts(new TextDecoder().decode(safeZip['word/document.xml'])).join(' ');
  assert(!safeText.includes('Считаме, че')&&!safeText.includes('Според нас'),'First-person plural AI opinion leaked into authority Word');
