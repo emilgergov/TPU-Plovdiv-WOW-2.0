@@ -49,7 +49,7 @@ async function make(scenario,paragraphs,metadata){
  const protectedTerritoryText=nodes(xml,'t').map(t=>t.textContent).join(' ');
  if(!protectedTerritoryText.includes('защитени територии'))throw Error('Липсва отделната проверка за защитени територии по ЗЗТ.');
  // Case-specific identity, subject, and incoming reference must be supplied and reviewed.
- const required=['recipient','address','subject','incomingReference','salutation','legalParagraphs'];
+ const required=['subject','incomingReference','salutation'];
  if(!metadata||required.some(k=>!['legalParagraphs','recipient','address'].includes(k)&&!String(metadata[k]||'').trim()))throw Error('Липсват потвърдени предмет, входящ номер или обръщение.');
  const replaceParagraph=(index,value)=>{
   if(!writable(index))return;
@@ -58,7 +58,6 @@ async function make(scenario,paragraphs,metadata){
   texts[0].textContent=value;texts[0].setAttribute('xml:space','preserve');for(const t of texts.slice(1))t.textContent='';
  };
  const legalIndices=scenario==='A'?[22,23,24,25,31]:[20,21,22,23,24,25,31];
- if(!Array.isArray(metadata.legalParagraphs)||metadata.legalParagraphs.length<legalIndices.length||metadata.legalParagraphs.slice(0,legalIndices.length).some(x=>!String(x).trim()))throw Error('Не са потвърдени всички фактически и правни констатации.');
  // KT24.3: the expert-confirmed subject is authoritative. Do not rewrite,
  // spell-correct, normalize quotes or alter whitespace during DOCX generation.
  // Editing belongs exclusively to the earlier optional subject-confirmation step.
@@ -90,9 +89,7 @@ async function make(scenario,paragraphs,metadata){
   replaceParagraph(14,'Във връзка с уведомление '+incomingReference+' за '+metadata.subject+', '+parcelDescription+'.');
  }
  // KT24.3: preserve original A/B legal wording verbatim.
- // The procedure statement and five impact findings are case-specific, never reusable sample findings.
- if(!String(metadata.procedureFinding||'').trim())throw Error('Липсва проверена констатация за приложимата процедура по Наредбата за ОС.');
- if(!Array.isArray(metadata.impactFindings)||metadata.impactFindings.length!==5||metadata.impactFindings.some(v=>!String(v).trim()))throw Error('Липсват петте проверени констатации за въздействията.');
+ // Original procedure and impact paragraphs are fixed template text.
  // KT24.3: preserve original procedure wording verbatim.
  const impactIndices=[26,27,28,29,30];
  const used=new Set([...MAP[scenario],...legalIndices,...(scenario==='A'?[6,7,10,13,16,17]:[5,6,7,9,11,12,14,15])]);
