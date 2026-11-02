@@ -227,6 +227,15 @@ async function run(scenario){
  assert(!citationText.includes('Съгласно чл. 31'),'Unverified AI legal article escaped DOCX gate');
  assert(citationText.includes('Правните основания се уточняват'),'Unverified article did not trigger legal fallback');
 
+ // KT02: matching article numbers in different legal acts must not be interchangeable.
+ const legalText='Съгласно чл. 31, ал. 1 от Закон за биологичното разнообразие се извършва преценка.';
+ const legalSource={title:'Закон за биологичното разнообразие',source:'Проверен архив',article:'чл. 31, ал. 1',verifiedScope:'тест',revisionVerified:true};
+ const wrongAct={...enriched,aiDraft:aiDraft.replace('Конкретна правна преценка по тестовите материали.',legalText),legalSources:[{...legalSource,title:'Закон за опазване на околната среда'}]};
+ const wrongBlob=await w.V26ExpertWord.make(wrongAct,{mapPngBytes:new Uint8Array(mapPngBytes)});
+ const wrongText=paragraphTexts(new TextDecoder().decode(fflate.unzipSync(new Uint8Array(await wrongBlob.arrayBuffer()))['word/document.xml'])).join(' ');
+ assert(!wrongText.includes(legalText),'Matching article from a different act escaped DOCX gate');
+ assert(wrongText.includes('Правните основания се уточняват'),'Wrong legal act did not trigger fallback');
+
  // KT24.3 E22-E23: vague instructions must not be presented as an actionable authority conclusion.
  const vagueAiDraft=aiDraft.replace('За тестовия склад не са представени проверени правни основания за окончателно процедурно произнасяне.','Възложителят следва да предприеме необходимите действия.');
  const vagueDraft=w.V26ExpertDraft.build({results:[{input:'36676.129.457'}],roles:{'36676.129.457':'leading'},determination:{scenario,zones:scenario==='Б'?['BG0000001']:[]},metadata,paragraphs,evidence:{},aiDraft:vagueAiDraft});
