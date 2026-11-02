@@ -58,7 +58,7 @@ async function make(scenario,paragraphs,metadata){
   const sentences=value.match(/[^.!?]+[.!?]+/g)||[];
   const seenSentences=new Set();
   for(const sentence of sentences){
-   const normalized=sentence.replace(/\\s+/g,' ').trim().toLocaleLowerCase('bg');
+   const normalized=sentence.replace(/\s+/g,' ').trim().toLocaleLowerCase('bg');
    if(normalized.length<35)continue;
    if(seenSentences.has(normalized))throw Error('Повторено изречение в класическата характеристика.');
    seenSentences.add(normalized);
