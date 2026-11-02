@@ -28,7 +28,8 @@ async function mapPng(svg){
 }
 function mapParagraph(doc){
  // KT24.3: keep the overview map with the following Figure 1 caption.
- const p=ns(doc,'p'),pPr=ns(doc,'pPr');pPr.appendChild(ns(doc,'keepNext'));pPr.appendChild(ns(doc,'keepLines'));p.appendChild(pPr);
+ const p=ns(doc,'p'),pPr=ns(doc,'pPr');pPr.appendChild(ns(doc,'keepNext'));pPr.appendChild(ns(doc,'keepLines'));
+ const alignment=ns(doc,'jc');alignment.setAttributeNS(NS,'w:val','center');pPr.appendChild(alignment);p.appendChild(pPr);
  const r=ns(doc,'r'),drawing=ns(doc,'drawing');
  const wp='http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing';
  const a='http://schemas.openxmlformats.org/drawingml/2006/main';
