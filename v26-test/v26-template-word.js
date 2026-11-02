@@ -65,6 +65,12 @@ async function make(scenario,paragraphs,metadata){
  const confirmedSubject=String(metadata.subject);
  if(!confirmedSubject.trim())throw Error('Липсва потвърден предмет на инвестиционното предложение.');
  metadata={...metadata,subject:confirmedSubject};
+ // KT24.3: preserve a complete dossier reference; otherwise use the approved
+ // administrative placeholder rather than inventing a date or registration number.
+ const incomingReference=(
+  /\b\d{1,2}\.\d{1,2}\.\d{4}\b/.test(String(metadata.incomingReference||'')) &&
+  !/\[ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(String(metadata.incomingReference))
+ )?String(metadata.incomingReference).replace(/^Преписка:\s*/i,'').replace(/^Вх\.\s*№\s*/i,'Вх. № '):'Вх. № ОВОС-ХХХХ / ХХ.ХХ.ХХХХ г.';
  const parcelIds=String(metadata.parcelIds||'').match(/\b\d{5}\.\d+\.\d+(?:\.\d+){0,2}\b/g)||[];
  if(!parcelIds.length)throw Error('Липсват потвърдени кадастрални идентификатори.');
  const location=String(metadata.location||'').trim();
@@ -72,11 +78,11 @@ async function make(scenario,paragraphs,metadata){
  if(scenario==='A'){
   replaceParagraph(6,metadata.recipient);replaceParagraph(7,metadata.address);
   replaceParagraph(10,'Относно: '+metadata.subject+' — '+parcelDescription);replaceParagraph(13,metadata.salutation);
-  replaceParagraph(16,'Във връзка с уведомление '+metadata.incomingReference+' за '+metadata.subject+', '+parcelDescription+'.');
+  replaceParagraph(16,'Във връзка с уведомление '+incomingReference+' за '+metadata.subject+', '+parcelDescription+'.');
  }else{
   replaceParagraph(5,metadata.recipient);replaceParagraph(6,'');replaceParagraph(7,metadata.address);
   replaceParagraph(9,'Относно: '+metadata.subject+' — '+parcelDescription);replaceParagraph(11,metadata.salutation);replaceParagraph(12,'');
-  replaceParagraph(14,'Във връзка с уведомление '+metadata.incomingReference+' за '+metadata.subject+', '+parcelDescription+'.');
+  replaceParagraph(14,'Във връзка с уведомление '+incomingReference+' за '+metadata.subject+', '+parcelDescription+'.');
  }
  legalIndices.forEach((index,i)=>replaceParagraph(index,String(metadata.legalParagraphs[i])));
  // The procedure statement and five impact findings are case-specific, never reusable sample findings.
