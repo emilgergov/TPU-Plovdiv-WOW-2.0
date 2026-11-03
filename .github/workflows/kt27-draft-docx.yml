@@ -16,6 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            v26-test/templates
+            v26-test/v27-preview
+          sparse-checkout-cone-mode: true
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
