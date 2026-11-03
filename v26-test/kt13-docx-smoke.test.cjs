@@ -15,6 +15,27 @@ w.fetch=async path=>{
 const context=vm.createContext({window:w,document:w.document,DOMParser:w.DOMParser,XMLSerializer:w.XMLSerializer,TextDecoder,TextEncoder,Blob,fetch:w.fetch,console});
 for(const name of ['v26-expert-draft.js','v26-template-word.js','v26-expert-word.js'])
  vm.runInContext(fs.readFileSync('v26-test/'+name,'utf8'),context,{filename:name});
+// Package 3: execute the actual offline PDF generator for both document definitions.
+// Canvas rendering is stubbed; the PDF serialization and GIS/normative builders are real.
+(async()=>{
+ const drawing={fillRect(){},strokeRect(){},fillText(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},drawImage(){},measureText(t){return {width:String(t).length*9}}};
+ const tinyJpeg='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2Q==';
+ const doc={createElement(tag){assert.equal(tag,'canvas');return {getContext(){return drawing},toDataURL(){return tinyJpeg}}}};
+ const win={};
+ const pdfContext=vm.createContext({window:win,document:doc,Blob,TextEncoder,TextDecoder,Uint8Array,Uint32Array,Map,Set,URL,console,atob});
+ vm.runInContext(fs.readFileSync('v26-test/v26-offline-pdf.js','utf8'),pdfContext,{filename:'v26-offline-pdf.js'});
+ vm.runInContext(packageSource,pdfContext,{filename:'v26-draft-package.js'});
+ const gis=[{input:'36676.129.457',cadnum:'36676.129.457',status:'Намерен',geojson:{features:[{geometry:{type:'Polygon',coordinates:[[[24,42],[24.001,42],[24.001,42.001],[24,42]]]}}]},verified_zone_intersections:[],zone_intersections:[]}];
+ for(const kind of [1,2]){
+  const result=await win.V26DraftPackage.standalonePDF(gis,kind,{});
+  const bytes=new Uint8Array(await result.arrayBuffer());
+  const content=new TextDecoder().decode(bytes);
+  assert(content.startsWith('%PDF-1.4'),'Offline PDF'+kind+' header missing');
+  assert(content.includes('xref\\n')&&content.includes('%%EOF'),'Offline PDF'+kind+' serialization incomplete');
+  assert(bytes.length>300,'Offline PDF'+kind+' is empty');
+ }
+ console.log('Package 3 offline GIS and normative PDF serialization: PASS');
+})().catch(e=>{console.error(e);process.exitCode=1});
 // Package 3: PDF document-definition contract for both GIS and normative PDFs.
 const packageDefinitions=fs.readFileSync('v26-test/v26-draft-package.js','utf8');
 assert(packageDefinitions.includes('function gisPdf(results,options={})'),'PDF1 GIS builder missing');
