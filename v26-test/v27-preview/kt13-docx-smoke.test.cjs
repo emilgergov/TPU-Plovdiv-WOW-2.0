@@ -14,7 +14,7 @@ w.fetch=async path=>{
 };
 const context=vm.createContext({window:w,document:w.document,DOMParser:w.DOMParser,XMLSerializer:w.XMLSerializer,TextDecoder,TextEncoder,Blob,fetch:w.fetch,console});
 for(const name of ['v26-expert-draft.js','v26-template-word.js','v26-expert-word.js'])
- vm.runInContext(fs.readFileSync('v26-test/'+name,'utf8'),context,{filename:name});
+ vm.runInContext(fs.readFileSync('v26-test/'+(name==='v26-expert-word.js'?'v27-preview/':'')+name,'utf8'),context,{filename:name});
 function paragraphTexts(xml){
  const doc=new w.DOMParser().parseFromString(xml,'application/xml');
  assert.equal(doc.getElementsByTagName('parsererror').length,0,'Generated Word XML is valid');
