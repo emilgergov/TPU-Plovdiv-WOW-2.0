@@ -15,6 +15,13 @@ w.fetch=async path=>{
 const context=vm.createContext({window:w,document:w.document,DOMParser:w.DOMParser,XMLSerializer:w.XMLSerializer,TextDecoder,TextEncoder,Blob,fetch:w.fetch,console});
 for(const name of ['v26-expert-draft.js','v26-template-word.js','v26-expert-word.js'])
  vm.runInContext(fs.readFileSync('v26-test/'+name,'utf8'),context,{filename:name});
+// Package 3: static package-manifest contract, including optional PDF2.
+const packageSource=fs.readFileSync('v26-test/v26-draft-package.js','utf8');
+for(const name of ['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_Prilozhenie_1_GIS_analiz.pdf','04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf','README_BG.txt'])
+ assert(packageSource.includes(name),'Missing ZIP output contract: '+name);
+assert(packageSource.includes("...(includeAnnex2?["),'PDF2 must remain conditional on requested documentary analysis');
+assert(packageSource.includes("new Set(actualFiles).size!==actualFiles.length"),'Duplicate ZIP entries must fail closed');
+assert(packageSource.includes("expectedFiles.some(name=>!actualFiles.includes(name))"),'Missing ZIP artifacts must fail closed');
 function paragraphTexts(xml){
  const doc=new w.DOMParser().parseFromString(xml,'application/xml');
  assert.equal(doc.getElementsByTagName('parsererror').length,0,'Generated Word XML is valid');
