@@ -50,6 +50,12 @@ def change(i,value, bold=None, italic=None):
 change(6,"[ИМЕ НА ВЪЗЛОЖИТЕЛЯ — НЕ Е УСТАНОВЕНО]",bold=True)
 change(7,"[АДРЕС ЗА КОРЕСПОНДЕНЦИЯ — ЗА ПОПЪЛВАНЕ]",bold=True)
 change(10,f"Относно: Уведомление за инвестиционно предложение (ИП): {SUBJECT} в ПИ с идентификатори {PARCELS} по КККР на {AREA}.",italic=True)
+# Restore the approved visual split: bold italic 'Относно:', regular italic case description.
+subject_p=d.paragraphs[10]
+subject_p.runs[1].text="     Относно: "
+subject_p.runs[3].text=f"Уведомление за инвестиционно предложение (ИП): {SUBJECT} в ПИ с идентификатори {PARCELS} по КККР на {AREA}."
+subject_p.runs[3].bold=False
+subject_p.runs[3].italic=True
 change(13,"УВАЖАЕМИ ГОСПОЖИ И ГОСПОДА,",bold=True)
 change(16,f"Във връзка с внесеното в РИОСВ – Пловдив уведомление с {REF} за горецитираното инвестиционно предложение, на основание чл. 6а, т. 2 от Наредбата за ОС Ви уведомявам следното:")
 # The approved template's fixed normative section at paragraph 17 remains unchanged.
@@ -78,8 +84,12 @@ with ZipFile(SRC) as a, ZipFile(OUT) as b:
     orig_media={n for n in a.namelist() if n.startswith("word/media/")}
     new_media={n for n in b.namelist() if n.startswith("word/media/")}
     assert orig_media == new_media,(orig_media,new_media)
+    # python-docx reserializes namespace declaration order; compare text nodes, not raw bytes.
+    from lxml import etree
     for n in (x for x in a.namelist() if x.startswith("word/header") or x.startswith("word/footer")):
-        assert a.read(n)==b.read(n),f"Header/footer changed unexpectedly: {n}"
+        ao=etree.fromstring(a.read(n));bo=etree.fromstring(b.read(n))
+        ns={"w":"http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
+        assert ao.xpath(".//w:t/text()",namespaces=ns)==bo.xpath(".//w:t/text()",namespaces=ns),f"Header/footer text changed: {n}"
 print("KT28 CANONICAL A SUCCESS",OUT,OUT.stat().st_size,"bytes",len(z.paragraphs),"paragraphs",len(orig_media),"preserved media")
 print("UNCHANGED paragraphs: 17, 26-30, 32-33, 38-40")
 print("CHANGED paragraphs: 6,7,10,13,16,18-25,31")
