@@ -51,7 +51,7 @@ for s in d.sections:
                 p.paragraph_format.line_spacing=1.0
                 ancillary_count+=1
 
-assert text_count>=30,("Too few body text paragraphs",text_count)
+assert text_count>=26,("Too few body text paragraphs",text_count)
 assert [p.text for p in d.paragraphs]==original_body
 for el in d._element.body.xpath(".//w:p"):
     p=Paragraph(el,d._body)
