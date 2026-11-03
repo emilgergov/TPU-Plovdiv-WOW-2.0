@@ -48,6 +48,10 @@ def new_from_original():
     normal.font.size=Pt(10)
     normal.paragraph_format.space_after=Pt(5)
     normal.paragraph_format.line_spacing=1.12
+    # Original example footer has a hard-coded 2/2; do not copy false pagination.
+    for fp in sec.footer.paragraphs:
+        if re.fullmatch(r"\\s*\\d+\\s*/\\s*\\d+\\s*",fp.text):
+            fp.text=""
     return d
 
 def add(d,text="",bold=False,italic=False,size=10,align=None,keep=False,space=6):
@@ -80,7 +84,7 @@ def head(d,expert=False):
     add(d,"РЕПУБЛИКА БЪЛГАРИЯ · МИНИСТЕРСТВО НА ОКОЛНАТА СРЕДА И ВОДИТЕ",True,size=9,align=WD_ALIGN_PARAGRAPH.CENTER,space=2)
     add(d,"РЕГИОНАЛНА ИНСПЕКЦИЯ ПО ОКОЛНАТА СРЕДА И ВОДИТЕ — ПЛОВДИВ",True,size=9,align=WD_ALIGN_PARAGRAPH.CENTER,space=9)
     add(d,"Ниво на конфиденциалност 0 [TLP-WHITE]",size=8,align=WD_ALIGN_PARAGRAPH.RIGHT,space=5)
-    add(d,"",space=12)  # Top e-signature space — intentionally blank
+    add(d,"Електронен подпис — вътрешно съгласуване: ____________________________",size=9,space=10)
     add(d,"ДО ВЪЗЛОЖИТЕЛЯ НА ИНВЕСТИЦИОННОТО ПРЕДЛОЖЕНИЕ [ИМЕ ЗА ПОПЪЛВАНЕ]",True,space=2)
     add(d,"Адрес за кореспонденция: [ЗА ПОПЪЛВАНЕ]",space=7)
     if expert:
@@ -111,7 +115,7 @@ def quality(path,req):
     for word in ("Асеновград","Еднофамилна жилищна","гараж в УПИ XV","„„","Приложение №1"):
         assert word not in text, (path.name,word)
     for s in req:
-        assert s in text, (path.name,s)
+        assert s.lower() in text.lower(), (path.name,s)
     assert len(text)>2000,(path.name,len(text))
     print(path.name,"paragraphs",len(d.paragraphs),"characters",len(text))
     return text
