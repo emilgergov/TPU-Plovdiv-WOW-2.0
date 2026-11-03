@@ -317,7 +317,15 @@ async function make(results,roles,register){
  if(!overviewMap)throw Error('Липсва обзорната ГИС карта за експертния Word. Изпълнете картографския анализ преди създаване на пакета.');
  const expertWord=await window.V26ExpertWord.make(expertDraft,{mapSvg:overviewMap});
  const prefixes=expertDraft.scenario==='Б'?['С реализацията','Електроснабдяването','Водозахранването','Отпадъчните води']:['С реализацията','Електроснабдяването','Водоснабдяването','Отпадъчните води'];
- const classicParagraphs=expertDraft.characterization.map((value,i)=>value.startsWith(prefixes[i])?value:prefixes[i]+' — '+value);
+ const classicIntro='С реализацията на инвестиционното предложение';
+  const classicParagraphs=expertDraft.characterization.map((value,i)=>{
+   if(i===0){
+    if(value.startsWith(classicIntro))return value;
+    if(value.startsWith('С реализацията'))return classicIntro+value.slice('С реализацията'.length);
+    return classicIntro+' — '+value;
+   }
+   return value.startsWith(prefixes[i])?value:prefixes[i]+' — '+value;
+  });
  const classicWord=await window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata);
  for(const [label,blob] of [['експертен',expertWord],['класически',classicWord]]){
   if(blob.size<100||new TextDecoder().decode(await blob.slice(0,2).arrayBuffer())!=='PK')throw Error('КТ13: невалиден '+label+' DOCX.');
