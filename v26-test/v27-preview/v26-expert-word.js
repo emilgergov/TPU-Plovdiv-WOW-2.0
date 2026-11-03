@@ -89,6 +89,12 @@ async function make(draft,options={}){
   }
   return out;
  })();
+ if(options.requireAiAuthor){
+  const required=['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'];
+  const headings=[...String(draft.aiDraft||'').matchAll(/^\\s*\\[\\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\\]\\]\\s*$/gm)].map(m=>m[1]);
+  if(headings.length!==4||required.some((key,i)=>headings[i]!==key)||required.some(key=>!aiSections[key]))
+   throw Error('V27: AI авторът не предостави четирите задължителни раздела в правилния ред.');
+ }
  // Do not let an AI narrative override the GIS determination or assert unverified procedural exemptions.
  const unsupportedAi=x=>/(?:не е приложима процедура|не подлежи на процедура|не се изисква оценка|не попадат в границите на защитени зони или територии|намалява вероятността за задължително|малко вероятно|не показва наличие на рискове|намалява риска|намалява риск|по-нисък риск|нисък риск|незначителн(?:о|и|а) въздейств|без значим(?:о|и|а) въздейств|не се очаква въздейств|липса на значими въздействия|не поражда въздействия|извън защитени зони,? което)/i.test(x);
  // KT26: Review AI paragraphs independently. A single unsupported assertion
