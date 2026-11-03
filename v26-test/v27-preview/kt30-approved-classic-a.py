@@ -90,6 +90,12 @@ for section in d.sections:
                 if rr.font.highlight_color is not None:
                     rr.font.highlight_color=None
 
+# Some original template highlights are inside nested shapes, tables or
+# non-run XML. Remove the OOXML marker itself everywhere in the document body;
+# this does not touch text, fonts, images, bold, italic, or paragraph geometry.
+for h in list(d.element.xpath(".//w:highlight")):
+    h.getparent().remove(h)
+
 after=[p.text for p in d.paragraphs]
 for i in range(41):
     if i not in allowed:
