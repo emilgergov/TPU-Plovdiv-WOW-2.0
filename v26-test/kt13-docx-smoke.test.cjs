@@ -15,6 +15,7 @@ w.fetch=async path=>{
 const context=vm.createContext({window:w,document:w.document,DOMParser:w.DOMParser,XMLSerializer:w.XMLSerializer,TextDecoder,TextEncoder,Blob,fetch:w.fetch,console});
 for(const name of ['v26-expert-draft.js','v26-template-word.js','v26-expert-word.js'])
  vm.runInContext(fs.readFileSync('v26-test/'+name,'utf8'),context,{filename:name});
+const packageSource=fs.readFileSync('v26-test/v26-draft-package.js','utf8');
 // Package 3: execute the actual offline PDF generator for both document definitions.
 // Canvas rendering is stubbed; the PDF serialization and GIS/normative builders are real.
 (async()=>{
@@ -45,7 +46,7 @@ assert(packageDefinitions.includes('pdfBlob(normativePdf(results,register))'),'Z
 assert(packageDefinitions.includes("await pdf1.slice(0,4).text()!=='%PDF'"),'PDF1 signature validation missing');
 assert(packageDefinitions.includes("await pdf2.slice(0,4).text()!=='%PDF'"),'PDF2 signature validation missing');
 // Package 3: static package-manifest contract, including optional PDF2.
-const packageSource=fs.readFileSync('v26-test/v26-draft-package.js','utf8');
+
 for(const name of ['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_Prilozhenie_1_GIS_analiz.pdf','04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf','README_BG.txt'])
  assert(packageSource.includes(name),'Missing ZIP output contract: '+name);
 assert(packageSource.includes("...(includeAnnex2?["),'PDF2 must remain conditional on requested documentary analysis');
