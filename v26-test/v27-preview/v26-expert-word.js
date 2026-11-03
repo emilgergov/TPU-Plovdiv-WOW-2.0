@@ -91,8 +91,12 @@ async function make(draft,options={}){
  })();
  // Do not let an AI narrative override the GIS determination or assert unverified procedural exemptions.
  const unsupportedAi=x=>/(?:не е приложима процедура|не подлежи на процедура|не се изисква оценка|не попадат в границите на защитени зони или територии|намалява вероятността за задължително|малко вероятно|не показва наличие на рискове|намалява риска|намалява риск|по-нисък риск|нисък риск|незначителн(?:о|и|а) въздейств|без значим(?:о|и|а) въздейств|не се очаква въздейств|липса на значими въздействия|не поражда въздействия|извън защитени зони,? което)/i.test(x);
- const safeAi=key=>aiSections[key]&&!unsupportedAi(aiSections[key])&&!/защитени територии|BG[0-9]{7}|не се налага|не се изисква|не подлежи|няма вероятност|липсват въздействия|липсват рискове|не оказва въздействие/i.test(aiSections[key]);
- const aiProposal=key=>safeAi(key)?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
+ // KT26: Review AI paragraphs independently. A single unsupported assertion
+ // must not discard the other, source-grounded paragraphs in that section.
+ const unsupportedParagraph=x=>unsupportedAi(x)||/защитени територии|BG[0-9]{7}|не се налага|не се изисква|не подлежи|няма вероятност|липсват въздействия|липсват рискове|не оказва въздействие/i.test(x);
+ const reviewedAi=key=>String(aiSections[key]||'').split(/\n\s*\n/).map(x=>x.trim()).filter(x=>x&&!unsupportedParagraph(x)).slice(0,7);
+ const safeAi=key=>reviewedAi(key).length>0;
+ const aiProposal=key=>reviewedAi(key).map(x=>paragraph(doc,x));
 
  const mapBytes=options.mapPngBytes?.byteLength?Uint8Array.from(options.mapPngBytes):(options.mapSvg?await mapPng(options.mapSvg):null);
  const blocks=[
