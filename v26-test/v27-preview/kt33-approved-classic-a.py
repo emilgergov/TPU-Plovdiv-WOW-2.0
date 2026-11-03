@@ -235,7 +235,7 @@ with ZipFile(SRC) as old, ZipFile(OUT) as new:
             # Not every section footer has a page-number paragraph. Assert
             # fields only when its source footer displayed a static page count.
             old_static="".join(a.xpath(".//w:t/text()",namespaces=ns))
-            if re.search(r"(?<!\\d)2\\s*/\\s*2(?!\\d)",old_static):
+            if re.search(r"(?<!\d)2\s*/\s*2(?!\d)",old_static):
                 assert len(b.xpath(".//w:instrText[contains(text(),'PAGE')]",namespaces=ns))>=1,n
                 assert len(b.xpath(".//w:instrText[contains(text(),'NUMPAGES')]",namespaces=ns))>=1,n
     for n in new.namelist():
