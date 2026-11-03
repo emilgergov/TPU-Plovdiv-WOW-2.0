@@ -5,13 +5,13 @@ const NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const ns=(doc,name)=>doc.createElementNS(NS,'w:'+name);
 const all=(node,name)=>Array.from(node.getElementsByTagNameNS(NS,name));
 const textOf=p=>all(p,'t').map(t=>t.textContent).join('');
-function paragraph(doc,value,{bold=false,heading=false}={}){
+function paragraph(doc,value,{bold=false,italic=false,heading=false,keepNext=false}={}){
  const p=ns(doc,'p'),pPr=ns(doc,'pPr'),spacing=ns(doc,'spacing');
- spacing.setAttributeNS(NS,'w:after',heading?'160':'110');pPr.appendChild(spacing);p.appendChild(pPr);
+ spacing.setAttributeNS(NS,'w:after',heading?'160':'110');pPr.appendChild(spacing);if(keepNext)pPr.appendChild(ns(doc,'keepNext'));p.appendChild(pPr);
  const r=ns(doc,'r'),rPr=ns(doc,'rPr'),font=ns(doc,'rFonts');
  font.setAttributeNS(NS,'w:ascii','Verdana');font.setAttributeNS(NS,'w:hAnsi','Verdana');font.setAttributeNS(NS,'w:cs','Verdana');rPr.appendChild(font);
  const size=ns(doc,'sz');size.setAttributeNS(NS,'w:val',heading?'24':'20');rPr.appendChild(size);
- if(bold||heading)rPr.appendChild(ns(doc,'b'));r.appendChild(rPr);
+ if(bold||heading)rPr.appendChild(ns(doc,'b'));if(italic)rPr.appendChild(ns(doc,'i'));r.appendChild(rPr);
  const t=ns(doc,'t');t.setAttribute('xml:space','preserve');t.textContent=String(value);r.appendChild(t);p.appendChild(r);return p;
 }
 async function mapPng(svg){
@@ -109,18 +109,18 @@ async function make(draft,options={}){
   paragraph(doc,''),
   paragraph(doc,'ПРОЕКТ НА СТАНОВИЩЕ',{heading:true}),
   paragraph(doc,m.recipient,{bold:true}),paragraph(doc,m.address),
-  paragraph(doc,'Относно: '+subject,{bold:true}),
+  paragraph(doc,'Относно: '+subject,{bold:true,italic:true}),
   paragraph(doc,'Преписка: '+m.incomingReference),
   ...(isPending(m.salutation)?[]:[paragraph(doc,m.salutation)]),
   paragraph(doc,'I. ПРЕДМЕТ И ИМОТЕН ОБХВАТ',{heading:true}),
   paragraph(doc,'Предмет на ИП: '+subject),
   paragraph(doc,'Поземлени имоти: '+draft.parcels.map(p=>p.id+(p.location?' — '+p.location:'')+' ('+(p.role==='leading'?'предмет на ИП':'съпътстващ')+')').join('; ')),
-  ...(m.location?[paragraph(doc,'Местоположение: '+m.location)]:[]),
+  ...(m.location?[paragraph(doc,'Местоположение: '+m.location,{italic:true})]:[]),
   paragraph(doc,'II. ПРОСТРАНСТВЕН АНАЛИЗ',{heading:true}),
   paragraph(doc,draft.scenario==='Б'?'По наличните ГИС данни е установено пространствено пресичане със защитена зона: '+draft.zones.join(', ')+'.':'По наличните ГИС данни не е установено пресичане на потвърдените имоти със защитена зона.'),
   paragraph(doc,'В съответствие с принципа за пространствено онагледяване на инвестиционните предложения, отразен в приложение №3 към чл. 10, ал. 2, част Б, т. 3 от Наредбата за оценка за съвместимост, в настоящия експертен проект е включено обзорно картографско извлечение от извършения ГИС анализ.'),
   ...(mapBytes?[mapParagraph(doc)]:[]),
-  paragraph(doc,'Фигура 1. Пространствено положение на имотите спрямо защитените зони от мрежата „Натура 2000“. Източник: ГИС анализ.'),
+  paragraph(doc,'Фигура 1. Пространствено положение на имотите спрямо защитените зони от мрежата „Натура 2000“. Източник: ГИС анализ.',{italic:true}),
   paragraph(doc,'Картографското извлечение от ГИС анализа представя пространствените резултати и имотния обхват; пълният ГИС анализ е в самостоятелен PDF.'),
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
   ...(safeAi('CHARACTERIZATION')?aiProposal('CHARACTERIZATION'):confirmed(draft.characterization).map(x=>paragraph(doc,String(x).replace(/\[ОТКЪС ОТ ПРЕПИСКАТА\s*[—-]\s*ЗА СВЕРЯВАНЕ\]/gi,'[ЗА ЕКСПЕРТНА ПРОВЕРКА — непълен откъс; необходимо е сверяване с оригиналната преписка]').replace(/^\s*[-–]\s*/,''))),
