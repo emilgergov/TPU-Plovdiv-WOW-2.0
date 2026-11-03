@@ -173,6 +173,24 @@ async function run(scenario){
  // The classic renderer is tested against the same draft; do not allow silent
  // divergence between expert and template-based outputs.
  const classic=await w.V26TemplateWord.make(draft.scenario,draft.characterization,draft.metadata);
+ // Package 3: package the actual A/B-generated DOCX pair, extract and verify both.
+ for(const withPdf2 of [false,true]){
+  const writer=actualZipWriter();
+  writer.file('01_Proekt_na_stanovishte_Klasicheski.docx',classic);
+  writer.file('02_Proekt_na_stanovishte_Eksperten.docx',blob);
+  writer.file('03_Prilozhenie_1_GIS_analiz.pdf','%PDF-1.4\\nfixture');
+  if(withPdf2)writer.file('04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf','%PDF-1.4\\nfixture');
+  writer.file('README_BG.txt','Scenario '+scenario);
+  const archive=fflate.unzipSync(new Uint8Array(await (await writer.generateAsync()).arrayBuffer()));
+  assert.equal(Object.keys(archive).length,withPdf2?5:4,'Unexpected ZIP file count');
+  for(const [name,original] of [['01_Proekt_na_stanovishte_Klasicheski.docx',classic],['02_Proekt_na_stanovishte_Eksperten.docx',blob]]){
+   const bytes=new Uint8Array(await original.arrayBuffer());
+   assert.equal(Buffer.compare(Buffer.from(archive[name]),Buffer.from(bytes)),0,'Generated '+scenario+' DOCX changed inside ZIP: '+name);
+   const doc=fflate.unzipSync(archive[name]);
+   assert(doc['word/document.xml'],'Missing Word document XML: '+name);
+  }
+  assert.equal(Boolean(archive['04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf']),withPdf2,'PDF2 inclusion mismatch');
+ }
  const classicZip=fflate.unzipSync(new Uint8Array(await classic.arrayBuffer()));
  const classicText=paragraphTexts(new TextDecoder().decode(classicZip['word/document.xml'])).join(' ');
  const classicPs=[...new w.DOMParser().parseFromString(new TextDecoder().decode(classicZip['word/document.xml']),'application/xml').getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','p')].map(p=>p.textContent);
