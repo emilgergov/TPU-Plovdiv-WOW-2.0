@@ -101,6 +101,12 @@ async function make(draft,options={}){
  // must not discard the other, source-grounded paragraphs in that section.
  const unsupportedParagraph=x=>unsupportedAi(x)||/защитени територии|BG[0-9]{7}|не се налага|не се изисква|не подлежи|няма вероятност|липсват въздействия|липсват рискове|не оказва въздействие/i.test(x);
  const reviewedAi=key=>String(aiSections[key]||'').split(/\n\s*\n/).map(x=>x.trim()).filter(x=>x&&!unsupportedParagraph(x)).slice(0,7);
+ // A formally complete response is not sufficient: all four sections must retain
+ // at least one admissible paragraph after safety review.
+ if(options.requireAiAuthor){
+  const empty=['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'].filter(key=>!reviewedAi(key).length);
+  if(empty.length)throw Error('V27: AI раздел без допустимо съдържание след проверка: '+empty.join(', '));
+ }
  const safeAi=key=>reviewedAi(key).length>0;
  const aiProposal=key=>reviewedAi(key).map(x=>paragraph(doc,x));
 
