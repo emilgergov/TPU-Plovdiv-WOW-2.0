@@ -96,8 +96,8 @@ async function make(draft,options={}){
 
  const mapBytes=options.mapPngBytes?.byteLength?Uint8Array.from(options.mapPngBytes):(options.mapSvg?await mapPng(options.mapSvg):null);
  const blocks=[
-  paragraph(doc,'Място за електронен подпис — вътрешно съгласуване'),
-  paragraph(doc,'РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ — НЕ Е АДМИНИСТРАТИВЕН АКТ',{heading:true}),
+  paragraph(doc,''),
+  paragraph(doc,'ПРОЕКТ НА СТАНОВИЩЕ',{heading:true}),
   paragraph(doc,m.recipient,{bold:true}),paragraph(doc,m.address),
   paragraph(doc,'Относно: '+subject,{bold:true}),
   paragraph(doc,'Преписка: '+m.incomingReference),
@@ -113,13 +113,13 @@ async function make(draft,options={}){
   paragraph(doc,'Фигура 1. Пространствено положение на имотите спрямо защитените зони от мрежата „Натура 2000“. Източник: ГИС анализ.'),
   paragraph(doc,'Картографското извлечение от ГИС анализа представя пространствените резултати и имотния обхват; пълният ГИС анализ е в самостоятелен PDF.'),
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
-  ...confirmed(draft.characterization).map(x=>paragraph(doc,String(x).replace(/\[ОТКЪС ОТ ПРЕПИСКАТА\s*[—-]\s*ЗА СВЕРЯВАНЕ\]/gi,'[ЗА ЕКСПЕРТНА ПРОВЕРКА — непълен откъс; необходимо е сверяване с оригиналната преписка]').replace(/^\s*[-–]\s*/,''))),
+  ...(safeAi('CHARACTERIZATION')?aiProposal('CHARACTERIZATION'):confirmed(draft.characterization).map(x=>paragraph(doc,String(x).replace(/\[ОТКЪС ОТ ПРЕПИСКАТА\s*[—-]\s*ЗА СВЕРЯВАНЕ\]/gi,'[ЗА ЕКСПЕРТНА ПРОВЕРКА — непълен откъс; необходимо е сверяване с оригиналната преписка]').replace(/^\s*[-–]\s*/,''))),
 
   paragraph(doc,'IV. ФАКТИЧЕСКИ И ПРАВНИ КОНСТАТАЦИИ',{heading:true}),
-  paragraph(doc,'Правните основания се уточняват чрез съпоставка на документите в преписката с интегрирания нормативен архив. До потвърждаването им: ЗА ЕКСПЕРТНА ПРОВЕРКА.'),
+  ...(safeAi('LEGAL')?aiProposal('LEGAL'):[paragraph(doc,'Правните основания се уточняват чрез съпоставка на документите в преписката с интегрирания нормативен архив. До потвърждаването им: ЗА ЕКСПЕРТНА ПРОВЕРКА.')]),
 
   paragraph(doc,'V. ПРОЦЕДУРНА ПРЕЦЕНКА',{heading:true}),
-  paragraph(doc,'Приложимата процедура се определя след проверка на цялата преписка и относимите правни основания. Само от пространствения резултат не може да се прави извод за наличие или липса на проведени процедури и административни актове. ЗА ЕКСПЕРТНА ПРОВЕРКА.'),
+  ...(safeAi('PROCEDURE')?aiProposal('PROCEDURE'):[paragraph(doc,'Приложимата процедура се определя след проверка на цялата преписка и относимите правни основания. Само от пространствения резултат не може да се прави извод за наличие или липса на проведени процедури и административни актове. ЗА ЕКСПЕРТНА ПРОВЕРКА.')]),
   paragraph(doc,'VI. КОНСТАТАЦИИ ЗА ВЪЗДЕЙСТВИЯТА',{heading:true}),
   ...(safeAi('IMPACTS')?aiProposal('IMPACTS'):[paragraph(doc,'От ГИС анализа е установен единствено пространственият статус на имотите спрямо защитените зони. Извод за вероятност, характер и значимост на въздействията изисква отделна експертна оценка на дейностите и доказателствата.')]),
   ...(!aiSections.IMPACTS&&impacts.some(isPending)?[paragraph(doc,'Не е изготвена окончателна оценка на въздействията. Изводите се попълват след проверка на приложимите режими и доказателствата.')]:[]),
@@ -128,9 +128,9 @@ async function make(draft,options={}){
   paragraph(doc,'ГИС анализ (самостоятелен PDF); Нормативни и документални референции (самостоятелен PDF, когато е изготвен).'),
   paragraph(doc,'НЕОБХОДИМА Е ЕКСПЕРТНА ПРОВЕРКА НА ПРЕПИСКАТА, ПРАВНИТЕ ОСНОВАНИЯ И ИЗВОДИТЕ. Документът не представлява издаден административен акт.')
  ];
- body.replaceChildren(...blocks,paragraph(doc,'Място за електронен подпис — окончателно подписване'),sect.cloneNode(true));
+ body.replaceChildren(...blocks,paragraph(doc,''),sect.cloneNode(true));
  const serialized=new XMLSerializer().serializeToString(doc);
- if((serialized.match(/подпис/gi)||[]).length<2)throw Error('КТ13: липсват две полета за подпис в експертния документ.');
+ if(all(body,'p').filter(p=>!textOf(p).trim()).length<2)throw Error('КТ26: липсват две празни полета за електронен подпис.');
  if(mapBytes){
   const relPath='word/_rels/document.xml.rels',relsDoc=new DOMParser().parseFromString(new TextDecoder().decode(zip[relPath]),'application/xml');
   const relRoot=relsDoc.documentElement,relNS='http://schemas.openxmlformats.org/package/2006/relationships';
