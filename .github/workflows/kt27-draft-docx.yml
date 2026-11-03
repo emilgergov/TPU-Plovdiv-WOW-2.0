@@ -10,6 +10,7 @@ on:
       - 'v26-test/v27-preview/kt32-*'
       - 'v26-test/v27-preview/kt33-*'
       - 'v26-test/v27-preview/kt34-*'
+      - 'v26-test/v27-preview/kt35-*'
       - '.github/workflows/kt27-draft-docx.yml'
   workflow_dispatch:
 permissions:
@@ -40,6 +41,12 @@ jobs:
           python v26-test/v27-preview/kt32-classic-intro-paragraph.py
           python v26-test/v27-preview/kt33-approved-classic-a.py
           python v26-test/v27-preview/kt34-classic-zoos-emphasis.py
+          python v26-test/v27-preview/kt35-classic-single-justified.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KT35-Classic-Word
+          path: out/01A_Obrazec_A_KLASICHESKI_KT35.docx
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: KT34-Classic-Word
