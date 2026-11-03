@@ -1,0 +1,31 @@
+name: KT27 Draft two DOCX files
+on:
+  push:
+    branches:
+      - work/v27-kt26-five-packages
+    paths:
+      - 'v26-test/v27-preview/kt27-*'
+      - '.github/workflows/kt27-draft-docx.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  docx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install python-docx Pillow
+      - name: Inspect canonical A template
+        run: python v26-test/v27-preview/kt27-inspect-template.py
+      - name: Build review Word files
+        run: |
+          mkdir -p out
+          if [ -f v26-test/v27-preview/kt27-build-docx.py ]; then python v26-test/v27-preview/kt27-build-docx.py; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KT27-two-Word-documents
+          path: out/*.docx
+          if-no-files-found: warn
