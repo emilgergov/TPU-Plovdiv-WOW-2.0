@@ -345,16 +345,15 @@ async function make(results,roles,register){
  if(!overviewMap)throw Error('Липсва обзорната ГИС карта за експертния Word. Изпълнете картографския анализ преди създаване на пакета.');
  if(register?.v27Package&&!String(register.v27AiDraft||'').trim())throw Error('V27.2: липсва AI авторски текст; експертният Word не може да се замени със стандартен.');
  const expertWord=await window.V26ExpertWord.make(expertDraft,{mapSvg:overviewMap,requireAiAuthor:Boolean(register?.v27Package)});
- const prefixes=expertDraft.scenario==='Б'?['С реализацията','Електроснабдяването','Водозахранването','Отпадъчните води']:['С реализацията','Електроснабдяването','Водоснабдяването','Отпадъчните води'];
- const classicIntro='С реализацията на инвестиционното предложение';
-  const classicParagraphs=expertDraft.characterization.map((value,i)=>{
-   if(i===0){
-    if(value.startsWith(classicIntro))return value;
-    if(value.startsWith('С реализацията'))return classicIntro+value.slice('С реализацията'.length);
-    return classicIntro+' — '+value;
-   }
-   return value.startsWith(prefixes[i])?value:prefixes[i]+' — '+value;
-  });
+ // KT26: The canonical A/B document must use the expert-confirmed case
+ // characterization, never the independently AI-authored Expert Word narrative.
+ // Preserve the approved paragraph wording; the original A/B template owns its
+ // fixed legal and impact paragraphs and their formatting.
+ const classicSource=Array.isArray(paragraphs)&&paragraphs.length===4
+  ?paragraphs:expertDraft.characterization;
+ if(!Array.isArray(classicSource)||classicSource.length!==4||classicSource.some(p=>!String(p||'').trim()))
+  throw Error('КТ26: липсват четирите потвърдени абзаца за класическия образец А/Б.');
+ const classicParagraphs=classicSource.map(value=>String(value).trim());
  // KT23: Classic Word uses the expert-confirmed four paragraphs unchanged; AI authors the separate Expert Word.
  const classicWord=await window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata);
  for(const [label,blob] of [['експертен',expertWord],['класически',classicWord]]){
