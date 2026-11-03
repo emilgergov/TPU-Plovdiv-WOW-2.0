@@ -37,11 +37,15 @@ try{
   }
   const legalFacts={...facts,legalSources:[
     {id:'verified-1',title:'Тестов нормативен източник',source:'Официален архив',article:'чл. 1',verifiedScope:'Проверен тестов обхват',page:'стр. 1',revisionVerified:true},
+    {id:'accepted-1',title:'Проектно приет източник',source:'Интегриран архив',article:'чл. 3',verifiedScope:'Приет текст',revisionVerified:false,projectRevisionAccepted:true},
     {id:'unverified-1',title:'Непотвърден източник',source:'Неустановен',article:'чл. 2',verifiedScope:'Тест',revisionVerified:false}
   ]};
   const legalResponse=await worker.fetch(post('test-access-token',{mode:'expert',facts:legalFacts}),env);
   assert.equal(legalResponse.status,200);
-  assert.equal(lastFacts.legalSources.length,1);
+  assert.equal(lastFacts.legalSources.length,2);
+  assert.equal(lastFacts.legalSources[1].article,'чл. 3');
+  assert.equal(lastFacts.legalSources[1].projectRevisionAccepted,true);
+  assert.equal(lastFacts.legalSources[1].revisionVerified,false);
   assert.equal(lastFacts.legalSources[0].article,'чл. 1');
   assert.equal(lastFacts.legalSources[0].verifiedScope,'Проверен тестов обхват');
   assert.equal(lastFacts.legalSources[0].page,'стр. 1');
