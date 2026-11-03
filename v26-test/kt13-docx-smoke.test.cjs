@@ -22,6 +22,31 @@ for(const name of ['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_sta
 assert(packageSource.includes("...(includeAnnex2?["),'PDF2 must remain conditional on requested documentary analysis');
 assert(packageSource.includes("new Set(actualFiles).size!==actualFiles.length"),'Duplicate ZIP entries must fail closed');
 assert(packageSource.includes("expectedFiles.some(name=>!actualFiles.includes(name))"),'Missing ZIP artifacts must fail closed');
+// Package 3: exercise the real ZIP writer and inspect extracted artifacts.
+const zipWriterSource=packageSource.slice(packageSource.indexOf('function zipWriter(){'),packageSource.indexOf('function scenarioFromGIS('));
+assert(zipWriterSource.startsWith('function zipWriter(){'),'ZIP writer source not found');
+const actualZipWriter=vm.runInNewContext(zipWriterSource+';zipWriter',{Uint8Array,Uint32Array,TextEncoder,Blob,Math,Error,Array,Set});
+(async()=>{
+ for(const withPdf2 of [false,true]){
+  const z=actualZipWriter();
+  const files=[
+   ['01_Proekt_na_stanovishte_Klasicheski.docx',new Uint8Array([80,75,3,4])],
+   ['02_Proekt_na_stanovishte_Eksperten.docx',new Uint8Array([80,75,3,4])],
+   ['03_Prilozhenie_1_GIS_analiz.pdf','%PDF-1.4'],
+   ...(withPdf2?[['04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf','%PDF-1.4']]:[]),
+   ['README_BG.txt','Работен пакет']
+  ];
+  for(const [name,bytes] of files)z.file(name,bytes);
+  const blob=await z.generateAsync();
+  const extracted=fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
+  assert.deepEqual(Object.keys(extracted).sort(),files.map(x=>x[0]).sort(),'Actual ZIP file list differs');
+  for(const [name,bytes] of files){
+   const expected=typeof bytes==='string'?new TextEncoder().encode(bytes):bytes;
+   assert.equal(Buffer.compare(Buffer.from(extracted[name]),Buffer.from(expected)),0,'Corrupt ZIP payload: '+name);
+  }
+ }
+ console.log('Package 3 ZIP writer extraction with/without PDF2: PASS');
+})().catch(e=>{console.error(e);process.exitCode=1});
 function paragraphTexts(xml){
  const doc=new w.DOMParser().parseFromString(xml,'application/xml');
  assert.equal(doc.getElementsByTagName('parsererror').length,0,'Generated Word XML is valid');
