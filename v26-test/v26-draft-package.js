@@ -16,6 +16,7 @@ function zipWriter(){
  function u32(a,o,v){u16(a,o,v&65535);u16(a,o+2,Math.floor(v/65536))}
  const api={
   file(name,data){entries.push({name:String(name),data});return api},
+  names(){return entries.map(e=>e.name)},
   folder(prefix){return {file(name,data){api.file(prefix+'/'+name,data);return this}}},
   async generateAsync(){
    const chunks=[],central=[];let offset=0;
@@ -338,6 +339,9 @@ async function make(results,roles,register){
   for(const warning of (dossierEvidence.warnings||[]).slice(0,15))evidenceLines.push('Предупреждение: '+String(warning.kind||'неуточнено')+'; документ: '+String(warning.file||'неизвестен'));
  }
  z.file('README_BG.txt',evidenceLines.join('\n')+'\n');
+ const expectedFiles=['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx','03_Prilozhenie_1_GIS_analiz.pdf',...(includeAnnex2?['04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf']:[]),'README_BG.txt'];
+ const actualFiles=z.names();
+ if(actualFiles.length!==expectedFiles.length||expectedFiles.some(name=>!actualFiles.includes(name))||new Set(actualFiles).size!==actualFiles.length)throw Error('Непълен или дублиран ZIP пакет: проверете PDF1, PDF2 и двата Word документа.');
  const packageBlob=await z.generateAsync({type:'blob'});if(packageBlob.size<300||new TextDecoder().decode(await packageBlob.slice(0,2).arrayBuffer())!=='PK')throw Error('Неуспешно пакетиране в ZIP.');return packageBlob;
 }
 async function standalonePDF(results,kind,register){if(!results?.length)throw Error('Първо изпълнете ГИС справката.');if(kind!==2&&!results.some(r=>r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type))))throw Error('Липсва имотна геометрия за PDF №1. Заредете архивната геометрия и изпълнете справката отново.');await ensurePDF();return pdfBlob(kind===2?normativePdf(results,register):gisPdf(results,register))}
