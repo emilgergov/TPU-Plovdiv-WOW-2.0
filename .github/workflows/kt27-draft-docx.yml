@@ -6,6 +6,7 @@ on:
     paths:
       - 'v26-test/v27-preview/kt27-*'
       - 'v26-test/v27-preview/kt30-*'
+      - 'v26-test/v27-preview/kt31-*'
       - '.github/workflows/kt27-draft-docx.yml'
   workflow_dispatch:
 permissions:
@@ -27,6 +28,12 @@ jobs:
           if [ -f v26-test/v27-preview/kt27-build-docx.py ]; then python v26-test/v27-preview/kt27-build-docx.py; fi
           python v26-test/v27-preview/kt27-canonical-variant-a.py
           python v26-test/v27-preview/kt30-approved-classic-a.py
+          python v26-test/v27-preview/kt31-classic-admin-layout.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KT31-Classic-Word
+          path: out/01A_Obrazec_A_KLASICHESKI_KT31.docx
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: KT27-two-Word-documents
