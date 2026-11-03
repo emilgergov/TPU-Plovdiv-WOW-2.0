@@ -8,6 +8,7 @@ on:
       - 'v26-test/v27-preview/kt30-*'
       - 'v26-test/v27-preview/kt31-*'
       - 'v26-test/v27-preview/kt32-*'
+      - 'v26-test/v27-preview/kt33-*'
       - '.github/workflows/kt27-draft-docx.yml'
   workflow_dispatch:
 permissions:
@@ -36,6 +37,12 @@ jobs:
           python v26-test/v27-preview/kt30-approved-classic-a.py
           python v26-test/v27-preview/kt31-classic-admin-layout.py
           python v26-test/v27-preview/kt32-classic-intro-paragraph.py
+          python v26-test/v27-preview/kt33-approved-classic-a.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KT33-Classic-Word
+          path: out/01A_Obrazec_A_KLASICHESKI_KT33.docx
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: KT32-Classic-Word
