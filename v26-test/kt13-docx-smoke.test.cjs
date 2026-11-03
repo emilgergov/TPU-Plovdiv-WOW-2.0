@@ -18,7 +18,7 @@ for(const name of ['v26-expert-draft.js','v26-template-word.js','v26-expert-word
 const packageSource=fs.readFileSync('v26-test/v26-draft-package.js','utf8');
 // Package 3: execute the actual offline PDF generator for both document definitions.
 // Canvas rendering is stubbed; the PDF serialization and GIS/normative builders are real.
-(async()=>{
+const realPdfFixturesPromise=(async()=>{
  const drawing={fillRect(){},strokeRect(){},fillText(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},drawImage(){},measureText(t){return {width:String(t).length*9}}};
  const tinyJpeg='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2Q==';
  const doc={createElement(tag){assert.equal(tag,'canvas');return {getContext(){return drawing},toDataURL(){return tinyJpeg}}}};
@@ -27,6 +27,7 @@ const packageSource=fs.readFileSync('v26-test/v26-draft-package.js','utf8');
  vm.runInContext(fs.readFileSync('v26-test/v26-offline-pdf.js','utf8'),pdfContext,{filename:'v26-offline-pdf.js'});
  vm.runInContext(packageSource,pdfContext,{filename:'v26-draft-package.js'});
  const gis=[{input:'36676.129.457',cadnum:'36676.129.457',status:'Намерен',geojson:{features:[{geometry:{type:'Polygon',coordinates:[[[24,42],[24.001,42],[24.001,42.001],[24,42]]]}}]},verified_zone_intersections:[],zone_intersections:[]}];
+ const pdfs={};
  for(const kind of [1,2]){
   const result=await win.V26DraftPackage.standalonePDF(gis,kind,{});
   const bytes=new Uint8Array(await result.arrayBuffer());
@@ -34,9 +35,11 @@ const packageSource=fs.readFileSync('v26-test/v26-draft-package.js','utf8');
   assert(content.startsWith('%PDF-1.4'),'Offline PDF'+kind+' header missing');
   assert(content.includes('xref\n')&&content.includes('%%EOF'),'Offline PDF'+kind+' serialization incomplete');
   assert(bytes.length>300,'Offline PDF'+kind+' is empty');
+  pdfs[kind]=result;
  }
  console.log('Package 3 offline GIS and normative PDF serialization: PASS');
-})().catch(e=>{console.error(e);process.exitCode=1});
+ return pdfs;
+})();
 // Package 3: PDF document-definition contract for both GIS and normative PDFs.
 const packageDefinitions=fs.readFileSync('v26-test/v26-draft-package.js','utf8');
 assert(packageDefinitions.includes('function gisPdf(results,options={})'),'PDF1 GIS builder missing');
@@ -208,8 +211,9 @@ async function run(scenario){
   const writer=actualZipWriter();
   writer.file('01_Proekt_na_stanovishte_Klasicheski.docx',classic);
   writer.file('02_Proekt_na_stanovishte_Eksperten.docx',blob);
-  writer.file('03_Prilozhenie_1_GIS_analiz.pdf','%PDF-1.4\\nfixture');
-  if(withPdf2)writer.file('04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf','%PDF-1.4\\nfixture');
+  const pdfFixtures=await realPdfFixturesPromise;
+  writer.file('03_Prilozhenie_1_GIS_analiz.pdf',pdfFixtures[1]);
+  if(withPdf2)writer.file('04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf',pdfFixtures[2]);
   writer.file('README_BG.txt','Scenario '+scenario);
   const archive=fflate.unzipSync(new Uint8Array(await (await writer.generateAsync()).arrayBuffer()));
   assert.equal(Object.keys(archive).length,withPdf2?5:4,'Unexpected ZIP file count');
@@ -218,6 +222,11 @@ async function run(scenario){
    assert.equal(Buffer.compare(Buffer.from(archive[name]),Buffer.from(bytes)),0,'Generated '+scenario+' DOCX changed inside ZIP: '+name);
    const doc=fflate.unzipSync(archive[name]);
    assert(doc['word/document.xml'],'Missing Word document XML: '+name);
+  }
+  for(const [name,pdf] of [['03_Prilozhenie_1_GIS_analiz.pdf',pdfFixtures[1]],...(withPdf2?[['04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf',pdfFixtures[2]]]:[])]){
+   const bytes=new Uint8Array(await pdf.arrayBuffer());
+   assert.equal(Buffer.compare(Buffer.from(archive[name]),Buffer.from(bytes)),0,'Generated PDF changed inside ZIP: '+name);
+   assert(new TextDecoder().decode(archive[name]).startsWith('%PDF-1.4'),'Extracted PDF header missing: '+name);
   }
   assert.equal(Boolean(archive['04_Prilozhenie_2_Normativni_i_dokumentalni_referencii.pdf']),withPdf2,'PDF2 inclusion mismatch');
  }
