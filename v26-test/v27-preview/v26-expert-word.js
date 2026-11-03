@@ -91,7 +91,7 @@ async function make(draft,options={}){
  })();
  if(options.requireAiAuthor){
   const required=['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'];
-  const headings=[...String(draft.aiDraft||'').matchAll(/^\\s*\\[\\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\\]\\]\\s*$/gm)].map(m=>m[1]);
+  const headings=[...String(draft.aiDraft||'').matchAll(/^\s*\[\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\]\]\s*$/gm)].map(m=>m[1]);
   if(headings.length!==4||required.some((key,i)=>headings[i]!==key)||required.some(key=>!aiSections[key]))
    throw Error('V27: AI авторът не предостави четирите задължителни раздела в правилния ред.');
  }
