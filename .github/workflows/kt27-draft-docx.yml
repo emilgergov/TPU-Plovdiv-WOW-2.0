@@ -24,6 +24,7 @@ jobs:
         run: |
           mkdir -p out
           if [ -f v26-test/v27-preview/kt27-build-docx.py ]; then python v26-test/v27-preview/kt27-build-docx.py; fi
+          python v26-test/v27-preview/kt27-canonical-variant-a.py
       - uses: actions/upload-artifact@v4
         with:
           name: KT27-two-Word-documents
