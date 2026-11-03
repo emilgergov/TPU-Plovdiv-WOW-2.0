@@ -146,9 +146,10 @@ assert d.paragraphs[31].runs[1].bold and d.paragraphs[31].runs[12].bold
 assert len(bullets)==5
 for i in body_regular:
     f=d.paragraphs[i].paragraph_format
-    assert f.first_line_indent==Cm(1.0),i
-    assert f.space_after==Pt(5),i
-    assert f.line_spacing==1.15,i
+    # OOXML stores twips; cm values are quantized when read back.
+    assert abs(f.first_line_indent.cm-1.0)<0.02,(i,f.first_line_indent.cm)
+    assert abs(f.space_after.pt-5)<0.15,(i,f.space_after.pt)
+    assert abs(f.line_spacing-1.15)<0.01,(i,f.line_spacing)
     assert d.paragraphs[i].alignment==WD_ALIGN_PARAGRAPH.JUSTIFY,i
 
 OUT.parent.mkdir(parents=True,exist_ok=True)
