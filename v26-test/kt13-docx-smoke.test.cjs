@@ -32,7 +32,7 @@ const packageSource=fs.readFileSync('v26-test/v26-draft-package.js','utf8');
   const bytes=new Uint8Array(await result.arrayBuffer());
   const content=new TextDecoder().decode(bytes);
   assert(content.startsWith('%PDF-1.4'),'Offline PDF'+kind+' header missing');
-  assert(content.includes('xref\\n')&&content.includes('%%EOF'),'Offline PDF'+kind+' serialization incomplete');
+  assert(content.includes('xref\n')&&content.includes('%%EOF'),'Offline PDF'+kind+' serialization incomplete');
   assert(bytes.length>300,'Offline PDF'+kind+' is empty');
  }
  console.log('Package 3 offline GIS and normative PDF serialization: PASS');
