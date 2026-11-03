@@ -11,6 +11,7 @@ on:
       - 'v26-test/v27-preview/kt33-*'
       - 'v26-test/v27-preview/kt34-*'
       - 'v26-test/v27-preview/kt35-*'
+      - 'v26-test/v27-preview/kt36-*'
       - '.github/workflows/kt27-draft-docx.yml'
   workflow_dispatch:
 permissions:
@@ -42,6 +43,12 @@ jobs:
           python v26-test/v27-preview/kt33-approved-classic-a.py
           python v26-test/v27-preview/kt34-classic-zoos-emphasis.py
           python v26-test/v27-preview/kt35-classic-single-justified.py
+          python v26-test/v27-preview/kt36-classic-b-variant-simulation.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KT36-Classic-B-Simulation
+          path: out/01B_Obrazec_B_KLASICHESKI_KT36_SIMULACIA.docx
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: KT35-Classic-Word
