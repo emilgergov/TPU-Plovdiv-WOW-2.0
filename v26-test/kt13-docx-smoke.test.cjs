@@ -218,6 +218,20 @@ async function run(scenario){
   assert(resultText.includes(c.fallback),'Unsafe AI section did not use explicit review fallback: '+c.fallback);
  }
 
+ // Package 2: content safety across all five AI-authored sections in A/B DOCX.
+ const fiveSectionCases=[
+  {old:'Конкретна характеристика на тестов склад и офиси.',replacement:'Според мен инвестиционното предложение е подходящо.',forbidden:'Според мен инвестиционното предложение е подходящо.'},
+  {old:'Конкретна правна преценка по тестовите материали.',replacement:'Правното основание е чл. ХХ от приложимата наредба.',forbidden:'чл. ХХ'},
+  {old:'Конкретна процедурна преценка по тестовите материали.',replacement:'Не се изисква оценка за съвместимост.',forbidden:'Не се изисква оценка за съвместимост.'},
+  {old:'Конкретни въздействия на тестовия склад.',replacement:'Липсват въздействия върху защитените зони.',forbidden:'Липсват въздействия върху защитените зони.'},
+  {old:'За тестовия склад не са представени проверени правни основания за окончателно процедурно произнасяне.',replacement:'Предлагам инвестиционното предложение да бъде разрешено.',forbidden:'Предлагам инвестиционното предложение да бъде разрешено.'}
+ ];
+ for(const c of fiveSectionCases){
+  const candidate={...enriched,aiDraft:aiDraft.replace(c.old,c.replacement)};
+  const blob=await w.V26ExpertWord.make(candidate,{mapPngBytes:new Uint8Array(mapPngBytes)});
+  const text=paragraphTexts(new TextDecoder().decode(fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()))['word/document.xml'])).join(' ');
+  assert(!text.includes(c.forbidden),'Unsafe content entered '+scenario+' expert Word: '+c.forbidden);
+ }
  // KT02: a plausible but unverified article number must not reach the expert Word.
  const citationDraft=aiDraft.replace('Конкретна правна преценка по тестовите материали.','Съгласно чл. 31, ал. 1 от Закона за биологичното разнообразие се извършва преценка.');
  const citationModel={...enriched,aiDraft:citationDraft,legalSources:[]};
