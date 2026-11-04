@@ -13,6 +13,7 @@ on:
       - 'v26-test/v27-preview/kt35-*'
       - 'v26-test/v27-preview/kt36-*'
       - 'v26-test/v27-preview/kt37-*'
+      - 'v26-test/v27-preview/kt38-*'
       - '.github/workflows/kt27-draft-docx.yml'
   workflow_dispatch:
 permissions:
@@ -46,6 +47,12 @@ jobs:
           python v26-test/v27-preview/kt35-classic-single-justified.py
           python v26-test/v27-preview/kt36-classic-b-variant-simulation.py
           python v26-test/v27-preview/kt37-classic-b-two-layout-fixes.py
+          python v26-test/v27-preview/kt38-classic-b-deduplicate-zone.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KT38-Classic-B-Review
+          path: out/01B_Obrazec_B_KLASICHESKI_KT38_SIMULACIA.docx
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: KT37-Classic-B-Review
