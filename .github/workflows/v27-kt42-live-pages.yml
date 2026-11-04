@@ -1,4 +1,4 @@
-name: V27 KT46 live Pages deployment verification
+name: V27 KT47 live Pages deployment verification
 on:
   push:
     paths:
@@ -13,30 +13,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Confirm KT46 Pages deployment serves one Word bridge and all approved DOCX files
+      - name: Confirm KT47 Pages deployment serves one Word bridge and all approved DOCX files
         run: |
           python - <<'PY'
           import urllib.request,time,zipfile,io,json
           base='https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/'
-          expected='v27-preview/v27-kt41-etalon-bridge.js?v=kt46-characterization-0fe047d'
+          expected='v27-preview/v27-kt41-etalon-bridge.js?v=kt47-integrated-9f77c66'
           last=''
           for attempt in range(36):
               try:
                   req=urllib.request.Request(base+'?kt46='+str(attempt),headers={'Cache-Control':'no-cache'})
                   with urllib.request.urlopen(req,timeout=18) as res: html=res.read().decode('utf-8')
                   if expected not in html: raise RuntimeError('Pages still serves old Word generator')
-                  if html.count('v27-preview/v27-kt41-etalon-bridge.js?v=') != 1: raise RuntimeError('KT46 requires exactly one Word bridge on public Pages')
+                  if 'v27-preview/v26-draft-package.js?v=kt47-ekatte-cd4dfab' not in html: raise RuntimeError('Pages does not use KT47 EKATTE package')
+                  if html.count('v27-preview/v27-kt41-etalon-bridge.js?v=') != 1: raise RuntimeError('KT47 requires exactly one Word bridge on public Pages')
                   with urllib.request.urlopen(base+'v27-kt41-etalon-bridge.js?kt46=verification',timeout=18) as res: code=res.read().decode('utf-8')
-                  if any(k not in code for k in ('function isApprovedCase','function characterizationDraft','function legalDraft','function impactDraft','function heading','function putHeading','function zoneList','function alignClassicAConfidentialityWithB')): raise RuntimeError('Live JS not KT46')
+                  if any(k not in code for k in ('function isApprovedCase','function characterizationDraft','function legalDraft','function impactDraft','function heading','function putHeading','function zoneList','function alignClassicAConfidentialityWithB','function neutralProcedure','function supportedAILegal')): raise RuntimeError('Live JS not KT47')
+                  with urllib.request.urlopen(base+'v26-draft-package.js?kt47=verification',timeout=18) as res: package=res.read().decode('utf-8')
+                  if not all(term in package for term in ('function kt47VerifiedAdministration','const KT47_EKATTE','caseMetadata.nearestZone=')): raise RuntimeError('Live package lacks KT47 GIS/administration linkage')
                   for filename in ('KT35-A.docx','KT39-B.docx','V27-R02.docx'):
                       with urllib.request.urlopen(base+'etalon/'+filename,timeout=18) as res: raw=res.read()
                       with zipfile.ZipFile(io.BytesIO(raw)) as z:
                           assert 'word/document.xml' in z.namelist(),filename
-                  print('LIVE PAGES KT46 PASS: HTML, JS and all three approved DOCX files')
+                  print('LIVE PAGES KT47 PASS: HTML, JS and all three approved DOCX files')
                   break
               except Exception as e:
                   last=str(e)
-                  if attempt==35: raise RuntimeError('KT46 Pages deployment not verified: '+last)
+                  if attempt==35: raise RuntimeError('KT47 Pages deployment not verified: '+last)
                   time.sleep(8)
           PY
       - name: Record verified public Pages deployment
@@ -44,13 +47,13 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import json,subprocess
-          marker=Path('v26-test/v27-preview/KT46_LIVE_VERIFIED.json')
-          marker.write_text(json.dumps({'checkpoint':'KT46','result':'LIVE_PAGES_VERIFIED','verified_repo_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'checks':['HTML serves KT46 loader','Live Word bridge contains KT46 safeguards','KT35-A.docx accessible','KT39-B.docx accessible','V27-R02.docx accessible']},ensure_ascii=False,indent=2)+'\n')
+          marker=Path('v26-test/v27-preview/KT47_LIVE_VERIFIED.json')
+          marker.write_text(json.dumps({'checkpoint':'KT47','result':'LIVE_PAGES_VERIFIED','verified_repo_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'checks':['HTML serves KT47 loader','Live Word bridge contains KT47 safeguards','Verified EKATTE metadata from package','KT35-A.docx accessible','KT39-B.docx accessible','V27-R02.docx accessible']},ensure_ascii=False,indent=2)+'\n')
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v26-test/v27-preview/KT46_LIVE_VERIFIED.json
-          git commit -m "KT46: verified Pages serves A+B aligned confidentiality and complete location"
+          git add v26-test/v27-preview/KT47_LIVE_VERIFIED.json
+          git commit -m "KT47: verified deployed AI legal and EKATTE package with one Word bridge"
           for attempt in 1 2 3 4 5; do
             git pull --rebase origin main && git push origin HEAD:main && break
             sleep 3
