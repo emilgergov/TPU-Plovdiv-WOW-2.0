@@ -104,8 +104,11 @@ async function expert(draft,options={}){
  for(let i=0;i<3;i++)put(p[26+i],safe(ai.LEGAL[i+1]||m.legalParagraphs?.[i],'правно основание '+(i+1)));
  put(p[31],safe(ai.IMPACTS[0],'обобщена преценка на въздействията'));
  for(let i=0;i<5;i++)put(p[32+i],safe(ai.IMPACTS[i+1]||m.impactFindings?.[i],'въздействие '+(i+1)));
- put(p[38],safe(ai.PROCEDURE[0],'процедурна преценка'));
- put(p[39],safe(m.procedureFinding,'проект на заключение'));
+ const blockedProcedure=/(?:не е приложима процедура|не подлежи на процедура|не се изисква оценка|не се налага|не се изисква|не подлежи|няма вероятност|малко вероятно|незначителн(?:о|и|а) въздейств|не се очаква въздейств|липса на значими въздействия|не поражда въздействия|не оказва въздействие|ниск[аио] риск)/i;
+ const reviewedProcedure=(ai.PROCEDURE||[]).filter(t=>!blockedProcedure.test(t));
+ put(p[38],reviewedProcedure.length?safe(reviewedProcedure[0],'процедурна преценка'):'Приложимата процедура се определя след експертна проверка на пълната преписка, пространствените резултати и относимите нормативни основания. Само липсата на териториално пресичане не е достатъчно основание за окончателен процедурен извод.');
+ const conclusion=safe(m.procedureFinding,'проект на заключение');
+ put(p[39],blockedProcedure.test(conclusion)?'[ЗА ЕКСПЕРТНА ПРОВЕРКА — окончателен процедурен извод по пълната преписка]':conclusion);
  return finish(doc,'V27 R02');
 }
 root.V26TemplateWord=Object.freeze({make:classic,templatePaths:classicBase.templatePaths,layout:'KT41_EXACT_KT35_KT39'});
