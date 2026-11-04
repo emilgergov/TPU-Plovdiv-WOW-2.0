@@ -78,7 +78,7 @@ function checkAdministrative(doc,which,subject,ids){
  checkHeadingEtalonRuns(doc,which);
  const p=pList(doc).p,headline=phrase(p[10]),intro=phrase(p[which==='E'?17:16]);
  // Both the subject and verified locality can be independently quoted.
- const quotedSubject=headline.match(/Относно:[\\s\\S]*?„([^“]+)“/);
+ const quotedSubject=headline.match(/Относно:[\s\S]*?„([^“]+)“/);
  assert.ok(quotedSubject&&quotedSubject[1].includes(subject),which+' subject must be quoted exactly once');
  assert.equal((headline.match(/„/g)||[]).length,(headline.match(/“/g)||[]).length,which+' balanced quotation marks');
  assert.equal((headline.match(new RegExp(ids.replace(/\./g,'\\.'),'g'))||[]).length,1,which+' duplicate parcel');
