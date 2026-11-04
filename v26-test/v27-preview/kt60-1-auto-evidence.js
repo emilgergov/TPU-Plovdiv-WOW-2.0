@@ -81,5 +81,5 @@ function show(result){
  const p=document.createElement('p');p.textContent=result.ok?'Всички доказателствени условия са налице.':'Генерирането на Б остава защитено; заключените абзаци не са заменени.';dialog.append(p);
  const close=document.createElement('button');close.textContent='Затвори';close.onclick=()=>dialog.close();dialog.append(close);dialog.showModal();
 }
-root.KT60Evidence=Object.freeze({build,show,sections});
+root.KT601Evidence=Object.freeze({build,show,sections});
 })(window);
