@@ -10,7 +10,7 @@ on:
       - 'v26-test/v27-preview/kt51-restored-content-regression.cjs'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   restored-content:
     runs-on: ubuntu-latest
@@ -29,7 +29,13 @@ jobs:
           node --check v26-test/v27-preview/v26-draft-package.js
           node --check v26-test/v27-preview/kt51-restored-content-regression.cjs
       - name: Generate actual A/B/R02 DOCX through approved authoring adapters
-        run: node v26-test/v27-preview/kt51-restored-content-regression.cjs
+        shell: bash
+        run: |
+          set +e
+          node v26-test/v27-preview/kt51-restored-content-regression.cjs > KT51_RESTORE_QA.log 2>&1
+          rc=$?
+          cat KT51_RESTORE_QA.log
+          exit "$rc"
       - name: Verify test HTML loads the approved adapters before administrative bridge
         run: |
           python - <<'PY'
@@ -41,6 +47,19 @@ jobs:
           assert '<base href="../">' in s
           print('KT51 approved generator order PASS')
           PY
+      - name: Publish factual QA output for review
+        if: always()
+        shell: bash
+        run: |
+          cp KT51_RESTORE_QA.log v26-test/v27-preview/KT51_RESTORE_QA.txt 2>/dev/null || echo "KT51: test did not reach DOCX generation" > v26-test/v27-preview/KT51_RESTORE_QA.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add v26-test/v27-preview/KT51_RESTORE_QA.txt
+          git commit -m 'KT51: record restored Classic Expert DOCX QA' || true
+          for i in 1 2 3 4; do
+            git pull --rebase origin main && git push origin HEAD:main && break
+            sleep 3
+          done
   live-pages:
     runs-on: ubuntu-latest
     needs: restored-content
