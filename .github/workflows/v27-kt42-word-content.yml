@@ -1,9 +1,10 @@
-name: V27 KT47 integrated content regression
+name: V27 KT47 locked user-approved DOCX regression
 on:
   push:
     paths:
       - '.github/workflows/v27-kt42-word-content.yml'
       - 'v26-test/v27-preview/kt42-approved-word-regression.cjs'
+      - 'v26-test/v27-preview/etalon/**'
       - 'v26-test/v27-preview/v27-kt41-etalon-bridge.js'
       - 'v26-test/v27-preview/v26-draft-package.js'
       - 'v26-test/v27-preview/index.html'
@@ -18,7 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Execute and capture KT47 A+B, expert and EKATTE regression
+      - name: Verify exact user-approved A/B/E DOCX and run cross-case Word regression
         run: |
           set +e
           {
@@ -57,7 +58,7 @@ jobs:
           import json,subprocess
           from pathlib import Path
           marker=Path('v26-test/v27-preview/KT47_VERIFIED.json')
-          marker.write_text(json.dumps({'checkpoint':'KT47','verified_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'tests':'DOCX A/B/R02 legal and GIS content, NSI EKATTE and preserved Word layouts: PASS','status':'verified-for-preview'},ensure_ascii=False,indent=2)+'\n')
+          marker.write_text(json.dumps({'checkpoint':'KT47','verified_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'tests':'Exact user-approved A/B/R02 binary hashes + layout, metadata and GIS checks: PASS','status':'verified-for-preview'},ensure_ascii=False,indent=2)+'\n')
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
