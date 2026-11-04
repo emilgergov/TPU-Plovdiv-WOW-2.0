@@ -24,9 +24,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          node --check v26-test/v27-preview/v27-kt51-admin-only.js
-          node --check v26-test/v27-preview/kt51-admin-only-regression.cjs
-          node v26-test/v27-preview/kt51-admin-only-regression.cjs 2>&1 | tee KT51_ADMIN_DOCX_QA.log
+          set +e
+          {
+            node --check v26-test/v27-preview/v27-kt51-admin-only.js &&
+            node --check v26-test/v27-preview/kt51-admin-only-regression.cjs &&
+            node v26-test/v27-preview/kt51-admin-only-regression.cjs
+          } > KT51_ADMIN_DOCX_QA.log 2>&1
+          rc=$?
+          cat KT51_ADMIN_DOCX_QA.log
+          exit "$rc"
       - name: Capture real test results
         if: always()
         shell: bash
