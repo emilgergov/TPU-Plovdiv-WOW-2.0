@@ -1,4 +1,4 @@
-name: V27 KT42 live Pages deployment verification
+name: V27 KT44 live Pages deployment verification
 on:
   push:
     paths:
@@ -13,29 +13,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Confirm real Pages deployment serves KT42 and all approved DOCX files
+      - name: Confirm real Pages deployment serves KT44 and all approved DOCX files
         run: |
           python - <<'PY'
           import urllib.request,time,zipfile,io,json
           base='https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/'
-          expected='v27-preview/v27-kt41-etalon-bridge.js?v=kt43-characterization-cb451bd'
+          expected='v27-preview/v27-kt41-etalon-bridge.js?v=kt44-unified-0810b41'
           last=''
           for attempt in range(36):
               try:
-                  req=urllib.request.Request(base+'?kt42='+str(attempt),headers={'Cache-Control':'no-cache'})
+                  req=urllib.request.Request(base+'?kt44='+str(attempt),headers={'Cache-Control':'no-cache'})
                   with urllib.request.urlopen(req,timeout=18) as res: html=res.read().decode('utf-8')
                   if expected not in html: raise RuntimeError('Pages still serves old Word generator')
-                  with urllib.request.urlopen(base+'v27-kt41-etalon-bridge.js?kt42=verification',timeout=18) as res: code=res.read().decode('utf-8')
-                  if 'function isApprovedCase' not in code or 'characteristicNames' not in code: raise RuntimeError('Live JS not KT42')
+                  with urllib.request.urlopen(base+'v27-kt41-etalon-bridge.js?kt44=verification',timeout=18) as res: code=res.read().decode('utf-8')
+                  if any(k not in code for k in ('function isApprovedCase','function characterizationDraft','function legalDraft','function impactDraft','function heading','function zoneList')): raise RuntimeError('Live JS not KT44')
                   for filename in ('KT35-A.docx','KT39-B.docx','V27-R02.docx'):
                       with urllib.request.urlopen(base+'etalon/'+filename,timeout=18) as res: raw=res.read()
                       with zipfile.ZipFile(io.BytesIO(raw)) as z:
                           assert 'word/document.xml' in z.namelist(),filename
-                  print('LIVE PAGES KT43 PASS: HTML, JS and all three approved DOCX files')
+                  print('LIVE PAGES KT44 PASS: HTML, JS and all three approved DOCX files')
                   break
               except Exception as e:
                   last=str(e)
-                  if attempt==35: raise RuntimeError('KT43 Pages deployment not verified: '+last)
+                  if attempt==35: raise RuntimeError('KT44 Pages deployment not verified: '+last)
                   time.sleep(8)
           PY
       - name: Record verified public Pages deployment
@@ -43,11 +43,11 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import json,subprocess
-          marker=Path('v26-test/v27-preview/KT42_LIVE_VERIFIED.json')
-          marker.write_text(json.dumps({'checkpoint':'KT42','result':'LIVE_PAGES_VERIFIED','verified_repo_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'checks':['HTML serves KT42 loader','Live Word bridge contains KT42 safeguards','KT35-A.docx accessible','KT39-B.docx accessible','V27-R02.docx accessible']},ensure_ascii=False,indent=2)+'\n')
+          marker=Path('v26-test/v27-preview/KT44_LIVE_VERIFIED.json')
+          marker.write_text(json.dumps({'checkpoint':'KT44','result':'LIVE_PAGES_VERIFIED','verified_repo_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'checks':['HTML serves KT44 loader','Live Word bridge contains KT44 safeguards','KT35-A.docx accessible','KT39-B.docx accessible','V27-R02.docx accessible']},ensure_ascii=False,indent=2)+'\n')
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add v26-test/v27-preview/KT42_LIVE_VERIFIED.json
-          git commit -m "KT42: verified public Pages serves approved Word templates"
+          git commit -m "KT44: verified public Pages serves unified approved A+B Word generator"
           git push
