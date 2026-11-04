@@ -6,7 +6,7 @@ const fflate=require('fflate');
 const {DOMParser,XMLSerializer}=require('@xmldom/xmldom');
 const base='v26-test/v27-preview';
 const sourceBytes=fs.readFileSync(path.join(base,'v27-kt50-original-kt42.js'));
-const historicalBlobSha=crypto.createHash('sha1').update('blob '+sourceBytes.length+'\\0').update(sourceBytes).digest('hex');
+const historicalBlobSha=crypto.createHash('sha1').update('blob '+sourceBytes.length+String.fromCharCode(0)).update(sourceBytes).digest('hex');
 assert.equal(historicalBlobSha,'2c879e0f743f9863051f4126769977e8f1dcf842','KT50 must be the exact original Git blob');
 for(const [n,expected] of Object.entries({'KT35-A.docx':'1a495fc2d6047a6377e48dfb963a737502404087','KT39-B.docx':'508402ce5a631617bdc0da4ca9d9cd535b6b3b7c','V27-R02.docx':'335634ab930253671dc090391ed366867ca7e438'})){
  const bytes=fs.readFileSync(path.join(base,'etalon',n));
