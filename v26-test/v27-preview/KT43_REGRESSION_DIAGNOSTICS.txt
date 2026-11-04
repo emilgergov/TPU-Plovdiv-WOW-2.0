@@ -1,7 +1,7 @@
 == dependency installation ==
 npm warn deprecated @xmldom/xmldom@0.9.8: this version has critical issues, please update to the latest version
 
-added 2 packages in 795ms
+added 2 packages in 1s
 == JS syntax ==
 == three approved templates, two scenarios, full place headings ==
 KT35-A PASS 41 paragraphs 35 unchanged paragraphs
@@ -18,17 +18,8 @@ KT44 HEADING STYLE PASS: E original four Word formatting segments retained
 KT44 A ADMINISTRATION PASS: subject de-duplication, address/recipient, complete legal introduction
 KT44 HEADING STYLE PASS: B original four Word formatting segments retained
 KT46 B PASS: confidentiality right; body justified; GREEN/header/footer match B
-AssertionError [ERR_ASSERTION]: The input did not match the regular expression /ЗА ЕКСПЕРТНА ПРОВЕРКА/. Input:
+KT46 INCOMPLETE DOSSIER PASS: four administrative characteristics contain explicit evidence reservations without internal QA markers
+KT44 HEADING STYLE PASS: E original four Word formatting segments retained
+KT43 regression PASS: scenario B creates both reviewed DOCX drafts without unverified legal or procedure conclusions
 
-'Предметът на проекта е „Учебен казус — изпитване на сценарий с пресичане“ за имотите с идентификатори 36676.129.457, местност Попското. Дейностите, капацитетът, строителните граници, временните площадки и необходимите инфраструктурни връзки се уточняват по уведомлението и проектната документация. Посочените технически параметри и източниците за тях не са потвърдени в работния проект и подлежат на уточняване по преписката.'
-
-    at /home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:160:32 {
-  generatedMessage: true,
-  code: 'ERR_ASSERTION',
-  actual: 'Предметът на проекта е „Учебен казус — изпитване на сценарий с пресичане“ за имотите с идентификатори 36676.129.457, местност Попското. Дейностите, капацитетът, строителните граници, временните площадки и необходимите инфраструктурни връзки се уточняват по уведомлението и проектната документация. Посочените технически параметри и източниците за тях не са потвърдени в работния проект и подлежат на уточняване по преписката.',
-  expected: /ЗА ЕКСПЕРТНА ПРОВЕРКА/,
-  operator: 'match',
-  diff: 'simple'
-}
-
-Exit code: unknown
+Exit code: 0
