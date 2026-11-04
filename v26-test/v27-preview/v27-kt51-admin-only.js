@@ -14,7 +14,7 @@ const NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const T={A:'v27-preview/etalon/KT35-A.docx',B:'v27-preview/etalon/KT39-B.docx',E:'v27-preview/etalon/V27-R02.docx'};
 const clean=x=>String(x??'').replace(/\[\[(?:CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS|CONCLUSION)\]\]/g,'').trim();
 const safe=(x,where)=>{let s=clean(x);return s&&!/\[\[|\]\]/.test(s)?s:'[ЗА ЕКСПЕРТНА ПРОВЕРКА — '+where+']';};
-const subject=x=>clean(x).replace(/^Относно:\s*/i,'').replace(/^(инвестиционно предложение\s*)+/i,'').replace(/^[„“"\s]+|[„“"\s]+$/g,'').replace(/\s+/g,' ');
+const subject=x=>clean(x).replace(/^Относно:\s*/i,'').replace(/^(?:(?:уведомление\s+за\s+)?инвестиционно\s+предложение(?:\s*\(ИП\))?\s*[:–—-]?\s*)+/i,'').replace(/^[„“"\s]+|[„“"\s]+$/g,'').replace(/\s+/g,' ');
 const all=(el,name)=>Array.from(el.getElementsByTagNameNS(NS,name));
 const text=p=>all(p,'t').map(t=>t.textContent).join('');
 function put(p,value){
