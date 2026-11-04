@@ -1,0 +1,38 @@
+name: KT53-D B missing characterization recovery
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt53d-b-characterization.yml'
+      - 'v26-test/v27-preview/kt53d-b-characterization-word.js'
+      - 'v26-test/v27-preview/kt53d-b-characterization-test.html'
+      - 'v26-test/v27-preview/kt53d-b-characterization-regression.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  word-a-b-reviewed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install regression dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Check source syntax and original A B R02 etalons
+        run: |
+          node --check v26-test/v27-preview/kt53d-b-characterization-word.js
+          node --check v26-test/v27-preview/kt53d-b-characterization-regression.cjs
+          node v26-test/v27-preview/kt50-original-kt42-regression.cjs
+      - name: Test real B DOCX with missing characterization and unchanged verified paragraphs
+        run: node v26-test/v27-preview/kt53d-b-characterization-regression.cjs
+      - name: Validate isolated HTML route references
+        shell: python
+        run: |
+          from pathlib import Path
+          h=Path('v26-test/v27-preview/kt53d-b-characterization-test.html').read_text()
+          assert 'kt53d-b-characterization-word.js?v=kt53d-b-only-1' in h
+          assert 'kt53-original-draft-package.js?v=kt53d-package-1' in h
+          assert 'v27-kt51-admin-only.js' not in h
+          print('KT53-D route source PASS')
