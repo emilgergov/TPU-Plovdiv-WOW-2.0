@@ -4,24 +4,27 @@ npm warn deprecated @xmldom/xmldom@0.9.8: this version has critical issues, plea
 added 2 packages in 1s
 == JS syntax ==
 == three approved templates, two scenarios, full place headings ==
-KT47 EKATTE PASS: two official cadastral mappings; contradictory and mixed cases safely rejected
-KT35-A PASS 41 paragraphs 33 unchanged paragraphs
-KT44 HEADING STYLE PASS: A original four Word formatting segments retained
-KT46 A PASS: confidentiality right; body justified; GREEN/header/footer match B
-KT39-B PASS 43 paragraphs 38 unchanged paragraphs
-KT44 HEADING STYLE PASS: B original four Word formatting segments retained
-KT46 B PASS: confidentiality right; body justified; GREEN/header/footer match B
-V27-R02 PASS 49 paragraphs 43 unchanged paragraphs
-KT44 HEADING STYLE PASS: E original four Word formatting segments retained
-KT44 HEADING STYLE PASS: A original four Word formatting segments retained
-KT46 A PASS: confidentiality right; body justified; GREEN/header/footer match B
-KT44 HEADING STYLE PASS: E original four Word formatting segments retained
-KT44 A ADMINISTRATION PASS: subject de-duplication, address/recipient, complete legal introduction
-KT47 REAL-DOSSIER GUARD PASS: matching IDs do not authorize copying exemplar legal/factual sections
-KT44 HEADING STYLE PASS: B original four Word formatting segments retained
-KT46 B PASS: confidentiality right; body justified; GREEN/header/footer match B
-KT46 INCOMPLETE DOSSIER PASS: four administrative characteristics contain explicit evidence reservations without internal QA markers
-KT44 HEADING STYLE PASS: E original four Word formatting segments retained
-KT43 regression PASS: scenario B creates both reviewed DOCX drafts without unverified legal or procedure conclusions
+node:assert:150
+  throw new AssertionError(obj);
+  ^
 
-Exit code: 0
+AssertionError [ERR_ASSERTION]: LOCKED USER-APPROVED DOCX CHANGED: KT35-A.docx
+    at Object.<anonymous> (/home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:17:9)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 'fee39276412cd7b31e32990fefa8e7a74b12240d',
+  expected: '1a495fc2d6047a6377e48dfb963a737502404087',
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v22.23.4
+
+Exit code: unknown
