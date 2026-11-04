@@ -1,0 +1,13 @@
+{
+  "checkpoint": "KT48",
+  "result": "LIVE_PAGES_VERIFIED",
+  "verified_repo_sha": "32bd48bde2ac8b93a3e9ea85308c20851f697859",
+  "checks": [
+    "HTML serves single KT48 mosaic loader",
+    "KT48 preserves A/B five original impact directions and R02 legal-impact structure",
+    "Verified EKATTE metadata from package",
+    "KT35-A.docx exact binary hash",
+    "KT39-B.docx exact binary hash",
+    "V27-R02.docx exact binary hash"
+  ]
+}
