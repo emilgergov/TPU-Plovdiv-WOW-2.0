@@ -1,18 +1,25 @@
 == dependency installation ==
 npm warn deprecated @xmldom/xmldom@0.9.8: this version has critical issues, please update to the latest version
 
-added 2 packages in 733ms
+added 2 packages in 799ms
 == JS syntax ==
 == three approved templates, two scenarios, full place headings ==
-AssertionError [ERR_ASSERTION]: KT35-A paragraph 17 changed
-    at test (/home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:103:10)
-    at async /home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:112:2 {
-  generatedMessage: false,
-  code: 'ERR_ASSERTION',
-  actual: '"/></w:rPr></w:r><w:r w:rsidRPr="001E0EDA"><w:rPr><w:rFonts w:ascii="Verdana" w:hAnsi="Verdana"/><w:sz w:val="20"/><w:lang w:val="bg-BG"/></w:rPr><w:t xml:space="preserve">Постъпилата документация се разглежда с оглед характера на дейностите, териториалния обхват, инженерните връзки и относимите защитени зони. Приложимият процедурен ред по Закона за биологичното разнообразие и Наредбата за оценка за съвместимост се установява въз основа на потвърдените факти и проверените нормативни основания. Липсата на имотно пресичане не изключва преценка за преки, косвени и съвкупни въздействия.</w:t></w:r><w:r w:rsidRPr="001E0EDA"><w:rPr><w:rFonts w:ascii="Verdana" w:hAnsi="Verdana"/><w:b/><w:sz w:val="20"/><w:lang w:val="bg-BG"/></w:rPr><w:t xml:space="preserve"/></w:r><w:r w:rsidRPr="001E0EDA"><w:rPr><w:rFonts w:ascii="Verdana" w:hAnsi="Verdana"/><w:sz w:val="20"/><w:lang w:val="bg-BG"/></w:rPr><w:t xml:space="preserve"/></w:r><w:r w:rsidRPr="001E0EDA"><w:rPr><w:rFonts w:ascii="Verdana" w:hAnsi="Verdana"/><w:b/><w:sz w:val="20"/><w:lang w:val="bg-BG"/></w:rPr><w:t/></w:r><w:r w:rsidRPr="001E0EDA"><w:rPr><w:rFonts w:ascii="Verdana" w:hAnsi="Verdana"/><w:sz w:val="20"/><w:lang w:val="bg-BG"/></w:rPr><w:t xml:space="preserve"/></w:r><w:r w:rsidRPr="00446CFD"><w:rPr><w:rFonts w:ascii="Verdana" w:hAnsi="Verdana"/><w:sz w:val="20"/><w:lang w:val="ru-RU"/></w:rPr><w:t xml:space="preserve"/></w:r></w:p>...',
-  expected: '"/></w:rPr></w:r><w:r w:rsidRPr="001E0EDA"><w:rPr><w:rFonts w:ascii="Verdana" w:hAnsi="Verdana"/><w:sz w:val="20"/><w:lang w:val="bg-BG"/></w:rPr><w:t>Инвестиционното предложение</w:t></w:r><w:r w:rsidRPr="001E0EDA"><w:rPr><w:rFonts w:ascii="Verdana" w:hAnsi="Verdana"/><w:b/><w:sz w:val="20"/><w:lang w:val="bg-BG"/></w:rPr><w:t xml:space="preserve"> </w:t></w:r><w:r w:rsidRPr="001E0EDA"><w:rPr><w:rFonts w:ascii="Verdana" w:hAnsi="Verdana"/><w:sz w:val="20"/><w:lang w:val="bg-BG"/></w:rPr><w:t xml:space="preserve">попада в обхвата на </w:t></w:r><w:r w:rsidRPr="001E0EDA"><w:rPr><w:rFonts w:ascii="Verdana" w:hAnsi="Verdana"/><w:b/><w:sz w:val="20"/><w:lang w:val="bg-BG"/></w:rPr><w:t>чл. 2, ал. 2</w:t></w:r><w:r w:rsidRPr="001E0EDA"><w:rPr><w:rFonts w:ascii="Verdana" w:hAnsi="Verdana"/><w:sz w:val="20"/><w:lang w:val="bg-BG"/></w:rPr><w:t xml:space="preserve"> от Наредбата за ОС и внесената информация може да бъде приета като уведомление по приложение № 1 към чл. 10, ал. 1. от същата.</w:t></w:r><w:r w:rsidRPr="00446CFD"><w:rPr><w:rFonts w:ascii="Verdana" w:hAnsi="Verdana"/><w:sz w:val="20"/><w:lang w:val="ru-RU"/></w:rPr><w:t xml:space="preserve"> </w:t></w:r></w:p>...',
-  operator: '==',
-  diff: 'simple'
-}
+KT35-A PASS 41 paragraphs 33 unchanged paragraphs
+KT44 HEADING STYLE PASS: A original four Word formatting segments retained
+KT46 A PASS: confidentiality right; body justified; GREEN/header/footer match B
+KT39-B PASS 43 paragraphs 38 unchanged paragraphs
+KT44 HEADING STYLE PASS: B original four Word formatting segments retained
+KT46 B PASS: confidentiality right; body justified; GREEN/header/footer match B
+V27-R02 PASS 49 paragraphs 43 unchanged paragraphs
+KT44 HEADING STYLE PASS: E original four Word formatting segments retained
+KT44 HEADING STYLE PASS: A original four Word formatting segments retained
+KT46 A PASS: confidentiality right; body justified; GREEN/header/footer match B
+KT44 HEADING STYLE PASS: E original four Word formatting segments retained
+KT44 A ADMINISTRATION PASS: subject de-duplication, address/recipient, complete legal introduction
+KT44 HEADING STYLE PASS: B original four Word formatting segments retained
+KT46 B PASS: confidentiality right; body justified; GREEN/header/footer match B
+KT46 INCOMPLETE DOSSIER PASS: four administrative characteristics contain explicit evidence reservations without internal QA markers
+KT44 HEADING STYLE PASS: E original four Word formatting segments retained
+KT43 regression PASS: scenario B creates both reviewed DOCX drafts without unverified legal or procedure conclusions
 
-Exit code: unknown
+Exit code: 0
