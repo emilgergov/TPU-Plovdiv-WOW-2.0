@@ -145,7 +145,7 @@ async function run(label,intersection){
      'AI-authored, safety-reviewed impact narrative missing');
     if(intersection)assert(joined.includes('BG0000194')&&!joined.includes('не попадат в границите'));
     else assert(joined.includes('не попадат в границите')&&!joined.includes('BG0000194'));
-    const map=body.getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/wordprocessingDrawing','inline');
+    const map=body.getElementsByTagNameNS('http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing','inline');
     assert(map.length>=1,'No map drawing object');
     docs.expert=joined;
    } else {
