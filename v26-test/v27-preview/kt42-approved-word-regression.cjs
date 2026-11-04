@@ -83,6 +83,11 @@ function checkAdministrative(doc,which,subject,ids){
  assert.ok(headline.includes(subject),which+' missing subject');
  assert.match(intro,/Наредба за условията и реда за извършване на оценка за съвместимостта/,which+' shortened ordinance');
  assert.doesNotMatch(phrase(p[6]),/^ДО ВЪЗЛОЖИТЕЛЯ НА ИНВЕСТИЦИОННОТО ПРЕДЛОЖЕНИЕ$/,which+' generic recipient');
+ assert.match(phrase(p[6]),/^Възложителя: /,which+' exact original recipient label');
+ assert.match(phrase(p[7]),/^Адрес: /,which+' exact original address label');
+ assert.doesNotMatch(phrase(p[6])+' '+phrase(p[7]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/,which+' technical diagnostic in admin header');
+ assert.doesNotMatch(headline,/ЗА ЕКСПЕРТНА ПРОВЕРКА/,which+' technical diagnostic in subject heading');
+ assert.match(headline,/по КККР на /,which+' original cadastral heading phrase');
  return p;
 }
 
@@ -127,13 +132,13 @@ async function test(name,blob,variable){
  const expertAp=checkAdministrative(await expertA.arrayBuffer(),'E','Складове за промишлени стоки и офиси','56784.13.102');
  assert.match(phrase(expertAp[7]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
  console.log('KT44 A ADMINISTRATION PASS: subject de-duplication, address/recipient, complete legal introduction');
- const differing={...meta,parcelIds:'36676.129.457',subject:'Учебен казус — изпитване на сценарий с пресичане',location:'местност Попското',settlement:'с. Катуница',municipality:'Садово',region:'Пловдив',procedureFinding:'[ЗА ЕКСПЕРТНА ПРОВЕРКА — приложима процедура]'};
+ const differing={...meta,parcelIds:'36676.129.457',subject:'Учебен казус — изпитване на сценарий с пресичане',location:'местност Попското',locality:'Попското',settlement:'с. Катуница',municipality:'Садово',region:'Пловдив',procedureFinding:'[ЗА ЕКСПЕРТНА ПРОВЕРКА — приложима процедура]'};
  const syntheticB=await sandbox.V26TemplateWord.make('Б',verified,differing,{determination:{scenario:'Б',zones:['BG0000194']}});
  const caseB=checkAdministrative(await syntheticB.arrayBuffer(),'B','Учебен казус','36676.129.457')&&pList(await syntheticB.arrayBuffer());
  assertKT46ClassicalLayout(await syntheticB.arrayBuffer(),'B');
  assert.equal(caseB.p.length,43);
  assert.match(phrase(caseB.p[23]),/36676\.129\.457/);
- assert.match(phrase(caseB.p[10]),/с\. Катуница, местност Попското, община Садово, област Пловдив/,'case B full place name');
+ assert.match(phrase(caseB.p[10]),/по КККР на с\. Катуница, местност „Попското“, община Садово, област Пловдив/,'case B full place name');
  assert.match(phrase(caseB.p[23]),/BG0000194.*Река Чая/,'classic B zone name');
  assert.match(phrase(caseB.p[24]),/BG0000194.*Река Чая/,'classic B missing zone in legal paragraph');
  assert.doesNotMatch(phrase(caseB.p[24]),/зони:\s*\./,'no empty zones');
@@ -158,7 +163,7 @@ async function test(name,blob,variable){
  assert.equal(resultE.p.length,49);
  assert.match(phrase(resultE.p[39]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
  assert.match(phrase(resultE.p[23]),/36676\.129\.457/);
- assert.match(phrase(resultE.p[10]),/с\. Катуница, местност Попското, община Садово, област Пловдив/,'expert B full place');
+ assert.match(phrase(resultE.p[10]),/по КККР на с\. Катуница, местност „Попското“, община Садово, област Пловдив/,'expert B full place');
  assert.match(phrase(resultE.p[24]),/BG0000194.*Река Чая/,'expert B zone');
  assert.ok((phrase(resultE.p[21]).match(/ЗА ЕКСПЕРТНА ПРОВЕРКА/g)||[]).length<=1,'AI characterization repeated review markers');
  assert.match(phrase(resultE.p[26]),/чл\. 31|зона|режим/,'expert B legal references');
