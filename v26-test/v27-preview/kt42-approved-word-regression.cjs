@@ -24,7 +24,7 @@ const pList=buffer=>{
  return {z,p,serial:new XMLSerializer()};
 };
 const phrase=p=>Array.from(p.getElementsByTagNameNS(NS,'t')).map(t=>t.textContent).join('');
-const meta={parcelIds:'56784.13.102, 56784.13.105, 56784.13.106',subject:'Складове за промишлени стоки и офиси',recipient:'Възложителя: контролна преписка',address:'Адрес: контролен',incomingReference:'Вх. № ОВОС-9999 / ДАТА-99.99.9999 г.',location:'гр. Пловдив, местност Рогошко шосе'};
+const meta={parcelIds:'56784.13.102, 56784.13.105, 56784.13.106',subject:'Складове за промишлени стоки и офиси',recipient:'Възложителя: контролна преписка',address:'Адрес: контролен',incomingReference:'Вх. № ОВОС-9999 / ДАТА-99.99.9999 г.',location:'гр. Пловдив, местност Рогошко шосе',approvedSpecimen:true};
 const verified=['С реализацията на инвестиционното предложение се предвижда складов обект','Електрозахранване','Водоснабдяване','Отпадъчни води'];
 function assertKT46ClassicalLayout(doc,which){
  const actual=pList(doc),reference=pList(fs.readFileSync(path.join(base,'etalon','KT39-B.docx')));
@@ -164,6 +164,17 @@ console.log('KT47 EKATTE PASS: two official cadastral mappings; contradictory an
  const expertAp=checkAdministrative(await expertA.arrayBuffer(),'E','Складове за промишлени стоки и офиси','56784.13.102');
  assert.equal(phrase(expertAp[7]),'Адрес: ХХХХХХХХХХХХ','expert A approved address placeholder');
  console.log('KT44 A ADMINISTRATION PASS: subject de-duplication, address/recipient, complete legal introduction');
+ const realApprovedLike={...meta,approvedSpecimen:false};
+ const realA=await sandbox.V26TemplateWord.make('А',[
+  '[ЗА ЕКСПЕРТНА ПРОВЕРКА — предмет]','[ЗА ЕКСПЕРТНА ПРОВЕРКА — ток]',
+  '[ЗА ЕКСПЕРТНА ПРОВЕРКА — вода]','[ЗА ЕКСПЕРТНА ПРОВЕРКА — отпадъчни води]'
+ ],realApprovedLike,{determination:{scenario:'А',zones:[]}});
+ const realAp=pList(await realA.arrayBuffer()).p;
+ assert.doesNotMatch(phrase(realAp[18]),/се предвижда складов обект/,'Real dossier cannot inherit specimen warehouse description');
+ assert.match(phrase(realAp[18]),/подлежат на уточняване/,'Real dossier must retain evidence uncertainty');
+ assert.doesNotMatch(phrase(realAp[17]),/попада в обхвата на чл\. 2, ал\. 2/,'Real dossier cannot inherit specimen procedure');
+ assert.match(phrase(realAp[23]),/НЯМА ДАННИ/,'Real dossier cannot inherit specimen nearest zone');
+ console.log('KT47 REAL-DOSSIER GUARD PASS: matching IDs do not authorize copying exemplar legal/factual sections');
  const differing={...meta,parcelIds:'36676.129.457',subject:'Учебен казус — изпитване на сценарий с пресичане',location:'местност Попското',locality:'Попското',settlement:'с. Катуница',municipality:'Садово',region:'Пловдив',procedureFinding:'[ЗА ЕКСПЕРТНА ПРОВЕРКА — приложима процедура]'};
  const syntheticB=await sandbox.V26TemplateWord.make('Б',verified,differing,{determination:{scenario:'Б',zones:['BG0000194']}});
  const caseB=checkAdministrative(await syntheticB.arrayBuffer(),'B','Учебен казус','36676.129.457')&&pList(await syntheticB.arrayBuffer());
