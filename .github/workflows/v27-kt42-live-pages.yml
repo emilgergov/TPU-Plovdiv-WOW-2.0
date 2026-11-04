@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Confirm real Pages deployment serves KT44 and all approved DOCX files
+      - name: Confirm KT46 Pages deployment serves one Word bridge and all approved DOCX files
         run: |
           python - <<'PY'
           import urllib.request,time,zipfile,io,json
@@ -22,11 +22,12 @@ jobs:
           last=''
           for attempt in range(36):
               try:
-                  req=urllib.request.Request(base+'?kt44='+str(attempt),headers={'Cache-Control':'no-cache'})
+                  req=urllib.request.Request(base+'?kt46='+str(attempt),headers={'Cache-Control':'no-cache'})
                   with urllib.request.urlopen(req,timeout=18) as res: html=res.read().decode('utf-8')
                   if expected not in html: raise RuntimeError('Pages still serves old Word generator')
-                  with urllib.request.urlopen(base+'v27-kt41-etalon-bridge.js?kt44=verification',timeout=18) as res: code=res.read().decode('utf-8')
-                  if any(k not in code for k in ('function isApprovedCase','function characterizationDraft','function legalDraft','function impactDraft','function heading','function putHeading','function zoneList','function alignClassicAConfidentialityWithB')): raise RuntimeError('Live JS not KT44')
+                  if html.count('v27-preview/v27-kt41-etalon-bridge.js?v=') != 1: raise RuntimeError('KT46 requires exactly one Word bridge on public Pages')
+                  with urllib.request.urlopen(base+'v27-kt41-etalon-bridge.js?kt46=verification',timeout=18) as res: code=res.read().decode('utf-8')
+                  if any(k not in code for k in ('function isApprovedCase','function characterizationDraft','function legalDraft','function impactDraft','function heading','function putHeading','function zoneList','function alignClassicAConfidentialityWithB')): raise RuntimeError('Live JS not KT46')
                   for filename in ('KT35-A.docx','KT39-B.docx','V27-R02.docx'):
                       with urllib.request.urlopen(base+'etalon/'+filename,timeout=18) as res: raw=res.read()
                       with zipfile.ZipFile(io.BytesIO(raw)) as z:
