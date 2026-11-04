@@ -201,8 +201,20 @@ console.log('KT47 EKATTE PASS: two official cadastral mappings; contradictory an
  assert.match(phrase(caseB.p[24]),/BG0000194.*Река Чая/,'classic B missing zone in legal paragraph');
  assert.doesNotMatch(phrase(caseB.p[24]),/зони:\s*\./,'no empty zones');
 
- assert.match(phrase(caseB.p[33]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
- assert.match(phrase(caseB.p[25]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
+ // KT48: five approved bullet directions must survive intact in both A/B.
+ for(const [name,actual,first,original] of [
+  ['A',realAp,26,pList(fs.readFileSync(path.join(base,'etalon','KT35-A.docx'))).p],
+  ['B',caseB.p,28,pList(fs.readFileSync(path.join(base,'etalon','KT39-B.docx'))).p]
+ ]){
+  for(let i=0;i<5;i++)
+   assert.equal(phrase(actual[first+i]),phrase(original[first+i]),'KT48 '+name+' approved impact direction '+(i+1)+' was rewritten');
+ }
+ assert.doesNotMatch(phrase(realAp[24])+phrase(realAp[25]),/удостоверява пространствено пресичане|самото пресичане|ГИС анализът установява.*пресичане/i,'KT48 A cannot invent intersection');
+ assert.match(phrase(realAp[24]),/приложения № 1 и № 2|Приложения № 1 и № 2/,'KT48 A preserve ZOOS legal subject');
+ assert.match(phrase(caseB.p[25]),/Допустимостта/,'KT48 B preserve admissibility subject');
+ assert.match(phrase(caseB.p[33]),/Окончателен процедурен извод не е установен/,'KT48 unknown procedure is not an invented ruling');
+ assert.doesNotMatch(phrase(caseB.p[24]),/BG0000578|Река Марица|РД-728/,'KT48 B cannot inherit original specimen zone order');
+ console.log('KT48 A/B PASS: original 10 classical impact bullet directions immutable; factual and legal scenarios separated');
  const ai='[[CHARACTERIZATION]]\nУчебно описание на ИП.\n[[LEGAL]]\nОтносимите режими подлежат на проверка.\n[[PROCEDURE]]\nПриложимата процедура се преценява от компетентния орган.\n[[IMPACTS]]\nВъздействията се преценяват след преглед на пълната преписка.';
  const draft={schema:'KT13_EXPERT_DRAFT_V1',scenario:'Б',metadata:differing,aiDraft:ai,parcels:[{id:'36676.129.457'}],characterization:verified,zones:['BG0000194']};
  const incomplete=['[ЗА ЕКСПЕРТНА ПРОВЕРКА — характер на дейности]','[ЗА ЕКСПЕРТНА ПРОВЕРКА — електрозахранване]','[ЗА ЕКСПЕРТНА ПРОВЕРКА — водоснабдяване]','[ЗА ЕКСПЕРТНА ПРОВЕРКА — отпадъчни води]'];
