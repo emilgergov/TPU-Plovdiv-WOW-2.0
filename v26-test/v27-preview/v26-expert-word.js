@@ -5,13 +5,13 @@ const NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const ns=(doc,name)=>doc.createElementNS(NS,'w:'+name);
 const all=(node,name)=>Array.from(node.getElementsByTagNameNS(NS,name));
 const textOf=p=>all(p,'t').map(t=>t.textContent).join('');
-function paragraph(doc,value,{bold=false,heading=false}={}){
+function paragraph(doc,value,{bold=false,italic=false,heading=false,keepNext=false}={}){
  const p=ns(doc,'p'),pPr=ns(doc,'pPr'),spacing=ns(doc,'spacing');
- spacing.setAttributeNS(NS,'w:after',heading?'160':'110');pPr.appendChild(spacing);p.appendChild(pPr);
+ spacing.setAttributeNS(NS,'w:after',heading?'160':'110');pPr.appendChild(spacing);if(keepNext)pPr.appendChild(ns(doc,'keepNext'));p.appendChild(pPr);
  const r=ns(doc,'r'),rPr=ns(doc,'rPr'),font=ns(doc,'rFonts');
  font.setAttributeNS(NS,'w:ascii','Verdana');font.setAttributeNS(NS,'w:hAnsi','Verdana');font.setAttributeNS(NS,'w:cs','Verdana');rPr.appendChild(font);
  const size=ns(doc,'sz');size.setAttributeNS(NS,'w:val',heading?'24':'20');rPr.appendChild(size);
- if(bold||heading)rPr.appendChild(ns(doc,'b'));r.appendChild(rPr);
+ if(bold||heading)rPr.appendChild(ns(doc,'b'));if(italic)rPr.appendChild(ns(doc,'i'));r.appendChild(rPr);
  const t=ns(doc,'t');t.setAttribute('xml:space','preserve');t.textContent=String(value);r.appendChild(t);p.appendChild(r);return p;
 }
 async function mapPng(svg){
@@ -89,37 +89,53 @@ async function make(draft,options={}){
   }
   return out;
  })();
+ if(options.requireAiAuthor){
+  const required=['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'];
+  const headings=[...String(draft.aiDraft||'').matchAll(/^\s*\[\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\]\]\s*$/gm)].map(m=>m[1]);
+  if(headings.length!==4||required.some((key,i)=>headings[i]!==key)||required.some(key=>!aiSections[key]))
+   throw Error('V27: AI авторът не предостави четирите задължителни раздела в правилния ред.');
+ }
  // Do not let an AI narrative override the GIS determination or assert unverified procedural exemptions.
  const unsupportedAi=x=>/(?:не е приложима процедура|не подлежи на процедура|не се изисква оценка|не попадат в границите на защитени зони или територии|намалява вероятността за задължително|малко вероятно|не показва наличие на рискове|намалява риска|намалява риск|по-нисък риск|нисък риск|незначителн(?:о|и|а) въздейств|без значим(?:о|и|а) въздейств|не се очаква въздейств|липса на значими въздействия|не поражда въздействия|извън защитени зони,? което)/i.test(x);
- const safeAi=key=>aiSections[key]&&!unsupportedAi(aiSections[key])&&!/защитени територии|BG[0-9]{7}|не се налага|не се изисква|не подлежи|няма вероятност|липсват въздействия|липсват рискове|не оказва въздействие/i.test(aiSections[key]);
- const aiProposal=key=>safeAi(key)?aiSections[key].split(/\n\s*\n/).filter(Boolean).slice(0,7).map(x=>paragraph(doc,x)):[];
+ // KT26: Review AI paragraphs independently. A single unsupported assertion
+ // must not discard the other, source-grounded paragraphs in that section.
+ const unsupportedParagraph=x=>unsupportedAi(x)||/защитени територии|BG[0-9]{7}|не се налага|не се изисква|не подлежи|няма вероятност|липсват въздействия|липсват рискове|не оказва въздействие/i.test(x);
+ const reviewedAi=key=>String(aiSections[key]||'').split(/\n\s*\n/).map(x=>x.trim()).filter(x=>x&&!unsupportedParagraph(x)).slice(0,7);
+ // A formally complete response is not sufficient: all four sections must retain
+ // at least one admissible paragraph after safety review.
+ if(options.requireAiAuthor){
+  const empty=['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'].filter(key=>!reviewedAi(key).length);
+  if(empty.length)throw Error('V27: AI раздел без допустимо съдържание след проверка: '+empty.join(', '));
+ }
+ const safeAi=key=>reviewedAi(key).length>0;
+ const aiProposal=key=>reviewedAi(key).map(x=>paragraph(doc,x));
 
  const mapBytes=options.mapPngBytes?.byteLength?Uint8Array.from(options.mapPngBytes):(options.mapSvg?await mapPng(options.mapSvg):null);
  const blocks=[
-  paragraph(doc,'Място за електронен подпис — вътрешно съгласуване'),
-  paragraph(doc,'РАБОТЕН ЕКСПЕРТЕН ПРОЕКТ — НЕ Е АДМИНИСТРАТИВЕН АКТ',{heading:true}),
+  paragraph(doc,''),
+  paragraph(doc,'ПРОЕКТ НА СТАНОВИЩЕ',{heading:true}),
   paragraph(doc,m.recipient,{bold:true}),paragraph(doc,m.address),
-  paragraph(doc,'Относно: '+subject,{bold:true}),
+  paragraph(doc,'Относно: '+subject,{bold:true,italic:true}),
   paragraph(doc,'Преписка: '+m.incomingReference),
   ...(isPending(m.salutation)?[]:[paragraph(doc,m.salutation)]),
   paragraph(doc,'I. ПРЕДМЕТ И ИМОТЕН ОБХВАТ',{heading:true}),
   paragraph(doc,'Предмет на ИП: '+subject),
   paragraph(doc,'Поземлени имоти: '+draft.parcels.map(p=>p.id+(p.location?' — '+p.location:'')+' ('+(p.role==='leading'?'предмет на ИП':'съпътстващ')+')').join('; ')),
-  ...(m.location?[paragraph(doc,'Местоположение: '+m.location)]:[]),
+  ...(m.location?[paragraph(doc,'Местоположение: '+m.location,{italic:true})]:[]),
   paragraph(doc,'II. ПРОСТРАНСТВЕН АНАЛИЗ',{heading:true}),
   paragraph(doc,draft.scenario==='Б'?'По наличните ГИС данни е установено пространствено пресичане със защитена зона: '+draft.zones.join(', ')+'.':'По наличните ГИС данни не е установено пресичане на потвърдените имоти със защитена зона.'),
   paragraph(doc,'В съответствие с принципа за пространствено онагледяване на инвестиционните предложения, отразен в приложение №3 към чл. 10, ал. 2, част Б, т. 3 от Наредбата за оценка за съвместимост, в настоящия експертен проект е включено обзорно картографско извлечение от извършения ГИС анализ.'),
   ...(mapBytes?[mapParagraph(doc)]:[]),
-  paragraph(doc,'Фигура 1. Пространствено положение на имотите спрямо защитените зони от мрежата „Натура 2000“. Източник: ГИС анализ.'),
+  paragraph(doc,'Фигура 1. Пространствено положение на имотите спрямо защитените зони от мрежата „Натура 2000“. Източник: ГИС анализ.',{italic:true}),
   paragraph(doc,'Картографското извлечение от ГИС анализа представя пространствените резултати и имотния обхват; пълният ГИС анализ е в самостоятелен PDF.'),
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
-  ...confirmed(draft.characterization).map(x=>paragraph(doc,String(x).replace(/\[ОТКЪС ОТ ПРЕПИСКАТА\s*[—-]\s*ЗА СВЕРЯВАНЕ\]/gi,'[ЗА ЕКСПЕРТНА ПРОВЕРКА — непълен откъс; необходимо е сверяване с оригиналната преписка]').replace(/^\s*[-–]\s*/,''))),
+  ...(safeAi('CHARACTERIZATION')?aiProposal('CHARACTERIZATION'):confirmed(draft.characterization).map(x=>paragraph(doc,String(x).replace(/\[ОТКЪС ОТ ПРЕПИСКАТА\s*[—-]\s*ЗА СВЕРЯВАНЕ\]/gi,'[ЗА ЕКСПЕРТНА ПРОВЕРКА — непълен откъс; необходимо е сверяване с оригиналната преписка]').replace(/^\s*[-–]\s*/,'')))),
 
   paragraph(doc,'IV. ФАКТИЧЕСКИ И ПРАВНИ КОНСТАТАЦИИ',{heading:true}),
-  paragraph(doc,'Правните основания се уточняват чрез съпоставка на документите в преписката с интегрирания нормативен архив. До потвърждаването им: ЗА ЕКСПЕРТНА ПРОВЕРКА.'),
+  ...(safeAi('LEGAL')?aiProposal('LEGAL'):[paragraph(doc,'Правните основания се уточняват чрез съпоставка на документите в преписката с интегрирания нормативен архив. До потвърждаването им: ЗА ЕКСПЕРТНА ПРОВЕРКА.')]),
 
   paragraph(doc,'V. ПРОЦЕДУРНА ПРЕЦЕНКА',{heading:true}),
-  paragraph(doc,'Приложимата процедура се определя след проверка на цялата преписка и относимите правни основания. Само от пространствения резултат не може да се прави извод за наличие или липса на проведени процедури и административни актове. ЗА ЕКСПЕРТНА ПРОВЕРКА.'),
+  ...(safeAi('PROCEDURE')?aiProposal('PROCEDURE'):[paragraph(doc,'Приложимата процедура се определя след проверка на цялата преписка и относимите правни основания. Само от пространствения резултат не може да се прави извод за наличие или липса на проведени процедури и административни актове. ЗА ЕКСПЕРТНА ПРОВЕРКА.')]),
   paragraph(doc,'VI. КОНСТАТАЦИИ ЗА ВЪЗДЕЙСТВИЯТА',{heading:true}),
   ...(safeAi('IMPACTS')?aiProposal('IMPACTS'):[paragraph(doc,'От ГИС анализа е установен единствено пространственият статус на имотите спрямо защитените зони. Извод за вероятност, характер и значимост на въздействията изисква отделна експертна оценка на дейностите и доказателствата.')]),
   ...(!aiSections.IMPACTS&&impacts.some(isPending)?[paragraph(doc,'Не е изготвена окончателна оценка на въздействията. Изводите се попълват след проверка на приложимите режими и доказателствата.')]:[]),
@@ -128,9 +144,9 @@ async function make(draft,options={}){
   paragraph(doc,'ГИС анализ (самостоятелен PDF); Нормативни и документални референции (самостоятелен PDF, когато е изготвен).'),
   paragraph(doc,'НЕОБХОДИМА Е ЕКСПЕРТНА ПРОВЕРКА НА ПРЕПИСКАТА, ПРАВНИТЕ ОСНОВАНИЯ И ИЗВОДИТЕ. Документът не представлява издаден административен акт.')
  ];
- body.replaceChildren(...blocks,paragraph(doc,'Място за електронен подпис — окончателно подписване'),sect.cloneNode(true));
+ body.replaceChildren(...blocks,paragraph(doc,''),sect.cloneNode(true));
  const serialized=new XMLSerializer().serializeToString(doc);
- if((serialized.match(/подпис/gi)||[]).length<2)throw Error('КТ13: липсват две полета за подпис в експертния документ.');
+ if(all(body,'p').filter(p=>!textOf(p).trim()).length<2)throw Error('КТ26: липсват две празни полета за електронен подпис.');
  if(mapBytes){
   const relPath='word/_rels/document.xml.rels',relsDoc=new DOMParser().parseFromString(new TextDecoder().decode(zip[relPath]),'application/xml');
   const relRoot=relsDoc.documentElement,relNS='http://schemas.openxmlformats.org/package/2006/relationships';
