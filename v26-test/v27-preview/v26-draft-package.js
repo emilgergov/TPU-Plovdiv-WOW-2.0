@@ -198,6 +198,10 @@ function gisPdf(results,options={}){
  const verifiedLandArea=String(options.verifiedCaseMetadata?.landArea||'').trim();
  if(verifiedLocation)content.push({text:'Местоположение на имотите: '+verifiedLocation,margin:[0,5,0,7]});
  if(verifiedSettlement)content.push({text:'Населено място: '+verifiedSettlement});
+ const admin=options.verifiedCaseMetadata||{};
+ if(admin.municipality)content.push({text:'Община: '+String(admin.municipality)});
+ if(admin.region)content.push({text:'Област: '+String(admin.region)});
+ if(admin.kt47EkatteSource)content.push({text:'Източник на административната принадлежност: ЕКАТТЕ, НСИ — '+admin.kt47EkatteSource,fontSize:8});
  if(results.some(r=>r.nearest_verified_zone||r.nearestZoneVerified||r.intersection_verified_outside===true||!(r.verified_zone_intersections||[]).length)){
   for(const r of results){if((r.verified_zone_intersections||[]).length&&!r.intersection_verified_outside&&!r.nearest_verified_zone&&!r.nearestZoneVerified)continue;
    const nearest=r.nearest_verified_zone||r.nearestZoneVerified;
@@ -301,6 +305,24 @@ function normativePdf(results,register){
  return def;
 }
 
+// KT47: audited EKATTE associations for the two regression parcels.
+// Additional settlements must come from verified GIS/admin input or official EKATTE data.
+const KT47_EKATTE={
+ '56784':{settlement:'гр. Пловдив',municipality:'Пловдив',region:'Пловдив',source:'https://www.nsi.bg/press-release/administrativno-teritorialno-i-teritorialno-delenie-na-republika-balgariya-9010'},
+ '36676':{settlement:'с. Катуница',municipality:'Садово',region:'Пловдив',source:'https://www.nsi.bg/nrnm/index.php/ekatte/territorial-units?orderBy=obshtina&page=132&sort=desc'}
+};
+function kt47VerifiedAdministration(results,metadata){
+ const codes=[...new Set(results.map(r=>String(r.input||r.cadnum||'').split('.')[0]))];
+ if(codes.length!==1||!KT47_EKATTE[codes[0]])return;
+ const entry=KT47_EKATTE[codes[0]];
+ const normalized=x=>String(x||'').replace(/^(?:гр\\.|с\\.|град|село)\\s*/i,'').trim().toLocaleLowerCase('bg');
+ for(const key of ['settlement','municipality','region']){
+  const val=String(metadata[key]||'').trim();
+  if(val&&normalized(val)!==normalized(entry[key]))return;
+ }
+ for(const key of ['settlement','municipality','region'])if(!metadata[key])metadata[key]=entry[key];
+ metadata.kt47EkatteSource=entry.source;
+}
 async function make(results,roles,register){
  if(window.V26TemplateWord?.layout!=='KT41_EXACT_KT35_KT39'||window.V26ExpertWord?.layout!=='KT41_EXACT_V27_R02')
   throw Error('КТ41: одобрените Word еталони не са заредени. ZIP с други генератори няма да се създаде.');
@@ -344,6 +366,7 @@ async function make(results,roles,register){
       if(values.length===1&&results.every(r=>sourceKeys.some(k=>String(r[k]||'').trim()===values[0])))caseMetadata[key]=values[0];
     }
   }
+  kt47VerifiedAdministration(results,caseMetadata);
   register={...register,verifiedCaseMetadata:caseMetadata};
  // KT23/2: Legal findings are evidence-bound; never turn dossier observations into legal conclusions.
  const legalCount=determination.scenario==='Б'?7:5;
