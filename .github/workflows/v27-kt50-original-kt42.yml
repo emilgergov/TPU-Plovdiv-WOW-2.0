@@ -34,6 +34,20 @@ jobs:
           name: KT50-Original-KT42-DOCX-QA
           path: KT50_DOCX_LOG.txt
           if-no-files-found: ignore
+      - name: Record original KT42 DOCX results for review
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p v26-test/v27-preview
+          cp KT50_DOCX_LOG.txt v26-test/v27-preview/KT50_HISTORICAL_DOCX_QA.txt 2>/dev/null || echo 'DOCX checks failed before log collection' > v26-test/v27-preview/KT50_HISTORICAL_DOCX_QA.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add v26-test/v27-preview/KT50_HISTORICAL_DOCX_QA.txt
+          git commit -m 'KT50: record actual historical DOCX regeneration QA' || true
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin HEAD:main && break
+            sleep 2
+          done
   kt50-pages:
     runs-on: ubuntu-latest
     needs: kt42-original-docx
