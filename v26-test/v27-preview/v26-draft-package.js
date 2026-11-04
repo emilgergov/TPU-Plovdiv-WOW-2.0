@@ -374,7 +374,7 @@ async function make(results,roles,register){
     const nearest=r.nearest_verified_zone||r.nearestZoneVerified;
     const code=String(nearest?.sitecode||nearest?.code||'').trim();
     const name=String(nearest?.name_bg||nearest?.name||'').trim();
-    return /^BG\\d{7}$/.test(code)&&name?String(r.input||r.cadnum)+': '+code+' — '+name:'';
+    return /^BG\d{7}$/.test(code)&&name?String(r.input||r.cadnum)+': '+code+' — '+name:'';
    });
    caseMetadata.nearestZone=labels.every(Boolean)?labels.join('; '):'НЯМА ДАННИ';
   }
