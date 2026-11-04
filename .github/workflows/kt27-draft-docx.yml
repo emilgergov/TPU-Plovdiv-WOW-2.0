@@ -51,6 +51,12 @@ jobs:
           python v26-test/v27-preview/kt38-classic-b-deduplicate-zone.py
           python v26-test/v27-preview/kt39-classic-b-veranda-justify-single.py
           python v26-test/v27-preview/v27-expert-r01-admin-voice.py
+          python v26-test/v27-preview/v27-expert-r02-administrative-evidence.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V27-Expert-Second-Review-R02
+          path: out/02_Proekt_na_stanovishte_EKSPERTEN_V27_R02.docx
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: V27-Expert-First-Review-R01
