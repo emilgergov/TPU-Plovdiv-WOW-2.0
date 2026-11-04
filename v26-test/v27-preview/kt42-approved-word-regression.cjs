@@ -77,8 +77,10 @@ function checkHeadingEtalonRuns(doc,which){
 function checkAdministrative(doc,which,subject,ids){
  checkHeadingEtalonRuns(doc,which);
  const p=pList(doc).p,headline=phrase(p[10]),intro=phrase(p[which==='E'?17:16]);
- assert.equal((headline.match(/„/g)||[]).length,1,which+' opening quotes');
- assert.equal((headline.match(/“/g)||[]).length,1,which+' closing quotes');
+ // Both the subject and verified locality can be independently quoted.
+ const quotedSubject=headline.match(/Относно:[\\s\\S]*?„([^“]+)“/);
+ assert.ok(quotedSubject&&quotedSubject[1].includes(subject),which+' subject must be quoted exactly once');
+ assert.equal((headline.match(/„/g)||[]).length,(headline.match(/“/g)||[]).length,which+' balanced quotation marks');
  assert.equal((headline.match(new RegExp(ids.replace(/\./g,'\\.'),'g'))||[]).length,1,which+' duplicate parcel');
  assert.ok(headline.includes(subject),which+' missing subject');
  assert.match(intro,/Наредба за условията и реда за извършване на оценка за съвместимостта/,which+' shortened ordinance');
@@ -88,6 +90,7 @@ function checkAdministrative(doc,which,subject,ids){
  assert.doesNotMatch(phrase(p[6])+' '+phrase(p[7]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/,which+' technical diagnostic in admin header');
  assert.doesNotMatch(headline,/ЗА ЕКСПЕРТНА ПРОВЕРКА/,which+' technical diagnostic in subject heading');
  assert.match(headline,/по КККР на /,which+' original cadastral heading phrase');
+ assert.doesNotMatch(phrase(p[6])+' '+phrase(p[7]),/НЯМА ДАННИ|името на възложителя не е установено|не е посочен адрес за кореспонденция/,which+' verbose or non-etalon administrative placeholders');
  return p;
 }
 
