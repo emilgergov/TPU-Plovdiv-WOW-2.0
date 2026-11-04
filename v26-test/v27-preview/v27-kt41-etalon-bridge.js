@@ -333,6 +333,29 @@ function approvedR02LegalFallback(i,int,draft,p){
 function contradictoryGIS(textValue,scenario){
  return (scenario==='А'||scenario==='A')&&/(?:ГИС анализът удостоверява пространствено пресичане|установено пространствено пресичане|попада(?:т)? частично в границите на защитена зона|за засегнатата защитена зона)/i.test(String(textValue||''));
 }
+// KT48: preserve R02's five independent impact dimensions instead of the
+// generic KT43 impact writer. A GIS intersection alone is not a habitat finding.
+function approvedR02ImpactFallback(i,int,draft,p){
+ const outside=draft.scenario==='А'||draft.scenario==='A';
+ const zone=zones(draft);
+ if(i===-1)return 'При съвкупната преценка на местоположението, характера на инвестиционното предложение и неговите инженерни връзки се разглеждат възможните преки, косвени и съвкупни въздействия по следните пет направления:';
+ const paragraphs=outside?[
+  'Установеното отсъствие на имотно пресичане изключва пряко отнемане на площ от защитена зона в границите на разглежданите имоти. Възможните извънимотни дейности и инженерни трасета се разглеждат отделно.',
+  'Отчитат се естеството и действителното разположение на строителните дейности, транспортът, шумът и осветлението, включително възможните пътища на косвено въздействие.',
+  'Разграничават се липсата на имотно пресичане и възможните функционални връзки с предмета и целите на опазване на защитените зони.',
+  'Проверява се дали предвидените инженерни връзки и съпътстващи дейности могат да повлияят на свързаността между защитени зони.',
+  'Разглеждат се самостоятелните и съвкупните въздействия във взаимодействие с други установени планове, програми, проекти и инвестиционни предложения.'
+ ]:[
+  'Установеното ГИС пресичане със '+(zone||'защитена зона')+' се съпоставя с действителния строителен отпечатък и пространствените данни за местообитанията; пресичането не доказва само по себе си загуба на местообитание.',
+  'Отчитат се характерът и сезонността на дейностите, шумът, транспортът и светлината спрямо видовете, предмет на опазване в '+(zone||'защитената зона')+'.',
+  'При преценката се съпоставят реалните дейности, границите на '+(zone||'зоната')+' и конкретните цели на опазване, без предварителен извод за допустимост или въздействие.',
+  'Разглеждат се възможните бариерни ефекти и връзки с други защитени зони, включително инженерните трасета извън разглежданите имоти.',
+  'Разглеждат се самостоятелните и съвкупните въздействия на предложението във взаимодействие с други установени планове, програми и проекти.'
+ ];
+ const heading=text(p[32+i]).split(/\.\s/)[0].trim();
+ if(!heading||!paragraphs[i])throw Error('KT48: missing approved R02 impact section '+i);
+ return heading+'. '+paragraphs[i];
+}
 function groundedLegalParagraph(raw,draft,fallback){
  const t=supportedAILegal(raw,draft);
  if(!t||contradictoryGIS(t,draft.scenario))return fallback;
@@ -370,8 +393,13 @@ async function expert(draft,options={}){
    const supplied=validated(m.legalParagraphs,i);
    put(p[26+i],(supplied&&!contradictoryGIS(supplied,draft.scenario)?supplied:null)||groundedLegalParagraph(ai.LEGAL[i+1],draft,approvedR02LegalFallback(i+1,int,draft,p)));
  }
- put(p[31],evidenceText(ai.IMPACTS[0], 'Направленията на възможните въздействия се анализират спрямо предмета и целите на опазване на '+zones(draft)+'. '+reviewMarker('доказателствен анализ')));
- for(let i=0;i<5;i++)put(p[32+i],evidenceText(ai.IMPACTS[i+1],impactDraft(i,int,draft)));
+ const imp0=cleanAIPart(ai.IMPACTS[0]);
+ put(p[31],imp0&&!contradictoryGIS(imp0,draft.scenario)?imp0:approvedR02ImpactFallback(-1,int,draft,p));
+ for(let i=0;i<5;i++){
+  const candidate=cleanAIPart(ai.IMPACTS[i+1]);
+  put(p[32+i],candidate&&!contradictoryGIS(candidate,draft.scenario)
+   ?candidate:approvedR02ImpactFallback(i,int,draft,p));
+ }
  const blockedProcedure=/(?:не е приложима процедура|не подлежи на процедура|не се изисква оценка|не се налага|не се изисква|не подлежи|няма вероятност|малко вероятно|незначителн(?:о|и|а) въздейств|не се очаква въздейств|липса на значими въздействия|не поражда въздействия|не оказва въздействие|ниск[аио] риск)/i;
  const reviewedProcedure=(ai.PROCEDURE||[]).filter(t=>!blockedProcedure.test(t));
  put(p[38],reviewedProcedure.length?safe(reviewedProcedure[0],'процедурна преценка'):'Приложимата процедура се определя след експертна проверка на пълната преписка, пространствените резултати и относимите нормативни основания. Само липсата на териториално пресичане не е достатъчно основание за окончателен процедурен извод.');
