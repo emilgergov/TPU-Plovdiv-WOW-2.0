@@ -1,22 +1,21 @@
 == dependency installation ==
 npm warn deprecated @xmldom/xmldom@0.9.8: this version has critical issues, please update to the latest version
 
-added 2 packages in 667ms
+added 2 packages in 744ms
 == JS syntax ==
 == three approved templates and synthetic scenario B ==
 KT35-A PASS 41 paragraphs 37 unchanged paragraphs
+KT44 HEADING STYLE PASS: A original four Word formatting segments retained
 KT39-B PASS 43 paragraphs 39 unchanged paragraphs
+KT44 HEADING STYLE PASS: B original four Word formatting segments retained
 V27-R02 PASS 49 paragraphs 45 unchanged paragraphs
+KT44 HEADING STYLE PASS: E original four Word formatting segments retained
+KT44 HEADING STYLE PASS: A original four Word formatting segments retained
+KT44 HEADING STYLE PASS: E original four Word formatting segments retained
 KT44 A ADMINISTRATION PASS: subject de-duplication, address/recipient, complete legal introduction
+KT44 HEADING STYLE PASS: B original four Word formatting segments retained
 KT43 INCOMPLETE DOSSIER PASS: four characteristics are review fields, not copied conclusions
-AssertionError [ERR_ASSERTION]: AI characterization repeated review markers
-    at /home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:102:9 {
-  generatedMessage: false,
-  code: 'ERR_ASSERTION',
-  actual: false,
-  expected: true,
-  operator: '==',
-  diff: 'simple'
-}
+KT44 HEADING STYLE PASS: E original four Word formatting segments retained
+KT43 regression PASS: scenario B creates both reviewed DOCX drafts without unverified legal or procedure conclusions
 
-Exit code: unknown
+Exit code: 0
