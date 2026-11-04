@@ -1,0 +1,77 @@
+name: KT60.1 classified dossier evidence and locked Word QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt60-1-source-match.yml'
+      - 'v26-test/v27-preview/kt60-1-evidence-classifier.js'
+      - 'v26-test/v27-preview/kt60-1-auto-evidence.js'
+      - 'v26-test/v27-preview/kt60-1-source-match-test.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence-and-etalon:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install DOCX regression dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Test original locked A/B/R02 and new modules syntax
+        run: |
+          node --check v26-test/v27-preview/kt60-1-evidence-classifier.js
+          node --check v26-test/v27-preview/kt60-1-auto-evidence.js
+          node v26-test/v27-preview/kt50-original-kt42-regression.cjs
+      - name: Test verbatim sources, classifications and no invented conclusions
+        run: |
+          node <<'JS'
+          const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+          const w={},ctx=vm.createContext({window:w});
+          for(const f of ['v27-case-evidence.js','kt60-1-evidence-classifier.js','kt60-1-auto-evidence.js'])
+            vm.runInContext(fs.readFileSync('v26-test/v27-preview/'+f,'utf8'),ctx,{filename:f});
+          const body=[
+            'Предмет: изграждане на склад за промишлени стоки и офиси.',
+            'Електрозахранване: присъединяване към съществуваща мрежа.',
+            'Водоснабдяване: от съществуващ водопровод.',
+            'Отпадъчни води: ще се отвеждат към канализация.'
+          ].join('\n');
+          const docs=w.KT601Classifier.extract({files:[{path:'test.txt',text:body}]});
+          assert(docs[0].facts.some(f=>f.kind==='electricity'));
+          assert(docs[0].facts.some(f=>f.kind==='water_supply'));
+          assert(docs[0].facts.some(f=>f.kind==='wastewater'));
+          const evidence=w.V27CaseEvidence.create({documents:docs});
+          assert(evidence.facts.every(f=>f.status==='source_matched'));
+          const paragraphs=body.split('\n');
+          const draft={paragraphs,metadata:{}};
+          const B=w.KT601Evidence.build({results:[{input:'36676.129.457',verified_zone_intersections:['BG0000194']}],workingDraft:draft,evidence,normativeRegister:{records:[]}});
+          assert.equal(B.scenario,'Б');
+          assert.equal(B.report.required,14);
+          assert.equal(B.report.verified,4);
+          assert.equal(B.report.documentCount,1);
+          assert.equal(B.ok,false,'Missing legal, impacts and decision must block');
+          assert(B.issues.includes('Мотивиран процедурен извод'));
+          assert.equal(B.draft.paragraphs[0],paragraphs[0],'No alteration to approved wording');
+          const loose=w.KT601Evidence.build({results:[{input:'36676.129.457',verified_zone_intersections:['BG0000194']}],workingDraft:{paragraphs:['друга характеристика','','',''],metadata:{}},evidence});
+          assert.equal(loose.report.sourceFound,4,'Candidate sources must be visible but not magically verified');
+          assert.equal(loose.report.verified,0);
+          const A=w.KT601Evidence.build({results:[{input:'56784.13.102',verified_zone_intersections:[]}],workingDraft:draft});
+          assert.equal(A.scenario,'А');assert.equal(A.ok,true);assert.equal(A.draft,draft);
+          console.log('KT60.1 quote provenance, 3-state B evidence and unchanged A PASS');
+          JS
+      - name: Verify AI and classifier integration before locked ZIP
+        shell: python
+        run: |
+          from pathlib import Path
+          h=Path('v26-test/v27-preview/kt60-1-source-match-test.html').read_text()
+          assert 'kt60-1-evidence-classifier.js?v=kt601-classify-1' in h
+          assert 'kt60-1-auto-evidence.js?v=kt601-evidence-1' in h
+          assert 'KT601Classifier.extract(window.V26ArchiveTextPreview)' in h
+          assert 'KT601Evidence?.build' in h
+          assert h.index('const proposedDraft=await window.V27AIAuthor.generate(')<h.index('window.KT601Evidence?.build(')<h.index('window.V26DraftPackage.make(')
+          assert 'v27-kt50-original-kt42.js?v=kt601-original-locked-b1d2cfb' in h
+          assert 'kt53-original-draft-package.js?v=kt601-original-locked-b1d2cfb' in h
+          assert 'kt53c-b-review-word.js' not in h and 'kt53d-b-characterization-word.js' not in h
+          print('KT60.1 integrated page matches locked generator PASS')
