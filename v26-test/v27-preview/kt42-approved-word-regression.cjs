@@ -109,15 +109,15 @@ async function test(name,blob,variable){
  console.log(name, 'PASS',got.p.length,'paragraphs',compared,'unchanged paragraphs');
 }
 (async()=>{
- await test('KT35-A',await sandbox.V26TemplateWord.make('А',verified,meta,{determination:{scenario:'А',zones:[]}}),[0,1,6,7,10,16]);
+ await test('KT35-A',await sandbox.V26TemplateWord.make('А',verified,meta,{determination:{scenario:'А',zones:[]}}),[0,1,6,7,10,16,17,23]);
  const approvedA=await sandbox.V26TemplateWord.make('А',verified,meta,{determination:{scenario:'А',zones:[]}});
  checkHeadingEtalonRuns(await approvedA.arrayBuffer(),'A');
  assertKT46ClassicalLayout(await approvedA.arrayBuffer(),'A');
- await test('KT39-B',await sandbox.V26TemplateWord.make('Б',verified,meta,{determination:{scenario:'Б',zones:['BG0000578']}}),[6,7,10,16]);
+ await test('KT39-B',await sandbox.V26TemplateWord.make('Б',verified,meta,{determination:{scenario:'Б',zones:['BG0000578']}}),[6,7,10,16,17]);
  const approvedB=await sandbox.V26TemplateWord.make('Б',verified,meta,{determination:{scenario:'Б',zones:['BG0000578']}});
  checkHeadingEtalonRuns(await approvedB.arrayBuffer(),'B');
  assertKT46ClassicalLayout(await approvedB.arrayBuffer(),'B');
- await test('V27-R02',await sandbox.V26ExpertWord.make({schema:'KT13_EXPERT_DRAFT_V1',scenario:'А',metadata:meta,aiDraft:'',parcels:[]},{requireAiAuthor:true}),[6,7,10,17]);
+ await test('V27-R02',await sandbox.V26ExpertWord.make({schema:'KT13_EXPERT_DRAFT_V1',scenario:'А',metadata:meta,aiDraft:'',parcels:[]},{requireAiAuthor:true}),[6,7,10,17,18,24]);
  const approvedE=await sandbox.V26ExpertWord.make({schema:'KT13_EXPERT_DRAFT_V1',scenario:'А',metadata:meta,aiDraft:'',parcels:[]},{requireAiAuthor:true});
  checkHeadingEtalonRuns(await approvedE.arrayBuffer(),'E');
  const aWithDuplicatedSubject={...meta,
@@ -128,6 +128,9 @@ async function test(name,blob,variable){
  const caseA=await sandbox.V26TemplateWord.make('А',verified,aWithDuplicatedSubject,{determination:{scenario:'А',zones:[]}});
  const resultA=checkAdministrative(await caseA.arrayBuffer(),'A','Складове за промишлени стоки и офиси','56784.13.102');
  assertKT46ClassicalLayout(await caseA.arrayBuffer(),'A');
+ assert.doesNotMatch(phrase(resultA[17]),/попада в обхвата на чл\. 2, ал\. 2/, 'A must not inherit procedural determination');
+ assert.match(phrase(resultA[23]),/НЯМА ДАННИ/, 'A nearest zone must use GIS verified data, not sample BG0000578');
+ assert.doesNotMatch(phrase(resultA[23]),/BG0000578/, 'A specimen nearest zone must not leak');
  assert.equal(phrase(resultA[6]),'Възложителя: ХХХХХХХХХХХХ','A recipient approved placeholder');
  assert.equal(phrase(resultA[7]),'Адрес: ХХХХХХХХХХХХ','A address approved placeholder');
  assert.doesNotMatch(phrase(resultA[10]),/север“ в поземлени/,'A trailing quote regression');
@@ -139,6 +142,7 @@ async function test(name,blob,variable){
  const syntheticB=await sandbox.V26TemplateWord.make('Б',verified,differing,{determination:{scenario:'Б',zones:['BG0000194']}});
  const caseB=checkAdministrative(await syntheticB.arrayBuffer(),'B','Учебен казус','36676.129.457')&&pList(await syntheticB.arrayBuffer());
  assertKT46ClassicalLayout(await syntheticB.arrayBuffer(),'B');
+ assert.doesNotMatch(phrase(caseB.p[17]),/попада в обхвата на чл\. 2, ал\. 2/, 'B must not inherit sample procedural assertion');
  assert.equal(caseB.p.length,43);
  assert.match(phrase(caseB.p[23]),/36676\.129\.457/);
  assert.match(phrase(caseB.p[10]),/по КККР на с\. Катуница, местност „Попското“, община Садово, област Пловдив/,'case B full place name');
@@ -167,6 +171,8 @@ async function test(name,blob,variable){
  checkAdministrative(await expertB.arrayBuffer(),'E','Учебен казус','36676.129.457');
  const resultE=pList(await expertB.arrayBuffer());
  assert.equal(resultE.p.length,49);
+ assert.doesNotMatch(phrase(resultE.p[18]),/попада в обхвата на чл\. 2, ал\. 2/, 'expert must not copy sample decision');
+ assert.match(phrase(resultE.p[25]),/Относимите режими подлежат на проверка/, 'safe AI legal content must actually enter expert Word');
  assert.match(phrase(resultE.p[39]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
  assert.match(phrase(resultE.p[23]),/36676\.129\.457/);
  assert.match(phrase(resultE.p[10]),/по КККР на с\. Катуница, местност „Попското“, община Садово, област Пловдив/,'expert B full place');
