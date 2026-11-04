@@ -39,10 +39,33 @@ async function makeClassic(scenario,paragraphs,metadata,context){
  protectClassic(paragraphs);
  return classic.make(scenario,paragraphs,normalized(metadata),context);
 }
+const TECH_MARKER=/\\[\\[(?:CONCLUSION|CHARACTERIZATION|PROCEDURE|LEGAL|IMPACTS)\\]\\]/g;
+async function stripTechnicalMarkers(blob){
+ // Only remove internal AI section delimiters. Keep ALL surrounding
+ // legal, factual and expert-authored wording in the approved V27 R02.
+ const zip=root.fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
+ const raw=zip['word/document.xml'];
+ if(!raw)throw Error('КТ51: липсва Word XML на експертния проект.');
+ const xml=new DOMParser().parseFromString(new TextDecoder().decode(raw),'application/xml');
+ if(xml.getElementsByTagName('parsererror').length)throw Error('КТ51: невалиден XML на експертния проект.');
+ const W='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+ let count=0;
+ for(const t of Array.from(xml.getElementsByTagNameNS(W,'t'))){
+  const before=t.textContent||'';
+  const after=before.replace(TECH_MARKER,'').replace(/ {2,}/g,' ');
+  if(after!==before){t.textContent=after;count++;}
+ }
+ const allText=Array.from(xml.getElementsByTagNameNS(W,'t')).map(t=>t.textContent||'').join('');
+ if(TECH_MARKER.test(allText))throw Error('КТ51: технически AI разделител е разделен между Word елементи и изисква отделна корекция.');
+ if(!count)return blob;
+ zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
+ return new Blob([root.fflate.zipSync(zip,{level:6})],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+}
 async function makeExpert(draft,options){
  if(!draft?.metadata)throw Error('КТ51: липсва административният контекст за експертния Word.');
  const meta=normalized(draft.metadata);
- return expert.make({...draft,metadata:meta},options);
+ const approved=await expert.make({...draft,metadata:meta},options);
+ return stripTechnicalMarkers(approved);
 }
 root.V26TemplateWord=Object.freeze({make:makeClassic,templatePaths:classic.templatePaths,layout:'KT51_APPROVED_CLASSIC_RESTORED'});
 root.V26ExpertWord=Object.freeze({make:makeExpert,layout:'KT51_APPROVED_EXPERT_R02_RESTORED'});
