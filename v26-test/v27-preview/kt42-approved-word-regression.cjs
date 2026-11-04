@@ -278,12 +278,12 @@ console.log('KT47 EKATTE PASS: two official cadastral mappings; contradictory an
   const withSource=await sandbox.V26TemplateWord.make('Б',verified,sourcedMeta,{determination:{scenario:'Б',zones:['BG0000194']}});
   assert.equal(phrase(pList(await withSource.arrayBuffer()).p[25]),'Документално проверено съответствие — тестов факт.','KT49 sourced legal paragraph must still be used');
   const sixImpacts=['Обобщение на проверените направления.','Факт за възможното пряко засягане.','Факт за видовете и местообитанията.','Факт за безпокойството.','Факт за екологичните връзки.','Факт за съвкупните въздействия.'];
-  const specialAI='[[CHARACTERIZATION]]\\nПредмет и технически параметри.\\n\\n[[LEGAL]]\\nПравен режим.\\n\\n[[PROCEDURE]]\\nПроцедурна преценка.\\n\\n[[IMPACTS]]\\n'+sixImpacts.join('\\n\\n');
-  const specialDraft={...draft,aiDraft:specialAI};
+  const specialAI=['[[CHARACTERIZATION]]','Предмет и технически параметри.','[[LEGAL]]','Правен режим.','[[PROCEDURE]]','Процедурна преценка.','[[IMPACTS]]',...sixImpacts].join(String.fromCharCode(10,10));
+ const specialDraft={...draft,aiDraft:specialAI};
   const sixDoc=await sandbox.V26ExpertWord.make(specialDraft,{requireAiAuthor:true});
   const sixPs=pList(await sixDoc.arrayBuffer()).p;
   for(let i=0;i<5;i++){
-   const title=phrase(approvedR02[32+i]).split(/\\.\\s/)[0].trim();
+   const title=phrase(approvedR02[32+i]).split(/\.\s/)[0].trim();
    assert.ok(phrase(sixPs[32+i]).startsWith(title+'.'),'KT49 AI must retain approved impact heading '+i);
    assert.match(phrase(sixPs[32+i]),/Факт за/,'KT49 AI evidence detail must be included under original heading '+i);
   }
