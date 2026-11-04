@@ -65,11 +65,15 @@ function kt51HeadingPlace(m){
  }
  return items.join(', ');
 }
+/* KT51: agreed official visible placeholders, not the older [ЗА ПОПЪЛВАНЕ]. */
+const KT51_UNKNOWN_PARTY='Х'.repeat(10);
+const KT51_UNKNOWN_ADDRESS='Х'.repeat(15);
+const KT51_UNKNOWN_INCOMING='Вх. № ОВОС-ХХХХ/ХХ.ХХ.ХХХХ г.';
 function kt51Party(value,label){
  const original=clean(value);
- if(!original)return label+': [ЗА ПОПЪЛВАНЕ]';
  const stripped=original.replace(label==='Възложител'?/^(?:Възложител(?:я)?|ДО)\s*:?\s*/i:/^(?:Адрес(?:\s+за\s+кореспонденция)?|За\s+кореспонденция)\s*:?\s*/i,'').trim();
- return label+': '+(stripped||'[ЗА ПОПЪЛВАНЕ]');
+ const unknown=!stripped||/^\[(?:ЗА ПОПЪЛВАНЕ|ЗА ЕКСПЕРТНА ПРОВЕРКА)[^\]]*\]$/i.test(stripped)||/^НЯМА ДАННИ$/i.test(stripped);
+ return label+': '+(unknown?(label==='Възложител'?KT51_UNKNOWN_PARTY:KT51_UNKNOWN_ADDRESS):stripped);
 }
 function isApprovedCase(m,scenario){
  const ids=(clean(m.parcelIds).match(/\b\d{5}\.\d+\.\d+\b/g)||[]).sort().join(',');
@@ -93,7 +97,7 @@ function finish(doc,label){
 }
 function intro(m){
  const ids=clean(m.parcelIds);if(!/^\d{5}\.\d+\.\d+/.test(ids))throw Error('КТ41: липсват потвърдени имоти.');
- return {ids,title:subject(m.subject),loc:clean(m.location),ref:safe(m.incomingReference,'входящ номер и дата')};
+ const reference=clean(m.incomingReference);const unknown=!reference||/^(?:\[ЗА |НЯМА ДАННИ|Вх\.\s*№\s*ОВОС-9999\s*\/\s*ДАТА-99\.99\.9999)/i.test(reference);return {ids,title:subject(m.subject),loc:clean(m.location),ref:unknown?KT51_UNKNOWN_INCOMING:reference};
 }
 function char1(t){t=clean(t);return /^С реализацията на инвестиционното предложение/i.test(t)?t:'С реализацията на инвестиционното предложение '+t.replace(/^(?:Предвижда се\s*)/i,'се предвижда ');}
 const get= (xs,i,where)=>safe(Array.isArray(xs)?xs[i]:'',where);
