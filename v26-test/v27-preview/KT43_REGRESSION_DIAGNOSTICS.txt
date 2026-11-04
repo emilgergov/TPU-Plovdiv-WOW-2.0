@@ -1,15 +1,29 @@
 == dependency installation ==
 npm warn deprecated @xmldom/xmldom@0.9.8: this version has critical issues, please update to the latest version
 
-added 2 packages in 2s
+added 2 packages in 783ms
 == JS syntax ==
-/home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:260
-   assert.doesNotMatch(phrase(actual[32+j]),/\\[ЗА ЕКСПЕРТНА ПРОВЕРКА/,'KT48 Expert '+which+' impact direction '+j+' unfinished marker');
-                                            ^
+== three approved templates, two scenarios, full place headings ==
+node:assert:150
+  throw new AssertionError(obj);
+  ^
 
-SyntaxError: Invalid regular expression: missing /
-    at wrapSafe (node:internal/modules/cjs/loader:1713:18)
-    at checkSyntax (node:internal/main/check_syntax:78:3)
+AssertionError [ERR_ASSERTION]: LOCKED USER-APPROVED DOCX CHANGED: KT35-A.docx
+    at Object.<anonymous> (/home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:17:9)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: '85743aa3ca7c44d6f484795cddad70f13cdc4b03',
+  expected: '1a495fc2d6047a6377e48dfb963a737502404087',
+  operator: '==',
+  diff: 'simple'
+}
 
 Node.js v22.23.4
 
