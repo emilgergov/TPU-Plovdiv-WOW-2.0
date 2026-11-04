@@ -14,7 +14,34 @@ const NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const T={A:'v27-preview/etalon/KT35-A.docx',B:'v27-preview/etalon/KT39-B.docx',E:'v27-preview/etalon/V27-R02.docx'};
 const clean=x=>String(x??'').replace(/\[\[(?:CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS|CONCLUSION)\]\]/g,'').trim();
 const safe=(x,where)=>{let s=clean(x);return s&&!/\[\[|\]\]/.test(s)?s:'[ЗА ЕКСПЕРТНА ПРОВЕРКА — '+where+']';};
-const subject=x=>clean(x).replace(/^Относно:\s*/i,'').replace(/^(инвестиционно предложение\s*)+/i,'').replace(/^[„“"\s]+|[„“"\s]+$/g,'').replace(/\s+/g,' ');
+const subject=x=>{
+ let s=clean(x).replace(/^Относно:\s*/i,'').replace(/^(?:уведомление\s+за\s+)?инвестиционно\s+предложение\s*(?:\(ИП\))?\s*[:–-]?\s*/i,'').replace(/\s+/g,' ').trim();
+ const quoted=s.match(/^[„"«]([^“"»]{8,})[“"»]/);
+ if(quoted)s=quoted[1];
+ else s=s.replace(/\s+в\s+(?:ПИ|поземлен(?:и|\s+имот(?:и)?)?)\s+(?:с\s+)?(?:идентификатор(?:и)?|ИД)\s*[:№]?\s*\d{5}\.\d+\.\d+.*$/i,'');
+ return s.replace(/^[„“"«»\s]+|[„“"«»\s]+$/g,'').trim();
+};
+const reviewMarker=label=>'[ЗА ЕКСПЕРТНА ПРОВЕРКА — '+label+']';
+function party(x,type){
+ const s=clean(x);
+ if(type==='recipient'){
+  if(!s||/^(?:ДО\s+)?ВЪЗЛОЖИТЕЛЯ\s+НА\s+ИНВЕСТИЦИОННОТО\s+ПРЕДЛОЖЕНИЕ/i.test(s)||/\[ЗА ПОПЪЛВАНЕ\]/i.test(s))return 'Възложител: '+reviewMarker('името на възложителя не е установено от преписката');
+  return /^(?:ДО|Възложител)/i.test(s)?s:'Възложител: '+s;
+ }
+ if(!s||/\[ЗА ПОПЪЛВАНЕ\]|НЕ\s+Е\s+ПОСОЧЕН/i.test(s))return 'Адрес: '+reviewMarker('не е посочен адрес за кореспонденция');
+ return /^(?:Адрес|За кореспонденция)/i.test(s)?s:'Адрес: '+s;
+}
+const zoneNames={'BG0000194':'Река Чая','BG0000578':'Река Марица'};
+function zoneList(d){
+ const raw=[...(Array.isArray(d?.zones)?d.zones:[]),...(Array.isArray(d?.zoneCodes)?d.zoneCodes:[])];
+ const set=new Map();
+ for(const item of raw){const code=String(typeof item==='string'?item:item?.sitecode||item?.code||'').match(/BG\d{7}/)?.[0];if(!code)continue;
+  const name=typeof item==='object'?String(item?.name||item?.sitename||'').trim():'';
+  set.set(code,code+(name||zoneNames[code]?' „'+(name||zoneNames[code])+'“':''));
+ }
+ return [...set.values()];
+}
+const refText='Наредба за условията и реда за извършване на оценка за съвместимостта на планове, програми, проекти и инвестиционни предложения с предмета и целите на опазване на защитените зони (Наредбата за ОС)';
 const all=(el,name)=>Array.from(el.getElementsByTagNameNS(NS,name));
 const text=p=>all(p,'t').map(t=>t.textContent).join('');
 function put(p,value){
@@ -60,20 +87,33 @@ function intro(m){
 }
 function char1(t){t=clean(t);return /^С реализацията на инвестиционното предложение/i.test(t)?t:'С реализацията на инвестиционното предложение '+t.replace(/^(?:Предвижда се\s*)/i,'се предвижда ');}
 const get= (xs,i,where)=>safe(Array.isArray(xs)?xs[i]:'',where);
-const zones=d=>d.zones?.join(', ')||'';
+const zones=d=>zoneList(d).join(', ');
 const spatial=(d,int)=>d.scenario==='А'
  ?'Поземлените имоти с идентификатори '+int.ids+(int.loc?', '+int.loc:'')+' не попадат в границите на защитени зони от екологичната мрежа „Натура 2000“ по смисъла на Закона за биологичното разнообразие.'
  :'За имотите с идентификатори '+int.ids+' е установено пространствено пресичане със защитена зона '+zones(d)+'. Конкретното пресичане е документирано в самостоятелния ГИС анализ.';
 function locationSentence(m,d){
- if(d.scenario==='Б')return 'Пресичащи се защитени зони: '+zones(d)+'. Конкретните режими и приложимите заповеди подлежат на експертна проверка по нормативния архив.';
+ if(d.scenario==='Б')return 'Пресичащи се защитени зони: '+(zones(d)||reviewMarker('код и наименование на защитената зона'))+'. Правният режим се сверява с приложимата заповед и целите на опазване по нормативния архив.';
  return safe(m.nearestZone,'най-близка защитена зона');
+}
+function heading(int){
+ const ids=[...new Set((int.ids.match(/\b\d{5}\.\d+\.\d+\b/g)||[]))];
+ const parcel=ids.length===1?'в поземлен имот с идентификатор '+ids[0]:'в поземлени имоти с идентификатори '+ids.join(', ');
+ let loc=int.loc.replace(/^(?:населено\s+място\s*)/i,'').trim().replace(/[„“]/g,'');
+ if(loc&&ids.some(id=>loc.includes(id)))loc=loc.replace(/\b\d{5}\.\d+\.\d+\b/g,'').replace(/^(?:ПИ|имот|поземлен имот)\s+с\s+идентификатор\s*/i,'').replace(/^[,\s]+|[,\s]+$/g,'');
+ return 'Относно: Уведомление за инвестиционно предложение (ИП): „'+int.title+'“ '+parcel+(loc?', '+loc:'')+'.';
+}
+function introParagraph(p,index,int,expert){
+ const old=text(p[index]);
+ let updated=old.replace(/Вх\. № ОВОС-ХХХХ\s*\/\s*ХХ\.ХХ\.ХХХХ г\./,int.ref);
+ if(updated===old||!updated.includes('Наредба за условията и реда'))updated='Във връзка с внесеното уведомление в РИОСВ-Пловдив с '+int.ref+' за горецитираното инвестиционно предложение, на основание чл. 6а, т. 2 от '+refText+(expert?' е изготвен настоящият експертен проект.':' Ви уведомявам следното:');
+ put(p[index],updated);
 }
 function metadata(doc,m){
  const p=doc.p,int=intro(m);
- put(p[6],safe(m.recipient,'възложител'));
- put(p[7],safe(m.address,'адрес за кореспонденция'));
- put(p[10],'Относно: Уведомление за инвестиционно предложение (ИП): „'+int.title+'“ в поземлени имоти с идентификатори '+int.ids+(int.loc?', '+int.loc:'')+'.');
- put(p[16],'Във връзка с внесеното уведомление в РИОСВ-Пловдив с '+int.ref+' за горецитираното инвестиционно предложение, на основание чл. 6а, т. 2 от Наредбата за ОС Ви уведомявам следното:');
+ put(p[6],party(m.recipient,'recipient'));
+ put(p[7],party(m.address,'address'));
+ put(p[10],heading(int));
+ introParagraph(p,16,int,false);
  return int;
 }
 async function classic(scenario,paragraphs,m,context={}){
@@ -115,7 +155,7 @@ async function classic(scenario,paragraphs,m,context={}){
   put(p[31],procedureText);
  }else{
   put(p[22],textLegal(0));put(p[23],spatial({...d,scenario:'Б',zones:d.zones},int));
-  put(p[24],locationSentence(m,{scenario:'Б'}));
+  put(p[24],locationSentence(m,d));
   put(p[25],textLegal(1));put(p[26],textLegal(2));put(p[27],textLegal(3));
   for(let i=0;i<5;i++)put(p[28+i],textImpact(i));
   put(p[33],procedureText);
@@ -133,16 +173,16 @@ async function expert(draft,options={}){
  const same=isApprovedCase(m,draft.scenario);
  if(same){
   // Exact approved V27 R02, including legal analysis, GIS overview, styles and signatures.
-  put(p[6],safe(m.recipient,'възложител'));
-  put(p[7],safe(m.address,'адрес'));
-  put(p[10],'Относно: Уведомление за инвестиционно предложение (ИП): „'+int.title+'“ в поземлени имоти с идентификатори '+int.ids+(int.loc?', '+int.loc:'')+'.');
-  put(p[17],'Във връзка с внесеното уведомление в РИОСВ-Пловдив с '+int.ref+' за горецитираното инвестиционно предложение, на основание чл. 6а, т. 2 от Наредбата за ОС е изготвен настоящият експертен проект.');
+  put(p[6],party(m.recipient,'recipient'));
+  put(p[7],party(m.address,'address'));
+  put(p[10],heading(int));
+  introParagraph(p,17,int,true);
   return finish(doc,'V27 R02');
  }
  if(['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'].some(k=>!ai[k]?.length))throw Error('КТ42: непълен AI авторски проект.');
- put(p[6],safe(m.recipient,'възложител'));put(p[7],safe(m.address,'адрес'));
- put(p[10],'Относно: Уведомление за инвестиционно предложение (ИП): „'+int.title+'“ в поземлени имоти с идентификатори '+int.ids+(int.loc?', '+int.loc:'')+'.');
- put(p[17],'Във връзка с внесеното уведомление в РИОСВ-Пловдив с '+int.ref+' за горецитираното инвестиционно предложение, на основание чл. 6а, т. 2 от Наредбата за ОС е изготвен настоящият експертен проект.');
+ put(p[6],party(m.recipient,'recipient'));put(p[7],party(m.address,'address'));
+ put(p[10],heading(int));
+ introParagraph(p,17,int,true);
  put(p[20],safe(ai.CHARACTERIZATION[0],'предмет на инвестиционното предложение'));
  put(p[21],safe(ai.CHARACTERIZATION.slice(1).join('\n\n')||draft.characterization.slice(1).join(' '),'инженерни характеристики'));
  put(p[23],spatial(draft,int));
