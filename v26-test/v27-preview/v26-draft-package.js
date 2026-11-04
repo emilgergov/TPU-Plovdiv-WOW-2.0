@@ -315,7 +315,7 @@ function kt47VerifiedAdministration(results,metadata){
  const codes=[...new Set(results.map(r=>String(r.input||r.cadnum||'').split('.')[0]))];
  if(codes.length!==1||!KT47_EKATTE[codes[0]])return;
  const entry=KT47_EKATTE[codes[0]];
- const normalized=x=>String(x||'').replace(/^(?:гр\\.|с\\.|град|село)\\s*/i,'').trim().toLocaleLowerCase('bg');
+ const normalized=x=>String(x||'').replace(/^(?:гр\.|с\.|град|село)\s*/i,'').trim().toLocaleLowerCase('bg');
  for(const key of ['settlement','municipality','region']){
   const val=String(metadata[key]||'').trim();
   if(val&&normalized(val)!==normalized(entry[key]))return;
