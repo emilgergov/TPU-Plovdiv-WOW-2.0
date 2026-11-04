@@ -18,7 +18,7 @@ jobs:
           python - <<'PY'
           import urllib.request,time,zipfile,io,json
           base='https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/'
-          expected='v27-preview/v27-kt41-etalon-bridge.js?v=kt42-verified-cb68194'
+          expected='v27-preview/v27-kt41-etalon-bridge.js?v=kt43-reviewed-dede752'
           last=''
           for attempt in range(36):
               try:
@@ -26,16 +26,16 @@ jobs:
                   with urllib.request.urlopen(req,timeout=18) as res: html=res.read().decode('utf-8')
                   if expected not in html: raise RuntimeError('Pages still serves old Word generator')
                   with urllib.request.urlopen(base+'v27-kt41-etalon-bridge.js?kt42=verification',timeout=18) as res: code=res.read().decode('utf-8')
-                  if 'function isApprovedCase' not in code or 'КТ42: липсват доказани правни основания' not in code: raise RuntimeError('Live JS not KT42')
+                  if 'function isApprovedCase' not in code or 'ЗА ЕКСПЕРТНА ПРОВЕРКА — правна констатация' not in code: raise RuntimeError('Live JS not KT42')
                   for filename in ('KT35-A.docx','KT39-B.docx','V27-R02.docx'):
                       with urllib.request.urlopen(base+'etalon/'+filename,timeout=18) as res: raw=res.read()
                       with zipfile.ZipFile(io.BytesIO(raw)) as z:
                           assert 'word/document.xml' in z.namelist(),filename
-                  print('LIVE PAGES KT42 PASS: HTML, JS and all three approved DOCX files')
+                  print('LIVE PAGES KT43 PASS: HTML, JS and all three approved DOCX files')
                   break
               except Exception as e:
                   last=str(e)
-                  if attempt==35: raise RuntimeError('Pages deployment not verified: '+last)
+                  if attempt==35: raise RuntimeError('KT43 Pages deployment not verified: '+last)
                   time.sleep(8)
           PY
       - name: Record verified public Pages deployment
