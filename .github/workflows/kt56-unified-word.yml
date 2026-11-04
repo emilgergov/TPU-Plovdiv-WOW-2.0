@@ -1,0 +1,35 @@
+name: KT56 combined approved Word A B R02 regression
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'v26-test/v27-preview/kt56-unified-A-B-locked-test.html'
+      - '.github/workflows/kt56-unified-word.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  approved-three:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install DOCX test dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Check original Word generator and three actual DOCX
+        run: node v26-test/v27-preview/kt50-original-kt42-regression.cjs
+      - name: Check combined A and B visual loader
+        shell: python
+        run: |
+          from pathlib import Path
+          h=Path('v26-test/v27-preview/kt56-unified-A-B-locked-test.html').read_text()
+          assert "kt56AModel" in h and "kt54BModel" in h
+          assert "async function generateA()" in h and "async function generate()" in h
+          assert "window.V26TemplateWord.make('А'" in h
+          assert "window.V26TemplateWord.make('Б'" in h
+          assert 'v27-kt50-original-kt42.js?v=kt56-unified-locked-b1d2cfb' in h
+          assert 'kt53-original-draft-package.js?v=kt56-unified-locked-b1d2cfb' in h
+          assert 'kt53c-b-review-word.js' not in h and 'kt53d-b-characterization-word.js' not in h
+          print('KT56 combined A/B reference page PASS')
