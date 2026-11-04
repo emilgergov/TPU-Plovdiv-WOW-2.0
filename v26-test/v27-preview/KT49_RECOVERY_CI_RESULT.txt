@@ -19,13 +19,6 @@ KT48 A/B PASS: original 10 classical impact bullet directions immutable; factual
 KT46 INCOMPLETE DOSSIER PASS: four administrative characteristics contain explicit evidence reservations without internal QA markers
 KT44 HEADING STYLE PASS: E original four Word formatting segments retained
 KT48 EXPERT IMPACT PASS: five R02 headings in A and B
-AssertionError [ERR_ASSERTION]: KT49 AI fixture must contain four sections
-    at /home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:283:10
-    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
-  generatedMessage: false,
-  code: 'ERR_ASSERTION',
-  actual: [],
-  expected: [Array],
-  operator: 'deepEqual',
-  diff: 'simple'
-}
+KT49 KT42 SOURCE GATE PASS: 4 unverified legal conclusions rejected; sourced legal text accepted; 5 expert R02 impact headings preserved with AI details
+KT48 Expert R02 PASS: original legal architecture, A/B scenario safeguards and no unsupported final outcome
+KT43 regression PASS: scenario B creates both reviewed DOCX drafts without unverified legal or procedure conclusions
