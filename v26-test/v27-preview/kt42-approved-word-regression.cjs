@@ -33,6 +33,11 @@ function assertKT46ClassicalLayout(doc,which){
  for(let i=0;i<2;i++){
   assert.equal(jc(actual.p[i]),'right',which+' confidentiality paragraph '+i);
   assert.equal(jc(actual.p[i]),jc(reference.p[i]),which+' must match KT39-B');
+  // Verify full positioning, not only right alignment: indentation, spacing,
+  // paragraph style, keepNext and all other property nodes.
+  const props=p=>Array.from(p.children).find(x=>x.localName==='pPr');
+  const normalized=n=>n ? [n.localName,Array.from(n.attributes||[]).map(a=>[a.namespaceURI,a.localName,a.value]).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b))),Array.from(n.children||[]).map(normalized)] : null;
+  assert.deepEqual(normalized(props(actual.p[i])),normalized(props(reference.p[i])),which+' confidentiality complete paragraph geometry '+i);
  }
  // All other body paragraphs retain justified alignment; no full-body restyling.
  for(let i=2;i<actual.p.length;i++){
