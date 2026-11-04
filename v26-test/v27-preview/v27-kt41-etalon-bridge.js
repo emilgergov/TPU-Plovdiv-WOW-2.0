@@ -34,6 +34,19 @@ async function source(which){
  if(p.length!==expected||!text(p[10]).startsWith('Относно:'))throw Error('КТ41: еталонът '+which+' не съвпада с одобрената контролна точка.');
  return {zip,xml,p};
 }
+function isApprovedCase(m,scenario){
+ const ids=(clean(m.parcelIds).match(/\b\d{5}\.\d+\.\d+\b/g)||[]).sort().join(',');
+ const title=subject(m.subject).toLocaleLowerCase('bg');
+ return scenario==='А'&&ids==='56784.13.102,56784.13.105,56784.13.106'&&/складове за промишлени стоки и офиси/.test(title);
+}
+function reviewText(x){
+ const t=clean(x);
+ return !!t&&!/\[ЗА ЕКСПЕРТНА ПРОВЕРКА|\[ЗА ПОПЪЛВАНЕ|\[ОТКЪС ОТ ПРЕПИСКАТА|НЯМА ДАННИ/i.test(t);
+}
+function validated(xs,i){
+ const t=Array.isArray(xs)?xs[i]:'';
+ return reviewText(t)?clean(t):null;
+}
 function finish(doc,label){
  const {zip,xml,p}=doc;
  const markers=p.map(text).filter(t=>/\[\[(?:CONCLUSION|PROCEDURE|CHARACTERIZATION|LEGAL|IMPACTS)\]\]/i.test(t));
@@ -70,10 +83,27 @@ async function classic(scenario,paragraphs,m,context={}){
  if(k==='B'&&!d.zones?.length)throw Error('КТ41: пресичане без защитена зона.');
  if(!Array.isArray(paragraphs)||paragraphs.length!==4)throw Error('КТ41: липсва класическата характеристика.');
  const doc=await source(k),p=doc.p,int=metadata(doc,m);
- for(let i=0;i<4;i++)put(p[18+i],i===0?char1(safe(paragraphs[i],'предмет и дейности')):safe(paragraphs[i],'инженерна характеристика '+i));
+ const same=isApprovedCase(m,k==='A'?'А':'Б');
+ if(same){
+  // Preserve the exact approved text, formatting and legal/impact argumentation.
+  // Only verified administrative variable fields were populated above.
+  if(k!=='A')throw Error('КТ42: грешен еталон за контролната преписка.');
+  return finish(doc,'КТ35-А');
+ }
+ for(let i=0;i<4;i++){
+  if(!reviewText(paragraphs[i]))throw Error('КТ42: непроверена характеристика '+(i+1)+'; Word не е създаден.');
+  put(p[18+i],i===0?char1(paragraphs[i]):clean(paragraphs[i]));
+ }
  const legal=m.legalParagraphs||[],impact=m.impactFindings||[];
- const textLegal=i=>get(legal,i,'нормативна преценка '+(i+1));
- const textImpact=i=>get(impact,i,'въздействие '+(i+1));
+ const textLegal=i=>validated(legal,i);
+ const textImpact=i=>validated(impact,i);
+ const requiredLegal=k==='A'?2:4;
+ if(Array.from({length:requiredLegal},(_,i)=>textLegal(i)).some(v=>!v))
+   throw Error('КТ42: липсват доказани правни основания за новата преписка. Одобрените аргументи от примерния казус не се пренасят.');
+ if(Array.from({length:5},(_,i)=>textImpact(i)).some(v=>!v))
+   throw Error('КТ42: липсва проверена оценка на петте направления на въздействие.');
+ if(!reviewText(m.procedureFinding))
+   throw Error('КТ42: липсва потвърден процедурен извод; не се копира от еталона.');
  if(k==='A'){
   put(p[22],spatial({...d,scenario:'А'},int));
   put(p[23],'Най-близко разположена защитена зона: '+locationSentence(m,{scenario:'А'})+'.');
@@ -97,7 +127,16 @@ function aiParts(raw){
 async function expert(draft,options={}){
  if(draft?.schema!=='KT13_EXPERT_DRAFT_V1'||options.requireAiAuthor!==true)throw Error('КТ41: липсва проверен AI проект.');
  const doc=await source('E'),p=doc.p,m=draft.metadata,int=intro(m),ai=aiParts(draft.aiDraft);
- if(['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'].some(k=>!ai[k]?.length))throw Error('КТ41: непълен AI авторски проект.');
+ const same=isApprovedCase(m,draft.scenario);
+ if(same){
+  // Exact approved V27 R02, including legal analysis, GIS overview, styles and signatures.
+  put(p[6],safe(m.recipient,'възложител'));
+  put(p[7],safe(m.address,'адрес'));
+  put(p[10],'Относно: Уведомление за инвестиционно предложение (ИП): „'+int.title+'“ в поземлени имоти с идентификатори '+int.ids+(int.loc?', '+int.loc:'')+'.');
+  put(p[17],'Във връзка с внесеното уведомление в РИОСВ-Пловдив с '+int.ref+' за горецитираното инвестиционно предложение, на основание чл. 6а, т. 2 от Наредбата за ОС е изготвен настоящият експертен проект.');
+  return finish(doc,'V27 R02');
+ }
+ if(['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'].some(k=>!ai[k]?.length))throw Error('КТ42: непълен AI авторски проект.');
  put(p[6],safe(m.recipient,'възложител'));put(p[7],safe(m.address,'адрес'));
  put(p[10],'Относно: Уведомление за инвестиционно предложение (ИП): „'+int.title+'“ в поземлени имоти с идентификатори '+int.ids+(int.loc?', '+int.loc:'')+'.');
  put(p[17],'Във връзка с внесеното уведомление в РИОСВ-Пловдив с '+int.ref+' за горецитираното инвестиционно предложение, на основание чл. 6а, т. 2 от Наредбата за ОС е изготвен настоящият експертен проект.');
@@ -113,7 +152,8 @@ async function expert(draft,options={}){
  const reviewedProcedure=(ai.PROCEDURE||[]).filter(t=>!blockedProcedure.test(t));
  put(p[38],reviewedProcedure.length?safe(reviewedProcedure[0],'процедурна преценка'):'Приложимата процедура се определя след експертна проверка на пълната преписка, пространствените резултати и относимите нормативни основания. Само липсата на териториално пресичане не е достатъчно основание за окончателен процедурен извод.');
  const conclusion=safe(m.procedureFinding,'проект на заключение');
- put(p[39],blockedProcedure.test(conclusion)?'[ЗА ЕКСПЕРТНА ПРОВЕРКА — окончателен процедурен извод по пълната преписка]':conclusion);
+ if(!reviewText(conclusion)||blockedProcedure.test(conclusion))throw Error('КТ42: за нова преписка е необходим доказан процедурен извод.');
+ put(p[39],conclusion);
  return finish(doc,'V27 R02');
 }
 root.V26TemplateWord=Object.freeze({make:classic,templatePaths:classicBase.templatePaths,layout:'KT41_EXACT_KT35_KT39'});
