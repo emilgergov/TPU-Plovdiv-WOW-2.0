@@ -40,7 +40,7 @@ jobs:
                   }
                   for filename,sha in approved.items():
                       with urllib.request.urlopen(base+'etalon/'+filename,timeout=18) as res: raw=res.read()
-                      blob_sha=hashlib.sha1(('blob '+str(len(raw))).encode()+b'\\x00'+raw).hexdigest()
+                      blob_sha=hashlib.sha1(('blob '+str(len(raw))).encode()+bytes([0])+raw).hexdigest()
                       if blob_sha!=sha: raise RuntimeError('Uploaded approved DOCX differs on Pages: '+filename+' '+blob_sha)
                       with zipfile.ZipFile(io.BytesIO(raw)) as z:
                           assert 'word/document.xml' in z.namelist(),filename
