@@ -42,6 +42,46 @@ function zoneList(d){
  return [...set.values()];
 }
 const refText='Наредба за условията и реда за извършване на оценка за съвместимостта на планове, програми, проекти и инвестиционни предложения с предмета и целите на опазване на защитените зони (Наредбата за ОС)';
+function characterizationDraft(i,int,d){
+ const loc=int.loc?', '+int.loc:'';
+ const base=[
+  'Предметът на проекта е „'+int.title+'“ за имотите с идентификатори '+int.ids+loc+'. Дейностите, капацитетът, строителните граници, временните площадки и необходимите инфраструктурни връзки се уточняват по уведомлението и проектната документация.',
+  'За електроснабдяването се изисква конкретно описание на присъединяването, трасетата, строително-монтажните работи и съгласуванията с оператора; потенциалното им попадане в зоната следва да се провери.',
+  'За водоснабдяването се уточняват източникът, необходимите количества, трасето на евентуално присъединяване и необходимостта от нови съоръжения в или близо до защитената зона.',
+  'За отпадъчните води се уточняват видът, количествата, събирането, пречистването и отвеждането; липсата на заявено заустване не замества доказано техническо решение.'
+ ];
+ return base[i]+' '+reviewMarker('непотвърдени параметри и източници — '+['предмет','електроснабдяване','водоснабдяване','отпадъчни води'][i]);
+}
+function legalDraft(i,int,d){
+ const z=zones(d)||reviewMarker('идентификация на защитена зона');
+ const a=[
+  'ГИС анализът удостоверява пространствено пресичане между имотите '+int.ids+' и '+z+'. В този случай следва да се извърши преценка на приложимите разпоредби от Закона за биологичното разнообразие и Наредбата за ОС, като се разграничат установеното местоположение, допустимостта спрямо режимите и вероятността от въздействие.',
+  'За '+z+' приложимият режим и конкретните ограничения се установяват чрез заповедта за обявяване, последващите изменения и специфичните цели на опазване. Самото пресичане не доказва нито допустимост, нито недопустимост на заявените дейности.',
+  'За процедурната преценка се съпоставят чл. 31 от Закона за биологичното разнообразие и релевантните хипотези на Наредбата за ОС с конкретните дейности, инженерни връзки, земеползване и евентуалните други проекти. Приложимият член, алинея и точка се посочват след проверка на нормативния архив.',
+  'Данните за пресичане не заместват проучването на засегнатите местообитания и видове, целите на опазване и възможните преки, косвени и съвкупни въздействия. Необходимите доказателства следва да бъдат свързани с конкретни източници.',
+ ];
+ return a[i]+' '+reviewMarker('правен и доказателствен извод '+(i+1));
+}
+function impactDraft(i,int,d){
+ const z=zones(d)||'засегнатата зона';
+ const a=[
+  'Пряко засягане на природни местообитания: следва да се наложи реалният строителен отпечатък, включително временните площадки и трасетата, върху пространствените данни за природните местообитания, предмет на опазване в '+z+'. Имотното пресичане само по себе си не доказва наличие или унищожаване на местообитание.',
+  'Видове и местообитания на видове: преценява се дали дейностите могат да доведат до загуба, фрагментация, бариерен ефект или нарушаване на екологични връзки, с оглед конкретните цели на опазване за '+z+'.',
+  'Безпокойство: изследват се шум, светлина, транспорт и сезонност на строителните и експлоатационните дейности спрямо чувствителните видове в защитената зона.',
+  'Води, почви и емисии: оценяват се земни работи, повърхностен отток, отпадъчни води, замърсяване и вероятните пътища за разпространение към природните местообитания и видовете.',
+  'Кумулативни въздействия и цялост на зоната: разглеждат се други планове и инвестиционни предложения, трасетата на инженерните връзки и функционалната свързаност; липсата на данни не е доказателство за липса на въздействие.'
+ ];
+ return a[i]+' '+reviewMarker('конкретизиране и доказателства за направление '+(i+1));
+}
+function cleanAIPart(t){
+ const s=clean(t).replace(/\s*\[(?:ЗА ЕКСПЕРТНА ПРОВЕРКА|ОТКЪС ОТ ПРЕПИСКАТА)[^\]]*\]/gi,'').replace(/\s+/g,' ').trim();
+ return s&&!/^(?:НЯМА ДАННИ|не са предоставени данни)$/i.test(s)?s:'';
+}
+function evidenceText(para,fallback){
+ const t=cleanAIPart(para);
+ return t? t+' '+reviewMarker('сверяване на фактите и правните основания'):fallback;
+}
+
 const all=(el,name)=>Array.from(el.getElementsByTagNameNS(NS,name));
 const text=p=>all(p,'t').map(t=>t.textContent).join('');
 function put(p,value){
@@ -132,17 +172,16 @@ async function classic(scenario,paragraphs,m,context={}){
  }
  // For a new case do not inherit the specimen's factual characterization.
  // A missing or unverified paragraph remains visibly pending expert review.
- const characteristicNames=['предвидени дейности','електроснабдяване','водоснабдяване','отпадъчни води'];
  for(let i=0;i<4;i++){
-  const value=reviewText(paragraphs[i])?clean(paragraphs[i])
-    :'[ЗА ЕКСПЕРТНА ПРОВЕРКА — '+characteristicNames[i]+': данните се установяват от конкретната преписка.]';
-  put(p[18+i],i===0&&reviewText(value)?char1(value):value);
+  const confirmed=reviewText(paragraphs[i]);
+  const value=confirmed?clean(paragraphs[i]):characterizationDraft(i,int,d);
+  put(p[18+i],i===0&&confirmed?char1(value):value);
  }
  const legal=m.legalParagraphs||[],impact=m.impactFindings||[];
  // Unknown legal and impact findings do not prevent creating an unsigned draft.
  // Missing evidence must not silently inherit findings from the approved example.
- const textLegal=i=>validated(legal,i)||'[ЗА ЕКСПЕРТНА ПРОВЕРКА — правна констатация '+(i+1)+': приложимостта се установява по преписката и нормативния архив.]';
- const textImpact=i=>validated(impact,i)||'[ЗА ЕКСПЕРТНА ПРОВЕРКА — въздействие '+(i+1)+': преценката се извършва спрямо предмета и целите на опазване на засегнатите защитени зони.]';
+ const textLegal=i=>validated(legal,i)||legalDraft(i,int,d);
+ const textImpact=i=>validated(impact,i)||impactDraft(i,int,d);
  // A draft must remain possible when no final procedure decision has been verified.
  // Do not copy the example case's conclusion into a different dossier.
  const procedureText=reviewText(m.procedureFinding)?clean(m.procedureFinding)
@@ -183,14 +222,18 @@ async function expert(draft,options={}){
  put(p[6],party(m.recipient,'recipient'));put(p[7],party(m.address,'address'));
  put(p[10],heading(int));
  introParagraph(p,17,int,true);
- put(p[20],safe(ai.CHARACTERIZATION[0],'предмет на инвестиционното предложение'));
- put(p[21],safe(ai.CHARACTERIZATION.slice(1).join('\n\n')||draft.characterization.slice(1).join(' '),'инженерни характеристики'));
+ put(p[20],evidenceText(ai.CHARACTERIZATION[0],characterizationDraft(0,int,draft)));
+ const engineering=ai.CHARACTERIZATION.slice(1).map(cleanAIPart).filter(Boolean);
+ put(p[21],engineering.length?evidenceText([...new Set(engineering)].join(' '),characterizationDraft(1,int,draft)):characterizationDraft(1,int,draft)+' '+characterizationDraft(2,int,draft)+' '+characterizationDraft(3,int,draft));
  put(p[23],spatial(draft,int));
  put(p[24],locationSentence(m,draft));
- put(p[25],safe(ai.LEGAL[0],'нормативен режим'));
- for(let i=0;i<3;i++)put(p[26+i],safe(ai.LEGAL[i+1]||m.legalParagraphs?.[i],'правно основание '+(i+1)));
- put(p[31],safe(ai.IMPACTS[0],'обобщена преценка на въздействията'));
- for(let i=0;i<5;i++)put(p[32+i],safe(ai.IMPACTS[i+1]||m.impactFindings?.[i],'въздействие '+(i+1)));
+ put(p[25],legalDraft(0,int,draft));
+ for(let i=0;i<3;i++){
+   const supplied=validated(m.legalParagraphs,i);
+   put(p[26+i],supplied||legalDraft(i+1,int,draft));
+ }
+ put(p[31],evidenceText(ai.IMPACTS[0], 'Направленията на възможните въздействия се анализират спрямо предмета и целите на опазване на '+zones(draft)+'. '+reviewMarker('доказателствен анализ')));
+ for(let i=0;i<5;i++)put(p[32+i],evidenceText(ai.IMPACTS[i+1],impactDraft(i,int,draft)));
  const blockedProcedure=/(?:не е приложима процедура|не подлежи на процедура|не се изисква оценка|не се налага|не се изисква|не подлежи|няма вероятност|малко вероятно|незначителн(?:о|и|а) въздейств|не се очаква въздейств|липса на значими въздействия|не поражда въздействия|не оказва въздействие|ниск[аио] риск)/i;
  const reviewedProcedure=(ai.PROCEDURE||[]).filter(t=>!blockedProcedure.test(t));
  put(p[38],reviewedProcedure.length?safe(reviewedProcedure[0],'процедурна преценка'):'Приложимата процедура се определя след експертна проверка на пълната преписка, пространствените резултати и относимите нормативни основания. Само липсата на териториално пресичане не е достатъчно основание за окончателен процедурен извод.');
