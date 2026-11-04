@@ -1,13 +1,22 @@
 == dependency installation ==
 npm warn deprecated @xmldom/xmldom@0.9.8: this version has critical issues, please update to the latest version
 
-added 2 packages in 706ms
+added 2 packages in 667ms
 == JS syntax ==
 == three approved templates and synthetic scenario B ==
 KT35-A PASS 41 paragraphs 37 unchanged paragraphs
 KT39-B PASS 43 paragraphs 39 unchanged paragraphs
 V27-R02 PASS 49 paragraphs 45 unchanged paragraphs
+KT44 A ADMINISTRATION PASS: subject de-duplication, address/recipient, complete legal introduction
 KT43 INCOMPLETE DOSSIER PASS: four characteristics are review fields, not copied conclusions
-KT43 regression PASS: scenario B creates both reviewed DOCX drafts without unverified legal or procedure conclusions
+AssertionError [ERR_ASSERTION]: AI characterization repeated review markers
+    at /home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:102:9 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
 
-Exit code: 0
+Exit code: unknown
