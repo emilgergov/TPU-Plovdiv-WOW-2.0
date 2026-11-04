@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'v26-test/v27-preview/kt53-locked-generator-test.html'
+      - 'v26-test/v27-preview/kt53b-original-pair-test.html'
       - 'v26-test/v27-preview/kt53-original-draft-package.js'
       - '.github/workflows/kt53-locked-generator.yml'
   workflow_dispatch:
@@ -38,6 +39,10 @@ jobs:
           package=Path('v26-test/v27-preview/kt53-original-draft-package.js').read_text()
           assert "KT41_EXACT_KT35_KT39" in package and "KT41_EXACT_V27_R02" in package
           assert 'KT51_APPROVED_CLASSIC_RESTORED' not in package
+          fresh=Path('v26-test/v27-preview/kt53b-original-pair-test.html').read_text()
+          assert 'kt53-original-draft-package.js?v=kt53b-original-b1d2cfb' in fresh
+          assert 'v27-kt50-original-kt42.js?v=kt53b-locked-b1d2cfb' in fresh
+          assert 'v26-draft-package.js?v=kt47' not in fresh
           assert 'v27-kt51-admin-only.js' not in html
           assert sha1(b'blob '+str(len(src)).encode()+b'\0'+src).hexdigest()=='2c879e0f743f9863051f4126769977e8f1dcf842'
           print('KT53 LOADER AND ORIGINAL SOURCE PASS')
@@ -45,12 +50,14 @@ jobs:
         shell: python
         run: |
           import urllib.request,time
-          url='https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt53-locked-generator-test.html'
+          url='https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt53b-original-pair-test.html'
+          base='https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/'
           for i in range(18):
             try:
               request=urllib.request.Request(url,headers={'Cache-Control':'no-cache'})
               page=urllib.request.urlopen(request,timeout=15).read().decode()
-              if 'КТ53 · КТ50 оригинален генератор' in page and 'v27-kt50-original-kt42.js?v=kt53-locked-b1d2cfb' in page:
+              pkg=urllib.request.urlopen(urllib.request.Request(base+'kt53-original-draft-package.js?v=kt53b-original-b1d2cfb',headers={'Cache-Control':'no-cache'}),timeout=15).read().decode()
+              if 'КТ53-B · оригинални Word и ZIP генератори' in page and 'v27-kt50-original-kt42.js?v=kt53b-locked-b1d2cfb' in page and 'kt53-original-draft-package.js?v=kt53b-original-b1d2cfb' in page and 'KT41_EXACT_KT35_KT39' in pkg and 'KT51_APPROVED_CLASSIC_RESTORED' not in pkg:
                 print('KT53 PUBLIC PAGES PASS',url)
                 break
             except Exception as e:
