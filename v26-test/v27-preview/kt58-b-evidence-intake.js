@@ -16,6 +16,9 @@ function show(results,draft=null){
  if(!modal)throw Error('КТ55: липсва редакторът за доказателствените данни.');
  const parcel=idsOf(results);
  if(!saved||saved.parcels!==parcel)saved=null;
+ modal.querySelectorAll('textarea[data-kt58-i],input[data-kt58-source]').forEach(el=>el.value='');
+ modal.querySelector('#kt58-confirm').checked=false;
+ modal.querySelector('[data-kt58-status]').textContent='';
  modal.querySelector('[data-kt58-parcels]').textContent=parcel;
  const inputs=Array.from(modal.querySelectorAll('textarea[data-kt58-i]'));
  if(saved){inputs.forEach((el,i)=>el.value=saved.values[i]);Array.from(modal.querySelectorAll('input[data-kt58-source]')).forEach((el,i)=>el.value=saved.sources[i]);modal.querySelector('#kt58-confirm').checked=true;}
