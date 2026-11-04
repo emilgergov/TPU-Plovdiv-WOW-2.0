@@ -26,6 +26,7 @@ jobs:
       - name: Check syntax in actual approved authors, bridge and package
         run: |
           node --check v26-test/v27-preview/v27-approved-classic-word-ab.js
+          node --check v26-test/v27-preview/v26-expert-word.js
           node --check v26-test/v27-preview/v27-approved-expert-word-r02.js
           node --check v26-test/v27-preview/v27-kt51-admin-only.js
           node --check v26-test/v27-preview/kt51-ai-characterization.js
@@ -47,7 +48,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           s=Path('v26-test/v27-preview/kt51-admin-test.html').read_text()
-          paths=['v27-preview/v27-approved-classic-word-ab.js','v27-preview/v27-approved-expert-word-r02.js','v27-preview/v27-kt51-admin-only.js?v=kt51-expert-markers-10','v27-preview/kt51-ai-characterization.js?v=kt51-uncertainty-9','v27-preview/v26-draft-package.js?v=kt51-ai-bridge-7']
+          paths=['v27-preview/v26-expert-word.js?v=kt51-impacts-filter-11','v27-preview/v27-approved-classic-word-ab.js','v27-preview/v27-approved-expert-word-r02.js','v27-preview/v27-kt51-admin-only.js?v=kt51-expert-markers-10','v27-preview/kt51-ai-characterization.js?v=kt51-uncertainty-9','v27-preview/v26-draft-package.js?v=kt51-ai-bridge-7']
           for a,b in zip(paths,paths[1:]):
             assert a in s and b in s and s.index(a)<s.index(b),(a,b)
           assert '<base href="../">' in s
@@ -77,7 +78,7 @@ jobs:
           from pathlib import Path
           import hashlib,time,urllib.request
           base='https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/'
-          files=['kt51-admin-test.html','v27-kt51-admin-only.js','kt51-ai-characterization.js','v26-draft-package.js']
+          files=['kt51-admin-test.html','v26-expert-word.js','v27-kt51-admin-only.js','kt51-ai-characterization.js','v26-draft-package.js']
           def digest(x): return hashlib.sha256(x).hexdigest()
           for attempt in range(30):
             try:
