@@ -108,6 +108,32 @@ async function test(name,blob,variable){
  }
  console.log(name, 'PASS',got.p.length,'paragraphs',compared,'unchanged paragraphs');
 }
+// KT47: check the actual production EKATTE mapping in the package source
+// rather than a test-only copy of its code.
+const packageSource=fs.readFileSync(path.join(base,'v26-draft-package.js'),'utf8');
+const kt47Start=packageSource.indexOf('const KT47_EKATTE=');
+const kt47End=packageSource.indexOf('async function make(results,roles,register)',kt47Start);
+assert(kt47Start>=0&&kt47End>kt47Start,'KT47 EKATTE helper missing');
+const ekatteSandbox={};
+vm.runInNewContext(packageSource.slice(kt47Start,kt47End)+ '\nthis.verify=kt47VerifiedAdministration;',ekatteSandbox);
+for(const fixture of [
+ {id:'56784.13.102',settlement:'гр. Пловдив',municipality:'Пловдив',region:'Пловдив'},
+ {id:'36676.129.457',settlement:'с. Катуница',municipality:'Садово',region:'Пловдив'}
+]){
+ const m={settlement:fixture.settlement};
+ ekatteSandbox.verify([{input:fixture.id}],m);
+ assert.equal(m.municipality,fixture.municipality,'KT47 municipality for '+fixture.id);
+ assert.equal(m.region,fixture.region,'KT47 region for '+fixture.id);
+ assert.match(m.kt47EkatteSource,/nsi\.bg/,'KT47 official evidence link');
+}
+const contradictory={settlement:'с. Катуница',municipality:'Пловдив'};
+ekatteSandbox.verify([{input:'36676.129.457'}],contradictory);
+assert.equal(contradictory.municipality,'Пловдив','KT47 must not overwrite conflicting confirmed administration');
+assert.equal(contradictory.region,undefined,'KT47 must not supply data for contradictory cases');
+const mixed={};
+ekatteSandbox.verify([{input:'56784.13.102'},{input:'36676.129.457'}],mixed);
+assert.equal(mixed.municipality,undefined,'KT47 mixed settlements cannot borrow one municipality');
+console.log('KT47 EKATTE PASS: two official cadastral mappings; contradictory and mixed cases safely rejected');
 (async()=>{
  await test('KT35-A',await sandbox.V26TemplateWord.make('А',verified,meta,{determination:{scenario:'А',zones:[]}}),[0,1,6,7,10,16,17,23]);
  const approvedA=await sandbox.V26TemplateWord.make('А',verified,meta,{determination:{scenario:'А',zones:[]}});
