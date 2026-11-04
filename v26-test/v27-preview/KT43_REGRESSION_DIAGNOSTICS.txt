@@ -1,7 +1,7 @@
 == dependency installation ==
 npm warn deprecated @xmldom/xmldom@0.9.8: this version has critical issues, please update to the latest version
 
-added 2 packages in 2s
+added 2 packages in 858ms
 == JS syntax ==
 == three approved templates, two scenarios, full place headings ==
 AssertionError [ERR_ASSERTION]: KT35-A paragraph 17 changed
