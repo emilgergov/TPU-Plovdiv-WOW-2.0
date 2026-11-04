@@ -1,0 +1,26 @@
+name: KT54 Word B specimen regression
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'v26-test/v27-preview/kt54-locked-B-evidence-test.html'
+      - '.github/workflows/kt54-b-model.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  word-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install DOCX inspection libraries
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Verify approved A B and R02 Word content
+        run: node v26-test/v27-preview/kt50-original-kt42-regression.cjs
+      - name: Check model B source and original script link
+        run: |
+          grep -q 'KT39-B_ODOBREN_KONTROLEN_OBRAZEC.docx' v26-test/v27-preview/kt54-locked-B-evidence-test.html
+          grep -q 'v27-kt50-original-kt42.js?v=kt54-exact-original-b1d2cfb' v26-test/v27-preview/kt54-locked-B-evidence-test.html
