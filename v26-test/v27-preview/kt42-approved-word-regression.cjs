@@ -1,9 +1,23 @@
 /* KT42: test real approved Word files, not just source-code flags. */
 'use strict';
 const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');
+const crypto=require('crypto');
 const fflate=require('fflate');
 const {DOMParser,XMLSerializer}=require('@xmldom/xmldom');
 const base='v26-test/v27-preview';
+const approvedSha={
+ 'KT35-A.docx':'1a495fc2d6047a6377e48dfb963a737502404087',
+ 'KT39-B.docx':'508402ce5a631617bdc0da4ca9d9cd535b6b3b7c',
+ 'V27-R02.docx':'335634ab930253671dc090391ed366867ca7e438'
+};
+for(const [name,expected] of Object.entries(approvedSha)){
+ const bytes=fs.readFileSync(path.join(base,'etalon',name));
+ const header=Buffer.from('blob '+bytes.length+'\\0');
+ const actual=crypto.createHash('sha1').update(header).update(bytes).digest('hex');
+ assert.equal(actual,expected,'LOCKED USER-APPROVED DOCX CHANGED: '+name);
+}
+console.log('KT47 USER APPROVED ETALON LOCK PASS: exact 3 original binary Word documents');
+
 const demo=new DOMParser().parseFromString('<r><x/><y/></r>','application/xml').documentElement;
 Object.defineProperty(Object.getPrototypeOf(demo),'children',{configurable:true,get(){return Array.from(this.childNodes||[]).filter(n=>n.nodeType===1)}});
 const sandbox={fflate,DOMParser,XMLSerializer,Blob,TextDecoder,TextEncoder,console,document:{},V26TemplateWord:{make(){throw Error('should not call old generator');},templatePaths:{A:'',B:''}},V26ExpertWord:{make(){throw Error('should not call old generator');}}};
