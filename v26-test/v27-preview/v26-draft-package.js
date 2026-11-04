@@ -339,11 +339,11 @@ async function make(results,roles,register){
  register={...register,verifiedCaseMetadata:caseMetadata};
  const dossierEvidence=register?.unifiedContext?.commonEvidence||null;
  // Use ONLY article-level, source-traceable excerpts in the internal normative archive.
- const legalSources=(register?.records||[]).filter(r=>r?.verified===true&&r?.verified_scope&&r?.article&&r?.source&&r?.project_revision_accepted===true).map(r=>({
+ const verifiedLegalSources=(register?.records||[]).filter(r=>r?.verified===true&&r?.verified_scope&&r?.article&&r?.source&&r?.project_revision_accepted===true).map(r=>({
   id:r.id,title:r.title,source:r.source,article:r.article,page:r.page,
   verifiedScope:r.verified_scope,projectRevisionAccepted:true,revisionVerified:r.revision_verified===true
  }));
- const expertDraft=window.V26ExpertDraft?.build({results,roles:normalized,determination,metadata:caseMetadata,paragraphs,evidence:dossierEvidence,aiDraft:register?.v27AiDraft||'',legalSources});
+ const expertDraft=window.V26ExpertDraft?.build({results,roles:normalized,determination,metadata:caseMetadata,paragraphs,evidence:dossierEvidence,aiDraft:register?.v27AiDraft||'',legalSources:verifiedLegalSources});
  if(!expertDraft)throw Error('КТ13: липсва единният експертен проект.');
  if(!window.V26ExpertWord?.make)throw Error('КТ13: липсва генераторът за експертния Word.');
  const overviewMap=results.length>1?(window.V27MultiParcelMap?.build(results,register?.zoneFeatures||[])||null):(register?.mapSvg||null);
