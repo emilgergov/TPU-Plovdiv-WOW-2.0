@@ -1,0 +1,43 @@
+name: KT59 verified GIS B zone routing
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'v26-test/v27-preview/kt59-b-zone-guard-test.html'
+      - '.github/workflows/kt59-b-zone-guard.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  recognize-B:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install DOCX regression dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Verify original approved Word documents unchanged
+        run: node v26-test/v27-preview/kt50-original-kt42-regression.cjs
+      - name: Check actual B route regex on GIS zone and parcel
+        run: |
+          node <<'JS'
+          const fs=require('fs'),assert=require('assert');
+          const html=fs.readFileSync('v26-test/v27-preview/kt59-b-zone-guard-test.html','utf8');
+          const m=html.match(/filter\(z=>(\/\^BG.*?\/).test\(z\)\)/);
+          assert(m,'B route zone match exists');
+          const zone=new Function('return '+m[1])();
+          assert(zone.test('BG0000194'),'BG0000194 must trigger B review');
+          assert(zone.test('BG0000578'),'BG0000578 must trigger B review');
+          assert(!zone.test('BG000019'),'malformed code must not trigger');
+          const p=html.match(/const ids=\(document.getElementById\('ids'\).*?\)\.match\((\/.*?\/g)\)/);
+          assert(p,'parcel regex is available');
+          const parcel=new Function('return '+p[1])();
+          assert('36676.129.457'.match(parcel)?.[0]==='36676.129.457');
+          assert(html.includes('KT58BPreflight.prepare(workingDraft,found)'));
+          assert(html.includes("if(verifiedZones.length)"));
+          assert(html.includes('kt59-b-proof-1'));
+          assert(!html.includes('kt53d-b-characterization-word.js'));
+          console.log('KT59 GIS B route and approved Word regression PASS');
+          JS
