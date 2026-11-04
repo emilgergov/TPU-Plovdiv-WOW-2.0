@@ -55,6 +55,20 @@ async function test(name,blob,variable){
  await test('KT35-A',await sandbox.V26TemplateWord.make('А',verified,meta,{determination:{scenario:'А',zones:[]}}),[6,7,10,16]);
  await test('KT39-B',await sandbox.V26TemplateWord.make('Б',verified,meta,{determination:{scenario:'Б',zones:['BG0000578']}}),[6,7,10,16]);
  await test('V27-R02',await sandbox.V26ExpertWord.make({schema:'KT13_EXPERT_DRAFT_V1',scenario:'А',metadata:meta,aiDraft:'',parcels:[]},{requireAiAuthor:true}),[6,7,10,17]);
+ const aWithDuplicatedSubject={...meta,
+  subject:'„Складове за промишлени стоки и офиси“ в ПИ с идентификатор 56784.13.102, населено място гр. Пловдив, местност Рогошко шосе - север',
+  location:'населено място гр. Пловдив, местност Рогошко шосе - север',
+  recipient:'ДО ВЪЗЛОЖИТЕЛЯ НА ИНВЕСТИЦИОННОТО ПРЕДЛОЖЕНИЕ',
+  address:'Адрес за кореспонденция: [ЗА ПОПЪЛВАНЕ]'};
+ const caseA=await sandbox.V26TemplateWord.make('А',verified,aWithDuplicatedSubject,{determination:{scenario:'А',zones:[]}});
+ const resultA=checkAdministrative(await caseA.arrayBuffer(),'A','Складове за промишлени стоки и офиси','56784.13.102');
+ assert.match(phrase(resultA[6]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/,'A recipient missing flag');
+ assert.match(phrase(resultA[7]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/,'A address missing flag');
+ assert.doesNotMatch(phrase(resultA[10]),/север“ в поземлени/,'A trailing quote regression');
+ const expertA=await sandbox.V26ExpertWord.make({schema:'KT13_EXPERT_DRAFT_V1',scenario:'А',metadata:aWithDuplicatedSubject,aiDraft:'',parcels:[]},{requireAiAuthor:true});
+ const expertAp=checkAdministrative(await expertA.arrayBuffer(),'E','Складове за промишлени стоки и офиси','56784.13.102');
+ assert.match(phrase(expertAp[7]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
+ console.log('KT44 A ADMINISTRATION PASS: subject de-duplication, address/recipient, complete legal introduction');
  const differing={...meta,parcelIds:'36676.129.457',subject:'Учебен казус — изпитване на сценарий с пресичане',procedureFinding:'[ЗА ЕКСПЕРТНА ПРОВЕРКА — приложима процедура]'};
  const syntheticB=await sandbox.V26TemplateWord.make('Б',verified,differing,{determination:{scenario:'Б',zones:['BG0000194']}});
  const caseB=checkAdministrative(await syntheticB.arrayBuffer(),'B','Учебен казус','36676.129.457')&&pList(await syntheticB.arrayBuffer());
@@ -85,6 +99,7 @@ async function test(name,blob,variable){
  assert.match(phrase(resultE.p[39]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
  assert.match(phrase(resultE.p[23]),/36676\.129\.457/);
  assert.match(phrase(resultE.p[24]),/BG0000194.*Река Чая/,'expert B zone');
+ assert.ok((phrase(resultE.p[21]).match(/ЗА ЕКСПЕРТНА ПРОВЕРКА/g)||[]).length<=1,'AI characterization repeated review markers');
  assert.match(phrase(resultE.p[26]),/чл\. 31|зона|режим/,'expert B legal references');
 
  console.log('KT43 regression PASS: scenario B creates both reviewed DOCX drafts without unverified legal or procedure conclusions');
