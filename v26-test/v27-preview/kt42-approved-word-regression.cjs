@@ -128,8 +128,8 @@ async function test(name,blob,variable){
  const caseA=await sandbox.V26TemplateWord.make('А',verified,aWithDuplicatedSubject,{determination:{scenario:'А',zones:[]}});
  const resultA=checkAdministrative(await caseA.arrayBuffer(),'A','Складове за промишлени стоки и офиси','56784.13.102');
  assertKT46ClassicalLayout(await caseA.arrayBuffer(),'A');
- assert.match(phrase(resultA[6]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/,'A recipient missing flag');
- assert.match(phrase(resultA[7]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/,'A address missing flag');
+ assert.equal(phrase(resultA[6]),'Възложителя: ХХХХХХХХХХХХ','A recipient approved placeholder');
+ assert.equal(phrase(resultA[7]),'Адрес: ХХХХХХХХХХХХ','A address approved placeholder');
  assert.doesNotMatch(phrase(resultA[10]),/север“ в поземлени/,'A trailing quote regression');
  const expertA=await sandbox.V26ExpertWord.make({schema:'KT13_EXPERT_DRAFT_V1',scenario:'А',metadata:aWithDuplicatedSubject,aiDraft:'',parcels:[]},{requireAiAuthor:true});
  const expertAp=checkAdministrative(await expertA.arrayBuffer(),'E','Складове за промишлени стоки и офиси','56784.13.102');
