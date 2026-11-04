@@ -102,20 +102,22 @@ async function classic(scenario,paragraphs,m,context={}){
    throw Error('КТ42: липсват доказани правни основания за новата преписка. Одобрените аргументи от примерния казус не се пренасят.');
  if(Array.from({length:5},(_,i)=>textImpact(i)).some(v=>!v))
    throw Error('КТ42: липсва проверена оценка на петте направления на въздействие.');
- if(!reviewText(m.procedureFinding))
-   throw Error('КТ42: липсва потвърден процедурен извод; не се копира от еталона.');
+ // A draft must remain possible when no final procedure decision has been verified.
+ // Do not copy the example case's conclusion into a different dossier.
+ const procedureText=reviewText(m.procedureFinding)?clean(m.procedureFinding)
+  :'[ЗА ЕКСПЕРТНА ПРОВЕРКА — приложимата процедура и окончателният извод се определят от компетентния орган по пълната преписка и относимите нормативни основания.]';
  if(k==='A'){
   put(p[22],spatial({...d,scenario:'А'},int));
   put(p[23],'Най-близко разположена защитена зона: '+locationSentence(m,{scenario:'А'})+'.');
   put(p[24],textLegal(0));put(p[25],textLegal(1));
   for(let i=0;i<5;i++)put(p[26+i],textImpact(i));
-  put(p[31],safe(m.procedureFinding,'окончателна преценка на компетентния орган'));
+  put(p[31],procedureText);
  }else{
   put(p[22],textLegal(0));put(p[23],spatial({...d,scenario:'Б',zones:d.zones},int));
   put(p[24],locationSentence(m,{scenario:'Б'}));
   put(p[25],textLegal(1));put(p[26],textLegal(2));put(p[27],textLegal(3));
   for(let i=0;i<5;i++)put(p[28+i],textImpact(i));
-  put(p[33],safe(m.procedureFinding,'окончателна преценка на компетентния орган'));
+  put(p[33],procedureText);
  }
  return finish(doc,'КТ'+(k==='A'?'35-А':'39-Б'));
 }
@@ -152,8 +154,10 @@ async function expert(draft,options={}){
  const reviewedProcedure=(ai.PROCEDURE||[]).filter(t=>!blockedProcedure.test(t));
  put(p[38],reviewedProcedure.length?safe(reviewedProcedure[0],'процедурна преценка'):'Приложимата процедура се определя след експертна проверка на пълната преписка, пространствените резултати и относимите нормативни основания. Само липсата на териториално пресичане не е достатъчно основание за окончателен процедурен извод.');
  const conclusion=safe(m.procedureFinding,'проект на заключение');
- if(!reviewText(conclusion)||blockedProcedure.test(conclusion))throw Error('КТ42: за нова преписка е необходим доказан процедурен извод.');
- put(p[39],conclusion);
+ const safeConclusion=reviewText(conclusion)&&!blockedProcedure.test(conclusion)
+  ?conclusion
+  :'[ЗА ЕКСПЕРТНА ПРОВЕРКА — окончателният процедурен извод не е потвърден по пълната преписка. Наличието на пресичане само по себе си не определя вида на необходимата процедура.]';
+ put(p[39],safeConclusion);
  return finish(doc,'V27 R02');
 }
 root.V26TemplateWord=Object.freeze({make:classic,templatePaths:classicBase.templatePaths,layout:'KT41_EXACT_KT35_KT39'});
