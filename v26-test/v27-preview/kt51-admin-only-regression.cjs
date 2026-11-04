@@ -80,6 +80,11 @@ async function test(name,blob,variable){
  const unsupported={...novel,procedureFinding:'[ЗА ЕКСПЕРТНА ПРОВЕРКА — приложима процедура]'};
  const reviewB=pList(await (await sandbox.V26TemplateWord.make('Б',verified,unsupported,{determination:{scenario:'Б',zones:['BG0000194']}})).arrayBuffer());
  assert.ok(phrase(reviewB.p[33]).includes('ЗА ЕКСПЕРТНА ПРОВЕРКА'),'KT51 unsupported B procedure must be marked, not copied');
+ const uncertainCharacterization=['[ЗА ЕКСПЕРТНА ПРОВЕРКА — описание]','НЯМА ДАННИ','Проверена характеристика на водоснабдяването','Проверена характеристика на отпадъчните води'];
+ const reviewBChar=pList(await (await sandbox.V26TemplateWord.make('Б',uncertainCharacterization,novel,{determination:{scenario:'Б',zones:['BG0000194']}})).arrayBuffer());
+ assert.ok(phrase(reviewBChar.p[18]).includes('ЗА ЕКСПЕРТНА ПРОВЕРКА — характеристика 1'),'KT51 B missing first characterization must not block ZIP');
+ assert.ok(phrase(reviewBChar.p[19]).includes('ЗА ЕКСПЕРТНА ПРОВЕРКА — характеристика 2'),'KT51 B missing second characterization must be visible');
+ assert.equal(phrase(reviewBChar.p[20]),uncertainCharacterization[2],'KT51 verified third characterization changed');
  const differing={...meta,parcelIds:'12345.1.1',subject:'Различно предложение',recipient:'',address:'',incomingReference:''};
  const reviewA=pList(await (await sandbox.V26TemplateWord.make('А',verified,differing,{determination:{scenario:'А',zones:[]}})).arrayBuffer());
  assert.equal(phrase(reviewA.p[6]),'Възложител: '+('Х'.repeat(10)),'KT51 missing recipient placeholder');
