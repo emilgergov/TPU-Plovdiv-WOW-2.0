@@ -18,7 +18,7 @@ function show(results){
  if(!saved||saved.parcels!==parcel)saved=null;
  modal.querySelector('[data-kt55-parcels]').textContent=parcel;
  const inputs=Array.from(modal.querySelectorAll('textarea[data-kt55-i]'));
- if(saved){inputs.forEach((el,i)=>el.value=saved.values[i]);modal.querySelector('#kt55-confirm').checked=true;}
+ if(saved){inputs.forEach((el,i)=>el.value=saved.values[i]);Array.from(modal.querySelectorAll('input[data-kt55-source]')).forEach((el,i)=>el.value=saved.sources[i]);modal.querySelector('#kt55-confirm').checked=true;}
  modal.showModal();
 }
 function missing(values){
@@ -29,19 +29,22 @@ function missing(values){
 function capture(results){
  const dlg=document.getElementById('kt55-evidence-dialog');
  const values=Array.from(dlg.querySelectorAll('textarea[data-kt55-i]')).map(e=>clean(e.value));
+ const sources=Array.from(dlg.querySelectorAll('input[data-kt55-source]')).map(e=>clean(e.value));
  const absent=missing(values);
+ sources.forEach((source,i)=>{if(placeholder(source))absent.push('Източник за правно основание '+(i+1));});
  const status=dlg.querySelector('[data-kt55-status]');
  if(absent.length){status.textContent='Непотвърдени: '+absent.join('; ')+'.';return false;}
  if(!dlg.querySelector('#kt55-confirm').checked){status.textContent='Потвърждението от експерта е задължително.';return false;}
- saved={parcels:idsOf(results),values};
+ saved={parcels:idsOf(results),values,sources};
  dlg.close();return true;
 }
 function prepare(draft,results){
  if(!readyFor(results))return {ok:false,missing:['Липсват потвърдени доказателствени полета за текущия набор имоти.']};
  const v=saved.values,absent=missing(v);
+ saved.sources.forEach((source,i)=>{if(placeholder(source))absent.push('Източник за правно основание '+(i+1));});
  if(absent.length)return {ok:false,missing:absent};
  const paragraphs=v.slice(0,4),legalParagraphs=v.slice(4,8),impactFindings=v.slice(8,13),procedureFinding=v[13];
- const metadata={...(draft.metadata||{}),legalParagraphs,legalFindingSources:legalParagraphs.map(_=>'Експертно потвърдено по текущата преписка (КТ55)'),impactFindings,procedureFinding};
+ const metadata={...(draft.metadata||{}),legalParagraphs,legalFindingSources:saved.sources,impactFindings,procedureFinding};
  return {ok:true,draft:{...draft,paragraphs,metadata}};
 }
 function reset(){saved=null;}
@@ -55,7 +58,9 @@ function mount(){
   const wrap=document.createElement('div');wrap.style='margin:12px 0';
   const l=document.createElement('label');l.textContent=label;l.htmlFor='kt55-f'+i;l.style='display:block;font-weight:bold';
   const t=document.createElement('textarea');t.id='kt55-f'+i;t.dataset.kt55I=i;t.rows=3;t.style='display:block;width:100%;border:1px solid #afc2b3;border-radius:6px;padding:7px';
-  wrap.append(l,t);d.appendChild(wrap);
+  wrap.append(l,t);
+  if(i>=4&&i<=7){const source=document.createElement('input');source.type='text';source.dataset.kt55Source=i-4;source.placeholder='Документ, член/страница или друг проверим източник';source.style='display:block;width:100%;margin-top:5px;padding:7px';wrap.appendChild(source);}
+  d.appendChild(wrap);
  });
  const confirm=document.createElement('label');confirm.style='display:flex;gap:10px;align-items:flex-start;margin:12px 0';const cb=document.createElement('input');cb.type='checkbox';cb.id='kt55-confirm';confirm.append(cb,document.createTextNode('Потвърждавам, че всички въведени текстове са проверени за тази преписка. Не са копирани непроверени фактически или процедурни изводи от еталоните.'));d.appendChild(confirm);
  const status=document.createElement('p');status.dataset.kt55Status='1';status.setAttribute('role','status');d.appendChild(status);
