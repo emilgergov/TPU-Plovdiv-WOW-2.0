@@ -1,0 +1,35 @@
+name: V27 KT48 mosaic — canonical A/B/R02 regression
+on:
+  push:
+    paths:
+      - '.github/workflows/v27-kt48-mosaic.yml'
+      - 'v26-test/v27-preview/v27-kt41-etalon-bridge.js'
+      - 'v26-test/v27-preview/kt42-approved-word-regression.cjs'
+      - 'v26-test/v27-preview/etalon/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mosaic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install DOCX validation dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Verify browser JS syntax
+        run: |
+          node --check v26-test/v27-preview/v27-kt41-etalon-bridge.js
+          node --check v26-test/v27-preview/kt42-approved-word-regression.cjs
+      - name: KT48 — actual DOCX A/B/R02 original-format and content regression
+        run: |
+          set -o pipefail
+          node v26-test/v27-preview/kt42-approved-word-regression.cjs 2>&1 | tee KT48_MOSAIC_TEST_LOG.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: KT48-Mosaic-Word-Regression
+          path: KT48_MOSAIC_TEST_LOG.txt
+          if-no-files-found: ignore
