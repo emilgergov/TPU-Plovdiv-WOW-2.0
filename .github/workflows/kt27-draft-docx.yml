@@ -15,6 +15,7 @@ on:
       - 'v26-test/v27-preview/kt37-*'
       - 'v26-test/v27-preview/kt38-*'
       - 'v26-test/v27-preview/kt39-*'
+      - 'v26-test/v27-preview/v27-expert-*'
       - '.github/workflows/kt27-draft-docx.yml'
   workflow_dispatch:
 permissions:
