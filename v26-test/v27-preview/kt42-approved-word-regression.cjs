@@ -157,9 +157,12 @@ async function test(name,blob,variable){
  assert.match(phrase(incompleteB.p[29]),/Видове|видове|местообитания/,'review must identify specific impact pathways');
 
  assert.equal(incompleteB.p.length,43);
- for(let i=18;i<=21;i++)assert.match(phrase(incompleteB.p[i]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
+ for(let i=18;i<=21;i++){
+  assert.doesNotMatch(phrase(incompleteB.p[i]),/\[ЗА ЕКСПЕРТНА ПРОВЕРКА|непотвърдени параметри и източници/, 'no internal QA markers in classical characteristics '+i);
+  assert.match(phrase(incompleteB.p[i]),/подлежат на (?:уточняване|потвърждение)/, 'evidence uncertainty must remain explicit '+i);
+ }
  assert.doesNotMatch(phrase(incompleteB.p[18]),/складов обект/i);
- console.log('KT43 INCOMPLETE DOSSIER PASS: four characteristics are review fields, not copied conclusions');
+ console.log('KT46 INCOMPLETE DOSSIER PASS: four administrative characteristics contain explicit evidence reservations without internal QA markers');
  const expertB=await sandbox.V26ExpertWord.make(draft,{requireAiAuthor:true});
  checkAdministrative(await expertB.arrayBuffer(),'E','Учебен казус','36676.129.457');
  const resultE=pList(await expertB.arrayBuffer());
