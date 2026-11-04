@@ -1,6 +1,6 @@
 {
   "checkpoint": "KT47",
-  "verified_commit": "aab4ae900b8d977515bdaea0e7dcd70d42c27eeb",
+  "verified_commit": "fca71ad64a2aa36d34ead1bcef0f11c948b3b94c",
   "tests": "Exact user-approved A/B/R02 binary hashes + layout, metadata and GIS checks: PASS",
   "status": "verified-for-preview"
 }
