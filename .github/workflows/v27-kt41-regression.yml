@@ -1,0 +1,38 @@
+name: V27 KT41 exact Word regression
+on:
+  push:
+    paths:
+      - '.github/workflows/v27-kt41-regression.yml'
+      - 'v26-test/v27-preview/v27-kt41-etalon-bridge.js'
+      - 'v26-test/v27-preview/v26-draft-package.js'
+      - 'v26-test/v27-preview/index.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify JavaScript syntax and active etalon integration
+        run: |
+          node --check v26-test/v27-preview/v27-kt41-etalon-bridge.js
+          node --check v26-test/v27-preview/v26-draft-package.js
+          python - <<'PY'
+          from pathlib import Path
+          base=Path('v26-test/v27-preview')
+          page=(base/'index.html').read_text()
+          bridge=(base/'v27-kt41-etalon-bridge.js').read_text()
+          package=(base/'v26-draft-package.js').read_text()
+          for name in ('KT35-A.docx','KT39-B.docx','V27-R02.docx'):
+              assert (base/'etalon'/name).is_file(),name
+          assert page.index('v27-kt41-etalon-bridge.js')>page.index('v27-approved-expert-word-r02.js')
+          assert 'async function ensureZip()' in bridge
+          assert "root.V26TemplateWord=Object.freeze({make:classic" in bridge
+          assert "root.V26ExpertWord=Object.freeze({make:expert" in bridge
+          assert "KT41_EXACT_KT35_KT39" in package
+          assert "KT41_EXACT_V27_R02" in package
+          assert "await verifyEtalon(classicWord" in package
+          assert "await verifyEtalon(expertWord,49" in package
+          print('KT41 STATIC INTEGRATION PASS; runtime ZIP visual review still required')
+          PY
