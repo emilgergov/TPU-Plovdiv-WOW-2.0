@@ -428,10 +428,10 @@ async function make(results,roles,register){
   if(!body)throw Error('КТ51: липсва Word body: '+kind);
   const paragraphs=Array.from(body.children).filter(p=>p.localName==='p');
   const lines=paragraphs.map(p=>Array.from(p.getElementsByTagNameNS(ns,'t')).map(x=>x.textContent).join(''));
-  const text=lines.join('\\n');
+  const text=lines.join('\n');
   if(paragraphs.length<15||!lines.some(t=>/^Относно:/i.test(t))||!body.getElementsByTagNameNS(ns,'sectPr').length)
     throw Error('КТ51: непълен одобрен Word: '+kind);
-  if(/\\[\\[(?:CONCLUSION|CHARACTERIZATION|PROCEDURE|LEGAL|IMPACTS)\\]\\]/.test(text))
+  if(/\[\[(?:CONCLUSION|CHARACTERIZATION|PROCEDURE|LEGAL|IMPACTS)\]\]/.test(text))
     throw Error('КТ51: останали технически маркери: '+kind);
   if(kind==='expert'){
    for(const section of ['1. ПРЕДМЕТ','2. ПРОСТРАНСТВЕНО','3. ПРЕЦЕНКА','4. ПРЕЦЕНКА'])
