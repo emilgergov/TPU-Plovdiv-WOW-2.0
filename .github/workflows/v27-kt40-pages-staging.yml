@@ -1,0 +1,70 @@
+name: V27 KT40 isolated GitHub Pages visual preview
+on:
+  push:
+    branches: [work/v27-kt26-five-packages]
+    paths:
+      - '.github/workflows/v27-kt40-pages-staging.yml'
+permissions:
+  contents: write
+concurrency:
+  group: v27-kt40-staging
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate preview renderer and integrated ZIP
+        run: |
+          node --check v26-test/v27-preview/v26-expert-word.js
+          node --check v26-test/v27-preview/v27-approved-classic-word-ab.js
+          node --check v26-test/v27-preview/v27-approved-expert-word-r02.js
+          node --check v26-test/v27-preview/v26-draft-package.js
+      - name: Install ZIP/DOCX/PDF QA dependencies
+        run: npm install --no-save --no-package-lock jsdom@26 fflate@0.8.2 jszip@3 pdfmake@0.2.20 pdf-parse@1.1.1
+      - name: Check real 5-file ZIP for both GIS scenarios
+        run: node v26-test/v27-preview/kt40-full-browser-zip.test.cjs
+  publish-preview-only:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+      - name: Publish isolated V27 KT40 review at existing Pages preview path
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Only the isolated v27-preview files are copied. Never change the
+          # root index.html, Block 06 stable page, or existing release assets.
+          files=(
+            v26-test/v27-preview/index.html
+            v26-test/v27-preview/v26-draft-package.js
+            v26-test/v27-preview/v26-expert-word.js
+            v26-test/v27-preview/v27-approved-classic-word-ab.js
+            v26-test/v27-preview/v27-approved-expert-word-r02.js
+          )
+          for f in "${files[@]}"; do test -s "$f" || exit 1; done
+          git fetch origin main
+          git worktree add -b v27-kt40-pages-worktree /tmp/v27-kt40-pages origin/main
+          for f in "${files[@]}"; do
+            mkdir -p "/tmp/v27-kt40-pages/$(dirname "$f")"
+            cp "$f" "/tmp/v27-kt40-pages/$f"
+          done
+          cd /tmp/v27-kt40-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- "${files[@]}"
+          if git diff --cached --quiet; then
+            echo "The isolated preview already matches KT40."
+          else
+            git commit -m "V27 KT40: isolated reviewed Pages preview; preserve stable Block 06"
+            git push origin HEAD:main
+          fi
+          echo "Visual review URL: https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/index.html"
+          echo "NOTE: Stable root entrypoint and Block 06 unchanged."
