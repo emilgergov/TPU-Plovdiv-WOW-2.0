@@ -327,6 +327,17 @@ async function make(results,roles,register){
   for(const [key,sourceKeys] of [['settlement',['settlement','settlement_name']],['landArea',['landArea','land_area']]]){
    if(!caseMetadata[key]){const values=[...new Set(results.map(x=>sourceKeys.map(k=>x[k]).find(v=>typeof v==='string'&&v.trim())).filter(Boolean).map(x=>x.trim()))];if(values.length===1&&(key!=='settlement'||verifiedPlaceLabel(values[0])))caseMetadata[key]=values[0];}
   }
+  // KT45: consolidate verified place metadata for both Word outputs.
+  // Each inferred administrative value must be present and identical for ALL parcels.
+  for(const [key,sourceKeys] of [
+    ['municipality',['municipality','municipality_name','obshtina']],
+    ['region',['region','region_name','province','oblast']]
+  ]){
+    if(!String(caseMetadata[key]||'').trim()){
+      const values=[...new Set(results.flatMap(r=>sourceKeys.map(k=>String(r[k]||'').trim()).filter(Boolean)))];
+      if(values.length===1&&results.every(r=>sourceKeys.some(k=>String(r[k]||'').trim()===values[0])))caseMetadata[key]=values[0];
+    }
+  }
   register={...register,verifiedCaseMetadata:caseMetadata};
  // KT23/2: Legal findings are evidence-bound; never turn dossier observations into legal conclusions.
  const legalCount=determination.scenario==='Б'?7:5;
