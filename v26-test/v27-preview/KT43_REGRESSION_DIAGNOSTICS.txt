@@ -4,13 +4,15 @@ npm warn deprecated @xmldom/xmldom@0.9.8: this version has critical issues, plea
 added 2 packages in 2s
 == JS syntax ==
 == three approved templates, two scenarios, full place headings ==
-AssertionError [ERR_ASSERTION]: KT35-A paragraph 0 changed
-    at test (/home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:70:10)
-    at async /home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:79:2 {
+KT35-A PASS 41 paragraphs 35 unchanged paragraphs
+KT44 HEADING STYLE PASS: A original four Word formatting segments retained
+AssertionError [ERR_ASSERTION]: A body paragraph 36 must remain justified
+    at assertKT46ClassicalLayout (/home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:39:10)
+    at /home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:100:2 {
   generatedMessage: false,
   code: 'ERR_ASSERTION',
-  actual: 'w:rStyle w:val="a7"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:u w:val="none"/></w:rPr><w:t>Ниво на конфиденциалност</w:t></w:r><w:r w:rsidRPr="001E0EDA"><w:rPr><w:rStyle w:val="a7"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:u w:val="none"/><w:lang w:val="en-US"/></w:rPr><w:t xml:space="preserve"> </w:t></w:r><w:r w:rsidRPr="001E0EDA"><w:rPr><w:rStyle w:val="a7"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:u w:val="none"/></w:rPr><w:t>0</w:t></w:r></w:p>...',
-  expected: ':rStyle w:val="a7"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:u w:val="none"/></w:rPr><w:t>Ниво на конфиденциалност</w:t></w:r><w:r w:rsidRPr="001E0EDA"><w:rPr><w:rStyle w:val="a7"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:u w:val="none"/><w:lang w:val="en-US"/></w:rPr><w:t xml:space="preserve"> </w:t></w:r><w:r w:rsidRPr="001E0EDA"><w:rPr><w:rStyle w:val="a7"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:u w:val="none"/></w:rPr><w:t>0</w:t></w:r></w:p>...',
+  actual: undefined,
+  expected: 'both',
   operator: '==',
   diff: 'simple'
 }
