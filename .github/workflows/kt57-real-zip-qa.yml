@@ -32,7 +32,7 @@ jobs:
           q=Path('v26-test/v27-preview/kt57-locked-package-qa.js').read_text()
           assert 'kt57-locked-package-qa.js?v=kt57-v1' in h
           assert 'await window.KT57PackageQA.verify(blob,' in h
-          assert h.index('await window.KT57PackageQA.verify(blob,')<h.index('const url=URL.createObjectURL(blob)')
+          assert h.index('const url=URL.createObjectURL(blob)',h.index('await window.KT57PackageQA.verify(blob,'))>h.index('await window.KT57PackageQA.verify(blob,')
           assert 'v27-kt50-original-kt42.js?v=kt57-original-locked-b1d2cfb' in h
           assert 'kt53-original-draft-package.js?v=kt57-original-locked-b1d2cfb' in h
           assert 'kt53d-b-characterization-word.js' not in h
