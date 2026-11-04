@@ -44,8 +44,12 @@ jobs:
           printf '\nExit code: ' >> v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt
           cat /tmp/kt43_status.txt >> v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt 2>/dev/null || echo 'unknown' >> v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt
           git add v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt
-          git commit -m "KT43: record exact Word regression diagnostic" || true
-          git push || true
+          git commit -m "KT44: record latest exact Word regression diagnostic" || true
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin HEAD:main && break
+            echo "Diagnostic push retry $attempt"
+            sleep 3
+          done
       - name: Publish verified CI marker for the isolated Pages preview
         if: success()
         run: |
