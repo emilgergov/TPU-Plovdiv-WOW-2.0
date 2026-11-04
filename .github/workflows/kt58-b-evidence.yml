@@ -1,0 +1,44 @@
+name: KT58 B provenance gate and original A B R02 generator
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt58-b-evidence.yml'
+      - 'v26-test/v27-preview/kt58-b-evidence-intake.js'
+      - 'v26-test/v27-preview/kt58-b-procedure-evidence-test.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  protected-word-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install DOCX verification dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Recheck three approved DOCX outputs and original writer
+        run: node v26-test/v27-preview/kt50-original-kt42-regression.cjs
+      - name: Verify evidence gate and parser
+        run: node --check v26-test/v27-preview/kt58-b-evidence-intake.js
+      - name: Verify no regression, B evidence and ZIP QA
+        shell: python
+        run: |
+          from pathlib import Path
+          h=Path('v26-test/v27-preview/kt58-b-procedure-evidence-test.html').read_text()
+          m=Path('v26-test/v27-preview/kt58-b-evidence-intake.js').read_text()
+          assert "v27-kt50-original-kt42.js?v=kt58-original-locked-b1d2cfb" in h
+          assert "kt53-original-draft-package.js?v=kt58-original-locked-b1d2cfb" in h
+          assert "kt58-b-evidence-intake.js?v=kt58-b-proof-1" in h
+          assert "let workingDraft=window.V26WordReview.getWorkingDraft()" in h
+          assert "KT58BPreflight.prepare(workingDraft,found)" in h
+          assert "workingDraft=check.draft" in h
+          assert "if(verifiedZones.length)" in h
+          assert h.index('KT58BPreflight.prepare(workingDraft,found)')<h.index('window.V26DraftPackage.make(')
+          assert 'await window.KT57PackageQA.verify(blob,' in h
+          assert "legalFindingSources:saved.sources" in m
+          assert "procedureFinding=v[13]" in m
+          assert "kt53c-b-review-word.js" not in h and "kt53d-b-characterization-word.js" not in h
+          print('KT58 original A and verified B source gate PASS')
