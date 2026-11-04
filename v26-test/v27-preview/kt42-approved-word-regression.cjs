@@ -133,7 +133,7 @@ async function test(name,blob,variable){
  assert.doesNotMatch(phrase(resultA[10]),/север“ в поземлени/,'A trailing quote regression');
  const expertA=await sandbox.V26ExpertWord.make({schema:'KT13_EXPERT_DRAFT_V1',scenario:'А',metadata:aWithDuplicatedSubject,aiDraft:'',parcels:[]},{requireAiAuthor:true});
  const expertAp=checkAdministrative(await expertA.arrayBuffer(),'E','Складове за промишлени стоки и офиси','56784.13.102');
- assert.match(phrase(expertAp[7]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
+ assert.equal(phrase(expertAp[7]),'Адрес: ХХХХХХХХХХХХ','expert A approved address placeholder');
  console.log('KT44 A ADMINISTRATION PASS: subject de-duplication, address/recipient, complete legal introduction');
  const differing={...meta,parcelIds:'36676.129.457',subject:'Учебен казус — изпитване на сценарий с пресичане',location:'местност Попското',locality:'Попското',settlement:'с. Катуница',municipality:'Садово',region:'Пловдив',procedureFinding:'[ЗА ЕКСПЕРТНА ПРОВЕРКА — приложима процедура]'};
  const syntheticB=await sandbox.V26TemplateWord.make('Б',verified,differing,{determination:{scenario:'Б',zones:['BG0000194']}});
