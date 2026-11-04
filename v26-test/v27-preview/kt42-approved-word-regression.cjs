@@ -252,6 +252,15 @@ console.log('KT47 EKATTE PASS: two official cadastral mappings; contradictory an
  assert.match(phrase(expAp[27]),/чл\. 2, ал\. 2/,'KT48 Expert A retains approved R02 paragraph 27');
  assert.match(phrase(expAp[28]),/ЗООС/,'KT48 Expert A retains R02 ZOOS reasoning');
  assert.match(phrase(resultE.p[26]),/чл\. 2, ал\. 1, т\. 2/,'KT48 Expert B retains approved R02 statutory analysis');
+ const approvedR02=pList(fs.readFileSync(path.join(base,'etalon','V27-R02.docx'))).p;
+ for(const [which,actual] of [['A',expAp],['B',resultE.p]]){
+  for(let j=0;j<5;j++){
+   const title=phrase(approvedR02[32+j]).split(/\\.\\s/)[0].trim();
+   assert.ok(phrase(actual[32+j]).startsWith(title+'.'),'KT48 Expert '+which+' impact direction '+j+' must retain R02 heading');
+   assert.doesNotMatch(phrase(actual[32+j]),/\\[ЗА ЕКСПЕРТНА ПРОВЕРКА/,'KT48 Expert '+which+' impact direction '+j+' unfinished marker');
+  }
+ }
+ console.log('KT48 EXPERT IMPACT PASS: five R02 headings in A and B');
  console.log('KT48 Expert R02 PASS: original legal architecture, A/B scenario safeguards and no unsupported final outcome');
  console.log('KT43 regression PASS: scenario B creates both reviewed DOCX drafts without unverified legal or procedure conclusions');
 })().catch(e=>{console.error(e);process.exitCode=1});
