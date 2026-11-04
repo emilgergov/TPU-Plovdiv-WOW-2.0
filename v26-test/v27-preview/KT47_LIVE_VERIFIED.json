@@ -1,7 +1,7 @@
 {
   "checkpoint": "KT47",
   "result": "LIVE_PAGES_VERIFIED",
-  "verified_repo_sha": "551d67d166177e069b52a76ac373c3bb254a5074",
+  "verified_repo_sha": "0ca3bf959e955af6e67dc48f6241f5e027067140",
   "checks": [
     "HTML serves KT47 loader",
     "Live Word bridge contains KT47 safeguards",
