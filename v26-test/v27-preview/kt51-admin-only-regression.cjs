@@ -64,17 +64,17 @@ async function test(name,blob,variable){
  const novel={...meta,parcelIds:'36676.129.457',subject:'Учебен обект с инженерни връзки в ПИ с идентификатор 36676.129.457, с. Катуница',location:'с. Катуница',settlement:'с. Катуница',municipality:'Садово',region:'Пловдив',recipient:'Възложителя: Тестови възложител',address:'Адрес: с. Катуница',legalParagraphs:Array.from({length:4},(_,i)=>'Проверено правно основание '+(i+1)),impactFindings:Array.from({length:5},(_,i)=>'Проверена характеристика на въздействието '+(i+1)),procedureFinding:'Доказателствено обоснован проект на процедурна преценка за експертна проверка'};
  const novelB=await sandbox.V26TemplateWord.make('Б',verified,novel,{determination:{scenario:'Б',zones:['BG0000194']}});
  const caseB=pList(await novelB.arrayBuffer()),heading=phrase(caseB.p[10]);
- assert.equal((heading.match(/36676\\.129\\.457/g)||[]).length,1,'KT51 cadastral ID repeated in heading');
+ assert.equal((heading.match(/36676\.129\.457/g)||[]).length,1,'KT51 cadastral ID repeated in heading');
  assert.ok(heading.includes('Катуница')&&heading.includes('община Садово')&&heading.includes('област Пловдив'),'KT51 verified locality omitted');
  assert.ok(phrase(caseB.p[33]).includes('Доказателствено обоснован'),'KT51 evidence-supplied procedure omitted');
  const etalonB=pList(fs.readFileSync(path.join(base,'etalon','KT39-B.docx')));
  for(const i of [0,1,2,3,4,5,8,9,11,12,13,14,15,17,34,35,36,37,38,39,40,41,42]){
   assert.equal(caseB.serial.serializeToString(caseB.p[i]),etalonB.serial.serializeToString(etalonB.p[i]),'KT51 B locked paragraph changed '+i);
  }
- for(const key of Object.keys(etalonB.z).filter(k=>/^(?:word\\/(?:footer|header|media))/.test(k))){
+ for(const key of Object.keys(etalonB.z).filter(k=>/^(?:word\/(?:footer|header|media))/.test(k))){
   assert.deepEqual(Buffer.from(caseB.z[key]),Buffer.from(etalonB.z[key]),'KT51 B footer/media changed '+key);
  }
- const novelExpert={schema:'KT13_EXPERT_DRAFT_V1',scenario:'Б',metadata:novel,parcels:[],zones:['BG0000194'],characterization:verified,aiDraft:'[[CHARACTERIZATION]]\\n\\nПроверена характеристика\\n\\nДопълнително описание\\n\\n[[LEGAL]]\\n\\nПравен режим\\n\\nПравно основание\\n\\n[[PROCEDURE]]\\n\\nВъзможни процедури след експертна проверка\\n\\n[[IMPACTS]]\\n\\nНаправление на въздействие\\n\\nНаправление 2'};
+ const novelExpert={schema:'KT13_EXPERT_DRAFT_V1',scenario:'Б',metadata:novel,parcels:[],zones:['BG0000194'],characterization:verified,aiDraft:'[[CHARACTERIZATION]]\n\nПроверена характеристика\n\nДопълнително описание\n\n[[LEGAL]]\n\nПравен режим\n\nПравно основание\n\n[[PROCEDURE]]\n\nВъзможни процедури след експертна проверка\n\n[[IMPACTS]]\n\nНаправление на въздействие\n\nНаправление 2'};
  const expertB=await sandbox.V26ExpertWord.make(novelExpert,{requireAiAuthor:true});
  assert.equal(pList(await expertB.arrayBuffer()).p.length,49,'KT51 sourced expert B document failed');
  const unsupported={...novel,procedureFinding:'[ЗА ЕКСПЕРТНА ПРОВЕРКА — приложима процедура]'};
