@@ -47,7 +47,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           s=Path('v26-test/v27-preview/kt51-admin-test.html').read_text()
-          paths=['v27-preview/v27-approved-classic-word-ab.js','v27-preview/v27-approved-expert-word-r02.js','v27-preview/v27-kt51-admin-only.js?v=kt51-content-restore-6','v27-preview/kt51-ai-characterization.js?v=kt51-ai-bridge-7','v27-preview/v26-draft-package.js?v=kt51-ai-bridge-7']
+          paths=['v27-preview/v27-approved-classic-word-ab.js','v27-preview/v27-approved-expert-word-r02.js','v27-preview/v27-kt51-admin-only.js?v=kt51-content-restore-6','v27-preview/kt51-ai-characterization.js?v=kt51-ai-markers-8','v27-preview/v26-draft-package.js?v=kt51-ai-bridge-7']
           for a,b in zip(paths,paths[1:]):
             assert a in s and b in s and s.index(a)<s.index(b),(a,b)
           assert '<base href="../">' in s
