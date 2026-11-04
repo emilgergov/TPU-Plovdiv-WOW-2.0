@@ -1,4 +1,4 @@
-name: V27 KT42 approved Word content lock
+name: V27 KT45 approved Word content lock
 on:
   push:
     paths:
@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Execute and capture every KT43 regression stage
+      - name: Execute and capture KT45 A+B Word regression
         run: |
           set +e
           {
@@ -28,7 +28,7 @@ jobs:
             node --check v26-test/v27-preview/v27-kt41-etalon-bridge.js || exit 12
             node --check v26-test/v27-preview/v26-draft-package.js || exit 13
             node --check v26-test/v27-preview/kt42-approved-word-regression.cjs || exit 14
-            echo "== three approved templates and synthetic scenario B =="
+            echo "== three approved templates, two scenarios, full place headings =="
             node v26-test/v27-preview/kt42-approved-word-regression.cjs || exit 15
           } > /tmp/kt43_regression.txt 2>&1
           status=$?
@@ -50,17 +50,23 @@ jobs:
             echo "Diagnostic push retry $attempt"
             sleep 3
           done
-      - name: Publish verified CI marker for the isolated Pages preview
+      - name: Publish KT45 verified CI marker
         if: success()
         run: |
           python - <<'PY'
           import json,subprocess
           from pathlib import Path
-          marker=Path('v26-test/v27-preview/KT42_VERIFIED.json')
-          marker.write_text(json.dumps({'checkpoint':'KT42','verified_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'tests':'DOCX original paragraph preservation A, B and R02: PASS','status':'verified-for-preview'},ensure_ascii=False,indent=2)+'\n')
+          marker=Path('v26-test/v27-preview/KT45_VERIFIED.json')
+          marker.write_text(json.dumps({'checkpoint':'KT45','verified_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'tests':'DOCX A/B/R02 paragraph preservation and fully formatted place headings: PASS','status':'verified-for-preview'},ensure_ascii=False,indent=2)+'\n')
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add v26-test/v27-preview/KT42_VERIFIED.json
-          git commit -m "KT42: mark exact Word etalons verified by executable DOCX test"
-          git push
+          git commit -m "KT45: mark A+B and expert Word headings verified by executable DOCX test" || true
+          pushed=0
+          for attempt in 1 2 3 4 5; do
+            if git pull --rebase origin main && git push origin HEAD:main; then pushed=1; break; fi
+            echo "Verified marker push retry $attempt"
+            sleep 3
+          done
+          test "$pushed" -eq 1
