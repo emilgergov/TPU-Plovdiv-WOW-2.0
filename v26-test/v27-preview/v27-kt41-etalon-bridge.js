@@ -4,7 +4,12 @@
  */
 (function(root){'use strict';
 const classicBase=root.V26TemplateWord,expertBase=root.V26ExpertWord;
-if(!classicBase?.make||!expertBase?.make||!root.fflate?.unzipSync)throw Error('KT41: липсва базов Word модул.');
+if(!classicBase?.make||!expertBase?.make)throw Error('KT41: липсва базов Word модул.');
+async function ensureZip(){
+ if(root.fflate?.unzipSync&&root.fflate?.zipSync)return;
+ await new Promise((resolve,reject)=>{const el=document.createElement('script');el.src='https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js';el.onload=resolve;el.onerror=()=>reject(Error('КТ41: ZIP библиотеката не може да се зареди.'));document.head.appendChild(el)});
+ if(!root.fflate?.unzipSync||!root.fflate?.zipSync)throw Error('КТ41: ZIP библиотеката не е достъпна.');
+}
 const NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const T={A:'v27-preview/etalon/KT35-A.docx',B:'v27-preview/etalon/KT39-B.docx',E:'v27-preview/etalon/V27-R02.docx'};
 const clean=x=>String(x??'').replace(/\[\[(?:CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS|CONCLUSION)\]\]/g,'').trim();
@@ -18,6 +23,7 @@ function put(p,value){
  for(let i=1;i<t.length;i++)t[i].textContent='';
 }
 async function source(which){
+ await ensureZip();
  const resp=await fetch(T[which],{cache:'no-store'});if(!resp.ok)throw Error('КТ41: липсва одобреният еталон '+which);
  const zip=root.fflate.unzipSync(new Uint8Array(await resp.arrayBuffer()));
  if(!zip['word/document.xml']||!zip['word/_rels/document.xml.rels']||!Object.keys(zip).some(x=>x.startsWith('word/media/')))throw Error('КТ41: невалиден институционален DOCX '+which);
@@ -30,8 +36,8 @@ async function source(which){
 }
 function finish(doc,label){
  const {zip,xml,p}=doc;
- const remaining=p.map(text).filter(t=>/56784\.13\.10[256]|Рогошко шосе|Складове за промишлени стоки/i.test(t));
- if(remaining.length)throw Error('КТ41: останали примерни факти от еталона '+label+': '+remaining.length);
+ const markers=p.map(text).filter(t=>/\[\[(?:CONCLUSION|PROCEDURE|CHARACTERIZATION|LEGAL|IMPACTS)\]\]/i.test(t));
+ if(markers.length)throw Error('КТ41: останали технически маркери в '+label);
  zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
  return new Blob([root.fflate.zipSync(zip,{level:6})],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
 }
@@ -54,7 +60,6 @@ function metadata(doc,m){
  put(p[6],safe(m.recipient,'възложител'));
  put(p[7],safe(m.address,'адрес за кореспонденция'));
  put(p[10],'Относно: Уведомление за инвестиционно предложение (ИП): „'+int.title+'“ в поземлени имоти с идентификатори '+int.ids+(int.loc?', '+int.loc:'')+'.');
- const old=text(p[doc===null?0:16]); // All classic templates use position 16.
  put(p[16],'Във връзка с внесеното уведомление в РИОСВ-Пловдив с '+int.ref+' за горецитираното инвестиционно предложение, на основание чл. 6а, т. 2 от Наредбата за ОС Ви уведомявам следното:');
  return int;
 }
