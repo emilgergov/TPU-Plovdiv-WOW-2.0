@@ -1,0 +1,57 @@
+name: KT60 AI evidence intake and immutable Word regression
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt60-ai-evidence.yml'
+      - 'v26-test/v27-preview/kt60-ai-evidence-test.html'
+      - 'v26-test/v27-preview/kt60-auto-evidence.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install DOCX regression dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Check locked A B R02 originals
+        run: |
+          node --check v26-test/v27-preview/kt60-auto-evidence.js
+          node v26-test/v27-preview/kt50-original-kt42-regression.cjs
+      - name: Check automatic B fail-closed behavior and A compatibility
+        run: |
+          node <<'JS'
+          const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+          const win={};vm.runInNewContext(fs.readFileSync('v26-test/v27-preview/kt60-auto-evidence.js','utf8'),{window:win});
+          const good={status:'Намерен',input:'36676.129.457',verified_zone_intersections:['BG0000194']};
+          const subject={metadata:{subject:'Тестов предмет'},paragraphs:['описание 1','описание 2','описание 3','описание 4']};
+          const blocked=win.KT60Evidence.build({results:[good],workingDraft:subject,aiDraft:'[[CHARACTERIZATION]]\nТест\n[[LEGAL]]\nПравна рамка\n[[PROCEDURE]]\nПроцедура\n[[IMPACTS]]\nВъздействия',evidence:{facts:[]},normativeRegister:{records:[]}});
+          assert.equal(blocked.scenario,'Б');
+          assert.equal(blocked.ok,false);
+          assert.equal(blocked.report.required,14);
+          assert(blocked.issues.includes('Мотивиран процедурен извод'));
+          assert.equal(blocked.draft.paragraphs[0],'описание 1');
+          const a=win.KT60Evidence.build({results:[{input:'56784.13.102',verified_zone_intersections:[]}],workingDraft:subject});
+          assert.equal(a.scenario,'А');assert.equal(a.ok,true);assert.equal(a.draft,subject);
+          console.log('KT60 fail-closed B and unchanged A PASS');
+          JS
+      - name: Check AI-before-preflight route and protected Word loader
+        shell: python
+        run: |
+          from pathlib import Path
+          h=Path('v26-test/v27-preview/kt60-ai-evidence-test.html').read_text()
+          assert 'kt60-auto-evidence.js?v=kt60-a1' in h
+          assert 'v27-kt50-original-kt42.js?v=kt60-original-locked-b1d2cfb' in h
+          assert 'kt53-original-draft-package.js?v=kt60-original-locked-b1d2cfb' in h
+          assert 'const proposedDraft=await window.V27AIAuthor.generate(' in h
+          assert 'window.KT60Evidence?.build(' in h
+          assert h.index('const proposedDraft=await window.V27AIAuthor.generate(')<h.index('window.KT60Evidence?.build(')<h.index('window.V26DraftPackage.make(')
+          assert 'window.KT60Evidence.show(kt60)' in h
+          assert 'kt58-b-evidence-intake.js' not in h
+          assert 'kt53c-b-review-word.js' not in h and 'kt53d-b-characterization-word.js' not in h
+          print('KT60 original writer + AI evidence wiring PASS')
