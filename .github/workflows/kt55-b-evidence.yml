@@ -1,0 +1,42 @@
+name: KT55 B verified evidence preflight - original Word only
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt55-b-evidence.yml'
+      - 'v26-test/v27-preview/kt55-b-evidence-test.html'
+      - 'v26-test/v27-preview/kt55-b-evidence-preflight.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preserve-approved-docx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install DOCX regression libraries
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Validate exact approved Word writer and all three DOCX templates
+        run: node v26-test/v27-preview/kt50-original-kt42-regression.cjs
+      - name: Validate B evidence module syntax
+        run: node --check v26-test/v27-preview/kt55-b-evidence-preflight.js
+      - name: Validate B-only preflight and unchanged Word writer loader
+        shell: python
+        run: |
+          from pathlib import Path
+          h=Path('v26-test/v27-preview/kt55-b-evidence-test.html').read_text()
+          p=Path('v26-test/v27-preview/kt55-b-evidence-preflight.js').read_text()
+          assert 'kt55-b-evidence-preflight.js?v=kt55-evidence-2' in h
+          assert 'v27-kt50-original-kt42.js?v=kt54-exact-original-b1d2cfb' in h
+          assert 'kt53-original-draft-package.js?v=kt54-exact-original-b1d2cfb' in h
+          assert 'KT55BPreflight.prepare(workingDraft,found)' in h
+          assert 'workingDraft=reviewed.draft' in h
+          assert 'if(confirmedB)' in h
+          assert 'kt53d-b-characterization-word.js' not in h
+          assert 'kt53c-b-review-word.js' not in h
+          assert 'legalFindingSources:saved.sources' in p
+          assert 'sources.forEach' in p
+          print('KT55 SOURCE AND ORIGINAL WRITER PASS')
