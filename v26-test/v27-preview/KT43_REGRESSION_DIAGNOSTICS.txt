@@ -1,7 +1,7 @@
 == dependency installation ==
 npm warn deprecated @xmldom/xmldom@0.9.8: this version has critical issues, please update to the latest version
 
-added 2 packages in 1s
+added 2 packages in 831ms
 == JS syntax ==
 == three approved templates, two scenarios, full place headings ==
 KT47 USER APPROVED ETALON LOCK PASS: exact 3 original binary Word documents
@@ -24,15 +24,8 @@ KT46 B PASS: confidentiality right; body justified; GREEN/header/footer match B
 KT48 A/B PASS: original 10 classical impact bullet directions immutable; factual and legal scenarios separated
 KT46 INCOMPLETE DOSSIER PASS: four administrative characteristics contain explicit evidence reservations without internal QA markers
 KT44 HEADING STYLE PASS: E original four Word formatting segments retained
-AssertionError [ERR_ASSERTION]: expert B legal references
-    at /home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:244:9
-    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
-  generatedMessage: false,
-  code: 'ERR_ASSERTION',
-  actual: 'Разгледана е хипотезата на чл. 2, ал. 1, т. 2 от Наредбата за ОС. За разглежданите имоти е установено пространствено пресичане, но приложимостта на хипотезата зависи и от заявената дейност и останалите нормативни условия.',
-  expected: /чл\. 31|зона|режим/,
-  operator: 'match',
-  diff: 'simple'
-}
+KT48 EXPERT IMPACT PASS: five R02 headings in A and B
+KT48 Expert R02 PASS: original legal architecture, A/B scenario safeguards and no unsupported final outcome
+KT43 regression PASS: scenario B creates both reviewed DOCX drafts without unverified legal or procedure conclusions
 
-Exit code: unknown
+Exit code: 0
