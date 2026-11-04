@@ -157,9 +157,12 @@ const zones=d=>zoneList(d).join(', ');
 const spatial=(d,int)=>d.scenario==='А'
  ?'Поземлените имоти с идентификатори '+int.ids+(int.loc?', '+int.loc:'')+' не попадат в границите на защитени зони от екологичната мрежа „Натура 2000“ по смисъла на Закона за биологичното разнообразие.'
  :'За имотите с идентификатори '+int.ids+' е установено пространствено пресичане със защитена зона '+zones(d)+'. Конкретното пресичане е документирано в самостоятелния ГИС анализ.';
+function neutralProcedure(scenario){
+ return 'Постъпилата документация се разглежда с оглед характера на дейностите, териториалния обхват, инженерните връзки и относимите защитени зони. Приложимият процедурен ред по Закона за биологичното разнообразие и Наредбата за оценка за съвместимост се установява въз основа на потвърдените факти и проверените нормативни основания. '+(scenario==='Б'?'Пресичането със защитена зона само по себе си не определя окончателния процедурен извод.':'Липсата на имотно пресичане не изключва преценка за преки, косвени и съвкупни въздействия.');
+}
 function locationSentence(m,d){
  if(d.scenario==='Б')return 'Пресичащи се защитени зони: '+(zones(d)||reviewMarker('код и наименование на защитената зона'))+'. Правният режим се сверява с приложимата заповед и целите на опазване по нормативния архив.';
- return safe(m.nearestZone,'най-близка защитена зона');
+ return reviewText(m.nearestZone)?clean(m.nearestZone):'НЯМА ДАННИ';
 }
 function heading(int){
  const ids=[...new Set((int.ids.match(/\b\d{5}\.\d+\.\d+\b/g)||[]))];
@@ -229,8 +232,11 @@ async function classic(scenario,paragraphs,m,context={}){
   // Preserve the exact approved text, formatting and legal/impact argumentation.
   // Only verified administrative variable fields were populated above.
   if(k==='B'&&!d.zones.some(z=>String(typeof z==='string'?z:z?.code||'').includes('BG0000578')))throw Error('КТ42: тестов образец Б не съответства на установената зона.');
+  put(p[17],neutralProcedure(k==='A'?'А':'Б'));
+  if(k==='A')put(p[23],'Най-близко разположена защитена зона: '+locationSentence(m,{scenario:'А'})+'.');
   return finish(doc,'КТ35-А');
  }
+ put(p[17],neutralProcedure(k==='A'?'А':'Б'));
  // For a new case do not inherit the specimen's factual characterization.
  // A missing or unverified paragraph remains visibly pending expert review.
  for(let i=0;i<4;i++){
@@ -277,12 +283,15 @@ async function expert(draft,options={}){
   put(p[7],party(m.address,'address'));
   putHeading(p[10],int);
   introParagraph(p,17,int,true);
+  put(p[18],neutralProcedure(draft.scenario));
+  put(p[24],locationSentence(m,draft));
   return finish(doc,'V27 R02');
  }
  if(['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'].some(k=>!ai[k]?.length))throw Error('КТ42: непълен AI авторски проект.');
  put(p[6],party(m.recipient,'recipient'));put(p[7],party(m.address,'address'));
  putHeading(p[10],int);
  introParagraph(p,17,int,true);
+ put(p[18],neutralProcedure(draft.scenario));
  put(p[20],evidenceText(ai.CHARACTERIZATION[0],characterizationDraft(0,int,draft)));
  const engineering=ai.CHARACTERIZATION.slice(1).map(cleanAIPart).filter(Boolean);
  const engineeringText=engineering.length?evidenceText([...new Set(engineering)].join(' '),characterizationDraft(1,int,draft))
