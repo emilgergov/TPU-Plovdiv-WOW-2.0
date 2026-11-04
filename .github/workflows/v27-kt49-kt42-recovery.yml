@@ -1,0 +1,35 @@
+name: V27 KT49 — KT42 evidence recovery A/B/R02
+on:
+  push:
+    paths:
+      - '.github/workflows/v27-kt49-kt42-recovery.yml'
+      - 'v26-test/v27-preview/v27-kt49-kt42-content-bridge.js'
+      - 'v26-test/v27-preview/kt42-approved-word-regression.cjs'
+      - 'v26-test/v27-preview/etalon/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  recovery-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install DOCX test dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Syntax and actual DOCX generated A/B/R02 regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check v26-test/v27-preview/v27-kt49-kt42-content-bridge.js
+          node --check v26-test/v27-preview/kt42-approved-word-regression.cjs
+          V27_WORD_BRIDGE=v27-kt49-kt42-content-bridge.js node v26-test/v27-preview/kt42-approved-word-regression.cjs 2>&1 | tee KT49_WORD_CONTENT_RESULT.txt
+      - name: Save test trace
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: V27-KT49-A-B-R02-DOCX-REGRESSION
+          path: KT49_WORD_CONTENT_RESULT.txt
+          if-no-files-found: ignore
