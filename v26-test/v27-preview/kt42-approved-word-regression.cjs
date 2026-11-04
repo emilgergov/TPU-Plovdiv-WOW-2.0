@@ -236,12 +236,22 @@ console.log('KT47 EKATTE PASS: two official cadastral mappings; contradictory an
  assert.equal(resultE.p.length,49);
  assert.doesNotMatch(phrase(resultE.p[18]),/попада в обхвата на чл\. 2, ал\. 2/, 'expert must not copy sample decision');
  assert.match(phrase(resultE.p[25]),/Относимите режими подлежат на проверка/, 'safe AI legal content must actually enter expert Word');
- assert.match(phrase(resultE.p[39]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
+ assert.match(phrase(resultE.p[39]),/окончателен процедурен извод не е установен/);
  assert.match(phrase(resultE.p[23]),/36676\.129\.457/);
  assert.match(phrase(resultE.p[10]),/по КККР на с\. Катуница, местност „Попското“, община Садово, област Пловдив/,'expert B full place');
  assert.match(phrase(resultE.p[24]),/BG0000194.*Река Чая/,'expert B zone');
  assert.ok((phrase(resultE.p[21]).match(/ЗА ЕКСПЕРТНА ПРОВЕРКА/g)||[]).length<=1,'AI characterization repeated review markers');
  assert.match(phrase(resultE.p[26]),/чл\. 31|зона|режим/,'expert B legal references');
 
+ // KT48: the non-intersection Expert R02 must not recycle the B scenario.
+ const actualExpertA=await sandbox.V26ExpertWord.make({...draft,scenario:'А',metadata:{...realApprovedLike,parcelIds:'56784.13.102, 56784.13.105, 56784.13.106'},zones:[]},{requireAiAuthor:true});
+ const expAp=pList(await actualExpertA.arrayBuffer()).p;
+ for(const i of [23,25,26,27,28,39])
+  assert.doesNotMatch(phrase(expAp[i]),/удостоверява пространствено пресичане|установено пространствено пресичане|Наличието на пресичане/i,'KT48 Expert A GI contradiction in paragraph '+i);
+ assert.match(phrase(expAp[26]),/чл\. 2, ал\. 1, т\. 2/,'KT48 Expert A retains approved R02 legal anchor');
+ assert.match(phrase(expAp[27]),/чл\. 2, ал\. 2/,'KT48 Expert A retains approved R02 paragraph 27');
+ assert.match(phrase(expAp[28]),/ЗООС/,'KT48 Expert A retains R02 ZOOS reasoning');
+ assert.match(phrase(resultE.p[26]),/чл\. 2, ал\. 1, т\. 2/,'KT48 Expert B retains approved R02 statutory analysis');
+ console.log('KT48 Expert R02 PASS: original legal architecture, A/B scenario safeguards and no unsupported final outcome');
  console.log('KT43 regression PASS: scenario B creates both reviewed DOCX drafts without unverified legal or procedure conclusions');
 })().catch(e=>{console.error(e);process.exitCode=1});
