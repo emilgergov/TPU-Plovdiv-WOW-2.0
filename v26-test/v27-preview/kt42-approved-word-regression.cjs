@@ -279,7 +279,7 @@ console.log('KT47 EKATTE PASS: two official cadastral mappings; contradictory an
   assert.equal(phrase(pList(await withSource.arrayBuffer()).p[25]),'Документално проверено съответствие — тестов факт.','KT49 sourced legal paragraph must still be used');
   const sixImpacts=['Обобщение на проверените направления.','Факт за възможното пряко засягане.','Факт за видовете и местообитанията.','Факт за безпокойството.','Факт за екологичните връзки.','Факт за съвкупните въздействия.'];
   const specialAI=ai.slice(0,ai.indexOf('[[IMPACTS]]'))+'[[IMPACTS]]'+String.fromCharCode(10,10)+sixImpacts.join(String.fromCharCode(10,10));
- const parsedLabels=[...specialAI.matchAll(/^\\s*\\[\\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\\]\\]\\s*$/gm)].map(x=>x[1]);
+ const parsedLabels=[...specialAI.matchAll(/^\s*\[\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\]\]\s*$/gm)].map(x=>x[1]);
   assert.deepEqual(parsedLabels,['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'],'KT49 AI fixture must contain four sections');
   const specialDraft={...draft,aiDraft:specialAI};
   const sixDoc=await sandbox.V26ExpertWord.make(specialDraft,{requireAiAuthor:true});
