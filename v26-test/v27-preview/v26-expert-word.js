@@ -99,7 +99,12 @@ async function make(draft,options={}){
  const unsupportedAi=x=>/(?:не е приложима процедура|не подлежи на процедура|не се изисква оценка|не попадат в границите на защитени зони или територии|намалява вероятността за задължително|малко вероятно|не показва наличие на рискове|намалява риска|намалява риск|по-нисък риск|нисък риск|незначителн(?:о|и|а) въздейств|без значим(?:о|и|а) въздейств|не се очаква въздейств|липса на значими въздействия|не поражда въздействия|извън защитени зони,? което)/i.test(x);
  // KT26: Review AI paragraphs independently. A single unsupported assertion
  // must not discard the other, source-grounded paragraphs in that section.
- const unsupportedParagraph=x=>unsupportedAi(x)||/защитени територии|BG[0-9]{7}|не се налага|не се изисква|не подлежи|няма вероятност|липсват въздействия|липсват рискове|не оказва въздействие/i.test(x);
+ // KT51: a Natura 2000 site code or reference to protected territories is
+ // evidence context, not an unsafe conclusion. The former blanket filter
+ // discarded the entire IMPACTS section, including its qualified analysis.
+ // Preserve the AI author's wording; reject only unsubstantiated categorical
+ // exemptions/no-impact conclusions. Never transfer a GIS code into a new claim.
+ const unsupportedParagraph=x=>unsupportedAi(x)||/(?:не се налага|не се изисква|не подлежи)\s+(?:провеждане|извършване|на|оценка|процедура)|няма вероятност\s+за\s+(?:значим|отрицателн)|липсват\s+(?:въздействия|рискове)|не оказва\s+(?:въздействие|влияние)/i.test(x);
  const reviewedAi=key=>String(aiSections[key]||'').split(/\n\s*\n/).map(x=>x.trim()).filter(x=>x&&!unsupportedParagraph(x)).slice(0,7);
  // A formally complete response is not sufficient: all four sections must retain
  // at least one admissible paragraph after safety review.
