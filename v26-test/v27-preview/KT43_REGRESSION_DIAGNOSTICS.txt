@@ -1,7 +1,7 @@
 == dependency installation ==
 npm warn deprecated @xmldom/xmldom@0.9.8: this version has critical issues, please update to the latest version
 
-added 2 packages in 693ms
+added 2 packages in 708ms
 == JS syntax ==
 == three approved templates, two scenarios, full place headings ==
 KT35-A PASS 41 paragraphs 35 unchanged paragraphs
@@ -14,11 +14,15 @@ V27-R02 PASS 49 paragraphs 45 unchanged paragraphs
 KT44 HEADING STYLE PASS: E original four Word formatting segments retained
 KT44 HEADING STYLE PASS: A original four Word formatting segments retained
 KT46 A PASS: confidentiality right; body justified; GREEN/header/footer match B
-AssertionError [ERR_ASSERTION]: A recipient missing flag
-    at /home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:131:9 {
-  generatedMessage: false,
+KT44 HEADING STYLE PASS: E original four Word formatting segments retained
+AssertionError [ERR_ASSERTION]: The input did not match the regular expression /ЗА ЕКСПЕРТНА ПРОВЕРКА/. Input:
+
+'Адрес: ХХХХХХХХХХХХ'
+
+    at /home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:136:9 {
+  generatedMessage: true,
   code: 'ERR_ASSERTION',
-  actual: 'Възложителя: ХХХХХХХХХХХХ',
+  actual: 'Адрес: ХХХХХХХХХХХХ',
   expected: /ЗА ЕКСПЕРТНА ПРОВЕРКА/,
   operator: 'match',
   diff: 'simple'
