@@ -1,7 +1,7 @@
 {
   "checkpoint": "KT42",
   "result": "LIVE_PAGES_VERIFIED",
-  "verified_repo_sha": "dede752595ed786c89ca9ca892fa6d297aafcb0e",
+  "verified_repo_sha": "85be2550a1c16497e56c14a41d8dfd0c14f9b9ad",
   "checks": [
     "HTML serves KT42 loader",
     "Live Word bridge contains KT42 safeguards",
