@@ -95,13 +95,10 @@ async function classic(scenario,paragraphs,m,context={}){
   put(p[18+i],i===0?char1(paragraphs[i]):clean(paragraphs[i]));
  }
  const legal=m.legalParagraphs||[],impact=m.impactFindings||[];
- const textLegal=i=>validated(legal,i);
- const textImpact=i=>validated(impact,i);
- const requiredLegal=k==='A'?2:4;
- if(Array.from({length:requiredLegal},(_,i)=>textLegal(i)).some(v=>!v))
-   throw Error('КТ42: липсват доказани правни основания за новата преписка. Одобрените аргументи от примерния казус не се пренасят.');
- if(Array.from({length:5},(_,i)=>textImpact(i)).some(v=>!v))
-   throw Error('КТ42: липсва проверена оценка на петте направления на въздействие.');
+ // Unknown legal and impact findings do not prevent creating an unsigned draft.
+ // Missing evidence must not silently inherit findings from the approved example.
+ const textLegal=i=>validated(legal,i)||'[ЗА ЕКСПЕРТНА ПРОВЕРКА — правна констатация '+(i+1)+': приложимостта се установява по преписката и нормативния архив.]';
+ const textImpact=i=>validated(impact,i)||'[ЗА ЕКСПЕРТНА ПРОВЕРКА — въздействие '+(i+1)+': преценката се извършва спрямо предмета и целите на опазване на засегнатите защитени зони.]';
  // A draft must remain possible when no final procedure decision has been verified.
  // Do not copy the example case's conclusion into a different dossier.
  const procedureText=reviewText(m.procedureFinding)?clean(m.procedureFinding)
