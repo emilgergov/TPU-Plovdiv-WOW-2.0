@@ -224,7 +224,9 @@ async function expert(draft,options={}){
  introParagraph(p,17,int,true);
  put(p[20],evidenceText(ai.CHARACTERIZATION[0],characterizationDraft(0,int,draft)));
  const engineering=ai.CHARACTERIZATION.slice(1).map(cleanAIPart).filter(Boolean);
- put(p[21],engineering.length?evidenceText([...new Set(engineering)].join(' '),characterizationDraft(1,int,draft)):characterizationDraft(1,int,draft)+' '+characterizationDraft(2,int,draft)+' '+characterizationDraft(3,int,draft));
+ const engineeringText=engineering.length?evidenceText([...new Set(engineering)].join(' '),characterizationDraft(1,int,draft))
+  :[1,2,3].map(i=>characterizationDraft(i,int,draft).replace(/\s*\[ЗА ЕКСПЕРТНА ПРОВЕРКА[^\]]*\]/g,'')).join(' ')+' '+reviewMarker('технически решения за електроснабдяване, водоснабдяване и отпадъчни води');
+ put(p[21],engineeringText);
  put(p[23],spatial(draft,int));
  put(p[24],locationSentence(m,draft));
  put(p[25],legalDraft(0,int,draft));
