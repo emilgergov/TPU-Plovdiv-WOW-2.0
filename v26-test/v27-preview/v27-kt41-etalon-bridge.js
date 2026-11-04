@@ -130,7 +130,7 @@ function alignClassicAConfidentialityWithB(doc,approvedB){
 function isApprovedCase(m,scenario){
  const ids=(clean(m.parcelIds).match(/\b\d{5}\.\d+\.\d+\b/g)||[]).sort().join(',');
  const title=subject(m.subject).toLocaleLowerCase('bg');
- return ['А','Б'].includes(scenario)&&ids==='56784.13.102,56784.13.105,56784.13.106'&&/складове за промишлени стоки и офиси/.test(title);
+ return m.approvedSpecimen===true&&['А','Б'].includes(scenario)&&ids==='56784.13.102,56784.13.105,56784.13.106'&&/складове за промишлени стоки и офиси/.test(title);
 }
 function reviewText(x){
  const t=clean(x);
