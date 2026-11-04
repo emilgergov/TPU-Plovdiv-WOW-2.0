@@ -324,8 +324,8 @@ function kt47VerifiedAdministration(results,metadata){
  metadata.kt47EkatteSource=entry.source;
 }
 async function make(results,roles,register){
- if(window.V26TemplateWord?.layout!=='KT41_EXACT_KT35_KT39'||window.V26ExpertWord?.layout!=='KT41_EXACT_V27_R02')
-  throw Error('КТ41: одобрените Word еталони не са заредени. ZIP с други генератори няма да се създаде.');
+ if(window.V26TemplateWord?.layout!=='KT51_APPROVED_CLASSIC_RESTORED'||window.V26ExpertWord?.layout!=='KT51_APPROVED_EXPERT_R02_RESTORED')
+  throw Error('КТ51: одобрените авторски генератори А/Б и V27 R02 не са заредени.');
 
  if(!results.length||!roles||results.some(r=>!['leading','ancillary'].includes(roles[r.input]||roles[r.cadnum])))throw Error('Потвърдете ролите за всички имоти.');
  if(!results.some(r=>r.status==='Намерен'&&r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type))))throw Error('Няма действителна имотна геометрия за Приложение №1.');
@@ -415,21 +415,35 @@ async function make(results,roles,register){
  const classicParagraphs=classicSource.map(value=>String(value).trim());
  // KT23: Classic Word uses the expert-confirmed four paragraphs unchanged; AI authors the separate Expert Word.
  const classicWord=await window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata,{determination});
- const verifyEtalon=async(blob,expected,label)=>{
-  if(!window.fflate?.unzipSync)throw Error('КТ41: липсва DOCX валидатор.');
+ const verifyApproved=async(blob,kind)=>{
+  if(!window.fflate?.unzipSync)throw Error('КТ51: липсва валидатор за DOCX.');
   const zip=window.fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
-  const xml=zip['word/document.xml'];if(!xml)throw Error('КТ41: няма Word XML за '+label);
+  const xml=zip['word/document.xml'];
+  if(!xml||!zip['word/_rels/document.xml.rels']||!Object.keys(zip).some(k=>k.startsWith('word/media/')))
+    throw Error('КТ51: липсва оригиналната институционална структура: '+kind);
   const doc=new DOMParser().parseFromString(new TextDecoder().decode(xml),'application/xml');
+  if(doc.getElementsByTagName('parsererror').length)throw Error('КТ51: невалиден XML: '+kind);
   const ns='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
   const body=doc.getElementsByTagNameNS(ns,'body')[0];
+  if(!body)throw Error('КТ51: липсва Word body: '+kind);
   const paragraphs=Array.from(body.children).filter(p=>p.localName==='p');
-  if(paragraphs.length!==expected)throw Error('КТ41: '+label+' не съвпада с одобрения еталон: '+paragraphs.length+' вместо '+expected+' абзаца.');
-  const text=paragraphs.map(p=>Array.from(p.getElementsByTagNameNS(ns,'t')).map(x=>x.textContent).join('')).join('\n');
-  if(/\[\[(?:CONCLUSION|CHARACTERIZATION|PROCEDURE|LEGAL|IMPACTS)\]\]/.test(text))
-   throw Error('КТ41: технически маркер в '+label);
+  const lines=paragraphs.map(p=>Array.from(p.getElementsByTagNameNS(ns,'t')).map(x=>x.textContent).join(''));
+  const text=lines.join('\\n');
+  if(paragraphs.length<15||!lines.some(t=>/^Относно:/i.test(t))||!body.getElementsByTagNameNS(ns,'sectPr').length)
+    throw Error('КТ51: непълен одобрен Word: '+kind);
+  if(/\\[\\[(?:CONCLUSION|CHARACTERIZATION|PROCEDURE|LEGAL|IMPACTS)\\]\\]/.test(text))
+    throw Error('КТ51: останали технически маркери: '+kind);
+  if(kind==='expert'){
+   for(const section of ['1. ПРЕДМЕТ','2. ПРОСТРАНСТВЕНО','3. ПРЕЦЕНКА','4. ПРЕЦЕНКА'])
+    if(!text.includes(section))throw Error('КТ51: липсва одобрен експертен раздел '+section);
+   if(!zip['word/media/v27-gis-overview.png'])throw Error('КТ51: липсва реалното ГИС извлечение на R02.');
+  }else{
+   if(!text.includes('С реализацията на инвестиционното предложение')||!text.includes('Относно:'))
+    throw Error('КТ51: нарушена класическа характеристика.');
+  }
  };
- await verifyEtalon(classicWord,expertDraft.scenario==='А'?41:43,'КТ35-А/КТ39-Б');
- await verifyEtalon(expertWord,49,'V27 R02');
+ await verifyApproved(classicWord,'classic');
+ await verifyApproved(expertWord,'expert');
  for(const [label,blob] of [['експертен',expertWord],['класически',classicWord]]){
   if(blob.size<100||new TextDecoder().decode(await blob.slice(0,2).arrayBuffer())!=='PK')throw Error('КТ13: невалиден '+label+' DOCX.');
  }
