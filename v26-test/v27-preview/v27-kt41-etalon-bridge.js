@@ -90,9 +90,13 @@ async function classic(scenario,paragraphs,m,context={}){
   if(k==='B'&&!d.zones.some(z=>String(typeof z==='string'?z:z?.code||'').includes('BG0000578')))throw Error('КТ42: тестов образец Б не съответства на установената зона.');
   return finish(doc,'КТ35-А');
  }
+ // For a new case do not inherit the specimen's factual characterization.
+ // A missing or unverified paragraph remains visibly pending expert review.
+ const characteristicNames=['предвидени дейности','електроснабдяване','водоснабдяване','отпадъчни води'];
  for(let i=0;i<4;i++){
-  if(!reviewText(paragraphs[i]))throw Error('КТ42: непроверена характеристика '+(i+1)+'; Word не е създаден.');
-  put(p[18+i],i===0?char1(paragraphs[i]):clean(paragraphs[i]));
+  const value=reviewText(paragraphs[i])?clean(paragraphs[i])
+    :'[ЗА ЕКСПЕРТНА ПРОВЕРКА — '+characteristicNames[i]+': данните се установяват от конкретната преписка.]';
+  put(p[18+i],i===0&&reviewText(value)?char1(value):value);
  }
  const legal=m.legalParagraphs||[],impact=m.impactFindings||[];
  // Unknown legal and impact findings do not prevent creating an unsigned draft.
