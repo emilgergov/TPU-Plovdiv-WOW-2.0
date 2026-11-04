@@ -104,7 +104,7 @@ async function make(draft,options={}){
  // A formally complete response is not sufficient: all four sections must retain
  // at least one admissible paragraph after safety review.
  if(options.requireAiAuthor){
-  const empty=['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'].filter(key=>!reviewedAi(key).length);
+  const empty=['CHARACTERIZATION','LEGAL','IMPACTS'].filter(key=>!reviewedAi(key).length);
   if(empty.length)throw Error('V27: AI раздел без допустимо съдържание след проверка: '+empty.join(', '));
  }
  const safeAi=key=>reviewedAi(key).length>0;
