@@ -142,6 +142,24 @@ function heading(int){
  if(loc&&ids.some(id=>loc.includes(id)))loc=loc.replace(/\b\d{5}\.\d+\.\d+\b/g,'').replace(/^(?:ПИ|имот|поземлен имот)\s+с\s+идентификатор\s*/i,'').replace(/^[,\s]+|[,\s]+$/g,'');
  return 'Относно: Уведомление за инвестиционно предложение (ИП): „'+int.title+'“ '+parcel+(loc?', '+loc:'')+'.';
 }
+function putHeading(p,int){
+ const headline=heading(int);
+ const match=headline.match(/^(Относно)(: Уведомление за инвестиционно предложение \(ИП\): )(„[^“]*“)([\s\S]*)$/);
+ if(!match)throw Error('КТ44: невалидно потвърдено заглавие за Word.');
+ // The exact three approved DOCX specimens split the heading into four
+ // styled text runs. Keep all original runs, paragraph and formatting XML.
+ // In particular, never overwrite the first (often empty) text run.
+ const original=all(p,'t').filter(t=>t.textContent.length>0);
+ if(original.length!==4||original[0].textContent!=='Относно'||
+    !original[1].textContent.includes('Уведомление за инвестиционно предложение')||
+    !/^„/.test(original[2].textContent)||
+    !original[3].textContent.includes('поземлен'))
+   throw Error('КТ44: структурата на абзаца „Относно“ се различава от одобрения еталон.');
+ for(let i=0;i<4;i++){
+   original[i].textContent=match[i+1];
+   original[i].setAttribute('xml:space','preserve');
+ }
+}
 function introParagraph(p,index,int,expert){
  const old=text(p[index]);
  let updated=old.replace(/Вх\. № ОВОС-ХХХХ\s*\/\s*ХХ\.ХХ\.ХХХХ г\./,int.ref);
@@ -152,7 +170,7 @@ function metadata(doc,m){
  const p=doc.p,int=intro(m);
  put(p[6],party(m.recipient,'recipient'));
  put(p[7],party(m.address,'address'));
- put(p[10],heading(int));
+ putHeading(p[10],int);
  introParagraph(p,16,int,false);
  return int;
 }
@@ -214,13 +232,13 @@ async function expert(draft,options={}){
   // Exact approved V27 R02, including legal analysis, GIS overview, styles and signatures.
   put(p[6],party(m.recipient,'recipient'));
   put(p[7],party(m.address,'address'));
-  put(p[10],heading(int));
+  putHeading(p[10],int);
   introParagraph(p,17,int,true);
   return finish(doc,'V27 R02');
  }
  if(['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'].some(k=>!ai[k]?.length))throw Error('КТ42: непълен AI авторски проект.');
  put(p[6],party(m.recipient,'recipient'));put(p[7],party(m.address,'address'));
- put(p[10],heading(int));
+ putHeading(p[10],int);
  introParagraph(p,17,int,true);
  put(p[20],evidenceText(ai.CHARACTERIZATION[0],characterizationDraft(0,int,draft)));
  const engineering=ai.CHARACTERIZATION.slice(1).map(cleanAIPart).filter(Boolean);
