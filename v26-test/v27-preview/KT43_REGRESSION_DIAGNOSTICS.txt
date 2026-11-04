@@ -1,7 +1,7 @@
 == dependency installation ==
 npm warn deprecated @xmldom/xmldom@0.9.8: this version has critical issues, please update to the latest version
 
-added 2 packages in 751ms
+added 2 packages in 585ms
 == JS syntax ==
 == three approved templates, two scenarios, full place headings ==
 KT35-A PASS 41 paragraphs 35 unchanged paragraphs
@@ -15,7 +15,7 @@ KT44 HEADING STYLE PASS: E original four Word formatting segments retained
 KT44 HEADING STYLE PASS: A original four Word formatting segments retained
 AssertionError [ERR_ASSERTION]: A opening quotes
     at checkAdministrative (/home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:80:9)
-    at /home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:121:16 {
+    at /home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:126:16 {
   generatedMessage: false,
   code: 'ERR_ASSERTION',
   actual: 2,
