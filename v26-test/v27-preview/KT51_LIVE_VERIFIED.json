@@ -1,0 +1,13 @@
+{
+  "checkpoint": "KT51",
+  "result": "LIVE_PAGES_VERIFIED",
+  "scope": "administrative-only: A confidentiality like B; header, place, recipient; no changes to approved legal/impact bodies",
+  "body_source": "KT42 b1d2cfb",
+  "visual_url": "https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt51-admin-test.html",
+  "checks": [
+    "real DOCX A/B/R02 regression",
+    "synthetic B only with verified complete evidence",
+    "approved three original DOCX unchanged",
+    "public isolated HTML and JS"
+  ]
+}
