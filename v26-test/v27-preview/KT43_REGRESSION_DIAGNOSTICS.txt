@@ -1,9 +1,10 @@
 == dependency installation ==
 npm warn deprecated @xmldom/xmldom@0.9.8: this version has critical issues, please update to the latest version
 
-added 2 packages in 799ms
+added 2 packages in 752ms
 == JS syntax ==
 == three approved templates, two scenarios, full place headings ==
+KT47 EKATTE PASS: two official cadastral mappings; contradictory and mixed cases safely rejected
 KT35-A PASS 41 paragraphs 33 unchanged paragraphs
 KT44 HEADING STYLE PASS: A original four Word formatting segments retained
 KT46 A PASS: confidentiality right; body justified; GREEN/header/footer match B
