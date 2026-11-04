@@ -15,7 +15,7 @@ const source=fflate.unzipSync(new Uint8Array(read('etalon/V27-R02.docx')));
 function p(t){return '<w:p><w:r><w:t xml:space="preserve">'+t+'</w:t></w:r></w:p>'}
 const sections=[
 'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО','AI автор: конкретна проверена характеристика на дейностите.',
-'IV. ФАКТИЧЕСКИ И ПРАВНИ КОНСТАТАЦИИ','AI автор: специфичен правен аргумент за предмета на ИП.',
+'IV. ФАКТИЧЕСКИ И ПРАВНИ КОНСТАТАЦИИ','AI автор: специфичен правен аргумент за предмета на ИП. [[LEGAL]]',
 'V. ПРОЦЕДУРНА ПРЕЦЕНКА','AI автор: необходима е комплексна експертна преценка.',
 'VI. КОНСТАТАЦИИ ЗА ВЪЗДЕЙСТВИЯТА','AI автор: конкретна оценка на прякото и косвеното въздействие.',
 'VII. СЪПЪТСТВАЩИ ДОКУМЕНТИ'];
@@ -67,6 +67,7 @@ const paragraphText=async blob=>{
   assert.ok(e.some(x=>x.includes(heading)),'R02 section missing: '+heading);
  for(const phrase of ['конкретна проверена характеристика','специфичен правен аргумент','комплексна експертна преценка','конкретна оценка'])
   assert.ok(e.some(x=>x.includes(phrase)),'AI author paragraph lost: '+phrase);
+ assert.ok(!e.some(x=>/\[\[(?:CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\]\]/.test(x)),'KT51 technical AI section marker remained inside expert DOCX');
  assert.ok(zip['word/media/v27-gis-overview.png'],'R02 GIS image removed');
  assert.ok(e.some(x=>x.includes('Възложител: '+'Х'.repeat(10))),'R02 recipient missing');
  assert.ok(e.some(x=>x.includes('Адрес: '+'Х'.repeat(15))),'R02 address missing');
