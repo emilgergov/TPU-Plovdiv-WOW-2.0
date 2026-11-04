@@ -129,7 +129,7 @@ async function make(draft,options={}){
   paragraph(doc,'Фигура 1. Пространствено положение на имотите спрямо защитените зони от мрежата „Натура 2000“. Източник: ГИС анализ.',{italic:true}),
   paragraph(doc,'Картографското извлечение от ГИС анализа представя пространствените резултати и имотния обхват; пълният ГИС анализ е в самостоятелен PDF.'),
   paragraph(doc,'III. ХАРАКТЕРИСТИКА НА ПРЕДЛОЖЕНИЕТО',{heading:true}),
-  ...(safeAi('CHARACTERIZATION')?aiProposal('CHARACTERIZATION'):confirmed(draft.characterization).map(x=>paragraph(doc,String(x).replace(/\[ОТКЪС ОТ ПРЕПИСКАТА\s*[—-]\s*ЗА СВЕРЯВАНЕ\]/gi,'[ЗА ЕКСПЕРТНА ПРОВЕРКА — непълен откъс; необходимо е сверяване с оригиналната преписка]').replace(/^\s*[-–]\s*/,''))),
+  ...(safeAi('CHARACTERIZATION')?aiProposal('CHARACTERIZATION'):confirmed(draft.characterization).map(x=>paragraph(doc,String(x).replace(/\[ОТКЪС ОТ ПРЕПИСКАТА\s*[—-]\s*ЗА СВЕРЯВАНЕ\]/gi,'[ЗА ЕКСПЕРТНА ПРОВЕРКА — непълен откъс; необходимо е сверяване с оригиналната преписка]').replace(/^\s*[-–]\s*/,'')))),
 
   paragraph(doc,'IV. ФАКТИЧЕСКИ И ПРАВНИ КОНСТАТАЦИИ',{heading:true}),
   ...(safeAi('LEGAL')?aiProposal('LEGAL'):[paragraph(doc,'Правните основания се уточняват чрез съпоставка на документите в преписката с интегрирания нормативен архив. До потвърждаването им: ЗА ЕКСПЕРТНА ПРОВЕРКА.')]),
