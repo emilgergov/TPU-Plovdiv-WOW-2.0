@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'v26-test/v27-preview/kt53-locked-generator-test.html'
+      - 'v26-test/v27-preview/kt53-original-draft-package.js'
       - '.github/workflows/kt53-locked-generator.yml'
   workflow_dispatch:
 permissions:
@@ -32,6 +33,11 @@ jobs:
           html=Path('v26-test/v27-preview/kt53-locked-generator-test.html').read_text()
           src=Path('v26-test/v27-preview/v27-kt50-original-kt42.js').read_bytes()
           assert 'v27-preview/v27-kt50-original-kt42.js?v=kt53-locked-b1d2cfb' in html
+          assert 'v27-preview/kt53-original-draft-package.js?v=kt53-original-b1d2cfb' in html
+          assert 'v27-preview/v26-draft-package.js' not in html
+          package=Path('v26-test/v27-preview/kt53-original-draft-package.js').read_text()
+          assert "KT41_EXACT_KT35_KT39" in package and "KT41_EXACT_V27_R02" in package
+          assert 'KT51_APPROVED_CLASSIC_RESTORED' not in package
           assert 'v27-kt51-admin-only.js' not in html
           assert sha1(b'blob '+str(len(src)).encode()+b'\0'+src).hexdigest()=='2c879e0f743f9863051f4126769977e8f1dcf842'
           print('KT53 LOADER AND ORIGINAL SOURCE PASS')
