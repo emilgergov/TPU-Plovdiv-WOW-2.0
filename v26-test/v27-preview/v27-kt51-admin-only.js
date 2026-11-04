@@ -137,27 +137,24 @@ async function classic(scenario,paragraphs,m,context={}){
   put(p[18+i],i===0?char1(paragraphs[i]):clean(paragraphs[i]));
  }
  const legal=m.legalParagraphs||[],impact=m.impactFindings||[];
- const textLegal=i=>validated(legal,i);
- const textImpact=i=>validated(impact,i);
- const requiredLegal=k==='A'?2:4;
- if(Array.from({length:requiredLegal},(_,i)=>textLegal(i)).some(v=>!v))
-   throw Error('КТ42: липсват доказани правни основания за новата преписка. Одобрените аргументи от примерния казус не се пренасят.');
- if(Array.from({length:5},(_,i)=>textImpact(i)).some(v=>!v))
-   throw Error('КТ42: липсва проверена оценка на петте направления на въздействие.');
- if(!reviewText(m.procedureFinding))
-   throw Error('КТ42: липсва потвърден процедурен извод; не се копира от еталона.');
+ // KT51: missing case-specific findings must NEVER inherit etalon conclusions.
+ // Project-only output: mark uncertain findings visibly instead of stopping ZIP.
+ const reviewLabel=(kind,i)=>'ЗА ЕКСПЕРТНА ПРОВЕРКА — '+kind+(i==null?'':' '+(i+1))+'. Не е установен доказателствено обоснован извод по преписката.';
+ const textLegal=i=>validated(legal,i)||reviewLabel('правно основание',i);
+ const textImpact=i=>validated(impact,i)||reviewLabel('оценка на въздействието',i);
+ const procedure=validated([m.procedureFinding],0)||reviewLabel('процедурен извод');
  if(k==='A'){
   put(p[22],spatial({...d,scenario:'А'},int));
   put(p[23],'Най-близко разположена защитена зона: '+locationSentence(m,{scenario:'А'})+'.');
   put(p[24],textLegal(0));put(p[25],textLegal(1));
   for(let i=0;i<5;i++)put(p[26+i],textImpact(i));
-  put(p[31],safe(m.procedureFinding,'окончателна преценка на компетентния орган'));
+  put(p[31],procedure);
  }else{
   put(p[22],textLegal(0));put(p[23],spatial({...d,scenario:'Б',zones:d.zones},int));
   put(p[24],locationSentence(m,{scenario:'Б'}));
   put(p[25],textLegal(1));put(p[26],textLegal(2));put(p[27],textLegal(3));
   for(let i=0;i<5;i++)put(p[28+i],textImpact(i));
-  put(p[33],safe(m.procedureFinding,'окончателна преценка на компетентния орган'));
+  put(p[33],procedure);
  }
  return finish(doc,'КТ'+(k==='A'?'35-А':'39-Б'));
 }
@@ -193,8 +190,10 @@ async function expert(draft,options={}){
  const blockedProcedure=/(?:не е приложима процедура|не подлежи на процедура|не се изисква оценка|не се налага|не се изисква|не подлежи|няма вероятност|малко вероятно|незначителн(?:о|и|а) въздейств|не се очаква въздейств|липса на значими въздействия|не поражда въздействия|не оказва въздействие|ниск[аио] риск)/i;
  const reviewedProcedure=(ai.PROCEDURE||[]).filter(t=>!blockedProcedure.test(t));
  put(p[38],reviewedProcedure.length?safe(reviewedProcedure[0],'процедурна преценка'):'Приложимата процедура се определя след експертна проверка на пълната преписка, пространствените резултати и относимите нормативни основания. Само липсата на териториално пресичане не е достатъчно основание за окончателен процедурен извод.');
- const conclusion=safe(m.procedureFinding,'проект на заключение');
- if(!reviewText(conclusion)||blockedProcedure.test(conclusion))throw Error('КТ42: за нова преписка е необходим доказан процедурен извод.');
+ const proposedConclusion=validated([m.procedureFinding],0);
+ const conclusion=proposedConclusion&&!blockedProcedure.test(proposedConclusion)
+  ?proposedConclusion
+  :'ЗА ЕКСПЕРТНА ПРОВЕРКА — приложимата процедура и окончателният извод се определят от компетентния орган въз основа на пълната преписка и проверените нормативни основания.';
  put(p[39],conclusion);
  return finish(doc,'V27 R02');
 }
