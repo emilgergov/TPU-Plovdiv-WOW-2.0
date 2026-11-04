@@ -4,6 +4,7 @@ on:
     branches: [work/v27-kt26-five-packages]
     paths:
       - 'v26-test/v27-preview/v27-approved-*.js'
+      - 'v26-test/v27-preview/v26-expert-word.js'
       - 'v26-test/v27-preview/kt40-*.cjs'
       - 'v26-test/v27-preview/v26-draft-package.js'
       - 'v26-test/v27-preview/index.html'
