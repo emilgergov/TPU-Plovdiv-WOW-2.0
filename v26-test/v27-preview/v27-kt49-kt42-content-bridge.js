@@ -405,9 +405,9 @@ async function expert(draft,options={}){
  put(p[31],imp0&&!contradictoryGIS(imp0,draft.scenario)&&!/НЯМА ДАННИ|подлежи на проверка/i.test(imp0)?imp0:approvedR02ImpactFallback(-1,int,draft,p));
  for(let i=0;i<5;i++){
   const candidate=cleanAIPart(ai.IMPACTS[i+1]);
-  const heading=text(p[32+i]).split(/\\.\\s/)[0].trim();
+  const heading=text(p[32+i]).split(/\.\s/)[0].trim();
   const usable=candidate&&!contradictoryGIS(candidate,draft.scenario)&&
-   !/\\[ЗА ЕКСПЕРТНА ПРОВЕРКА|НЯМА ДАННИ|не са представени|подлежи на проверка/i.test(candidate);
+   !/\[ЗА ЕКСПЕРТНА ПРОВЕРКА|НЯМА ДАННИ|не са представени|подлежи на проверка/i.test(candidate);
   // Do not allow an AI paragraph to erase the agreed impact heading.
   put(p[32+i],usable
    ?(candidate.toLocaleLowerCase('bg').startsWith(heading.toLocaleLowerCase('bg'))?candidate:heading+'. '+candidate)
