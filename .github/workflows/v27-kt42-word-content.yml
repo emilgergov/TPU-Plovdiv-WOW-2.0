@@ -1,4 +1,4 @@
-name: V27 KT45 approved Word content lock
+name: V27 KT47 integrated content regression
 on:
   push:
     paths:
@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Execute and capture KT45 A+B Word regression
+      - name: Execute and capture KT47 A+B, expert and EKATTE regression
         run: |
           set +e
           {
@@ -44,25 +44,25 @@ jobs:
           printf '\nExit code: ' >> v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt
           cat /tmp/kt43_status.txt >> v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt 2>/dev/null || echo 'unknown' >> v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt
           git add v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt
-          git commit -m "KT44: record latest exact Word regression diagnostic" || true
+          git commit -m "KT47: record integrated Word regression diagnostic" || true
           for attempt in 1 2 3 4 5; do
             git pull --rebase origin main && git push origin HEAD:main && break
             echo "Diagnostic push retry $attempt"
             sleep 3
           done
-      - name: Publish KT45 verified CI marker
+      - name: Publish KT47 verified CI marker
         if: success()
         run: |
           python - <<'PY'
           import json,subprocess
           from pathlib import Path
-          marker=Path('v26-test/v27-preview/KT45_VERIFIED.json')
-          marker.write_text(json.dumps({'checkpoint':'KT45','verified_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'tests':'DOCX A/B/R02 paragraph preservation and fully formatted place headings: PASS','status':'verified-for-preview'},ensure_ascii=False,indent=2)+'\n')
+          marker=Path('v26-test/v27-preview/KT47_VERIFIED.json')
+          marker.write_text(json.dumps({'checkpoint':'KT47','verified_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'tests':'DOCX A/B/R02 legal and GIS content, NSI EKATTE and preserved Word layouts: PASS','status':'verified-for-preview'},ensure_ascii=False,indent=2)+'\n')
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v26-test/v27-preview/KT42_VERIFIED.json
-          git commit -m "KT45: mark A+B and expert Word headings verified by executable DOCX test" || true
+          git add v26-test/v27-preview/KT47_VERIFIED.json
+          git commit -m "KT47: verified A+B/Expert legal content and EKATTE sources with executable regression" || true
           pushed=0
           for attempt in 1 2 3 4 5; do
             if git pull --rebase origin main && git push origin HEAD:main; then pushed=1; break; fi
