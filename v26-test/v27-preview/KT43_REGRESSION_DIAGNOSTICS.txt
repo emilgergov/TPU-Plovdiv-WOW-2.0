@@ -1,7 +1,7 @@
 == dependency installation ==
 npm warn deprecated @xmldom/xmldom@0.9.8: this version has critical issues, please update to the latest version
 
-added 2 packages in 932ms
+added 2 packages in 614ms
 == JS syntax ==
 == three approved templates, two scenarios, full place headings ==
 KT47 EKATTE PASS: two official cadastral mappings; contradictory and mixed cases safely rejected
