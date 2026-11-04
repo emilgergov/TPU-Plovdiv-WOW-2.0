@@ -241,7 +241,7 @@ console.log('KT47 EKATTE PASS: two official cadastral mappings; contradictory an
  assert.match(phrase(resultE.p[10]),/по КККР на с\. Катуница, местност „Попското“, община Садово, област Пловдив/,'expert B full place');
  assert.match(phrase(resultE.p[24]),/BG0000194.*Река Чая/,'expert B zone');
  assert.ok((phrase(resultE.p[21]).match(/ЗА ЕКСПЕРТНА ПРОВЕРКА/g)||[]).length<=1,'AI characterization repeated review markers');
- assert.match(phrase(resultE.p[26]),/чл\. 31|зона|режим/,'expert B legal references');
+ assert.match(phrase(resultE.p[26]),/чл\. 2, ал\. 1, т\. 2/,'KT48 expert B approved R02 procedural hypothesis');
 
  // KT48: the non-intersection Expert R02 must not recycle the B scenario.
  const actualExpertA=await sandbox.V26ExpertWord.make({...draft,scenario:'А',metadata:{...realApprovedLike,parcelIds:'56784.13.102, 56784.13.105, 56784.13.106'},zones:[]},{requireAiAuthor:true});
