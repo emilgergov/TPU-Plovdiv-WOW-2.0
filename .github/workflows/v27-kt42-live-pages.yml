@@ -18,7 +18,7 @@ jobs:
           python - <<'PY'
           import urllib.request,time,zipfile,io,json
           base='https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/'
-          expected='v27-preview/v27-kt41-etalon-bridge.js?v=kt44-unified-535febb'
+          expected='v27-preview/v27-kt41-etalon-bridge.js?v=kt44-heading-style-7701c58'
           last=''
           for attempt in range(36):
               try:
@@ -26,7 +26,7 @@ jobs:
                   with urllib.request.urlopen(req,timeout=18) as res: html=res.read().decode('utf-8')
                   if expected not in html: raise RuntimeError('Pages still serves old Word generator')
                   with urllib.request.urlopen(base+'v27-kt41-etalon-bridge.js?kt44=verification',timeout=18) as res: code=res.read().decode('utf-8')
-                  if any(k not in code for k in ('function isApprovedCase','function characterizationDraft','function legalDraft','function impactDraft','function heading','function zoneList')): raise RuntimeError('Live JS not KT44')
+                  if any(k not in code for k in ('function isApprovedCase','function characterizationDraft','function legalDraft','function impactDraft','function heading','function putHeading','function zoneList')): raise RuntimeError('Live JS not KT44')
                   for filename in ('KT35-A.docx','KT39-B.docx','V27-R02.docx'):
                       with urllib.request.urlopen(base+'etalon/'+filename,timeout=18) as res: raw=res.read()
                       with zipfile.ZipFile(io.BytesIO(raw)) as z:
