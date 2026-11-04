@@ -408,11 +408,14 @@ async function make(results,roles,register){
  // characterization, never the independently AI-authored Expert Word narrative.
  // Preserve the approved paragraph wording; the original A/B template owns its
  // fixed legal and impact paragraphs and their formatting.
- const classicSource=Array.isArray(paragraphs)&&paragraphs.length===4
-  ?paragraphs:expertDraft.characterization;
- if(!Array.isArray(classicSource)||classicSource.length!==4||classicSource.some(p=>!String(p||'').trim()))
-  throw Error('КТ26: липсват четирите потвърдени абзаца за класическия образец А/Б.');
- const classicParagraphs=classicSource.map(value=>String(value).trim());
+ // KT51: accept genuinely expert-confirmed descriptions first. When the old
+ // working form supplies excerpts/review markers, use the accepted AI author's
+ // CHARACTERIZATION text, never the obsolete template warning text.
+ if(!window.KT51AICharacterization?.build)throw Error('КТ51: липсва връзката между AI автора и класическия Word.');
+ const classicInput=window.KT51AICharacterization.build(register.v27AiDraft||'',paragraphs);
+ const classicParagraphs=classicInput.paragraphs;
+ if(!Array.isArray(classicParagraphs)||classicParagraphs.length!==4)
+  throw Error('КТ51: липсват четири съдържателни абзаца на характеристиката.');
  // KT23: Classic Word uses the expert-confirmed four paragraphs unchanged; AI authors the separate Expert Word.
  const classicWord=await window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata,{determination});
  const verifyApproved=async(blob,kind)=>{
