@@ -1,0 +1,5 @@
+KT50 HISTORICAL SOURCE AND THREE EXACT APPROVED DOCX HASHES PASS
+KT35-A PASS 41 paragraphs 37 unchanged paragraphs
+KT39-B PASS 43 paragraphs 39 unchanged paragraphs
+V27-R02 PASS 49 paragraphs 45 unchanged paragraphs
+KT50 PRE-KT43 regression PASS: exact approved source, 3 DOCX content checks, unrelated case rejected. This is NOT proof of general case drafting.
