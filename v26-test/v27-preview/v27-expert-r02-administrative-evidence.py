@@ -24,7 +24,7 @@ base=Document(BASE)
 old=[p.text for p in doc.paragraphs]
 legal_decision=base.paragraphs[31].text
 assert old.count(legal_decision)==1
-assert "УВАЖАЕМИ ГОСПОЖИ И ГОСПОДА," in old
+assert sum(t.strip()=="УВАЖАЕМИ ГОСПОЖИ И ГОСПОДА," for t in old)==1
 assert len([t for t in old if t=="ПРОЕКТ НА ЕКСПЕРТНО СТАНОВИЩЕ"])==1
 
 def find_exact(s):
@@ -61,7 +61,7 @@ def add_after(anchor,pieces):
     return retype(p,pieces,align=WD_ALIGN_PARAGRAPH.JUSTIFY,size=10,after=5,indent=1.0)
 
 # 1. Completely remove the salutation, with no blank replacement.
-greeting=find_exact("УВАЖАЕМИ ГОСПОЖИ И ГОСПОДА,")
+greeting=next(p for p in doc.paragraphs if p.text.strip()=="УВАЖАЕМИ ГОСПОЖИ И ГОСПОДА,")
 greeting._p.getparent().remove(greeting._p)
 
 # 2. Properly hierarchical administrative title, two centered lines.
@@ -160,7 +160,7 @@ add_after(impacts_head,[
 ])
 
 after=[p.text for p in doc.paragraphs]
-assert "УВАЖАЕМИ ГОСПОЖИ И ГОСПОДА," not in after
+assert not any(t.strip()=="УВАЖАЕМИ ГОСПОЖИ И ГОСПОДА," for t in after)
 assert after.count("ПРОЕКТ НА ЕКСПЕРТНО СТАНОВИЩЕ")==1
 assert after.count("по чл. 2, ал. 2 от Наредбата за ОС")==1
 assert all(after.count(new)==1 for _,new in sections)
@@ -206,7 +206,7 @@ check=Document(OUT)
 texts=[p.text for p in check.paragraphs]
 assert texts==after
 assert texts.count(legal_decision)==1
-assert "УВАЖАЕМИ ГОСПОЖИ И ГОСПОДА," not in texts
+assert not any(t.strip()=="УВАЖАЕМИ ГОСПОЖИ И ГОСПОДА," for t in texts)
 assert len([x for x in texts if x.startswith(("1. ПРЕДМЕТ","2. ПРОСТРАНСТВЕНО",
   "3. ПРЕЦЕНКА","4. ПРЕЦЕНКА"))])==4
 for element in check._element.body.xpath(".//w:p"):
