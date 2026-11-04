@@ -1,0 +1,68 @@
+name: V27 KT41 approved Word etalons
+on:
+  push:
+    paths:
+      - '.github/workflows/v27-kt41-etalon.yml'
+      - 'v26-test/v27-preview/v27-kt41-etalon-bridge.js'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Download user-approved KT35 A, KT39 B and V27 R02 from archived Actions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/kt41/a /tmp/kt41/b /tmp/kt41/e v26-test/v27-preview/etalon
+          gh run download 41750769306 -n KT35-Classic-Word -D /tmp/kt41/a
+          gh run download 41750769306 -n KT39-Classic-B-Review -D /tmp/kt41/b
+          gh run download 41750769306 -n V27-Expert-Second-Review-R02 -D /tmp/kt41/e
+          cp /tmp/kt41/a/01A_Obrazec_A_KLASICHESKI_KT35.docx v26-test/v27-preview/etalon/KT35-A.docx
+          cp /tmp/kt41/b/01B_Obrazec_B_KLASICHESKI_KT39_SIMULACIA.docx v26-test/v27-preview/etalon/KT39-B.docx
+          cp /tmp/kt41/e/02_Proekt_na_stanovishte_EKSPERTEN_V27_R02.docx v26-test/v27-preview/etalon/V27-R02.docx
+      - name: Verify Word etalon document structure and activate bridge only in isolated preview
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile,xml.etree.ElementTree as E
+          root=Path('v26-test/v27-preview')
+          expected={'KT35-A':(41,'Относно:'),'KT39-B':(43,'Относно:'),'V27-R02':(49,'ПРОЕКТ НА ЕКСПЕРТНО СТАНОВИЩЕ')}
+          ns={'w':'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+          for name,(count,needle) in expected.items():
+              f=root/'etalon'/f'{name}.docx'
+              with zipfile.ZipFile(f) as z:
+                  files=z.namelist()
+                  assert 'word/document.xml' in files and 'word/_rels/document.xml.rels' in files
+                  assert any(x.startswith('word/media/') for x in files)
+                  dom=E.fromstring(z.read('word/document.xml'))
+                  paragraphs=[''.join(t.text or '' for t in p.findall('.//w:t',ns)) for p in dom.findall('.//w:body/w:p',ns)]
+                  assert len(paragraphs)==count,(name,len(paragraphs))
+                  assert any(needle in p for p in paragraphs),name
+                  print('VERIFIED',name,len(paragraphs),f.stat().st_size)
+          index=root/'index.html'
+          s=index.read_text()
+          marker='<script src="v27-preview/v27-kt41-etalon-bridge.js?v=kt41-etalons-original"></script>'
+          if marker not in s:
+              anchor='<script src="v27-preview/v27-approved-expert-word-r02.js?v=kt40-approved-r02"></script>'
+              assert anchor in s,'Missing KT40 expert loader anchor'
+              s=s.replace(anchor,anchor+marker,1)
+              index.write_text(s)
+          assert s.count(marker)==1
+          PY
+          node --check v26-test/v27-preview/v27-kt41-etalon-bridge.js
+      - name: Commit only isolated preview etalons and activation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v26-test/v27-preview/etalon/*.docx v26-test/v27-preview/index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "KT41: attach exact archived approved DOCX to isolated preview and activate bridge"
+            git push
+          fi
