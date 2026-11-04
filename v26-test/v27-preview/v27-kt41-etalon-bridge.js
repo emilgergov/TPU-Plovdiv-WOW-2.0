@@ -316,9 +316,26 @@ function supportedAILegal(raw,draft){
  if(cited.length&&!cited.every(n=>sources.some(x=>String(x.article||'').includes(n))))return '';
  return t;
 }
+// KT48: the source of the legal paragraph structure is the approved V27-R02.
+// Do not replace that R02 structure with the generic KT43/KT44 legalDraft().
+function approvedR02LegalFallback(i,int,draft,p){
+ const outside=draft.scenario==='А'||draft.scenario==='A';
+ if(i===0)return outside
+  ?'При извършената преценка са отчетени установеното пространствено положение на имотите извън границите на защитени зони от мрежата „Натура 2000“, характерът и предназначението на инвестиционното предложение, техническите му решения и възможните преки, косвени и съвкупни въздействия. Окончателният извод зависи от доказаните параметри на дейностите.'
+  :'При извършената преценка са отчетени установеното ГИС пресичане на имотите със '+(zones(draft)||'защитена зона')+', характерът на заявените дейности, приложимите режими, инженерните връзки и възможните преки, косвени и съвкупни въздействия. Самото пресичане не предрешава административния извод.';
+ if(i===1)return outside
+  ?'Разгледана е хипотезата на чл. 2, ал. 1, т. 2 от Наредбата за ОС, която предвижда териториална предпоставка за попадане изцяло или отчасти в защитена зона. За разглежданите имоти ГИС анализът не установява такава предпоставка.'
+  :'Разгледана е хипотезата на чл. 2, ал. 1, т. 2 от Наредбата за ОС. За разглежданите имоти е установено пространствено пресичане, но приложимостта на хипотезата зависи и от заявената дейност и останалите нормативни условия.';
+ if(i===2)return text(p[27]); // original R02 general legal method, not an example-specific decision
+ if(i===3)return 'При правната квалификация на инвестиционното предложение се съобразява чл. 2, ал. 1, т. 1 от Наредбата за ОС във връзка с обхвата на глава шеста от Закона за опазване на околната среда (ЗООС). Приложимостта на приложения № 1 и № 2 към ЗООС се преценява според установените дейности и техния капацитет.';
+ throw Error('KT48: unknown R02 legal section');
+}
+function contradictoryGIS(textValue,scenario){
+ return (scenario==='А'||scenario==='A')&&/(?:ГИС анализът удостоверява пространствено пресичане|установено пространствено пресичане|попада(?:т)? частично в границите на защитена зона|за засегнатата защитена зона)/i.test(String(textValue||''));
+}
 function groundedLegalParagraph(raw,draft,fallback){
  const t=supportedAILegal(raw,draft);
- if(!t)return fallback;
+ if(!t||contradictoryGIS(t,draft.scenario))return fallback;
  const references=(draft.legalSources||[]).filter(x=>x.article&&x.title&&x.source);
  return t+(references.length?' Проверени нормативни референции: '+references.slice(0,2).map(x=>x.title+', '+x.article+' ('+x.source+')').join('; ')+'.':' Правните основания се сверяват по нормативния архив.');
 }
@@ -348,10 +365,10 @@ async function expert(draft,options={}){
  put(p[21],engineeringText);
  put(p[23],spatial(draft,int));
  put(p[24],locationSentence(m,draft));
- put(p[25],groundedLegalParagraph(ai.LEGAL[0],draft,legalDraft(0,int,draft)));
+ put(p[25],groundedLegalParagraph(ai.LEGAL[0],draft,approvedR02LegalFallback(0,int,draft,p)));
  for(let i=0;i<3;i++){
    const supplied=validated(m.legalParagraphs,i);
-   put(p[26+i],supplied||groundedLegalParagraph(ai.LEGAL[i+1],draft,legalDraft(i+1,int,draft)));
+   put(p[26+i],(supplied&&!contradictoryGIS(supplied,draft.scenario)?supplied:null)||groundedLegalParagraph(ai.LEGAL[i+1],draft,approvedR02LegalFallback(i+1,int,draft,p)));
  }
  put(p[31],evidenceText(ai.IMPACTS[0], 'Направленията на възможните въздействия се анализират спрямо предмета и целите на опазване на '+zones(draft)+'. '+reviewMarker('доказателствен анализ')));
  for(let i=0;i<5;i++)put(p[32+i],evidenceText(ai.IMPACTS[i+1],impactDraft(i,int,draft)));
@@ -359,9 +376,9 @@ async function expert(draft,options={}){
  const reviewedProcedure=(ai.PROCEDURE||[]).filter(t=>!blockedProcedure.test(t));
  put(p[38],reviewedProcedure.length?safe(reviewedProcedure[0],'процедурна преценка'):'Приложимата процедура се определя след експертна проверка на пълната преписка, пространствените резултати и относимите нормативни основания. Само липсата на териториално пресичане не е достатъчно основание за окончателен процедурен извод.');
  const conclusion=safe(m.procedureFinding,'проект на заключение');
- const safeConclusion=reviewText(conclusion)&&!blockedProcedure.test(conclusion)
+ const safeConclusion=reviewText(conclusion)&&!blockedProcedure.test(conclusion)&&!contradictoryGIS(conclusion,draft.scenario)
   ?conclusion
-  :'[ЗА ЕКСПЕРТНА ПРОВЕРКА — окончателният процедурен извод не е потвърден по пълната преписка. Наличието на пресичане само по себе си не определя вида на необходимата процедура.]';
+  :'Окончателната преценка на компетентния орган се формира според потвърденото пространствено положение, действителния характер на дейностите и приложимите нормативни основания. При настоящите данни окончателен процедурен извод не е установен в работния проект.';
  put(p[39],safeConclusion);
  return finish(doc,'V27 R02');
 }
