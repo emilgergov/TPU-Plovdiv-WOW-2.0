@@ -48,10 +48,10 @@ function kt51AlignConfidentiality(doc,approvedB){
 function kt51TrimDuplicateSubject(value){
  const raw=subject(value).trim();
  // Do not rewrite the project's descriptive subject; only eliminate an appended cadastral/location tail.
- let name=raw.replace(/\\s*[,;—–-]?\\s*(?:в\\s+)?(?:ПИ|поземлен(?:и)?\\s+имот(?:и)?)\\s+(?:с\\s+)?(?:идентификатор(?:и)?|ИД)\\s*[:№]?\\s*\\d{5}\\.\\d+\\.\\d+[\\s\\S]*$/i,'').trim();
+ let name=raw.replace(/\s*[,;—–-]?\s*(?:в\s+)?(?:ПИ|поземлен(?:и)?\s+имот(?:и)?)\s+(?:с\s+)?(?:идентификатор(?:и)?|ИД)\s*[:№]?\s*\d{5}\.\d+\.\d+[\s\S]*$/i,'').trim();
  // Preserve bare descriptions that may contain an ID internally.
  if(!name)name=raw;
- return name.replace(/^[„“"'«»\\s]+|[„“"'«»\\s]+$/g,'').trim();
+ return name.replace(/^[„“"'«»\s]+|[„“"'«»\s]+$/g,'').trim();
 }
 function kt51HeadingPlace(m){
  // Values are already checked against GIS and EKATTE by the package builder.
@@ -68,7 +68,7 @@ function kt51HeadingPlace(m){
 function kt51Party(value,label){
  const original=clean(value);
  if(!original)return label+': [ЗА ПОПЪЛВАНЕ]';
- const stripped=original.replace(label==='Възложител'?/^(?:Възложител(?:я)?|ДО)\\s*:?\\s*/i:/^(?:Адрес(?:\\s+за\\s+кореспонденция)?|За\\s+кореспонденция)\\s*:?\\s*/i,'').trim();
+ const stripped=original.replace(label==='Възложител'?/^(?:Възложител(?:я)?|ДО)\s*:?\s*/i:/^(?:Адрес(?:\s+за\s+кореспонденция)?|За\s+кореспонденция)\s*:?\s*/i,'').trim();
  return label+': '+(stripped||'[ЗА ПОПЪЛВАНЕ]');
 }
 function isApprovedCase(m,scenario){
