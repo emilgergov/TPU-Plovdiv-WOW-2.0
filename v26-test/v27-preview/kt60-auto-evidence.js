@@ -39,7 +39,7 @@ function build({results=[],workingDraft={},aiDraft='',evidence=null,normativeReg
  const legal=Array.from({length:4},(_,i)=>{
   const t=clean(m.legalParagraphs?.[i]);
   const rec=legalRecords.find(r=>!invalid(t)&&t.includes(clean(r.provisionText||r.articleText)));
-  return {text:t,source:rec?{file:r.source,article:r.article||'',version:r.version||r.effectiveDate}:null};
+  return {text:t,source:rec?{file:rec.source,article:rec.article||'',version:rec.version||rec.effectiveDate}:null};
  });
  const impacts=Array.from({length:5},(_,i)=>clean(m.impactFindings?.[i]));
  const procedure=clean(m.procedureFinding);
