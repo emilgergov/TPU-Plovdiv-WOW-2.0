@@ -105,9 +105,14 @@ function cleanAIPart(t){
  const s=clean(t).replace(/\s*\[(?:ЗА ЕКСПЕРТНА ПРОВЕРКА|ОТКЪС ОТ ПРЕПИСКАТА)[^\]]*\]/gi,'').replace(/\s+/g,' ').trim();
  return s&&!/^(?:НЯМА ДАННИ|не са предоставени данни)$/i.test(s)?s:'';
 }
-function evidenceText(para,fallback){
+function mismatchedScenario(t,d){
+ const value=clean(t);
+ return scenarioA(d)&&/(?:ГИС анализът удостоверява пространствено пресичане|установено (?:е |пространствено )?пресичане|установеното пресичане|имотното пресичане|в границите на засегнатата зона|на пресичаната защитена зона|попада(?:т)? в границите на защитена зона)/i.test(value);
+}
+function evidenceText(para,fallback,d){
  const t=cleanAIPart(para);
- return t? t+' '+reviewMarker('сверяване на фактите и правните основания'):fallback;
+ // Do not copy AI assumptions that contradict the verified GIS determination.
+ return t&&!mismatchedScenario(t,d)?t+' Следва проверка на фактическата и документалната основа.':fallback;
 }
 
 const all=(el,name)=>Array.from(el.getElementsByTagNameNS(NS,name));
@@ -262,11 +267,11 @@ async function classic(scenario,paragraphs,m,context={}){
  const legal=m.legalParagraphs||[],impact=m.impactFindings||[];
  // Unknown legal and impact findings do not prevent creating an unsigned draft.
  // Missing evidence must not silently inherit findings from the approved example.
- const textLegal=i=>validated(legal,i)||legalDraft(i,int,d);
- const textImpact=i=>validated(impact,i)||impactDraft(i,int,d);
+ const textLegal=i=>{const v=validated(legal,i);return v&&!mismatchedScenario(v,d)?v:legalDraft(i,int,d)};
+ const textImpact=i=>{const v=validated(impact,i);return v&&!mismatchedScenario(v,d)?v:impactDraft(i,int,d)};
  // A draft must remain possible when no final procedure decision has been verified.
  // Do not copy the example case's conclusion into a different dossier.
- const procedureText=reviewText(m.procedureFinding)?clean(m.procedureFinding)
+ const procedureText=reviewText(m.procedureFinding)&&!mismatchedScenario(m.procedureFinding,d)?clean(m.procedureFinding)
   :'[ЗА ЕКСПЕРТНА ПРОВЕРКА — приложимата процедура и окончателният извод се определят от компетентния орган по пълната преписка и относимите нормативни основания.]';
  if(k==='A'){
   put(p[22],spatial({...d,scenario:'А'},int));
@@ -291,6 +296,7 @@ function aiParts(raw){
 // KT47: prevent unsourced AI assertions or provisions from becoming official findings.
 function supportedAILegal(raw,draft){
  const t=cleanAIPart(raw);
+ if(mismatchedScenario(t,draft))return '';
  if(!t||/(?:не подлежи|не е необходима оценка|не се изисква|липса на значими въздействия|няма вероятност за въздействие)/i.test(t))return '';
  const cited=[...t.matchAll(/чл\.\s*(\d+[а-я]?)/gi)].map(x=>x[1]);
  const sources=Array.isArray(draft.legalSources)?draft.legalSources:[];
@@ -322,9 +328,9 @@ async function expert(draft,options={}){
  putHeading(p[10],int);
  introParagraph(p,17,int,true);
  put(p[18],neutralProcedure(draft.scenario));
- put(p[20],evidenceText(ai.CHARACTERIZATION[0],characterizationDraft(0,int,draft)));
+ put(p[20],evidenceText(ai.CHARACTERIZATION[0],characterizationDraft(0,int,draft),draft));
  const engineering=ai.CHARACTERIZATION.slice(1).map(cleanAIPart).filter(Boolean);
- const engineeringText=engineering.length?evidenceText([...new Set(engineering)].join(' '),characterizationDraft(1,int,draft))
+ const engineeringText=engineering.length?evidenceText([...new Set(engineering)].join(' '),characterizationDraft(1,int,draft),draft)
   :[1,2,3].map(i=>characterizationDraft(i,int,draft).replace(/\s*\[ЗА ЕКСПЕРТНА ПРОВЕРКА[^\]]*\]/g,'')).join(' ')+' '+reviewMarker('технически решения за електроснабдяване, водоснабдяване и отпадъчни води');
  put(p[21],engineeringText);
  put(p[23],spatial(draft,int));
@@ -334,13 +340,13 @@ async function expert(draft,options={}){
    const supplied=validated(m.legalParagraphs,i);
    put(p[26+i],supplied||groundedLegalParagraph(ai.LEGAL[i+1],draft,legalDraft(i+1,int,draft)));
  }
- put(p[31],evidenceText(ai.IMPACTS[0], 'Направленията на възможните въздействия се анализират спрямо предмета и целите на опазване на '+zones(draft)+'. '+reviewMarker('доказателствен анализ')));
- for(let i=0;i<5;i++)put(p[32+i],evidenceText(ai.IMPACTS[i+1],impactDraft(i,int,draft)));
+ put(p[31],evidenceText(ai.IMPACTS[0], 'Възможните въздействия се анализират спрямо доказания ГИС статус и действителните пътища на въздействие. '+evidenceReservation(),draft));
+ for(let i=0;i<5;i++)put(p[32+i],evidenceText(ai.IMPACTS[i+1],impactDraft(i,int,draft),draft));
  const blockedProcedure=/(?:не е приложима процедура|не подлежи на процедура|не се изисква оценка|не се налага|не се изисква|не подлежи|няма вероятност|малко вероятно|незначителн(?:о|и|а) въздейств|не се очаква въздейств|липса на значими въздействия|не поражда въздействия|не оказва въздействие|ниск[аио] риск)/i;
- const reviewedProcedure=(ai.PROCEDURE||[]).filter(t=>!blockedProcedure.test(t));
+ const reviewedProcedure=(ai.PROCEDURE||[]).filter(t=>!blockedProcedure.test(t)&&!mismatchedScenario(t,draft));
  put(p[38],reviewedProcedure.length?safe(reviewedProcedure[0],'процедурна преценка'):'Приложимата процедура се определя след експертна проверка на пълната преписка, пространствените резултати и относимите нормативни основания. Само липсата на териториално пресичане не е достатъчно основание за окончателен процедурен извод.');
  const conclusion=safe(m.procedureFinding,'проект на заключение');
- const safeConclusion=reviewText(conclusion)&&!blockedProcedure.test(conclusion)
+ const safeConclusion=reviewText(conclusion)&&!blockedProcedure.test(conclusion)&&!mismatchedScenario(conclusion,draft)
   ?conclusion
   :'[ЗА ЕКСПЕРТНА ПРОВЕРКА — окончателният процедурен извод не е потвърден по пълната преписка. Наличието на пресичане само по себе си не определя вида на необходимата процедура.]';
  put(p[39],safeConclusion);
