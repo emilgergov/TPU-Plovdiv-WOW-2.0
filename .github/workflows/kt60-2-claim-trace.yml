@@ -1,0 +1,66 @@
+name: KT60.2 AI claim trace and approved Word content
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt60-2-claim-trace.yml'
+      - 'v26-test/v27-preview/kt60-2-claim-trace.js'
+      - 'v26-test/v27-preview/kt60-2-auto-evidence.js'
+      - 'v26-test/v27-preview/kt60-2-claim-review-test.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  claim-and-word:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install DOCX regression dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Verify no regression in three locked Word outputs
+        run: |
+          node --check v26-test/v27-preview/kt60-2-claim-trace.js
+          node --check v26-test/v27-preview/kt60-2-auto-evidence.js
+          node v26-test/v27-preview/kt50-original-kt42-regression.cjs
+      - name: Verify AI claims gain candidates but never automatic legal confirmation
+        run: |
+          node <<'JS'
+          const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');
+          const w={},ctx=vm.createContext({window:w});
+          for(const filename of ['kt60-2-claim-trace.js','kt60-2-auto-evidence.js'])
+            vm.runInContext(fs.readFileSync('v26-test/v27-preview/'+filename,'utf8'),ctx,{filename});
+          const ai='[[CHARACTERIZATION]]\nВодоснабдяване чрез съществуващ водопровод на територията.\n\n[[LEGAL]]\nПриложими разпоредби и режими на защитени зони.\n\n[[PROCEDURE]]\nОценка за съвместимост по приложимия режим.\n\n[[IMPACTS]]\nВъздействия върху природни местообитания и видове.';
+          const evidence={documents:[{readable:true}],facts:[{file:'Уведомление.pdf',kind:'water_supply',quote:'Водоснабдяване чрез съществуващ водопровод на територията.',status:'source_matched'}]};
+          const normativeRegister={records:[{title:'Наредба за оценка за съвместимост',source:'https://example.org/act',article:'чл. 1',officialVerified:false}]};
+          const trace=w.KT602ClaimTrace.rankClaims({aiDraft:ai,evidence,normativeRegister});
+          assert.equal(trace.totalClaims,4);
+          assert(trace.linkedClaims>=1);
+          assert.equal(trace.sourceCounts.articleVerified,0);
+          assert(trace.claims.every(c=>c.confirmed===false));
+          const B=w.KT602Evidence.build({results:[{input:'36676.129.457',verified_zone_intersections:['BG0000194']}],workingDraft:{paragraphs:['Предмет','Електричество','Вода','Отпадъчни води'],metadata:{}},aiDraft:ai,evidence,normativeRegister});
+          assert.equal(B.scenario,'Б');
+          assert.equal(B.ok,false);
+          assert.equal(B.report.verified,0);
+          assert.equal(B.report.trace.totalClaims,4);
+          assert(B.issues.includes('Мотивиран процедурен извод'));
+          const A=w.KT602Evidence.build({results:[{input:'56784.13.102',verified_zone_intersections:[]}],workingDraft:{paragraphs:[],metadata:{}}});
+          assert.equal(A.ok,true);
+          console.log('KT60.2 AI source candidate and fail-closed regression PASS');
+          JS
+      - name: Validate isolated page wiring and immutable Word generator
+        shell: python
+        run: |
+          from pathlib import Path
+          h=Path('v26-test/v27-preview/kt60-2-claim-review-test.html').read_text()
+          assert 'kt60-2-claim-trace.js?v=kt602-trace-1' in h
+          assert 'kt60-2-auto-evidence.js?v=kt602-evidence-1' in h
+          assert 'window.KT602Evidence?.build(' in h
+          assert 'window.KT602Evidence.show(kt60)' in h
+          assert h.index('const proposedDraft=await window.V27AIAuthor.generate(')<h.index('window.KT602Evidence?.build(')<h.index('window.V26DraftPackage.make(')
+          assert 'v27-kt50-original-kt42.js?v=kt602-original-locked-b1d2cfb' in h
+          assert 'kt53-original-draft-package.js?v=kt602-original-locked-b1d2cfb' in h
+          assert 'kt53c-b-review-word.js' not in h and 'kt53d-b-characterization-word.js' not in h
+          print('KT60.2 original Word and AI claim linkage PASS')
