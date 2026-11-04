@@ -1,5 +1,18 @@
 KT50 HISTORICAL SOURCE AND THREE EXACT APPROVED DOCX HASHES PASS
-KT35-A PASS 41 paragraphs 35 unchanged paragraphs
-KT39-B PASS 43 paragraphs 39 unchanged paragraphs
-V27-R02 PASS 49 paragraphs 45 unchanged paragraphs
-KT51 A/B DOCX PASS: placeholders 10/15, incoming reference, heading dedup, verified content and review-only unsupported findings; protected original templates unchanged.
+v27-kt51-admin-only.js:8
+ throw Error('КТ51: липсва одобреният авторски генератор (А/Б + V27 R02).');
+ ^
+
+Error: КТ51: липсва одобреният авторски генератор (А/Б + V27 R02).
+    at v27-kt51-admin-only.js:8:8
+    at v27-kt51-admin-only.js:50:3
+    at Script.runInContext (node:vm:149:12)
+    at Script.runInNewContext (node:vm:154:17)
+    at Object.runInNewContext (node:vm:310:38)
+    at Object.<anonymous> (/home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt51-admin-only-regression.cjs:26:4)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+
+Node.js v22.23.4
