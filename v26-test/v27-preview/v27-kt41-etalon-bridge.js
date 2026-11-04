@@ -101,6 +101,17 @@ async function source(which){
  if(p.length!==expected||!text(p[10]).startsWith('Относно:'))throw Error('КТ41: еталонът '+which+' не съвпада с одобрената контролна точка.');
  return {zip,xml,p};
 }
+function alignClassicAConfidentialityWithB(doc){
+ // KT46: user-approved exception to KT35-A's original alignment.
+ // The two identical confidentiality labels are right-aligned in KT39-B;
+ // retain every other paragraph, graphic and footer untouched.
+ for(const [i,expected] of [[0,'Ниво на конфиденциалност 0'],[1,'[TLP-WHITE]']]){
+  const para=doc.p[i];if(text(para).trim()!==expected)throw Error('KT46: unexpected confidentiality paragraph '+i);
+  const props=all(para,'pPr')[0],align=props&&all(props,'jc')[0];
+  if(!align)throw Error('KT46: alignment missing for confidentiality paragraph '+i);
+  align.setAttributeNS(NS,'w:val','right');
+ }
+}
 function isApprovedCase(m,scenario){
  const ids=(clean(m.parcelIds).match(/\b\d{5}\.\d+\.\d+\b/g)||[]).sort().join(',');
  const title=subject(m.subject).toLocaleLowerCase('bg');
@@ -194,7 +205,8 @@ async function classic(scenario,paragraphs,m,context={}){
  const d=context.determination;if(!d||(''+d.scenario)!==scenario)throw Error('КТ41: ГИС сценарият не съвпада.');
  if(k==='B'&&!d.zones?.length)throw Error('КТ41: пресичане без защитена зона.');
  if(!Array.isArray(paragraphs)||paragraphs.length!==4)throw Error('КТ41: липсва класическата характеристика.');
- const doc=await source(k),p=doc.p,int=metadata(doc,m);
+ const doc=await source(k);if(k==='A')alignClassicAConfidentialityWithB(doc);
+ const p=doc.p,int=metadata(doc,m);
  const same=isApprovedCase(m,k==='A'?'А':'Б');
  if(same){
   // Preserve the exact approved text, formatting and legal/impact argumentation.
