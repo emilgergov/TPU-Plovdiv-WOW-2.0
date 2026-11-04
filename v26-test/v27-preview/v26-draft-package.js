@@ -302,6 +302,9 @@ function normativePdf(results,register){
 }
 
 async function make(results,roles,register){
+ if(window.V26TemplateWord?.layout!=='KT41_EXACT_KT35_KT39'||window.V26ExpertWord?.layout!=='KT41_EXACT_V27_R02')
+  throw Error('КТ41: одобрените Word еталони не са заредени. ZIP с други генератори няма да се създаде.');
+
  if(!results.length||!roles||results.some(r=>!['leading','ancillary'].includes(roles[r.input]||roles[r.cadnum])))throw Error('Потвърдете ролите за всички имоти.');
  if(!results.some(r=>r.status==='Намерен'&&r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type))))throw Error('Няма действителна имотна геометрия за Приложение №1.');
  const z=zipWriter(),ids=results.map(r=>r.input),normalized=Object.fromEntries(results.map(r=>[r.input,roles[r.input]||roles[r.cadnum]]));
@@ -361,6 +364,21 @@ async function make(results,roles,register){
  const classicParagraphs=classicSource.map(value=>String(value).trim());
  // KT23: Classic Word uses the expert-confirmed four paragraphs unchanged; AI authors the separate Expert Word.
  const classicWord=await window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata,{determination});
+ const verifyEtalon=async(blob,expected,label)=>{
+  if(!window.fflate?.unzipSync)throw Error('КТ41: липсва DOCX валидатор.');
+  const zip=window.fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
+  const xml=zip['word/document.xml'];if(!xml)throw Error('КТ41: няма Word XML за '+label);
+  const doc=new DOMParser().parseFromString(new TextDecoder().decode(xml),'application/xml');
+  const ns='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+  const body=doc.getElementsByTagNameNS(ns,'body')[0];
+  const paragraphs=Array.from(body.children).filter(p=>p.localName==='p');
+  if(paragraphs.length!==expected)throw Error('КТ41: '+label+' не съвпада с одобрения еталон: '+paragraphs.length+' вместо '+expected+' абзаца.');
+  const text=paragraphs.map(p=>Array.from(p.getElementsByTagNameNS(ns,'t')).map(x=>x.textContent).join('')).join('\n');
+  if(/\[\[(?:CONCLUSION|CHARACTERIZATION|PROCEDURE|LEGAL|IMPACTS)\]\]/.test(text))
+   throw Error('КТ41: технически маркер в '+label);
+ };
+ await verifyEtalon(classicWord,expertDraft.scenario==='А'?41:43,'КТ35-А/КТ39-Б');
+ await verifyEtalon(expertWord,49,'V27 R02');
  for(const [label,blob] of [['експертен',expertWord],['класически',classicWord]]){
   if(blob.size<100||new TextDecoder().decode(await blob.slice(0,2).arrayBuffer())!=='PK')throw Error('КТ13: невалиден '+label+' DOCX.');
  }
