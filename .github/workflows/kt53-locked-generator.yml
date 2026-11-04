@@ -1,0 +1,53 @@
+name: KT53 locked Word generator A B R02 QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'v26-test/v27-preview/kt53-locked-generator-test.html'
+      - '.github/workflows/kt53-locked-generator.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-three-docx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated document inspection dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Verify exact original generator and three unchanged Word documents
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check v26-test/v27-preview/v27-kt50-original-kt42.js
+          node v26-test/v27-preview/kt50-original-kt42-regression.cjs
+      - name: Verify KT53 visual loader points to original generator, never KT51
+        shell: python
+        run: |
+          from pathlib import Path
+          from hashlib import sha1
+          html=Path('v26-test/v27-preview/kt53-locked-generator-test.html').read_text()
+          src=Path('v26-test/v27-preview/v27-kt50-original-kt42.js').read_bytes()
+          assert 'v27-preview/v27-kt50-original-kt42.js?v=kt53-locked-b1d2cfb' in html
+          assert 'v27-kt51-admin-only.js' not in html
+          assert sha1(b'blob '+str(len(src)).encode()+b'\0'+src).hexdigest()=='2c879e0f743f9863051f4126769977e8f1dcf842'
+          print('KT53 LOADER AND ORIGINAL SOURCE PASS')
+      - name: Verify public GitHub Pages test route
+        shell: python
+        run: |
+          import urllib.request,time
+          url='https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt53-locked-generator-test.html'
+          for i in range(18):
+            try:
+              request=urllib.request.Request(url,headers={'Cache-Control':'no-cache'})
+              page=urllib.request.urlopen(request,timeout=15).read().decode()
+              if 'КТ53 · КТ50 оригинален генератор' in page and 'v27-kt50-original-kt42.js?v=kt53-locked-b1d2cfb' in page:
+                print('KT53 PUBLIC PAGES PASS',url)
+                break
+            except Exception as e:
+              print('Pages not ready',i,str(e))
+            time.sleep(10)
+          else: raise AssertionError('KT53 Pages route not confirmed')
