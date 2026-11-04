@@ -25,4 +25,9 @@ assert.throws(()=>api.build('[[CHARACTERIZATION]]\n\nОбщо описание.\
 const marked=api.build('[[CHARACTERIZATION]]\n\n'+four[0]+' [ЗА ЕКСПЕРТНА ПРОВЕРКА — сверете източника]'+'\n\n[ЗА ЕКСПЕРТНА ПРОВЕРКА]\n\n'+four.slice(1).join('\n\n')+'\n\n[[LEGAL]]\n\nПравно.\n\n[[PROCEDURE]]\n\nПроцедурно.\n\n[[IMPACTS]]\n\nВъздействия.',[]);
 assert.deepEqual(Array.from(marked.paragraphs),four,'Remove review metadata but keep every factual sentence');
 assert.throws(()=>api.build('[[CHARACTERIZATION]]\n\n'+four[0]+'\n\n[ЗА ЕКСПЕРТНА ПРОВЕРКА]\n\n[[LEGAL]]\n\nПравно.\n\n[[PROCEDURE]]\n\nПроцедурно.\n\n[[IMPACTS]]\n\nВъздействия.',[]),/четири завършени/);
+const uncertain=[...four];
+uncertain[2]='Водоснабдяването се анализира спрямо наличната преписка; няма данни за потвърдена техническа схема на присъединяване.';
+const uncertainDraft='[[CHARACTERIZATION]]\n\n'+uncertain.join('\n\n')+'\n\n[[LEGAL]]\n\nПравни основания.\n\n[[PROCEDURE]]\n\nПреценка.\n\n[[IMPACTS]]\n\nВъздействия.';
+assert.deepEqual(Array.from(api.build(uncertainDraft,[]).paragraphs),uncertain,'Explicit missing-data qualifier inside complete sentence must be preserved');
+assert.throws(()=>api.build('[[CHARACTERIZATION]]\n\nНЯМА ДАННИ\n\n[[LEGAL]]\n\nПравно.\n\n[[PROCEDURE]]\n\nПреценка.\n\n[[IMPACTS]]\n\nВъздействия.',[]),/четири завършени/);
 console.log('KT51 AI CHARACTERIZATION PASS: 4 confirmed paragraphs retained, 4 AI paragraphs preserved, safe sentence splitting, review tags removed without losing facts, incomplete content rejected');
