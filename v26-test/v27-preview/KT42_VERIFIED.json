@@ -1,6 +1,6 @@
 {
   "checkpoint": "KT42",
-  "verified_commit": "942a29e0686a751986e60e147f5325fc53c8b783",
+  "verified_commit": "4fece15388c221c913e3d3bca5c2870761118104",
   "tests": "DOCX original paragraph preservation A, B and R02: PASS",
   "status": "verified-for-preview"
 }
