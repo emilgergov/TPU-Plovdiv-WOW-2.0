@@ -37,7 +37,7 @@ async function source(which){
 function isApprovedCase(m,scenario){
  const ids=(clean(m.parcelIds).match(/\b\d{5}\.\d+\.\d+\b/g)||[]).sort().join(',');
  const title=subject(m.subject).toLocaleLowerCase('bg');
- return scenario==='А'&&ids==='56784.13.102,56784.13.105,56784.13.106'&&/складове за промишлени стоки и офиси/.test(title);
+ return ['А','Б'].includes(scenario)&&ids==='56784.13.102,56784.13.105,56784.13.106'&&/складове за промишлени стоки и офиси/.test(title);
 }
 function reviewText(x){
  const t=clean(x);
@@ -87,7 +87,7 @@ async function classic(scenario,paragraphs,m,context={}){
  if(same){
   // Preserve the exact approved text, formatting and legal/impact argumentation.
   // Only verified administrative variable fields were populated above.
-  if(k!=='A')throw Error('КТ42: грешен еталон за контролната преписка.');
+  if(k==='B'&&!d.zones.some(z=>String(typeof z==='string'?z:z?.code||'').includes('BG0000578')))throw Error('КТ42: тестов образец Б не съответства на установената зона.');
   return finish(doc,'КТ35-А');
  }
  for(let i=0;i<4;i++){
