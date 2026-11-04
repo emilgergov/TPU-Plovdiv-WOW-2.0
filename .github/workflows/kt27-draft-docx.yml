@@ -50,6 +50,12 @@ jobs:
           python v26-test/v27-preview/kt37-classic-b-two-layout-fixes.py
           python v26-test/v27-preview/kt38-classic-b-deduplicate-zone.py
           python v26-test/v27-preview/kt39-classic-b-veranda-justify-single.py
+          python v26-test/v27-preview/v27-expert-r01-admin-voice.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V27-Expert-First-Review-R01
+          path: out/02_Proekt_na_stanovishte_EKSPERTEN_V27_R01.docx
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: KT39-Classic-B-Review
