@@ -123,7 +123,7 @@ function finish(doc,label){
 }
 function intro(m){
  const ids=clean(m.parcelIds);if(!/^\d{5}\.\d+\.\d+/.test(ids))throw Error('КТ41: липсват потвърдени имоти.');
- return {ids,title:subject(m.subject),loc:clean(m.location),ref:safe(m.incomingReference,'входящ номер и дата')};
+ return {ids,title:subject(m.subject),loc:clean(m.location),settlement:clean(m.settlement),municipality:clean(m.municipality),region:clean(m.region),ref:safe(m.incomingReference,'входящ номер и дата')};
 }
 function char1(t){t=clean(t);return /^С реализацията на инвестиционното предложение/i.test(t)?t:'С реализацията на инвестиционното предложение '+t.replace(/^(?:Предвижда се\s*)/i,'се предвижда ');}
 const get= (xs,i,where)=>safe(Array.isArray(xs)?xs[i]:'',where);
@@ -138,9 +138,23 @@ function locationSentence(m,d){
 function heading(int){
  const ids=[...new Set((int.ids.match(/\b\d{5}\.\d+\.\d+\b/g)||[]))];
  const parcel=ids.length===1?'в поземлен имот с идентификатор '+ids[0]:'в поземлени имоти с идентификатори '+ids.join(', ');
- let loc=int.loc.replace(/^(?:населено\s+място\s*)/i,'').trim().replace(/[„“]/g,'');
- if(loc&&ids.some(id=>loc.includes(id)))loc=loc.replace(/\b\d{5}\.\d+\.\d+\b/g,'').replace(/^(?:ПИ|имот|поземлен имот)\s+с\s+идентификатор\s*/i,'').replace(/^[,\s]+|[,\s]+$/g,'');
- return 'Относно: Уведомление за инвестиционно предложение (ИП): „'+int.title+'“ '+parcel+(loc?', '+loc:'')+'.';
+ const normal=x=>clean(x).replace(/[„“]/g,'').replace(/\s+/g,' ').trim();
+ // Never remove verified settlement/municipality/region from a confirmed heading.
+ // Nor silently infer them from the parcel number or copy the specimen's location.
+ let loc=normal(int.loc).replace(/^(?:населено място\s*)/i,'').replace(/\b\d{5}\.\d+\.\d+\b/g,'').replace(/^(?:ПИ|имот|поземлен имот)\s+с\s+идентификатор\s*/i,'').replace(/^[,\s]+|[,\s]+$/g,'');
+ const pieces=[];
+ const settlement=normal(int.settlement);
+ const municipality=normal(int.municipality).replace(/^община\s+/i,'');
+ const region=normal(int.region).replace(/^(?:област|обл\.)\s+/i,'');
+ // A location may contain an already verified full address, or just a locality.
+ const hasSettlement=/\b(?:гр\.|град|с\.|село)\s*[^,;]+/i.test(loc);
+ if(settlement&&!loc.includes(settlement))pieces.push(settlement);
+ else if(!settlement&&!hasSettlement)pieces.push(reviewMarker('населено място'));
+ if(loc)pieces.push(loc);
+ if(!/(?:^|[,;]\s*)община\s+[^,;]+/i.test(loc))pieces.push('община '+(municipality||reviewMarker('община')));
+ if(!/(?:^|[,;]\s*)(?:област|обл\.)\s+[^,;]+/i.test(loc))pieces.push('област '+(region||reviewMarker('област')));
+ const location=pieces.join(', ');
+ return 'Относно: Уведомление за инвестиционно предложение (ИП): „'+int.title+'“ '+parcel+', '+location+'.';
 }
 function putHeading(p,int){
  const headline=heading(int);
