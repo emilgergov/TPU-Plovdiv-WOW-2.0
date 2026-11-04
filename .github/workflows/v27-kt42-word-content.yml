@@ -1,0 +1,29 @@
+name: V27 KT42 approved Word content lock
+on:
+  push:
+    paths:
+      - '.github/workflows/v27-kt42-word-content.yml'
+      - 'v26-test/v27-preview/kt42-approved-word-regression.cjs'
+      - 'v26-test/v27-preview/v27-kt41-etalon-bridge.js'
+      - 'v26-test/v27-preview/v26-draft-package.js'
+      - 'v26-test/v27-preview/index.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  approved-content:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install standalone DOCX test dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Validate JS syntax
+        run: |
+          node --check v26-test/v27-preview/v27-kt41-etalon-bridge.js
+          node --check v26-test/v27-preview/v26-draft-package.js
+          node --check v26-test/v27-preview/kt42-approved-word-regression.cjs
+      - name: Compare generated Word against all three approved originals
+        run: node v26-test/v27-preview/kt42-approved-word-regression.cjs
