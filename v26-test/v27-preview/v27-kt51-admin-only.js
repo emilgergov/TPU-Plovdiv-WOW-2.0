@@ -133,8 +133,13 @@ async function classic(scenario,paragraphs,m,context={}){
   return finish(doc,'КТ35-А');
  }
  for(let i=0;i<4;i++){
-  if(!reviewText(paragraphs[i]))throw Error('КТ42: непроверена характеристика '+(i+1)+'; Word не е създаден.');
-  put(p[18+i],i===0?char1(paragraphs[i]):clean(paragraphs[i]));
+  // KT51: a review placeholder is not evidence. Preserve the original approved
+  // paragraph when verified, otherwise mark the relevant draft paragraph visibly.
+  // Never copy example-case factual text into a new investment proposal.
+  const verified=reviewText(paragraphs[i]);
+  const value=verified?(i===0?char1(paragraphs[i]):clean(paragraphs[i]))
+   :'ЗА ЕКСПЕРТНА ПРОВЕРКА — характеристика '+(i+1)+'. Данните за тази част от инвестиционното предложение не са потвърдени по преписката.';
+  put(p[18+i],value);
  }
  const legal=m.legalParagraphs||[],impact=m.impactFindings||[];
  // KT51: missing case-specific findings must NEVER inherit etalon conclusions.
