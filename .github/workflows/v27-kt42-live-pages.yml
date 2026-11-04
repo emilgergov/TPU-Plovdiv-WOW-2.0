@@ -18,7 +18,7 @@ jobs:
           python - <<'PY'
           import urllib.request,time,zipfile,io,json
           base='https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/'
-          expected='v27-preview/v27-kt41-etalon-bridge.js?v=kt46-admin-9eadcaa'
+          expected='v27-preview/v27-kt41-etalon-bridge.js?v=kt46-admin-xplaceholder-2fd7e61'
           last=''
           for attempt in range(36):
               try:
