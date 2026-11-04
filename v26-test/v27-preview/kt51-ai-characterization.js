@@ -7,7 +7,7 @@ const str=x=>String(x??'').replace(/\s+/g,' ').trim();
 // An explicit "няма данни" within a substantive AI paragraph is a legitimate
 // statement of uncertainty, not proof of a fabricated fact. Only free-standing
 // placeholders and technical tags invalidate a paragraph.
-const reviewTag=x=>/\\[(?:ЗА ЕКСПЕРТНА ПРОВЕРКА|ОТКЪС ОТ ПРЕПИСКАТА|ЗА ПОПЪЛВАНЕ)/i.test(str(x));
+const reviewTag=x=>/\[(?:ЗА ЕКСПЕРТНА ПРОВЕРКА|ОТКЪС ОТ ПРЕПИСКАТА|ЗА ПОПЪЛВАНЕ)/i.test(str(x));
 const pureMissing=x=>/^(?:НЯМА ДАННИ(?: В ПРЕПИСКАТА)?|НЕ Е УСТАНОВЕНО|НЕУСТАНОВЕНО)[.!]?$/i.test(str(x));
 const unverified=x=>!str(x)||reviewTag(x)||pureMissing(x);
 function sections(raw){
