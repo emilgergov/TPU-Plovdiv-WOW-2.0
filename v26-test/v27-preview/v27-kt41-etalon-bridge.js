@@ -24,15 +24,15 @@ const subject=x=>{
 const reviewMarker=label=>'[ЗА ЕКСПЕРТНА ПРОВЕРКА — '+label+']';
 function party(x,type){
  // KT46 presentation: preserve the administrative labels of KT35-A and KT39-B.
- // Unknown values remain a concise explicit blank, not multi-line diagnostics.
+ // Missing fields use the approved visible X-placeholder, never fabricated identities or long diagnostics.
  const s=clean(x);
  if(type==='recipient'){
   const generic=!s||/^(?:ДО\s+)?ВЪЗЛОЖИТЕЛЯ\s+НА\s+ИНВЕСТИЦИОННОТО\s+ПРЕДЛОЖЕНИЕ/i.test(s)||/\[ЗА (?:ПОПЪЛВАНЕ|ЕКСПЕРТНА ПРОВЕРКА)/i.test(s);
-  const value=generic?'НЯМА ДАННИ':s.replace(/^(?:Възложител(?:я)?\s*:|ДО\s+)/i,'').trim();
+  const value=generic?'ХХХХХХХХХХХХ':s.replace(/^(?:Възложител(?:я)?\s*:|ДО\s+)/i,'').trim();
   return 'Възложителя: '+value;
  }
  const generic=!s||/\[ЗА (?:ПОПЪЛВАНЕ|ЕКСПЕРТНА ПРОВЕРКА)/i.test(s)||/НЕ\s+Е\s+ПОСОЧЕН/i.test(s);
- const value=generic?'НЯМА ДАННИ':s.replace(/^(?:Адрес(?:\s+за\s+кореспонденция)?|За\s+кореспонденция)\s*:/i,'').trim();
+ const value=generic?'ХХХХХХХХХХХХ':s.replace(/^(?:Адрес(?:\s+за\s+кореспонденция)?|За\s+кореспонденция)\s*:/i,'').trim();
  return 'Адрес: '+value;
 }
 const zoneNames={'BG0000194':'Река Чая','BG0000578':'Река Марица'};
