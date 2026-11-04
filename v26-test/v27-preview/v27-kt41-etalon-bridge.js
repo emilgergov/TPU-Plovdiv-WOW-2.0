@@ -65,6 +65,40 @@ function characterizationDraft(i,int,d){
  ];
  return base[i]+' '+caveat[i];
 }
+
+// KT48: restore the approved KT35/KT39 document composition from the
+// original DOCX, without importing factual/legal conclusions from the example.
+// The five impact directions are headings / evaluation dimensions, not findings.
+function preserveApprovedImpactDirections(p,start){
+ for(let i=0;i<5;i++){
+  const original=text(p[start+i]).trim();
+  if(!original||/ЗА ЕКСПЕРТНА ПРОВЕРКА/.test(original))
+   throw Error('KT48: missing original approved impact direction '+(i+1));
+ }
+}
+function legalOutcomeForReview(kind,int,d){
+ const base='С оглед характера и местоположението на инвестиционното предложение ';
+ if(kind==='environment'){
+  return 'Така заявеното ИП и предвидените в него дейности се съпоставят с позициите на приложения № 1 и № 2 към Закона за опазване на околната среда (ЗООС). Преценката за приложимост на процедурите по глава шеста се мотивира въз основа на действителния предмет и потвърдените данни по преписката.';
+ }
+ if(kind==='effects'){
+  const relation=d.scenario==='А'?'извън границите на защитени зони':'с установено пространствено пресичане със '+(zones(d)||'защитена зона');
+  return base+'и установеното положение на имотите '+relation+', при преценката на вероятните преки, косвени и съвкупни въздействия се разглеждат следните направления:';
+ }
+ if(kind==='admissibility'){
+  return 'Допустимостта на заявеното инвестиционно предложение спрямо приложимите режими на '+(zones(d)||'засегнатата защитена зона')+' се установява след съпоставка с действащата заповед за обявяване, последващите изменения и относимите цели на опазване.';
+ }
+ if(kind==='zoneOrder'){
+  return 'Защитена зона '+(zones(d)||'НЯМА ДАННИ')+' е пространствено идентифицирана от ГИС анализа. Конкретната заповед за обявяване, нейните изменения и относимите режими се посочват след проверка в нормативния архив.';
+ }
+ if(kind==='landUse'){
+  return 'Заявените данни относно промяна предназначението и/или начина на трайно ползване на имота се съобразяват при преценката за приложимост на Наредбата за ОС.';
+ }
+ if(kind==='procedure'){
+  return 'В тази връзка преценката на компетентния орган по отношение на инвестиционното предложение „'+int.title+'“ за имотите с идентификатори '+int.ids+' се обосновава с потвърдените данни от преписката, пространствения анализ и приложимите нормативни основания. Окончателен процедурен извод не е установен в настоящия работен проект.';
+ }
+ throw Error('KT48: unknown legal segment '+kind);
+}
 function legalDraft(i,int,d){
  const z=zones(d)||reviewMarker('идентификация на защитена зона');
  const a=[
@@ -244,26 +278,26 @@ async function classic(scenario,paragraphs,m,context={}){
   const value=confirmed?clean(paragraphs[i]):characterizationDraft(i,int,d);
   put(p[18+i],i===0&&confirmed?char1(value):value);
  }
- const legal=m.legalParagraphs||[],impact=m.impactFindings||[];
- // Unknown legal and impact findings do not prevent creating an unsigned draft.
- // Missing evidence must not silently inherit findings from the approved example.
- const textLegal=i=>validated(legal,i)||legalDraft(i,int,d);
- const textImpact=i=>validated(impact,i)||impactDraft(i,int,d);
- // A draft must remain possible when no final procedure decision has been verified.
- // Do not copy the example case's conclusion into a different dossier.
- const procedureText=reviewText(m.procedureFinding)?clean(m.procedureFinding)
-  :'[ЗА ЕКСПЕРТНА ПРОВЕРКА — приложимата процедура и окончателният извод се определят от компетентния орган по пълната преписка и относимите нормативни основания.]';
+ // KT48: preserve the five approved classical bullet directions in the DOCX.
+ // Only the evidentiary narrative and conditional conclusions may change.
+ const legal=m.legalParagraphs||[];
+ const textLegal=i=>validated(legal,i);
+ const procedureText=reviewText(m.procedureFinding)?clean(m.procedureFinding):legalOutcomeForReview('procedure',int,d);
  if(k==='A'){
   put(p[22],spatial({...d,scenario:'А'},int));
   put(p[23],'Най-близко разположена защитена зона: '+locationSentence(m,{scenario:'А'})+'.');
-  put(p[24],textLegal(0));put(p[25],textLegal(1));
-  for(let i=0;i<5;i++)put(p[26+i],textImpact(i));
+  put(p[24],textLegal(0)||legalOutcomeForReview('environment',int,d));
+  put(p[25],textLegal(1)||legalOutcomeForReview('effects',int,{...d,scenario:'А'}));
+  preserveApprovedImpactDirections(p,26);
   put(p[31],procedureText);
  }else{
-  put(p[22],textLegal(0));put(p[23],spatial({...d,scenario:'Б',zones:d.zones},int));
-  put(p[24],locationSentence(m,d));
-  put(p[25],textLegal(1));put(p[26],textLegal(2));put(p[27],textLegal(3));
-  for(let i=0;i<5;i++)put(p[28+i],textImpact(i));
+  put(p[22],textLegal(0)||legalOutcomeForReview('landUse',int,d));
+  put(p[23],spatial({...d,scenario:'Б',zones:d.zones},int));
+  put(p[24],legalOutcomeForReview('zoneOrder',int,d));
+  put(p[25],textLegal(1)||legalOutcomeForReview('admissibility',int,d));
+  put(p[26],textLegal(2)||legalOutcomeForReview('environment',int,d));
+  put(p[27],textLegal(3)||legalOutcomeForReview('effects',int,{...d,scenario:'Б'}));
+  preserveApprovedImpactDirections(p,28);
   put(p[33],procedureText);
  }
  return finish(doc,'КТ'+(k==='A'?'35-А':'39-Б'));
