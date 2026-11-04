@@ -1,10 +1,10 @@
-name: V27 KT48 mosaic live Pages and canonical DOCX verification
+name: V27 KT49 recovered KT42 source gate live Pages and DOCX verification
 on:
   push:
     paths:
       - '.github/workflows/v27-kt42-live-pages.yml'
       - 'v26-test/v27-preview/index.html'
-      - 'v26-test/v27-preview/v27-kt41-etalon-bridge.js'
+      - 'v26-test/v27-preview/v27-kt49-kt42-content-bridge.js'
       - 'v26-test/v27-preview/etalon/**'
   workflow_dispatch:
 permissions:
@@ -14,12 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Confirm KT48 Pages deployment serves one Word bridge and all approved DOCX files
+      - name: Confirm KT49 Pages deployment serves one Word bridge and all approved DOCX files
         run: |
           python - <<'PY'
           import urllib.request,time,zipfile,io,json,hashlib
           base='https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/'
-          expected='v27-preview/v27-kt41-etalon-bridge.js?v=kt48-mosaic-754ae3bf'
+          expected='v27-preview/v27-kt49-kt42-content-bridge.js?v=kt49-kt42-evidence'
           last=''
           for attempt in range(36):
               try:
@@ -27,9 +27,9 @@ jobs:
                   with urllib.request.urlopen(req,timeout=18) as res: html=res.read().decode('utf-8')
                   if expected not in html: raise RuntimeError('Pages still serves old Word generator')
                   if 'v27-preview/v26-draft-package.js?v=kt47-ekatte-cd4dfab' not in html: raise RuntimeError('Pages does not use KT47 EKATTE package')
-                  if html.count('v27-preview/v27-kt41-etalon-bridge.js?v=') != 1: raise RuntimeError('KT48 requires exactly one Word bridge on public Pages')
-                  with urllib.request.urlopen(base+'v27-kt41-etalon-bridge.js?kt47-restored=verification',timeout=18) as res: code=res.read().decode('utf-8')
-                  if not all(k in code for k in ('function approvedR02LegalFallback','function approvedR02ImpactFallback','function preserveApprovedImpactDirections')): raise RuntimeError('Live Word bridge lacks KT48 mosaic logic')
+                  if html.count('v27-preview/v27-kt49-kt42-content-bridge.js?v=') != 1: raise RuntimeError('KT49 requires exactly one Word bridge on public Pages')
+                  with urllib.request.urlopen(base+'v27-kt49-kt42-content-bridge.js?kt49-verification=1',timeout=18) as res: code=res.read().decode('utf-8')
+                  if not all(k in code for k in ('function approvedR02LegalFallback','function approvedR02ImpactFallback','function preserveApprovedImpactDirections','KT42 evidence rule','KT49: use the approved R02 introduction')): raise RuntimeError('Live Word bridge lacks KT49 content recovery safeguards')
                   if any(k not in code for k in ('function isApprovedCase','function characterizationDraft','function legalDraft','function impactDraft','function heading','function putHeading','function zoneList','function alignClassicAConfidentialityWithB','function neutralProcedure','function supportedAILegal')): raise RuntimeError('Live JS not KT47')
                   with urllib.request.urlopen(base+'v26-draft-package.js?kt47=verification',timeout=18) as res: package=res.read().decode('utf-8')
                   if not all(term in package for term in ('function kt47VerifiedAdministration','const KT47_EKATTE','caseMetadata.nearestZone=')): raise RuntimeError('Live package lacks KT47 GIS/administration linkage')
@@ -44,11 +44,11 @@ jobs:
                       if blob_sha!=sha: raise RuntimeError('Uploaded approved DOCX differs on Pages: '+filename+' '+blob_sha)
                       with zipfile.ZipFile(io.BytesIO(raw)) as z:
                           assert 'word/document.xml' in z.namelist(),filename
-                  print('LIVE PAGES KT48 MOSAIC EXACT ETALONS PASS: HTML, JS and three byte-identical user-approved DOCX files')
+                  print('LIVE PAGES KT49 SOURCE-GATED MOSAIC EXACT ETALONS PASS: HTML, JS and three byte-identical user-approved DOCX files')
                   break
               except Exception as e:
                   last=str(e)
-                  if attempt==35: raise RuntimeError('KT48 Pages deployment not verified: '+last)
+                  if attempt==35: raise RuntimeError('KT49 Pages deployment not verified: '+last)
                   time.sleep(8)
           PY
       - name: Record verified public Pages deployment
@@ -56,13 +56,13 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import json,subprocess
-          marker=Path('v26-test/v27-preview/KT48_LIVE_VERIFIED.json')
-          marker.write_text(json.dumps({'checkpoint':'KT48','result':'LIVE_PAGES_VERIFIED','verified_repo_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'checks':['HTML serves single KT48 mosaic loader','KT48 preserves A/B five original impact directions and R02 legal-impact structure','Verified EKATTE metadata from package','KT35-A.docx exact binary hash','KT39-B.docx exact binary hash','V27-R02.docx exact binary hash']},ensure_ascii=False,indent=2)+'\n')
+          marker=Path('v26-test/v27-preview/KT49_LIVE_VERIFIED.json')
+          marker.write_text(json.dumps({'checkpoint':'KT49','result':'LIVE_PAGES_VERIFIED','verified_repo_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'checks':['HTML serves single KT49 KT42 evidence-restored loader','KT49 preserves A/B 5 impact headings and restores KT42 evidence source requirements','Verified EKATTE metadata from package','KT35-A.docx exact binary hash','KT39-B.docx exact binary hash','V27-R02.docx exact binary hash']},ensure_ascii=False,indent=2)+'\n')
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v26-test/v27-preview/KT48_LIVE_VERIFIED.json
-          git commit -m "KT48: verified live approved Word mosaic and three exact user DOCX"
+          git add v26-test/v27-preview/KT49_LIVE_VERIFIED.json
+          git commit -m "KT49: verified live source-gated Word mosaic and exact user DOCX"
           for attempt in 1 2 3 4 5; do
             git pull --rebase origin main && git push origin HEAD:main && break
             sleep 3
