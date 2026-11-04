@@ -26,6 +26,17 @@ const pList=buffer=>{
 const phrase=p=>Array.from(p.getElementsByTagNameNS(NS,'t')).map(t=>t.textContent).join('');
 const meta={parcelIds:'56784.13.102, 56784.13.105, 56784.13.106',subject:'Складове за промишлени стоки и офиси',recipient:'Възложителя: контролна преписка',address:'Адрес: контролен',incomingReference:'Вх. № ОВОС-9999 / ДАТА-99.99.9999 г.',location:'гр. Пловдив, местност Рогошко шосе'};
 const verified=['С реализацията на инвестиционното предложение се предвижда складов обект','Електрозахранване','Водоснабдяване','Отпадъчни води'];
+function checkAdministrative(doc,which,subject,ids){
+ const p=pList(doc).p,headline=phrase(p[10]),intro=phrase(p[which==='E'?17:16]);
+ assert.equal((headline.match(/„/g)||[]).length,1,which+' opening quotes');
+ assert.equal((headline.match(/“/g)||[]).length,1,which+' closing quotes');
+ assert.equal((headline.match(new RegExp(ids.replace(/\./g,'\\.'),'g'))||[]).length,1,which+' duplicate parcel');
+ assert.ok(headline.includes(subject),which+' missing subject');
+ assert.match(intro,/Наредба за условията и реда за извършване на оценка за съвместимостта/,which+' shortened ordinance');
+ assert.doesNotMatch(phrase(p[6]),/^ДО ВЪЗЛОЖИТЕЛЯ НА ИНВЕСТИЦИОННОТО ПРЕДЛОЖЕНИЕ$/,which+' generic recipient');
+ return p;
+}
+
 async function test(name,blob,variable){
  const got=pList(await blob.arrayBuffer()),original=pList(fs.readFileSync(path.join(base,'etalon',name+'.docx')));
  assert.equal(got.p.length,original.p.length,name+' paragraph count');
@@ -46,9 +57,13 @@ async function test(name,blob,variable){
  await test('V27-R02',await sandbox.V26ExpertWord.make({schema:'KT13_EXPERT_DRAFT_V1',scenario:'А',metadata:meta,aiDraft:'',parcels:[]},{requireAiAuthor:true}),[6,7,10,17]);
  const differing={...meta,parcelIds:'36676.129.457',subject:'Учебен казус — изпитване на сценарий с пресичане',procedureFinding:'[ЗА ЕКСПЕРТНА ПРОВЕРКА — приложима процедура]'};
  const syntheticB=await sandbox.V26TemplateWord.make('Б',verified,differing,{determination:{scenario:'Б',zones:['BG0000194']}});
- const caseB=pList(await syntheticB.arrayBuffer());
+ const caseB=checkAdministrative(await syntheticB.arrayBuffer(),'B','Учебен казус','36676.129.457')&&pList(await syntheticB.arrayBuffer());
  assert.equal(caseB.p.length,43);
  assert.match(phrase(caseB.p[23]),/36676\.129\.457/);
+ assert.match(phrase(caseB.p[23]),/BG0000194.*Река Чая/,'classic B zone name');
+ assert.match(phrase(caseB.p[24]),/BG0000194.*Река Чая/,'classic B missing zone in legal paragraph');
+ assert.doesNotMatch(phrase(caseB.p[24]),/зони:\s*\./,'no empty zones');
+
  assert.match(phrase(caseB.p[33]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
  assert.match(phrase(caseB.p[25]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
  const ai='[[CHARACTERIZATION]]\nУчебно описание на ИП.\n[[LEGAL]]\nОтносимите режими подлежат на проверка.\n[[PROCEDURE]]\nПриложимата процедура се преценява от компетентния орган.\n[[IMPACTS]]\nВъздействията се преценяват след преглед на пълната преписка.';
@@ -56,14 +71,21 @@ async function test(name,blob,variable){
  const incomplete=['[ЗА ЕКСПЕРТНА ПРОВЕРКА — характер на дейности]','[ЗА ЕКСПЕРТНА ПРОВЕРКА — електрозахранване]','[ЗА ЕКСПЕРТНА ПРОВЕРКА — водоснабдяване]','[ЗА ЕКСПЕРТНА ПРОВЕРКА — отпадъчни води]'];
  const incompleteBlob=await sandbox.V26TemplateWord.make('Б',incomplete,differing,{determination:{scenario:'Б',zones:['BG0000194']}});
  const incompleteB=pList(await incompleteBlob.arrayBuffer());
+ assert.match(phrase(incompleteB.p[18]),/проектът|Предметът/,'review must be substantive');
+ assert.match(phrase(incompleteB.p[29]),/Видове|видове|местообитания/,'review must identify specific impact pathways');
+
  assert.equal(incompleteB.p.length,43);
  for(let i=18;i<=21;i++)assert.match(phrase(incompleteB.p[i]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
  assert.doesNotMatch(phrase(incompleteB.p[18]),/складов обект/i);
  console.log('KT43 INCOMPLETE DOSSIER PASS: four characteristics are review fields, not copied conclusions');
  const expertB=await sandbox.V26ExpertWord.make(draft,{requireAiAuthor:true});
+ checkAdministrative(await expertB.arrayBuffer(),'E','Учебен казус','36676.129.457');
  const resultE=pList(await expertB.arrayBuffer());
  assert.equal(resultE.p.length,49);
  assert.match(phrase(resultE.p[39]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
  assert.match(phrase(resultE.p[23]),/36676\.129\.457/);
+ assert.match(phrase(resultE.p[24]),/BG0000194.*Река Чая/,'expert B zone');
+ assert.match(phrase(resultE.p[26]),/чл\. 31|зона|режим/,'expert B legal references');
+
  console.log('KT43 regression PASS: scenario B creates both reviewed DOCX drafts without unverified legal or procedure conclusions');
 })().catch(e=>{console.error(e);process.exitCode=1});
