@@ -367,6 +367,17 @@ async function make(results,roles,register){
     }
   }
   kt47VerifiedAdministration(results,caseMetadata);
+  // A nearest Natura zone is published only if each parcel has verified GIS
+  // nearest-zone data. This intentionally mirrors the PDF1 rule.
+  if(determination.scenario==='А'){
+   const labels=results.map(r=>{
+    const nearest=r.nearest_verified_zone||r.nearestZoneVerified;
+    const code=String(nearest?.sitecode||nearest?.code||'').trim();
+    const name=String(nearest?.name_bg||nearest?.name||'').trim();
+    return /^BG\\d{7}$/.test(code)&&name?String(r.input||r.cadnum)+': '+code+' — '+name:'';
+   });
+   caseMetadata.nearestZone=labels.every(Boolean)?labels.join('; '):'НЯМА ДАННИ';
+  }
   register={...register,verifiedCaseMetadata:caseMetadata};
  // KT23/2: Legal findings are evidence-bound; never turn dossier observations into legal conclusions.
  const legalCount=determination.scenario==='Б'?7:5;
