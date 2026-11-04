@@ -27,7 +27,8 @@ sandbox.fetch=async url=>{
  const buffer=fs.readFileSync(filepath);
  return {ok:true,arrayBuffer:async()=>buffer.buffer.slice(buffer.byteOffset,buffer.byteOffset+buffer.byteLength)};
 };
-vm.runInNewContext(fs.readFileSync(path.join(base,'v27-kt41-etalon-bridge.js'),'utf8'),sandbox,{filename:'v27-kt41-etalon-bridge.js'});
+const bridgeName=process.env.V27_WORD_BRIDGE||'v27-kt41-etalon-bridge.js';
+vm.runInNewContext(fs.readFileSync(path.join(base,bridgeName),'utf8'),sandbox,{filename:bridgeName});
 assert.equal(sandbox.V26TemplateWord.layout,'KT41_EXACT_KT35_KT39');
 assert.equal(sandbox.V26ExpertWord.layout,'KT41_EXACT_V27_R02');
 const NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
