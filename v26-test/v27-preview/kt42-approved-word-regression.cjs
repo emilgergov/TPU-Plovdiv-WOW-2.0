@@ -53,6 +53,13 @@ async function test(name,blob,variable){
  assert.match(phrase(caseB.p[25]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
  const ai='[[CHARACTERIZATION]]\nУчебно описание на ИП.\n[[LEGAL]]\nОтносимите режими подлежат на проверка.\n[[PROCEDURE]]\nПриложимата процедура се преценява от компетентния орган.\n[[IMPACTS]]\nВъздействията се преценяват след преглед на пълната преписка.';
  const draft={schema:'KT13_EXPERT_DRAFT_V1',scenario:'Б',metadata:differing,aiDraft:ai,parcels:[{id:'36676.129.457'}],characterization:verified,zones:['BG0000194']};
+ const incomplete=['[ЗА ЕКСПЕРТНА ПРОВЕРКА — характер на дейности]','[ЗА ЕКСПЕРТНА ПРОВЕРКА — електрозахранване]','[ЗА ЕКСПЕРТНА ПРОВЕРКА — водоснабдяване]','[ЗА ЕКСПЕРТНА ПРОВЕРКА — отпадъчни води]'];
+ const incompleteBlob=await sandbox.V26TemplateWord.make('Б',incomplete,differing,{determination:{scenario:'Б',zones:['BG0000194']}});
+ const incompleteB=pList(await incompleteBlob.arrayBuffer());
+ assert.equal(incompleteB.p.length,43);
+ for(let i=18;i<=21;i++)assert.match(phrase(incompleteB.p[i]),/ЗА ЕКСПЕРТНА ПРОВЕРКА/);
+ assert.doesNotMatch(phrase(incompleteB.p[18]),/складов обект/i);
+ console.log('KT43 INCOMPLETE DOSSIER PASS: four characteristics are review fields, not copied conclusions');
  const expertB=await sandbox.V26ExpertWord.make(draft,{requireAiAuthor:true});
  const resultE=pList(await expertB.arrayBuffer());
  assert.equal(resultE.p.length,49);
