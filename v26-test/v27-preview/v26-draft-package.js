@@ -327,6 +327,12 @@ async function make(results,roles,register){
   for(const [key,sourceKeys] of [['settlement',['settlement','settlement_name']],['landArea',['landArea','land_area']]]){
    if(!caseMetadata[key]){const values=[...new Set(results.map(x=>sourceKeys.map(k=>x[k]).find(v=>typeof v==='string'&&v.trim())).filter(Boolean).map(x=>x.trim()))];if(values.length===1&&(key!=='settlement'||verifiedPlaceLabel(values[0])))caseMetadata[key]=values[0];}
   }
+  // KT46: the GIS already exposes locality in PDF1. Carry the same parcel-level
+  // locality to both Word headings only when it is consistent across all parcels.
+  if(!String(caseMetadata.locality||'').trim()){
+   const names=[...new Set(results.map(x=>String(x.locality||'').trim()).filter(Boolean))];
+   if(names.length===1&&results.every(x=>String(x.locality||'').trim()===names[0]))caseMetadata.locality=names[0];
+  }
   // KT45: consolidate verified place metadata for both Word outputs.
   // Each inferred administrative value must be present and identical for ALL parcels.
   for(const [key,sourceKeys] of [
