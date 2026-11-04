@@ -273,6 +273,21 @@ function aiParts(raw){
  for(let i=0;i<matches.length;i++){const name=matches[i][1],start=matches[i].index+matches[i][0].length,end=i+1<matches.length?matches[i+1].index:raw.length;out[name]=raw.slice(start,end).trim().split(/\n\s*\n/).map(clean).filter(Boolean);}
  return out;
 }
+// KT47: prevent unsourced AI assertions or provisions from becoming official findings.
+function supportedAILegal(raw,draft){
+ const t=cleanAIPart(raw);
+ if(!t||/(?:не подлежи|не е необходима оценка|не се изисква|липса на значими въздействия|няма вероятност за въздействие)/i.test(t))return '';
+ const cited=[...t.matchAll(/чл\.\s*(\d+[а-я]?)/gi)].map(x=>x[1]);
+ const sources=Array.isArray(draft.legalSources)?draft.legalSources:[];
+ if(cited.length&&!cited.every(n=>sources.some(x=>String(x.article||'').includes(n))))return '';
+ return t;
+}
+function groundedLegalParagraph(raw,draft,fallback){
+ const t=supportedAILegal(raw,draft);
+ if(!t)return fallback;
+ const references=(draft.legalSources||[]).filter(x=>x.article&&x.title&&x.source);
+ return t+(references.length?' Проверени нормативни референции: '+references.slice(0,2).map(x=>x.title+', '+x.article+' ('+x.source+')').join('; ')+'.':' Правните основания се сверяват по нормативния архив.');
+}
 async function expert(draft,options={}){
  if(draft?.schema!=='KT13_EXPERT_DRAFT_V1'||options.requireAiAuthor!==true)throw Error('КТ41: липсва проверен AI проект.');
  const doc=await source('E'),p=doc.p,m=draft.metadata,int=intro(m),ai=aiParts(draft.aiDraft);
@@ -299,10 +314,10 @@ async function expert(draft,options={}){
  put(p[21],engineeringText);
  put(p[23],spatial(draft,int));
  put(p[24],locationSentence(m,draft));
- put(p[25],legalDraft(0,int,draft));
+ put(p[25],groundedLegalParagraph(ai.LEGAL[0],draft,legalDraft(0,int,draft)));
  for(let i=0;i<3;i++){
    const supplied=validated(m.legalParagraphs,i);
-   put(p[26+i],supplied||legalDraft(i+1,int,draft));
+   put(p[26+i],supplied||groundedLegalParagraph(ai.LEGAL[i+1],draft,legalDraft(i+1,int,draft)));
  }
  put(p[31],evidenceText(ai.IMPACTS[0], 'Направленията на възможните въздействия се анализират спрямо предмета и целите на опазване на '+zones(draft)+'. '+reviewMarker('доказателствен анализ')));
  for(let i=0;i<5;i++)put(p[32+i],evidenceText(ai.IMPACTS[i+1],impactDraft(i,int,draft)));
