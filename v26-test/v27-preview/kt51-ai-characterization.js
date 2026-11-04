@@ -19,8 +19,14 @@ function build(aiDraft,confirmed=[]){
  if(Array.isArray(confirmed)&&confirmed.length===4&&confirmed.every(x=>!unverified(x)))
   return {paragraphs:confirmed.map(str),origin:'expert-confirmed'};
  const raw=sections(aiDraft);
- let fragments=raw.split(/\n\s*\n/).map(str).filter(Boolean);
- if(fragments.some(unverified))throw Error('КТ51: AI характеристиката съдържа непроверени технически маркери.');
+ // A source excerpt or explicit review flag may legitimately occur in the AI
+ // draft. It is metadata, not a factual proposition. Remove ONLY the technical
+ // bracketed marker, leaving the author's actual sentences untouched.
+ const removeReviewTags=x=>String(x).replace(/\[(?:ЗА ЕКСПЕРТНА ПРОВЕРКА|ОТКЪС ОТ ПРЕПИСКАТА|ЗА ПОПЪЛВАНЕ)[^\]\n]*\]/gi,'').trim();
+ let fragments=raw.split(/\n\s*\n/).map(removeReviewTags).map(str).filter(Boolean);
+ // Free-standing 'НЯМА ДАННИ' remains non-evidence, never a DOCX paragraph.
+ fragments=fragments.filter(x=>!/^НЯМА ДАННИ(?: В ПРЕПИСКАТА)?[.!]?$/i.test(x));
+ if(fragments.some(unverified))throw Error('КТ51: AI характеристиката съдържа неподкрепено твърдение в самия текст, не само технически маркер.');
  // Keep all original sentences; split long blocks only when more paragraphs are needed.
  while(fragments.length<4){
   let bestIndex=-1,bestPieces=null;
