@@ -1,6 +1,6 @@
 {
   "checkpoint": "KT47",
-  "verified_commit": "e52780632a8a5d59bc731af24676f80aa5a0df4a",
+  "verified_commit": "ef9b79445354fed30cc0d1d4eb1cbb92b412571f",
   "tests": "DOCX A/B/R02 legal and GIS content, NSI EKATTE and preserved Word layouts: PASS",
   "status": "verified-for-preview"
 }
