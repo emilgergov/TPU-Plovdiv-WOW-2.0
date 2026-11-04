@@ -8,7 +8,7 @@ on:
       - 'v26-test/v27-preview/etalon/**'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   recovery-test:
     runs-on: ubuntu-latest
@@ -33,3 +33,18 @@ jobs:
           name: V27-KT49-A-B-R02-DOCX-REGRESSION
           path: KT49_WORD_CONTENT_RESULT.txt
           if-no-files-found: ignore
+
+      - name: Record nonsecret regression diagnostics in repository
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p v26-test/v27-preview
+          cp KT49_WORD_CONTENT_RESULT.txt v26-test/v27-preview/KT49_RECOVERY_CI_RESULT.txt 2>/dev/null || echo 'Failure before DOCX test' > v26-test/v27-preview/KT49_RECOVERY_CI_RESULT.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add v26-test/v27-preview/KT49_RECOVERY_CI_RESULT.txt
+          git commit -m 'KT49: archive isolated recovery regression result' || true
+          for retry in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin HEAD:main && break
+            sleep 2
+          done
