@@ -1,0 +1,37 @@
+name: V27 KT40 integrated Word-PDF-ZIP QA
+on:
+  push:
+    branches: [work/v27-kt26-five-packages]
+    paths:
+      - 'v26-test/v27-preview/v27-approved-*.js'
+      - 'v26-test/v27-preview/kt40-*.cjs'
+      - 'v26-test/v27-preview/v26-draft-package.js'
+      - 'v26-test/v27-preview/index.html'
+      - '.github/workflows/v27-kt40-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  full-zip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source syntax and approved browser integration contract
+        run: |
+          node --check v26-test/v27-preview/v27-approved-classic-word-ab.js
+          node --check v26-test/v27-preview/v27-approved-expert-word-r02.js
+          node --check v26-test/v27-preview/v26-draft-package.js
+          node --check v26-test/v27-preview/kt40-full-browser-zip.test.cjs
+      - name: Install QA dependencies
+        run: npm install --no-save --no-package-lock jsdom@26 fflate@0.8.2 jszip@3 pdfmake@0.2.20 pdf-parse@1.1.1
+      - name: Generate and check real complete ZIP for A and B
+        run: node v26-test/v27-preview/kt40-full-browser-zip.test.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V27-KT40-integrated-review-ZIPs-A-and-B
+          path: out/v27-kt40/
+          if-no-files-found: error
