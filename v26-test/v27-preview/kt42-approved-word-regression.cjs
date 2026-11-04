@@ -255,9 +255,9 @@ console.log('KT47 EKATTE PASS: two official cadastral mappings; contradictory an
  const approvedR02=pList(fs.readFileSync(path.join(base,'etalon','V27-R02.docx'))).p;
  for(const [which,actual] of [['A',expAp],['B',resultE.p]]){
   for(let j=0;j<5;j++){
-   const title=phrase(approvedR02[32+j]).split(/\\.\\s/)[0].trim();
+   const title=phrase(approvedR02[32+j]).split(/\.\s/)[0].trim();
    assert.ok(phrase(actual[32+j]).startsWith(title+'.'),'KT48 Expert '+which+' impact direction '+j+' must retain R02 heading');
-   assert.doesNotMatch(phrase(actual[32+j]),/\\[ЗА ЕКСПЕРТНА ПРОВЕРКА/,'KT48 Expert '+which+' impact direction '+j+' unfinished marker');
+   assert.doesNotMatch(phrase(actual[32+j]),/\[ЗА ЕКСПЕРТНА ПРОВЕРКА/,'KT48 Expert '+which+' impact direction '+j+' unfinished marker');
   }
  }
  console.log('KT48 EXPERT IMPACT PASS: five R02 headings in A and B');
