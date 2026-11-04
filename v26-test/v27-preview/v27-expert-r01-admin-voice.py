@@ -135,7 +135,7 @@ assert content.index(base[32])>content.index(base[31])
 assert content.count(base[23])==0,"Expert draft should contain its own zone paragraph, not pasted classic text"
 assert any("BG0000578 „Река Марица“" in t for t in content)
 assert sum("56784.13.102" in t for t in content)>=3
-assert all(f in "\n".join(content) for f in ("56784.13.105","56784.13.106","възложителя","ОВОС"))
+assert all(f in "\n".join(content) for f in ("56784.13.105","56784.13.106","Възложителя","ОВОС"))
 assert all(term not in "\n".join(content) for term in ("Асеновград","Добростан","непотвърдена ГИС","изкуствен интелект","AI автор"))
 assert len([p for p in d.paragraphs if p.text=="ПРОЕКТ НА ЕКСПЕРТНО СТАНОВИЩЕ"])==1
 assert "не е необходимо провеждане на процедура" in content[idx]
