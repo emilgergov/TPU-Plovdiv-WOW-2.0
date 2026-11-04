@@ -1,0 +1,1 @@
+KT51 regression failed before log creation
