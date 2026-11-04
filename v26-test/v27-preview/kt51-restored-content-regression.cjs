@@ -72,5 +72,29 @@ const paragraphText=async blob=>{
  assert.ok(e.some(x=>x.includes('Възложител: '+'Х'.repeat(10))),'R02 recipient missing');
  assert.ok(e.some(x=>x.includes('Адрес: '+'Х'.repeat(15))),'R02 address missing');
  await assert.rejects(()=>sandbox.V26TemplateWord.make('Б',['[ЗА ЕКСПЕРТНА ПРОВЕРКА — описание]',...characterization.slice(1)],m,{determination:{scenario:'Б',zones:['BG0000194']}}),/характеристиката на ИП е непълна/);
+ // KT51 regression: execute the REAL underlying V26 expert content filter.
+ // Previous tests mocked this engine, so a rejected IMPACTS section escaped CI.
+ const core={fflate,DOMParser,XMLSerializer,TextEncoder,TextDecoder,Blob,Uint8Array,console,document:{},
+   V26TemplateWord:{templatePaths:{A:'v27-preview/etalon/KT35-A.docx',B:'v27-preview/etalon/KT39-B.docx'}},fetch:sandbox.fetch};
+ core.window=core;core.globalThis=core;
+ vm.runInNewContext(read('v26-expert-word.js').toString(),core,{filename:'v26-expert-word.js'});
+ const expertMeta={...m,recipient:'Възложител: Тестови възложител',address:'Адрес: тестов адрес',incomingReference:'Вх. № ОВОС-1234/01.01.2026 г.',
+   legalParagraphs:Array(7).fill('Проверен документален контекст за експертна преценка.'),
+   impactFindings:Array(5).fill('Експертна проверка на конкретните въздействия.'),procedureFinding:'Необходима е преценка по пълната преписка.'};
+ const realDraft={schema:'KT13_EXPERT_DRAFT_V1',metadata:expertMeta,scenario:'Б',
+   parcels:[{id:'36676.129.457',role:'leading',location:'с. Катуница'}],zones:['BG0000194'],characterization,
+   aiDraft:[
+    '[[CHARACTERIZATION]]','Проверяват се заявените дейности и техническите решения на инвестиционното предложение.',
+    '[[LEGAL]]','Относимите режими се преценяват въз основа на проверени документи от преписката.',
+    '[[PROCEDURE]]','Процедурният извод изисква самостоятелна проверка на правните предпоставки.',
+    '[[IMPACTS]]','Възможните косвени въздействия върху BG0000194 се разглеждат заедно с функциите на съседните защитени територии. Данните не позволяват категоричен извод за тяхната значимост.'
+   ].join('\n\n')};
+ const real=await core.V26ExpertWord.make(realDraft,{requireAiAuthor:true,mapPngBytes:new Uint8Array([137,80,78,71,13,10,26,10,0])});
+ const {lines:realLines}=await paragraphText(real);
+ assert.ok(realLines.some(t=>t.includes('Възможните косвени въздействия върху BG0000194')),'Valid AI IMPACTS with Natura code was deleted');
+ assert.ok(realLines.some(t=>t.includes('съседните защитени територии')),'Valid protected-territory context was deleted');
+ const bad={...realDraft,aiDraft:realDraft.aiDraft.replace(/Възможните косвени въздействия[\s\S]*$/, 'Не се очаква въздействие и не се изисква оценка.')};
+ await assert.rejects(()=>core.V26ExpertWord.make(bad,{requireAiAuthor:true,mapPngBytes:new Uint8Array([137,80,78,71,13,10,26,10,0])}),/AI раздел без допустимо съдържание/);
+ console.log('KT51 REAL EXPERT IMPACTS PASS: Natura zone and protected-area evidence preserved; unsupported no-impact conclusion rejected.');
  console.log('KT51 RESTORED CONTENT PASS: actual approved Classic A/B and Expert R02 adapters, original AI sections, map, admin fields, no fake characterization.');
 })().catch(e=>{console.error(e);process.exitCode=1});
