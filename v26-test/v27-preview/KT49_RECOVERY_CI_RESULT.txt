@@ -19,5 +19,7 @@ KT48 A/B PASS: original 10 classical impact bullet directions immutable; factual
 KT46 INCOMPLETE DOSSIER PASS: four administrative characteristics contain explicit evidence reservations without internal QA markers
 KT44 HEADING STYLE PASS: E original four Word formatting segments retained
 KT48 EXPERT IMPACT PASS: five R02 headings in A and B
-KT48 Expert R02 PASS: original legal architecture, A/B scenario safeguards and no unsupported final outcome
-KT43 regression PASS: scenario B creates both reviewed DOCX drafts without unverified legal or procedure conclusions
+Error: КТ42: непълен AI авторски проект.
+    at Object.expert [as make] (v27-kt49-kt42-content-bridge.js:385:86)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async /home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt42-approved-word-regression.cjs:283:16
