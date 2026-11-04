@@ -26,7 +26,27 @@ const pList=buffer=>{
 const phrase=p=>Array.from(p.getElementsByTagNameNS(NS,'t')).map(t=>t.textContent).join('');
 const meta={parcelIds:'56784.13.102, 56784.13.105, 56784.13.106',subject:'Складове за промишлени стоки и офиси',recipient:'Възложителя: контролна преписка',address:'Адрес: контролен',incomingReference:'Вх. № ОВОС-9999 / ДАТА-99.99.9999 г.',location:'гр. Пловдив, местност Рогошко шосе'};
 const verified=['С реализацията на инвестиционното предложение се предвижда складов обект','Електрозахранване','Водоснабдяване','Отпадъчни води'];
+function checkHeadingEtalonRuns(doc,which){
+ const output=pList(doc),original=pList(fs.readFileSync(path.join(base,'etalon',(which==='A'?'KT35-A':which==='B'?'KT39-B':'V27-R02')+'.docx')));
+ const xml=output.serial;
+ const runText=paragraph=>Array.from(paragraph.getElementsByTagNameNS(NS,'r')).map(r=>({
+   run:r,text:Array.from(r.getElementsByTagNameNS(NS,'t')).map(t=>t.textContent).join(''),
+   style:Array.from(r.getElementsByTagNameNS(NS,'rPr')).map(v=>xml.serializeToString(v)).join('')
+ })).filter(x=>x.text.length);
+ const curr=runText(output.p[10]),baseRuns=runText(original.p[10]);
+ assert.equal(curr.length,4,which+' must preserve four styled heading runs');
+ assert.equal(baseRuns.length,4,which+' original expected four styled heading runs');
+ for(let i=0;i<4;i++)assert.equal(curr[i].style,baseRuns[i].style,which+' run '+(i+1)+' formatting changed');
+ assert.equal(curr[0].text,'Относно',which+' first run');
+ assert.equal(curr[1].text,': Уведомление за инвестиционно предложение (ИП): ',which+' intro run');
+ assert.ok(/^„[^“]+“$/.test(curr[2].text),which+' title run');
+ assert.ok(curr[3].text.includes('поземлен'),which+' location run');
+ const oldRuns=Array.from(original.p[10].getElementsByTagNameNS(NS,'r')),newRuns=Array.from(output.p[10].getElementsByTagNameNS(NS,'r'));
+ assert.equal(newRuns.length,oldRuns.length,which+' original XML run count');
+ console.log('KT44 HEADING STYLE PASS: '+which+' original four Word formatting segments retained');
+}
 function checkAdministrative(doc,which,subject,ids){
+ checkHeadingEtalonRuns(doc,which);
  const p=pList(doc).p,headline=phrase(p[10]),intro=phrase(p[which==='E'?17:16]);
  assert.equal((headline.match(/„/g)||[]).length,1,which+' opening quotes');
  assert.equal((headline.match(/“/g)||[]).length,1,which+' closing quotes');
@@ -53,8 +73,14 @@ async function test(name,blob,variable){
 }
 (async()=>{
  await test('KT35-A',await sandbox.V26TemplateWord.make('А',verified,meta,{determination:{scenario:'А',zones:[]}}),[6,7,10,16]);
+ const approvedA=await sandbox.V26TemplateWord.make('А',verified,meta,{determination:{scenario:'А',zones:[]}});
+ checkHeadingEtalonRuns(await approvedA.arrayBuffer(),'A');
  await test('KT39-B',await sandbox.V26TemplateWord.make('Б',verified,meta,{determination:{scenario:'Б',zones:['BG0000578']}}),[6,7,10,16]);
+ const approvedB=await sandbox.V26TemplateWord.make('Б',verified,meta,{determination:{scenario:'Б',zones:['BG0000578']}});
+ checkHeadingEtalonRuns(await approvedB.arrayBuffer(),'B');
  await test('V27-R02',await sandbox.V26ExpertWord.make({schema:'KT13_EXPERT_DRAFT_V1',scenario:'А',metadata:meta,aiDraft:'',parcels:[]},{requireAiAuthor:true}),[6,7,10,17]);
+ const approvedE=await sandbox.V26ExpertWord.make({schema:'KT13_EXPERT_DRAFT_V1',scenario:'А',metadata:meta,aiDraft:'',parcels:[]},{requireAiAuthor:true});
+ checkHeadingEtalonRuns(await approvedE.arrayBuffer(),'E');
  const aWithDuplicatedSubject={...meta,
   subject:'„Складове за промишлени стоки и офиси“ в ПИ с идентификатор 56784.13.102, населено място гр. Пловдив, местност Рогошко шосе - север',
   location:'населено място гр. Пловдив, местност Рогошко шосе - север',
