@@ -18,28 +18,33 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install standalone DOCX test dependencies
-        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
-      - name: Validate JS syntax
-        run: |
-          node --check v26-test/v27-preview/v27-kt41-etalon-bridge.js
-          node --check v26-test/v27-preview/v26-draft-package.js
-          node --check v26-test/v27-preview/kt42-approved-word-regression.cjs
-      - name: Compare generated Word against all three approved originals
+      - name: Execute and capture every KT43 regression stage
         run: |
           set +e
-          node v26-test/v27-preview/kt42-approved-word-regression.cjs > /tmp/kt43_regression.txt 2>&1
+          {
+            echo "== dependency installation =="
+            npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8 || exit 11
+            echo "== JS syntax =="
+            node --check v26-test/v27-preview/v27-kt41-etalon-bridge.js || exit 12
+            node --check v26-test/v27-preview/v26-draft-package.js || exit 13
+            node --check v26-test/v27-preview/kt42-approved-word-regression.cjs || exit 14
+            echo "== three approved templates and synthetic scenario B =="
+            node v26-test/v27-preview/kt42-approved-word-regression.cjs || exit 15
+          } > /tmp/kt43_regression.txt 2>&1
           status=$?
           cat /tmp/kt43_regression.txt
+          echo "$status" > /tmp/kt43_status.txt
           exit "$status"
-      - name: Preserve KT43 regression diagnostics if failed
-        if: failure()
+      - name: Record test diagnostics in GitHub
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          cp /tmp/kt43_regression.txt v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt 2>/dev/null || printf 'Failure before JS execution\n' > v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt
+          cp /tmp/kt43_regression.txt v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt 2>/dev/null || printf 'Failure before regression stage\n' > v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt
+          printf '\nExit code: ' >> v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt
+          cat /tmp/kt43_status.txt >> v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt 2>/dev/null || echo 'unknown' >> v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt
           git add v26-test/v27-preview/KT43_REGRESSION_DIAGNOSTICS.txt
-          git commit -m "KT43: preserve failed DOCX regression diagnostic" || true
+          git commit -m "KT43: record exact Word regression diagnostic" || true
           git push || true
       - name: Publish verified CI marker for the isolated Pages preview
         if: success()
