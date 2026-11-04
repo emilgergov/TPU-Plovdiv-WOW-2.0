@@ -1,9 +1,6 @@
-/home/runner/work/TPU-Plovdiv-WOW-2.0/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt51-admin-only-regression.cjs:74
- for(const key of Object.keys(etalonB.z).filter(k=>/^(?:word\\/(?:footer|header|media))/.test(k))){
-                                                   ^^^^^^^^^^^^
-
-SyntaxError: Invalid regular expression: /^(?:word\\/: Unterminated group
-    at wrapSafe (node:internal/modules/cjs/loader:1713:18)
-    at checkSyntax (node:internal/main/check_syntax:78:3)
-
-Node.js v22.23.4
+KT50 HISTORICAL SOURCE AND THREE EXACT APPROVED DOCX HASHES PASS
+KT35-A PASS 41 paragraphs 35 unchanged paragraphs
+KT39-B PASS 43 paragraphs 39 unchanged paragraphs
+V27-R02 PASS 49 paragraphs 45 unchanged paragraphs
+KT51 A/B ADMIN PASS: A matches B confidentiality exactly, protected content unchanged, footers intact, verified new-case B works, unsupported procedure still rejected.
+KT51 REGRESSION PASS: original KT42 exact source still locked, approved DOCX untouched, only administrative changes; novel B requires verified legal, impact and procedure facts.
