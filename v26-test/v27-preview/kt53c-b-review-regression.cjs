@@ -66,7 +66,7 @@ async function test(name,blob,variable){
  assert(phrase(bxml.p[23]).includes('BG0000194'),'B verified spatial zone');
  assert(phrase(bxml.p[33]).includes('подлежат на експертно произнасяне'),'B non-conclusive draft');
  for(const i of [22,25,26,27,28,29,30,31,32])assert(!phrase(bxml.p[i]).includes('56784.13.'),'no old case parcel in B variable content');
- const fakeAi='[[CHARACTERIZATION]]\\nПроверена характеристика\\n\\nИнженерни дейности\\n[[LEGAL]]\\nПриложими нормативни рамки\\n\\nОбхват на проверка\\n[[PROCEDURE]]\\nПроцедурна преценка за експертна проверка\\n[[IMPACTS]]\\nОбобщена преценка\\n\\nВъздействие 1\\n\\nВъздействие 2\\n\\nВъздействие 3\\n\\nВъздействие 4\\n\\nВъздействие 5';
+ const fakeAi='[[CHARACTERIZATION]]\nПроверена характеристика\n\nИнженерни дейности\n[[LEGAL]]\nПриложими нормативни рамки\n\nОбхват на проверка\n[[PROCEDURE]]\nПроцедурна преценка за експертна проверка\n[[IMPACTS]]\nОбобщена преценка\n\nВъздействие 1\n\nВъздействие 2\n\nВъздействие 3\n\nВъздействие 4\n\nВъздействие 5';
  const bExpert=await sandbox.V26ExpertWord.make({schema:'KT13_EXPERT_DRAFT_V1',scenario:'Б',zones:['BG0000194'],metadata:bmeta,aiDraft:fakeAi,characterization:verified,parcels:[]},{requireAiAuthor:true});
  const exml=pList(await bExpert.arrayBuffer());
  assert.equal(exml.p.length,49,'B expert paragraph count');
