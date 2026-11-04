@@ -1,9 +1,9 @@
 == dependency installation ==
 npm warn deprecated @xmldom/xmldom@0.9.8: this version has critical issues, please update to the latest version
 
-added 2 packages in 829ms
+added 2 packages in 733ms
 == JS syntax ==
-== three approved templates and synthetic scenario B ==
+== three approved templates, two scenarios, full place headings ==
 KT35-A PASS 41 paragraphs 37 unchanged paragraphs
 KT44 HEADING STYLE PASS: A original four Word formatting segments retained
 KT39-B PASS 43 paragraphs 39 unchanged paragraphs
