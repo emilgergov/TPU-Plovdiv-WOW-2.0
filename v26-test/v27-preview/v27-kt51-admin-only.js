@@ -39,7 +39,7 @@ async function makeClassic(scenario,paragraphs,metadata,context){
  protectClassic(paragraphs);
  return classic.make(scenario,paragraphs,normalized(metadata),context);
 }
-const TECH_MARKER=/\\[\\[(?:CONCLUSION|CHARACTERIZATION|PROCEDURE|LEGAL|IMPACTS)\\]\\]/g;
+const TECH_MARKER=/\[\[(?:CONCLUSION|CHARACTERIZATION|PROCEDURE|LEGAL|IMPACTS)\]\]/g;
 async function stripTechnicalMarkers(blob){
  // Only remove internal AI section delimiters. Keep ALL surrounding
  // legal, factual and expert-authored wording in the approved V27 R02.
