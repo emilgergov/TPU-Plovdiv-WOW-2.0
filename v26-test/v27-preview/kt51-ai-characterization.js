@@ -4,7 +4,12 @@
  */
 (function(root){'use strict';
 const str=x=>String(x??'').replace(/\s+/g,' ').trim();
-const unverified=x=>!str(x)||/\[(?:ЗА ЕКСПЕРТНА ПРОВЕРКА|ОТКЪС ОТ ПРЕПИСКАТА|ЗА ПОПЪЛВАНЕ)|НЯМА ДАННИ|Няма данни в преписката/i.test(str(x));
+// An explicit "няма данни" within a substantive AI paragraph is a legitimate
+// statement of uncertainty, not proof of a fabricated fact. Only free-standing
+// placeholders and technical tags invalidate a paragraph.
+const reviewTag=x=>/\\[(?:ЗА ЕКСПЕРТНА ПРОВЕРКА|ОТКЪС ОТ ПРЕПИСКАТА|ЗА ПОПЪЛВАНЕ)/i.test(str(x));
+const pureMissing=x=>/^(?:НЯМА ДАННИ(?: В ПРЕПИСКАТА)?|НЕ Е УСТАНОВЕНО|НЕУСТАНОВЕНО)[.!]?$/i.test(str(x));
+const unverified=x=>!str(x)||reviewTag(x)||pureMissing(x);
 function sections(raw){
  const hits=[...String(raw||'').matchAll(/^\s*\[\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\]\]\s*$/gm)];
  if(hits.length!==4||hits.map(x=>x[1]).join(',')!=='CHARACTERIZATION,LEGAL,PROCEDURE,IMPACTS')
@@ -26,7 +31,7 @@ function build(aiDraft,confirmed=[]){
  let fragments=raw.split(/\n\s*\n/).map(removeReviewTags).map(str).filter(Boolean);
  // Free-standing 'НЯМА ДАННИ' remains non-evidence, never a DOCX paragraph.
  fragments=fragments.filter(x=>!/^НЯМА ДАННИ(?: В ПРЕПИСКАТА)?[.!]?$/i.test(x));
- if(fragments.some(unverified))throw Error('КТ51: AI характеристиката съдържа неподкрепено твърдение в самия текст, не само технически маркер.');
+ if(fragments.some(unverified))throw Error('КТ51: след почистване на помощните маркери е останал самостоятелен непопълнен абзац, а не конкретен анализ.');
  // Keep all original sentences; split long blocks only when more paragraphs are needed.
  while(fragments.length<4){
   let bestIndex=-1,bestPieces=null;
