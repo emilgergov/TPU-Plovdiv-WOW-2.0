@@ -12,7 +12,7 @@ const approvedSha={
 };
 for(const [name,expected] of Object.entries(approvedSha)){
  const bytes=fs.readFileSync(path.join(base,'etalon',name));
- const header=Buffer.from('blob '+bytes.length+'\\0');
+ const header=Buffer.concat([Buffer.from('blob '+bytes.length),Buffer.from([0])]);
  const actual=crypto.createHash('sha1').update(header).update(bytes).digest('hex');
  assert.equal(actual,expected,'LOCKED USER-APPROVED DOCX CHANGED: '+name);
 }
