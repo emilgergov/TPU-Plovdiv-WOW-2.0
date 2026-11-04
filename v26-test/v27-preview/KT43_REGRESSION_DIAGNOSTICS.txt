@@ -1,7 +1,7 @@
 == dependency installation ==
 npm warn deprecated @xmldom/xmldom@0.9.8: this version has critical issues, please update to the latest version
 
-added 2 packages in 2s
+added 2 packages in 741ms
 == JS syntax ==
 == three approved templates, two scenarios, full place headings ==
 KT47 USER APPROVED ETALON LOCK PASS: exact 3 original binary Word documents
