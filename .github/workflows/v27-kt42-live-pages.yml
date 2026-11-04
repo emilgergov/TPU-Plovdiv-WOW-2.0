@@ -1,10 +1,11 @@
-name: V27 KT47 live Pages deployment verification
+name: V27 KT47 exact approved DOCX live deployment verification
 on:
   push:
     paths:
       - '.github/workflows/v27-kt42-live-pages.yml'
       - 'v26-test/v27-preview/index.html'
       - 'v26-test/v27-preview/v27-kt41-etalon-bridge.js'
+      - 'v26-test/v27-preview/etalon/**'
   workflow_dispatch:
 permissions:
   contents: write
@@ -16,9 +17,9 @@ jobs:
       - name: Confirm KT47 Pages deployment serves one Word bridge and all approved DOCX files
         run: |
           python - <<'PY'
-          import urllib.request,time,zipfile,io,json
+          import urllib.request,time,zipfile,io,json,hashlib
           base='https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/'
-          expected='v27-preview/v27-kt41-etalon-bridge.js?v=kt47-restored-0ca3bf9'
+          expected='v27-preview/v27-kt41-etalon-bridge.js?v=kt47-locked-3c71b02'
           last=''
           for attempt in range(36):
               try:
@@ -32,11 +33,18 @@ jobs:
                   if any(k not in code for k in ('function isApprovedCase','function characterizationDraft','function legalDraft','function impactDraft','function heading','function putHeading','function zoneList','function alignClassicAConfidentialityWithB','function neutralProcedure','function supportedAILegal')): raise RuntimeError('Live JS not KT47')
                   with urllib.request.urlopen(base+'v26-draft-package.js?kt47=verification',timeout=18) as res: package=res.read().decode('utf-8')
                   if not all(term in package for term in ('function kt47VerifiedAdministration','const KT47_EKATTE','caseMetadata.nearestZone=')): raise RuntimeError('Live package lacks KT47 GIS/administration linkage')
-                  for filename in ('KT35-A.docx','KT39-B.docx','V27-R02.docx'):
+                  approved={
+                      'KT35-A.docx':'1a495fc2d6047a6377e48dfb963a737502404087',
+                      'KT39-B.docx':'508402ce5a631617bdc0da4ca9d9cd535b6b3b7c',
+                      'V27-R02.docx':'335634ab930253671dc090391ed366867ca7e438'
+                  }
+                  for filename,sha in approved.items():
                       with urllib.request.urlopen(base+'etalon/'+filename,timeout=18) as res: raw=res.read()
+                      blob_sha=hashlib.sha1(('blob '+str(len(raw))).encode()+b'\\x00'+raw).hexdigest()
+                      if blob_sha!=sha: raise RuntimeError('Uploaded approved DOCX differs on Pages: '+filename+' '+blob_sha)
                       with zipfile.ZipFile(io.BytesIO(raw)) as z:
                           assert 'word/document.xml' in z.namelist(),filename
-                  print('LIVE PAGES KT47 PASS: HTML, JS and all three approved DOCX files')
+                  print('LIVE PAGES KT47 EXACT ETALONS PASS: HTML, JS and three byte-identical user-approved DOCX files')
                   break
               except Exception as e:
                   last=str(e)
@@ -49,12 +57,12 @@ jobs:
           from pathlib import Path
           import json,subprocess
           marker=Path('v26-test/v27-preview/KT47_LIVE_VERIFIED.json')
-          marker.write_text(json.dumps({'checkpoint':'KT47','result':'LIVE_PAGES_VERIFIED','verified_repo_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'checks':['HTML serves KT47 loader','Restored approved A/B Word bridge with no unapproved rewrite','Verified EKATTE metadata from package','KT35-A.docx accessible','KT39-B.docx accessible','V27-R02.docx accessible']},ensure_ascii=False,indent=2)+'\n')
+          marker.write_text(json.dumps({'checkpoint':'KT47','result':'LIVE_PAGES_VERIFIED','verified_repo_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'checks':['HTML serves KT47 loader','Restored approved A/B Word bridge with no unapproved rewrite','Verified EKATTE metadata from package','KT35-A.docx exact binary hash','KT39-B.docx exact binary hash','V27-R02.docx exact binary hash']},ensure_ascii=False,indent=2)+'\n')
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add v26-test/v27-preview/KT47_LIVE_VERIFIED.json
-          git commit -m "KT47: verified restored A/B etalons, one Word bridge and official EKATTE"
+          git commit -m "KT47: verified exact user-approved A/B/E DOCX on public Pages and one Word bridge"
           for attempt in 1 2 3 4 5; do
             git pull --rebase origin main && git push origin HEAD:main && break
             sleep 3
