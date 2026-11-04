@@ -338,13 +338,18 @@ async function make(results,roles,register){
  if(!Array.isArray(caseMetadata.impactFindings)||caseMetadata.impactFindings.length!==5)caseMetadata.impactFindings=Array.from({length:5},(_,i)=>'[ЗА ЕКСПЕРТНА ПРОВЕРКА — въздействие '+(i+1)+']');
  register={...register,verifiedCaseMetadata:caseMetadata};
  const dossierEvidence=register?.unifiedContext?.commonEvidence||null;
- const expertDraft=window.V26ExpertDraft?.build({results,roles:normalized,determination,metadata:caseMetadata,paragraphs,evidence:dossierEvidence,aiDraft:register?.v27AiDraft||''});
+ // Use ONLY article-level, source-traceable excerpts in the internal normative archive.
+ const legalSources=(register?.records||[]).filter(r=>r?.verified===true&&r?.verified_scope&&r?.article&&r?.source&&r?.project_revision_accepted===true).map(r=>({
+  id:r.id,title:r.title,source:r.source,article:r.article,page:r.page,
+  verifiedScope:r.verified_scope,projectRevisionAccepted:true,revisionVerified:r.revision_verified===true
+ }));
+ const expertDraft=window.V26ExpertDraft?.build({results,roles:normalized,determination,metadata:caseMetadata,paragraphs,evidence:dossierEvidence,aiDraft:register?.v27AiDraft||'',legalSources});
  if(!expertDraft)throw Error('КТ13: липсва единният експертен проект.');
  if(!window.V26ExpertWord?.make)throw Error('КТ13: липсва генераторът за експертния Word.');
  const overviewMap=results.length>1?(window.V27MultiParcelMap?.build(results,register?.zoneFeatures||[])||null):(register?.mapSvg||null);
  if(!overviewMap)throw Error('Липсва обзорната ГИС карта за експертния Word. Изпълнете картографския анализ преди създаване на пакета.');
  if(register?.v27Package&&!String(register.v27AiDraft||'').trim())throw Error('V27.2: липсва AI авторски текст; експертният Word не може да се замени със стандартен.');
- const expertWord=await window.V26ExpertWord.make(expertDraft,{mapSvg:overviewMap,requireAiAuthor:Boolean(register?.v27Package)});
+ const expertWord=await window.V26ExpertWord.make(expertDraft,{mapSvg:overviewMap,requireAiAuthor:Boolean(register?.v27Package),...(register?.mapPngBytes?.byteLength?{mapPngBytes:register.mapPngBytes}:{})});
  // KT26: The canonical A/B document must use the expert-confirmed case
  // characterization, never the independently AI-authored Expert Word narrative.
  // Preserve the approved paragraph wording; the original A/B template owns its
@@ -355,7 +360,7 @@ async function make(results,roles,register){
   throw Error('КТ26: липсват четирите потвърдени абзаца за класическия образец А/Б.');
  const classicParagraphs=classicSource.map(value=>String(value).trim());
  // KT23: Classic Word uses the expert-confirmed four paragraphs unchanged; AI authors the separate Expert Word.
- const classicWord=await window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata);
+ const classicWord=await window.V26TemplateWord.make(expertDraft.scenario,classicParagraphs,expertDraft.metadata,{determination});
  for(const [label,blob] of [['експертен',expertWord],['класически',classicWord]]){
   if(blob.size<100||new TextDecoder().decode(await blob.slice(0,2).arrayBuffer())!=='PK')throw Error('КТ13: невалиден '+label+' DOCX.');
  }
