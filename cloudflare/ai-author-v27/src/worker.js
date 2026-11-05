@@ -91,7 +91,7 @@ Each paragraph must contain substantive text (at least 45 characters) and must n
     if(categorical.some(re=>re.test(fixed)))issues.push('UNSUPPORTED_CATEGORICAL_OS');
     if(/защитена\s+територия\s*\(\s*защитена\s+зона|защитен(?:ата|и)?\s+територи(?:я|и)\s+bg\d{7}/iu.test(output))
       issues.push('ZONE_TERRITORY_CONFLATION');
-    if(/\bОСВОС\b/iu.test(output))issues.push('INVALID_OSVOS_TERM');
+    if(/(?:^|[^\p{L}])ОСВОС(?=$|[^\p{L}])/iu.test(output))issues.push('INVALID_OSVOS_TERM');
     if(/съдебно-юридическ|проекто-експертн|присъдени\s+правомощия/iu.test(output))
       issues.push('NONADMINISTRATIVE_TERMINOLOGY');
     return issues;
