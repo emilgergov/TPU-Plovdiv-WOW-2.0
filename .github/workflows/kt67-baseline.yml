@@ -1,0 +1,40 @@
+name: KT67-0 immutable baseline and approved Word assets
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt67-baseline.yml'
+      - 'docs/V27_KT67_BASELINE_MANIFEST.json'
+      - 'v26-test/v27-preview/etalon/**'
+      - 'v26-test/v27-preview/v27-kt50-original-kt42.js'
+      - 'v26-test/v27-preview/kt53-original-draft-package.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-immutable-baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify baseline and current approved files against locked blob hashes
+        run: |
+          python - <<'PY'
+          import json,subprocess,pathlib
+          m=json.loads(pathlib.Path('docs/V27_KT67_BASELINE_MANIFEST.json').read_text())
+          branch='origin/'+m['branch']
+          subprocess.run(['git','fetch','origin',m['branch']],check=True)
+          sha=subprocess.check_output(['git','rev-parse',branch],text=True).strip()
+          assert sha==m['baseline_commit'],f'Baseline branch moved: {sha}'
+          for item in m['files']:
+              path=item['path']
+              baseline=subprocess.check_output(['git','rev-parse',f'{sha}:{path}'],text=True).strip()
+              current=subprocess.check_output(['git','rev-parse',f'HEAD:{path}'],text=True).strip()
+              assert baseline==item['blob_sha'],f'Baseline modified: {path}'
+              assert current==item['blob_sha'],f'Locked asset modified on main: {path}'
+              print('LOCKED:',item['role'],path,baseline)
+          for variant in ['classic_A','classic_B','expert']:
+              assert m['slots'][variant],f'Missing variable slot mapping: {variant}'
+          print('KT67-0 APPROVED BASELINE VERIFIED')
+          PY
