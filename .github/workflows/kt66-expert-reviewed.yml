@@ -51,6 +51,8 @@ jobs:
           const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');
           const crypto=require('node:crypto'),fflate=require('fflate');
           const {DOMParser}=require('@xmldom/xmldom');
+          const demo=new DOMParser().parseFromString('<r><x/><y/></r>','application/xml').documentElement;
+          Object.defineProperty(Object.getPrototypeOf(demo),'children',{configurable:true,get(){return Array.from(this.childNodes||[]).filter(n=>n.nodeType===1)}});
           const source=fs.readFileSync('v26-test/v27-preview/kt66-locked-content-qa.js','utf8');
           const root={fflate},sandbox={window:root,DOMParser,TextDecoder,console,fetch:async url=>{
             let p='v26-test/'+url;let buf=fs.readFileSync(p);return {ok:true,arrayBuffer:async()=>buf.buffer.slice(buf.byteOffset,buf.byteOffset+buf.byteLength)};
