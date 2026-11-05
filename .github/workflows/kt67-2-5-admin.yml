@@ -1,0 +1,72 @@
+name: KT67-2.5 shared A-B administrative metadata and EKATTE QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt67-2-5-admin.yml'
+      - 'v26-test/v27-preview/kt67-2-5-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  a-b-admin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install DOCX regression dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Confirm frozen original Word templates and writers
+        run: |
+          node v26-test/v27-preview/kt62-locked-replay-regression.cjs
+          node --check v26-test/v27-preview/kt67-2-5-shared-admin.js
+      - name: Exercise administrative rules for A and B
+        run: |
+          node - <<'JS'
+          const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+          const sandbox={window:{}};vm.runInNewContext(fs.readFileSync('v26-test/v27-preview/kt67-2-5-shared-admin.js','utf8'),sandbox);
+          const api=sandbox.window.KT6725Admin, X10='Х'.repeat(10),X15='Х'.repeat(15);
+          const loc=[{input:'36676.129.457',settlement:'с. Катуница',locality:'Попското',municipality:'Садово',region:'Пловдив'}];
+          for(const scenario of ['А','Б']){
+           const a=api.normalize({subject:'Изграждане на обслужващ обект',recipient:'ДО ВЪЗЛОЖИТЕЛЯ НА ИНВЕСТИЦИОННОТО ПРЕДЛОЖЕНИЕ',address:'Адрес за кореспонденция: [ЗА ПОПЪЛВАНЕ]',incomingReference:'Вх. № ОВОС-9999 / ДАТА-99.99.9999 г.'},loc);
+           assert.equal(a.metadata.recipient,'Възложител: '+X10,scenario);
+           assert.equal(a.metadata.address,'Адрес: '+X15,scenario);
+           assert.equal(a.metadata.incomingReference,'Вх. № ОВОС-ХХХХ/ХХ.ХХ.ХХХХ г.',scenario);
+           assert.match(a.metadata.location,/с\. Катуница, община Садово, област Пловдив, местност Попското/,scenario);
+           assert(!a.metadata.location.includes('36676.129.457'),'Parcel ID is inserted separately by original KT42');
+           assert.equal(a.metadata.subject,'Изграждане на обслужващ обект');
+           const known=api.normalize({recipient:'Възложител: ИП „Тест“',address:'Адрес: ул. Тест 2',incomingReference:'Вх. № ОВОС-1234/01.11.2026 г.'},loc);
+           assert.equal(known.metadata.recipient,'Възложител: ИП „Тест“');
+           assert.equal(known.metadata.address,'Адрес: ул. Тест 2');
+           assert.equal(known.metadata.incomingReference,'Вх. № ОВОС-1234/01.11.2026 г.');
+          }
+          const noMunicipality=api.normalize({},[{settlement:'с. Катуница',locality:'Попското'}]);
+          assert.match(noMunicipality.metadata.location,/община ХХХХХХХХХХ, област ХХХХХХХХХХ/);
+          const unverified=api.normalize({},[{settlement:'с. Катуница',ekatte:'12345'}],{verifiedEkatte:{code:'12345',verified:false,municipality:'Фалшива',region:'Фалшива'}});
+          assert.equal(unverified.location.verifiedEkatte,false);
+          assert(!unverified.metadata.location.includes('Фалшива'));
+          const other=api.normalize({},[{settlement:'с. Катуница',ekatte:'12345'}],{verifiedEkatte:{code:'99999',verified:true,municipality:'Чужда',region:'Чужда'}});
+          assert(!other.metadata.location.includes('Чужда'));
+          const verified=api.normalize({},[{settlement:'с. Катуница',ekatte:'12345'}],{verifiedEkatte:{code:'12345',verified:true,municipality:'Садово',region:'Пловдив'}});
+          assert.equal(verified.location.verifiedEkatte,true);
+          assert(verified.metadata.location.includes('община Садово, област Пловдив'));
+          const conflicts=api.normalize({municipality:'Садово'},[{settlement:'с. Катуница',municipality:'Друга община'}]);
+          assert.match(conflicts.metadata.location,/община ХХХХХХХХХХ/);
+          console.log('KT67-2.5 A/B administrative fields, unknown X placeholder, complete location and EKATTE mismatch tests PASS');
+          JS
+      - name: Browser integration and original source contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('v26-test/v27-preview/kt67-2-5-a-b-admin-test.html').read_text()
+          assert 'KT6725Admin.normalize(workingDraft.metadata,found' in s
+          assert s.index('KT6725Admin.normalize(workingDraft.metadata,found')<s.index('V26DraftPackage.make(')
+          assert 'verifiedCaseMetadata:workingDraft.metadata' in s
+          assert 'v27-kt50-original-kt42.js?v=kt603-original-locked-b1d2cfb' in s
+          assert 'KT66ExpertReview.create' not in s
+          assert 'kt67-2-5-shared-admin.js?v=kt67-25-admin-1' in s
+          assert 'KT66ContentQA.verify(blob' in s
+          print('KT67-2.5 browser uses immutable KT42 and KT56 for A and B PASS')
+          PY
