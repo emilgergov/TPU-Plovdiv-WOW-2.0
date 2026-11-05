@@ -34,8 +34,11 @@ function inspect(plan){
      /(?:заради|поради|тъй\s+като|понеже)\s+(?:.*?)(?:попада|пресича)(?:.*?)(?:зона|натура\s*2000)(?:.*?)(?:налага|изисква|препоръчва)/u
    ];
    if(provisions===0&&overreach.some(p=>p.test(t)))issues.push({code:'UNSOURCED_PROCEDURE_INFERENCE',section});
+   // An uncrosschecked article citation in a clearly marked working draft is
+   // a review warning, not a claim that the legal provision has been verified.
+   // Unsupported categorical procedural findings above remain blocking.
    if(provisions===0&&(/(?:на основание|съгласно|по смисъла на)\s+чл\.?\s*\d+/iu).test(t))
-    issues.push({code:'UNVERIFIED_ARTICLE',section});
+    warnings.push({code:'UNVERIFIED_ARTICLE',section,reviewRequired:true});
    if(/съдебно-юридическ|присъдени правомощия|проекто-експертн/u.test(t))
     issues.push({code:'INAPPROPRIATE_LEGAL_LANGUAGE',section});
   }
