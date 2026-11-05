@@ -5,6 +5,7 @@ on:
     paths:
       - 'v26-test/v27-preview/kt57-unified-real-zip-qa-test.html'
       - 'v26-test/v27-preview/kt57-locked-package-qa.js'
+      - 'v26-test/v27-preview/kt66-locked-content-qa.js'
       - '.github/workflows/kt57-real-zip-qa.yml'
   workflow_dispatch:
 permissions:
@@ -24,6 +25,22 @@ jobs:
           node --check v26-test/v27-preview/kt57-locked-package-qa.js
           node --check v26-test/v27-preview/v27-kt50-original-kt42.js
           node v26-test/v27-preview/kt50-original-kt42-regression.cjs
+      - name: KT68 precise placeholder regression for Classic and Expert Word
+        run: |
+          node - <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+          const sandbox={window:{}};vm.runInNewContext(fs.readFileSync('v26-test/v27-preview/kt57-locked-package-qa.js','utf8'),sandbox);
+          const problem=sandbox.window.KT57PackageQA.problem;
+          for(const t of [
+            'Няма данни за потвърдени текстове от нормативния архив и правните основания подлежат на експертна проверка.',
+            'В преписката няма данни относно електрозахранването.',
+            'Няма данни за съпътстващи имоти.'
+          ])assert.equal(problem(t),'',t);
+          for(const t of ['НЯМА ДАННИ','Няма данни в преписката','[[LEGAL]]','[ЗА ЕКСПЕРТНА ПРОВЕРКА — въздействия]'])
+            assert(problem(t),t);
+          assert(fs.readFileSync('v26-test/v27-preview/kt66-locked-content-qa.js','utf8').includes('^НЯМА ДАННИ'));
+          console.log('KT68 valid no-data prose allowed; standalone placeholders still blocked PASS');
+          JS
       - name: Confirm final ZIP is guarded before download
         shell: python
         run: |
