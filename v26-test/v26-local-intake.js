@@ -149,7 +149,7 @@ async function singleDocumentZip(file){
  u32(av,0,0x04034b50);u16(av,4,20);u32(av,14,crc);u32(av,18,content.length);u32(av,22,content.length);u16(av,26,fn.length);a.set(fn,30);
  u32(bv,0,0x02014b50);u16(bv,4,20);u16(bv,6,20);u32(bv,16,crc);u32(bv,20,content.length);u32(bv,24,content.length);u16(bv,28,fn.length);b.set(fn,46);
  const offset=a.length+content.length;u32(ev,0,0x06054b50);u16(ev,8,1);u16(ev,10,1);u32(ev,12,b.length);u32(ev,16,offset);
- return new Blob([a,content,b,end],{type:'application/zip'});
+ return new File([a,content,b,end],'kt68-single-document.zip',{type:'application/zip'});
 }
 async function process(file){
  if(!file||file.size>40*1024*1024)throw Error('Изберете преписка до 40 MB.');
