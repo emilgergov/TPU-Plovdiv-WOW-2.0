@@ -1,0 +1,138 @@
+{
+  "schema": "KT67_BASELINE_LOCK_V1",
+  "date": "2026-11-05",
+  "status": "baseline-snapshot-not-final-release",
+  "branch": "V27-KT56-BASELINE",
+  "baseline_commit": "c3dc245106ce27c3b7f977f3da30274b096c944f",
+  "note": "This branch snapshots current V27 state and existing approved KT56 etalons. It is not a claim that the current real-case B works.",
+  "files": [
+    {
+      "path": "v26-test/v27-preview/etalon/KT35-A.docx",
+      "blob_sha": "1a495fc2d6047a6377e48dfb963a737502404087",
+      "role": "approved-classic-A"
+    },
+    {
+      "path": "v26-test/v27-preview/etalon/KT39-B.docx",
+      "blob_sha": "508402ce5a631617bdc0da4ca9d9cd535b6b3b7c",
+      "role": "approved-classic-B"
+    },
+    {
+      "path": "v26-test/v27-preview/etalon/V27-R02.docx",
+      "blob_sha": "335634ab930253671dc090391ed366867ca7e438",
+      "role": "approved-expert"
+    },
+    {
+      "path": "v26-test/v27-preview/v27-kt50-original-kt42.js",
+      "blob_sha": "2c879e0f743f9863051f4126769977e8f1dcf842",
+      "role": "original-KT42-writer"
+    },
+    {
+      "path": "v26-test/v27-preview/kt53-original-draft-package.js",
+      "blob_sha": "bed93305b33b6e0afdf5b1d2087b06fd77ceca8f",
+      "role": "original-KT53-package"
+    },
+    {
+      "path": "v26-test/v27-preview/kt62-1-deterministic-content-test.html",
+      "blob_sha": "7b5292789eac14a1656f6bca51e6bb5bafeb3e6d",
+      "role": "original-KT62.1-repeatability"
+    },
+    {
+      "path": "v26-test/v27-preview/kt62-locked-replay-regression.cjs",
+      "blob_sha": "83e6a2bef1b43a5ccd9281aa98e5c9509d9fed1d",
+      "role": "CI-locked-regression"
+    },
+    {
+      "path": "docs/V27_KT67_FINAL_CLOSURE_PLAN_2026-11-05.md",
+      "blob_sha": "d841e91ec292ce6b197f33f6a868d2a31644dbcc",
+      "role": "approved-plan"
+    }
+  ],
+  "slots": {
+    "note": "All paragraph positions are 0-based indices in original KT42 source; blank/variable fields may only be populated using verified data or clearly marked draft content. Existing metadata() changes separate administrator fields.",
+    "classic_common": {
+      "characterization": [
+        18,
+        19,
+        20,
+        21
+      ]
+    },
+    "classic_A": {
+      "spatial": [
+        22,
+        23
+      ],
+      "legal": [
+        24,
+        25
+      ],
+      "impacts": [
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "procedure": [
+        31
+      ]
+    },
+    "classic_B": {
+      "legal": [
+        22,
+        25,
+        26,
+        27
+      ],
+      "spatial": [
+        23,
+        24
+      ],
+      "impacts": [
+        28,
+        29,
+        30,
+        31,
+        32
+      ],
+      "procedure": [
+        33
+      ]
+    },
+    "expert": {
+      "header": [
+        6,
+        7,
+        10,
+        17
+      ],
+      "characterization": [
+        20,
+        21
+      ],
+      "spatial": [
+        23,
+        24
+      ],
+      "legal": [
+        25,
+        26,
+        27,
+        28
+      ],
+      "impacts": [
+        31,
+        32,
+        33,
+        34,
+        35,
+        36
+      ],
+      "procedure": [
+        38,
+        39
+      ]
+    }
+  },
+  "acceptance": "Green CI is not sufficient; actual new A/B packages, legal/content review and user visual acceptance required."
+}
