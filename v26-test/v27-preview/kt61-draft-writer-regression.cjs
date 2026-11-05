@@ -27,10 +27,11 @@ const p=(binary)=>{const zip=fflate.unzipSync(new Uint8Array(binary));const doc=
 (async()=>{
  const restore=win.KT61DraftWord.install();
  const m={subject:'Изграждане на нов обект в имот 36676.129.457',parcelIds:'36676.129.457',location:'с. Катуница, община Садово',recipient:'Тестов възложител',address:'Тестов адрес',incomingReference:'Вх. № ОВОС-XXXX'};
- const B=await win.V26TemplateWord.make('Б',['Описание на инвестиционното предложение с технически данни.','','',''],m,{determination:{scenario:'Б',zones:['BG0000194']}});
+ const B=await win.V26TemplateWord.make('Б',['Описание на инвестиционното предложение с технически данни. [[LEGAL]]','','',''],m,{determination:{scenario:'Б',zones:['BG0000194']}});
  const E=await win.V26ExpertWord.make({schema:'KT13_EXPERT_DRAFT_V1',scenario:'Б',zones:['BG0000194'],metadata:m,aiDraft:win.KT61CurrentAiDraft},{requireAiAuthor:true});
  const b=p(await B.arrayBuffer()),e=p(await E.arrayBuffer());
  assert.equal(b.paras.length,43);
+ assert(b.text[18].includes('Описание на инвестиционното предложение с технически данни.'),'Source content is retained when a technical tag is stripped');
  assert.equal(e.paras.length,49);
  for(const [name,d] of [['classic B',b],['expert R02',e]]){
   const markers=d.text.flatMap((value,i)=>/\[\[(?:CONCLUSION|CHARACTERIZATION|PROCEDURE|LEGAL|IMPACTS)\]\]/.test(value)?[{index:i,text:value.slice(0,180)}]:[]);
