@@ -114,6 +114,41 @@ try{
   assert.match(repaired.draft,/Въздействие 6/);
   console.log('PASS: five-impact AI response is automatically rewritten into six substantive sections before sending to browser.');
 
+  // KT67-2.7 A and B use the same substantive repair, never swap the Word writer.
+  for(const [mode,claim,code] of [
+    ['classic','Оценката за съвместимост е необходима поради пространственото пресичане.','UNSUPPORTED_CATEGORICAL_OS'],
+    ['expert','Обектът се намира в защитена територия (защитена зона BG0000194).','ZONE_TERRITORY_CONFLATION'],
+    ['expert','Процедурният ред е ОСВОС въз основа на пресичането.','INVALID_OSVOS_TERM']
+  ]){
+    const faulty=sampleDraft.replace('Правен анализ 1:',claim+' Правен анализ 1:');
+    let attempts=0;
+    globalThis.fetch=async (_url,opts)=>{
+      attempts++;
+      const request=JSON.parse(opts.body);
+      if(attempts===2)assert.match(request.input[3].content,new RegExp(code));
+      return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:attempts===1?faulty:sampleDraft}]}]}),{status:200,headers:{'Content-Type':'application/json'}});
+    };
+    const fixed=await worker.fetch(post('test-access-token',{mode,facts}),env);
+    assert.equal(fixed.status,200,mode+' '+code);
+    const answer=await fixed.json();
+    assert.equal(answer.revised,true,mode+' '+code);
+    assert.equal(attempts,2,mode+' '+code);
+    assert.equal(answer.draft,sampleDraft);
+  }
+  // Fail closed if the provider still emits the same unsupported conclusion.
+  const categoric=sampleDraft.replace('Правен анализ 1:','Оценката за съвместимост е необходима поради пространственото пресичане. Правен анализ 1:');
+  let rejectedCalls=0;
+  globalThis.fetch=async()=>{
+    rejectedCalls++;
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:categoric}]}]}),{status:200,headers:{'Content-Type':'application/json'}});
+  };
+  const blocked=await worker.fetch(post('test-access-token',{mode:'classic',facts}),env);
+  assert.equal(blocked.status,422);
+  const rejection=await blocked.json();
+  assert(rejection.qualityIssues.includes('UNSUPPORTED_CATEGORICAL_OS'));
+  assert.equal(rejectedCalls,2);
+  console.log('PASS: A/B legal and Natura 2000 terminology revision, and fail-closed unresolved quality checks.');
+
   console.log('PASS: health, unauthorized access, invalid input, classic and expert AI drafting (mock provider).');
   console.log('No real OpenAI API calls made; live generation still requires separate verification.');
 } finally {globalThis.fetch=savedFetch}
