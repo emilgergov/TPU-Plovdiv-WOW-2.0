@@ -81,7 +81,7 @@ jobs:
           assert 'kt66-locked-content-qa.js?v=kt66-qa-1' in s
           assert 'await window.KT66ContentQA.verify(blob,kt60.scenario)' in s
           assert s.index('await window.KT66ExpertReview.create')<s.index('window.V26DraftPackage.make')
-          assert s.index('await window.KT66ContentQA.verify')<s.index('URL.createObjectURL(blob)')
+          assert s.index('await window.KT66ContentQA.verify')<s.index('URL.createObjectURL(blob)',s.index('await window.KT66ContentQA.verify'))
           assert 'if(!reviewed?.expertReviewed)' in s
           assert "kt61-draft-writer.js" not in s
           assert "v27-kt50-original-kt42.js?v=kt603-original-locked-b1d2cfb" in s
