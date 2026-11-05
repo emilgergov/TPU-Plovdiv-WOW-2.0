@@ -6,6 +6,7 @@ on:
       - '.github/workflows/kt67-2-integration.yml'
       - 'v26-test/v27-preview/kt67-2-*'
       - 'v26-test/v27-preview/kt67-1-ai-content-contract.js'
+      - 'v26-test/v27-preview/v27-approved-expert-word-r02.js'
   workflow_dispatch:
 permissions:
   contents: read
@@ -82,3 +83,25 @@ jobs:
           assert "Генерирането на DOCX не удостоверява достоверността" in s
           print('KT67-2 case-identity and unverified-draft source status PASS')
           PY
+
+      - name: KT68 R02 grammatical and template protection regression
+        run: |
+          node - <<'JS'
+          const fs=require('node:fs'),assert=require('node:assert/strict');
+          const expert=fs.readFileSync('v26-test/v27-preview/v27-approved-expert-word-r02.js','utf8');
+          const classic=fs.readFileSync('v26-test/v27-preview/v27-approved-classic-word-ab.js','utf8');
+          assert(expert.includes("parcels.length===1?'Поземлен имот с идентификатор ':'Поземлени имоти с идентификатори '"));
+          assert(expert.includes("parcels.length===1?' не попада':' не попадат'"));
+          assert(expert.includes("parcels.length===1?'на потвърдения имот':'на един или повече от потвърдените имоти'"));
+          for(const ids of [['36676.129.457'],['56784.13.102','56784.13.105','56784.13.106']]){
+            const title=(ids.length===1?'Поземлен имот с идентификатор ':'Поземлени имоти с идентификатори ')+ids.join(', ');
+            assert(title.includes(ids.join(', ')));
+            assert(title.startsWith(ids.length===1?'Поземлен имот с идентификатор ':'Поземлени имоти с идентификатори '));
+          }
+          assert(classic.includes("ids.length===1?'поземлен имот с идентификатор ':'поземлени имоти с идентификатори '"));
+          assert(expert.includes("const originalSect="));
+          assert(expert.includes("originalSect.cloneNode(true)"));
+          assert(expert.includes("word/media/v27-gis-overview.png"));
+          assert(expert.includes("root.V26ExpertWord=Object.freeze({make,layout:'V27_EXPERT_R02_APPROVED'})"));
+          console.log('KT68 singular/plural A-B R02 + unchanged institutional shell contract PASS');
+          JS
