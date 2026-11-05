@@ -1,0 +1,100 @@
+name: KT67-2.2 real B quality and immutable DOCX checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt67-2-2-quality.yml'
+      - 'v26-test/v27-preview/kt67-2-2-*'
+      - 'v26-test/v27-preview/kt67-2-original-word-auto-project-test.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verified:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Original KT56 content replay
+        run: node v26-test/v27-preview/kt62-locked-replay-regression.cjs
+      - name: Syntax and normalized factual fields
+        run: |
+          node --check v26-test/v27-preview/kt67-2-2-case-normalize.js
+          node --check v26-test/v27-preview/kt67-2-2-spatial-slot.js
+          node --check v26-test/v27-preview/kt67-2-2-legal-quality.js
+          node - <<'JS'
+          const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+          const window={};vm.runInNewContext(fs.readFileSync('v26-test/v27-preview/kt67-2-2-case-normalize.js','utf8'),{window});
+          const a=window.KT6722CaseNormalize;
+          const subject='„Изграждане на малък едноетажен обслужващ обект“ в ПИ с идентификатор 36676.129.457, населено място с. Катуница, местност Попското';
+          assert.equal(a.title(subject),'Изграждане на малък едноетажен обслужващ обект');
+          const p=a.characterization('Инвестиционното предложение включва изграждане на едноетажен обект с площ около 40 кв.м.');
+          assert.equal(p,'С реализацията на инвестиционното предложение се предвижда изграждане на едноетажен обект с площ около 40 кв.м.');
+          assert.equal(a.characterization(p),p);
+          const v=a.normalize({metadata:{subject},paragraphs:[p,'Електрозахранване','Водоснабдяване','Отпадъчни води']});
+          assert.equal(v.metadata.subject,'Изграждане на малък едноетажен обслужващ обект');
+          assert.equal(v.paragraphs[0],p);
+          console.log('KT67-2.2 TITLE/CHARACTERIZATION PASS');
+          JS
+      - name: Reject unverified legal conclusions and impact order mismatches
+        run: |
+          node - <<'JS'
+          const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+          const window={};vm.runInNewContext(fs.readFileSync('v26-test/v27-preview/kt67-2-2-legal-quality.js','utf8'),{window});
+          const api=window.KT6722LegalQuality;
+          const base={expert:{legal:['Наличните сведения изискват проверка на приложимите нормативни условия, без окончателно произнасяне.'],procedure:['Преценката на компетентния орган зависи от конкретните технически характеристики и проверения режим.'],impacts:['Въвеждаща оценка на вероятните последствия.','Природните местообитания изискват пространствена проверка.','Въздействието върху видовете и безпокойството подлежи на преценка.','Целостта на зоната и целите на опазване следва да бъдат разгледани.','Свързаността между обектите трябва да се отчете.','Кумулативните въздействия с други инвестиционни предложения се анализират.']},provenance:{verifiedProvisionCount:0}};
+          assert.equal(api.inspect(base).ok,true);
+          const legal={...base,expert:{...base.expert,legal:['Тъй като имотът е в защитена зона, е необходима оценка за съвместимост.']}};
+          assert(api.inspect(legal).issues.some(x=>x.code==='UNSUPPORTED_CATEGORICAL_OS'));
+          const cited={...base,expert:{...base.expert,legal:['Съгласно чл. 30 се въвеждат задължителни условия.']}};
+          assert(api.inspect(cited).issues.some(x=>x.code==='UNVERIFIED_ARTICLE'));
+          const mixed={...base,expert:{...base.expert,impacts:[...base.expert.impacts.slice(0,2),'Екологичната целост и целите на опазване са важни.',...base.expert.impacts.slice(3)]}};
+          assert(api.inspect(mixed).issues.some(x=>x.code==='IMPACT_TOPIC_ORDER'));
+          const language={...base,expert:{...base.expert,legal:['Необходимо е съдебно-юридическо преценяване на обекта.']}};
+          assert(api.inspect(language).issues.some(x=>x.code==='INAPPROPRIATE_LEGAL_LANGUAGE'));
+          console.log('KT67-2.2 LEGAL/IMPACTS NEGATIVE TESTS PASS');
+          JS
+      - name: Verify spatial correction only changes the variable Classic B GIS slot
+        run: |
+          node - <<'JS'
+          const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),fflate=require('fflate');
+          const {DOMParser,XMLSerializer}=require('@xmldom/xmldom');
+          const demo=new DOMParser().parseFromString('<r><x/><y/></r>','application/xml').documentElement;
+          Object.defineProperty(Object.getPrototypeOf(demo),'children',{configurable:true,get(){return Array.from(this.childNodes||[]).filter(n=>n.nodeType===1)}});
+          const window={fflate};vm.runInNewContext(fs.readFileSync('v26-test/v27-preview/kt67-2-2-spatial-slot.js','utf8'),{window,DOMParser,XMLSerializer,TextDecoder,TextEncoder,Blob});
+          const original=fflate.unzipSync(new Uint8Array(fs.readFileSync('v26-test/v27-preview/etalon/KT39-B.docx')));
+          const ns='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+          const xml=new DOMParser().parseFromString(new TextDecoder().decode(original['word/document.xml']),'application/xml');
+          const paras=Array.from(xml.getElementsByTagNameNS(ns,'body')[0].children).filter(e=>e.localName==='p');
+          const t=paras[24].getElementsByTagNameNS(ns,'t');t[0].textContent='Пресичащи се защитени зони: . Конкретните режими подлежат на проверка.';for(let i=1;i<t.length;i++)t[i].textContent='';
+          original['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
+          const source=fflate.zipSync(original);
+          const updated=window.KT6722SpatialFix.patchWord(source,['BG0000194']);
+          const changed=fflate.unzipSync(updated);
+          for(const n of Object.keys(original))if(n!=='word/document.xml')assert.deepEqual(changed[n],original[n],n+' altered');
+          const updatedXML=new DOMParser().parseFromString(new TextDecoder().decode(changed['word/document.xml']),'application/xml');
+          const pp=Array.from(updatedXML.getElementsByTagNameNS(ns,'body')[0].children).filter(e=>e.localName==='p');
+          const ss=pp.map(p=>Array.from(p.getElementsByTagNameNS(ns,'t')).map(t=>t.textContent).join(''));
+          assert.match(ss[24],/Пресичащи се защитени зони: BG0000194\./u);
+          assert.equal(ss.length,43);
+          for(let i=0;i<43;i++)if(i!==24)assert.equal(ss[i],paras[i].getElementsByTagNameNS(ns,'t').length?Array.from(paras[i].getElementsByTagNameNS(ns,'t')).map(x=>x.textContent).join(''):'',i+' changed');
+          console.log('KT67-2.2 SINGLE GIS VARIABLE SLOT PASS');
+          JS
+      - name: Validate real browser pipeline order without replacing approved writers
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('v26-test/v27-preview/kt67-2-original-word-auto-project-test.html').read_text()
+          assert 'KT6722LegalQuality?.inspect(kt67Plan)' in s
+          assert 'KT6722CaseNormalize.normalize' in s
+          assert 'KT6722SpatialFix.fix(initialBlob' in s
+          assert s.index('KT6722LegalQuality?.inspect')<s.index('V26DraftPackage.make')
+          assert s.index('KT6722SpatialFix.fix')<s.index('KT57PackageQA.verify')
+          assert 'KT66ExpertReview.create' not in s
+          assert 'v27-kt50-original-kt42.js?v=kt603-original-locked-b1d2cfb' in s
+          print('KT67-2.2 BROWSER PIPELINE PASS')
+          PY
