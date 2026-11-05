@@ -38,7 +38,7 @@ function plan(raw,{parcelIds=[],gisScenario='',sourceFacts=[],verifiedLegalSourc
  if(s.CHARACTERIZATION.length!==4)issues.push({code:'CHARACTERIZATION_COUNT',severity:'block',actual:s.CHARACTERIZATION.length,required:4});
  if(s.LEGAL.length!==4)issues.push({code:'LEGAL_COUNT',severity:'block',actual:s.LEGAL.length,required:4});
  if(s.IMPACTS.length!==6)issues.push({code:'IMPACTS_COUNT',severity:'block',actual:s.IMPACTS.length,required:6});
- if(s.PROCEDURE.length<1||s.PROCEDURE.length>2)issues.push({code:'PROCEDURE_COUNT',severity:'block',actual:s.PROCEDURE.length,required:2});
+ if(s.PROCEDURE.length<1||s.PROCEDURE.length>8)issues.push({code:'PROCEDURE_COUNT',severity:'block',actual:s.PROCEDURE.length,allowed:'1–8 complete passages'});
  for(const key of labels)if(!unique(s[key]))issues.push({code:'DUPLICATE_PARAGRAPH',severity:'block',section:key});
  for(const key of labels)for(const p of s[key])if(p.length<45)issues.push({code:'SHALLOW_PARAGRAPH',severity:'block',section:key});
  const ids=[...new Set(parcelIds.map(normalize))].filter(Boolean);
@@ -53,12 +53,20 @@ function plan(raw,{parcelIds=[],gisScenario='',sourceFacts=[],verifiedLegalSourc
  const warnings=[];
  if(!verifiedFacts.length)warnings.push('КТ67.1: липсват проследими индивидуални факти; фактологичните твърдения изискват експертна проверка.');
  if(!verifiedProvisions.length)warnings.push('КТ67.1: липсват проверени текстове на разпоредби; правните изводи остават проектни.');
- const draftForKT42=assemble(s); // Preserve full paragraphs and exactly four sections for original client.
+ // KT67.2.1: The Worker can generate several complete procedural arguments.
+ // KT42 has ONE procedural analysis slot and ONE project-conclusion slot.
+ // Combine reasoning in authored order, keep every sentence, and reserve the
+ // last complete passage for the draft conclusion. No slicing or factual edits.
+ const procedureForWord=s.PROCEDURE.length>2
+  ?[s.PROCEDURE.slice(0,-1).join(' '),s.PROCEDURE[s.PROCEDURE.length-1]]
+  :s.PROCEDURE.slice();
+ const compatible={...s,PROCEDURE:procedureForWord};
+ const draftForKT42=assemble(compatible); // No omitted procedure arguments; original client gets four sections.
  return Object.freeze({
   schema:'KT67_AI_CONTENT_V1',sourceVersion:parsed.version,reviewRequired:true,
   scenario:normalizedScenario,parcelIds:ids,
-  classic:Object.freeze({characterization:s.CHARACTERIZATION.slice(),legalProject:s.LEGAL.slice(),impactsProject:s.IMPACTS.slice(1),procedureProject:s.PROCEDURE[s.PROCEDURE.length-1]}),
-  expert:Object.freeze({characterization:s.CHARACTERIZATION.slice(),legal:s.LEGAL.slice(),impacts:s.IMPACTS.slice(),procedure:s.PROCEDURE.slice(),draft: draftForKT42}),
+  classic:Object.freeze({characterization:s.CHARACTERIZATION.slice(),legalProject:s.LEGAL.slice(),impactsProject:s.IMPACTS.slice(1),procedureProject:procedureForWord[procedureForWord.length-1]}),
+  expert:Object.freeze({characterization:s.CHARACTERIZATION.slice(),legal:s.LEGAL.slice(),impacts:s.IMPACTS.slice(),procedure:procedureForWord.slice(),draft: draftForKT42}),
   provenance:Object.freeze({verifiedFactCount:verifiedFacts.length,verifiedProvisionCount:verifiedProvisions.length,legalStatus:'draft_requires_expert_review',procedureStatus:'draft_requires_expert_review'}),
   warnings,issues,readyForIntegration:issues.every(i=>i.severity!=='block')
  });
