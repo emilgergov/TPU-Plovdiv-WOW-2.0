@@ -3,6 +3,16 @@ import { readFile } from 'node:fs/promises';
 const source = await readFile(new URL('../src/worker.js', import.meta.url), 'utf8');
 const worker = (await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'))).default;
 const savedFetch=globalThis.fetch;
+const sampleDraft=[
+ '[[CHARACTERIZATION]]',
+ ...Array.from({length:4},(_,i)=>'Характеристика '+(i+1)+': конкретните параметри на инвестиционното предложение се съобразяват с представената проверима документация и пространствената основа.'),
+ '[[LEGAL]]',
+ ...Array.from({length:4},(_,i)=>'Правен анализ '+(i+1)+': наличните правни основания се използват като проектна преценка при проверка на индивидуалните обстоятелства, а не като окончателно произнасяне.'),
+ '[[PROCEDURE]]',
+ ...Array.from({length:2},(_,i)=>'Процедура '+(i+1)+': приложимостта следва да се определи въз основа на установените доказателства, без автоматична преценка единствено по пространствено пресичане.'),
+ '[[IMPACTS]]',
+ ...Array.from({length:6},(_,i)=>'Въздействие '+(i+1)+': индивидуалният пространствен анализ следва да отчете относимите параметри на проекта и предмета на опазване, без неподкрепен категоричен извод.')
+].join('\n\n');
 let calls=0;
 let lastFacts=null;
 globalThis.fetch=async (_url,opts)=>{
@@ -12,7 +22,7 @@ globalThis.fetch=async (_url,opts)=>{
   lastFacts=request.input[1].content ? JSON.parse(request.input[1].content) : null;
   assert.equal(request.store,false);
   assert.equal(request.model,'gpt-4.1-mini');
-  return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:'ПРОЕКТ — за експертна проверка'}]}]}),{status:200,headers:{'Content-Type':'application/json'}});
+  return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:sampleDraft}]}]}),{status:200,headers:{'Content-Type':'application/json'}});
 };
 const env={OPENAI_API_KEY:'test-openai-key',AI_AUTHOR_ACCESS_TOKEN:'test-access-token'};
 const url='https://example.test/author';
@@ -33,7 +43,7 @@ try{
     const data=await response.json();
     assert.equal(data.mode,mode);
     assert.equal(data.reviewRequired,true);
-    assert.match(data.draft,/ПРОЕКТ/);
+    assert.match(data.draft,/\[\[IMPACTS\]\]/);
   }
   const legalFacts={...facts,legalSources:[
     {id:'verified-1',title:'Тестов нормативен източник',source:'Официален архив',article:'чл. 1',verifiedScope:'Проверен тестов обхват',page:'стр. 1',revisionVerified:true},
