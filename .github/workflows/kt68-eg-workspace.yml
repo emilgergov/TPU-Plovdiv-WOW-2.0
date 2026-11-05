@@ -27,7 +27,7 @@ jobs:
             'v26-test/v27-preview/kt67-2-5-a-b-admin-test.html'
           ]){
             const html=fs.readFileSync(filename,'utf8');
-            assert(html.includes('v27-preview/kt68-eg-workspace.js?v=kt68-ui-3'),filename+' must load approved UI layer');
+            assert(html.includes('v27-preview/kt68-eg-workspace.js?v=kt68-ui-4'),filename+' must load approved UI layer');
             assert(html.includes('await window.KT68UI.confirmPackage()'),filename+' must use styled modal');
             assert(html.includes('id="kt68IdsHelp"'), filename+' must show input guidance below cadastral IDs');
             assert(!html.includes('role="status">Въведете идентификатор'), filename+' must not duplicate cadastral guidance at bottom');
@@ -43,6 +43,7 @@ jobs:
           }
           const ui=fs.readFileSync('v26-test/v27-preview/kt68-eg-workspace.js','utf8');
           assert(ui.includes("Изготви ГИС справка (PDF)"), 'step 3 PDF action label must be unambiguous');
+          assert(ui.includes("gisPdf.classList.add('kt68-primary')"), 'PDF1 primary action must be dark green');
           assert(ui.includes('position:absolute;top:64px'), 'map control must not overlap original legend');
           assert(!ui.includes("legend.textContent='▣ Имот"),'duplicate legend removed');
           const s=fs.readFileSync('v26-test/v26-local-intake.js','utf8');
