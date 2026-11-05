@@ -24,6 +24,20 @@ jobs:
           node --check v26-test/v27-preview/kt69-classic-b-etalon-restore.js
           node --check v26-test/v27-preview/kt69-classic-b-qa.cjs
           node v26-test/v27-preview/kt69-classic-b-qa.cjs
+      - name: Check public A/B page includes adapter after locked KT50 only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ['kt67-2-original-word-auto-project-test.html','kt67-2-5-a-b-admin-test.html']:
+              s=Path('v26-test/v27-preview',name).read_text()
+              original='v27-preview/v27-kt50-original-kt42.js?v=kt603-original-locked-b1d2cfb'
+              fix='v27-preview/kt69-classic-b-etalon-restore.js?v=kt69-b-1'
+              draft='v27-preview/kt67-2-draft-package.js?v=kt67-2-draft-1'
+              assert s.count(fix)==1, name
+              assert s.index(original)<s.index(fix)<s.index(draft), name
+              assert 'v27-preview/kt68-map-controls.js?v=kt68-map-3' in s, name
+          print('KT69 PASS: B-only adapter follows unchanged KT50 on both pages, map layer retained')
+          PY
       - name: Audit original 43-paragraph KT39-B with source data untouched
         run: |
           python3 - <<'PY'
