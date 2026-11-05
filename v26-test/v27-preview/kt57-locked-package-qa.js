@@ -15,8 +15,8 @@
  // slot. Reject technical AI markers and standalone missing-content fillers.
  const problem=t=>{
    const v=String(t||'').trim();
-   if(/\\[\\[(?:CHARACTERIZATION|LEGAL|IMPACTS|PROCEDURE|CONCLUSION)\\]\\]|\\[\\s*ЗА ЕКСПЕРТНА ПРОВЕРКА/iu.test(v))return 'AI_MARKER';
-   if(/^НЯМА ДАННИ(?:\\s+В\\s+ПРЕПИСКАТА)?[.!]?$/iu.test(v))return 'EMPTY_PLACEHOLDER';
+   if(/\[\[(?:CHARACTERIZATION|LEGAL|IMPACTS|PROCEDURE|CONCLUSION)\]\]|\[\s*ЗА ЕКСПЕРТНА ПРОВЕРКА/iu.test(v))return 'AI_MARKER';
+   if(/^НЯМА ДАННИ(?:\s+В\s+ПРЕПИСКАТА)?[.!]?$/iu.test(v))return 'EMPTY_PLACEHOLDER';
    return '';
  };
  async function exactRef(path){
