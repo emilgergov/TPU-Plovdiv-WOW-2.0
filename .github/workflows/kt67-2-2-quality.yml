@@ -107,6 +107,40 @@ jobs:
           for(let i=0;i<43;i++)if(i!==24)assert.equal(ss[i],paras[i].getElementsByTagNameNS(ns,'t').length?Array.from(paras[i].getElementsByTagNameNS(ns,'t')).map(x=>x.textContent).join(''):'',i+' changed');
           console.log('KT67-2.2 SINGLE GIS VARIABLE SLOT PASS');
           JS
+      - name: KT68 protect Classic A confidentiality positioning using approved B
+        run: |
+          node - <<'JS'
+          const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),fflate=require('fflate');
+          const {DOMParser,XMLSerializer}=require('@xmldom/xmldom');
+          const d=new DOMParser().parseFromString('<r><x/></r>','application/xml').documentElement;
+          Object.defineProperty(Object.getPrototypeOf(d),'children',{configurable:true,get(){return Array.from(this.childNodes||[]).filter(n=>n.nodeType===1)}});
+          const window={fflate};
+          vm.runInNewContext(fs.readFileSync('v26-test/v27-preview/kt67-2-2-spatial-slot.js','utf8'),{window,DOMParser,XMLSerializer,TextDecoder,TextEncoder,Blob});
+          const ns='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+          const doc=zip=>new DOMParser().parseFromString(new TextDecoder().decode(zip['word/document.xml']),'application/xml');
+          const paras=xml=>Array.from(xml.getElementsByTagNameNS(ns,'body')[0].children).filter(x=>x.localName==='p');
+          const value=p=>Array.from(p.getElementsByTagNameNS(ns,'t')).map(x=>x.textContent).join('');
+          const A=fflate.unzipSync(new Uint8Array(fs.readFileSync('v26-test/v27-preview/etalon/KT35-A.docx')));
+          const B=fflate.unzipSync(new Uint8Array(fs.readFileSync('v26-test/v27-preview/etalon/KT39-B.docx')));
+          const oldA=paras(doc(A)),originalTexts=oldA.map(value);
+          const patched=fflate.unzipSync(window.KT6722SpatialFix.patchClassicAHeader(fflate.zipSync(A)));
+          for(const entry of Object.keys(A))if(entry!=='word/document.xml')assert.deepEqual(patched[entry],A[entry],entry+' changed');
+          const outA=paras(doc(patched)),baseB=paras(doc(B));
+          assert.deepEqual(outA.map(value),originalTexts,'No text may change');
+          assert.equal(outA.length,oldA.length);
+          for(let i=0;i<2;i++){
+            assert.equal(value(outA[i]),value(baseB[i]),'Approved B label must match');
+            for(const prop of ['jc','ind','spacing']){
+              const get=(p)=>Array.from(p.getElementsByTagNameNS(ns,prop))[0];
+              const attrs=x=>Array.from(x.attributes).filter(a=>a.namespaceURI===ns).map(a=>[a.localName,a.value]).sort((a,b)=>a[0].localeCompare(b[0]));
+              assert.deepEqual(attrs(get(outA[i])),attrs(get(baseB[i])),prop+' mismatch B at '+i);
+            }
+          }
+          for(let i=2;i<outA.length;i++)assert.equal(value(outA[i]),value(oldA[i]),'Body '+i+' altered');
+          assert.equal(value(baseB[0]),'Ниво на конфиденциалност 0');
+          assert.equal(value(baseB[1]),'[TLP-WHITE]');
+          console.log('KT68 CLASSIC A confidential labels aligned to approved B; no DOCX contents changed PASS');
+          JS
       - name: Validate real browser pipeline order without replacing approved writers
         run: |
           python - <<'PY'
