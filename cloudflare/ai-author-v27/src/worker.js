@@ -54,22 +54,52 @@ PROCEDURE: exactly TWO substantial paragraphs. First discuss procedural factors 
 IMPACTS: exactly SIX complete paragraphs: (1) introductory assessment framework, then (2–6) habitat, species, integrity/conservation objectives, network connectivity, cumulative effects. Consider actual verified GIS data without equating intersection with proved significant effect. Keep analysis case-specific without unsupported zero-risk or automatic no-impact assertions.
 
 Each paragraph must contain substantive text (at least 45 characters) and must not repeat another. Do not split sentences into separate paragraphs to fill slots. Do not introduce a fifth section. Keep under 8500 total characters. Write in the institutional register of a Bulgarian competent environmental administrative authority preparing a DRAFT official response: concise, precise, factual, legally structured, with a clear chain from the submitted notification and GIS findings through the applicable legal criteria to the proposed procedural assessment. The speaker is the institution, never an external narrator or adviser. Prefer restrained formulations such as 'От представената документация се установява...', 'При извършената проверка е установено...', 'С оглед характеристиките на заявеното инвестиционно предложение...', 'За определяне на приложимия процедурен ред следва да се съобразят...' ONLY when they accurately reflect supplied facts. Do not write first-person plural ('ние', 'не разполагаме'), conversational meta-commentary, a tutorial for the reader, vague exhortations to consult specialists, or phrases such as 'В момента не разполагаме', 'може да се обсъди', 'трябва да се анализира' without explaining the specific identified evidentiary gap. Distinguish the concise classic administrative register from the more detailed expert project, while both remain authored in the voice of the administrative authority. Organize the legal paragraphs as factual premise, relevant verified source or clearly qualified unverified citation, application to the specific investment proposal, and limited reasoned provisional finding. A draft may express a qualified evaluation; it must not impersonate an already issued or signed official decision. Speak impersonally in formal Bulgarian. IMPACTS: keep each of the five topics exclusively in its own paragraph: habitats, species, integrity and conservation objectives, connectivity, cumulative effects. Avoid formulaic or categorical procedural conclusions unsupported by verified provisions. Before returning, perform a consistency review across LEGAL and PROCEDURE: do not infer that a compatibility assessment is necessary, recommended or required merely because an investment site intersects a Natura 2000 zone. With no verified article-level provision, describe the potential requirement as a subject for the competent authority's reasoned screening, not as an established procedural disposition. Do not say 'съвместимостна оценка', 'предполага необходимост от извършване', 'оценката е препоръчителна', 'съдебно-юридическо', 'юридическа формулировка' or invent legal terminology. Use accurate administrative Bulgarian, including 'оценка за съвместимост' only to name the possible assessment without deciding that it must occur. Ensure the conclusion does not contradict the procedural analysis. For first CHARACTERIZATION paragraph write a grammatical, complete proposed description that will fit a Classic Word sentence beginning 'С реализацията на инвестиционното предложение се предвижда'; do not add a second opening such as 'Инвестиционното предложение включва/обхваща'. All documents are projects for expert verification. ${input.mode==="classic"?"Use restrained canonical administrative style, preserving the supplied facts.":"Write a motivated expert project with clear factual and legal reasoning, without claiming independent verification."}`;
+  // KT67-2.6: validate the actual paragraph structure before returning any
+  // AI text to A or B. Structural failures cause ONE whole-draft authorial
+  // revision, never sentence splitting or generic template substitution.
+  function structuralIssues(output){
+    const headers=[...output.matchAll(/^\s*\[\[(CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS)\]\]\s*$/gm)];
+    const expected=['CHARACTERIZATION','LEGAL','PROCEDURE','IMPACTS'];
+    if(headers.length!==4||headers.some((x,i)=>x[1]!==expected[i]))return ['SECTION_ORDER'];
+    const target={CHARACTERIZATION:4,LEGAL:4,PROCEDURE:2,IMPACTS:6},issues=[];
+    for(let i=0;i<headers.length;i++){
+      const h=headers[i],next=headers[i+1]?.index??output.length;
+      const content=output.slice(h.index+h[0].length,next).trim();
+      const passages=content.split(/\n\s*\n/).map(t=>t.trim()).filter(Boolean);
+      const required=target[h[1]];
+      if(h[1]==='PROCEDURE' ? (passages.length<1||passages.length>8) : passages.length!==required)
+        issues.push(h[1]+'_COUNT '+passages.length+'/'+required);
+      if(passages.some(p=>p.length<45))issues.push(h[1]+'_SHALLOW');
+    }
+    return issues;
+  }
   const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),25000);
+  const timeout=setTimeout(()=>controller.abort(),65000);
   try {
-   const upstream=await fetch("https://api.openai.com/v1/responses",{
-    method:"POST",signal:controller.signal,
-    headers:{"Authorization":`Bearer ${env.OPENAI_API_KEY}`,"Content-Type":"application/json"},
-    body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:3000,
-      input:[{role:"system",content:system},{role:"user",content:JSON.stringify(input.facts)}]})
-   });
-   if(!upstream.ok) return reply({error:"AI provider request failed",providerStatus:upstream.status},502);
-   const data=await upstream.json();
-   const output=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
-   if(!output) return reply({error:"No text returned by AI provider"},502);
-   return reply({mode:input.mode,draft:output,reviewRequired:true,source:"user-supplied structured test facts"});
+    let previous='',issues=[];
+    for(let pass=0;pass<2;pass++){
+      const messages=[{role:"system",content:system},{role:"user",content:JSON.stringify(input.facts)}];
+      if(pass===1){
+        messages.push({role:"assistant",content:previous});
+        messages.push({role:"user",content:"STRUCTURAL REVISION REQUIRED. Your previous Bulgarian draft had "+issues.join(", ")+". Rewrite the entire project for the SAME input and verified facts, preserving its individual analysis and institutional administrative voice. Output EXACTLY four headed sections. Use four full separate CHARACTERIZATION paragraphs, four full LEGAL paragraphs, 1–2 full PROCEDURE paragraphs and EXACTLY SIX full IMPACTS paragraphs separated by blank lines: introduction; natural habitats; species; integrity/conservation objectives; ecological connectivity; cumulative effects. Never break sentences merely to meet paragraph count, never invent source facts, and do not append a fifth section. Return ONLY the corrected entire draft."});
+      }
+      const upstream=await fetch("https://api.openai.com/v1/responses",{
+        method:"POST",signal:controller.signal,
+        headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
+        body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:4200,input:messages})
+      });
+      if(!upstream.ok)return reply({error:"AI provider request failed",providerStatus:upstream.status},502);
+      const data=await upstream.json();
+      const output=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
+      if(!output)return reply({error:"No text returned by AI provider"},502);
+      issues=structuralIssues(output);
+      if(!issues.length)return reply({mode:input.mode,draft:output,reviewRequired:true,source:"user-supplied structured test facts",revised:pass===1});
+      previous=output;
+    }
+    return reply({error:"AI output still structurally incomplete after one authorial revision",qualityIssues:issues},422);
   } catch {return reply({error:"AI request timed out or failed"},504)}
   finally {clearTimeout(timeout)}
+
 }
 
 export default {
