@@ -1,0 +1,72 @@
+name: KT68 EG workspace and single-document intake
+on:
+  push:
+    paths:
+      - 'v26-test/v26-local-intake.js'
+      - 'v26-test/v27-preview/kt68-eg-workspace.js'
+      - 'v26-test/v27-preview/kt67-2-original-word-auto-project-test.html'
+      - 'v26-test/v27-preview/kt67-2-5-a-b-admin-test.html'
+      - '.github/workflows/kt68-eg-workspace.yml'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate JS syntax and HTML bindings
+        run: |
+          node --check v26-test/v26-local-intake.js
+          node --check v26-test/v27-preview/kt68-eg-workspace.js
+          node <<'NODE'
+          const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm');
+          for(const filename of [
+            'v26-test/v27-preview/kt67-2-original-word-auto-project-test.html',
+            'v26-test/v27-preview/kt67-2-5-a-b-admin-test.html'
+          ]){
+            const html=fs.readFileSync(filename,'utf8');
+            assert(html.includes('v27-preview/kt68-eg-workspace.js?v=kt68-ui-1'),filename+' must load approved UI layer');
+            assert(html.includes('await window.KT68UI.confirmPackage()'),filename+' must use styled modal');
+            assert(!html.includes("if(!f.name.toLowerCase().endsWith('.zip'))"),filename+' must allow single file');
+            assert(html.includes('v26-local-intake.js?v=kt68-single-file-'),filename+' cache must be busted');
+            for(const match of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)){
+              if(match[1].trim())new vm.Script(match[1],{filename});
+            }
+          }
+          const s=fs.readFileSync('v26-test/v26-local-intake.js','utf8');
+          assert(s.includes('async function singleDocumentZip(file)'), 'single-file intake is enabled');
+          assert(s.includes("'kt68-single-document.zip'"), 'virtual ZIP must carry a .zip filename');
+          assert(s.includes('const data=await process(virtual)'), 'single document must reuse original intake');
+          assert(s.includes('const bytes=await file.arrayBuffer(),v=new DataView(bytes),list=[]'), 'original ZIP parser remains');
+          console.log('KT68: 2 public pages, JS parser, modal, single-file adapter checked');
+          NODE
+      - name: Verify single-document ZIP structure, CRC32 and content
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+          const {File}=require('node:buffer');
+          const source=fs.readFileSync('v26-test/v26-local-intake.js','utf8');
+          const helper=source.slice(source.indexOf('async function singleDocumentZip'),source.indexOf('async function process(file)'));
+          const ctx={TextEncoder,Uint8Array,DataView,File,Error};
+          vm.createContext(ctx);
+          vm.runInContext(helper+';globalThis.make=singleDocumentZip;',ctx);
+          (async()=>{
+            for(const name of ['Уведомление.pdf','Данни.docx','снимка.png']){
+              const original=new File([Buffer.from('Зона Натура 2000 — 36676.129.457')],name);
+              const zip=await ctx.make(original), b=Buffer.from(await zip.arrayBuffer());
+              assert.equal(zip.name,'kt68-single-document.zip');
+              assert.equal(b.readUInt32LE(0),0x04034b50);
+              const localNameLen=b.readUInt16LE(26);
+              assert.equal(b.subarray(30,30+localNameLen).toString('utf8'),name);
+              const payloadOffset=30+localNameLen;
+              const originalBytes=Buffer.from(await original.arrayBuffer());
+              assert(b.subarray(payloadOffset,payloadOffset+originalBytes.length).equals(originalBytes));
+              const centralOffset=b.readUInt32LE(b.length-6);
+              assert.equal(b.readUInt32LE(centralOffset),0x02014b50);
+              assert.equal(b.readUInt32LE(b.length-22),0x06054b50);
+            }
+            console.log('KT68 single PDF DOCX image intake ZIP structure PASS');
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
