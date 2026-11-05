@@ -4,6 +4,7 @@ on:
     paths:
       - 'v26-test/v26-local-intake.js'
       - 'v26-test/v27-preview/kt68-eg-workspace.js'
+      - 'v26-test/v27-preview/kt68-map-controls.js'
       - 'v26-test/v27-preview/kt67-2-original-word-auto-project-test.html'
       - 'v26-test/v27-preview/kt67-2-5-a-b-admin-test.html'
       - '.github/workflows/kt68-eg-workspace.yml'
@@ -20,6 +21,7 @@ jobs:
         run: |
           node --check v26-test/v26-local-intake.js
           node --check v26-test/v27-preview/kt68-eg-workspace.js
+          node --check v26-test/v27-preview/kt68-map-controls.js
           node <<'NODE'
           const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm');
           for(const filename of [
@@ -28,6 +30,7 @@ jobs:
           ]){
             const html=fs.readFileSync(filename,'utf8');
             assert(html.includes('v27-preview/kt68-eg-workspace.js?v=kt68-ui-4'),filename+' must load approved UI layer');
+            assert(html.includes('v27-preview/kt68-map-controls.js?v=kt68-map-1'),filename+' must load map switch layer');
             assert(html.includes('await window.KT68UI.confirmPackage()'),filename+' must use styled modal');
             assert(html.includes('id="kt68IdsHelp"'), filename+' must show input guidance below cadastral IDs');
             assert(!html.includes('role="status">Въведете идентификатор'), filename+' must not duplicate cadastral guidance at bottom');
@@ -52,6 +55,40 @@ jobs:
           assert(s.includes('const data=await process(virtual)'), 'single document must reuse original intake');
           assert(s.includes('const bytes=await file.arrayBuffer(),v=new DataView(bytes),list=[]'), 'original ZIP parser remains');
           console.log('KT68: 2 public pages, JS parser, modal, single-file adapter checked');
+          NODE
+      - name: Regression test map viewer switch without touching GIS or PDF
+        run: |
+          node <<'NODE'
+          const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+          const code=fs.readFileSync('v26-test/v27-preview/kt68-map-controls.js','utf8');
+          const ids='zoomIn zoomOut fit zoneContext showAll showSelected toggleOverlaps labelMode results map run'.split(' ');
+          const nodes=new Map();
+          const node=id=>{if(!nodes.has(id))nodes.set(id,{id,textContent:'',attrs:{},children:[],style:{},
+            append(...children){this.children.push(...children)},appendChild(child){this.children.push(child)},
+            setAttribute(key,val){this.attrs[key]=val},addEventListener(){},set className(v){this.class=v}});return nodes.get(id)};
+          ids.forEach(node);
+          const controls=node('controls'),label=node('labels');
+          const document={head:node('head'),createElement:tag=>node('created-'+tag+'-'+nodes.size),
+            getElementById:node,querySelector:sel=>sel==='.map .controls'?controls:sel==='label[for="labelMode"]'?label:null};
+          const poly=(n)=>({type:'Polygon',coordinates:[[[n,n],[n+1,n],[n+1,n+1],[n,n+1],[n,n]]]});
+          const results=['56784.13.102','56784.13.105','56784.13.106'].map((id,i)=>({
+            status:'Намерен',cadnum:id,input:id,geojson:{features:[{geometry:poly(i),properties:{}}]},overlap_geojson:{features:[]}
+          }));
+          const ctx={document,found:results,selected:0,allFeatures:[],baseBox:null,combined:false,viewBox:null,zoneFeatures:[],
+            bounds:features=>features.length?{minX:0,maxX:3,minY:0,maxY:3}:null,
+            loadZones:()=>{},fit:()=>{ctx.viewBox=[0,0,1000,650]},redraw:()=>{},
+            select:i=>{ctx.selected=i;ctx.combined=false;ctx.allFeatures=results[i].geojson.features;ctx.baseBox={minX:0,maxX:1,minY:0,maxY:1}}};
+          vm.createContext(ctx);vm.runInContext(code,ctx);
+          node('showAll').onclick();
+          assert.equal(ctx.combined,true);assert.equal(ctx.allFeatures.length,3);
+          assert.equal(node('showAll').attrs['aria-pressed'],'true');
+          assert.equal(node('showSelected').attrs['aria-pressed'],'false');
+          assert.deepEqual([...new Set(ctx.allFeatures.map(f=>f.properties.cadnum))],results.map(r=>r.cadnum));
+          node('showSelected').onclick();
+          assert.equal(ctx.combined,false);assert.equal(ctx.allFeatures.length,1);
+          assert.equal(node('showSelected').attrs['aria-pressed'],'true');
+          node('zoneContext').onclick();assert.equal(ctx.viewBox[2],2000);
+          console.log('KT68 map viewer PASS: three parcels, selected parcel, context, untouched source GIS fixtures');
           NODE
       - name: Verify single-document ZIP structure, CRC32 and content
         run: |
