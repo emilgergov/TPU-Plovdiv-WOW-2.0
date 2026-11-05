@@ -54,6 +54,15 @@ jobs:
           assert(verified.metadata.location.includes('община Садово, област Пловдив'));
           const conflicts=api.normalize({municipality:'Садово'},[{settlement:'с. Катуница',municipality:'Друга община'}]);
           assert.match(conflicts.metadata.location,/община ХХХХХХХХХХ/);
+          const restoredB=api.normalize({},[{input:'36676.129.457',settlement:'с. Катуница',locality:'Попското'}]);
+          assert.equal(restoredB.location.verifiedEkatte,true);
+          assert.match(restoredB.metadata.location,/с\\. Катуница, община Садово, област Пловдив, местност Попското/);
+          const restoredA=api.normalize({},[{input:'56784.13.102',settlement:'гр. Пловдив'}]);
+          assert.equal(restoredA.location.verifiedEkatte,true);
+          assert.match(restoredA.metadata.location,/гр\\. Пловдив, община Пловдив, област Пловдив/);
+          const conflictingHistorical=api.normalize({},[{input:'36676.129.457',settlement:'гр. Непознато'}]);
+          assert.equal(conflictingHistorical.location.verifiedEkatte,false);
+          assert.match(conflictingHistorical.metadata.location,/община ХХХХХХХХХХ, област ХХХХХХХХХХ/);
           console.log('KT67-2.5 A/B administrative fields, unknown X placeholder, complete location and EKATTE mismatch tests PASS');
           JS
       - name: Browser integration and original source contract
