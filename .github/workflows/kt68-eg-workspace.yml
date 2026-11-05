@@ -30,7 +30,7 @@ jobs:
           ]){
             const html=fs.readFileSync(filename,'utf8');
             assert(html.includes('v27-preview/kt68-eg-workspace.js?v=kt68-ui-4'),filename+' must load approved UI layer');
-            assert(html.includes('v27-preview/kt68-map-controls.js?v=kt68-map-1'),filename+' must load map switch layer');
+            assert(html.includes('v27-preview/kt68-map-controls.js?v=kt68-map-2'),filename+' must load map switch layer');
             assert(html.includes('await window.KT68UI.confirmPackage()'),filename+' must use styled modal');
             assert(html.includes('id="kt68IdsHelp"'), filename+' must show input guidance below cadastral IDs');
             assert(!html.includes('role="status">Въведете идентификатор'), filename+' must not duplicate cadastral guidance at bottom');
@@ -65,7 +65,7 @@ jobs:
           const nodes=new Map();
           const node=id=>{if(!nodes.has(id))nodes.set(id,{id,textContent:'',attrs:{},children:[],style:{},
             append(...children){this.children.push(...children)},appendChild(child){this.children.push(child)},
-            setAttribute(key,val){this.attrs[key]=val},addEventListener(){},set className(v){this.class=v}});return nodes.get(id)};
+            setAttribute(key,val){this.attrs[key]=val},addEventListener(type,fn){(this.listeners??={})[type]=fn},contains(){return true},set className(v){this.class=v}});return nodes.get(id)};
           ids.forEach(node);
           const controls=node('controls'),label=node('labels');
           const document={head:node('head'),createElement:tag=>node('created-'+tag+'-'+nodes.size),
@@ -77,14 +77,21 @@ jobs:
           const ctx={document,found:results,selected:0,allFeatures:[],baseBox:null,combined:false,viewBox:null,zoneFeatures:[],
             bounds:features=>features.length?{minX:0,maxX:3,minY:0,maxY:3}:null,
             loadZones:()=>{},fit:()=>{ctx.viewBox=[0,0,1000,650]},redraw:()=>{},
-            select:i=>{ctx.selected=i;ctx.combined=false;ctx.allFeatures=results[i].geojson.features;ctx.baseBox={minX:0,maxX:1,minY:0,maxY:1}}};
+            select:(i,keepAll=false)=>{ctx.selected=i;if(!keepAll){ctx.combined=false;ctx.allFeatures=results[i].geojson.features;ctx.baseBox={minX:0,maxX:1,minY:0,maxY:1}}}};
           vm.createContext(ctx);vm.runInContext(code,ctx);
           node('showAll').onclick();
           assert.equal(ctx.combined,true);assert.equal(ctx.allFeatures.length,3);
           assert.equal(node('showAll').attrs['aria-pressed'],'true');
           assert.equal(node('showSelected').attrs['aria-pressed'],'false');
           assert.deepEqual([...new Set(ctx.allFeatures.map(f=>f.properties.cadnum))],results.map(r=>r.cadnum));
+          // Pointer capture on the SVG must not discard the chosen narrow parcel.
+          const clicked={getAttribute:()=> 'Избери имот 56784.13.106'};
+          node('map').listeners.pointerdown({button:0,target:{closest:()=>clicked},clientX:150,clientY:200});
+          node('map').listeners.pointerup({clientX:152,clientY:200});
+          assert.equal(ctx.selected,2,'clicking narrow third parcel must set the actual selection');
+          assert.equal(ctx.combined,true,'clicking in All must keep combined geometry visible');
           node('showSelected').onclick();
+          assert.equal(ctx.selected,2,'Selected must preserve clicked parcel');
           assert.equal(ctx.combined,false);assert.equal(ctx.allFeatures.length,1);
           assert.equal(node('showSelected').attrs['aria-pressed'],'true');
           node('zoneContext').onclick();assert.equal(ctx.viewBox[2],2000);
