@@ -1,0 +1,88 @@
+name: KT66 expert-reviewed original B content and ZIP regression
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt66-expert-reviewed.yml'
+      - 'v26-test/v27-preview/kt66-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  immutable-source-and-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Original locked Word fidelity and deterministic replay
+        run: node v26-test/v27-preview/kt62-locked-replay-regression.cjs
+      - name: Syntax of both KT66 modules
+        run: |
+          node --check v26-test/v27-preview/kt66-expert-review.js
+          node --check v26-test/v27-preview/kt66-locked-content-qa.js
+      - name: Check 14 review fields cannot be auto-accepted or substitute original prose
+        run: |
+          node - <<'JS'
+          const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');
+          const source=fs.readFileSync('v26-test/v27-preview/kt66-expert-review.js','utf8');
+          const sandbox={window:{},console};vm.runInNewContext(source,sandbox);
+          const f=sandbox.window.KT66ExpertReview;
+          const draft=['[[CHARACTERIZATION]]','AI характеристика','','[[LEGAL]]','AI правен анализ','','[[PROCEDURE]]','AI процедура','','[[IMPACTS]]','AI въздействия'].join('\n');
+          const sections=f.structuredAI(draft);
+          assert.equal(sections.LEGAL,'AI правен анализ');
+          assert.equal(sections.IMPACTS,'AI въздействия');
+          const values=Array.from({length:14},(_,i)=>'Изрично проверена индивидуална констатация за съответния казус '+i+' от преписката.');
+          const sources=['Наредба член 1 редакция и източник','Наредба член 2 редакция и източник','Закон член 3 редакция и източник','Закон член 4 редакция и източник'];
+          assert.equal(f.check(values,sources,true,draft).length,0);
+          assert(f.check(values,sources,false,draft).some(x=>x.includes('потвърждение')));
+          assert(f.check(values,['','','',''],true,draft).some(x=>x.includes('източник')));
+          const d=values.slice();d[5]='[ЗА ЕКСПЕРТНА ПРОВЕРКА]';
+          assert(f.check(d,sources,true,draft).length>0);
+          assert.equal(values.length,14);
+          console.log('KT66 content review rejects incomplete, unsourced or unconfirmed inputs — PASS');
+          JS
+      - name: Ensure content check detects mutations to fixed approved paragraphs
+        run: |
+          node - <<'JS'
+          const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');
+          const crypto=require('node:crypto'),fflate=require('fflate');
+          const {DOMParser}=require('@xmldom/xmldom');
+          const source=fs.readFileSync('v26-test/v27-preview/kt66-locked-content-qa.js','utf8');
+          const root={fflate},sandbox={window:root,DOMParser,TextDecoder,console,fetch:async url=>{
+            let p='v26-test/'+url;let buf=fs.readFileSync(p);return {ok:true,arrayBuffer:async()=>buf.buffer.slice(buf.byteOffset,buf.byteOffset+buf.byteLength)};
+          }};
+          const test=(name)=>fs.readFileSync('v26-test/v27-preview/etalon/'+name+'.docx');
+          vm.runInNewContext(source,sandbox);
+          const zip=fflate.zipSync({'01_Proekt_na_stanovishte_Klasicheski.docx':test('KT39-B'),'02_Proekt_na_stanovishte_Eksperten.docx':test('V27-R02')});
+          (async()=>{
+            const blob=new Blob([zip]);const pass=await root.KT66ContentQA.verify(blob,'Б');
+            assert(pass.classic.fixed>=20&&pass.expert.fixed>=25);
+            const b=fflate.unzipSync(test('KT39-B'));
+            let xml=new TextDecoder().decode(b['word/document.xml']);
+            const t=xml.indexOf('<w:t');assert(t>=0);xml=xml.slice(0,t)+xml.slice(t).replace(/>[^<]+</, '>НАРУШЕН ЕТАЛОНЕН ТЕКСТ<');
+            b['word/document.xml']=new TextEncoder().encode(xml);
+            const changed=fflate.zipSync({'01_Proekt_na_stanovishte_Klasicheski.docx':fflate.zipSync(b),'02_Proekt_na_stanovishte_Eksperten.docx':test('V27-R02')});
+            await assert.rejects(()=>root.KT66ContentQA.verify(new Blob([changed]),'Б'),/КТ66: /);
+            console.log('KT66 positive original specimen and negative content mutation checks PASS');
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          JS
+      - name: Browser must use original writers only and require human review before package download
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('v26-test/v27-preview/kt66-original-b-reviewed-test.html').read_text()
+          assert 'KT66ExpertReview.create' in s
+          assert 'kt66-locked-content-qa.js?v=kt66-qa-1' in s
+          assert 'await window.KT66ContentQA.verify(blob,kt60.scenario)' in s
+          assert s.index('await window.KT66ExpertReview.create')<s.index('window.V26DraftPackage.make')
+          assert s.index('await window.KT66ContentQA.verify')<s.index('URL.createObjectURL(blob)')
+          assert 'if(!reviewed?.expertReviewed)' in s
+          assert "kt61-draft-writer.js" not in s
+          assert "v27-kt50-original-kt42.js?v=kt603-original-locked-b1d2cfb" in s
+          assert "kt53-original-draft-package.js?v=kt603-original-locked-b1d2cfb" in s
+          print('KT66 real package original writer and review/QA order PASS')
+          PY
