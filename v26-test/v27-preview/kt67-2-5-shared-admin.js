@@ -5,6 +5,13 @@
 (function(root){'use strict';
 const X10='Х'.repeat(10),X15='Х'.repeat(15);
 const REF='Вх. № ОВОС-ХХХХ/ХХ.ХХ.ХХХХ г.';
+
+/* Historical KT47 audited NSI settlement affiliations, restored for the
+ * two regression cadastral districts. Not a complete national EKATTE list. */
+const KT47_EKATTE=Object.freeze({
+ '36676':{settlement:'с. Катуница',municipality:'Садово',region:'Пловдив',code:'36676',verified:true,source:'NSI EKATTE — KT47 archived audit'},
+ '56784':{settlement:'гр. Пловдив',municipality:'Пловдив',region:'Пловдив',code:'56784',verified:true,source:'NSI EKATTE — KT47 archived audit'}
+});
 const trim=x=>String(x??'').replace(/\s+/g,' ').trim();
 const missing=x=>!trim(x)||/\[(?:ЗА ПОПЪЛВАНЕ|ЗА ЕКСПЕРТНА ПРОВЕРКА)/iu.test(trim(x))||/^НЯМА ДАННИ$/iu.test(trim(x))||/^Х{4,}$/iu.test(trim(x))||/ОВОС-9999\s*\/\s*ДАТА-99/iu.test(trim(x));
 function unique(xs){return [...new Set(xs.map(trim).filter(x=>x&&!missing(x)))];}
@@ -30,11 +37,18 @@ function administrative(meta={},results=[],ekatte=null){
   // Accept EKATTE lookup only when it is explicitly verified and identifies
   // the same settlement code as the GIS cadastral record.
   if(!row||row.verified!==true)return null;
-  const codes=unique(values.map(x=>x.ekatte||x.ekatte_code||x.ekatteCode));
+  const codes=unique(values.map(x=>x.ekatte||x.ekatte_code||x.ekatteCode||String(x.input||x.cadnum||'').split('.')[0]));
   if(codes.length!==1||trim(row.code||row.ekatte)!==codes[0])return null;
+  const short=x=>trim(x).replace(/^(?:гр\\.|с\\.|град|село|община|област)\\s+/iu,'').toLocaleLowerCase('bg');
+  for(const k of ['settlement','municipality','region']){
+   const inputs=unique([meta[k]||'',...values.map(v=>v[k]||'')]);
+   if(inputs.some(v=>short(v)!==short(row[k]||'')))return null;
+  }
   return row;
  };
- const ek=match(ekatte)||{};
+ const codes=unique(values.map(x=>String(x.input||x.cadnum||'').split('.')[0]));
+ const historical=codes.length===1?KT47_EKATTE[codes[0]]:null;
+ const ek=match(ekatte)||match(historical)||{};
  let settlement=placeLabel(meta.settlement)||single(values.map(v=>placeLabel(v.settlement)))||placeLabel(ek.settlement);
  const municipal=single([meta.municipality||'',...values.map(v=>v.municipality||''),ek.municipality||''].filter(Boolean).map(name));
  const regional=single([meta.region||meta.oblast||'',...values.map(v=>v.region||v.oblast||''),ek.region||ek.oblast||''].filter(Boolean).map(name));
