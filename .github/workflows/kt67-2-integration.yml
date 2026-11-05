@@ -17,6 +17,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install isolated DOCX test dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
       - name: Restore original immutable etalons and Word logic
         run: |
           node v26-test/v27-preview/kt62-locked-replay-regression.cjs
