@@ -53,7 +53,12 @@ jobs:
           const cited={...base,expert:{...base.expert,legal:['Съгласно чл. 30 се въвеждат задължителни условия.']}};
           assert(api.inspect(cited).issues.some(x=>x.code==='UNVERIFIED_ARTICLE'));
           const mixed={...base,expert:{...base.expert,impacts:[...base.expert.impacts.slice(0,2),'Екологичната целост и целите на опазване са важни.',...base.expert.impacts.slice(3)]}};
-          assert(api.inspect(mixed).issues.some(x=>x.code==='IMPACT_TOPIC_ORDER'));
+          assert(api.inspect(mixed).warnings.some(x=>x.code==='IMPACT_TOPIC_REVIEW') || api.inspect(mixed).issues.some(x=>x.code==='IMPACT_TOPIC_SWAP'));
+          const validParaphrase={...base,expert:{...base.expert,impacts:[...base.expert.impacts.slice(0,3),'Във връзка с предмета на опазване на зоната може да се обсъди влиянието върху защитените природни ценности, без категорично твърдение.',...base.expert.impacts.slice(4)]}};
+          assert.equal(api.inspect(validParaphrase).ok,true, 'Valid prose must not be blocked merely because a keyword is missing');
+          const swapped={...base,expert:{...base.expert,impacts:[base.expert.impacts[0],base.expert.impacts[1],base.expert.impacts[2],base.expert.impacts[4],base.expert.impacts[3],base.expert.impacts[5]]}};
+          assert(api.inspect(swapped).issues.some(x=>x.code==='IMPACT_TOPIC_SWAP'),'Unambiguous reciprocal topic swap must block');
+          
           const language={...base,expert:{...base.expert,legal:['Необходимо е съдебно-юридическо преценяване на обекта.']}};
           assert(api.inspect(language).issues.some(x=>x.code==='INAPPROPRIATE_LEGAL_LANGUAGE'));
           console.log('KT67-2.2 LEGAL/IMPACTS NEGATIVE TESTS PASS');
