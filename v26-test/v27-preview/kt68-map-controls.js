@@ -64,6 +64,32 @@ showSelected.onclick=()=>{
  if(i<0)return;
  select(i,false);refresh();
 };
+// KT68 selection: the legacy SVG drag code captures the pointer on pointerdown,
+// which can redirect the native click from a parcel path to the SVG itself.
+// Remember the pressed cadastral path and select it on pointerup only when
+// the pointer did not drag. Never alter any cadastral geometry or GIS result.
+const parcelSvg=get('map');
+let pressedParcel=null;
+if(parcelSvg){
+ parcelSvg.addEventListener('pointerdown',event=>{
+  pressedParcel=null;
+  if(event.button!==0)return;
+  const path=event.target?.closest?.('path[aria-label^="Избери имот "]');
+  if(!path||!parcelSvg.contains(path))return;
+  const cadnum=path.getAttribute('aria-label').slice('Избери имот '.length).trim();
+  if(cadnum)pressedParcel={cadnum,x:event.clientX,y:event.clientY};
+ },true);
+ parcelSvg.addEventListener('pointerup',event=>{
+  const pressed=pressedParcel;pressedParcel=null;
+  if(!pressed)return;
+  if(Math.hypot(event.clientX-pressed.x,event.clientY-pressed.y)>5)return;
+  const index=found.findIndex(r=>r.status==='Намерен'&&String(r.cadnum||r.input)===pressed.cadnum);
+  if(index<0)return;
+  // In 'Всички' mode select the parcel while retaining the combined viewport.
+  select(index,combined);refresh();
+ },true);
+ parcelSvg.addEventListener('pointercancel',()=>{pressedParcel=null},true);
+}
 // Map click and result selection must also keep the visual segment synchronized.
 const syncSoon=()=>Promise.resolve().then(refresh);
 get('results')?.addEventListener('click',syncSoon);
