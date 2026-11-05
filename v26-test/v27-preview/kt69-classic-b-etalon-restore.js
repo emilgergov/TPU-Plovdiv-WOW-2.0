@@ -75,5 +75,5 @@ async function classic(scenario,characterization,metadata,context){
  zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
  return new Blob([root.fflate.zipSync(zip,{level:6})],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
 }
-root.V26TemplateWord=Object.freeze({...original,make:classic,layout:'KT69_CLASSIC_B_ETALON_PARAGRAPHS'});
+root.V26TemplateWord=Object.freeze({...original,make:classic});
 })(typeof window!=='undefined'?window:globalThis);
