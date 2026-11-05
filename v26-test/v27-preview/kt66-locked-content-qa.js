@@ -36,8 +36,8 @@ async function check(doc,which){
  const text=current.texts.join('\n');
  for(let i=0;i<current.texts.length;i++){
   const t=current.texts[i].trim();
-  if(/\\[\\[(?:LEGAL|IMPACTS|PROCEDURE|CHARACTERIZATION|CONCLUSION)\\]\\]|\\[\\s*ЗА ЕКСПЕРТНА ПРОВЕРКА/iu.test(t)
-    ||/^НЯМА ДАННИ(?:\\s+В\\s+ПРЕПИСКАТА)?[.!]?$/iu.test(t))
+  if(/\[\[(?:LEGAL|IMPACTS|PROCEDURE|CHARACTERIZATION|CONCLUSION)\]\]|\[\s*ЗА ЕКСПЕРТНА ПРОВЕРКА/iu.test(t)
+    ||/^НЯМА ДАННИ(?:\s+В\s+ПРЕПИСКАТА)?[.!]?$/iu.test(t))
    throw Error('КТ66: невалиден самостоятелен заместител в '+which+', абзац '+(i+1));
  }
  return {fixed,assets:assets.length,paragraphs:expected};
