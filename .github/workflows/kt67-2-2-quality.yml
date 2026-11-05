@@ -63,7 +63,13 @@ jobs:
           const conditional={...base,expert:{...base.expert,procedure:['Необходимо е да се провери дали са изпълнени предпоставките за преценка на приложимата процедура по Наредбата за ОС.']}};
           assert.equal(api.inspect(conditional).ok,true,'Conditional project wording must remain possible');
           const cited={...base,expert:{...base.expert,legal:['Съгласно чл. 30 се въвеждат задължителни условия.']}};
-          assert(api.inspect(cited).issues.some(x=>x.code==='UNVERIFIED_ARTICLE'));
+          assert.equal(api.inspect(cited).ok,true,'Unverified provision in a draft must not block ZIP');
+          assert(api.inspect(cited).warnings.some(x=>x.code==='UNVERIFIED_ARTICLE'&&x.reviewRequired===true));
+          const categoricalCited={...base,expert:{...base.expert,legal:['Съгласно чл. 30 е необходима оценка за съвместимост.']}};
+          assert.equal(api.inspect(categoricalCited).ok,false,'A citation cannot justify unsupported categorical procedure');
+          assert(api.inspect(categoricalCited).issues.some(x=>x.code==='UNSUPPORTED_CATEGORICAL_OS'));
+          const verified={...cited,provenance:{verifiedProvisionCount:1}};
+          assert(!api.inspect(verified).warnings.some(x=>x.code==='UNVERIFIED_ARTICLE'));
           const mixed={...base,expert:{...base.expert,impacts:[...base.expert.impacts.slice(0,2),'Екологичната целост и целите на опазване са важни.',...base.expert.impacts.slice(3)]}};
           assert(api.inspect(mixed).warnings.some(x=>x.code==='IMPACT_TOPIC_REVIEW') || api.inspect(mixed).issues.some(x=>x.code==='IMPACT_TOPIC_SWAP'));
           const validParaphrase={...base,expert:{...base.expert,impacts:[...base.expert.impacts.slice(0,3),'Във връзка с предмета на опазване на зоната може да се обсъди влиянието върху защитените природни ценности, без категорично твърдение.',...base.expert.impacts.slice(4)]}};
