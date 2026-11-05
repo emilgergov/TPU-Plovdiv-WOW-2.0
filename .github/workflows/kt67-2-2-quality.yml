@@ -44,6 +44,60 @@ jobs:
             }
           }
           JS
+      - name: KT68 validate real DOCX subject bold segments and spatial prose for A/B/R02
+        run: |
+          node - <<'JS'
+          const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm'),fflate=require('fflate');
+          const {DOMParser,XMLSerializer}=require('@xmldom/xmldom');
+          const demo=new DOMParser().parseFromString('<r><x/></r>','application/xml').documentElement;
+          Object.defineProperty(Object.getPrototypeOf(demo),'children',{configurable:true,get(){return Array.from(this.childNodes||[]).filter(n=>n.nodeType===1)}});
+          const window={fflate};
+          vm.runInNewContext(fs.readFileSync('v26-test/v27-preview/kt67-2-2-spatial-slot.js','utf8'),{window,DOMParser,XMLSerializer,TextDecoder,TextEncoder,Blob});
+          const ns='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+          const parse=bytes=>new DOMParser().parseFromString(new TextDecoder().decode(fflate.unzipSync(bytes)['word/document.xml']),'application/xml');
+          const paragraphs=doc=>Array.from(doc.getElementsByTagNameNS(ns,'body')[0].children).filter(p=>p.localName==='p');
+          const text=p=>Array.from(p.getElementsByTagNameNS(ns,'t')).map(t=>t.textContent).join('');
+          const bold=r=>{const bp=r.getElementsByTagNameNS(ns,'b')[0];return !!bp&&bp.getAttributeNS(ns,'val')!=='0';};
+          const cases=[
+           ['А',['56784.13.102','56784.13.105','56784.13.106'],'KT35-A','classic'],
+           ['А',['56784.13.102','56784.13.105','56784.13.106'],'V27-R02','expert'],
+           ['Б',['36676.129.457'],'KT39-B','classic'],
+           ['Б',['36676.129.457'],'V27-R02','expert'],
+           ['А',['56784.13.102'],'KT35-A','classic'],
+           ['А',['56784.13.102'],'V27-R02','expert']
+          ];
+          for(const [scenario,ids,fixture,kind] of cases){
+            const original=fflate.unzipSync(new Uint8Array(fs.readFileSync('v26-test/v27-preview/etalon/'+fixture+'.docx')));
+            const xml=new DOMParser().parseFromString(new TextDecoder().decode(original['word/document.xml']),'application/xml');
+            const ps=paragraphs(xml),spatialIndex=kind==='expert'?23:scenario==='А'?22:23;
+            const candidate='Относно: Уведомление за инвестиционно предложение (ИП): „Тестов казус“ в поземлени имоти с идентификатори '+ids.join(', ')+'.';
+            const ts=Array.from(ps[10].getElementsByTagNameNS(ns,'t'));
+            ts[0].textContent=candidate;for(let i=1;i<ts.length;i++)ts[i].textContent='';
+            const variable=ps[spatialIndex].getElementsByTagNameNS(ns,'t');
+            const originalSpatial=scenario==='А'
+              ?'Поземлените имоти с идентификатори '+ids.join(', ')+' не попадат в границите на защитени зони.'
+              :'За имотите с идентификатори '+ids.join(', ')+' е установено пространствено пресичане със защитена зона BG0000194.';
+            variable[0].textContent=originalSpatial;for(let i=1;i<variable.length;i++)variable[i].textContent='';
+            original['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
+            const before=paragraphs(parse(fflate.zipSync(original))).map(text);
+            const updated=window.KT6722SpatialFix.formatGeneratedWord(fflate.zipSync(original),
+              {scenario,parcelIds:ids,zoneCodes:scenario==='Б'?['BG0000194']:[],kind});
+            const after=paragraphs(parse(updated));
+            const t=after[10],runs=Array.from(t.childNodes).filter(x=>x.nodeType===1&&x.localName==='r');
+            const actual=runs.filter(x=>text(x)).map(x=>({value:text(x),bold:bold(x)}));
+            assert.equal(actual.length,4,fixture+' '+scenario+' subject run count');
+            assert.deepEqual(actual.map(x=>x.bold),[true,false,true,false],fixture+' '+scenario+' bold structure');
+            assert.equal(text(t).replace(/в поземлен имот с идентификатор/u,'в поземлени имоти с идентификатори').replace('„Тестов казус“','„Тестов казус“'),candidate,
+              'Subject content preserved except expected singular normalization');
+            assert(text(after[spatialIndex]).includes(scenario==='А'?'не попад':'попад'),kind+' '+scenario+' spatial language');
+            if(scenario==='Б')assert(!text(after[spatialIndex]).includes('е установено пространствено пресичане'));
+            const mutable=new Set([10,spatialIndex,...(scenario==='Б'?[24]:[])]);
+            for(let i=0;i<after.length;i++)if(!mutable.has(i))assert.equal(text(after[i]),before[i],fixture+' paragraph '+i+' changed');
+            const files=fflate.unzipSync(updated);
+            for(const entry of Object.keys(original))if(entry!=='word/document.xml')assert.deepEqual(files[entry],original[entry],entry+' changed');
+            console.log('KT68 WORD TYPOGRAPHY PASS',fixture,scenario,ids.length,'subject bold [1,0,1,0]');
+          }
+          JS
       - name: Syntax and normalized factual fields
         run: |
           node --check v26-test/v27-preview/kt67-2-2-case-normalize.js
