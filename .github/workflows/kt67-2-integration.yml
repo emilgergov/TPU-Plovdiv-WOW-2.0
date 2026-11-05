@@ -46,7 +46,7 @@ jobs:
           assert 'kt67Plan.classic.legalProject' in html
           assert 'kt67Plan.classic.impactsProject' in html
           assert 'kt67Plan.classic.procedureProject' in html
-          assert package.count('KT67-2')>=3
+          assert package.count('КТ67-2')>=3
           assert 'register?.kt67DraftMode===true' in package
           assert 'register.kt67Content.readyForIntegration===true' in package
           assert 'return value&&((source&&' in package
