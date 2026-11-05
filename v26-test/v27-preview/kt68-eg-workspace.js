@@ -45,6 +45,7 @@ const proposal=$('proposal');if(proposal){proposal.textContent='Изготви �
 const reset=$('reset');if(reset)reset.textContent='Изчисти данните';
 const gisPdf=$('v26pdf');if(gisPdf){
  gisPdf.textContent='Изготви ГИС справка (PDF)';
+ gisPdf.classList.add('kt68-primary');
  gisPdf.setAttribute('title','Изготвя задължителния PDF1 въз основа на намерените имоти и пространствения анализ.');
 }
 const zoomFit=$('fit');if(zoomFit)zoomFit.textContent='Центрирай';
