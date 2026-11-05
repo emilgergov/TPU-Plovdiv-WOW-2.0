@@ -27,7 +27,7 @@ jobs:
             'v26-test/v27-preview/kt67-2-5-a-b-admin-test.html'
           ]){
             const html=fs.readFileSync(filename,'utf8');
-            assert(html.includes('v27-preview/kt68-eg-workspace.js?v=kt68-ui-1'),filename+' must load approved UI layer');
+            assert(html.includes('v27-preview/kt68-eg-workspace.js?v=kt68-ui-2'),filename+' must load approved UI layer');
             assert(html.includes('await window.KT68UI.confirmPackage()'),filename+' must use styled modal');
             assert(!html.includes("document.getElementById('kt56AModel').addEventListener"),filename+' must not bind removed KT56 specimen button');
             assert(!html.includes("document.getElementById('kt54BModel').addEventListener"),filename+' must not bind removed KT54 specimen button');
