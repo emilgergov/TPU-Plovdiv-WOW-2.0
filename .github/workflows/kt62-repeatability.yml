@@ -1,0 +1,39 @@
+name: KT62 exact same dossier replay original A B R02
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt62-repeatability.yml'
+      - 'v26-test/v27-preview/kt62-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-words-unchanged:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install inspection dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: KT62 same input twice vs immutable A B R02
+        run: node v26-test/v27-preview/kt62-locked-replay-regression.cjs
+      - name: KT62 browser is isolated from KT61 replacement writer
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('v26-test/v27-preview/kt62-locked-replay-test.html')
+          h=p.read_text()
+          assert '<title>КТ62' in h
+          assert 'window.V26TemplateWord.make(kind,' in h
+          assert 'window.V26ExpertWord.make({' in h
+          assert 'if(!equal(a.data,b.data))throw' in h
+          assert 'a.para[index]!==orig.para[index]' in h
+          assert 'word/media/' in h
+          assert 'kt61-draft-writer.js' not in h
+          assert 'KT62_AB_IDENTICAL_INPUT_REPEATABILITY.zip' in h
+          assert 'v27-kt50-original-kt42.js?v=kt56-unified-locked-b1d2cfb' in h
+          print('KT62 browser exact-content replay wiring PASS')
+          PY
