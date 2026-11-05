@@ -33,6 +33,20 @@ for(const legacy of [false,true]){
  assert(result.warnings.some(x=>x.includes('правните')));
  assert.equal(result.reviewRequired,true);
 }
+const extendedProcedure=[
+ 'Наличието на пресичане със защитена зона налага анализ на вероятните преки и косвени въздействия съобразно конкретния характер на дейностите.',
+ 'Функционалните връзки, инженерната инфраструктура и възможните кумулативни ефекти следва да се съобразят при последващата експертна преценка.',
+ 'За да се формира мотивирано произнасяне, следва да бъдат проверени отделните нормативни предпоставки и относимите документи.',
+ 'Проектният извод остава предмет на експертна редакция и следва да отчете конкретните потвърдени факти преди административното подписване.'
+];
+const longDraft=draft().replace(procedure.join('\n\n'),extendedProcedure.join('\n\n'));
+const merged=build(longDraft);
+assert.equal(merged.readyForIntegration,true,JSON.stringify(merged.issues));
+assert.equal(merged.expert.procedure.length,2);
+assert.equal(merged.classic.procedureProject,extendedProcedure[3]);
+for(const passage of extendedProcedure)assert(merged.expert.draft.includes(passage),'Lost AI-authored procedure argument');
+assert.equal(merged.expert.procedure[0],extendedProcedure.slice(0,-1).join(' '),'Procedure reasoning order must be unchanged');
+assert(!merged.expert.draft.includes('[[CONCLUSION]]'));
 const split=draft().replace(chars.join('\n\n'),chars.join(' '));
 assert(build(split).issues.some(x=>x.code==='CHARACTERIZATION_COUNT'), 'Do not split arbitrary AI sentences into 4');
 const malicious=draft().replace('36676.129.457','56784.13.102');
