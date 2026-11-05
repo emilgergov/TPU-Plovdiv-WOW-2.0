@@ -43,6 +43,10 @@ const zipName=$('zipName');if(zipName&&zipName.textContent.includes('архив'
 const extract=$('extract');if(extract)extract.textContent='Обработи преписката';
 const proposal=$('proposal');if(proposal){proposal.textContent='Изготви проектите';proposal.classList.add('kt68-primary')}
 const reset=$('reset');if(reset)reset.textContent='Изчисти данните';
+const gisPdf=$('v26pdf');if(gisPdf){
+ gisPdf.textContent='Изготви ГИС справка (PDF)';
+ gisPdf.setAttribute('title','Изготвя задължителния PDF1 въз основа на намерените имоти и пространствения анализ.');
+}
 const zoomFit=$('fit');if(zoomFit)zoomFit.textContent='Центрирай';
 const map=$('map')?.closest('.map');
 if(map){
