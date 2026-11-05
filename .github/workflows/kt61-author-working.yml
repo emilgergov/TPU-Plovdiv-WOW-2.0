@@ -29,7 +29,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           h=Path('v26-test/v27-preview/kt61-ai-author-working-test.html').read_text()
-          assert 'kt61-draft-writer.js?v=kt61-draft-1' in h
+          assert 'kt61-draft-writer.js?v=kt61-draft-2' in h
           assert 'window.KT61DraftWord.install()' in h
           assert 'kt61Restore()' in h
           assert 'blob=await window.V26DraftPackage.make(' in h
