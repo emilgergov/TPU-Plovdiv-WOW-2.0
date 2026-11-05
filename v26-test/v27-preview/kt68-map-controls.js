@@ -8,16 +8,64 @@ const controls=document.querySelector('.map .controls');
 if(!controls||!get('showAll')||!get('showSelected'))return;
 const style=document.createElement('style');
 style.textContent=`
-.map .controls{max-width:min(350px,calc(100% - 24px));z-index:7;gap:4px}
-.map .controls .kt68-control-set{background:rgba(255,255,255,.96);border:1px solid #c7d9ce;border-radius:9px;padding:5px;display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:4px}
-.map .controls .kt68-control-title{flex:1 0 100%;font-size:10px;font-weight:800;text-align:right;letter-spacing:.025em;color:#315b45}
-.map .controls .kt68-parcel-switch{display:inline-flex;gap:0;border:1px solid #267047;border-radius:7px;overflow:hidden}
-.map .controls .kt68-parcel-switch button{border-radius:0!important;padding:6px 10px!important;min-height:30px!important;font-size:12px!important}
-.map .controls .kt68-parcel-switch button[aria-pressed=false]{background:#e8f1eb!important;color:#24523d!important}
-.map .controls .kt68-parcel-switch button[aria-pressed=true]{background:#176548!important;color:#fff!important}
-.map .controls .kt68-control-set>label{font-size:11px!important;padding:3px!important;background:none!important}
-.map .controls .kt68-control-set>select{max-width:135px!important;font-size:11px}
-@media(max-width:720px){.map .controls{max-width:min(260px,65%)}.map .controls .kt68-control-set button{font-size:11px!important;padding:5px 7px!important}}
+/* KT68: a single compact horizontal map toolbar. Presentation only. */
+.map .controls{
+ position:absolute!important;top:12px!important;right:12px!important;left:auto!important;
+ display:flex!important;flex-flow:row wrap!important;justify-content:flex-end!important;
+ align-items:center!important;align-content:flex-start!important;
+ width:max-content!important;max-width:calc(100% - 315px)!important;
+ padding:5px 6px!important;gap:4px!important;
+ border:1px solid #bfd6c9!important;border-radius:9px!important;
+ background:rgba(255,255,255,.96)!important;
+ box-shadow:0 2px 6px #0001!important;z-index:7!important;
+}
+.map .controls .kt68-control-set{
+ display:flex!important;flex:0 0 auto!important;flex-wrap:nowrap!important;
+ align-items:center!important;gap:4px!important;justify-content:flex-start!important;
+ background:transparent!important;border:0!important;padding:0!important;
+ border-radius:0!important;
+}
+.map .controls .kt68-control-set+.kt68-control-set{
+ border-left:1px solid #c6d9cc!important;padding-left:5px!important;
+}
+.map .controls .kt68-control-title{display:none!important}
+.map .controls button{
+ font-size:11px!important;padding:6px 8px!important;
+ min-height:30px!important;line-height:1.05!important;border-radius:6px!important;
+ white-space:nowrap!important;
+}
+.map .controls #zoomIn,.map .controls #zoomOut{min-width:29px!important;padding:5px 7px!important}
+.map .controls #fit{max-width:110px!important}
+.map .controls #zoneContext{max-width:75px!important}
+.map .controls .kt68-parcel-switch{
+ display:inline-flex!important;gap:0!important;border:1px solid #267047!important;
+ border-radius:7px!important;overflow:hidden!important;
+}
+.map .controls .kt68-parcel-switch button{
+ border-radius:0!important;padding:6px 8px!important;min-height:28px!important;font-size:11px!important;
+}
+.map .controls .kt68-parcel-switch button[aria-pressed=false]{
+ background:#e8f1eb!important;color:#24523d!important;
+}
+.map .controls .kt68-parcel-switch button[aria-pressed=true]{
+ background:#176548!important;color:#fff!important;
+}
+.map .controls .kt68-control-set>label{
+ font-size:11px!important;padding:2px!important;background:none!important;white-space:nowrap!important;
+}
+.map .controls .kt68-control-set>select{
+ max-width:126px!important;height:30px!important;font-size:11px!important;padding:4px!important;
+}
+@media(max-width:1050px){
+ .map .controls{max-width:calc(100% - 260px)!important;row-gap:5px!important}
+}
+@media(max-width:760px){
+ .map .controls{top:58px!important;right:8px!important;max-width:calc(100% - 16px)!important;
+   padding:4px!important;gap:3px!important}
+ .map .controls .kt68-control-set+.kt68-control-set{padding-left:4px!important}
+ .map .controls button{padding:5px 6px!important;font-size:10px!important}
+ .map .controls .kt68-control-set>select{max-width:112px!important}
+}
 `;
 document.head.appendChild(style);
 const makeSet=(title,ids)=>{
