@@ -42,7 +42,7 @@ function administrative(meta={},results=[],ekatte=null){
   const short=x=>trim(x).replace(/^(?:гр\.|с\.|град|село|община|област)\s+/iu,'').toLocaleLowerCase('bg');
   for(const k of ['settlement','municipality','region']){
    const inputs=unique([meta[k]||'',...values.map(v=>v[k]||'')]);
-   if(inputs.some(v=>short(v)!==short(row[k]||'')))return null;
+   if(row[k]&&inputs.some(v=>short(v)!==short(row[k])))return null;
   }
   return row;
  };
