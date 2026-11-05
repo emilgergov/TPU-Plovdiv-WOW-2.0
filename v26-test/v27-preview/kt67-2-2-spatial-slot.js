@@ -57,7 +57,72 @@ function patchClassicAHeader(bytes){
  zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(tree));
  return root.fflate.zipSync(zip,{level:6});
 }
-async function fix(blob,{scenario,zones=[]}={}){
+// KT68: restore the four run styles of the approved "Относно" paragraph in
+// both Word outputs, without touching their underlying institutional shell.
+// Original KT42 has filled the whole subject into the first (bold) run.
+function formatGeneratedWord(bytes,{scenario,parcelIds=[],zoneCodes=[],kind='classic'}={}){
+ const zip=root.fflate.unzipSync(bytes),raw=zip['word/document.xml'];
+ if(!raw)throw Error('КТ68: липсва Word XML за стиловата проверка.');
+ const tree=new DOMParser().parseFromString(new TextDecoder().decode(raw),'application/xml');
+ if(tree.getElementsByTagName('parsererror').length)throw Error('КТ68: грешка в Word XML.');
+ const body=tree.getElementsByTagNameNS(ns,'body')[0];
+ const ps=Array.from(body?.children||[]).filter(p=>p.localName==='p');
+ const expected=kind==='expert'?49:(scenario==='А'?41:43);
+ if(ps.length!==expected)throw Error('КТ68: отклонение от заключената Word структура.');
+ const allText=p=>Array.from(p.getElementsByTagNameNS(ns,'t'));
+ const value=p=>allText(p).map(t=>t.textContent).join('');
+ const subj=ps[10],ts=allText(subj),full=value(subj);
+ const head='Относно: Уведомление за инвестиционно предложение (ИП): ';
+ const split=full.lastIndexOf('“ в поземлен');
+ if(!full.startsWith(head+'„')||split<head.length||ts.length<4)
+  throw Error('КТ68: неизвестна структура на „Относно“; форматирането е спряно без подмяна.');
+ let tail=full.slice(split+1),quoted=full.slice(head.length,split+1);
+ const ids=Array.isArray(parcelIds)?parcelIds:[];
+ if(ids.length===1)tail=tail.replace(/^ в поземлени имоти с идентификатори /u,' в поземлен имот с идентификатор ');
+ const pieces=['Относно',': Уведомление за инвестиционно предложение (ИП): ',quoted,tail];
+ const runs=pieces.map((_,i)=>ts[i]?.parentNode);
+ const bold=r=>{const pr=Array.from(r?.children||[]).find(x=>x.localName==='rPr');
+   const b=Array.from(pr?.children||[]).find(x=>x.localName==='b');
+   return !!b&&b.getAttributeNS(ns,'val')!=='0'&&b.getAttribute('w:val')!=='0';};
+ if(!bold(runs[0])||bold(runs[1])||!bold(runs[2])||bold(runs[3]))
+  throw Error('КТ68: заглавният стил на Word е различен от еталоните КТ35/39/R02.');
+ for(let i=0;i<ts.length;i++){ts[i].textContent=pieces[i]||'';ts[i].setAttribute('xml:space','preserve');}
+ // Only variable spatial paragraphs can change; approved example case text is
+ // left intact. The GIS intersection/geometry itself is NEVER changed.
+ const spatialIndex=kind==='expert'?23:scenario==='А'?22:23;
+ const p=ps[spatialIndex],before=value(p);
+ if(scenario==='Б'&&/е установено пространствено пресичане със защитена зона/u.test(before)){
+   if(!ids.length||!zoneCodes.length)throw Error('КТ68: липсват потвърдени имоти или кодове на зони.');
+   const one=ids.length===1;
+   const leading=one?'Поземленият имот с идентификатор '+ids[0]:
+      'Един или повече от поземлените имоти с идентификатори '+ids.join(', ');
+   const zoneText=(zoneCodes.length===1?'защитена зона ':'защитени зони ')+zoneCodes.join(', ');
+   const after=leading+' '+(one?'попада':'попадат')+' изцяло или частично в границите на '+zoneText+
+    '. Конкретното пространствено положение и площта на попадане са отразени в самостоятелния ГИС анализ.';
+   const nodes=allText(p);
+   nodes[0].textContent=after;nodes[0].setAttribute('xml:space','preserve');
+   for(let i=1;i<nodes.length;i++)nodes[i].textContent='';
+ }
+ if(scenario==='А'&&ids.length===1&&/^Поземлените имоти с идентификатори /u.test(before)){
+   const after=before.replace(/^Поземлените имоти с идентификатори /u,'Поземленият имот с идентификатор ')
+     .replace(' не попадат в границите',' не попада в границите');
+   const nodes=allText(p);nodes[0].textContent=after;nodes[0].setAttribute('xml:space','preserve');
+   for(let i=1;i<nodes.length;i++)nodes[i].textContent='';
+ }
+ if(scenario==='Б'){
+   const zonePara=ps[24],old=value(zonePara);
+   if(/^Пресичащи се защитени зони:/u.test(old)){
+     const nodes=allText(zonePara);
+     nodes[0].textContent=old.replace(/^Пресичащи се защитени зони:/u,
+       'Защитени зони, в чиито граници попада имотът или попадат разглежданите имоти:');
+     nodes[0].setAttribute('xml:space','preserve');
+     for(let i=1;i<nodes.length;i++)nodes[i].textContent='';
+   }
+ }
+ zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(tree));
+ return root.fflate.zipSync(zip,{level:6});
+}
+async function fix(blob,{scenario,zones=[],parcelIds=[]}={}){
  if(scenario!=='А'&&scenario!=='Б')return blob;
  const codes=[...new Set(zones.map(x=>String(typeof x==='string'?x:x?.sitecode||x?.code||'').trim()).filter(x=>/^BG\d{7}$/.test(x)))];
  if(scenario==='Б'&&!codes.length)throw Error('КТ67-2.2: няма потвърдена защитена зона за Б.');
@@ -66,7 +131,12 @@ async function fix(blob,{scenario,zones=[]}={}){
  const name='01_Proekt_na_stanovishte_Klasicheski.docx';
  if(!outer[name])throw Error('КТ67/68: липсва класически Word.');
  outer[name]=scenario==='А'?patchClassicAHeader(outer[name]):patchWord(outer[name],codes);
+ const ids=Array.isArray(parcelIds)?parcelIds:[];
+ outer[name]=formatGeneratedWord(outer[name],{scenario,parcelIds:ids,zoneCodes:codes,kind:'classic'});
+ const expertName='02_Proekt_na_stanovishte_Eksperten.docx';
+ if(!outer[expertName])throw Error('КТ68: липсва експертният Word.');
+ outer[expertName]=formatGeneratedWord(outer[expertName],{scenario,parcelIds:ids,zoneCodes:codes,kind:'expert'});
  return new Blob([root.fflate.zipSync(outer,{level:0})],{type:'application/zip'});
 }
-root.KT6722SpatialFix=Object.freeze({fix,patchWord,patchClassicAHeader});
+root.KT6722SpatialFix=Object.freeze({fix,patchWord,patchClassicAHeader,formatGeneratedWord});
 })(window);
