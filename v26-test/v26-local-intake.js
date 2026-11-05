@@ -134,8 +134,31 @@ function semanticReview(subjects,documents){
  const heading=v26EditorialHeading(title,locPieces,missing);
  return {flags,location:locPieces,location_sources:[...new Set(locEvidence)],missing,ancillary,heading,needs_review:flags.some(x=>x.kind==='conflict')||missing.length>0,source:main?.source||''};
 }
+// KT68 EK-07: a single supported dossier document is a one-entry stored ZIP
+// ONLY inside the existing intake engine; no changes to downstream evidence logic.
+async function singleDocumentZip(file){
+ const name=String(file.name||'document').split(/[\\/]/).pop();
+ if(!/\.(pdf|docx|jpe?g|png|tiff?|bmp|webp|txt)$/i.test(name))throw Error('Поддържат се ZIP, PDF, DOCX и изображения (JPG, PNG, TIFF, BMP, WEBP).');
+ const content=new Uint8Array(await file.arrayBuffer()),fn=new TextEncoder().encode(name);
+ if(fn.length>65535)throw Error('Твърде дълго име на файла.');
+ let crc=-1;for(const b of content){crc^=b;for(let i=0;i<8;i++)crc=(crc>>>1)^((crc&1)?0xedb88320:0);}
+ crc=(crc^-1)>>>0;
+ const a=new Uint8Array(30+fn.length),b=new Uint8Array(46+fn.length),end=new Uint8Array(22);
+ const av=new DataView(a.buffer),bv=new DataView(b.buffer),ev=new DataView(end.buffer);
+ const u16=(v,p,x)=>v.setUint16(p,x,true),u32=(v,p,x)=>v.setUint32(p,x,true);
+ u32(av,0,0x04034b50);u16(av,4,20);u32(av,14,crc);u32(av,18,content.length);u32(av,22,content.length);u16(av,26,fn.length);a.set(fn,30);
+ u32(bv,0,0x02014b50);u16(bv,4,20);u16(bv,6,20);u32(bv,16,crc);u32(bv,20,content.length);u32(bv,24,content.length);u16(bv,28,fn.length);b.set(fn,46);
+ const offset=a.length+content.length;u32(ev,0,0x06054b50);u16(ev,8,1);u16(ev,10,1);u32(ev,12,b.length);u32(ev,16,offset);
+ return new Blob([a,content,b,end],{type:'application/zip'});
+}
 async function process(file){
- if(!file||file.size>40*1024*1024)throw Error('Изберете ZIP до 40 MB.');
+ if(!file||file.size>40*1024*1024)throw Error('Изберете преписка до 40 MB.');
+ if(!/\.zip$/i.test(file.name||'')){
+   const virtual=await singleDocumentZip(file);
+   if(virtual.size>40*1024*1024)throw Error('Файлът надвишава ограничението за обработка от 40 MB.');
+   const data=await process(virtual);
+   return {...data,archive_name:file.name};
+ }
  const bytes=await file.arrayBuffer(),v=new DataView(bytes),list=[];let e=-1;
  for(let p=bytes.byteLength-22;p>=Math.max(0,bytes.byteLength-65557);p--)if(u32(v,p)===0x06054b50){e=p;break}
  if(e<0)throw Error('Невалиден ZIP.');
