@@ -1,0 +1,46 @@
+name: KT67-1 AI author contract and content integrity
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt67-1-ai-content.yml'
+      - 'v26-test/v27-preview/kt67-1-ai-content-contract.js'
+      - 'v26-test/v27-preview/kt67-1-ai-content-contract.test.cjs'
+      - 'cloudflare/ai-author-v27/src/worker.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  content-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and complete-sentence case-content contract
+        run: |
+          node --check v26-test/v27-preview/kt67-1-ai-content-contract.js
+          node --check cloudflare/ai-author-v27/src/worker.js
+          node v26-test/v27-preview/kt67-1-ai-content-contract.test.cjs
+      - name: Mock protected AI author and legacy browser API
+        run: |
+          node cloudflare/ai-author-v27/test/author-smoke.mjs
+          node v26-test/v27-preview/v27-ai-client-contract.test.cjs
+      - name: Verify author prompt exactly matches V27 browser sections and does not change locked Word writers
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('cloudflare/ai-author-v27/src/worker.js').read_text()
+          assert 'EXACTLY FOUR titled sections' in s
+          assert 'No [[CONCLUSION]]' in s
+          assert 'CHARACTERIZATION: exactly FOUR' in s
+          assert 'LEGAL: exactly FOUR' in s
+          assert 'IMPACTS: exactly SIX' in s
+          assert 'Never invent cadastral IDs' in s
+          contract=Path('v26-test/v27-preview/kt67-1-ai-content-contract.js').read_text()
+          assert 'draft_requires_expert_review' in contract
+          assert 'readyForIntegration' in contract
+          assert "split(/\\n\\s*\\n/)" in contract
+          print('KT67-1 unified content and non-approval policy PASS')
+          PY
