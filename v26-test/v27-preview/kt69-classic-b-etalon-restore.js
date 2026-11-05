@@ -60,7 +60,7 @@ async function classic(scenario,characterization,metadata,context){
  const admissibility=read(ps[25]),environment=read(ps[26]);
  if(!/чл\.\s*12,\s*ал\.\s*2/.test(admissibility))
   put(ps[25],'При проверката за допустимост по чл. 12, ал. 2 от Наредбата за ОС се съобразява следното: '+admissibility);
- if(!/ЗООС|Закона за опазване на околната среда/.test(environment))
+ if(!/ЗООС/.test(environment))
   put(ps[26],'По отношение на Приложения № 1 и № 2 към Закона за опазване на околната среда (ЗООС) и процедурите по глава шеста: '+environment);
  // The exemplar's impact list is a set of assessment directions, not a claim
  // of absence of impacts. It can therefore be preserved literally.
