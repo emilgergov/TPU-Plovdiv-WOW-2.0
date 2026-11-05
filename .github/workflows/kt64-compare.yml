@@ -1,0 +1,58 @@
+name: KT64 compare real A B inputs and guard locked Words
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt64-compare.yml'
+      - 'v26-test/v27-preview/kt64-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-word-compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install test dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Exact KT56 approved A B R02 DOCX preservation
+        run: node v26-test/v27-preview/kt62-locked-replay-regression.cjs
+      - name: Syntax of read-only A B comparison
+        run: node --check v26-test/v27-preview/kt64-compare-original-a-b.js
+      - name: Same dossier: A requires two legal findings, B four; no content replacement
+        run: |
+          node - <<'JS'
+          const vm=require('node:vm'),assert=require('node:assert/strict'),fs=require('node:fs');
+          const source=fs.readFileSync('v26-test/v27-preview/kt64-compare-original-a-b.js','utf8');
+          const sandbox={window:{},document:{readyState:'loading',addEventListener(){}},console};
+          vm.runInNewContext(source,sandbox);
+          const f=sandbox.window.KT64Compare.compare;
+          const d={paragraphs:['ИП дейности','Електро','Вода','Отпадъчни води'],metadata:{
+            parcelIds:'36676.129.457',subject:'Тестово предложение',legalParagraphs:['основание 1','основание 2','',''],
+            legalFindingSources:['закон','наредба','',''],impactFindings:['1','2','3','4','5'],procedureFinding:'Обоснован проект на процедурен извод'}};
+          const saved=JSON.stringify(d);const a=f(d);
+          assert.equal(a.aReady,true);assert.equal(a.bReady,false);
+          assert.equal(a.checks[1].a,true);assert.equal(a.checks[1].b,false);
+          assert.equal(JSON.stringify(d),saved);
+          d.metadata.legalParagraphs[2]='основание 3';d.metadata.legalParagraphs[3]='основание 4';
+          const b=f(d);assert.equal(b.bReady,true);assert.equal(b.sourceCount,2);
+          d.metadata.impactFindings[1]='[ЗА ЕКСПЕРТНА ПРОВЕРКА]';
+          const c=f(d);assert.equal(c.aReady,false);assert.equal(c.bReady,false);
+          console.log('KT64 side-by-side input requirements and zero-mutation test PASS');
+          JS
+      - name: Browser uses only original locked KT42 and original package
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('v26-test/v27-preview/kt64-real-a-b-comparison-test.html').read_text()
+          assert 'kt64-compare-original-a-b.js?v=kt64-compare-1' in s
+          assert 'kt63-real-b-input-audit.js?v=kt63-audit-1' in s
+          assert 'v27-kt50-original-kt42.js?v=kt603-original-locked-b1d2cfb' in s
+          assert 'kt53-original-draft-package.js?v=kt603-original-locked-b1d2cfb' in s
+          assert 'kt61-draft-writer.js' not in s
+          assert "if(kt60.scenario==='Б'&&!kt60.ok)" in s
+          print('KT64 original Word source and unchanged dossier workflow PASS')
+          PY
