@@ -29,12 +29,19 @@ jobs:
             const html=fs.readFileSync(filename,'utf8');
             assert(html.includes('v27-preview/kt68-eg-workspace.js?v=kt68-ui-1'),filename+' must load approved UI layer');
             assert(html.includes('await window.KT68UI.confirmPackage()'),filename+' must use styled modal');
+            assert(!html.includes("document.getElementById('kt56AModel').addEventListener"),filename+' must not bind removed KT56 specimen button');
+            assert(!html.includes("document.getElementById('kt54BModel').addEventListener"),filename+' must not bind removed KT54 specimen button');
+            assert(html.includes('if(kt68A)kt68A.addEventListener'),filename+' conditionally binds legacy A only if present');
+            assert(html.includes('if(kt68B)kt68B.addEventListener'),filename+' conditionally binds legacy B only if present');
             assert(!html.includes("if(!f.name.toLowerCase().endsWith('.zip'))"),filename+' must allow single file');
             assert(html.includes('v26-local-intake.js?v=kt68-single-file-'),filename+' cache must be busted');
             for(const match of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)){
               if(match[1].trim())new vm.Script(match[1],{filename});
             }
           }
+          const ui=fs.readFileSync('v26-test/v27-preview/kt68-eg-workspace.js','utf8');
+          assert(ui.includes('position:absolute;top:64px'), 'map control must not overlap original legend');
+          assert(!ui.includes("legend.textContent='▣ Имот"),'duplicate legend removed');
           const s=fs.readFileSync('v26-test/v26-local-intake.js','utf8');
           assert(s.includes('async function singleDocumentZip(file)'), 'single-file intake is enabled');
           assert(s.includes("'kt68-single-document.zip'"), 'virtual ZIP must carry a .zip filename');
