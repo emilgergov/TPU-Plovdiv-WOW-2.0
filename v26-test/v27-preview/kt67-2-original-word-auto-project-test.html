@@ -530,7 +530,7 @@ if(!kt67Plan.readyForIntegration){
 }
 const kt6722Legal=window.KT6722LegalQuality?.inspect(kt67Plan);
 if(!kt6722Legal)throw Error('КТ67-2.2: липсва контролът за правни и тематични твърдения.');
-if(!kt6722Legal.ok)throw Error('КТ67-2.2: AI проектът съдържа неподкрепено правно заключение или разменени направления: '+kt6722Legal.issues.map(x=>x.code+(x.position?' / '+x.position:'')).join('; ')+'. Не се подписва и не се подменя с общ текст.');
+if(!kt6722Legal.ok)throw Error('КТ67-2.2: AI проектът съдържа неподкрепено правно заключение или разменени направления: '+kt6722Legal.issues.map(x=>x.code+(x.position?' / '+x.position:'')+(x.section?' ['+x.section+']':'')+(x.excerpt?' — „'+x.excerpt+'“':'')).join('; ')+'. Не се подписва и не се подменя с общ текст.');
 if(kt6722Legal.warnings?.length)console.warn('КТ67-2.3: направления за експертна проверка (не са автоматично разменени):',kt6722Legal.warnings);
 if(!window.KT6722CaseNormalize?.normalize)throw Error('КТ67-2.2: липсва нормализаторът на променливите данни.');
 workingDraft=window.KT6722CaseNormalize.normalize({
