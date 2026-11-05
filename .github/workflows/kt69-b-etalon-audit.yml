@@ -4,12 +4,26 @@ on:
     paths:
       - '.github/workflows/kt69-b-etalon-audit.yml'
       - 'v26-test/v27-preview/v27-kt50-original-kt42.js'
+      - 'v26-test/v27-preview/kt69-classic-b-etalon-restore.js'
+      - 'v26-test/v27-preview/kt69-classic-b-qa.cjs'
+      - 'v26-test/v27-preview/kt67-2-original-word-auto-project-test.html'
+      - 'v26-test/v27-preview/kt67-2-5-a-b-admin-test.html'
   workflow_dispatch:
 jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated DOCX test dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Test scenario B real DOCX and locked A/Expert isolation
+        run: |
+          node --check v26-test/v27-preview/kt69-classic-b-etalon-restore.js
+          node --check v26-test/v27-preview/kt69-classic-b-qa.cjs
+          node v26-test/v27-preview/kt69-classic-b-qa.cjs
       - name: Audit original 43-paragraph KT39-B with source data untouched
         run: |
           python3 - <<'PY'
