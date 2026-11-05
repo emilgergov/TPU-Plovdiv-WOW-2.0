@@ -1,0 +1,54 @@
+name: KT63 real B original Word and input audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt63-real-b.yml'
+      - 'v26-test/v27-preview/kt63-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  protect-original-word:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Approved A B R02 unchanged and repeatable
+        run: node v26-test/v27-preview/kt62-locked-replay-regression.cjs
+      - name: KT63 audit JavaScript syntax
+        run: node --check v26-test/v27-preview/kt63-real-b-input-audit.js
+      - name: Real B audit must not mutate case or approved paragraphs
+        run: |
+          node - <<'JS'
+          const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+          const source=fs.readFileSync('v26-test/v27-preview/kt63-real-b-input-audit.js','utf8');
+          const context={window:{},document:{readyState:'loading',addEventListener(){}},console};
+          vm.runInNewContext(source,context);
+          const p={paragraphs:['Описание на дейностите','Захранване с ток','Водоснабдяване','Отпадъчни води'],metadata:{subject:'Съществуващо ИП',parcelIds:'36676.129.457',legalParagraphs:[],impactFindings:[],procedureFinding:'[ЗА ЕКСПЕРТНА ПРОВЕРКА — процедура]'}};
+          const before=JSON.stringify(p);
+          const r=context.window.KT63InputAudit.examine({draft:p,scenario:'Б'});
+          assert.equal(r.total,14);
+          assert.equal(r.inspectable,4);
+          assert.equal(p.metadata.parcelIds,'36676.129.457');
+          assert.equal(JSON.stringify(p),before,'KT63 must never alter the input');
+          assert.equal(r.rows[13].ready,false);
+          console.log('KT63 real B input audit: 4 supplied case descriptions, 10 missing confirmed legal/procedure/impact fields, ZERO content edits — PASS');
+          JS
+      - name: Original browser composer and KT42 unchanged
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('v26-test/v27-preview/kt63-real-b-original-test.html').read_text()
+          assert 'kt63-real-b-input-audit.js?v=kt63-audit-1' in s
+          assert 'v27-kt50-original-kt42.js?v=kt603-original-locked-b1d2cfb' in s
+          assert 'kt53-original-draft-package.js?v=kt603-original-locked-b1d2cfb' in s
+          assert 'kt61-draft-writer.js' not in s
+          assert 'KT603Evidence?.build' in s
+          assert "if(kt60.scenario==='Б'&&!kt60.ok)" in s
+          print('KT63 unchanged production B composer and original content gate: PASS')
+          PY
