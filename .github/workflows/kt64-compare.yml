@@ -22,7 +22,7 @@ jobs:
         run: node v26-test/v27-preview/kt62-locked-replay-regression.cjs
       - name: Syntax of read-only A B comparison
         run: node --check v26-test/v27-preview/kt64-compare-original-a-b.js
-      - name: Same dossier: A requires two legal findings, B four; no content replacement
+      - name: 'Same dossier — A requires two legal findings, B four; no content replacement'
         run: |
           node - <<'JS'
           const vm=require('node:vm'),assert=require('node:assert/strict'),fs=require('node:fs');
