@@ -1,0 +1,28 @@
+name: KT69 Classic B etalon paragraph audit
+on:
+  push:
+    paths:
+      - '.github/workflows/kt69-b-etalon-audit.yml'
+      - 'v26-test/v27-preview/v27-kt50-original-kt42.js'
+  workflow_dispatch:
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit original 43-paragraph KT39-B with source data untouched
+        run: |
+          python3 - <<'PY'
+          import zipfile,xml.etree.ElementTree as ET,hashlib
+          path='v26-test/v27-preview/etalon/KT39-B.docx'
+          with open(path,'rb') as f: data=f.read()
+          print('KT39-B SHA256:',hashlib.sha256(data).hexdigest())
+          with zipfile.ZipFile(path) as z: doc=ET.fromstring(z.read('word/document.xml'))
+          ns={'w':'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+          body=doc.find('w:body',ns)
+          ps=body.findall('w:p',ns)
+          assert len(ps)==43, f'Expected 43 paragraphs, got {len(ps)}'
+          for i,p in enumerate(ps):
+              text=''.join(n.text or '' for n in p.findall('.//w:t',ns))
+              print(f'KT39-B paragraph [{i:02d}]: {text[:580]}')
+          PY
