@@ -26,16 +26,47 @@ function patchWord(bytes,codes){
  doczip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(tree));
  return root.fflate.zipSync(doczip,{level:6});
 }
+// KT68: Only the confidentiality geometry in Classic A is changed. Classic B
+// is the approved visual reference, the KT56 original template is immutable.
+function patchClassicAHeader(bytes){
+ const zip=root.fflate.unzipSync(bytes),raw=zip['word/document.xml'];
+ if(!raw)throw Error('КТ68: липсва Word XML в класически А.');
+ const tree=new DOMParser().parseFromString(new TextDecoder().decode(raw),'application/xml');
+ if(tree.getElementsByTagName('parsererror').length)throw Error('КТ68: невалиден Word XML.');
+ const body=tree.getElementsByTagNameNS(ns,'body')[0];
+ const paras=Array.from(body?.children||[]).filter(x=>x.localName==='p');
+ const values=paras.slice(0,2).map(p=>Array.from(p.getElementsByTagNameNS(ns,'t')).map(t=>t.textContent).join('').trim());
+ if(values[0]!=='Ниво на конфиденциалност 0'||values[1]!=='[TLP-WHITE]')
+  throw Error('КТ68: неочакван ред на реквизитите в класически А.');
+ function ensure(parent,name){
+  let child=Array.from(parent.children).find(x=>x.namespaceURI===ns&&x.localName===name);
+  if(!child){child=tree.createElementNS(ns,'w:'+name);parent.appendChild(child);}
+  return child;
+ }
+ const set=(el,name,value)=>el.setAttributeNS(ns,'w:'+name,value);
+ for(let i=0;i<2;i++){
+  const pr=ensure(paras[i],'pPr');
+  set(ensure(pr,'jc'),'val','right');
+  const ind=ensure(pr,'ind'),spacing=ensure(pr,'spacing');
+  for(const [name,value] of Object.entries({left:'0',right:'0',firstLine:'0'}))set(ind,name,value);
+  for(const [name,value] of Object.entries({before:'0',after:'0',line:'240',lineRule:'auto'}))set(spacing,name,value);
+  if(i===0&&!Array.from(pr.children).some(x=>x.namespaceURI===ns&&x.localName==='keepNext')){
+   const keep=tree.createElementNS(ns,'w:keepNext');pr.insertBefore(keep,pr.firstChild);
+  }
+ }
+ zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(tree));
+ return root.fflate.zipSync(zip,{level:6});
+}
 async function fix(blob,{scenario,zones=[]}={}){
- if(scenario!=='Б')return blob;
+ if(scenario!=='А'&&scenario!=='Б')return blob;
  const codes=[...new Set(zones.map(x=>String(typeof x==='string'?x:x?.sitecode||x?.code||'').trim()).filter(x=>/^BG\d{7}$/.test(x)))];
- if(!codes.length)throw Error('КТ67-2.2: няма потвърдена защитена зона за Б.');
+ if(scenario==='Б'&&!codes.length)throw Error('КТ67-2.2: няма потвърдена защитена зона за Б.');
  if(!root.fflate?.unzipSync||!root.fflate?.zipSync)throw Error('КТ67-2.2: липсва валидаторът на ZIP.');
  const outer=root.fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
  const name='01_Proekt_na_stanovishte_Klasicheski.docx';
- if(!outer[name])throw Error('КТ67-2.2: липсва класически Word Б.');
- outer[name]=patchWord(outer[name],codes);
+ if(!outer[name])throw Error('КТ67/68: липсва класически Word.');
+ outer[name]=scenario==='А'?patchClassicAHeader(outer[name]):patchWord(outer[name],codes);
  return new Blob([root.fflate.zipSync(outer,{level:0})],{type:'application/zip'});
 }
-root.KT6722SpatialFix=Object.freeze({fix,patchWord});
+root.KT6722SpatialFix=Object.freeze({fix,patchWord,patchClassicAHeader});
 })(window);
