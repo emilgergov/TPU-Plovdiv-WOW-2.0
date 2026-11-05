@@ -1,0 +1,82 @@
+name: KT67-2 original Word automatic draft integration
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt67-2-integration.yml'
+      - 'v26-test/v27-preview/kt67-2-*'
+      - 'v26-test/v27-preview/kt67-1-ai-content-contract.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  kt67-draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Restore original immutable etalons and Word logic
+        run: |
+          node v26-test/v27-preview/kt62-locked-replay-regression.cjs
+          node --check v26-test/v27-preview/kt67-2-draft-package.js
+          node --check v26-test/v27-preview/kt67-1-ai-content-contract.js
+          node v26-test/v27-preview/kt67-1-ai-content-contract.test.cjs
+      - name: Assert user workflow and original writer still intact
+        run: |
+          python - <<'PY'
+          import subprocess,re
+          from pathlib import Path
+          html=Path('v26-test/v27-preview/kt67-2-original-word-auto-project-test.html').read_text()
+          package=Path('v26-test/v27-preview/kt67-2-draft-package.js').read_text()
+          original=Path('v26-test/v27-preview/kt53-original-draft-package.js').read_text()
+          assert 'KT67AIContent.plan(v27AiDraft' in html
+          assert 'KT66ExpertReview.create' not in html
+          assert 'kt66-expert-review.js?v=' not in html
+          assert 'kt67DraftMode:true,kt67Content:kt67Plan' in html
+          assert 'v27-kt50-original-kt42.js?v=kt603-original-locked-b1d2cfb' in html
+          assert 'kt67-2-draft-package.js?v=kt67-2-draft-1' in html
+          assert 'KT57PackageQA.verify(blob' in html
+          assert 'await window.KT66ContentQA.verify(blob,kt60.scenario)' in html
+          assert 'v27AiDraft=kt67Plan.expert.draft' in html
+          assert 'kt67Plan.classic.characterization' in html
+          assert 'kt67Plan.classic.legalProject' in html
+          assert 'kt67Plan.classic.impactsProject' in html
+          assert 'kt67Plan.classic.procedureProject' in html
+          assert package.count('KT67-2')>=3
+          assert 'register?.kt67DraftMode===true' in package
+          assert 'register.kt67Content.readyForIntegration===true' in package
+          assert 'return value&&((source&&' in package
+          assert 'caseMetadata.procedureFinding' in package
+          assert 'window.V26TemplateWord.make' in package
+          assert 'window.V26ExpertWord.make' in package
+          assert 'КТ67-2 — ПРЕДВАРИТЕЛЕН РАБОТЕН ПРОЕКТ' in package
+          assert 'AI изготвените правни и процедурни пасажи не са автоматично проверени' in package
+          assert 'function scenarioFromGIS' in package
+          assert 'Не е доказано, че всички водещи имоти са извън' in package
+          assert package!=original
+          # All edits to original KT53 are only the explicit project-mode guard,
+          # allowance and README; the rest of the original body remains identical.
+          norm=package
+          start=norm.index(' // KT67-2: ONLY an explicitly labeled working-DRAFT package')
+          end=norm.index(' // KT23/2: Legal findings are evidence-bound',start)
+          norm=norm[:start]+norm[end:]
+          norm=norm.replace("return value&&((source&&source!=='НЯМА ДАННИ'&&source!=='Няма данни')||(register?.kt67DraftMode===true&&register?.kt67Content?.schema==='KT67_AI_CONTENT_V1'&&register.kt67Content.readyForIntegration===true))?value:reviewFinding(i);","return value&&source&&source!=='НЯМА ДАННИ'&&source!=='Няма данни'?value:reviewFinding(i);")
+          start=norm.index(' if(register?.kt67DraftMode===true){',norm.index("const evidenceLines="))
+          end=norm.index(' if(register?.v27Package){',start)
+          norm=norm[:start]+norm[end:]
+          assert norm==original, 'Unexpected changes to original KT53 logic!'
+          print('KT67-2 original KT53 logic and KT42/KT56 etalon boundaries PASS')
+          PY
+      - name: Assert project drafts are not automatically verified evidence
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('v26-test/v27-preview/kt67-2-draft-package.js').read_text()
+          assert "register?.kt67DraftMode===true&&register?.kt67Content?.schema==='KT67_AI_CONTENT_V1'" in s
+          assert "register.kt67Content.scenario!==determination.scenario" in s
+          assert "register.kt67Content.parcelIds.join(', ')!==confirmedIds.join(', ')" in s
+          assert "Генерирането на DOCX не удостоверява достоверността" in s
+          print('KT67-2 case-identity and unverified-draft source status PASS')
+          PY
