@@ -35,6 +35,9 @@ jobs:
           const p=a.characterization('Инвестиционното предложение включва изграждане на едноетажен обект с площ около 40 кв.м.');
           assert.equal(p,'С реализацията на инвестиционното предложение се предвижда изграждане на едноетажен обект с площ около 40 кв.м.');
           assert.equal(a.characterization(p),p);
+          const fromZip14=a.characterization('Инвестиционното предложение обхваща изграждане на малък едноетажен обслужващ обект с временна площадка.');
+          assert.equal(fromZip14,'С реализацията на инвестиционното предложение се предвижда изграждане на малък едноетажен обслужващ обект с временна площадка.');
+          assert.equal(a.characterization(fromZip14),fromZip14);
           const v=a.normalize({metadata:{subject},paragraphs:[p,'Електрозахранване','Водоснабдяване','Отпадъчни води']});
           assert.equal(v.metadata.subject,'Изграждане на малък едноетажен обслужващ обект');
           assert.equal(v.paragraphs[0],p);
@@ -50,6 +53,15 @@ jobs:
           assert.equal(api.inspect(base).ok,true);
           const legal={...base,expert:{...base.expert,legal:['Тъй като имотът е в защитена зона, е необходима оценка за съвместимост.']}};
           assert(api.inspect(legal).issues.some(x=>x.code==='UNSUPPORTED_CATEGORICAL_OS'));
+          for(const claim of [
+            'Пресичането със зона, което предполага необходимост от извършване на съвместимостна оценка.',
+            'Съвместимостната оценка е препоръчителна, тъй като имотът попада в защитена зона.'
+          ]){
+            const unverified={...base,expert:{...base.expert,legal:[claim]}};
+            assert(api.inspect(unverified).issues.some(x=>x.code==='UNSOURCED_PROCEDURE_INFERENCE'),claim);
+          }
+          const conditional={...base,expert:{...base.expert,procedure:['Необходимо е да се провери дали са изпълнени предпоставките за преценка на приложимата процедура по Наредбата за ОС.']}};
+          assert.equal(api.inspect(conditional).ok,true,'Conditional project wording must remain possible');
           const cited={...base,expert:{...base.expert,legal:['Съгласно чл. 30 се въвеждат задължителни условия.']}};
           assert(api.inspect(cited).issues.some(x=>x.code==='UNVERIFIED_ARTICLE'));
           const mixed={...base,expert:{...base.expert,impacts:[...base.expert.impacts.slice(0,2),'Екологичната целост и целите на опазване са важни.',...base.expert.impacts.slice(3)]}};
