@@ -39,7 +39,7 @@ function administrative(meta={},results=[],ekatte=null){
   if(!row||row.verified!==true)return null;
   const codes=unique(values.map(x=>x.ekatte||x.ekatte_code||x.ekatteCode||String(x.input||x.cadnum||'').split('.')[0]));
   if(codes.length!==1||trim(row.code||row.ekatte)!==codes[0])return null;
-  const short=x=>trim(x).replace(/^(?:гр\\.|с\\.|град|село|община|област)\\s+/iu,'').toLocaleLowerCase('bg');
+  const short=x=>trim(x).replace(/^(?:гр\.|с\.|град|село|община|област)\s+/iu,'').toLocaleLowerCase('bg');
   for(const k of ['settlement','municipality','region']){
    const inputs=unique([meta[k]||'',...values.map(v=>v[k]||'')]);
    if(inputs.some(v=>short(v)!==short(row[k]||'')))return null;
