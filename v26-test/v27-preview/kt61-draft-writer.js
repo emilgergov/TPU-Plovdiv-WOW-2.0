@@ -65,7 +65,15 @@ function cleanCaseSamples(p){
 }
 async function finish(o,which,d){
  cleanCaseSamples(o.p);
+ // Strip only actual generator control tags, including those embedded in dynamic AI
+ // paragraphs; leave all surrounding author text and institutional formatting intact.
+ const technical=/\[\[(?:CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS|CONCLUSION)\]\]/gu;
+ for(const para of o.p){const current=get(para);technical.lastIndex=0;
+  if(technical.test(current)){technical.lastIndex=0;put(para,current.replace(technical,''));}
+ }
  const remaining=o.p.map(get).join('\n');
+ if(/\[\[(?:CHARACTERIZATION|LEGAL|PROCEDURE|IMPACTS|CONCLUSION)\]\]/u.test(remaining))
+  throw Error('КТ61: незатворен технически маркер в Word файла');
  if(/56784\.13\.(?:102|105|106)|BG0000578|Рогошко шосе/iu.test(remaining))throw Error('КТ61: останали чужди фактически данни от еталона');
  // Do not silently allow copy-pasted sample decision or filled artificial proof.
  const xml=new XMLSerializer().serializeToString(o.doc);
