@@ -32,6 +32,11 @@ const p=(binary)=>{const zip=fflate.unzipSync(new Uint8Array(binary));const doc=
  const b=p(await B.arrayBuffer()),e=p(await E.arrayBuffer());
  assert.equal(b.paras.length,43);
  assert.equal(e.paras.length,49);
+ for(const [name,d] of [['classic B',b],['expert R02',e]]){
+  const markers=d.text.flatMap((value,i)=>/\[\[(?:CONCLUSION|CHARACTERIZATION|PROCEDURE|LEGAL|IMPACTS)\]\]/.test(value)?[{index:i,text:value.slice(0,180)}]:[]);
+  console.log('KT61 remaining markers '+name,JSON.stringify(markers));
+  assert.equal(markers.length,0,'KT61 must eliminate all original template control markers from '+name);
+ }
  for(const d of [b,e]){
   assert(d.text.join('\n').includes('36676.129.457'));
   assert(!/56784\.13\.(?:102|105|106)|BG0000578|Рогошко шосе/.test(d.text.join('\n')));
