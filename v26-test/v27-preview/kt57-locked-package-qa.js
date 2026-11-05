@@ -11,7 +11,14 @@
    const txt=ps.map(p=>Array.from(p.getElementsByTagNameNS(NS,'t')).map(x=>x.textContent).join(''));
    return {entries,ps,txt};
  };
- const bad=t=>/\[\[(?:CHARACTERIZATION|LEGAL|IMPACTS|PROCEDURE|CONCLUSION)\]\]|\[ЗА ЕКСПЕРТНА ПРОВЕРКА|НЯМА ДАННИ/i.test(t);
+ // A descriptive sentence containing “няма данни” is not an empty Word
+ // slot. Reject technical AI markers and standalone missing-content fillers.
+ const problem=t=>{
+   const v=String(t||'').trim();
+   if(/\\[\\[(?:CHARACTERIZATION|LEGAL|IMPACTS|PROCEDURE|CONCLUSION)\\]\\]|\\[\\s*ЗА ЕКСПЕРТНА ПРОВЕРКА/iu.test(v))return 'AI_MARKER';
+   if(/^НЯМА ДАННИ(?:\\s+В\\s+ПРЕПИСКАТА)?[.!]?$/iu.test(v))return 'EMPTY_PLACEHOLDER';
+   return '';
+ };
  async function exactRef(path){
    const r=await fetch(path,{cache:'no-store'});
    if(!r.ok)throw Error('Не може да се зареди заключеният образец: '+path);
@@ -31,7 +38,12 @@
    const B=Array.isArray(context.zoneCodes)&&context.zoneCodes.length>0, refClassic=B?'KT39-B':'KT35-A';
    const expected=B?43:41;
    if(classic.ps.length!==expected||expert.ps.length!==49)throw Error('КТ57: разлика в структурата на заключените Word образци.');
-   if([classic,expert].some(d=>d.txt.some(bad)))throw Error('КТ57: открито е недопустимо заместващо съдържание в Word.');
+   for(const [label,document] of [['класически',classic],['експертен',expert]]){
+     for(let i=0;i<document.txt.length;i++){
+       const issue=problem(document.txt[i]);
+       if(issue)throw Error('КТ57: недопустим заместител '+issue+' в '+label+' Word, абзац '+(i+1)+'.');
+     }
+   }
    if(!classic.entries['word/styles.xml']||!expert.entries['word/styles.xml'])throw Error('КТ57: липсва оригиналното Word оформление.');
    const refA=await exactRef('v27-preview/etalon/'+refClassic+'.docx');
    const refE=await exactRef('v27-preview/etalon/V27-R02.docx');
@@ -44,5 +56,5 @@
    }
    return {scenario:B?'Б':'А',classicParagraphs:classic.ps.length,expertParagraphs:expert.ps.length,specimenExact:isSpecimen,files:names.length};
  }
- root.KT57PackageQA=Object.freeze({verify});
+ root.KT57PackageQA=Object.freeze({verify,problem});
 })(window);
