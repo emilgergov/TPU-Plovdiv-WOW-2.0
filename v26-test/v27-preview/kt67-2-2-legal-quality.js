@@ -23,6 +23,17 @@ function inspect(plan){
       t.includes('препоръча провеждане на процедура за оценка за съвместимост')||
       t.includes('следва да се проведе процедура за оценка за съвместимост'))
     issues.push({code:'UNSUPPORTED_CATEGORICAL_OS',section});
+   // These are procedural conclusions, not merely statements of GIS overlap.
+   // In the absence of verified provisions, an AI project may identify possible
+   // procedures for checking, but cannot infer that one is necessary or advised
+   // *because* the site intersects a Natura 2000 zone.
+   const overreach=[
+     /предполага\s+необходимост(?:та)?\s+от\s+(?:извършване|провеждане)\s+на\s+(?:оценка\s+за\s+съвместимост|съвместимостна\s+оценка)/u,
+     /(?:съвместимостна\s+оценка|оценка\s+за\s+съвместимост)\s+е\s+(?:препоръчителна|необходима|задължителна)/u,
+     /(?:препоръчва\s+се|целесъобразно\s+е|следва)\s+(?:да\s+се\s+)?(?:извърши|проведе)\s+(?:оценка\s+за\s+съвместимост|съвместимостна\s+оценка)/u,
+     /(?:заради|поради|тъй\s+като|понеже)\s+(?:.*?)(?:попада|пресича)(?:.*?)(?:зона|натура\s*2000)(?:.*?)(?:налага|изисква|препоръчва)/u
+   ];
+   if(provisions===0&&overreach.some(p=>p.test(t)))issues.push({code:'UNSOURCED_PROCEDURE_INFERENCE',section});
    if(provisions===0&&(/(?:на основание|съгласно|по смисъла на)\s+чл\.?\s*\d+/iu).test(t))
     issues.push({code:'UNVERIFIED_ARTICLE',section});
    if(/съдебно-юридическ|присъдени правомощия|проекто-експертн/u.test(t))
