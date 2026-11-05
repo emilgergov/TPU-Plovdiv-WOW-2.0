@@ -3,10 +3,10 @@
    Only unambiguous displacement blocks generation; uncertainty is reported for DOCX review.
  */
 (function(root){'use strict';
-const norm=t=>String(t||'').toLocaleLowerCase('bg').replace(/\\s+/g,' ').trim();
+const norm=t=>String(t||'').toLocaleLowerCase('bg').replace(/\s+/g,' ').trim();
 const topics=[
- {id:'HABITATS',pattern:/местообитан|хабитат|природн[иаое]+\\s+местообитан/u},
- {id:'SPECIES',pattern:/видов|видове|птици|безпокойств|популаци|местообитания\\s+на\\s+видов/u},
+ {id:'HABITATS',pattern:/местообитан|хабитат|природн[иаое]+\s+местообитан/u},
+ {id:'SPECIES',pattern:/видов|видове|птици|безпокойств|популаци|местообитания\s+на\s+видов/u},
  {id:'INTEGRITY',pattern:/целост|цялост|предмет.{0,12}цел.{0,20}опазван|цели.{0,8}опазван|опазван.{0,15}цел|природозащитн|състояние.{0,20}зон/u},
  {id:'COHERENCE',pattern:/кохерент|свързаност|свързан.{0,20}зон|екологичн.{0,20}мреж|миграционн.{0,25}коридор/u},
  {id:'CUMULATIVE',pattern:/кумулатив|съвкупн|натрупван.{0,20}въздейств|комбиниран.{0,20}въздейств/u}
@@ -23,7 +23,7 @@ function inspect(plan){
       t.includes('препоръча провеждане на процедура за оценка за съвместимост')||
       t.includes('следва да се проведе процедура за оценка за съвместимост'))
     issues.push({code:'UNSUPPORTED_CATEGORICAL_OS',section});
-   if(provisions===0&&(/(?:на основание|съгласно|по смисъла на)\\s+чл\\.?\\s*\\d+/iu).test(t))
+   if(provisions===0&&(/(?:на основание|съгласно|по смисъла на)\s+чл\.?\s*\d+/iu).test(t))
     issues.push({code:'UNVERIFIED_ARTICLE',section});
    if(/съдебно-юридическ|присъдени правомощия|проекто-експертн/u.test(t))
     issues.push({code:'INAPPROPRIATE_LEGAL_LANGUAGE',section});
