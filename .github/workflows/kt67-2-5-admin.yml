@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/kt67-2-5-admin.yml'
       - 'v26-test/v27-preview/kt67-2-5-*'
+      - 'v26-test/v27-preview/kt67-2-original-word-auto-project-test.html'
   workflow_dispatch:
 permissions:
   contents: read
@@ -77,5 +78,13 @@ jobs:
           assert 'KT66ExpertReview.create' not in s
           assert 'kt67-2-5-shared-admin.js?v=kt67-25-admin-1' in s
           assert 'KT66ContentQA.verify(blob' in s
-          print('KT67-2.5 browser uses immutable KT42 and KT56 for A and B PASS')
+          # Both published test routes must use the same validated administrative
+          # case metadata before the original immutable KT42/KT53 generators.
+          original=Path('v26-test/v27-preview/kt67-2-original-word-auto-project-test.html').read_text()
+          assert 'KT6725Admin.normalize(workingDraft.metadata,found' in original
+          assert original.index('KT6725Admin.normalize(workingDraft.metadata,found')<original.index('V26DraftPackage.make(')
+          assert 'kt67-2-5-shared-admin.js?v=kt67-unified-admin-20261105' in original
+          assert 'v27-ai-author.js?v=kt67-26-shared-revision-1' in original
+          assert 'v27-kt50-original-kt42.js?v=kt603-original-locked-b1d2cfb' in original
+          print('KT67-2.5 both published test routes use common administrative data PASS')
           PY
