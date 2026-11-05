@@ -1,0 +1,37 @@
+name: KT65 real post-AI input to original Word B
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt65-post-ai.yml'
+      - 'v26-test/v27-preview/kt65-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-word-and-post-ai-diagnostic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install validation dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Original KT56 A B R02 replay unchanged
+        run: node v26-test/v27-preview/kt62-locked-replay-regression.cjs
+      - name: Actual post-AI snapshot executes before the KT60 B refusal
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('v26-test/v27-preview/kt65-real-post-ai-b-test.html').read_text()
+          assert s.index("const kt60=window.KT603Evidence?.build")<s.index("// KT65: inspect the ACTUAL post-AI")
+          assert s.index("// KT65: inspect the ACTUAL post-AI")<s.index("if(kt60.scenario==='Б'&&!kt60.ok)")
+          assert 'window.KT64Compare.compare(actualWordInput)' in s
+          assert "kt60.draft||workingDraft" in s
+          assert 'v27AiDraft.length' in s
+          assert "kt61-draft-writer.js" not in s
+          assert "v27-kt50-original-kt42.js?v=kt603-original-locked-b1d2cfb" in s
+          assert "kt53-original-draft-package.js?v=kt603-original-locked-b1d2cfb" in s
+          print('KT65 actual post-AI diagnostic position and original generator PASS')
+          PY
