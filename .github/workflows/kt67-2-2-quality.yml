@@ -21,6 +21,29 @@ jobs:
         run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
       - name: Original KT56 content replay
         run: node v26-test/v27-preview/kt62-locked-replay-regression.cjs
+      - name: KT68 inspect approved DOCX run-by-run bold typography
+        run: |
+          node - <<'JS'
+          const fs=require('node:fs'),fflate=require('fflate'),{DOMParser}=require('@xmldom/xmldom');
+          const ns='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+          const all=(el,n)=>Array.from(el.getElementsByTagNameNS(ns,n));
+          for(const name of ['KT35-A','KT39-B','V27-R02']){
+            const zip=fflate.unzipSync(new Uint8Array(fs.readFileSync('v26-test/v27-preview/etalon/'+name+'.docx')));
+            const doc=new DOMParser().parseFromString(new TextDecoder().decode(zip['word/document.xml']),'application/xml');
+            const ps=Array.from(all(doc,'body')[0].childNodes).filter(x=>x.nodeType===1&&x.localName==='p');
+            console.log('KT68 FONT AUDIT',name,'paragraphs',ps.length);
+            for(let i=0;i<ps.length;i++){
+              if(i!==10&&i!==6&&i!==7&&i!==16&&i!==17&&i!==23&&i!==31&&i!==39)continue;
+              const runs=Array.from(ps[i].childNodes).filter(x=>x.nodeType===1&&x.localName==='r').map(r=>{
+                const t=all(r,'t').map(x=>x.textContent).join('');
+                if(!t)return null;
+                const bp=all(r,'b')[0];
+                return {text:t.slice(0,115),length:t.length,bold:bp?bp.getAttributeNS(ns,'val')!=='0':false};
+              }).filter(Boolean);
+              console.log(JSON.stringify({name,paragraph:i,runs}));
+            }
+          }
+          JS
       - name: Syntax and normalized factual fields
         run: |
           node --check v26-test/v27-preview/kt67-2-2-case-normalize.js
