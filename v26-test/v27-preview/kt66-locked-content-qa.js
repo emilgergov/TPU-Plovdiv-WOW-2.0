@@ -34,7 +34,12 @@ async function check(doc,which){
   if(!current.zip[file]||!same(current.zip[file],original.zip[file]))throw Error('КТ66: променено оформление/лого/футер '+file+' в '+which);
  }
  const text=current.texts.join('\n');
- if(/\[\[(?:LEGAL|IMPACTS|PROCEDURE|CHARACTERIZATION|CONCLUSION)\]\]|\[ЗА ЕКСПЕРТНА ПРОВЕРКА|НЯМА ДАННИ/i.test(text))throw Error('КТ66: невалидни маркери или заместители в '+which);
+ for(let i=0;i<current.texts.length;i++){
+  const t=current.texts[i].trim();
+  if(/\\[\\[(?:LEGAL|IMPACTS|PROCEDURE|CHARACTERIZATION|CONCLUSION)\\]\\]|\\[\\s*ЗА ЕКСПЕРТНА ПРОВЕРКА/iu.test(t)
+    ||/^НЯМА ДАННИ(?:\\s+В\\s+ПРЕПИСКАТА)?[.!]?$/iu.test(t))
+   throw Error('КТ66: невалиден самостоятелен заместител в '+which+', абзац '+(i+1));
+ }
  return {fixed,assets:assets.length,paragraphs:expected};
 }
 async function verify(blob,scenario){
