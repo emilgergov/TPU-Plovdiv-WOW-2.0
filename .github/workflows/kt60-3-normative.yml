@@ -1,0 +1,58 @@
+name: KT60.3 normative citations and locked Word
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt60-3-normative.yml'
+      - 'v26-test/v27-preview/kt60-3-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  legal-and-word:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install DOCX regression dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Check original Word A B R02 and module syntax
+        run: |
+          node v26-test/v27-preview/kt50-original-kt42-regression.cjs
+          node --check v26-test/v27-preview/kt60-3-normative-adapter.js
+          node --check v26-test/v27-preview/kt60-3-claim-trace.js
+          node --check v26-test/v27-preview/kt60-3-auto-evidence.js
+      - name: Validate real normative archive fields and fail closed behavior
+        run: |
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('fs'),vm=require('vm');
+          const w={},ctx=vm.createContext({window:w});
+          for(const n of ['kt60-3-normative-adapter.js','kt60-3-claim-trace.js','kt60-3-auto-evidence.js'])
+           vm.runInContext(fs.readFileSync('v26-test/v27-preview/'+n,'utf8'),ctx);
+          const archive=JSON.parse(fs.readFileSync('v26-test/data/verified-legal-excerpts-20261028.json','utf8')).records;
+          const result=w.KT603LegalArchive.build({records:archive});
+          assert(result.counts.verifiedCitations>=3,'recognized project-accepted official citations');
+          assert.equal(result.counts.verifiedFullText,0,'no invented verbatim content');
+          const approved=result.rows.find(x=>x.id==='P_ZBR_31');
+          assert(approved&&approved.status==='verified_citation'&&approved.article.includes('31'));
+          const trace=w.KT603ClaimTrace.rankClaims({aiDraft:'[[CHARACTERIZATION]]\nИнвестиционно предложение\n[[LEGAL]]\nЗакон за биологичното разнообразие член 31 оценка за съвместимост\n[[PROCEDURE]]\nПроцедура оценка за съвместимост\n[[IMPACTS]]\nПреценка на въздействия',normativeRegister:{records:archive}});
+          assert(trace.sourceCounts.scopedCitations>=3);
+          assert.equal(trace.sourceCounts.articleVerified,0);
+          assert(trace.claims.every(x=>x.confirmed===false));
+          const B=w.KT603Evidence.build({results:[{input:'36676.129.457',verified_zone_intersections:['BG0000194']}],workingDraft:{metadata:{},paragraphs:['a','b','c','d']},aiDraft:'[[CHARACTERIZATION]]\nTest\n[[LEGAL]]\nTest\n[[PROCEDURE]]\nTest\n[[IMPACTS]]\nTest',normativeRegister:{records:archive}});
+          assert.equal(B.ok,false);
+          assert.equal(B.report.verified,0);
+          console.log('KT60.3 archive citation and protected Word B PASS');
+          JS
+      - name: Check isolated page integration
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          h=Path('v26-test/v27-preview/kt60-3-normative-test.html').read_text()
+          for t in ['kt60-3-normative-adapter.js?v=kt603-normative-1','kt60-3-claim-trace.js?v=kt603-trace-1','kt60-3-auto-evidence.js?v=kt603-evidence-1','window.KT603Evidence?.build','v27-kt50-original-kt42.js?v=kt603-original-locked-b1d2cfb','kt53-original-draft-package.js?v=kt603-original-locked-b1d2cfb']:
+            assert t in h,t
+          assert 'kt53d-b-characterization-word.js' not in h
+          print('KT60.3 browser route PASS')
+          PY
