@@ -91,6 +91,29 @@ try{
   assert.equal(browserResponse.status,200);
   assert.equal(browserResponse.headers.get('Access-Control-Allow-Origin'),origin);
   assert.equal(calls,4);
+  // KT67-2.6: a real-shaped five-impact reply must cause one full authorial
+  // revision rather than a partial DOCX, generic filler, or six-way text split.
+  const fiveImpacts=sampleDraft.replace(/\n\nВъздействие 6:[^\n]+$/u,'');
+  let revisionCalls=0;
+  globalThis.fetch=async (_url,opts)=>{
+    revisionCalls++;
+    const request=JSON.parse(opts.body);
+    assert.equal(request.store,false);
+    assert.equal(request.max_output_tokens,4200);
+    if(revisionCalls===2){
+      assert.equal(request.input.length,4);
+      assert.match(request.input[3].content,/IMPACTS_COUNT 5\/6/);
+    }
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:revisionCalls===1?fiveImpacts:sampleDraft}]}]}),{status:200,headers:{'Content-Type':'application/json'}});
+  };
+  const repairedResponse=await worker.fetch(post('test-access-token',{mode:'expert',facts}),env);
+  assert.equal(repairedResponse.status,200);
+  const repaired=await repairedResponse.json();
+  assert.equal(repaired.revised,true);
+  assert.equal(revisionCalls,2);
+  assert.match(repaired.draft,/Въздействие 6/);
+  console.log('PASS: five-impact AI response is automatically rewritten into six substantive sections before sending to browser.');
+
   console.log('PASS: health, unauthorized access, invalid input, classic and expert AI drafting (mock provider).');
   console.log('No real OpenAI API calls made; live generation still requires separate verification.');
 } finally {globalThis.fetch=savedFetch}
