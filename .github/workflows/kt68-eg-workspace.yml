@@ -29,6 +29,8 @@ jobs:
             const html=fs.readFileSync(filename,'utf8');
             assert(html.includes('v27-preview/kt68-eg-workspace.js?v=kt68-ui-2'),filename+' must load approved UI layer');
             assert(html.includes('await window.KT68UI.confirmPackage()'),filename+' must use styled modal');
+            assert(html.includes('id="kt68IdsHelp"'), filename+' must show input guidance below cadastral IDs');
+            assert(!html.includes('role="status">Въведете идентификатор'), filename+' must not duplicate cadastral guidance at bottom');
             assert(!html.includes("document.getElementById('kt56AModel').addEventListener"),filename+' must not bind removed KT56 specimen button');
             assert(!html.includes("document.getElementById('kt54BModel').addEventListener"),filename+' must not bind removed KT54 specimen button');
             assert(html.includes('if(kt68A)kt68A.addEventListener'),filename+' conditionally binds legacy A only if present');
