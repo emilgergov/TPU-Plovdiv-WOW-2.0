@@ -73,6 +73,29 @@ Each paragraph must contain substantive text (at least 45 characters) and must n
     }
     return issues;
   }
+  // KT67-2.7: common substantive guard for A and B. The model gets ONE
+  // whole-document revision if it asserts a decided procedure without a
+  // source, conflates Natura 2000 zones with protected territories, or uses
+  // fabricated terminology. Do not silently delete the offending passage.
+  function substantiveIssues(output){
+    const issues=[];
+    const part=(start,end)=>output.split('[['+start+']]')[1]?.split('[['+end+']]')[0]||'';
+    const legalProcedure=part('LEGAL','PROCEDURE')+'\n'+part('PROCEDURE','IMPACTS');
+    const fixed=legalProcedure.toLocaleLowerCase('bg');
+    const categorical=[
+      /(?:е|се\s+явява)\s+(?:необходима|задължителна)\s+(?:оценка\s+за\s+съвместимост|ос)\b/u,
+      /(?:е|се\s+счита\s+за)\s+препоръчителна\s+(?:оценка\s+за\s+съвместимост|ос)\b/u,
+      /(?:необходимо|задължително|следва)\s+е?\s*(?:да\s+)?(?:се\s+)?(?:извърши|проведе)\s+оценка\s+за\s+съвместимост/u,
+      /(?:оценка(?:та)?\s+за\s+съвместимост|съвместимостн(?:а|ата)\s+оценка)\s+е\s+(?:необходима|задължителна|препоръчителна)/u
+    ];
+    if(categorical.some(re=>re.test(fixed)))issues.push('UNSUPPORTED_CATEGORICAL_OS');
+    if(/защитена\s+територия\s*\(\s*защитена\s+зона|защитен(?:ата|и)?\s+територи(?:я|и)\s+bg\d{7}/iu.test(output))
+      issues.push('ZONE_TERRITORY_CONFLATION');
+    if(/\bОСВОС\b/iu.test(output))issues.push('INVALID_OSVOS_TERM');
+    if(/съдебно-юридическ|проекто-експертн|присъдени\s+правомощия/iu.test(output))
+      issues.push('NONADMINISTRATIVE_TERMINOLOGY');
+    return issues;
+  }
   const controller=new AbortController();
   const timeout=setTimeout(()=>controller.abort(),65000);
   try {
@@ -81,7 +104,7 @@ Each paragraph must contain substantive text (at least 45 characters) and must n
       const messages=[{role:"system",content:system},{role:"user",content:JSON.stringify(input.facts)}];
       if(pass===1){
         messages.push({role:"assistant",content:previous});
-        messages.push({role:"user",content:"STRUCTURAL REVISION REQUIRED. Your previous Bulgarian draft had "+issues.join(", ")+". Rewrite the entire project for the SAME input and verified facts, preserving its individual analysis and institutional administrative voice. Output EXACTLY four headed sections. Use four full separate CHARACTERIZATION paragraphs, four full LEGAL paragraphs, 1–2 full PROCEDURE paragraphs and EXACTLY SIX full IMPACTS paragraphs separated by blank lines: introduction; natural habitats; species; integrity/conservation objectives; ecological connectivity; cumulative effects. Never break sentences merely to meet paragraph count, never invent source facts, and do not append a fifth section. Return ONLY the corrected entire draft."});
+        messages.push({role:"user",content:"STRUCTURAL AND SUBSTANTIVE REVISION REQUIRED. Your previous Bulgarian draft had "+issues.join(", ")+". Rewrite the entire project for the SAME input and verified facts, preserving its individual analysis and institutional administrative voice. Output EXACTLY four headed sections. Use four full separate CHARACTERIZATION paragraphs, four full LEGAL paragraphs, 1–2 full PROCEDURE paragraphs and EXACTLY SIX full IMPACTS paragraphs separated by blank lines: introduction; natural habitats; species; integrity/conservation objectives; ecological connectivity; cumulative effects. Never break sentences merely to meet paragraph count, never invent source facts, and do not append a fifth section. Correct any unverified categorical conclusion that compatibility assessment is required, necessary or recommended: spatial intersection alone never establishes that outcome. Keep a specific provisional administrative assessment grounded in the case facts. Never call a Natura 2000 protected zone a 'защитена територия'; these are distinct legal regimes. Never use the fabricated abbreviation 'ОСВОС'. Preserve the individual factual material and the four verified headings, then return ONLY the corrected entire draft."});
       }
       const upstream=await fetch("https://api.openai.com/v1/responses",{
         method:"POST",signal:controller.signal,
@@ -92,11 +115,11 @@ Each paragraph must contain substantive text (at least 45 characters) and must n
       const data=await upstream.json();
       const output=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
       if(!output)return reply({error:"No text returned by AI provider"},502);
-      issues=structuralIssues(output);
+      issues=[...structuralIssues(output),...substantiveIssues(output)];
       if(!issues.length)return reply({mode:input.mode,draft:output,reviewRequired:true,source:"user-supplied structured test facts",revised:pass===1});
       previous=output;
     }
-    return reply({error:"AI output still structurally incomplete after one authorial revision",qualityIssues:issues},422);
+    return reply({error:"AI draft still fails structural or administrative-law review after one authorial revision",qualityIssues:issues},422);
   } catch {return reply({error:"AI request timed out or failed"},504)}
   finally {clearTimeout(timeout)}
 
