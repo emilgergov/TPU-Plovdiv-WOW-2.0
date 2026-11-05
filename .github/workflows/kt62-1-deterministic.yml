@@ -1,0 +1,47 @@
+name: KT62.1 B content repeatability and ZIP envelope diagnosis
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt62-1-deterministic.yml'
+      - 'v26-test/v27-preview/kt62-1-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  approved-content:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Original A B Expert R02 must retain exact approved content and replay
+        run: node v26-test/v27-preview/kt62-locked-replay-regression.cjs
+      - name: Browser must compare all actual DOCX members, never overwrite text
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('v26-test/v27-preview/kt62-1-deterministic-content-test.html').read_text()
+          assert 'function verifySameDocxEntries(a,b,label)' in s
+          assert 'equal(a.unzipped[key],b.unzipped[key])' in s
+          assert "const sameEnvelope=verifySameDocxEntries(a,b,label);" in s
+          assert 'a.para[index]!==orig.para[index]' in s
+          assert "word/media/" in s
+          assert "kt61-draft-writer.js" not in s
+          print('KT62.1 immutable content compare and metadata diagnostic PASS')
+          PY
+      - name: Prove ZIP envelope timestamps can differ without content modification
+        run: |
+          node - <<'JS'
+          const assert=require('node:assert/strict'), fflate=require('fflate');
+          const bytes=new TextEncoder().encode('СЪЩИЯТ ОДОБРЕН ТЕКСТ');
+          const oldDate=new Date('2020-02-02T12:00:00Z'),newDate=new Date('2020-02-02T12:01:00Z');
+          const a=fflate.zipSync({'word/document.xml':[bytes,{mtime:oldDate}]});
+          const b=fflate.zipSync({'word/document.xml':[bytes,{mtime:newDate}]});
+          assert.notDeepEqual(a,b);
+          assert.deepEqual(fflate.unzipSync(a)['word/document.xml'],fflate.unzipSync(b)['word/document.xml']);
+          console.log('Different ZIP header timestamps, identical underlying document: PASS');
+          JS
