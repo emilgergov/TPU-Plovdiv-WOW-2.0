@@ -137,6 +137,18 @@ jobs:
             const unverified={...base,expert:{...base.expert,legal:[claim]}};
             assert(api.inspect(unverified).issues.some(x=>x.code==='UNSOURCED_PROCEDURE_INFERENCE'),claim);
           }
+          // Spatial overlap may demand a procedural APPLICABILITY review; it must not
+          // be conflated with a mandatory appropriate assessment finding.
+          const proceduralReview={...base,expert:{...base.expert,legal:[
+            'Тъй като имотът попада в границите на защитена зона Натура 2000, обстоятелството изисква преценка на приложимата процедура по Наредбата за ОС, без автоматичен извод за необходимост от оценка за съвместимост.'
+          ]}};
+          assert.equal(api.inspect(proceduralReview).ok,true,'B procedural applicability review is not an unsupported assessment order');
+          const binding={...base,expert:{...base.expert,legal:[
+            'Тъй като имотът попада в защитена зона Натура 2000, това изисква провеждане на оценка за съвместимост.'
+          ]}};
+          assert(api.inspect(binding).issues.some(x=>x.code==='UNSOURCED_PROCEDURE_INFERENCE'),'Unverified mandatory OS must remain blocked');
+          const found=api.inspect(binding).issues.find(x=>x.code==='UNSOURCED_PROCEDURE_INFERENCE');
+          assert(found.excerpt.includes('изисква провеждане'),'Actionable offending excerpt must be recorded');
           const conditional={...base,expert:{...base.expert,procedure:['Необходимо е да се провери дали са изпълнени предпоставките за преценка на приложимата процедура по Наредбата за ОС.']}};
           assert.equal(api.inspect(conditional).ok,true,'Conditional project wording must remain possible');
           const cited={...base,expert:{...base.expert,legal:['Съгласно чл. 30 се въвеждат задължителни условия.']}};
