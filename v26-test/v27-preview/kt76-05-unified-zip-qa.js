@@ -63,6 +63,12 @@ function verifyCase(c,e,{scenario='Б',parcelIds=[],zoneCodes=[],spatialRelation
   requireOk(visibleBold(c.ps[40]).some(r=>r.bold&&r.value.includes('С уважение')),'липсва bold на подписния поздрав');
   requireOk(!c.lines[17].includes('ал. 1. от'),'регресия в пунктуацията §18');
  }
+ // KT76-08: block the observed nonsensical wastewater terminology before release.
+ // This is a non-mutating fail-closed check: approved Classic and Expert templates
+ // remain untouched; an invalid AI draft must be regenerated or reviewed.
+ const expertText=e.lines.join('\\n');
+ requireOk(!/санкционн(?:ото|о|и|ия|ият)?\\s+третиране\\s+на\\s+отпадъчни\\s+води/iu.test(expertText),
+  'Expert съдържа неправилния термин „санкционно третиране на отпадъчни води“');
  // Even in other scenarios, never allow ambiguous geometric statement.
  requireOk(!/попада\s+изцяло\s+или\s+частично|попадат\s+или\s+частично/iu.test(e.lines.join('\n')),'двусмислено попадане в Expert');
  return {scenario:normalized,classicParagraphs:n,expertParagraphs:49,parcelCount:parcelIds.length,spatialRelation:spatialRelation||null};
