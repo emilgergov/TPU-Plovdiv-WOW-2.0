@@ -59,7 +59,14 @@ const data=()=>({scenario:'Б',parcelIds:['36676.129.457'],zoneCodes:['BG0000194
   assert.match(after.items[24].text,/РД-648\/19\.07\.2024/);
   assert(after.items[25].runs.some(x=>x.bold&&x.text==='BG0000194 „Река Чая“'),'para26 zone bold');
   assert(after.items[26].runs.some(x=>x.bold&&x.text.startsWith('и не подлежат')),'para27 bold');
-  assert(after.items[33].runs.some(x=>x.bold&&x.text.startsWith('не е необходимо')),'para34 conclusion bold');
+  const p34=after.items[33].runs.filter(x=>x.text);
+  const ipTitle='„Изграждане на малък едноетажен обслужващ обект с временна площадка за складиране на оборудване“';
+  const conclusion34='не е необходимо провеждане на процедура по реда на Глава втора от Наредбата за ОС.';
+  assert.equal(p34.filter(x=>x.bold).length,2,'para34 must have exactly two bold runs');
+  assert(p34.some(x=>x.bold&&x.text===ipTitle),'para34 full quoted investment title bold');
+  assert(p34.some(x=>x.bold&&x.text===conclusion34),'para34 conclusion bold');
+  assert(p34.some(x=>!x.bold&&x.text.includes('в поземлен имот с идентификатор 36676.129.457')),'para34 location unbolded');
+  assert(p34.filter(x=>x.bold).every(x=>!x.text.includes('населено място')),'para34 locality must remain plain');
   assert(after.items[34].runs.some(x=>x.bold&&x.text==='Общ устройствен план.'),'para35 bold');
   assert(after.items[35].runs.some(x=>x.bold&&x.text==='настоящото писмо'),'para36 bold');
   assert(after.items[40].runs[0].bold,'para41 greeting must remain bold');
