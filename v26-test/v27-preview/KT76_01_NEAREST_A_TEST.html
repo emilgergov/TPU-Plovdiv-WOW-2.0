@@ -562,7 +562,7 @@ async function kt76AlignNearestWordSlots(blob,nearestText){
  const zip=window.fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
  const ns='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
  const pairs=[['01_Proekt_na_stanovishte_Klasicheski.docx',41,23],['02_Proekt_na_stanovishte_Eksperten.docx',49,24]];
- const computed=String(nearestText||'').match(/BG\\d{7}/)?.[0]||'';
+ const computed=String(nearestText||'').match(/BG\d{7}/)?.[0]||'';
  if(!computed)throw Error('КТ76-01: липсва потвърдена най-близка зона. Не се заменя еталонният правен текст.');
  for(const [file,count,index] of pairs){
   const raw=zip[file];if(!raw)throw Error('КТ76-01: липсва '+file);
@@ -573,7 +573,7 @@ async function kt76AlignNearestWordSlots(blob,nearestText){
   const ps=Array.from(xml.getElementsByTagNameNS(ns,'body')[0].children).filter(p=>p.localName==='p');
   if(ps.length!==count)throw Error('КТ76-01: нарушен брой абзаци на '+file);
   const old=Array.from(ps[index].getElementsByTagNameNS(ns,'t')).map(t=>t.textContent||'').join('');
-  const cited=old.match(/BG\\d{7}/)?.[0]||'';
+  const cited=old.match(/BG\d{7}/)?.[0]||'';
   if(cited!==computed)throw Error('КТ76-01: измерената зона '+computed+' не съвпада с еталонната '+cited+'. Необходима е нормативна проверка; ZIP не се променя.');
   if(computed==='BG0000578'&&(!old.includes('Заповед № РД-728/19.08.2024 г.')||!old.includes('ДВ, бр. 74/30.08.2024 г.')||!old.includes('за опазване на природните местообитания и на дивата флора и фауна')))
    throw Error('КТ76-01: липсва част от одобрения абзац или заповедта за обявяване.');
