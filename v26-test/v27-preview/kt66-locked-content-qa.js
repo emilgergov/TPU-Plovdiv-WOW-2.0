@@ -22,7 +22,16 @@ async function check(doc,which){
  if(current.ps.length!==expected||original.ps.length!==expected)throw Error('КТ66: регресия в броя абзаци на '+which);
  const variable=which==='E'?[6,7,10,17,20,21,23,24,25,26,27,28,31,32,33,34,35,36,38,39]:
  [6,7,10,16,18,19,20,21,...(which==='B'?[22,23,24,25,26,27,28,29,30,31,32,33]:[22,23,24,25,26,27,28,29,30,31])];
+ // KT71: B paragraph 18 is the sole additional procedural sentence.
+ // It MUST be a precisely approved non-determinative formulation; unlike
+ // generic mutable slots, arbitrary rewrites remain prohibited.
+ if(which==='B'){
+  const safeProcedure='Инвестиционното предложение се разглежда във връзка с чл. 2, ал. 2 от Наредбата за ОС. Приложимият ред и необходимите последващи действия се определят въз основа на представените документи и проверените обстоятелства по конкретната преписка.';
+  if(current.texts[17]!==safeProcedure&&current.texts[17]!==original.texts[17])
+   throw Error('КТ66: неразрешена промяна на процедурния абзац 18 в Б');
+ }
  const mutable=new Set(variable);
+ if(which==='B')mutable.add(17);
  let fixed=0;
  for(let i=0;i<expected;i++){
   if(mutable.has(i))continue;
