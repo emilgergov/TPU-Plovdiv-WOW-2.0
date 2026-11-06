@@ -1,0 +1,27 @@
+name: KT76-01 isolated GIS and A Word nearest-zone alignment
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt76-01-nearest-a.yml'
+      - 'v26-test/v27-preview/KT76_01_NEAREST_A_TEST.html'
+      - 'v26-test/v27-preview/kt76-01-nearest-a-qa.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  nearest-a:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install ZIP and OOXML test dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Verify isolated KT76-01 route and document synchronization
+        run: node v26-test/v27-preview/kt76-01-nearest-a-qa.cjs
+      - name: Preserve KT74 and KT75 Word regressions
+        run: |
+          node v26-test/v27-preview/kt74-classic-fidelity-qa.cjs
+          node v26-test/v27-preview/kt75-expert-intro-qa.cjs
