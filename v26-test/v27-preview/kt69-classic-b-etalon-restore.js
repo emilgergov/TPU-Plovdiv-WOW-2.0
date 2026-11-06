@@ -76,7 +76,7 @@ async function classic(scenario,characterization,metadata,context){
  // The KT39-B position 23 concerns land-use, not a generic list of laws.
  // Lack of supporting data is a review item, never a claim of "no change".
  put(ps[22],'По отношение на предназначението и начина на трайно ползване на имота, както и необходимостта от тяхната промяна, следва да се съобразят данните от КККР и представените документи. При липса на потвърдени сведения този въпрос подлежи на документална и експертна проверка.');
- const zoneLabel=zones.replace(/BG0000194(?!\\s*„Река Чая“)/g,'BG0000194 „Река Чая“');
+ const zoneLabel=zones.replace(/BG0000194(?!\s*„Река Чая“)/g,'BG0000194 „Река Чая“');
  put(ps[24],'Относима защитена зона: '+zoneLabel+'. Обявяването, режимите и приложимите разпоредби на заповедите се проверяват спрямо актуалния нормативен архив за конкретната преписка.');
  const admissibility=read(ps[25]),environment=read(ps[26]);
  if(!/чл\.\s*12,\s*ал\.\s*2/.test(admissibility))
