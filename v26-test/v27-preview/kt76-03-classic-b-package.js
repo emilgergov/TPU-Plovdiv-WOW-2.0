@@ -99,10 +99,25 @@ function segmentsFor(index,value,relation){
   if(a<0)throw Error('KT76-03: липсва ГИС израз');
   return [{text:value.slice(0,a)},{text:token,bold:true},{text:value.slice(a+token.length)}];
  }
+ if(index===34){
+  // KT76-03 R2: only the quoted investment title and the closing legal
+  // finding are bold; cadastral ID and the entire location remain plain.
+  const title='„Изграждане на малък едноетажен обслужващ обект с временна площадка за складиране на оборудване“';
+  const conclusion='не е необходимо провеждане на процедура по реда на Глава втора от Наредбата за ОС.';
+  const a=value.indexOf(title),b=value.indexOf(conclusion);
+  if(a<0||b<=a+title.length||value.indexOf(title,a+1)!==-1||value.indexOf(conclusion,b+1)!==-1)
+   throw Error('KT76-03: неоднозначно заглавие/извод за bold в абзац №34');
+  return [
+   {text:value.slice(0,a)},
+   {text:title,bold:true},
+   {text:value.slice(a+title.length,b)},
+   {text:conclusion,bold:true},
+   {text:value.slice(b+conclusion.length)}
+  ];
+ }
  let suffix='';
  if(index===26)suffix='BG0000194 „Река Чая“';
  if(index===27)suffix='и не подлежат на регламентираните по реда на глава шеста от него процедури по оценка на въздействието върху околната среда (ОВОС) или екологична оценка (ЕО).';
- if(index===34)suffix='не е необходимо провеждане на процедура по реда на Глава втора от Наредбата за ОС.';
  if(index===35)suffix='Общ устройствен план.';
  if(index===36)suffix='настоящото писмо';
  if(!suffix)return [{text:value}];
