@@ -1,0 +1,30 @@
+name: KT75 Expert A-B introductory legal citation
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt75-expert-intro.yml'
+      - 'v26-test/v27-preview/kt75-expert-intro.js'
+      - 'v26-test/v27-preview/kt75-expert-intro-qa.cjs'
+      - 'v26-test/v27-preview/kt67-2-original-word-auto-project-test.html'
+      - 'v26-test/v27-preview/kt67-2-5-a-b-admin-test.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  expert-docx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install DOCX parsing dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Validate source and generated Expert A/B DOCX
+        run: |
+          node --check v26-test/v27-preview/kt75-expert-intro.js
+          node --check v26-test/v27-preview/kt75-expert-intro-qa.cjs
+          node v26-test/v27-preview/kt75-expert-intro-qa.cjs
+      - name: Recheck locked Classic A/B fidelity
+        run: node v26-test/v27-preview/kt74-classic-fidelity-qa.cjs
