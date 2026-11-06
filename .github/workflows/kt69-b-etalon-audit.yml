@@ -36,6 +36,8 @@ jobs:
               fix='v27-preview/kt69-classic-b-etalon-restore.js?v=kt71-b-1'
               draft='v27-preview/kt67-2-draft-package.js?v=kt67-2-draft-1'
               assert s.count(fix)==1, name
+              assert s.count('v27-preview/kt66-locked-content-qa.js?v=kt72-qa-2')==1, 'KT72 must bust KT66 script cache: '+name
+              assert 'kt66-locked-content-qa.js?v=kt66-qa-1' not in s
               assert s.index(original)<s.index(fix)<s.index(draft), name
               assert 'v27-preview/kt68-map-controls.js?v=kt71-compact-1' in s, name
           print('KT69 PASS: B-only adapter follows unchanged KT50 on both pages, map layer retained')
