@@ -11,10 +11,10 @@ style.textContent=`
 /* KT68: a single compact horizontal map toolbar. Presentation only. */
 .map .controls{
  position:absolute!important;top:12px!important;right:12px!important;left:auto!important;
- display:flex!important;flex-flow:row wrap!important;justify-content:flex-end!important;
+ display:flex!important;flex-flow:row wrap!important;justify-content:flex-start!important;
  align-items:center!important;align-content:flex-start!important;
- width:max-content!important;max-width:calc(100% - 315px)!important;
- padding:5px 6px!important;gap:4px!important;
+ width:500px!important;max-width:calc(100% - 315px)!important;
+ padding:4px!important;gap:3px!important;
  border:1px solid #bfd6c9!important;border-radius:9px!important;
  background:rgba(255,255,255,.96)!important;
  box-shadow:0 2px 6px #0001!important;z-index:7!important;
@@ -30,11 +30,11 @@ style.textContent=`
 }
 .map .controls .kt68-control-title{display:none!important}
 .map .controls button{
- font-size:11px!important;padding:6px 8px!important;
- min-height:30px!important;line-height:1.05!important;border-radius:6px!important;
+ font-size:10px!important;padding:4px 6px!important;
+ min-height:27px!important;line-height:1.05!important;border-radius:6px!important;
  white-space:nowrap!important;
 }
-.map .controls #zoomIn,.map .controls #zoomOut{min-width:29px!important;padding:5px 7px!important}
+.map .controls #zoomIn,.map .controls #zoomOut{min-width:26px!important;padding:4px 6px!important}
 .map .controls #fit{max-width:110px!important}
 .map .controls #zoneContext{max-width:75px!important}
 .map .controls .kt68-parcel-switch{
@@ -42,7 +42,7 @@ style.textContent=`
  border-radius:7px!important;overflow:hidden!important;
 }
 .map .controls .kt68-parcel-switch button{
- border-radius:0!important;padding:6px 8px!important;min-height:28px!important;font-size:11px!important;
+ border-radius:0!important;padding:6px 8px!important;min-height:26px!important;font-size:10px!important;
 }
 .map .controls .kt68-parcel-switch button[aria-pressed=false]{
  background:#e8f1eb!important;color:#24523d!important;
@@ -54,10 +54,10 @@ style.textContent=`
  font-size:11px!important;padding:2px!important;background:none!important;white-space:nowrap!important;
 }
 .map .controls .kt68-control-set>select{
- max-width:126px!important;height:30px!important;font-size:11px!important;padding:4px!important;
+ max-width:126px!important;height:27px!important;font-size:10px!important;padding:3px!important;
 }
 @media(max-width:1050px){
- .map .controls{max-width:calc(100% - 260px)!important;row-gap:5px!important}
+ .map .controls{max-width:calc(100% - 260px)!important;row-gap:3px!important}
 }
 @media(max-width:760px){
  .map .controls{top:58px!important;right:8px!important;max-width:calc(100% - 16px)!important;
