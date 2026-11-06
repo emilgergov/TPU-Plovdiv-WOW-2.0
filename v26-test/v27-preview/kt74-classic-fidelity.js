@@ -53,11 +53,11 @@ function restoreIntro(xml,p,metadata){
 function fixHeadingB(p,metadata){
  const ids=String(metadata?.parcelIds||'').match(/\b\d{5}\.\d+\.\d+\b/g)||[];
  if(ids.length!==1)return;
- const rs=nodes(p,'r');if(rs.length!==4)throw Error('KT74: нарушени четири еталонни сегмента на Относно.');
- const location=nodes(rs[3],'t');
- if(!location.length)throw Error('KT74: липсва местоположение.');
- const t=location.map(x=>x.textContent).join('').replace(/в поземлени имоти с идентификатори/iu,'в поземлен имот с идентификатор');
- location[0].textContent=t;location.slice(1).forEach(x=>x.textContent='');
+ // The template has formatting-only runs as well as four styled visible
+ // segments. Update the existing location text in place, never rebuild runs.
+ const ts=nodes(p,'t');
+ const target=ts.find(x=>/в поземлени имоти с идентификатори/iu.test(x.textContent||''));
+ if(target)target.textContent=target.textContent.replace(/в поземлени имоти с идентификатори/iu,'в поземлен имот с идентификатор');
  if(!text(p).includes(ids[0]))throw Error('KT74: липсва имотът в заглавието.');
 }
 function correctImpactB(p){
