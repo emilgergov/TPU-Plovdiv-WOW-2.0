@@ -40,9 +40,25 @@ async function getEtalon(){
  })().catch(error=>{etalonPromise=null;throw error});
  return etalonPromise;
 }
+const reviewRequired=t=>!String(t||'').trim()||/\\[ЗА ЕКСПЕРТНА ПРОВЕРКА|\\[ЗА ПОПЪЛВАНЕ|\\[ОТКЪС ОТ ПРЕПИСКАТА|НЯМА ДАННИ/i.test(String(t));
+function safeBCharacteristics(input){
+ if(!Array.isArray(input)||input.length!==4)return input;
+ const topics=[
+  'Предметът и предвидените дейности',
+  'Електрозахранването и присъединяването',
+  'Водоснабдяването',
+  'Отпадъчните води и начинът на заустване'
+ ];
+ return input.map((value,i)=>reviewRequired(value)
+   ?topics[i]+' не са достатъчно удостоверени от наличните документи и изискват конкретизиране и експертна проверка преди произнасяне.'
+   :value);
+}
 async function classic(scenario,characterization,metadata,context){
- const generated=await original.make(scenario,characterization,metadata,context);
- if(scenario!=='Б'&&scenario!=='B')return generated;
+ if(scenario!=='Б'&&scenario!=='B')return original.make(scenario,characterization,metadata,context);
+ // B-only: unresolved dossier characteristic is a clearly qualified review
+ // statement, not an invented factual assertion. The locked KT50 safety guard
+ // for legal grounds, impact evidence and procedure stays in force.
+ const generated=await original.make(scenario,safeBCharacteristics(characterization),metadata,context);
  // Keep the explicitly approved historical specimen untouched.
  if(metadata?.approvedSpecimen===true)return generated;
  const zones=asZones(context?.determination);
