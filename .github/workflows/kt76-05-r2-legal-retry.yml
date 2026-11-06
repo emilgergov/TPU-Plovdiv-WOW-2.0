@@ -1,0 +1,28 @@
+name: KT76-05 R2 AI legal retry safety
+on:
+  push:
+    branches: [kt76-05-legal-author-retry-20261106, main]
+    paths:
+      - '.github/workflows/kt76-05-r2-legal-retry.yml'
+      - 'v26-test/v27-preview/KT76_05_R2_LEGAL_RETRY_TEST.html'
+      - 'v26-test/v27-preview/kt76-05-r2-legal-retry-qa.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  retry-safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify legal retry, strict fail-closed and original-route preservation
+        run: node v26-test/v27-preview/kt76-05-r2-legal-retry-qa.cjs
+      - name: Install integration QA dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Preserve KT76-05 full ZIP QA and baseline
+        run: |
+          node v26-test/v27-preview/kt76-05-unified-zip-qa.cjs
+          node v26-test/v27-preview/kt76-04-expert-gis-qa.cjs
+          node v26-test/v27-preview/kt76-03-classic-b-qa.cjs
