@@ -1,0 +1,29 @@
+name: KT76-04 Expert GIS definite statement
+on:
+  push:
+    branches: [main, kt76-04-expert-gis-definitive-20261106]
+    paths:
+      - '.github/workflows/kt76-04-expert-gis.yml'
+      - 'v26-test/v27-preview/kt76-04-expert-gis.js'
+      - 'v26-test/v27-preview/kt76-04-expert-gis-qa.cjs'
+      - 'v26-test/v27-preview/KT76_04_EXPERT_GIS_TEST.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install QA dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Expert full/partial GIS, 49 paragraphs, fail-closed ZIP QA
+        run: node v26-test/v27-preview/kt76-04-expert-gis-qa.cjs
+      - name: Protected Classic and Expert baseline QA
+        run: |
+          node v26-test/v27-preview/kt76-03-classic-b-qa.cjs
+          node v26-test/v27-preview/kt76-02-expert-b-qa.cjs
+          node v26-test/v27-preview/kt75-expert-intro-qa.cjs
