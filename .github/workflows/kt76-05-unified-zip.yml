@@ -1,0 +1,30 @@
+name: KT76-05 unified ZIP integration acceptance
+on:
+  push:
+    branches: [main, kt76-05-unified-zip-qa-20261106]
+    paths:
+      - '.github/workflows/kt76-05-unified-zip.yml'
+      - 'v26-test/v27-preview/KT76_05_UNIFIED_ZIP_TEST.html'
+      - 'v26-test/v27-preview/kt76-05-unified-zip-qa.js'
+      - 'v26-test/v27-preview/kt76-05-unified-zip-qa.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unified-zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install ZIP and XML dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Five-member ZIP regression, GIS agreement and PDF signatures
+        run: node v26-test/v27-preview/kt76-05-unified-zip-qa.cjs
+      - name: Preserve Classic B and Expert GIS baseline
+        run: |
+          node v26-test/v27-preview/kt76-03-classic-b-qa.cjs
+          node v26-test/v27-preview/kt76-04-expert-gis-qa.cjs
+          node v26-test/v27-preview/kt76-02-expert-b-qa.cjs
+          node v26-test/v27-preview/kt75-expert-intro-qa.cjs
