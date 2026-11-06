@@ -554,47 +554,33 @@ setStatus('КТ67-2: AI подготви два работни Word проект
  * final A Word outputs. KT57/KT66 are first run on the approved unchanged source;
  * this dedicated check compares all untouched paragraphs and DOCX entries.
  */
+/* KT76-01 R2 — retain the ENTIRE approved KT35-A / V27-R02 paragraph,
+ * including the legal declaration order and its original OOXML run styles.
+ * Fail closed instead of inventing a legal order for a different zone.
+ */
 async function kt76AlignNearestWordSlots(blob,nearestText){
  const zip=window.fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
  const ns='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
  const pairs=[['01_Proekt_na_stanovishte_Klasicheski.docx',41,23],['02_Proekt_na_stanovishte_Eksperten.docx',49,24]];
+ const computed=String(nearestText||'').match(/BG\\d{7}/)?.[0]||'';
+ if(!computed)throw Error('КТ76-01: липсва потвърдена най-близка зона. Не се заменя еталонният правен текст.');
  for(const [file,count,index] of pairs){
-  if(!zip[file])throw Error('КТ76-01: липсва '+file);
-  const inner=window.fflate.unzipSync(zip[file]),raw=inner['word/document.xml'];
-  if(!raw)throw Error('КТ76-01: липсва Word XML за '+file);
-  const xml=new DOMParser().parseFromString(new TextDecoder().decode(raw),'application/xml');
+  const raw=zip[file];if(!raw)throw Error('КТ76-01: липсва '+file);
+  const inner=window.fflate.unzipSync(raw),xmlRaw=inner['word/document.xml'];
+  if(!xmlRaw)throw Error('КТ76-01: липсва Word XML.');
+  const xml=new DOMParser().parseFromString(new TextDecoder().decode(xmlRaw),'application/xml');
   if(xml.getElementsByTagName('parsererror').length)throw Error('КТ76-01: невалиден Word XML.');
-  const ps=Array.from(xml.getElementsByTagNameNS(ns,'body')[0].children).filter(n=>n.localName==='p');
-  if(ps.length!==count)throw Error('КТ76-01: неочаквана структура на '+file);
-  const p=ps[index],ts=Array.from(p.getElementsByTagNameNS(ns,'t'));
-  if(!ts.length)throw Error('КТ76-01: липсва пространствен абзац.');
-  const old=ts.map(t=>t.textContent||'').join('');
-  if(!/най.близ|BG\d{7}|Река Марица|НЯМА ДАННИ/iu.test(old))
-   throw Error('КТ76-01: непознат еталонен пространствен абзац '+file);
-  const value='Най-близко разположена защитена зона: '+nearestText+'.';
-  ts[0].textContent=value;ts[0].setAttribute('xml:space','preserve');
-  ts.slice(1).forEach(t=>t.textContent='');
-  const after=ts.map(t=>t.textContent||'').join('');
-  if(after!==value)throw Error('КТ76-01: некоректен пространствен абзац.');
-  for(let i=0;i<ps.length;i++)if(i!==index){
-   const next=Array.from(ps[i].getElementsByTagNameNS(ns,'t')).map(t=>t.textContent||'').join('');
-   if(!next)continue; // all other paragraphs are untouched DOM nodes
-  }
-  inner['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
-  const originalKeys=Object.keys(window.fflate.unzipSync(zip[file])).sort();
-  if(JSON.stringify(Object.keys(inner).sort())!==JSON.stringify(originalKeys))throw Error('КТ76-01: променени ресурси на Word.');
-  zip[file]=window.fflate.zipSync(inner,{level:6});
+  const ps=Array.from(xml.getElementsByTagNameNS(ns,'body')[0].children).filter(p=>p.localName==='p');
+  if(ps.length!==count)throw Error('КТ76-01: нарушен брой абзаци на '+file);
+  const old=Array.from(ps[index].getElementsByTagNameNS(ns,'t')).map(t=>t.textContent||'').join('');
+  const cited=old.match(/BG\\d{7}/)?.[0]||'';
+  if(cited!==computed)throw Error('КТ76-01: измерената зона '+computed+' не съвпада с еталонната '+cited+'. Необходима е нормативна проверка; ZIP не се променя.');
+  if(computed==='BG0000578'&&(!old.includes('Заповед № РД-728/19.08.2024 г.')||!old.includes('ДВ, бр. 74/30.08.2024 г.')||!old.includes('за опазване на природните местообитания и на дивата флора и фауна')))
+   throw Error('КТ76-01: липсва част от одобрения абзац или заповедта за обявяване.');
+  if(file.startsWith('02_')&&!old.includes('Пространственото положение е отразено в самостоятелния ГИС анализ'))
+   throw Error('КТ76-01: липсва одобреното второ изречение на Expert A.');
  }
- const output=new Blob([window.fflate.zipSync(zip,{level:0})],{type:'application/zip'});
- const final=window.fflate.unzipSync(new Uint8Array(await output.arrayBuffer()));
- for(const [file,count,index] of pairs){
-  const inner=window.fflate.unzipSync(final[file]);
-  const xml=new DOMParser().parseFromString(new TextDecoder().decode(inner['word/document.xml']),'application/xml');
-  const ps=Array.from(xml.getElementsByTagNameNS(ns,'body')[0].children).filter(n=>n.localName==='p');
-  const value=Array.from(ps[index].getElementsByTagNameNS(ns,'t')).map(t=>t.textContent||'').join('');
-  if(ps.length!==count||!value.includes(nearestText))throw Error('КТ76-01: пространственото съгласуване не е доказано.');
- }
- return output;
+ return blob; // zero-byte mutation: the approved DOCX, runs, headers and footers remain untouched
 }
 /* KT76-01: one provenance-checked nearest-zone observation for ZIP PDF1 and A Word.
  * Based on the existing KT21 WGS84 geometry estimator and all 32 SNAP_BG zones.
