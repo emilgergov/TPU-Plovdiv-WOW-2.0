@@ -55,7 +55,7 @@ async function fix(blob,{scenario='',parcelIds=[],zoneCodes=[]}={}){
  const before=ps.map(text);
  if(!before[10].includes(TARGET_ID)||!before[23].includes(ZONE)||!before[17].includes('чл. 6а'))
   throw Error('КТ76-02: различен образец/преписка, отказана е автоматична редакция.');
- if(!before[25].includes(ZONE)||!before[38].includes(ZONE))
+ if(!before[26].includes(ZONE)||!before[38].includes(ZONE))
   throw Error('КТ76-02: липсва връзка към провереното пространствено положение.');
  for(const index of SLOT_INDICES)put(ps[index],REPLACEMENTS[index]);
  const after=ps.map(text);
