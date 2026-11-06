@@ -73,6 +73,11 @@ async function classic(scenario,characterization,metadata,context){
  put(ps[17],'Инвестиционното предложение се разглежда във връзка с чл. 2, ал. 2 от Наредбата за ОС. Приложимият ред и необходимите последващи действия се определят въз основа на представените документи и проверените обстоятелства по конкретната преписка.');
  // Preserve the substantive, dossier-specific legal findings at p22,25,26,
  // but restore the institutional subjects and normative anchors of KT39-B.
+ // The KT39-B position 23 concerns land-use, not a generic list of laws.
+ // Lack of supporting data is a review item, never a claim of "no change".
+ put(ps[22],'По отношение на предназначението и начина на трайно ползване на имота, както и необходимостта от тяхната промяна, следва да се съобразят данните от КККР и представените документи. При липса на потвърдени сведения този въпрос подлежи на документална и експертна проверка.');
+ const zoneLabel=zones.replace(/BG0000194(?!\\s*„Река Чая“)/g,'BG0000194 „Река Чая“');
+ put(ps[24],'Относима защитена зона: '+zoneLabel+'. Обявяването, режимите и приложимите разпоредби на заповедите се проверяват спрямо актуалния нормативен архив за конкретната преписка.');
  const admissibility=read(ps[25]),environment=read(ps[26]);
  if(!/чл\.\s*12,\s*ал\.\s*2/.test(admissibility))
   put(ps[25],'При проверката за допустимост по чл. 12, ал. 2 от Наредбата за ОС се съобразява следното: '+admissibility);
@@ -82,10 +87,15 @@ async function classic(scenario,characterization,metadata,context){
  // of absence of impacts. It can therefore be preserved literally.
  put(ps[27],'С оглед местоположението, характера на инвестиционното предложение и установеното пресичане със защитена зона '+zones+' възможните въздействия се разглеждат по отношение на:');
  originalBullets.forEach((text,i)=>put(ps[28+i],text));
- const procedure=read(ps[33]);
- const subject=clean(metadata?.subject).replace(/^Относно:\s*/i,'');
- const loc=clean(metadata?.location);
- put(ps[33],'В тази връзка и на основание чл. 2, ал. 2 от Наредбата за ОС преценката на компетентния орган за инвестиционно предложение „'+(subject||'неуточнен предмет')+'“ в ПИ '+ids+(loc?', '+loc:'')+' е следната: '+procedure);
+ // Reuse the complete approved "Относно:" subject and location.
+ const heading=read(ps[10]).replace(/^Относно:\s*(?:Уведомление за инвестиционно предложение\s*\(ИП\)\s*:\s*)?/iu,'').trim().replace(/[.\s]+$/u,'');
+ if(!heading||!heading.includes(ids.split(/[;,\s]+/)[0]))throw Error('КТ73: непълен предмет или местоположение в Относно.');
+ const procedureDraft=clean(metadata?.procedureFinding);
+ // A draft cannot claim to be a signed administrative decision.
+ const conclusion=procedureDraft&&/окончателен процедурен извод не е установен|подлежи на експертна проверка|необходима е допълнителна проверка/iu.test(procedureDraft)
+   ?procedureDraft
+   :'За окончателния процедурен извод е необходима експертна проверка на представените материали, приложимите режими и установеното пространствено пресичане.';
+ put(ps[33],'В тази връзка и на основание чл. 2, ал. 2 от Наредбата за ОС, преценката на компетентния орган относно заявеното инвестиционно предложение — '+heading+' — се основава на конкретно установените обстоятелства. '+conclusion);
  if(originalBullets.some((t,i)=>read(ps[28+i])!==t))throw Error('KT69: променена еталонна структура на въздействията.');
  if(!read(ps[23]).includes(ids.split(/[;,\s]+/)[0]))throw Error('KT69: липсва провереният имот в пространствения абзац.');
  zip['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(xml));
