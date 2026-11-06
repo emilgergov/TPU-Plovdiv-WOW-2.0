@@ -33,19 +33,19 @@ jobs:
           for name in ['kt67-2-original-word-auto-project-test.html','kt67-2-5-a-b-admin-test.html']:
               s=Path('v26-test/v27-preview',name).read_text()
               original='v27-preview/v27-kt50-original-kt42.js?v=kt603-original-locked-b1d2cfb'
-              fix='v27-preview/kt69-classic-b-etalon-restore.js?v=kt71-b-1'
+              fix='v27-preview/kt69-classic-b-etalon-restore.js?v=kt73-b-1'
               draft='v27-preview/kt67-2-draft-package.js?v=kt67-2-draft-1'
               assert s.count(fix)==1, name
               assert s.count('v27-preview/kt66-locked-content-qa.js?v=kt72-qa-2')==1, 'KT72 must bust KT66 script cache: '+name
               assert 'kt66-locked-content-qa.js?v=kt66-qa-1' not in s
               assert s.index(original)<s.index(fix)<s.index(draft), name
-              assert 'v27-preview/kt68-map-controls.js?v=kt71-compact-1' in s, name
+              assert 'v27-preview/kt68-map-controls.js?v=kt73-compact-1' in s, name
           print('KT69 PASS: B-only adapter follows unchanged KT50 on both pages, map layer retained')
           map_js=Path('v26-test/v27-preview/kt68-map-controls.js').read_text()
-          assert 'width:max-content!important' in map_js and 'max-width:min(410px' in map_js
+          assert 'width:360px!important' in map_js
           assert 'justify-content:flex-start!important' in map_js
           assert 'pressedParcel' in map_js and 'showAll.onclick' in map_js and 'showSelected.onclick' in map_js
-          print('KT70 PASS: map 500px compact toolbar; cadastral click and both views intact')
+          print('KT73 PASS: map 360px compact toolbar; cadastral click and both views intact')
           PY
       - name: Audit original 43-paragraph KT39-B with source data untouched
         run: |
