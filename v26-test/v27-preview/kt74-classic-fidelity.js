@@ -43,6 +43,9 @@ function restoreIntro(xml,p,metadata){
  if(!runs.length)throw Error('KT74: липсват Word run елементи в увода.');
  const template=runs.find(r=>nodes(r,'t').length);if(!template)throw Error('KT74: липсват текстови run сегменти.');
  for(const r of runs){if(r!==template)p.removeChild(r)}
+ // The original text-bearing run can inherit italic from template: clear it
+ // for the main clause, then set italic only on the explicit citation.
+ for(const prop of nodes(template,'rPr'))for(const it of [...nodes(prop,'i'),...nodes(prop,'iCs')])it.parentNode.removeChild(it);
  const t=nodes(template,'t');if(!t.length)throw Error('KT74: липсва уводен Word текст.');
  t[0].textContent=start;t[0].setAttribute('xml:space','preserve');
  t.slice(1).forEach(x=>x.textContent='');
