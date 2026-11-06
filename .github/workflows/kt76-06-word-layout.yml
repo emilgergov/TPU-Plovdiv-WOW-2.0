@@ -1,0 +1,30 @@
+name: KT76-06 Word layout and ZIP regression
+on:
+  push:
+    branches: [main, kt76-06-word-layout-safe-20261106]
+    paths:
+      - '.github/workflows/kt76-06-word-layout.yml'
+      - 'v26-test/v27-preview/KT76_06_WORD_INTEGRATION_TEST.html'
+      - 'v26-test/v27-preview/kt76-06-word-layout.js'
+      - 'v26-test/v27-preview/kt76-06-word-layout-qa.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  visual-word-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install XML/ZIP QA dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Check 43/49 paragraph text preservation, signature and styles
+        run: node v26-test/v27-preview/kt76-06-word-layout-qa.cjs
+      - name: Preserve KT75–KT76-05 baseline
+        run: |
+          node v26-test/v27-preview/kt76-05-unified-zip-qa.cjs
+          node v26-test/v27-preview/kt76-05-r2-legal-retry-qa.cjs
+          node v26-test/v27-preview/kt76-04-expert-gis-qa.cjs
+          node v26-test/v27-preview/kt76-03-classic-b-qa.cjs
