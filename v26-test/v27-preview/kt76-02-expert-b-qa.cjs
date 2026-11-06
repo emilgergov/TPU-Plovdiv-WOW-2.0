@@ -64,6 +64,14 @@ const paragraphs=bytes=>{
  assert(!skipped.applied);assert.equal(skipped.blob,original);
  const otherB=await ctx.window.KT7602ExpertB.fix(original,{scenario:'Б',parcelIds:['99999.1.1'],zoneCodes:['BG0000194']});
  assert(!otherB.applied);assert.equal(otherB.blob,original);
+// AI paragraphs 27/39 legitimately vary and may omit zone codes; GIS paras 24/25 remain authoritative.
+const varyingInner=fflate.unzipSync(expert);
+const varyingXml=new TextDecoder().decode(varyingInner['word/document.xml']).replace('С оглед GIS данните ... BG0000194 „Река Чая“.','AI авторството е формулирало правната преценка без код на зона.').replace('При определяне на процедурния ред в BG0000194 „Река Чая“ ...','Процедурната преценка се извършва по представените данни.');
+const varyingZip=fflate.zipSync({...varyingInner,'word/document.xml':new TextEncoder().encode(varyingXml)});
+const varyingCase=new Blob([fflate.zipSync({...entries,'02_Proekt_na_stanovishte_Eksperten.docx':varyingZip})]);
+const varyingResult=await ctx.window.KT7602ExpertB.fix(varyingCase,{scenario:'Б',parcelIds:['36676.129.457'],zoneCodes:['BG0000194']});
+assert(varyingResult.applied,'AI paragraphs may vary: GIS source must control authenticity');
+
  // A later, substantively different investment on the same property must not receive this case-specific text.
  const altEntries={...entries,'02_Proekt_na_stanovishte_Eksperten.docx':fflate.zipSync({...fflate.unzipSync(expert),'word/document.xml':new TextEncoder().encode(new TextDecoder().decode(fflate.unzipSync(expert)['word/document.xml']).replace('Изграждане на малък едноетажен обслужващ обект с временна площадка','Строеж на пътна инфраструктура'))})};
  const differentSubject=await ctx.window.KT7602ExpertB.fix(new Blob([fflate.zipSync(altEntries)]),{scenario:'Б',parcelIds:['36676.129.457'],zoneCodes:['BG0000194']});assert(!differentSubject.applied);
