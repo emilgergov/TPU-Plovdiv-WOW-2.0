@@ -67,7 +67,7 @@ function verifyCase(c,e,{scenario='Б',parcelIds=[],zoneCodes=[],spatialRelation
  // This is a non-mutating fail-closed check: approved Classic and Expert templates
  // remain untouched; an invalid AI draft must be regenerated or reviewed.
  const expertText=e.lines.join('\\n');
- requireOk(!/санкционн(?:ото|о|и|ия|ият)?\\s+третиране\\s+на\\s+отпадъчни\\s+води/iu.test(expertText),
+ requireOk(!/санкционн(?:ото|о|и|ия|ият)?\s+третиране\s+на\s+отпадъчни\s+води/iu.test(expertText),
   'Expert съдържа неправилния термин „санкционно третиране на отпадъчни води“');
  // Even in other scenarios, never allow ambiguous geometric statement.
  requireOk(!/попада\s+изцяло\s+или\s+частично|попадат\s+или\s+частично/iu.test(e.lines.join('\n')),'двусмислено попадане в Expert');
