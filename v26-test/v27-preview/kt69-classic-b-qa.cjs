@@ -35,6 +35,12 @@ const reader=blob=>blob.arrayBuffer().then(buffer=>{
   'Електрозахранването е описано в преписката.','Водоснабдяването се уточнява.',
   'Предвижда се третиране на отпадъчните води.'];
  const ctx={determination:{scenario:'Б',zones:['BG0000194']}};
+ const incomplete=['С реализацията на инвестиционното предложение се предвижда изпълнение на заявената дейност.','Електрозахранването е описано в преписката.','Водоснабдяването се уточнява.','[ЗА ЕКСПЕРТНА ПРОВЕРКА — отпадъчни води]'];
+ await assert.rejects(originalMake('Б',incomplete,m,ctx),/непроверена характеристика 4/);
+ const repairedMissing=await reader(await root.V26TemplateWord.make('Б',incomplete,m,ctx));
+ assert.equal(repairedMissing.ps.length,43,'missing characteristic B must still create a DOCX');
+ assert.match(repairedMissing.text[21],/Отпадъчните води.*експертна проверка/,'missing fourth characteristic must remain transparently unverified');
+ assert.doesNotMatch(repairedMissing.text[21],/ще се заустват|изгребна яма/,'must never invent waste-water destination');
  const before=await reader(await originalMake('Б',char,m,ctx));
  const after=await reader(await root.V26TemplateWord.make('Б',char,m,ctx));
  const specimen=await reader(new Blob([fs.readFileSync(path.join(base,'etalon','KT39-B.docx'))]));
