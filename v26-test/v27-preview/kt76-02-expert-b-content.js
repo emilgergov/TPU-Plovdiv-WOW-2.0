@@ -58,8 +58,10 @@ async function fix(blob,{scenario='',parcelIds=[],zoneCodes=[]}={}){
  if(!before[10].includes('малък едноетажен обслужващ обект')||!before[10].includes('временна площадка'))return {blob,applied:false,positions:[]};
  if(!before[10].includes(TARGET_ID)||!before[23].includes(ZONE)||!before[17].includes('чл. 6а'))
   throw Error('КТ76-02: различен образец/преписка, отказана е автоматична редакция.');
- if(!before[26].includes(ZONE)||!before[38].includes(ZONE))
-  throw Error('КТ76-02: липсва връзка към провереното пространствено положение.');
+ /* The GIS-confirmed spatial paragraphs are fixed by KT68. AI narrative paragraphs
+  * 27 and 39 can legitimately vary; never use them as authenticity guards. */
+ if(!before[23].includes(TARGET_ID)||!before[23].includes(ZONE)||!before[24].includes(ZONE))
+  throw Error('КТ76-02: пространствените данни в проекта не съвпадат с потвърдената ГИС справка.');
  for(const index of SLOT_INDICES)put(ps[index],REPLACEMENTS[index]);
  const after=ps.map(text);
  if(before.length!==after.length||after.some((v,i)=>!SLOT_INDICES.includes(i)&&v!==before[i]))
