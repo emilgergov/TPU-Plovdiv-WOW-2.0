@@ -41,7 +41,8 @@ function restoreIntro(xml,p,metadata){
  const finish=', Ви уведомявам следното:';
  const runs=Array.from(p.childNodes).filter(n=>n.nodeType===1&&n.localName==='r');
  if(!runs.length)throw Error('KT74: липсват Word run елементи в увода.');
- const template=runs[0];for(const r of runs.slice(1))p.removeChild(r);
+ const template=runs.find(r=>nodes(r,'t').length);if(!template)throw Error('KT74: липсват текстови run сегменти.');
+ for(const r of runs){if(r!==template)p.removeChild(r)}
  const t=nodes(template,'t');if(!t.length)throw Error('KT74: липсва уводен Word текст.');
  t[0].textContent=start;t[0].setAttribute('xml:space','preserve');
  t.slice(1).forEach(x=>x.textContent='');
