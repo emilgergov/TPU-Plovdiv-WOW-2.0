@@ -5,6 +5,8 @@ on:
       - '.github/workflows/kt69-b-etalon-audit.yml'
       - 'v26-test/v27-preview/v27-kt50-original-kt42.js'
       - 'v26-test/v27-preview/kt69-classic-b-etalon-restore.js'
+      - 'v26-test/v27-preview/kt66-locked-content-qa.js'
+      - 'v26-test/v27-preview/kt68-map-controls.js'
       - 'v26-test/v27-preview/kt69-classic-b-qa.cjs'
       - 'v26-test/v27-preview/kt67-2-original-word-auto-project-test.html'
       - 'v26-test/v27-preview/kt67-2-5-a-b-admin-test.html'
@@ -38,7 +40,7 @@ jobs:
               assert 'v27-preview/kt68-map-controls.js?v=kt70-compact-1' in s, name
           print('KT69 PASS: B-only adapter follows unchanged KT50 on both pages, map layer retained')
           map_js=Path('v26-test/v27-preview/kt68-map-controls.js').read_text()
-          assert 'width:500px!important' in map_js
+          assert 'width:max-content!important' in map_js and 'max-width:min(410px' in map_js
           assert 'justify-content:flex-start!important' in map_js
           assert 'pressedParcel' in map_js and 'showAll.onclick' in map_js and 'showSelected.onclick' in map_js
           print('KT70 PASS: map 500px compact toolbar; cadastral click and both views intact')
