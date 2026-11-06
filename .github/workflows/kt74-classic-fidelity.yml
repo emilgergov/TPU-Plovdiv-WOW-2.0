@@ -1,0 +1,27 @@
+name: KT74 Classic A-B etalon fidelity
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt74-classic-fidelity.yml'
+      - 'v26-test/v27-preview/kt74-classic-fidelity.js'
+      - 'v26-test/v27-preview/kt74-classic-fidelity-qa.cjs'
+      - 'v26-test/v27-preview/kt67-2-original-word-auto-project-test.html'
+      - 'v26-test/v27-preview/kt67-2-5-a-b-admin-test.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Verify source syntax and real A/B DOCX fidelity
+        run: |
+          node --check v26-test/v27-preview/kt74-classic-fidelity.js
+          node --check v26-test/v27-preview/kt74-classic-fidelity-qa.cjs
+          node v26-test/v27-preview/kt74-classic-fidelity-qa.cjs
