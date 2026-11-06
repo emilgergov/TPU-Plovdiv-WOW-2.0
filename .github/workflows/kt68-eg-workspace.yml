@@ -30,7 +30,7 @@ jobs:
           ]){
             const html=fs.readFileSync(filename,'utf8');
             assert(html.includes('v27-preview/kt68-eg-workspace.js?v=kt68-ui-4'),filename+' must load approved UI layer');
-            assert(html.includes('v27-preview/kt68-map-controls.js?v=kt70-compact-1'),filename+' must load map switch layer');
+            assert(html.includes('v27-preview/kt68-map-controls.js?v=kt71-compact-1'),filename+' must load map switch layer');
             assert(html.includes('await window.KT68UI.confirmPackage()'),filename+' must use styled modal');
             assert(html.includes('id="kt68IdsHelp"'), filename+' must show input guidance below cadastral IDs');
             assert(!html.includes('role="status">Въведете идентификатор'), filename+' must not duplicate cadastral guidance at bottom');
@@ -62,7 +62,7 @@ jobs:
           const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
           const code=fs.readFileSync('v26-test/v27-preview/kt68-map-controls.js','utf8');
           assert(code.includes('flex-flow:row wrap!important'), 'compact horizontal map toolbar required');
-          assert(code.includes('width:500px!important'), 'new narrower map toolbar required');
+          assert(code.includes('width:max-content!important'), 'new narrower map toolbar required');
           assert(code.includes('.kt68-control-title{display:none!important}'), 'redundant headers must be hidden');
           assert(!code.includes('max-width:min(350px'), 'old three stacked card layout must be gone');
           const ids='zoomIn zoomOut fit zoneContext showAll showSelected toggleOverlaps labelMode results map run'.split(' ');
