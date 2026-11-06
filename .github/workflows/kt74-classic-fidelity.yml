@@ -25,3 +25,20 @@ jobs:
           node --check v26-test/v27-preview/kt74-classic-fidelity.js
           node --check v26-test/v27-preview/kt74-classic-fidelity-qa.cjs
           node v26-test/v27-preview/kt74-classic-fidelity-qa.cjs
+      - name: Assert public A/B routes and unchanged GIS/PDF sources
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          base=Path('v26-test/v27-preview')
+          for file in ('kt67-2-original-word-auto-project-test.html','kt67-2-5-a-b-admin-test.html'):
+              text=(base/file).read_text()
+              original='v27-preview/v27-kt50-original-kt42.js?v=kt603-original-locked-b1d2cfb'
+              kt73='v27-preview/kt69-classic-b-etalon-restore.js?v=kt73-b-1'
+              kt74='v27-preview/kt74-classic-fidelity.js?v=kt74-fidelity-1'
+              zipwriter='v27-preview/kt67-2-draft-package.js?v=kt67-2-draft-1'
+              assert text.count(kt74)==1,file
+              assert text.index(original)<text.index(kt73)<text.index(kt74)<text.index(zipwriter),file
+              assert 'v27-preview/kt68-map-controls.js?v=kt73-compact-1' in text,file
+              assert 'v27-preview/kt66-locked-content-qa.js?v=kt72-qa-2' in text,file
+          print('KT74 public A/B script activation PASS: unchanged GIS and ZIP routes')
+          PY
