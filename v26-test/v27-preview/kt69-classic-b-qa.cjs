@@ -44,6 +44,27 @@ const reader=blob=>blob.arrayBuffer().then(buffer=>{
  const before=await reader(await originalMake('Б',char,m,ctx));
  const after=await reader(await root.V26TemplateWord.make('Б',char,m,ctx));
  const specimen=await reader(new Blob([fs.readFileSync(path.join(base,'etalon','KT39-B.docx'))]));
+ // Integrate the *real* immutable KT66 package gate, not just paragraph-count QA.
+ root.window=root;
+ vm.runInNewContext(fs.readFileSync(path.join(dir,'kt66-locked-content-qa.js'),'utf8'),root);
+ const verifiedPack=new Blob([fflate.zipSync({
+  '01_Proekt_na_stanovishte_Klasicheski.docx':new Uint8Array(await (await root.V26TemplateWord.make('Б',char,m,ctx)).arrayBuffer()),
+  '02_Proekt_na_stanovishte_Eksperten.docx':new Uint8Array(fs.readFileSync(path.join(base,'etalon','V27-R02.docx')))
+ })]);
+ const kt66Result=await root.KT66ContentQA.verify(verifiedPack,'Б');
+ assert.equal(kt66Result.classic.paragraphs,43);
+ // A change to paragraph 18 outside the one audited conservative sentence
+ // must remain forbidden even after the adapter is installed.
+ const corrupt=new Uint8Array(await (await root.V26TemplateWord.make('Б',char,m,ctx)).arrayBuffer());
+ const corruptedZip=fflate.unzipSync(corrupt);
+ const xmlString=new TextDecoder().decode(corruptedZip['word/document.xml']);
+ const forbidden='Процедурата е приключила без необходимост от оценка.';
+ const target='Инвестиционното предложение се разглежда във връзка с чл. 2, ал. 2 от Наредбата за ОС. Приложимият ред и необходимите последващи действия се определят въз основа на представените документи и проверените обстоятелства по конкретната преписка.';
+ assert(xmlString.includes(target));
+ corruptedZip['word/document.xml']=new TextEncoder().encode(xmlString.replace(target,forbidden));
+ const corruptPack=new Blob([fflate.zipSync({'01_Proekt_na_stanovishte_Klasicheski.docx':fflate.zipSync(corruptedZip),'02_Proekt_na_stanovishte_Eksperten.docx':new Uint8Array(fs.readFileSync(path.join(base,'etalon','V27-R02.docx')))} )]);
+ await assert.rejects(root.KT66ContentQA.verify(corruptPack,'Б'),/неразрешена промяна на процедурния абзац 18/);
+
  assert.equal(before.ps.length,43);assert.equal(after.ps.length,43);assert.equal(specimen.ps.length,43);
  for(let i=28;i<33;i++)assert.equal(after.text[i],specimen.text[i],'B impact paragraph '+i+' must equal original etalon');
  for(let i=0;i<43;i++)if(![17,25,26,27,28,29,30,31,32,33].includes(i))
