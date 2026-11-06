@@ -40,7 +40,7 @@ async function getEtalon(){
  })().catch(error=>{etalonPromise=null;throw error});
  return etalonPromise;
 }
-const reviewRequired=t=>!String(t||'').trim()||/\\[ЗА ЕКСПЕРТНА ПРОВЕРКА|\\[ЗА ПОПЪЛВАНЕ|\\[ОТКЪС ОТ ПРЕПИСКАТА|НЯМА ДАННИ/i.test(String(t));
+const reviewRequired=t=>!String(t||'').trim()||/\[ЗА ЕКСПЕРТНА ПРОВЕРКА|\[ЗА ПОПЪЛВАНЕ|\[ОТКЪС ОТ ПРЕПИСКАТА|НЯМА ДАННИ/i.test(String(t));
 function safeBCharacteristics(input){
  if(!Array.isArray(input)||input.length!==4)return input;
  const topics=[
