@@ -53,6 +53,9 @@ async function fix(blob,{scenario='',parcelIds=[],zoneCodes=[]}={}){
  if(!raw)throw Error('КТ76-02: липсва Word XML.');
  const {doc,ps,text}=paragraphs(raw);
  const before=ps.map(text);
+ // This document-level wording is approved only for the original tested subject.
+ // Never apply case-specific paragraphs to a later proposal on the same parcel.
+ if(!before[10].includes('малък едноетажен обслужващ обект')||!before[10].includes('временна площадка'))return {blob,applied:false,positions:[]};
  if(!before[10].includes(TARGET_ID)||!before[23].includes(ZONE)||!before[17].includes('чл. 6а'))
   throw Error('КТ76-02: различен образец/преписка, отказана е автоматична редакция.');
  if(!before[26].includes(ZONE)||!before[38].includes(ZONE))
