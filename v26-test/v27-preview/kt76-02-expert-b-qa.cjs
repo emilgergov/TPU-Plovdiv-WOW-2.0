@@ -22,7 +22,7 @@ Object.defineProperty(Object.getPrototypeOf(demo),'children',{configurable:true,
 const ctx={window:{fflate},fflate,DOMParser,XMLSerializer,TextEncoder,TextDecoder,Blob,Error,console};
 vm.createContext(ctx);vm.runInContext(moduleCode,ctx);
 function docx(count,expert){
- const text=i=>i===10?'Относно: Изграждане на малък едноетажен обслужващ обект с временна площадка в поземлен имот 36676.129.457':i===17?'Във връзка с преписката, на основание чл. 6а от Наредбата за ОС е изготвен експертен проект.':i===23?'Поземленият имот попада изцяло или частично в BG0000194.':i===26?'С оглед GIS данните ... BG0000194 „Река Чая“.':i===38?'При определяне на процедурния ред в BG0000194 „Река Чая“ ...':'Еталонен абзац '+i;
+ const text=i=>i===10?'Относно: Изграждане на малък едноетажен обслужващ обект с временна площадка в поземлен имот 36676.129.457':i===17?'Във връзка с преписката, на основание чл. 6а от Наредбата за ОС е изготвен експертен проект.':i===23?'Поземленият имот с идентификатор 36676.129.457 попада изцяло или частично в BG0000194.':i===24?'Защитена зона BG0000194 „Река Чая“ — ГИС потвърдено.':i===26?'С оглед GIS данните ... BG0000194 „Река Чая“.':i===38?'При определяне на процедурния ред в BG0000194 „Река Чая“ ...':'Еталонен абзац '+i;
  const ps=Array.from({length:count},(_,i)=>'<w:p><w:r><w:t xml:space="preserve">'+text(i)+'</w:t></w:r></w:p>').join('');
  const xml='<w:document xmlns:w="'+ns+'"><w:body>'+ps+'</w:body></w:document>';
  return fflate.zipSync({'word/document.xml':new TextEncoder().encode(xml),'word/styles.xml':new TextEncoder().encode('SAVED-STYLES'),'word/header1.xml':new TextEncoder().encode('SAVED-HEADER'),'word/footer1.xml':new TextEncoder().encode('SAVED-FOOTER'),'word/media/logo.txt':new TextEncoder().encode('SAVED-LOGO')});
