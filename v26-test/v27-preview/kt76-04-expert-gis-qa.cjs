@@ -45,8 +45,9 @@ const args=partial=>({scenario:'Б',parcelIds:['36676.129.457'],zoneCodes:['BG00
   for(const name of ['word/styles.xml','word/header1.xml','word/footer1.xml'])assert.deepEqual(Buffer.from(after.inner[name]),Buffer.from(before.inner[name]));
   console.log('KT76-04 Expert GIS '+(partial?'PARTIAL':'FULL')+' PASS; 49 paras + other ZIP bytes intact');
  }
- const notSupported=await ctx.window.KT7604ExpertGIS.fix(new Blob([outer]),{...args(false),scenario:'А'});
- assert(!notSupported.applied);assert.equal(notSupported.blob.size,outer.length);
+ // Scenario A must also fail closed if the source Word contains the forbidden
+ // ambiguous expression; it must not silently publish it unchanged.
+ await assert.rejects(()=>ctx.window.KT7604ExpertGIS.fix(new Blob([outer]),{...args(false),scenario:'А'}),/двусмислено пространствено отношение/);
  await assert.rejects(()=>ctx.window.KT7604ExpertGIS.fix(new Blob([outer]),{...args(false),gisResults:[]}),/недоказуем GIS/);
  console.log('KT76-04 COMPLETE PASS');
 })().catch(e=>{console.error(e);process.exitCode=1});
