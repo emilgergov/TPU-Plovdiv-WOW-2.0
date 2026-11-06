@@ -1,0 +1,30 @@
+name: KT76-03 Classic B scoped integration and regression
+on:
+  push:
+    branches: [kt76-03-classic-b-test-20261106, main]
+    paths:
+      - '.github/workflows/kt76-03-classic-b.yml'
+      - 'v26-test/v27-preview/KT76_03_CLASSIC_B_TEST.html'
+      - 'v26-test/v27-preview/kt76-03-classic-b-package.js'
+      - 'v26-test/v27-preview/kt76-03-classic-b-qa.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  classic-b:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install test dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Approved 43-paragraph Classic B and ZIP regressions
+        run: node v26-test/v27-preview/kt76-03-classic-b-qa.cjs
+      - name: Preserve KT74, KT75, KT76-01 and KT76-02 baselines
+        run: |
+          node v26-test/v27-preview/kt74-classic-fidelity-qa.cjs
+          node v26-test/v27-preview/kt75-expert-intro-qa.cjs
+          node v26-test/v27-preview/kt76-01-nearest-a-qa.cjs
+          node v26-test/v27-preview/kt76-02-expert-b-qa.cjs
