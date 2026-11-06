@@ -7,6 +7,9 @@ on:
       - 'v26-test/v27-preview/KT76_07_AB_GIS_INTEGRATION_TEST.html'
       - 'v26-test/v27-preview/kt76-07-gis-evidence-audit.js'
       - 'v26-test/v27-preview/kt76-07-ab-gis-qa.cjs'
+      - 'v26-test/v27-preview/KT76_08_FINAL_ACCEPTANCE_TEST.html'
+      - 'v26-test/v27-preview/kt76-05-unified-zip-qa.js'
+      - 'v26-test/v27-preview/kt76-08-quality-qa.cjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -20,6 +23,8 @@ jobs:
           node-version: '22'
       - name: A two-parcel / B full-partial GIS and fail-closed regression
         run: node v26-test/v27-preview/kt76-07-ab-gis-qa.cjs
+      - name: KT76-08 release quality gate and public acceptance route
+        run: node v26-test/v27-preview/kt76-08-quality-qa.cjs
       - name: Install XML/ZIP regression dependencies
         run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
       - name: Preserve KT75–KT76-06 approved Word and ZIP content
