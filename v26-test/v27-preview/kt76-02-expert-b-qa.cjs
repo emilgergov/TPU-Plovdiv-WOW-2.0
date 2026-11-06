@@ -53,7 +53,7 @@ const paragraphs=bytes=>{
  const before=paragraphs(expert),after=paragraphs(out['02_Proekt_na_stanovishte_Eksperten.docx']);
  assert.equal(after.length,49);
  const changed=after.flatMap((v,i)=>v!==before[i]?[i+1]:[]);
- assert.deepEqual(changed,r.positions);
+ assert.deepEqual(changed,Array.from(r.positions));
  assert.equal(after[17],before[17]); // KT75 normative introduction
  assert.equal(after[23],before[23]); // GIS case fact
  assert.equal(after[24],before[24]); // zone reference
