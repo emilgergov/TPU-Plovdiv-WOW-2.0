@@ -13,24 +13,24 @@ style.textContent=`
  position:absolute!important;top:12px!important;right:12px!important;left:auto!important;
  display:flex!important;flex-flow:row wrap!important;justify-content:flex-start!important;
  align-items:center!important;align-content:flex-start!important;
- width:max-content!important;min-width:0!important;max-width:min(410px,calc(100% - 16px))!important;
- padding:4px!important;gap:3px!important;
+ width:360px!important;min-width:0!important;max-width:calc(100% - 16px)!important;
+ padding:3px!important;gap:2px!important;
  border:1px solid #bfd6c9!important;border-radius:9px!important;
  background:rgba(255,255,255,.96)!important;
  box-shadow:0 2px 6px #0001!important;z-index:7!important;
 }
 .map .controls .kt68-control-set{
  display:flex!important;flex:0 0 auto!important;flex-wrap:nowrap!important;
- align-items:center!important;gap:4px!important;justify-content:flex-start!important;
+ align-items:center!important;gap:2px!important;justify-content:flex-start!important;
  background:transparent!important;border:0!important;padding:0!important;
  border-radius:0!important;
 }
 .map .controls .kt68-control-set+.kt68-control-set{
- border-left:1px solid #c6d9cc!important;padding-left:5px!important;
+ border-left:1px solid #c6d9cc!important;padding-left:3px!important;
 }
 .map .controls .kt68-control-title{display:none!important}
 .map .controls button{
- font-size:10px!important;padding:4px 6px!important;
+ font-size:10px!important;padding:4px 5px!important;
  min-height:27px!important;line-height:1.05!important;border-radius:6px!important;
  white-space:nowrap!important;
 }
@@ -54,7 +54,7 @@ style.textContent=`
  font-size:11px!important;padding:2px!important;background:none!important;white-space:nowrap!important;
 }
 .map .controls .kt68-control-set>select{
- max-width:126px!important;height:27px!important;font-size:10px!important;padding:3px!important;
+ max-width:113px!important;height:27px!important;font-size:10px!important;padding:3px!important;
 }
 @media(max-width:1050px){
  .map .controls{max-width:calc(100% - 260px)!important;row-gap:3px!important}
@@ -83,7 +83,7 @@ const label=document.querySelector('label[for="labelMode"]');
 if(label){label.textContent='Етикети';labelsSet.append(label)}
 if(get('labelMode'))labelsSet.append(get('labelMode'));
 controls.append(modeGroup,parcelGroup,labelsSet);
-const fitButton=get('fit');if(fitButton){fitButton.textContent='Начален изглед';fitButton.title='Възстанови изгледа на имотите след мащабиране или преместване'}
+const fitButton=get('fit');if(fitButton){fitButton.textContent='Начален';fitButton.title='Възстанови изгледа на имотите след мащабиране или преместване'}
 const contextButton=get('zoneContext');
 if(contextButton){contextButton.textContent='Контекст';contextButton.title='Покажи по-широка територия; при налично архивно пресичане — обхвата на съответната зона'}
 const showAll=get('showAll'),showSelected=get('showSelected');
