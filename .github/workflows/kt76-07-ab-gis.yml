@@ -1,0 +1,31 @@
+name: KT76-07 A/B integration and GIS evidence
+on:
+  push:
+    branches: [main, kt76-07-integrated-ab-gis-20261106]
+    paths:
+      - '.github/workflows/kt76-07-ab-gis.yml'
+      - 'v26-test/v27-preview/KT76_07_AB_GIS_INTEGRATION_TEST.html'
+      - 'v26-test/v27-preview/kt76-07-gis-evidence-audit.js'
+      - 'v26-test/v27-preview/kt76-07-ab-gis-qa.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integrated-ab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: A two-parcel / B full-partial GIS and fail-closed regression
+        run: node v26-test/v27-preview/kt76-07-ab-gis-qa.cjs
+      - name: Install XML/ZIP regression dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Preserve KT75–KT76-06 approved Word and ZIP content
+        run: |
+          node v26-test/v27-preview/kt76-06-word-layout-qa.cjs
+          node v26-test/v27-preview/kt76-05-unified-zip-qa.cjs
+          node v26-test/v27-preview/kt76-04-expert-gis-qa.cjs
+          node v26-test/v27-preview/kt76-03-classic-b-qa.cjs
+          node v26-test/v27-preview/kt76-01-nearest-a-qa.cjs
