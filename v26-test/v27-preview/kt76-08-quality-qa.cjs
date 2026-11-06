@@ -9,10 +9,10 @@ assert(page.includes('KT7607GISEvidence.audit('));
 assert(page.includes('KT7605UnifiedQA.verify(kt7606.blob'));
 assert(prior.includes('kt76-05-unified-zip-qa.js?v=kt76-05-1'));
 assert(qa.includes('Expert съдържа неправилния термин'));
-for(const [i,m] of [...page.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)].entries())
+for(const [i,m] of [...page.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].entries())
   if(m[1].trim())new vm.Script(m[1],{filename:'inline-'+i});
 new vm.Script(qa,{filename:'kt76-05-unified-zip-qa.js'});
-const phrase=/санкционн(?:ото|о|и|ия|ият)?\\s+третиране\\s+на\\s+отпадъчни\\s+води/iu;
+const phrase=/санкционн(?:ото|о|и|ия|ият)?\s+третиране\s+на\s+отпадъчни\s+води/iu;
 assert(phrase.test('Санкционното третиране на отпадъчни води'));
 assert(!phrase.test('Предвижда се пречистване на отпадъчните води.'));
 console.log('KT76-08 PASS: isolated test route, original A/B GIS and ZIP gate, JS syntax, wastewater terminology quality guard');
