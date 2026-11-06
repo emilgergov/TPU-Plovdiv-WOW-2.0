@@ -13,7 +13,7 @@ style.textContent=`
  position:absolute!important;top:12px!important;right:12px!important;left:auto!important;
  display:flex!important;flex-flow:row wrap!important;justify-content:flex-start!important;
  align-items:center!important;align-content:flex-start!important;
- width:500px!important;max-width:calc(100% - 315px)!important;
+ width:max-content!important;min-width:0!important;max-width:min(410px,calc(100% - 16px))!important;
  padding:4px!important;gap:3px!important;
  border:1px solid #bfd6c9!important;border-radius:9px!important;
  background:rgba(255,255,255,.96)!important;
