@@ -67,11 +67,16 @@ const reader=blob=>blob.arrayBuffer().then(buffer=>{
 
  assert.equal(before.ps.length,43);assert.equal(after.ps.length,43);assert.equal(specimen.ps.length,43);
  for(let i=28;i<33;i++)assert.equal(after.text[i],specimen.text[i],'B impact paragraph '+i+' must equal original etalon');
- for(let i=0;i<43;i++)if(![17,25,26,27,28,29,30,31,32,33].includes(i))
+ for(let i=0;i<43;i++)if(![17,22,24,25,26,27,28,29,30,31,32,33].includes(i))
   assert.equal(after.text[i],before.text[i],'unexpected change to B paragraph '+i);
  assert(!after.text[17].includes('попада в обхвата'),'B must not inherit sample procedure');
  assert.match(after.text[23],/36676\.129\.457/);assert.match(after.text[23],/BG0000194/);
  assert.match(after.text[25],/чл\. 12, ал\. 2/);assert.match(after.text[26],/ЗООС/);
+ assert.match(after.text[22],/начина на трайно ползване/,'B paragraph 23 must follow etalon land-use subject');
+ assert.match(after.text[24],/BG0000194 „Река Чая“/,'B zone must carry verified name');
+ assert.match(after.text[33],/по КККР на с\. Катуница/,'B conclusion must preserve administrative locality');
+ assert.doesNotMatch(after.text[33],/инвестиционно предложение „инвестиционно предложение|„„|„[^“]*„/,'B conclusion must not duplicate subject or quotes');
+ assert.doesNotMatch(after.text[33],/най-подходящо се явява/,'B conclusion may not claim arbitrary procedural choice');
  assert.match(after.text[33],/36676\.129\.457/);assert(!after.text[33].includes('Река Марица'));
  for(const key of Object.keys(before.zip))if(key!=='word/document.xml')assert.deepEqual(Buffer.from(after.zip[key]),Buffer.from(before.zip[key]),'non-body DOCX asset altered: '+key);
  // Scenario A and Expert remain on exactly the same generator paths.
