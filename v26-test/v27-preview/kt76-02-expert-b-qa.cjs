@@ -22,7 +22,7 @@ Object.defineProperty(Object.getPrototypeOf(demo),'children',{configurable:true,
 const ctx={window:{fflate},fflate,DOMParser,XMLSerializer,TextEncoder,TextDecoder,Blob,Error,console};
 vm.createContext(ctx);vm.runInContext(moduleCode,ctx);
 function docx(count,expert){
- const text=i=>i===10?'Относно: проект в поземлен имот 36676.129.457':i===17?'Във връзка с преписката, на основание чл. 6а от Наредбата за ОС е изготвен експертен проект.':i===23?'Поземленият имот попада изцяло или частично в BG0000194.':i===26?'С оглед GIS данните ... BG0000194 „Река Чая“.':i===38?'При определяне на процедурния ред в BG0000194 „Река Чая“ ...':'Еталонен абзац '+i;
+ const text=i=>i===10?'Относно: Изграждане на малък едноетажен обслужващ обект с временна площадка в поземлен имот 36676.129.457':i===17?'Във връзка с преписката, на основание чл. 6а от Наредбата за ОС е изготвен експертен проект.':i===23?'Поземленият имот попада изцяло или частично в BG0000194.':i===26?'С оглед GIS данните ... BG0000194 „Река Чая“.':i===38?'При определяне на процедурния ред в BG0000194 „Река Чая“ ...':'Еталонен абзац '+i;
  const ps=Array.from({length:count},(_,i)=>'<w:p><w:r><w:t xml:space="preserve">'+text(i)+'</w:t></w:r></w:p>').join('');
  const xml='<w:document xmlns:w="'+ns+'"><w:body>'+ps+'</w:body></w:document>';
  return fflate.zipSync({'word/document.xml':new TextEncoder().encode(xml),'word/styles.xml':new TextEncoder().encode('SAVED-STYLES'),'word/header1.xml':new TextEncoder().encode('SAVED-HEADER'),'word/footer1.xml':new TextEncoder().encode('SAVED-FOOTER'),'word/media/logo.txt':new TextEncoder().encode('SAVED-LOGO')});
@@ -64,5 +64,8 @@ const paragraphs=bytes=>{
  assert(!skipped.applied);assert.equal(skipped.blob,original);
  const otherB=await ctx.window.KT7602ExpertB.fix(original,{scenario:'Б',parcelIds:['99999.1.1'],zoneCodes:['BG0000194']});
  assert(!otherB.applied);assert.equal(otherB.blob,original);
+ // A later, substantively different investment on the same property must not receive this case-specific text.
+ const altEntries={...entries,'02_Proekt_na_stanovishte_Eksperten.docx':fflate.zipSync({...fflate.unzipSync(expert),'word/document.xml':new TextEncoder().encode(new TextDecoder().decode(fflate.unzipSync(expert)['word/document.xml']).replace('Изграждане на малък едноетажен обслужващ обект с временна площадка','Строеж на пътна инфраструктура'))})};
+ const differentSubject=await ctx.window.KT7602ExpertB.fix(new Blob([fflate.zipSync(altEntries)]),{scenario:'Б',parcelIds:['36676.129.457'],zoneCodes:['BG0000194']});assert(!differentSubject.applied);
  console.log('KT76-02 PASS: exact RIOSV title, dark intake button, Expert B 12 scoped paragraphs, approved introduction intact, Classic+PDF+DOCX assets unchanged, other cases unchanged.');
 })().catch(e=>{console.error(e);process.exitCode=1});
