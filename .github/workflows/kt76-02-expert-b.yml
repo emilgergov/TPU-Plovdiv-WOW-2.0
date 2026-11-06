@@ -1,0 +1,29 @@
+name: KT76-02 Expert B and UI isolated regression
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt76-02-expert-b.yml'
+      - 'v26-test/v27-preview/KT76_02_EXPERT_B_TEST.html'
+      - 'v26-test/v27-preview/kt76-02-expert-b-content.js'
+      - 'v26-test/v27-preview/kt76-02-expert-b-qa.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  expert-b:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install test dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock fflate@0.8.2 @xmldom/xmldom@0.9.8
+      - name: Verify exact Expert B, PDFs and UI on synthetic DOCX/ZIP
+        run: node v26-test/v27-preview/kt76-02-expert-b-qa.cjs
+      - name: Preserve KT74, KT75 and KT76-01 regressions
+        run: |
+          node v26-test/v27-preview/kt74-classic-fidelity-qa.cjs
+          node v26-test/v27-preview/kt75-expert-intro-qa.cjs
+          node v26-test/v27-preview/kt76-01-nearest-a-qa.cjs
