@@ -1,0 +1,24 @@
+name: KT77 R09 final compact acceptance
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/kt77-r09-final-ux.yml'
+      - 'v26-test/v27-preview/V27_27_KT77_03_PI_MASTER_R09_FINAL_COMPACT.html'
+      - 'v26-test/v27-preview/kt77-r09-final-ux-regression.cjs'
+permissions:
+  contents: read
+jobs:
+  final-ux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prove R09 changes only visual CSS
+        run: node v26-test/v27-preview/kt77-r09-final-ux-regression.cjs
+      - name: Preserve R08 context red marker and R13 map
+        run: node v26-test/v27-preview/kt77-r08-context-marker-regression.cjs
+      - name: Preserve full PI MASTER and Word/PDF/AI dependencies
+        run: |
+          node v26-test/gis-data/pi-master/verify-browser-index.cjs v26-test/gis-data/pi-master/browser-index
+          node v26-test/v27-preview/kt77-r07-compact-regression.cjs
+          node v26-test/v27-preview/kt77-r06-readonly-regression.cjs
