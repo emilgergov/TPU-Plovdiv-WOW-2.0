@@ -1009,7 +1009,8 @@ function state(cadnum,selection,message){
 }
 window.select=function(i,keepAll){
  const out=original.apply(this,arguments);
- const rows=window.found;
+ /* Original R13 uses a global lexical `let found`, not a window.found property. */
+ const rows=typeof found!=="undefined"?found:window.found;
  const cadnum=rows?.[i]?.cadnum;
  if(!cadnum)return out;
  const serial=++token;
