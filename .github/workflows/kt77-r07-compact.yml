@@ -1,0 +1,21 @@
+name: KT77 R07 compact panel safety
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/kt77-r07-compact.yml'
+      - 'v26-test/v27-preview/V27_27_KT77_03_PI_MASTER_FULL_R07_COMPACT.html'
+      - 'v26-test/v27-preview/kt77-r07-compact-regression.cjs'
+permissions:
+  contents: read
+jobs:
+  visual-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm R07 changes only compact panel CSS
+        run: node v26-test/v27-preview/kt77-r07-compact-regression.cjs
+      - name: Verify entire 67-part PI MASTER index
+        run: node v26-test/gis-data/pi-master/verify-browser-index.cjs v26-test/gis-data/pi-master/browser-index
+      - name: Preserve R06 map/GIS and approved Word/PDF/AI dependencies
+        run: node v26-test/v27-preview/kt77-r06-readonly-regression.cjs
