@@ -1,0 +1,38 @@
+name: KT77 PI MASTER complete browser index
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/kt77-master-build.yml'
+      - 'v26-test/gis-data/pi-master/build-browser-index-from-gis.py'
+      - 'v26-test/gis-data/pi-master/admin-ekatte-212-groups.json'
+permissions:
+  contents: write
+concurrency:
+  group: kt77-pi-master-build
+  cancel-in-progress: false
+jobs:
+  build-verify-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Reconstruct 917417 verified parcel profiles
+        run: python v26-test/gis-data/pi-master/build-browser-index-from-gis.py
+      - name: Verify every published shard and global counts
+        run: node v26-test/gis-data/pi-master/verify-browser-index.cjs v26-test/gis-data/pi-master/browser-index
+      - name: Git publish ONLY verified index (never maps or generators)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v26-test/gis-data/pi-master/browser-index/
+          if git diff --cached --quiet; then
+            echo "Verified index is already published."
+          else
+            git commit -m "KT77-03: publish validated 67-part PI MASTER browser index (917417 parcels)"
+            git push origin "HEAD:${{ github.ref_name }}"
+          fi
