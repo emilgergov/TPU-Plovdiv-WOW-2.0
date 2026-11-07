@@ -25,7 +25,8 @@ assert(node.includes('scenario_override:null'),'no A/B scenario override');
  const events=[],state={status:'ready',records:[]};
  const masterRows={
   '46989.205.218':{cadnum:'46989.205.218',zz:[{code:'BG0001031'}],zt:[{category:'Природна забележителност',name:'СВЕТИ ДУХ',area_m2:2878.449,percent:99.832}]},
-  '56784.13.102':{cadnum:'56784.13.102',zz:[],zt:[]}
+  '56784.13.102':{cadnum:'56784.13.102',zz:[],zt:[]},
+  '47086.6.15':{cadnum:'47086.6.15',zz:[],zt:[{category:'Защитена местност',name:'ТЕСТОВА ЗТ',area_m2:100,percent:10}]}
  };
  const win={V26NormativeRegister:state,KT77PiMasterIndex:{create:()=>({lookup:async id=>masterRows[id]?{status:'FOUND',profile:masterRows[id]}:{status:'NOT_IN_VALIDATED_CADASTRE'}})}};
  const document={baseURI:'https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/',readyState:'complete',dispatchEvent:e=>events.push(e.type)};
@@ -46,6 +47,11 @@ assert(node.includes('scenario_override:null'),'no A/B scenario override');
  assert.equal(result.zt[0].source_url.includes('areaID=97'),true);
  const none=await win.KT77R11ZZT.findingsForParcel('56784.13.102');
  assert.equal(none.zt.length,0);
+ const onlyZT=await win.KT77R11ZZT.findingsForParcel('47086.6.15');
+ assert.equal(onlyZT.zt.length,1);
+ assert.equal(onlyZT.zz,0);
+ assert.equal(onlyZT.scenario_override,null);
+ assert.equal(onlyZT.legalConclusion,null);
  assert.equal(events.includes('kt77:zzt-supplement-ready'),true);
  console.log('PASS R11: official sources, safe archive adapter, matched SVETI DUH, no generated conclusions, no A/B reclassification, no modifications to R10/R09.');
 })().catch(e=>{console.error(e);process.exitCode=1});
