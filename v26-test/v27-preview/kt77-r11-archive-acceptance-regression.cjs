@@ -22,7 +22,12 @@ for(const key of keys){
 assert.equal(catalog.items.length,47);
 assert.equal(new Set(catalog.items.map(x=>x.id)).size,catalog.items.length);
 const zzt=catalog.items.find(x=>x.id===3);
-assert(zzt.url.endsWith('/ZZT.pdf'),'ZZT link must be direct official PDF');
+assert(zzt.url.includes('eur-lex.europa.eu/legal-content/BG/TXT/PDF/'),'ZZT link must point to crosschecked later official published text');
+assert(zzt.note.includes('102/08.12.2023'),'ZZT citation must state the crosschecked revision');
+const sv=primary.find(x=>x.id==='T02');
+assert.equal(sv.official_territory_area_dka,2.883);
+assert.equal(sv.area_update_dv,'99/2018');
+assert.equal(sv.conclusion_inference_allowed,false);
 assert.equal(zzt.verified_revision,false);
 for(const number of [46,47])assert(catalog.items.some(x=>x.id===number));
 assert(primary.some(x=>x.id==='R01'&&x.source.includes('pdbase.eea.government.bg')));
