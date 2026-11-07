@@ -1,0 +1,24 @@
+name: KT77 R11 local normative archive integrity
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'v26-test/normative/offline/**'
+      - 'v26-test/v27-preview/kt77-r11-local-normative-reader.js'
+      - 'v26-test/v27-preview/kt77-r11-local-archive-regression.cjs'
+      - '.github/workflows/kt77-r11-local-archive-qa.yml'
+permissions:
+  contents: read
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check copied PDF/text bytes, SHA256, source completeness and legal guardrails
+        run: node v26-test/v27-preview/kt77-r11-local-archive-regression.cjs
+      - name: Check original accepted PI MASTER and expert generators
+        run: |
+          node v26-test/v27-preview/kt77-r11-archive-acceptance-regression.cjs
+          node v26-test/v27-preview/kt77-r11-zzt-regression.cjs
+          node v26-test/v27-preview/kt77-r10-editor-regression.cjs
+          node v26-test/gis-data/pi-master/verify-browser-index.cjs v26-test/gis-data/pi-master/browser-index
