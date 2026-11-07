@@ -40,6 +40,20 @@
     "verified": false
   },
   {
+    "id": "N05",
+    "title": "Закон за защитените територии (ЗЗТ)",
+    "source": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Zakoni/ZZT.pdf",
+    "purpose": "Правна рамка ЗТ — справочен източник; пространствената констатация по ПИ MASTER не изменя заключението относно ЗЗ",
+    "source_status": "Официален PDF на МОСВ; публикувана редакция до ДВ бр. 66/2013; актуалността към 2026 г. не е удостоверена",
+    "page": "НЯМА ДАННИ",
+    "date": "НЯМА ДАННИ",
+    "verified": false,
+    "revision_verified": false,
+    "kt77_r11": true,
+    "reference_only": true,
+    "legal_conclusion_override": false
+  },
+  {
     "id": "Z01",
     "title": "BG0002057 Заповед РД-786/29.10.2008 (ДВ 106/2008)",
     "source": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/PublicDownloads/Auto/PS_SPA/BG0002057/BG0002057_PS_11.pdf",
@@ -82,9 +96,9 @@
   {
     "id": "R01",
     "title": "Регистър защитени територии и зони ИАОС",
-    "source": "https://pdbase.government.bg/zpo/bg/",
+    "source": "https://pdbase.eea.government.bg/zpo/bg/index_search.jsp",
     "purpose": "Актуални актове и режими",
-    "source_status": "Официален регистър установен",
+    "source_status": "Действаща официална страница на ИАОС; индивидуалните режими се проверяват",
     "page": "ПРЕДСТОИ",
     "date": "ПРЕДСТОИ",
     "verified": false
@@ -98,5 +112,33 @@
     "page": "ПРЕДСТОИ",
     "date": "ПРЕДСТОИ",
     "verified": false
+  },
+  {
+    "id": "T01",
+    "title": "ИАОС — Държавен регистър на защитените територии",
+    "source": "https://pdbase.eea.government.bg/zpo/bg/index_search.jsp",
+    "purpose": "Официални данни за категории, заповеди, режими и планове за управление на защитени територии",
+    "source_status": "Официален публичен регистър; проверка на конкретния акт преди цитиране",
+    "page": "НЯМА ДАННИ",
+    "date": "НЯМА ДАННИ",
+    "verified": false,
+    "revision_verified": false,
+    "kt77_r11": true,
+    "reference_only": true,
+    "legal_conclusion_override": false
+  },
+  {
+    "id": "T02",
+    "title": "Природна забележителност „Свети Дух“ — ИАОС",
+    "source": "https://pdbase.eea.government.bg/zpo/bg/area.jsp?NEM_Partition=1&areaID=97&categoryID=3",
+    "purpose": "Констатация за ЗТ при ПИ 46989.205.218; заповед № 3796/11.10.1965 г., ДВ бр. 12/1966 г.",
+    "source_status": "Регистър ИАОС; конкретните правни ограничения по заповедта изискват проверка",
+    "page": "НЯМА ДАННИ",
+    "date": "НЯМА ДАННИ",
+    "verified": false,
+    "revision_verified": false,
+    "kt77_r11": true,
+    "reference_only": true,
+    "legal_conclusion_override": false
   }
 ]
