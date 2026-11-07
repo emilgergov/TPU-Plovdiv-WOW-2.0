@@ -1,0 +1,87 @@
+{
+  "schema": "kt77-r11-zzt-normative-supplement-v1",
+  "checkpoint": "KT77-03-R11",
+  "status": "SOURCE_INDEX_READY_LEGAL_REVISION_REVIEW_REQUIRED",
+  "scope": "Documentary factual support only; no change to Natura 2000 A/B classification, approved conclusions or generators",
+  "policy": {
+    "zz_scenario_source": "existing verified protected-zone GIS workflow",
+    "zt_role": "documented spatial and normative factual findings",
+    "zt_never_automatically_reclassifies_ab": true,
+    "zt_never_overwrites_zz_expert_conclusion": true,
+    "independent_zzt_obligations": "report separately and require expert legal verification",
+    "classic_a_b_and_expert": "changes only after three-template controlled content approval",
+    "pdf1_pdf2": "spatial and documentary factual traceability, not derived legal conclusions"
+  },
+  "sources": [
+    {
+      "id": "R11_ZZT_LAW",
+      "title": "Закон за защитените територии",
+      "kind": "legislation",
+      "authority": "МОСВ",
+      "official_catalog": "https://www.moew.government.bg/bg/priroda/zakonodatelstvo/nacionalno-zakonodatelstvo/zakoni/",
+      "official_pdf": "https://moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Zakoni/ZZT.pdf",
+      "source_note": "Официалният PDF на МОСВ, визуално проверен, съдържа изменения до ДВ бр. 66/2013; НЕ се счита за потвърдена актуална редакция през 2026 г.",
+      "law_revision_verified": false,
+      "sections": [
+        {
+          "article": "чл. 5",
+          "purpose": "Категории защитени територии",
+          "source_pdf_page": 1,
+          "verified_scope": "историческата официална редакция"
+        },
+        {
+          "article": "чл. 11",
+          "purpose": "Спазване на режима според закона, заповедта и плана",
+          "source_pdf_page": 2,
+          "verified_scope": "историческата официална редакция"
+        },
+        {
+          "article": "чл. 13, ал. 1–2",
+          "purpose": "Строителство и съгласуване в защитени територии; необходимо е актуално потвърждение",
+          "source_pdf_page": 2,
+          "verified_scope": "историческата официална редакция"
+        },
+        {
+          "article": "чл. 44",
+          "purpose": "Държавен регистър на защитените територии",
+          "source_pdf_page": null,
+          "verified_scope": "историческата официална редакция"
+        }
+      ],
+      "usage": "REFERENCE_ONLY_UNTIL_CURRENT_LAW_VERIFIED"
+    },
+    {
+      "id": "R11_EEA_ZT_REGISTER",
+      "title": "Държавен регистър на защитените територии и защитените зони",
+      "kind": "official_register",
+      "authority": "ИАОС",
+      "url": "https://pdbase.eea.government.bg/zpo/bg/index_search.jsp",
+      "verified_source": true,
+      "usage": "source of site identity, official orders, regimes and management plans; per-site verification required"
+    },
+    {
+      "id": "R11_ZT_SVETI_DUH",
+      "title": "Природна забележителност „Свети Дух“",
+      "kind": "protected_territory_site",
+      "authority": "ИАОС",
+      "url": "https://pdbase.eea.government.bg/zpo/bg/area.jsp?NEM_Partition=1&areaID=97&categoryID=3",
+      "registry_category": "Природна забележителност",
+      "registry_number": "97",
+      "declaration_order": "Заповед № 3796 от 11.10.1965 г.",
+      "published_in": "ДВ, бр. 12/1966 г.",
+      "administrative_location": "с. Манастир, община Лъки, област Пловдив",
+      "source_verified": true,
+      "legal_regime_verified": false,
+      "usage": "documentary factual reference only; verify specific order text before stating restrictions"
+    }
+  ],
+  "mapping": {
+    "master_field": "zt",
+    "site_identity": "display official name and category; retain technical codes internally",
+    "master_not_legal_source": true,
+    "unknown_order": "НЯМА ДАННИ",
+    "unknown_management_plan": "НЯМА ДАННИ",
+    "summary_rule": "ZZ and ZT facts independent; legal regimes must be established from official published acts."
+  },
+  "generated_at_not_claimed": true
+}
