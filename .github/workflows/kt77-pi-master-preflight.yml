@@ -1,0 +1,32 @@
+name: KT77 PI MASTER source preflight
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/kt77-pi-master-preflight.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect archived GIS segment schemas
+        shell: bash
+        run: |
+          python - <<'PY'
+          import gzip, json, glob
+          for pattern in ["v26-test/gis-data/parcels_*.json.gz","v26-test/gis-data/overlays_*.json.gz","v26-test/gis-data/parcelgeom_*.json.gz","v26-test/gis-data/overlapgeom_*.json.gz"]:
+              files=sorted(glob.glob(pattern))
+              print("SOURCE",pattern,"FILES",len(files))
+              if not files: continue
+              with gzip.open(files[0],"rt",encoding="utf-8") as f: data=json.load(f)
+              print("FIRST",files[0],"TYPE",type(data).__name__)
+              if isinstance(data,dict):
+                  print("DICT KEYS",list(data)[:15])
+                  for key,value in data.items():
+                      print("FIELD",key,"TYPE",type(value).__name__,"EXAMPLE",str(value)[:700])
+                      break
+              elif isinstance(data,list):
+                  print("LIST LEN",len(data),"ITEM",str(data[0] if data else None)[:900])
+          PY
