@@ -1,0 +1,23 @@
+name: KT77 R08 context parcel locator safety
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/kt77-r08-context-marker.yml'
+      - 'v26-test/v27-preview/V27_27_KT77_03_PI_MASTER_R08_CONTEXT_MARKER.html'
+      - 'v26-test/v27-preview/kt77-r08-context-marker-regression.cjs'
+permissions:
+  contents: read
+jobs:
+  visual-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify R08 only appends a context locator to locked R07
+        run: node v26-test/v27-preview/kt77-r08-context-marker-regression.cjs
+      - name: Verify all published PI MASTER segments
+        run: node v26-test/gis-data/pi-master/verify-browser-index.cjs v26-test/gis-data/pi-master/browser-index
+      - name: Confirm underlying GIS and generators unchanged
+        run: |
+          node v26-test/v27-preview/kt77-r07-compact-regression.cjs
+          node v26-test/v27-preview/kt77-r06-readonly-regression.cjs
