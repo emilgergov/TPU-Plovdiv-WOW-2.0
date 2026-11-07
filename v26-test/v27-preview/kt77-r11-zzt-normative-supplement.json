@@ -1,7 +1,7 @@
 {
   "schema": "kt77-r11-zzt-normative-supplement-v1",
   "checkpoint": "KT77-03-R11",
-  "status": "SOURCE_INDEX_READY_LEGAL_REVISION_REVIEW_REQUIRED",
+  "status": "SOURCES_CROSSCHECKED_2026_11_08_ZZT_FULL_REVISION_AND_INDIVIDUAL_LEGAL_APPLICATION_PENDING",
   "scope": "Documentary factual support only; no change to Natura 2000 A/B classification, approved conclusions or generators",
   "policy": {
     "zz_scenario_source": "existing verified protected-zone GIS workflow",
@@ -20,39 +20,50 @@
       "authority": "МОСВ",
       "official_catalog": "https://www.moew.government.bg/bg/priroda/zakonodatelstvo/nacionalno-zakonodatelstvo/zakoni/",
       "official_pdf": "https://moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Zakoni/ZZT.pdf",
-      "source_note": "Официалният PDF на МОСВ, визуално проверен, съдържа изменения до ДВ бр. 66/2013; НЕ се счита за потвърдена актуална редакция през 2026 г.",
+      "source_note": "МОСВ публикува стар PDF до ДВ 66/2013; за по-късните разпоредби се използва пълният текст на EUR-Lex с последно посочено изменение ДВ 102/2023 и официалната страница на МРРБ. Пълна проверка на редакцията към 2026 не е приключила.",
       "law_revision_verified": false,
       "sections": [
         {
           "article": "чл. 5",
           "purpose": "Категории защитени територии",
           "source_pdf_page": 1,
-          "verified_scope": "историческата официална редакция"
+          "verified_scope": "проверен публикуван пълен текст с изменения до ДВ бр.102/2023; точна правна приложимост към ИП се оценява отделно"
         },
         {
           "article": "чл. 11",
           "purpose": "Спазване на режима според закона, заповедта и плана",
           "source_pdf_page": 2,
-          "verified_scope": "историческата официална редакция"
+          "verified_scope": "проверен публикуван пълен текст с изменения до ДВ бр.102/2023; точна правна приложимост към ИП се оценява отделно"
         },
         {
           "article": "чл. 13, ал. 1–2",
           "purpose": "Строителство и съгласуване в защитени територии; необходимо е актуално потвърждение",
           "source_pdf_page": 2,
-          "verified_scope": "историческата официална редакция"
+          "verified_scope": "проверен публикуван пълен текст с изменения до ДВ бр.102/2023; точна правна приложимост към ИП се оценява отделно"
         },
         {
           "article": "чл. 44",
           "purpose": "Държавен регистър на защитените територии",
           "source_pdf_page": null,
-          "verified_scope": "историческата официална редакция"
+          "verified_scope": "проверен публикуван пълен текст с изменения до ДВ бр.102/2023; точна правна приложимост към ИП се оценява отделно"
         }
       ],
-      "usage": "REFERENCE_ONLY_UNTIL_CURRENT_LAW_VERIFIED",
-      "official_2023_consolidated_reference": "https://eur-lex.europa.eu/legal-content/BG/TXT/PDF/?uri=NIM%3A202602968",
+      "usage": "REFERENCE_WITH_CROSSCHECKED_2023_EDITION_PENDING_FULL_2026_LEGAL_CHAIN",
+      "official_2023_consolidated_reference": "https://eur-lex.europa.eu/legal-content/BG/TXT/PDF/?uri=CELEX%3A72024L1203BGR_202602968",
       "official_2023_ministry_page": "https://www.mrrb.bg/bg/zakon-za-zastitenite-teritorii/",
       "latest_identified_amendment": "ДВ, бр. 102 от 08.12.2023 г.",
-      "latest_reference_note": "Евро-Лекс публикува пълен български текст с изменения до ДВ бр. 102/2023; МРРБ публикува актуализация от 08.12.2023. Не се обявява пълна юридическа верификация за 2026."
+      "latest_reference_note": "Евро-Лекс публикува пълен български текст с изменения до ДВ бр. 102/2023; МРРБ публикува актуализация от 08.12.2023. Не се обявява пълна юридическа верификация за 2026.",
+      "revision_evidence": {
+        "as_of": "2026-11-08",
+        "cross_checked_through": "ДВ, бр. 102 от 08.12.2023 г.",
+        "sources": [
+          "https://eur-lex.europa.eu/legal-content/BG/TXT/PDF/?uri=CELEX%3A72024L1203BGR_202602968",
+          "https://www.mrrb.bg/bg/zakon-za-zastitenite-teritorii/",
+          "https://magistrat.bg/laws/1212a2e3ba65"
+        ],
+        "verification_scope": "чл. 5, чл. 11, чл. 13, чл. 44 са установени в пълния публикуван текст; независима официална проверка на всички ДВ след 08.12.2023 г. не е извършена",
+        "legal_2026_full_chain_verified": false
+      }
     },
     {
       "id": "R11_EEA_ZT_REGISTER",
@@ -76,7 +87,32 @@
       "administrative_location": "с. Манастир, община Лъки, област Пловдив",
       "source_verified": true,
       "legal_regime_verified": false,
-      "usage": "documentary factual reference only; verify specific order text before stating restrictions"
+      "usage": "documentary factual reference only; verify specific order text before stating restrictions",
+      "alternate_official_name": "Водопад „Свети Дух“",
+      "area_change_order": "Заповед № РД-629 от 23.10.2018 г.",
+      "area_change_publication": "ДВ, бр. 99/30.11.2018 г.",
+      "official_area_ha": 0.2883,
+      "official_area_note": "Заповед РД-629/2018 актуализира площта от 5.000 дка на 2.883 дка. Не приравнявайте автоматично официалната площ с площта на кадастралния ПИ или с площта на пространственото пресичане.",
+      "official_register_status": "ИАОС: актуални цифрови граници; в регистъра площта се закръгля до 0.29 ха",
+      "management_plan_verified": false,
+      "regime_evidence": {
+        "source": "https://pdbase.eea.government.bg/zpo/bg/area.jsp?NEM_Partition=1&areaID=97&categoryID=3",
+        "purpose": "Опазване на водопад",
+        "listed_prohibitions": [
+          "Добив и къртене на камъни, изкопаване на пръст и пясък",
+          "Риболов, лов, стрелба и взривни дейности",
+          "Прокарване на пътища, строеж на сгради, изменение или замърсяване на водни течения",
+          "Косене, събиране на растения и билки",
+          "Палене на огън и замърсяване на района"
+        ],
+        "listed_exceptions": [
+          "Залесителни мероприятия за подобряване на ландшафта",
+          "Горски сечи с определени защитни цели",
+          "Пътища, алеи и сгради, необходими за правилното ползване и стопанисване на обекта"
+        ],
+        "scope": "Публикуван режим в регистъра; конкретната приложимост към инвестиционно предложение и точният текст на актовете подлежат на експертен контрол",
+        "no_automatic_procedural_conclusion": true
+      }
     }
   ],
   "mapping": {
@@ -87,5 +123,14 @@
     "unknown_management_plan": "НЯМА ДАННИ",
     "summary_rule": "ZZ and ZT facts independent; legal regimes must be established from official published acts."
   },
-  "generated_at_not_claimed": true
+  "generated_at_not_claimed": true,
+  "legal_verification_summary": {
+    "as_of": "2026-11-08",
+    "law_2023_edition_confirmed": true,
+    "law_full_2026_edition_officially_confirmed": false,
+    "site_sveti_duh_orders_registry_confirmed": true,
+    "site_sveti_duh_individual_regime_registry_checked": true,
+    "all_territories_individual_regimes_verified": false,
+    "document_generator_integration_authorized": false
+  }
 }
