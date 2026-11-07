@@ -1,0 +1,24 @@
+{
+  "checkpoint": "KT78-03 municipalities closed",
+  "total_parcels": 917417,
+  "assigned_municipalities": 917417,
+  "unassigned": 0,
+  "codes": 212,
+  "direct_nsi_codes": 210,
+  "official_cadastral_quarter_codes": [
+    "99087",
+    "99088"
+  ],
+  "special_counts": {
+    "99087": 2885,
+    "99088": 3879
+  },
+  "municipalities": 18,
+  "province": "Пловдив",
+  "zz_pairs": 176553,
+  "zt_pairs": 2746,
+  "sqlite_integrity": "ok",
+  "sqlite_sha256": "a884ac1d3dc096259918513c7d12a89d5db93bea94d36f1b5e0a59c792e018ba",
+  "v02_unchanged": true,
+  "KT77_unchanged": true
+}
