@@ -1,0 +1,67 @@
+{
+  "version": "KT77_02_PI_X_ZT_V1",
+  "source_date": "2026-11-07",
+  "source_zt": "zpo_all.zip (user supplied)",
+  "source_zt_sha256": "46e040ae2d0a437f11a9426c7f3fafc5efa7ca264d10d33416b2c1d11069240a",
+  "source_parcels": "V26_FULL_GEOMETRY_100_PERCENT_2026-10-27.zip",
+  "source_parcels_sha256": "2d6f1498b89dd7a16b6dd69f15410141c94dd988831e4e74293c1be9c565e291",
+  "crs": "EPSG:32635",
+  "input_geometry_records": 917418,
+  "unique_parcel_ids": 917417,
+  "duplicate_geometry_id": "05150.501.2454",
+  "merged_duplicate_parts": 1,
+  "source_zt_features": 1081,
+  "accepted_zt_features": 1064,
+  "excluded_zt_features": 17,
+  "excluded_detail": {
+    "invalid_geometries": 6,
+    "boundaries_updating": 11
+  },
+  "positive_parcels": 2518,
+  "positive_pairs": 2746,
+  "non_intersecting_parcels": 914899,
+  "processing_errors": 0,
+  "github_csv_parts": [
+    {
+      "file": "PI_X_ZT_POPADA_PART_01.csv",
+      "records": 400
+    },
+    {
+      "file": "PI_X_ZT_POPADA_PART_02.csv",
+      "records": 400
+    },
+    {
+      "file": "PI_X_ZT_POPADA_PART_03.csv",
+      "records": 400
+    },
+    {
+      "file": "PI_X_ZT_POPADA_PART_04.csv",
+      "records": 400
+    },
+    {
+      "file": "PI_X_ZT_POPADA_PART_05.csv",
+      "records": 400
+    },
+    {
+      "file": "PI_X_ZT_POPADA_PART_06.csv",
+      "records": 400
+    },
+    {
+      "file": "PI_X_ZT_POPADA_PART_07.csv",
+      "records": 346
+    }
+  ],
+  "semantics": {
+    "found": "ПОПАДА",
+    "absent": "НЕ ПОПАДА само при пълно обработен кадастър и използване на приетия слой",
+    "negative_scope": "Само валидните и актуални 1064 ЗТ в zpo_all.zip",
+    "excluded": "17 обекта се описват само технически, без допълнителен статус по ПИ"
+  },
+  "data_provenance_warning": "Източникът е предоставен от потребителя; официалната правна актуалност на геометрията не е независимо удостоверена.",
+  "geometry_source_status": "FULL_GEOMETRIC_INTERSECTION_COMPUTED_ACCEPTED_WORKING_LAYER",
+  "original_source_modified": false,
+  "gis_app_modified": false,
+  "generators_modified": false,
+  "sqlite_sha256": "5cb97adf3cacf501e9eb8767721ab15f1196a8a6946162944d0cc77e5dea0e59",
+  "zip_sha256": "8475760e7412c4f71dd612836721da070e583fecc9fa1dcc1255d37327645a38"
+}
