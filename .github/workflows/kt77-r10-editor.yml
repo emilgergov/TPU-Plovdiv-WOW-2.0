@@ -1,0 +1,22 @@
+name: KT77 R10 smart cadastral editor
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/kt77-r10-editor.yml'
+      - 'v26-test/v27-preview/kt77-r10-smart-editor.js'
+      - 'v26-test/v27-preview/kt77-r10-editor-regression.cjs'
+      - 'v26-test/v27-preview/V27_27_KT77_03_PI_MASTER_R10_SMART_EDITOR.html'
+permissions:
+  contents: read
+jobs:
+  smart-editor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test R10 parsing, archive lookup, confirmation and fail-closed rules
+        run: node v26-test/v27-preview/kt77-r10-editor-regression.cjs
+      - name: Verify locked R09 visuals and full PI MASTER
+        run: |
+          node v26-test/v27-preview/kt77-r09-final-ux-regression.cjs
+          node v26-test/gis-data/pi-master/verify-browser-index.cjs v26-test/gis-data/pi-master/browser-index
