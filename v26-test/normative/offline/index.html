@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="bg">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<base href="../../"><title>ТПУ Пловдив · Локален нормативен архив · КТ77</title>
+<style>
+:root{font:15px system-ui,Arial,sans-serif;color:#173b2b;background:#edf4ef}*{box-sizing:border-box}
+body{margin:0}header{background:#12503a;color:#fff;padding:22px max(16px,calc((100vw - 1140px)/2))}
+header h1{font-size:25px;margin:0 0 7px}.wrap{max-width:1140px;margin:auto;padding:18px}
+.card{background:#fff;border:1px solid #d4e1d7;border-radius:9px;padding:14px;margin:9px 0}
+.notice{border-left:4px solid #c28b2a;background:#fff9e9;padding:12px;line-height:1.5}
+.stats{display:flex;gap:13px;flex-wrap:wrap;font-weight:600}
+.filter{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:14px 0}
+input,select{font:inherit;border:1px solid #9cafaa;border-radius:7px;padding:9px 12px}
+input{min-width:min(90vw,360px);flex:1}
+.entry{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start}
+.entry h3{margin:3px 0 8px;font-size:16px}.meta{font-size:12px;color:#52695a}
+.status{font-weight:700;font-size:12px}.ok{color:#176341}.pending{color:#9b3429}
+.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+a{color:#105a91}.actions a{font-size:13px;text-decoration:underline}
+small{color:#597066}.empty{padding:22px}
+@media(max-width:680px){.entry{grid-template-columns:1fr}.actions{justify-content:flex-start}}
+</style>
+</head>
+<body><header><h1>Самостоятелен нормативен архив · КТ77 R11</h1>
+<div>ТПУ Пловдив · вътрешни PDF и текстови копия с SHA-256 и история на произхода</div></header>
+<main class="wrap">
+<div class="notice">Публикуваните копия се четат само от нашия архив в GitHub Pages. Външните сайтове <b>не се отварят при генериране на документи</b>.
+Копието на нормативен акт само по себе си не удостоверява приложимата правна редакция. Непълните и непотвърдените източници са ясно обозначени.
+Заключенията по ЗЗ и одобрените Word/PDF/AI генератори не се променят от този архив.</div>
+<section class="card"><div class="stats" id="stats" aria-live="polite">Зарежда се провереният вътрешен регистър…</div></section>
+<div class="filter"><input id="q" placeholder="Закон, заповед, защитена територия, код…" aria-label="Търси в локалния архив">
+<select id="filter" aria-label="Състояние"><option value="">Всички записи</option><option value="archived">С локално копие</option><option value="missing">Без локално копие</option></select></div>
+<div id="results"></div>
+<div class="card"><a href="normative/index.html">Публичен нормативен каталог</a> · <a href="v27-preview/V27_27_KT77_03_R11_ZZT_ARCHIVE_ACCEPTANCE.html?kt77r11=1">Контрол на ЗЗТ и ПИ MASTER</a></div>
+</main>
+<script>
+(async function(){
+'use strict';
+const q=document.getElementById('q'),f=document.getElementById('filter'),out=document.getElementById('results'),stats=document.getElementById('stats');
+try{
+ const response=await fetch(new URL('normative/offline/archive-manifest.json',document.baseURI),{cache:'no-store'});
+ if(!response.ok)throw Error('Няма публикуван локален индекс: HTTP '+response.status);
+ const m=await response.json();
+ if(m.schema!=='kt77-r11-local-normative-archive-v1'||!Array.isArray(m.sources))throw Error('Невалиден архивен регистър');
+ stats.textContent='Копия: '+m.archived_entries+' / '+m.total_registry_entries+' · Без локално копие: '+m.missing_entries+' · Архивна снимка: '+m.archive_snapshot_utc+' · Пълнота: '+(m.complete?'пълна':'частична');
+ function render(){
+  out.replaceChildren();
+  const term=q.value.trim().toLocaleLowerCase('bg');
+  const rows=m.sources.filter(x=>(!f.value||(f.value==='archived'?x.archived:!x.archived))&&[x.id,x.title,x.official_url,x.registry].join(' ').toLocaleLowerCase('bg').includes(term));
+  for(const x of rows){
+   const card=document.createElement('article');card.className='card entry';
+   const left=document.createElement('div'),right=document.createElement('div');right.className='actions';
+   const h=document.createElement('h3');h.textContent=x.title;
+   const tag=document.createElement('div');tag.className='meta';tag.textContent=x.id+' · '+(x.registry==='catalog'?'Публичен каталог':'Основен нормативен регистър');
+   const status=document.createElement('div');status.className='status '+(x.archived?'ok':'pending');
+   status.textContent=x.archived?'ЛОКАЛНО КОПИЕ · '+(x.kind==='pdf'?'PDF':'ТЕКСТ'):'НЯМА ЛОКАЛНО КОПИЕ';
+   left.append(tag,h,status);
+   if(x.archived){
+    const hash=document.createElement('div');hash.className='meta';hash.textContent='SHA-256: '+x.sha256;left.append(hash);
+    const a=document.createElement('a');a.textContent='Отвори нашето копие';
+    a.href=new URL(x.local_path,document.baseURI).href;a.target='_blank';a.rel='noopener noreferrer';right.append(a);
+    if(x.extracted_text_path){
+     const t=document.createElement('a');t.textContent='Локален извлечен текст';t.href=new URL(x.extracted_text_path,document.baseURI).href;t.target='_blank';t.rel='noopener noreferrer';right.append(t);
+    }
+   }else{
+    const reason=document.createElement('small');reason.textContent='Неархивирано: '+(x.error||'източникът не е достъпен');left.append(reason);
+   }
+   card.append(left,right);out.append(card);
+  }
+  if(!rows.length){const empty=document.createElement('div');empty.className='card empty';empty.textContent='Няма съвпадащи записи.';out.append(empty);}
+ }
+ q.addEventListener('input',render);f.addEventListener('change',render);render();
+}catch(error){stats.textContent='Локалният архив не е готов: '+String(error.message||error);}
+})();
+</script>
+</body></html>
