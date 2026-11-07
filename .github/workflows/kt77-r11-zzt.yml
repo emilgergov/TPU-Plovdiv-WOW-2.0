@@ -1,0 +1,25 @@
+name: KT77 R11 protected territories legal archive
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/kt77-r11-zzt.yml'
+      - 'v26-test/v27-preview/kt77-r11-zzt-normative-supplement.json'
+      - 'v26-test/v27-preview/kt77-r11-zzt-supplement.js'
+      - 'v26-test/v27-preview/kt77-r11-zzt-regression.cjs'
+      - 'v26-test/v27-preview/V27_27_KT77_03_R11_EDITOR_ZZT_ARCHIVE.html'
+permissions:
+  contents: read
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test ZZT source traceability and strict preservation of expert conclusions
+        run: node v26-test/v27-preview/kt77-r11-zzt-regression.cjs
+      - name: Test R10 smart cadastral editor
+        run: node v26-test/v27-preview/kt77-r10-editor-regression.cjs
+      - name: Verify PI MASTER and locked R09 display
+        run: |
+          node v26-test/gis-data/pi-master/verify-browser-index.cjs v26-test/gis-data/pi-master/browser-index
+          node v26-test/v27-preview/kt77-r09-final-ux-regression.cjs
