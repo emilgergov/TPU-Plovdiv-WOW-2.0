@@ -12,7 +12,7 @@ function verify(root) {
  const manifestPath=path.join(root,'manifest.json');
  if(!fs.existsSync(manifestPath))fail('missing manifest.json');
  const m=JSON.parse(fs.readFileSync(manifestPath,'utf8'));
- if(m.schema!=='kt77-pi-master-browser-v1')fail('unknown schema');
+ if(m.schema!=='kt77-pi-master-browser-v1'||m.status!=='VERIFIED')fail('index not verified');
  if(!Array.isArray(m.parts)||m.parts.length!==67)fail('expected exactly 67 PI MASTER parts');
  if(m.total_unique_parcels!==917417||m.zz_pairs!==176553||m.zt_pairs!==2746)fail('unexpected declared totals');
  if(m.ekatte_codes!==212)fail('unexpected EKATTE scope');
@@ -28,6 +28,7 @@ function verify(root) {
   if(!Array.isArray(rows)||rows.length!==part.records)fail('row count mismatch '+part.file);
   for(const r of rows){
    if(!r||typeof r.cadnum!=='string'||!/^\d{5}\.\d+\.\d+$/.test(r.cadnum)||ids.has(r.cadnum))fail('invalid/duplicate cadnum '+r?.cadnum);
+   if(r.cadnum.slice(0,2)!==part.file.slice(10,12))fail('prefix mismatch '+r.cadnum);
    if(typeof r.settlement!=='string'||!r.settlement.trim()||typeof r.municipality!=='string'||!r.municipality.trim()||r.province!=='Пловдив')fail('incomplete administrative profile '+r.cadnum);
    if(!Number.isFinite(r.area_m2)||r.area_m2<=0||!Array.isArray(r.zz)||!Array.isArray(r.zt))fail('invalid spatial profile '+r.cadnum);
    if(r.zz.some(x=>!x||typeof x.code!=='string'||!/^BG\d{7}$/.test(x.code)||!Number.isFinite(x.area_m2)||!Number.isFinite(x.percent)))fail('invalid ZZ '+r.cadnum);
