@@ -48,7 +48,11 @@
           "verified_scope": "историческата официална редакция"
         }
       ],
-      "usage": "REFERENCE_ONLY_UNTIL_CURRENT_LAW_VERIFIED"
+      "usage": "REFERENCE_ONLY_UNTIL_CURRENT_LAW_VERIFIED",
+      "official_2023_consolidated_reference": "https://eur-lex.europa.eu/legal-content/BG/TXT/PDF/?uri=NIM%3A202602968",
+      "official_2023_ministry_page": "https://www.mrrb.bg/bg/zakon-za-zastitenite-teritorii/",
+      "latest_identified_amendment": "ДВ, бр. 102 от 08.12.2023 г.",
+      "latest_reference_note": "Евро-Лекс публикува пълен български текст с изменения до ДВ бр. 102/2023; МРРБ публикува актуализация от 08.12.2023. Не се обявява пълна юридическа верификация за 2026."
     },
     {
       "id": "R11_EEA_ZT_REGISTER",
