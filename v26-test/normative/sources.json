@@ -1,7 +1,7 @@
 {
   "title": "ТПУ Пловдив · Нормативен браузърен архив V26",
-  "compiled": "2026-10-27",
-  "status": "Каталог на официални източници; не удостоверява консолидирана актуална редакция",
+  "compiled": "2026-11-08",
+  "status": "Каталог на официални източници с добавена ЗЗТ и ИАОС (КТ77 R11); правната актуалност и режимите се проверяват преди цитиране",
   "items": [
     {
       "id": 1,
@@ -25,10 +25,11 @@
       "id": 3,
       "title": "Закон за защитените територии (ЗЗТ)",
       "category": "Закони",
-      "url": "https://www.moew.government.bg/bg/priroda/zakonodatelstvo/nacionalno-zakonodatelstvo/zakoni/",
-      "note": "Проверка на приложимостта към конкретния имот.",
+      "url": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Zakoni/ZZT.pdf",
+      "note": "Официален PDF на МОСВ (публикуван текст с изменения до ДВ бр. 66/2013). За актуална редакция и конкретни членове проверете ДВ. Защитените територии се отразяват като констатации; не променят автоматично заключението по ЗЗ.",
       "authority": "МОСВ",
-      "verified_revision": false
+      "verified_revision": false,
+      "reference_only": true
     },
     {
       "id": 4,
@@ -473,6 +474,26 @@
       "note": "Публични регистри на заповедите и измененията, и заповеди за специфични цели на опазване.",
       "authority": "МОСВ",
       "verified_revision": false
+    },
+    {
+      "id": 46,
+      "title": "Регистър на защитените територии — ИАОС",
+      "category": "Регистри",
+      "url": "https://pdbase.eea.government.bg/zpo/bg/index_search.jsp",
+      "note": "Официален регистър за идентифициране на защитени територии, заповеди и режими. За всеки обект се проверява конкретният акт.",
+      "authority": "ИАОС",
+      "verified_revision": false,
+      "reference_only": true
+    },
+    {
+      "id": 47,
+      "title": "Природна забележителност „Свети Дух“ — заповед за обявяване",
+      "category": "Защитени територии",
+      "url": "https://pdbase.eea.government.bg/zpo/bg/area.jsp?NEM_Partition=1&areaID=97&categoryID=3",
+      "note": "ИАОС, код 97; Заповед № 3796/11.10.1965 г., ДВ бр. 12/1966 г.; с. Манастир, община Лъки. Режимът се установява по заповедта, не от ГИС пресичането.",
+      "authority": "ИАОС",
+      "verified_revision": false,
+      "reference_only": true
     }
   ]
 }
