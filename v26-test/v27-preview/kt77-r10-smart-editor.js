@@ -74,6 +74,7 @@ async function validate(raw,index){
  }
  return {records,errors,warnings};
 }
+scope.KT77R10Core=Object.freeze({segments,proposals,validate});
 function install(){
  const run=byId('run'),input=byId('ids');if(!run||!input||!scope.KT77PiMasterIndex)return;
  const holder=document.createElement('section');holder.id='kt77-r10-review';holder.className='kt77-r10-review';
