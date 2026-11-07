@@ -1,0 +1,27 @@
+name: KT77 R11 ZZT full normative archive acceptance
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/kt77-r11-archive-acceptance.yml'
+      - 'v26-test/data/normative-archive-register.json'
+      - 'v26-test/normative/sources.json'
+      - 'v26-test/v27-preview/kt77-r11-archive-acceptance.js'
+      - 'v26-test/v27-preview/kt77-r11-archive-acceptance-regression.cjs'
+      - 'v26-test/v27-preview/V27_27_KT77_03_R11_ZZT_ARCHIVE_ACCEPTANCE.html'
+permissions:
+  contents: read
+jobs:
+  r11-archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test integration in both normative archives and protect approved generators
+        run: node v26-test/v27-preview/kt77-r11-archive-acceptance-regression.cjs
+      - name: Test ZZT legal facts and no A/B scenario changes
+        run: node v26-test/v27-preview/kt77-r11-zzt-regression.cjs
+      - name: Test R10 editor and complete PI MASTER
+        run: |
+          node v26-test/v27-preview/kt77-r10-editor-regression.cjs
+          node v26-test/gis-data/pi-master/verify-browser-index.cjs v26-test/gis-data/pi-master/browser-index
+          node v26-test/v27-preview/kt77-r09-final-ux-regression.cjs
