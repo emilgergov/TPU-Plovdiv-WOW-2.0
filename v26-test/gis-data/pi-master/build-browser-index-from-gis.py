@@ -5,7 +5,7 @@ Fail closed unless complete counts and pilots agree with KT78.
 """
 import collections,csv,glob,gzip,hashlib,json,math,os,pathlib,re,sys
 
-ROOT=pathlib.Path(__file__).resolve().parents[1]
+ROOT=pathlib.Path(__file__).resolve().parent
 GIS=ROOT.parent
 OUT=ROOT/'browser-index'
 MAP=ROOT/'admin-ekatte-212-groups.json'
