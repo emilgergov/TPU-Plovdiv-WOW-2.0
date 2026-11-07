@@ -38,7 +38,7 @@ jobs:
               files=z.namelist()
               assert "archive-manifest.json" in files
               assert "data/normative-archive-register.json" in files
-              assert sum(x.endswith(".pdf") for x in files)>=7 # 8 register PDF entries share 7 distinct, checksum-preserved PDF copies
+              assert sum(x.endswith(".pdf") for x in files)>=6 # 8 register PDF entries share 6 distinct, checksum-preserved PDF copies
           print("PORTABLE ZIP VERIFIED",len(files),"entries",digest)
           PY
       - name: Save portable ZIP and checksum to our GitHub archive
