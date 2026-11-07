@@ -1,0 +1,349 @@
+{
+  "schema": "kt77-pi-master-browser-v1",
+  "status": "VERIFIED",
+  "total_unique_parcels": 917417,
+  "zz_pairs": 176553,
+  "zt_pairs": 2746,
+  "ekatte_codes": 212,
+  "source_zz_fragments": 181154,
+  "parts": [
+    {
+      "file": "pi-master-00.json.gz",
+      "records": 20150,
+      "sha256": "a7421e2099f4f0b4079270ab6275f9f7e787cd375936ef8fe95e0b85bd55e83b"
+    },
+    {
+      "file": "pi-master-02.json.gz",
+      "records": 7515,
+      "sha256": "e3fa7c6767f3ab61d63620dd965d0f9f8c9d59ff21c77d8d57980247eaf6ab0b"
+    },
+    {
+      "file": "pi-master-03.json.gz",
+      "records": 28344,
+      "sha256": "79bb689a504c6594d06b095ae45504aa319dee3a1caa2e10d9b0b0c4275fca0e"
+    },
+    {
+      "file": "pi-master-04.json.gz",
+      "records": 7573,
+      "sha256": "af8649f060188ecdddb6c7071ed98916ab77ab759d2ae77c0c01559075f07852"
+    },
+    {
+      "file": "pi-master-05.json.gz",
+      "records": 18059,
+      "sha256": "8ba3b7e0c232d9583abc118576f9134749ab49dcb0214d56c220ae479fea0cf7"
+    },
+    {
+      "file": "pi-master-06.json.gz",
+      "records": 44291,
+      "sha256": "ed5935fb60b1a5964dc590c40a5f0405586511c48e5457a0341899436bc7bfec"
+    },
+    {
+      "file": "pi-master-07.json.gz",
+      "records": 5096,
+      "sha256": "e6b939b6e2ab423e0f60a1342860688a79d6fa7ff61d752b056042311c0c8cb7"
+    },
+    {
+      "file": "pi-master-10.json.gz",
+      "records": 7676,
+      "sha256": "c5043a6af833434818d41f9dafb56362cdf30c76cddbec8e095fa23547d6c86c"
+    },
+    {
+      "file": "pi-master-11.json.gz",
+      "records": 7425,
+      "sha256": "031872e458e8367049d3757f7d88dd546f911000ac905954d2b619f563281b2d"
+    },
+    {
+      "file": "pi-master-12.json.gz",
+      "records": 15527,
+      "sha256": "a7fb33714bdb7f518ac717a644a821b2510d3a2a470f0a7e08e675a15f74e46f"
+    },
+    {
+      "file": "pi-master-14.json.gz",
+      "records": 539,
+      "sha256": "617045d729ffc4819fd1944fb0cef58f4b34ed9b1d30f333cb0e92cd97c664fc"
+    },
+    {
+      "file": "pi-master-15.json.gz",
+      "records": 3786,
+      "sha256": "b704e8c4c37cdb9a5886fde187e7d5486c0bca36d6229895015252fe3091cf8b"
+    },
+    {
+      "file": "pi-master-16.json.gz",
+      "records": 7321,
+      "sha256": "a6e4646fe22bf5b703b63aa4e0503cd649a84f9d101483615205133c95482d86"
+    },
+    {
+      "file": "pi-master-17.json.gz",
+      "records": 9136,
+      "sha256": "540c5481beb4ce27fcf4398198e30843c4ab80e41c06cc4f1c86cd9ab88c7884"
+    },
+    {
+      "file": "pi-master-18.json.gz",
+      "records": 2765,
+      "sha256": "4e425a9d2d3db7f989ca3ed27e7167312331fd035046ac6bb30a182fb2e1b202"
+    },
+    {
+      "file": "pi-master-20.json.gz",
+      "records": 3594,
+      "sha256": "d9ad2862882763c4db469e0dc6ed57b7911ec514c456b434efccd12639c6e6bc"
+    },
+    {
+      "file": "pi-master-21.json.gz",
+      "records": 10795,
+      "sha256": "4bdeba9e817800e396bf5f9152ff6eea69978fdf35d433be0d3f5310d87ef3d9"
+    },
+    {
+      "file": "pi-master-22.json.gz",
+      "records": 8256,
+      "sha256": "d06bd461982312a933d64e5c9757fa591e3edb1cfbe354cf2974237975af9bf1"
+    },
+    {
+      "file": "pi-master-23.json.gz",
+      "records": 14424,
+      "sha256": "40957c6877c790c05c404ab6b0e7690f0bf12b5975cb534b3f3570b9177ea884"
+    },
+    {
+      "file": "pi-master-24.json.gz",
+      "records": 21465,
+      "sha256": "875570d809d9e160d268027836b1ed628816aecb15e05ca38042f58f9174202e"
+    },
+    {
+      "file": "pi-master-27.json.gz",
+      "records": 4693,
+      "sha256": "b22424367a615b43183982a077c1094db99e9eae8316c8a8e3df64e7d1da03e1"
+    },
+    {
+      "file": "pi-master-29.json.gz",
+      "records": 5614,
+      "sha256": "795d190f9070108a8c5dcab8bdf5a40ba16d89a5d7ef53449b57be669bbd5e75"
+    },
+    {
+      "file": "pi-master-30.json.gz",
+      "records": 6383,
+      "sha256": "f384fdb3ecbc5b098dbb16abc87a0303aab3958f3985298cf622f161be77aba2"
+    },
+    {
+      "file": "pi-master-31.json.gz",
+      "records": 10155,
+      "sha256": "fb1a173f3679dafaed0c3aef861807fe39f07d392d00d1838a18b9a7b754762b"
+    },
+    {
+      "file": "pi-master-32.json.gz",
+      "records": 26860,
+      "sha256": "b2784b993f7df989a91cd588139f7058eb109a75ffd5df92a12a4bc39a5fc3ca"
+    },
+    {
+      "file": "pi-master-34.json.gz",
+      "records": 864,
+      "sha256": "9fc920fa6808907454c25e4efc59eefdcbab83c91a85c4e860a0f86dc03ff69a"
+    },
+    {
+      "file": "pi-master-35.json.gz",
+      "records": 20511,
+      "sha256": "92431355657c8f586d883c51f866c03652961e6c5d18abca4e44e7b9f1471809"
+    },
+    {
+      "file": "pi-master-36.json.gz",
+      "records": 31336,
+      "sha256": "b9fb1d396e12bdfcb2688aa0ec74684bc6395cbd255ba34bb481ad4d1ff82ed6"
+    },
+    {
+      "file": "pi-master-37.json.gz",
+      "records": 12301,
+      "sha256": "ee18040da08cc0e9b424fa7e8f3ac7188a34518760c06a89807fbf07943fbb0f"
+    },
+    {
+      "file": "pi-master-38.json.gz",
+      "records": 12826,
+      "sha256": "4f3dcb24107e468ccb2fe9369a060ae9ce571a60757bb57cb2eef5123e10b240"
+    },
+    {
+      "file": "pi-master-39.json.gz",
+      "records": 20086,
+      "sha256": "0e656e970de865c1195374c2218e6f9cf8ceecd0da8aaa85c7f62b0bffc6349e"
+    },
+    {
+      "file": "pi-master-40.json.gz",
+      "records": 24785,
+      "sha256": "83353462764b0c10944a5c95c84c42e05c6328de39562c3caf6294935bf21d38"
+    },
+    {
+      "file": "pi-master-43.json.gz",
+      "records": 12492,
+      "sha256": "f25d8a07b3d3c692957cdf00f2c7e4db26402a8999e95ad24e30e049809ba8d6"
+    },
+    {
+      "file": "pi-master-44.json.gz",
+      "records": 6094,
+      "sha256": "4d8411cb0b997184ffe634b8c95ce1649f82eeb6dba9daaf4d4e1ece50ccd9ee"
+    },
+    {
+      "file": "pi-master-46.json.gz",
+      "records": 8037,
+      "sha256": "9be349f949474dfbf376415d76784fb50bd7ee557f519d8242838ce72089cbe8"
+    },
+    {
+      "file": "pi-master-47.json.gz",
+      "records": 18900,
+      "sha256": "c81373c272234664fbd7fd70a059387af2d8959bc1cfde5dafa332036c349a49"
+    },
+    {
+      "file": "pi-master-48.json.gz",
+      "records": 12379,
+      "sha256": "d860de3a78c6446694a9fd474f6fd41d257c47360a3c0e274c60e15e34050fa8"
+    },
+    {
+      "file": "pi-master-49.json.gz",
+      "records": 13558,
+      "sha256": "c9f91989921cb275f993434dbd419c170413d88aeab310adcf3673f592e81c13"
+    },
+    {
+      "file": "pi-master-51.json.gz",
+      "records": 13568,
+      "sha256": "761d8165e99ed3b677a185aa7a974a66241bcd68bc13e3bf45cd139583065691"
+    },
+    {
+      "file": "pi-master-52.json.gz",
+      "records": 5615,
+      "sha256": "fabe3aa9faec841aadab74eb3d013dc3822361108998192df737f844a2317739"
+    },
+    {
+      "file": "pi-master-53.json.gz",
+      "records": 4165,
+      "sha256": "3664e198437ff2d69129bc69a8924564ca09b521c4a36d6a0ae0f6494e320575"
+    },
+    {
+      "file": "pi-master-54.json.gz",
+      "records": 8639,
+      "sha256": "724dc2587de281c6c7290b8bcd0b152320a69c1a7816a8aadaf3b4febe830f39"
+    },
+    {
+      "file": "pi-master-55.json.gz",
+      "records": 39061,
+      "sha256": "5aa3eed6c336e0765a05a7e1e1ce32af1b7a9563b9fd2601eaba8634f1ccf4fd"
+    },
+    {
+      "file": "pi-master-56.json.gz",
+      "records": 43191,
+      "sha256": "0aa199a89576ce2f6d046d2b8b8ae63ca3638561e378a62734c51f277adc2cde"
+    },
+    {
+      "file": "pi-master-57.json.gz",
+      "records": 3717,
+      "sha256": "31f662d751a5d36a024a17aed924a19d502cf35c7e07cb74af1b3986e22559e9"
+    },
+    {
+      "file": "pi-master-58.json.gz",
+      "records": 10967,
+      "sha256": "aef3ed650aac0fd45b3021ee8fb9284a5d2bcf92aeb011db0d9445ae07b776f3"
+    },
+    {
+      "file": "pi-master-59.json.gz",
+      "records": 18359,
+      "sha256": "a3d272e4908fd7eb5c4b69c1ca7fb67033e630837e017009f062d4cfe2bdbd5f"
+    },
+    {
+      "file": "pi-master-61.json.gz",
+      "records": 2283,
+      "sha256": "3f486c921e8f240725fd2905552e5ae3c3edb72925dcca8ea09d03bf1ae24c06"
+    },
+    {
+      "file": "pi-master-62.json.gz",
+      "records": 31877,
+      "sha256": "2702eba8c8beaf6f9056d72501e60259ece0bbb7efbd1019a420700fe0354eba"
+    },
+    {
+      "file": "pi-master-63.json.gz",
+      "records": 10582,
+      "sha256": "3eb3b135936ca054f6673ace72b0a75daa52798e97e56aedbc5407b22eca75e8"
+    },
+    {
+      "file": "pi-master-65.json.gz",
+      "records": 7836,
+      "sha256": "63c3d2813ecfed7d75ab0d09af9931bbd4814a5ce15693f231ad18279ae453bc"
+    },
+    {
+      "file": "pi-master-66.json.gz",
+      "records": 13867,
+      "sha256": "7a4f9fb52babc5273066d932b88a260be0e1e9d21d96cf82fe72c05e36978e07"
+    },
+    {
+      "file": "pi-master-67.json.gz",
+      "records": 6612,
+      "sha256": "21394bf3a9c553d35f37a06e011b981e3d6c601cb5a390bd26cbb8a7ac638b9d"
+    },
+    {
+      "file": "pi-master-68.json.gz",
+      "records": 14303,
+      "sha256": "77ea00bd428e4ac7c6b8c63ff208e8ed9e3d950712363de2dd7772828d89d0de"
+    },
+    {
+      "file": "pi-master-69.json.gz",
+      "records": 32203,
+      "sha256": "65fce22eafd532380c88aa59b45239a530b17030880c1b65e5617ad1b78db5e6"
+    },
+    {
+      "file": "pi-master-70.json.gz",
+      "records": 23012,
+      "sha256": "db9d131a128478bc3f083430c0ef329ca1f971a9cf4b6e710ce4ff99aa065043"
+    },
+    {
+      "file": "pi-master-72.json.gz",
+      "records": 13035,
+      "sha256": "d632595ad6719f55f0b6c04394bfb4a34d48a07a0eda938d42490272f27582e2"
+    },
+    {
+      "file": "pi-master-73.json.gz",
+      "records": 13939,
+      "sha256": "93da112bd0895f602f735e9e052bd2c2fa346974145e9da3a53c7cc8758a402e"
+    },
+    {
+      "file": "pi-master-75.json.gz",
+      "records": 4704,
+      "sha256": "93c2c44a0ee538a0f015bb0a9da5134e39960df934b948682ec6e392cccd9509"
+    },
+    {
+      "file": "pi-master-77.json.gz",
+      "records": 29923,
+      "sha256": "dc5031b75cf175d75f1c95a69e5e5efcea3653af52123f31eed1975422ca3c90"
+    },
+    {
+      "file": "pi-master-78.json.gz",
+      "records": 25298,
+      "sha256": "a8a8e3533a833025bce781a1558766567e4e08c2b2f809d47c2b5e8664354efb"
+    },
+    {
+      "file": "pi-master-80.json.gz",
+      "records": 5824,
+      "sha256": "cc88a21d0a2c91b636e301fb1a81c94fe3b429a2c28e7928aa3ef60461649107"
+    },
+    {
+      "file": "pi-master-81.json.gz",
+      "records": 19233,
+      "sha256": "946220d189794254ae1f737c72cc5f9d67438423ba97f7fc86586527d914f10f"
+    },
+    {
+      "file": "pi-master-83.json.gz",
+      "records": 2951,
+      "sha256": "3d9bcc6d21024743403f4a1336f198fd32beb235e5d975bbcbc311b14baf5410"
+    },
+    {
+      "file": "pi-master-86.json.gz",
+      "records": 3029,
+      "sha256": "db6f22d3c6eed6928ac12f3953489a5cd795d6469cc36f8f0f27852d85fe439e"
+    },
+    {
+      "file": "pi-master-87.json.gz",
+      "records": 11249,
+      "sha256": "4ecacf62717613b24a4ea781b652a9e55b2480e28b7d3a84a8e8a5630e8d3b80"
+    },
+    {
+      "file": "pi-master-99.json.gz",
+      "records": 6764,
+      "sha256": "204b8992f0653087e03f8e153209c95e1d95f92996977f09547b1c606923cef7"
+    }
+  ],
+  "source": "V26 archived GIS 258 shards + KT77-02 protected territory positive CSV + KT78 municipality map",
+  "admin_as_of": "2026-05-15",
+  "view_rule": "internal protected-area codes are NEVER presented to experts"
+}
