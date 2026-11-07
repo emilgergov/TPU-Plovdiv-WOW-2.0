@@ -1,0 +1,51 @@
+name: KT77 R11 mirror official normative sources into own archive
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'v26-test/scripts/kt77_r11_mirror_normative.py'
+      - '.github/workflows/kt77-r11-offline-mirror.yml'
+permissions:
+  contents: write
+concurrency:
+  group: kt77-r11-local-archive
+  cancel-in-progress: false
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Capture and hash official PDF and HTML-derived text into the repository
+        run: python3 v26-test/scripts/kt77_r11_mirror_normative.py
+      - name: Validate source inventory; never claim completeness on failures
+        run: |
+          python3 - <<'PY'
+          import json,hashlib,pathlib
+          root=pathlib.Path("v26-test")
+          m=json.loads((root/"normative/offline/archive-manifest.json").read_text())
+          assert m["total_registry_entries"]>=60
+          assert m["archived_entries"]>0
+          assert m["missing_entries"]==m["total_registry_entries"]-m["archived_entries"]
+          for row in m["sources"]:
+              if row["archived"]:
+                  path=root/row["local_path"]
+                  assert path.is_file(),str(path)
+                  assert hashlib.sha256(path.read_bytes()).hexdigest()==row["sha256"],str(path)
+              else:
+                  assert row["error"],row["id"]
+          print("ARCHIVE VERIFIED",m["archived_entries"],"/",m["total_registry_entries"],"missing",m["missing_entries"])
+          PY
+      - name: Commit versioned local copies and immutable provenance
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v26-test/normative/offline/
+          if git diff --cached --quiet; then
+            echo "No archive changes"
+          else
+            git commit -m "KT77 R11: snapshot approved-source PDF and text files into self-contained normative archive"
+            git push origin HEAD:main
+          fi
