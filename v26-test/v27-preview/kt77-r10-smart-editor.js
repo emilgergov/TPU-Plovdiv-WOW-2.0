@@ -75,6 +75,20 @@ async function validate(raw,index){
  return {records,errors,warnings};
 }
 scope.KT77R10Core=Object.freeze({segments,proposals,validate});
+const acceptedAudit=[];
+scope.KT77R10Audit=Object.freeze({entries:()=>acceptedAudit.map(row=>({...row}))});
+function retainAudit(records,confirmed){
+ const now=new Date().toISOString();
+ const rows=records.map(r=>({
+  original:r.input,normalized:r.chosen?.full||'',
+  parcel:r.chosen?.parcel||'',confirmation_required:!!r.needConfirmation,
+  expert_confirmed:!!confirmed,verified_against:'PI_MASTER',accepted_at:now
+ }));
+ acceptedAudit.push(...rows);
+ if(acceptedAudit.length>300)acceptedAudit.splice(0,acceptedAudit.length-300);
+ try{sessionStorage.setItem('kt77-r10-parcel-corrections-current-tab',JSON.stringify(acceptedAudit));}catch(e){}
+}
+
 function install(){
  const run=byId('run'),input=byId('ids');if(!run||!input||!scope.KT77PiMasterIndex)return;
  const holder=document.createElement('section');holder.id='kt77-r10-review';holder.className='kt77-r10-review';
@@ -108,6 +122,7 @@ function install(){
    proceed.addEventListener('click',()=>{
     if(signature!==input.value){line('Входът е променен. Стартирайте нова проверка.','error');return;}
     if(result.records.some(r=>!r.chosen)){line('Потвърдете всички предложени имоти.','error');return;}
+    retainAudit(result.records,true);
     const ids=[...new Set(result.records.map(r=>r.chosen.parcel))];
     const changed=result.records.filter(r=>r.input!==r.chosen.full);
     if(changed.length)line('Коригирани записи: '+changed.map(r=>r.input+' → '+r.chosen.full).join('; '),'hint');
@@ -132,6 +147,7 @@ function install(){
    latest=result;
    // A blank or unresolved candidate blocks the original lookup, including partial results.
    if(result.errors.length||result.warnings.length){render(result);return;}
+   retainAudit(result.records,false);
    const ids=[...new Set(result.records.map(r=>r.chosen.parcel))];
    const differences=result.records.filter(r=>r.input!==r.chosen.full);
    input.value=ids.join('\n');
