@@ -5,10 +5,11 @@ on:
     paths:
       - 'v26-test/normative/offline/**'
       - 'v26-test/v27-preview/kt77-r11-local-normative-reader.js'
+      - 'v26-test/scripts/kt77_r11_package_archive.py'
       - 'v26-test/v27-preview/kt77-r11-local-archive-regression.cjs'
       - '.github/workflows/kt77-r11-local-archive-qa.yml'
 permissions:
-  contents: read
+  contents: write
 jobs:
   integrity:
     runs-on: ubuntu-latest
@@ -22,3 +23,39 @@ jobs:
           node v26-test/v27-preview/kt77-r11-zzt-regression.cjs
           node v26-test/v27-preview/kt77-r10-editor-regression.cjs
           node v26-test/gis-data/pi-master/verify-browser-index.cjs v26-test/gis-data/pi-master/browser-index
+      - name: Build downloadable independent normative archive ZIP from verified local files
+        run: python3 v26-test/scripts/kt77_r11_package_archive.py
+      - name: Validate portable ZIP package includes the originals, manifest and registers
+        run: |
+          python3 - <<'PY'
+          import hashlib,zipfile,pathlib
+          root=pathlib.Path("v26-test/normative/offline")
+          p=root/"TPU_Plovdiv_Normative_Archive_KT77_R11.zip"
+          digest=hashlib.sha256(p.read_bytes()).hexdigest()
+          assert (root/(p.name+".sha256")).read_text().split()[0]==digest
+          with zipfile.ZipFile(p) as z:
+              assert z.testzip() is None
+              files=z.namelist()
+              assert "archive-manifest.json" in files
+              assert "data/normative-archive-register.json" in files
+              assert sum(x.endswith(".pdf") for x in files)>=8
+          print("PORTABLE ZIP VERIFIED",len(files),"entries",digest)
+          PY
+      - name: Save portable ZIP and checksum to our GitHub archive
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v26-test/normative/offline/TPU_Plovdiv_Normative_Archive_KT77_R11.zip*
+          if git diff --cached --quiet; then
+            echo "No changes to archive"
+          else
+            git commit -m "KT77 R11: publish self-contained PDF and text normative ZIP backup"
+            git fetch origin main
+            git rebase origin/main
+            for attempt in 1 2 3; do
+              if git push origin HEAD:main; then exit 0; fi
+              git fetch origin main
+              git rebase origin/main
+            done
+            exit 1
+          fi
