@@ -42,16 +42,19 @@
   {
     "id": "N05",
     "title": "Закон за защитените територии (ЗЗТ)",
-    "source": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Zakoni/ZZT.pdf",
+    "source": "https://eur-lex.europa.eu/legal-content/BG/TXT/PDF/?uri=CELEX%3A72024L1203BGR_202602968",
     "purpose": "Правна рамка ЗТ — справочен източник; пространствената констатация по ПИ MASTER не изменя заключението относно ЗЗ",
-    "source_status": "Официален PDF на МОСВ; публикувана редакция до ДВ бр. 66/2013; актуалността към 2026 г. не е удостоверена",
+    "source_status": "Проверен публикуван текст с изменения до ДВ бр.102/08.12.2023 (EUR-Lex, МРРБ). Независима официална проверка на цялата редакция към 08.11.2026 и приложимостта към ИП не е завършена.",
     "page": "НЯМА ДАННИ",
     "date": "НЯМА ДАННИ",
     "verified": false,
     "revision_verified": false,
     "kt77_r11": true,
     "reference_only": true,
-    "legal_conclusion_override": false
+    "legal_conclusion_override": false,
+    "crosschecked_revision": "ДВ, бр. 102/2023",
+    "crosscheck_date": "2026-11-08",
+    "source_fallback_moew": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Zakoni/ZZT.pdf"
   },
   {
     "id": "Z01",
@@ -131,14 +134,19 @@
     "id": "T02",
     "title": "Природна забележителност „Свети Дух“ — ИАОС",
     "source": "https://pdbase.eea.government.bg/zpo/bg/area.jsp?NEM_Partition=1&areaID=97&categoryID=3",
-    "purpose": "Констатация за ЗТ при ПИ 46989.205.218; заповед № 3796/11.10.1965 г., ДВ бр. 12/1966 г.",
-    "source_status": "Регистър ИАОС; конкретните правни ограничения по заповедта изискват проверка",
+    "purpose": "ПЗ „Свети Дух“ — фактическа констатация за ПИ 46989.205.218. Заповед №3796/11.10.1965 г. (ДВ 12/1966); актуализирана площ с РД-629/23.10.2018 г. (ДВ 99/2018) до 2,883 дка.",
+    "source_status": "ИАОС: проверени наименование, категория, заповеди, площ и публикуван режим; правната приложимост към конкретно ИП не е удостоверена.",
     "page": "НЯМА ДАННИ",
     "date": "НЯМА ДАННИ",
     "verified": false,
     "revision_verified": false,
     "kt77_r11": true,
     "reference_only": true,
-    "legal_conclusion_override": false
+    "legal_conclusion_override": false,
+    "area_update_order": "РД-629/23.10.2018",
+    "area_update_dv": "99/2018",
+    "official_territory_area_dka": 2.883,
+    "register_regime_checked": true,
+    "conclusion_inference_allowed": false
   }
 ]
