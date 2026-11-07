@@ -1,0 +1,21 @@
+{
+  "checkpoint": "KT78-03 / PI_MASTER_V0_2",
+  "date": "2026-11-07",
+  "rows": 917417,
+  "plovdiv_rows": 917417,
+  "municipalities_missing": 917417,
+  "locality_missing_allowed": 150936,
+  "nonempty_localities": 759814,
+  "distinct_ekatte_codes": 212,
+  "zz_pairs": 176553,
+  "zt_pairs": 2746,
+  "address_columns": [],
+  "integrity": "ok",
+  "foreign_key_check_count": 0,
+  "sqlite_bytes": 178233344,
+  "sqlite_sha256": "dbb120813fd052eedf46adf530bb33d39c7d10fef8aa4d106217b2e540b0ccbd",
+  "zip_bytes": 32147341,
+  "zip_sha256": "93296edea846384ff478ab6d2db575dfda3a72d5a55b1b9b611e18e2eef57524",
+  "original_database_unchanged": true,
+  "KT77_untouched": true
+}
