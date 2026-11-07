@@ -47,5 +47,15 @@ jobs:
             echo "No archive changes"
           else
             git commit -m "KT77 R11: snapshot approved-source PDF and text files into self-contained normative archive"
-            git push origin HEAD:main
+            # Another repository commit may land during source fetching.
+            # Rebase only this archival snapshot commit, preserving all other changes.
+            git fetch origin main
+            git rebase origin/main
+            for attempt in 1 2 3; do
+              if git push origin HEAD:main; then exit 0; fi
+              git fetch origin main
+              git rebase origin/main
+            done
+            echo "Archive commit could not be published safely" >&2
+            exit 1
           fi
