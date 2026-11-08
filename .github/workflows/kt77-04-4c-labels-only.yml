@@ -1,0 +1,22 @@
+name: KT77 04-4C compact in-map ZZ ZT labels
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'v26-test/v27-preview/kt77-04-4c-pdf1-context-labels-only.js'
+      - 'v26-test/v27-preview/V27_27_KT77_04_4_R3_CONTEXT_LABELS_ONLY.html'
+      - 'v26-test/v27-preview/kt77-04-4c-labels-only-regression.cjs'
+      - '.github/workflows/kt77-04-4c-labels-only.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compact contextual names without duplicate cadastral list
+        run: node v26-test/v27-preview/kt77-04-4c-labels-only-regression.cjs
+      - name: Previously accepted source and PDF1 tests
+        run: |
+          node v26-test/v27-preview/kt77-04-4-context-auto-regression.cjs
+          node v26-test/v27-preview/kt77-04-3-pagination-regression.cjs
