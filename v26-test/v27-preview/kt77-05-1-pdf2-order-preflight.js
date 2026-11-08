@@ -1,10 +1,10 @@
 /* KT77-05.1: read-only PDF2 order preflight; makes absent archive references explicit. */
 (function(){
  'use strict';
- const canon=s=>String(s||'').toLocaleLowerCase('bg-BG').replace(/[„“"']/g,'').replace(/\\s+/g,' ').trim();
+ const canon=s=>String(s||'').toLocaleLowerCase('bg-BG').replace(/[„“"']/g,'').replace(/\s+/g,' ').trim();
  async function inspect(){
   const inp=document.getElementById('ids');
-  const ids=[...new Set((inp?.value||'').match(/\\b\\d{5}\\.\\d+\\.\\d+\\b/g)||[])];
+  const ids=[...new Set((inp?.value||'').match(/\b\d{5}\.\d+\.\d+\b/g)||[])];
   if(!ids.length)throw Error('Въведете кадастрален идентификатор.');
   if(!window.KT77PiMasterIndex?.create)throw Error('ПИ MASTER не е зареден.');
   const idx=window.KT77PiMasterIndex.create(new URL('gis-data/pi-master/browser-index/',document.baseURI).href);
@@ -19,7 +19,7 @@
    for(const z of p.zz){
     const code=z.code;
     const direct=window.KT77049ZoneOrders?.[code];
-    const rec=regs.find(r=>String(r.title||'').includes(code)&&/Заповед\\s*(?:№\\s*)?РД[-– ]?\\d+/i.test(r.title||'')&&/ДВ\\s*\\d+\\/\\d{4}/i.test(r.title||''));
+    const rec=regs.find(r=>String(r.title||'').includes(code)&&/Заповед\s*(?:№\s*)?РД[-– ]?\d+/i.test(r.title||'')&&/ДВ\s*\d+\/\d{4}/i.test(r.title||''));
     out.push('ЗЗ '+code+' '+(z.name||'')+' → '+(direct?.declaration||rec?.title||'ЛИПСВА ОБВЪРЗАНА ЗАПОВЕД В PDF2'));
    }
    for(const z of p.zt){
@@ -27,7 +27,7 @@
     out.push('ЗТ '+z.name+' → '+(doc?.declaration_order||'ЛИПСВА ОБВЪРЗАНА ЗАПОВЕД В PDF2'));
    }
   }
-  return out.join('\\n');
+  return out.join('\n');
  }
  function mount(){
   const host=document.getElementById('v26Annex2Static')||document.getElementById('v26LocalIndexMount')||document.getElementById('roleReview');
