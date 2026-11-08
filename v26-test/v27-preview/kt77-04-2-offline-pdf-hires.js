@@ -54,7 +54,7 @@ async function generate(def){
  const runningFooter=normativePdf?'ТПУ Пловдив · Нормативна справка · проект за експертна проверка':'РИОСВ – Пловдив · ГИС справка · източниците и ограниченията са посочени в документа';
  // GIS PDF1 only: emphasize cadastral IDs, Natura codes and 'Забележка:' without changing text wrapping or PDF2.
  function drawGISStrongText(line,x,baseline){
-  const str=String(line||''),baseFont=ctx.font,pattern=/(?:Забележка:|\\b\\d{5}\\.\\d+\\.\\d+\\b|\\bBG\\d{7}\\b)/g;
+  const str=String(line||''),baseFont=ctx.font,pattern=/(?:Забележка:|\b\d{5}\.\d+\.\d+\b|\bBG\d{7}\b)/g;
   let start=0,cursor=x,m;
   function drawSegment(part,strong){
    if(!part)return;
