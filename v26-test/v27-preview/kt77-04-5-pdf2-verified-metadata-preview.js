@@ -301,7 +301,7 @@ function normativePdf(results,register){
  const actList=window.KT77045Acts?.acts;
  if(!Array.isArray(actList)||actList.length<4)throw Error('КТ77-04.5: липсва проверен регистър на първоначалното приемане и обнародване на актовете.');
  const relevantActs=actList.filter(a=>a.key!=='ЗЗТ'||facts.some(f=>(f.territories||[]).length));
- const actText=relevantActs.flatMap(a=>[{text:a.title,bold:true},{text:a.adoption+'; '+a.publication+'. Оригинално обнародване; актуалната редакция изисква отделна проверка.'},{text:a.authority+' — '+new URL(a.url).hostname.replace(/^www\./,''),link:a.url,fontSize:8,color:'#165c86'}]);
+ const actText=relevantActs.flatMap(a=>[{text:a.title,bold:true},{text:a.adoption+'; '+a.publication+' Оригинално обнародване; актуалната редакция изисква отделна проверка.'},{text:a.authority+' — '+new URL(a.url).hostname.replace(/^www\./,''),link:a.url,fontSize:8,color:'#165c86'}]);
  const canonical=v=>String(v||'').toLocaleUpperCase('bg-BG').replace(/[„“"'‘’]/g,'').replace(/\s+/g,' ').trim();
  const ztRegistry=window.KT77R11ZZT?.archive?.sources||[];
  const ztLines=[];
@@ -340,7 +340,7 @@ function normativePdf(results,register){
    return [{text:label+': заповед за обявяване № '+confirmed.number+' от '+confirmed.date+(confirmed.gazette?', '+confirmed.gazette:'')+'.'},
     {text:'МОСВ — сайт на МОСВ ('+new URL(confirmed.source_url).hostname+')',link:confirmed.source_url,color:'#165c86',fontSize:8}];
   }
-  const source='https://www.moew.government.bg/bg/priroda/natura-2000/zastiteni-zoni/';
+  const source='https://www.moew.government.bg/bg/priroda/natura-2000/registri-za-zastiteni-zoni/obnarodvani-zapovedi-po-reda-na-chl-12-ot-zbr/';
   return [{text:label+': заповедта за обявяване не е потвърдена в наличния документален архив.'},
    {text:'Източник за проверка: МОСВ',link:source,color:'#165c86',fontSize:8}];
  });
