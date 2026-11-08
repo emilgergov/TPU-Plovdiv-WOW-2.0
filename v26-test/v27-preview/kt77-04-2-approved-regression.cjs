@@ -15,6 +15,7 @@ const baseline=read('kt77-04-1-pdf1-pi-master-zt-preview.js');
 new vm.Script(generator,{filename:'PDF1'});
 new vm.Script(read('kt77-04-2-offline-pdf-hires.js'),{filename:'OfflinePDF'});
 assert(generator.includes("const bgDate=new Intl.DateTimeFormat('bg-BG'"));
+assert(generator.includes(".replace(/\\s*г\\.\\s*$/u,'')"),'Bulgarian date must not repeat the year suffix');
 assert(!generator.includes('02.10.2026 г.'));
 assert(generator.includes("title==='ГИС анализ'?content"));
 assert(generator.includes('Пространствено положение на поземлените имоти спрямо защитените зони и защитените територии'));
