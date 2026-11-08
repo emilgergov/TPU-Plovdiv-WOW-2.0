@@ -220,7 +220,7 @@ function gisPdf(results,options={}){
    content.push(row);
   }
   content.push({text:'Легенда: бежово — имот; оранжево — пресичане; зелена пунктирна линия — граница на защитена зона (когато е видима в обхвата на картата).',fontSize:8,color:'#526a5e',margin:[0,8,0,12]});
-  for(const r of results){const id=String(r.input||r.cadnum||'');const codes=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z:String(z?.sitecode||z?.code||''));if(id==='36676.129.457'&&codes.includes('BG0000194')&&(r.overlap_geojson?.features||[]).length)content.push({text:'Имот 36676.129.457 попада изцяло в защитена зона BG0000194 — Река Чая.',fontSize:9,bold:true,color:'#234c38',margin:[0,0,0,8]});}
+
  }
  const verifiedLocation=String(options.verifiedCaseMetadata?.location||'').trim();
  const verifiedSettlement=verifiedPlaceLabel(options.verifiedCaseMetadata?.settlement)||(()=>{const values=[...new Set(results.map(r=>verifiedPlaceLabel(r.settlement||r.settlement_name||'')).filter(Boolean))];return values.length===1?values[0]:''})();
