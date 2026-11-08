@@ -390,6 +390,7 @@ function normativePdf(results,register){
  const def=pdfDef('Нормативни и документални референции',content);
  // PDF2 already has a running document title; remove the duplicated large title, not the substantive sections.
  def.content=def.content.slice(1);
+ def.kt77045Normative=true;
  // Compact only Annex 2; leave the approved GIS Annex 1 layout untouched.
  def.pageMargins=[42,16,42,16];
  def.defaultStyle={...def.defaultStyle,fontSize:7.9,lineHeight:0.97};
