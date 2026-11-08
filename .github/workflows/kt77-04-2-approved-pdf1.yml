@@ -1,0 +1,24 @@
+name: KT77 04-2 PDF1 approved edits and 300dpi preview
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'v26-test/v27-preview/kt77-04-2-pdf1-approved-10-edits-preview.js'
+      - 'v26-test/v27-preview/kt77-04-2-offline-pdf-hires.js'
+      - 'v26-test/v27-preview/V27_27_KT77_04_2_PDF1_APPROVED_EDITS_HIRES_PREVIEW.html'
+      - 'v26-test/v27-preview/kt77-04-2-approved-regression.cjs'
+      - '.github/workflows/kt77-04-2-approved-pdf1.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check PDF1 approved edits, unchanged Word/PDF2 and valid JS
+        run: node v26-test/v27-preview/kt77-04-2-approved-regression.cjs
+      - name: Baseline protected GIS R10/R11 and PI MASTER
+        run: |
+          node v26-test/v27-preview/kt77-r10-editor-regression.cjs
+          node v26-test/v27-preview/kt77-r11-zzt-regression.cjs
+          node v26-test/gis-data/pi-master/verify-browser-index.cjs v26-test/gis-data/pi-master/browser-index
