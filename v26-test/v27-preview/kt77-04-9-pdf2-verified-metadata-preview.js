@@ -335,6 +335,7 @@ function normativePdf(results,register){
  }
  const zones=[...zoneMap.values()].sort((a,b)=>a.code.localeCompare(b.code));
 
+ const records=register?.records||[];
  const zzLines=zones.flatMap(z=>{
   const available=register?.verifiedZoneOrders?.[z.code],archived=window.KT77049ZoneOrders?.[z.code];
   let order=null,gazette=null,source=null,changes=[];
@@ -350,7 +351,7 @@ function normativePdf(results,register){
    }
   }
   if(!order||!gazette||!source)throw Error('КТ77-04.9: липсва заповед за защитена зона '+z.code+'. PDF2 не е издаден.');
-  return [{text:'Защитена зона '+z.code+(z.name?' „'+z.name+'“':''),bold:true},
+  return [{text:'Защитена зона '+z.code+' „'+(z.name||archived?.name||'Наименование по регистъра')+'“',bold:true},
    {text:order+'; '+gazette},...changes.map(x=>({text:'Изменение: '+String(x)})),
    {text:'Източник: МОСВ',link:source,color:'#165c86',fontSize:8}];
  });
@@ -358,7 +359,6 @@ function normativePdf(results,register){
  const gisEvidence=results.map(r=>{const id=String(r.input||r.cadnum||'');const verified=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z:String(z?.sitecode||z?.code||'')).filter(z=>/^BG\d{7}$/.test(z));const overlays=[...(r.archived_overlay_records||[]),...(r.archived_zones||[])];const archived=overlays.map(z=>typeof z==='string'?z:String(z?.sitecode||z?.code||'')).filter(z=>/^BG\d{7}$/.test(z));return {id,codes:[...new Set(verified)],archivedCodes:[...new Set(archived)],outside:r.intersection_verified_outside===true};});
  const gisZoneCodes=[...new Set(gisEvidence.flatMap(x=>x.codes))];
  const gisSummary=gisEvidence.map(x=>'Имот '+x.id+': '+(x.codes.length?'отчетена зона '+x.codes.join(', '):x.outside?'без пресичане със защитена зона':'пространственият резултат изисква сверяване с ГИС анализа')).join('; ')+'.';
- const records=register?.records||[];
  const dossier=register?.dossierReferences;
  const subject=window.V26SubjectContext;
  const review=register?.verifiedCaseMetadata||null;
