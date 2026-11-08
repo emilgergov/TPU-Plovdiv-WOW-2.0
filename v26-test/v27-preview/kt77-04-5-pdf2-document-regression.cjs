@@ -8,9 +8,9 @@ const reverted=candidate.replace('<script src="v27-preview/kt77-04-5-legislation
 assert.equal(reverted,baseline,'Approved HTML changed beyond isolated PDF2 scripts');
 const a=rd('kt77-04-4b-pdf1-generator-auto-context-preview.js'),b=rd('kt77-04-5-pdf2-verified-metadata-preview.js');
 const between=(s,x,y)=>s.slice(s.indexOf(x),s.indexOf(y,s.indexOf(x)+x.length));
-assert.equal(between(a,'function gisPdf(','function normativePdf('),between(b,'function gisPdf(','function normativePdf(')),'PDF1 code drift');
-assert.equal(between(a,'function scenarioFromGIS(','function docx('),between(b,'function scenarioFromGIS(','function docx(')),'Scenario drift');
-assert.equal(between(a,'function docx(','function pdfDef('),between(b,'function docx(','function pdfDef(')),'Word drift');
+assert.equal(between(a,"function gisPdf(","function normativePdf("),between(b,"function gisPdf(","function normativePdf("),"PDF1 code drift");
+assert.equal(between(a,"function scenarioFromGIS(","function docx("),between(b,"function scenarioFromGIS(","function docx("),"Scenario drift");
+assert.equal(between(a,"function docx(","function pdfDef("),between(b,"function docx(","function pdfDef("),"Word drift");
 const pdf2=between(b,'function normativePdf(','async function make(');
 assert(pdf2.includes("'Източник за проверка: МОСВ'"));
 assert(pdf2.includes("'Източник за проверка: ИАОС'"));
