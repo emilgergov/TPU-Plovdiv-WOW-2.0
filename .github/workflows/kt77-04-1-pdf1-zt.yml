@@ -1,0 +1,25 @@
+name: KT77 04-1 PDF1 PI MASTER protected territories preview
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'v26-test/v27-preview/kt77-04-1-pdf1-pi-master-zt-preview.js'
+      - 'v26-test/v27-preview/V27_27_KT77_04_1_PDF1_PI_MASTER_ZT_PREVIEW.html'
+      - 'v26-test/v27-preview/kt77-04-1-pdf1-zt-regression.cjs'
+      - '.github/workflows/kt77-04-1-pdf1-zt.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify immutable KT77-03 and Word/PDF2; test verified ZT facts and ZT-only case
+        run: node v26-test/v27-preview/kt77-04-1-pdf1-zt-regression.cjs
+      - name: Prior locked R10/R11 regression
+        run: |
+          node v26-test/v27-preview/kt77-r10-editor-regression.cjs
+          node v26-test/v27-preview/kt77-r11-zzt-regression.cjs
+          node v26-test/v27-preview/kt77-r11-archive-acceptance-regression.cjs
+      - name: Validated full PI MASTER
+        run: node v26-test/gis-data/pi-master/verify-browser-index.cjs v26-test/gis-data/pi-master/browser-index
