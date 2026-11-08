@@ -20,6 +20,9 @@ jobs:
       - name: Inspect both original locked Word specimens, fail closed
         run: |
           python3 v26-test/v27-preview/kt77-11/kt77_11_ooxml_audit.py kt77-11-ab-ooxml-report.json
+      - name: Verify both deterministic secondary editors fail closed
+        run: |
+          python3 v26-test/v27-preview/kt77-11/test_secondary_editor.py
       - name: Upload read-only audit report
         uses: actions/upload-artifact@v4
         with:
