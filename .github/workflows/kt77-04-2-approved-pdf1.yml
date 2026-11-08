@@ -7,6 +7,8 @@ on:
       - 'v26-test/v27-preview/kt77-04-2-offline-pdf-hires.js'
       - 'v26-test/v27-preview/V27_27_KT77_04_2_PDF1_APPROVED_EDITS_HIRES_PREVIEW.html'
       - 'v26-test/v27-preview/kt77-04-2-approved-regression.cjs'
+      - 'v26-test/v27-preview/kt77-04-3-pagination-regression.cjs'
+      - 'v26-test/v27-preview/V27_27_KT77_04_3_PDF1_PAGINATION_ONLY.html'
       - '.github/workflows/kt77-04-2-approved-pdf1.yml'
 permissions:
   contents: read
@@ -17,6 +19,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check PDF1 approved edits, unchanged Word/PDF2 and valid JS
         run: node v26-test/v27-preview/kt77-04-2-approved-regression.cjs
+      - name: PDF1 pagination - section heading and first table rows stay together
+        run: node v26-test/v27-preview/kt77-04-3-pagination-regression.cjs
       - name: Baseline protected GIS R10/R11 and PI MASTER
         run: |
           node v26-test/v27-preview/kt77-r10-editor-regression.cjs
