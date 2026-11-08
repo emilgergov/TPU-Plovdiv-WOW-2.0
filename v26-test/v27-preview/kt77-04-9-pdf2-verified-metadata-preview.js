@@ -358,7 +358,7 @@ function normativePdf(results,register){
 
  const gisEvidence=results.map(r=>{const id=String(r.input||r.cadnum||'');const verified=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z:String(z?.sitecode||z?.code||'')).filter(z=>/^BG\d{7}$/.test(z));const overlays=[...(r.archived_overlay_records||[]),...(r.archived_zones||[])];const archived=overlays.map(z=>typeof z==='string'?z:String(z?.sitecode||z?.code||'')).filter(z=>/^BG\d{7}$/.test(z));return {id,codes:[...new Set(verified)],archivedCodes:[...new Set(archived)],outside:r.intersection_verified_outside===true};});
  const gisZoneCodes=[...new Set(gisEvidence.flatMap(x=>x.codes))];
- const gisSummary=gisEvidence.map(x=>'Имот '+x.id+': '+(x.codes.length?'отчетена зона '+x.codes.join(', '):x.outside?'без пресичане със защитена зона':'пространственият резултат изисква сверяване с ГИС анализа')).join('; ')+'.';
+ const gisSummary=gisEvidence.map(x=>'Имот '+x.id+': '+(x.codes.length?'отчетено пресичане със защитена зона':x.outside?'без пресичане със защитена зона':'пространственият резултат изисква сверяване с ГИС анализа')).join('; ')+'.';
  const dossier=register?.dossierReferences;
  const subject=window.V26SubjectContext;
  const review=register?.verifiedCaseMetadata||null;
@@ -407,9 +407,9 @@ function normativePdf(results,register){
   {text:'IV. Приложимост към инвестиционното предложение',style:'sub'},
   {text:resolvedTitle?'За предложение „'+subjectCore+'“ относимостта на посочените основания се разглежда спрямо описаните дейности и пространствените резултати от документа „РИОСВ – Пловдив · ГИС анализ“. Режимите на конкретна зона се преценяват отделно; настоящата справка не установява автоматично допустимост или забрана.':'Предметът и дейностите подлежат на потвърждение преди индивидуална преценка за приложимост на режимите.'},
 
-  ...zones.map(z=>({text:'Защитена зона '+z.code+(z.name?' „'+z.name+'“':'')+': пространственото пресичане е установено в документа „РИОСВ – Пловдив · ГИС анализ“. Приложимостта на конкретните режими се преценява спрямо заявените дейности.'})),
+  ...(zones.length?[{text:'Пресичанията и съответните заповеди са посочени в раздел III. Приложимостта на конкретните режими се преценява спрямо заявените дейности.'}]:[]),
   {text:'V. Експертен извод',style:'sub'},
-  {text:gisZoneCodes.length?'За посочените имоти са отчетени защитени зони: '+gisZoneCodes.join(', ')+'. Пространствените резултати не определят автоматично допустимостта на ИП.':gisEvidence.every(x=>x.outside)?'Не е установено пресичане със защитени зони.':'Пространственият резултат се сверява с документа „РИОСВ – Пловдив · ГИС анализ“.'},
+  {text:gisZoneCodes.length?'За посочените имоти са отчетени пресичания със защитени зони. Пространствените резултати не определят автоматично допустимостта на ИП.':gisEvidence.every(x=>x.outside)?'Не е установено пресичане със защитени зони.':'Пространственият резултат се сверява с документа „РИОСВ – Пловдив · ГИС анализ“.'},
   {text:'Приложимостта на посочените заповеди се преценява спрямо заявените дейности.'},
   {text:'Документът е проект за експертна проверка, а не административен акт.',italics:true,fontSize:8,margin:[0,0,0,0]}
  ];
