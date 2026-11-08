@@ -29,7 +29,7 @@ const title='Административна принадлежност на по
 const titlePage=pages.findIndex(p=>p.some(x=>x.text.startsWith('Административна принадлежност'))),firstPage=pages.findIndex(p=>p.some(x=>x.text==='56784.13.102'));
 assert(titlePage>=0&&firstPage>=0);
 assert.equal(titlePage,firstPage,'Orphan administrative heading');
-const txt=pages[firstPage].find(x=>x.text.startsWith('ПИ 56784.13.102'));
+const txt=pages[firstPage].find(x=>x.text==='ПИ '||x.text===' по КККР на гр. Пловдив. Площ на имота: 3 434,71 кв. м');
 assert(txt.font.startsWith('22px'),'Paragraph inherited bold page header font');
 console.log('PASS KT77-04.4D: heading and first administrative paragraph stay together; typography stable; locked generator unchanged');
 })().catch(e=>{console.error(e);process.exitCode=1});
