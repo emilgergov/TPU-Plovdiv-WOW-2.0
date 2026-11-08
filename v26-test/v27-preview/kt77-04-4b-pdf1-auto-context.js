@@ -19,8 +19,8 @@ function buildSVG(results,zoneFeatures=[]){
  const zones=(Array.isArray(zoneFeatures)?zoneFeatures:[]).filter(f=>['Polygon','MultiPolygon'].includes(f?.geometry?.type));
  // Expand only to relevant, already available Natura-zone geometry. The cadastral points are authoritative.
  const allPoints=pts.concat(zones.flatMap(f=>polygonRings(f.geometry).flat()).filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1])));
- const xs=allPoints.map(p=>p[0]*latFactor),ys=allPoints.map(p=>p[1]);
- let minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+ let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+ for(const p of allPoints){const x=p[0]*latFactor,y=p[1];minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y)}
  let dx=Math.max(maxX-minX,0.001),dy=Math.max(maxY-minY,0.001);
  const padX=dx*0.09,padY=dy*0.09;minX-=padX;maxX+=padX;minY-=padY;maxY+=padY;
  dx=maxX-minX;dy=maxY-minY;
