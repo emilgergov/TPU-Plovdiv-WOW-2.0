@@ -1,0 +1,20 @@
+name: KT77 04-5 PDF2 baseline architecture gate
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'v26-test/v27-preview/kt77-04-5-pdf2-baseline-regression.cjs'
+      - '.github/workflows/kt77-04-5-pdf2-baseline.yml'
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm locked PDF1 / Word and independent PDF2
+        run: node v26-test/v27-preview/kt77-04-5-pdf2-baseline-regression.cjs
+      - name: Check accepted PDF1 and context visual regression contracts
+        run: |
+          node v26-test/v27-preview/kt77-04-4c-labels-only-regression.cjs
+          node v26-test/v27-preview/kt77-04-4d-admin-pagekeep-regression.cjs
