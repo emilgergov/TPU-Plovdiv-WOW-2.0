@@ -371,12 +371,12 @@ function normativePdf(results,register){
  // KT77-04.10: the first paragraph cites all confirmed parcel IDs and their PI MASTER
  // administrative location, without modifying the dossier's confirmed subject itself.
  const subjectWithoutParcel=cleanSubject((subjectCore||subjectDisplay)
-   .replace(/\\s+в\\s+(?:(?:поземлен\\s+)?имот|ПИ)\\s+(?:с\\s+)?(?:идентификатор\\s*(?:№\\s*)?)?\\d{5}\\.\\d+\\.\\d+[\\s\\S]*$/i,''));
+   .replace(/\s+в\s+(?:(?:поземлен\s+)?имот|ПИ)\s+(?:с\s+)?(?:идентификатор\s*(?:№\s*)?)?\d{5}\.\d+\.\d+[\s\S]*$/i,''));
  const administrativeGroups=new Map();
  for(const result of results){
   const id=String(result.input||result.cadnum||''),a=fm.get(id)?.admin;
   if(!a?.settlement||!a?.municipality||!a?.province)throw Error('КТ77-04.10: липсва административна принадлежност за ПИ '+id);
-  const place='по КККР на '+a.settlement+(a.locality?', местност „'+pdfLocality(a.locality).replace(/\\s+-\\s+/g,' – ')+'“':'')+', община '+a.municipality+', област '+a.province;
+  const place='по КККР на '+a.settlement+(a.locality?', местност „'+pdfLocality(a.locality).replace(/\s+-\s+/g,' – ')+'“':'')+', община '+a.municipality+', област '+a.province;
   if(!administrativeGroups.has(place))administrativeGroups.set(place,[]);
   administrativeGroups.get(place).push(id);
  }
