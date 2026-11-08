@@ -222,11 +222,6 @@ function gisPdf(results,options={}){
   content.push({text:'Легенда: бежово — имот; оранжево — пресичане; зелена пунктирна линия — граница на защитена зона (когато е видима в обхвата на картата).',fontSize:8,color:'#526a5e',margin:[0,8,0,12]});
 
  }
- const verifiedLocation=String(options.verifiedCaseMetadata?.location||'').trim();
- const verifiedSettlement=verifiedPlaceLabel(options.verifiedCaseMetadata?.settlement)||(()=>{const values=[...new Set(results.map(r=>verifiedPlaceLabel(r.settlement||r.settlement_name||'')).filter(Boolean))];return values.length===1?values[0]:''})();
- const verifiedLandArea=String(options.verifiedCaseMetadata?.landArea||'').trim();
- if(verifiedLocation)content.push({text:'Местоположение на имотите: '+verifiedLocation,margin:[0,5,0,7]});
- if(verifiedSettlement)content.push({text:'Населено място: '+verifiedSettlement});
  const facts=options.kt77041ZtFindings;
  if(!Array.isArray(facts)||facts.length!==results.length)throw Error('КТ77-04.2: липсва пълният ПИ MASTER за PDF1');
  const fmt=n=>Number(n).toLocaleString('bg-BG',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -236,7 +231,12 @@ function gisPdf(results,options={}){
   return 'ПИ '+f.cadnum+' по КККР на '+a.settlement+(a.locality?', местност „'+pdfLocality(a.locality)+'“':'')+', община '+a.municipality+', област '+a.province;
  };
  content.push({text:'Административна принадлежност на поземлените имоти',style:'sub'});
- for(const f of facts)content.push({text:parcelLabel(f),fontSize:9,margin:[0,1,0,3]});
+ for(const f of facts){
+  const area=Number(f.admin.area_m2);
+  if(!Number.isFinite(area)||area<=0)throw Error('КТ77-04.2: липсва проверена площ на имот '+f.cadnum+' в ПИ MASTER');
+  content.push({text:parcelLabel(f),fontSize:9,margin:[0,1,0,2]});
+  content.push({text:'Площ на имота: '+fmt(area)+' кв. м',fontSize:9,margin:[0,0,0,7]});
+ }
  for(let i=0;i<results.length;i++){
   const r=results[i],f=facts[i];
   if(f.cadnum!==String(r.input||r.cadnum||''))throw Error('КТ77-04.2: подменен ПИ');
