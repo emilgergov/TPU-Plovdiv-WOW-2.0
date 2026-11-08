@@ -67,12 +67,28 @@ async function generate(def){
  function start(){canvas=document.createElement('canvas');canvas.width=IMG_W;canvas.height=IMG_H;ctx=canvas.getContext('2d');ctx.setTransform(PIXEL_SCALE,0,0,PIXEL_SCALE,0,0);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.fillStyle='#183b2d';ctx.font='bold 24px Arial';ctx.fillText(runningHeader,M,48);ctx.strokeStyle='#c4d9ce';ctx.beginPath();ctx.moveTo(M,65);ctx.lineTo(W-M,65);ctx.stroke();y=95}
  function finish(){ctx.font='18px Arial';ctx.fillStyle='#667';ctx.fillText(runningFooter,M,H-45);ctx.textAlign='right';ctx.fillText('Стр. '+(pages.length+1),W-M,H-45);ctx.textAlign='left';pages.push(canvas.toDataURL('image/jpeg',0.97))}
  start();
- for(const item of def.content||[]){
+ const items=def.content||[];
+ // KT77 PDF1 pagination only: keep each section caption with its table header and first data row.
+ function tableMinimumHeight(table){
+  const rows=table?.body||[];if(!rows.length)return 0;
+  const cols=rows[0]?.length||1,cellW=(W-2*M)/cols,oldFont=ctx.font;
+  let height=0;
+  for(const [i,row] of rows.slice(0,2).entries()){
+   ctx.font=(i===0?'bold 17px':'17px')+' Arial';
+   const wrapped=row.map(v=>wrap(ctx,String(v??''),cellW-14));
+   height+=Math.max(37,...wrapped.map(a=>a.length*24+14));
+  }
+  ctx.font=oldFont;return height;
+ }
+ for(let itemIndex=0;itemIndex<items.length;itemIndex++){
+  const item=items[itemIndex];
   // Respect explicit per-parcel page boundaries in the shared PDF generator.
   if(item.pageBreak==='before'&&y>95){finish();start()}
   if(item.table){
    const rows=item.table.body||[],cols=rows[0]?.length||1,available=W-2*M,cellW=available/cols;
    const drawRow=(cells,header)=>{ctx.font=(header?'bold 17px':'17px')+' Arial';const lines=cells.map(v=>wrap(ctx,String(v??''),cellW-14));const rh=Math.max(37,...lines.map(x=>x.length*24+14));if(y+rh>H-100){finish();start();if(!header&&rows.length){drawRow(rows[0],true)}}ctx.fillStyle=header?'#e3efe8':'#ffffff';ctx.fillRect(M,y,available,rh);ctx.strokeStyle='#b6c9bf';ctx.strokeRect(M,y,available,rh);ctx.fillStyle='#173d30';for(let c=0;c<cols;c++){if(c)ctx.beginPath(),ctx.moveTo(M+c*cellW,y),ctx.lineTo(M+c*cellW,y+rh),ctx.stroke();(lines[c]||[]).forEach((line,k)=>normativePdf?ctx.fillText(line,M+c*cellW+7,y+23+k*24):drawGISStrongText(line,M+c*cellW+7,y+23+k*24))}y+=rh};
+   // A table header must never be orphaned at the foot of a page.
+   if(!normativePdf&&rows.length>1&&y>95&&y+tableMinimumHeight(item.table)>H-100){finish();start()}
    rows.forEach((cells,i)=>drawRow(cells,i===0));y+=12;continue;
   }
   if(item.columns){
@@ -94,6 +110,12 @@ async function generate(def){
   }
   if(item.svg){const h=680;if(y+h>H-100){finish();start()}const drawn=await drawSVG(ctx,item.svg,M,y,W-2*M);y+=drawn+20;continue}
   const title=item.style==='heading',sub=item.style==='sub';
+  if(!normativePdf&&sub&&items[itemIndex+1]?.table&&y>95){
+   ctx.font='bold 26px Arial';
+   const captionLines=wrap(ctx,item.text||'',W-2*M-36);
+   const minRequired=captionLines.length*36+17+tableMinimumHeight(items[itemIndex+1].table);
+   if(y+minRequired>H-100){finish();start()}
+  }
   ctx.font=(title?'bold 35px':sub?'bold 26px':item.bold?'bold 22px':'22px')+' Arial';
   ctx.fillStyle='#173d30';
   const lines=wrap(ctx,item.text||'',W-2*M-36);
