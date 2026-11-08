@@ -6,6 +6,9 @@ on:
       - 'v26-test/v27-preview/kt77-04-4c-pdf1-context-labels-only.js'
       - 'v26-test/v27-preview/V27_27_KT77_04_4_R3_CONTEXT_LABELS_ONLY.html'
       - 'v26-test/v27-preview/kt77-04-4c-labels-only-regression.cjs'
+      - 'v26-test/v27-preview/kt77-04-4d-offline-pdf-pagekeep.js'
+      - 'v26-test/v27-preview/V27_27_KT77_04_4_R4_CONTEXT_ADMIN_PAGINATION.html'
+      - 'v26-test/v27-preview/kt77-04-4d-admin-pagekeep-regression.cjs'
       - '.github/workflows/kt77-04-4c-labels-only.yml'
 permissions:
   contents: read
@@ -16,6 +19,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Compact contextual names without duplicate cadastral list
         run: node v26-test/v27-preview/kt77-04-4c-labels-only-regression.cjs
+      - name: Administrative heading and first parcel stay together
+        run: node v26-test/v27-preview/kt77-04-4d-admin-pagekeep-regression.cjs
       - name: Previously accepted source and PDF1 tests
         run: |
           node v26-test/v27-preview/kt77-04-4-context-auto-regression.cjs
