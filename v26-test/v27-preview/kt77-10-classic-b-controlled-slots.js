@@ -117,7 +117,7 @@ function zoneFacts(codes,zones){
   return {code,name,order};
  });
 }
-async function fix(blob,{scenario='',parcelIds=[],zoneCodes=[],gisResults=[],archivePreview=null,subjectContext=null}={}){
+async function fix(blob,{scenario='',parcelIds=[],zoneCodes=[],gisResults=[],archivePreview=null,subjectContext=null,spatialRelation=null}={}){
  const mode=scenario==='B'?'Б':scenario==='A'?'А':scenario;
  if(mode==='А')return {blob,applied:false,reason:'КТ35-А без промяна'};
  if(mode!=='Б')throw Error('КТ77-10: непотвърден сценарий');
@@ -163,7 +163,7 @@ async function fix(blob,{scenario='',parcelIds=[],zoneCodes=[],gisResults=[],arc
   else if(index===11)replacement=formattedHeading(doc,previous,title,headingTail);
   else if(index===24){
    const lead=location+' ';
-   replacement=caseParagraph(doc,previous,index,[part(lead),part('попада',1),part(' в границите на защитена зона '+zoneLabel+'.',2)]);
+   replacement=caseParagraph(doc,previous,index,[part(lead),part(/частично/iu.test(String(spatialRelation||''))?'попада частично':'попада',1),part(' в границите на защитена зона '+zoneLabel+'.',2)]);
   }else if(index===34){
    const before='В тази връзка и на основание чл. 2, ал. 2 от Наредбата за ОС Ви уведомявам, че преценката на компетентния орган за така заявеното инвестиционно предложение: ';
    const end=' изисква проверка на заявените параметри, приложимите режими на '+zoneLabel+' и резултатите от пространствената проверка, преди определяне на окончателния процедурен извод.';
