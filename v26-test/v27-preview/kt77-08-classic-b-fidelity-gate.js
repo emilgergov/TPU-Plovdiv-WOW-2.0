@@ -6,7 +6,7 @@
 (function(root){'use strict';
 const NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const NAME='01_Proekt_na_stanovishte_Klasicheski.docx';
-const exactIndices=[18,30,31,32,33,35,36];
+const exactIndices=[18,30,31,32,33,34,36];
 const text=p=>Array.from(p.getElementsByTagNameNS(NS,'t')).map(x=>x.textContent||'').join('');
 function verify(blob,{scenario=''}={}){
  const mode=scenario==='B'?'Б':scenario==='A'?'А':scenario;
@@ -28,7 +28,7 @@ function verify(blob,{scenario=''}={}){
   for(const i of exactIndices){const actual=text(ps[i-1]);if(actual!==accepted[i])errors.push(i);}
   // Exact legal finding from another investment proposal must never be transplanted.
   // Verify that case-dependent parts exist, without altering or approving their content.
-  for(const i of [11,19,20,21,22,23,24,25,26,27,28,29,34]){
+  for(const i of [11,19,20,21,22,23,24,25,26,27,28,29,35]){
    if(!text(ps[i-1]).trim())errors.push(i);
   }
   if(errors.length)throw Error('КТ77-08: Classic Б НЕ СЪОТВЕТСТВА на заключения образец; засегнати абзаци № '+[...new Set(errors)].sort((a,b)=>a-b).join(', ')+'. ZIP блокиран, Word текстът не е променян.');
