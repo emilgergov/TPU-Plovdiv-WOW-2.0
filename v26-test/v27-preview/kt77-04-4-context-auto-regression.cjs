@@ -7,6 +7,9 @@ const now=rd('V27_27_KT77_04_4_CONTEXT_ALL_AND_PDF1_AUTO_PREVIEW.html');
 let norm=now.replace('v27-preview/kt77-04-4b-pdf1-generator-auto-context-preview.js?v=kt77-044b-1','v27-preview/kt77-04-2-pdf1-approved-10-edits-preview.js?v=kt77-042-3-area-inline');
 norm=norm.replace('<script src="v27-preview/kt77-04-4b-pdf1-auto-context.js?v=kt77-044b-1"></script>\n','').replace('<script src="v27-preview/kt77-04-4a-multi-context-red-points.js?v=kt77-044a-1"></script>\n','');
 assert.equal(norm,old,'KT77-04.3 locked HTML must be unchanged except 3 opt-in scripts');
+const namedHtml=rd('V27_27_KT77_04_4_R2_CONTEXT_NAMED_ZZ_ZT.html');
+assert.equal(namedHtml.replace('v27-preview/kt77-04-4b-pdf1-auto-context.js?v=kt77-044b-r2-names','v27-preview/kt77-04-4b-pdf1-auto-context.js?v=kt77-044b-1').replace('v27-preview/kt77-04-4b-pdf1-generator-auto-context-preview.js?v=kt77-044b-r2-names','v27-preview/kt77-04-4b-pdf1-generator-auto-context-preview.js?v=kt77-044b-1'),now,'Named R2 HTML must differ only in cache-busted context scripts');
+
 const marker=rd('kt77-04-4a-multi-context-red-points.js'),builder=rd('kt77-04-4b-pdf1-auto-context.js'),pack=rd('kt77-04-4b-pdf1-generator-auto-context-preview.js');
 new vm.Script(marker);new vm.Script(builder);new vm.Script(pack);
 assert(marker.includes("context.addEventListener('click',()=>{if(validIds().length>1)showAll.click()},true)"));
