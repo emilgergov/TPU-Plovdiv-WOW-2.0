@@ -23,7 +23,7 @@ assert(generator.includes('Картата представя пространс�
 assert(generator.includes('Административна принадлежност на поземлените имоти'));
 assert(!generator.includes("content.push({text:'Населено място: '+verifiedSettlement})"),'Standalone settlement line must not duplicate the PI MASTER administrative description');
 assert(!generator.includes("content.push({text:'Местоположение на имотите: '+verifiedLocation})"),'Standalone location line must not duplicate the PI MASTER administrative description');
-assert(generator.includes("content.push({text:'Площ на имота: '+fmt(area)+' кв. м'"),'Each property must display PI MASTER area after administrative description');
+assert(generator.includes("content.push({text:parcelLabel(f)+'. Площ на имота: '+fmt(area)+' кв. м'"),'Each property must show PI MASTER area inline after its administrative description');
 assert(generator.includes("!Number.isFinite(area)||area<=0"),'Missing PI MASTER area must fail closed');
 
 assert(generator.includes('nearest_verified_zone||r.nearestZoneVerified'));
@@ -41,6 +41,17 @@ const origOffline=fs.readFileSync(path.join(__dirname,'../v26-offline-pdf.js'),'
 assert.equal(off.includes('PIXEL_SCALE=2,IMG_W=W*PIXEL_SCALE,IMG_H=H*PIXEL_SCALE'),true);
 assert(off.includes("image/jpeg',0.97"));
 assert(off.includes("Стр. '+(pages.length+1)"));
+
+assert(off.includes("РИОСВ – Пловдив · ГИС анализ"),'PDF1 title must use RIOSV');
+assert(off.includes("РИОСВ – Пловдив · ГИС справка"),'PDF1 footer must use RIOSV');
+assert(off.includes("normativePdf?'ТПУ Пловдив · Нормативни референции'"),'PDF2 title must remain unchanged');
+assert(off.includes('function drawGISStrongText(line,x,baseline)'),'PDF1 bold-identifier renderer missing');
+assert(off.includes("drawGISStrongText(line,M+c*cellW+7"),'PDF1 table identifiers must be bold');
+assert(off.includes("else drawGISStrongText(line,M,y+LINE)"),'PDF1 narrative identifiers and note must be bold');
+assert(off.includes("Забележка:"),'Bold note prefix missing');
+const idRegex=/(?:Забележка:|\b\d{5}\.\d+\.\d+\b|\bBG\d{7}\b)/g;
+assert.deepEqual('ПИ 46989.205.218: BG0001031 — Забележка:'.match(idRegex),['46989.205.218','BG0001031','Забележка:'],'Bold-ID pattern must match sample parcel, Natura code and note');
+
 assert(origOffline.includes("image/jpeg',0.90"),'original PDF renderer changed');
 const cut=s=>s.slice(s.indexOf('async function make('),s.indexOf('async function standalonePDF('));
 assert.equal(cut(generator).replace('const kt77041ZtFindings=await kt77041Findings(results);\n const pdf1=await pdfBlob(gisPdf(results,{...register,kt77041ZtFindings}))','const kt77041ZtFindings=await kt77041Findings(results);\n const pdf1=await pdfBlob(gisPdf(results,{...register,kt77041ZtFindings}))'),cut(baseline),'Word and PDF2 package logic changed');
