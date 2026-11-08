@@ -10,6 +10,12 @@ const oldPdf='v26-offline-pdf.js?v=kt22-header-8418d93';
 const newPdf='v27-preview/kt77-04-2-offline-pdf-hires.js?v=kt77-042-1';
 assert.equal(curr.replace(newScript,oldScript).replace(newPdf,oldPdf),prev,'Approved HTML unchanged except new isolated PDF generator/render source');
 assert(!prev.includes(newScript)&&!prev.includes(newPdf));
+const r3=read('V27_27_KT77_04_2_R3_PDF1_FOUR_PARCELS_CACHE_SAFE.html');
+assert.equal(r3
+ .replace('v27-preview/kt77-04-2-offline-pdf-hires.js?v=kt77-042-3-pi-bold',newPdf)
+ .replace('v27-preview/kt77-04-2-pdf1-approved-10-edits-preview.js?v=kt77-042-3-area-inline',newScript),curr,
+ 'Fresh four-parcel HTML should ONLY cache-bust the 2 PDF1 assets');
+
 const generator=read('kt77-04-2-pdf1-approved-10-edits-preview.js');
 const baseline=read('kt77-04-1-pdf1-pi-master-zt-preview.js');
 new vm.Script(generator,{filename:'PDF1'});
