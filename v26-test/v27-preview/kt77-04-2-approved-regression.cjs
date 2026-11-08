@@ -21,6 +21,11 @@ assert(generator.includes("title==='ГИС анализ'?content"));
 assert(generator.includes('Пространствено положение на поземлените имоти спрямо защитените зони и защитените територии'));
 assert(generator.includes('Картата представя пространственото положение'));
 assert(generator.includes('Административна принадлежност на поземлените имоти'));
+assert(!generator.includes("content.push({text:'Населено място: '+verifiedSettlement})"),'Standalone settlement line must not duplicate the PI MASTER administrative description');
+assert(!generator.includes("content.push({text:'Местоположение на имотите: '+verifiedLocation})"),'Standalone location line must not duplicate the PI MASTER administrative description');
+assert(generator.includes("content.push({text:'Площ на имота: '+fmt(area)+' кв. м'"),'Each property must display PI MASTER area after administrative description');
+assert(generator.includes("!Number.isFinite(area)||area<=0"),'Missing PI MASTER area must fail closed');
+
 assert(generator.includes('nearest_verified_zone||r.nearestZoneVerified'));
 assert(generator.includes('if(f.zones.length)continue'));
 assert(generator.includes('А. Защитени зони от мрежата „Натура 2000“ (ЗБР)'));
