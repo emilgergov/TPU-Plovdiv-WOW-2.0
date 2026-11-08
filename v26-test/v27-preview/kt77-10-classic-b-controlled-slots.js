@@ -166,8 +166,8 @@ async function fix(blob,{scenario='',parcelIds=[],zoneCodes=[],gisResults=[],arc
    replacement=caseParagraph(doc,previous,index,[part(lead),part('попада',1),part(' в границите на защитена зона '+zoneLabel+'.',2)]);
   }else if(index===34){
    const before='В тази връзка и на основание чл. 2, ал. 2 от Наредбата за ОС Ви уведомявам, че преценката на компетентния орган за така заявеното инвестиционно предложение: ';
-   const end=' изисква проверка на заявените параметри, приложимите режими на '+zoneLabel+' и установеното пресичане със защитена територия, преди определяне на окончателния процедурен извод.';
-   replacement=caseParagraph(doc,previous,index,[part(before),part('„'+title+'“',1),part(place+end,2)]);
+   const end=' изисква проверка на заявените параметри, приложимите режими на '+zoneLabel+' и резултатите от пространствената проверка, преди определяне на окончателния процедурен извод.';
+   replacement=caseParagraph(doc,previous,index,[part(before),part('„'+title+'“',1),part(place,2),part(end,3)]);
   }else replacement=fill(doc,previous,newTexts[index]);
   previous.parentNode.replaceChild(replacement,previous);
  }
