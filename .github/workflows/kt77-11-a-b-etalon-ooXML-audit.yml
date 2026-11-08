@@ -1,0 +1,28 @@
+name: KT77-11 A and B locked DOCX OOXML audit
+
+on:
+  push:
+    branches:
+      - work/KT77-11-two-stage-editor
+    paths:
+      - 'v26-test/v27-preview/kt77-11/**'
+      - '.github/workflows/kt77-11-a-b-etalon-ooXML-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  locked-both:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect both original locked Word specimens, fail closed
+        run: |
+          python3 v26-test/v27-preview/kt77-11/kt77_11_ooxml_audit.py kt77-11-ab-ooxml-report.json
+      - name: Upload read-only audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: KT77-11-original-Classic-A-B-OOXML
+          path: kt77-11-ab-ooxml-report.json
+          retention-days: 30
