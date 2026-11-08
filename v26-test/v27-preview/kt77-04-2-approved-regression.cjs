@@ -38,5 +38,6 @@ assert(off.includes("Стр. '+(pages.length+1)"));
 assert(origOffline.includes("image/jpeg',0.90"),'original PDF renderer changed');
 const cut=s=>s.slice(s.indexOf('async function make('),s.indexOf('async function standalonePDF('));
 assert.equal(cut(generator).replace('const kt77041ZtFindings=await kt77041Findings(results);\n const pdf1=await pdfBlob(gisPdf(results,{...register,kt77041ZtFindings}))','const kt77041ZtFindings=await kt77041Findings(results);\n const pdf1=await pdfBlob(gisPdf(results,{...register,kt77041ZtFindings}))'),cut(baseline),'Word and PDF2 package logic changed');
-assert.equal(generator.slice(generator.indexOf('function normativePdf('),generator.indexOf('async function make(')),baseline.slice(baseline.indexOf('function normativePdf('),baseline.indexOf('async function make('))),'PDF2 normative generator changed');
+const normativePart=x=>x.slice(x.indexOf('function normativePdf('),x.indexOf('async function make('));
+assert.equal(normativePart(generator),normativePart(baseline),'PDF2 normative generator changed');
 console.log('PASS KT77-04.2: isolated HTML and renderer, source/date, approved headings, parcel administration, ZZ and ZT tables, nearest A-only, 2-digit values, Word/PDF2 generator untouched');
