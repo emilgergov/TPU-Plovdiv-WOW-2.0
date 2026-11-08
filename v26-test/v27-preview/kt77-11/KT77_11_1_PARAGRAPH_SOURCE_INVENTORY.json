@@ -2,7 +2,7 @@
   "schema": "kt77-11-paragraph-inventory-v1",
   "checkpoint_sha": "f407b176b477afb699643b73ce82ddf2e83badb0",
   "work_branch": "work/KT77-11-two-stage-editor",
-  "status": "stage-11.1-source-inventory-not-final-per-paragraph-acceptance",
+  "status": "stage-11.2-parallel-A-B-contract-mapping-dry-run-pending",
   "priority": [
     "latest explicit accepted decision",
     "locked OOXML specimen",
@@ -24,7 +24,10 @@
     "v26-test/KT76_02_CLASSIC_B_PARAGRAPH_REVIEW_REGISTER_2026-11-06.md",
     "v26-test/kt15-6/WORD_CONTENT_EDITORIAL_RULES_KT15_8.md",
     "v26-test/V26_3_STEPS_4_5_APPROVED_RULES_2026-10-28.md",
-    "v26-test/v27-preview/kt66-locked-content-qa.js"
+    "v26-test/v27-preview/kt66-locked-content-qa.js",
+    "v26-test/v27-preview/KT48_PARAGRAPH_CONTRACT.md",
+    "v26-test/v27-preview/kt64-compare-original-a-b.js",
+    "v26-test/v27-preview/KT76_01_NEAREST_A_TEST.html"
   ],
   "classic_A": {
     "expected_direct_paragraphs": 41,
@@ -91,23 +94,25 @@
       },
       {
         "paragraph": 7,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "metadata",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md + КТ35-А + КТ24.3",
+        "decision": "Адресат / възложител — само документално потвърдено име или одобрен X заместител",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 8,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "metadata",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md + КТ35-А + КТ24.3",
+        "decision": "Адрес — от преписката или одобрен X заместител",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 9,
@@ -131,13 +136,14 @@
       },
       {
         "paragraph": 11,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "subject-location",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md + КТ35-А + КТ24.3",
+        "decision": "Потвърден предмет и имоти, с населено място/община/област; запазените run стилове от КТ35-А",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 12,
@@ -191,13 +197,14 @@
       },
       {
         "paragraph": 17,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "administrative-intro",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md + КТ35-А + КТ24.3",
+        "decision": "Нормативен/административен увод по оригиналния КТ35-А; входящ номер/дата само по преписка или точен X формат",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 18,
@@ -211,143 +218,157 @@
       },
       {
         "paragraph": 19,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "characterization",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
+        "decision": "Фактическо описание на ИП — доказан предмет, площи и дейности",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 20,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "electricity-access",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
+        "decision": "Електроснабдяване и транспортен достъп — само по заявените факти",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 21,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "water",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
+        "decision": "Водоснабдяване — само по заявените факти",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 22,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "wastewater",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
+        "decision": "Отпадъчни води — само по заявените факти",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 23,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "gis-outside",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
+        "decision": "Извън ЗЗ: действителен ГИС анализ; няма автоматичен извод за липса на въздействие",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 24,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "nearest-zone",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
+        "decision": "Най-близка защитена зона само когато изчислението е проверено и съвпада с PDF1",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 25,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "legal-zoos",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
+        "decision": "Приложимост на ЗООС — индивидуален правен анализ, без копиране на тестов извод",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 26,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "effects-intro",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
+        "decision": "Увод за въздействията; извод само по доказателства от преписката/ГИС",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 27,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "impact-fixed-1",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
+        "decision": "Първо изброено въздействие — дословната част от КТ35-А",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": false,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 28,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "impact-fixed-2",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
+        "decision": "Второ изброено въздействие — дословната част от КТ35-А",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": false,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 29,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "impact-fixed-3",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
+        "decision": "Трето изброено въздействие — дословната част от КТ35-А",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": false,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 30,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "impact-fixed-4",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
+        "decision": "Четвърто изброено въздействие — дословната част от КТ35-А",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": false,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 31,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "impact-fixed-5",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
+        "decision": "Пето изброено въздействие — дословната част от КТ35-А",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": false,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 32,
-        "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
-        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "role": "legal-conclusion",
+        "editorial_review": true,
+        "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
+        "decision": "Заключение за необходимостта от процедура — само индивидуално доказан извод",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
       },
       {
         "paragraph": 33,
@@ -439,6 +460,52 @@
         "auto_rewrite_allowed": false,
         "needs_case_evidence": false
       }
+    ],
+    "documented_contract_positions": [
+      7,
+      8,
+      11,
+      17,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32
+    ],
+    "contract_positions_count": 18,
+    "unresolved_direct_positions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      9,
+      10,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41
     ]
   },
   "classic_B": {
@@ -874,6 +941,28 @@
         "auto_rewrite_allowed": false,
         "needs_case_evidence": false
       }
+    ],
+    "documented_contract_positions": [
+      7,
+      8,
+      11,
+      17,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
     ]
   }
 }
