@@ -1,0 +1,879 @@
+{
+  "schema": "kt77-11-paragraph-inventory-v1",
+  "checkpoint_sha": "f407b176b477afb699643b73ce82ddf2e83badb0",
+  "work_branch": "work/KT77-11-two-stage-editor",
+  "status": "stage-11.1-source-inventory-not-final-per-paragraph-acceptance",
+  "priority": [
+    "latest explicit accepted decision",
+    "locked OOXML specimen",
+    "case-supported primary evidence and GIS",
+    "historical editorial register"
+  ],
+  "policy": {
+    "candidate_variable_never_means_permission": true,
+    "no_cross_case_legal_findings": true,
+    "no_ai_overwrite_of_fixed_text": true,
+    "fail_closed_on_unverified_facts": true,
+    "pdf1_pdf2_expert_word_unchanged": true,
+    "publish_only_after_new_case_validation": true
+  },
+  "source_files": [
+    "v26-test/v27-preview/etalon/KT35-A.docx",
+    "v26-test/v27-preview/etalon/KT39-B.docx",
+    "v26-test/KT24_3_39_ACCEPTANCE_REGISTER.md",
+    "v26-test/KT76_02_CLASSIC_B_PARAGRAPH_REVIEW_REGISTER_2026-11-06.md",
+    "v26-test/kt15-6/WORD_CONTENT_EDITORIAL_RULES_KT15_8.md",
+    "v26-test/V26_3_STEPS_4_5_APPROVED_RULES_2026-10-28.md",
+    "v26-test/v27-preview/kt66-locked-content-qa.js"
+  ],
+  "classic_A": {
+    "expected_direct_paragraphs": 41,
+    "paragraphs": [
+      {
+        "paragraph": 1,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 2,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 3,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 4,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 5,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 6,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 7,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 8,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 9,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 10,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 11,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 12,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 13,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 14,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 15,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 16,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 17,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 18,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 19,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 20,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 21,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 22,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 23,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 24,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 25,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 26,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 27,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 28,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 29,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 30,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 31,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 32,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 33,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 34,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 35,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 36,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 37,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 38,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 39,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 40,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 41,
+        "role": "baseline-locked-until-reviewed",
+        "editorial_review": false,
+        "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
+        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      }
+    ]
+  },
+  "classic_B": {
+    "expected_direct_paragraphs": 43,
+    "paragraphs": [
+      {
+        "paragraph": 1,
+        "role": "baseline-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 2,
+        "role": "baseline-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 3,
+        "role": "baseline-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 4,
+        "role": "baseline-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 5,
+        "role": "baseline-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 6,
+        "role": "baseline-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 7,
+        "role": "baseline-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 8,
+        "role": "baseline-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 9,
+        "role": "baseline-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 10,
+        "role": "baseline-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 11,
+        "role": "heading",
+        "editorial_review": true,
+        "source": "KT76-02 §11",
+        "decision": "Единствено местност ПОПСКОТО → местност „Попското“ в одобрения тест; други факти се подават от преписката",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 12,
+        "role": "blank-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 13,
+        "role": "blank-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 14,
+        "role": "baseline-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 15,
+        "role": "blank-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 16,
+        "role": "blank-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 17,
+        "role": "fixed",
+        "editorial_review": true,
+        "source": "KT76-02 §17",
+        "decision": "Нормативният увод се пази дословно, включително чл. 6а, т. 2 и реквизити",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 18,
+        "role": "fixed-conditional",
+        "editorial_review": true,
+        "source": "KT76-02 §18",
+        "decision": "Одобрена единствено пунктуация 'чл. 10, ал. 1 от'; без други промени",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 19,
+        "role": "evidence-characterization",
+        "editorial_review": true,
+        "source": "KT76-02 §19",
+        "decision": "Фактическа характеристика; структурата е приета за пример Б, не се пренасят обект, площи и дейности",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 20,
+        "role": "evidence-electricity-access",
+        "editorial_review": true,
+        "source": "KT76-02 §20",
+        "decision": "Изложение само по данните от уведомлението",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 21,
+        "role": "evidence-water",
+        "editorial_review": true,
+        "source": "KT76-02 §21",
+        "decision": "Изложение само по данните от уведомлението",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 22,
+        "role": "evidence-wastewater",
+        "editorial_review": true,
+        "source": "KT76-02 §22",
+        "decision": "Изложение само по данните от уведомлението",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 23,
+        "role": "evidence-land-use",
+        "editorial_review": true,
+        "source": "KT76-02 §23",
+        "decision": "Задължителен абзац непосредствено след №22; целият текст bold",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 24,
+        "role": "gis-condition",
+        "editorial_review": true,
+        "source": "KT76-02 §24",
+        "decision": "Точно GIS изцяло/частично/извън; цялата пространствена формула bold, съгласие с PDF1",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 25,
+        "role": "official-order",
+        "editorial_review": true,
+        "source": "KT76-02 §25",
+        "decision": "Обявителна/изменителна заповед само за действителната ЗЗ; BG0000194 пример: РД-688/2020 и РД-648/2024",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 26,
+        "role": "legal-finding",
+        "editorial_review": true,
+        "source": "KT76-02 §26",
+        "decision": "Bold на код и име ЗЗ; допустимост само след проверка на действителни режими",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 27,
+        "role": "legal-eia",
+        "editorial_review": true,
+        "source": "KT76-02 §27",
+        "decision": "Bold само след '(ЗООС)' в одобрената примерна формулировка; отрицателен извод само при доказателства",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 28,
+        "role": "impact-intro",
+        "editorial_review": true,
+        "source": "KT76-02 §28",
+        "decision": "След одобрената въвеждаща фраза двоеточие; отрицателен извод само при доказателства",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 29,
+        "role": "impact-fixed",
+        "editorial_review": true,
+        "source": "KT76-02 §29",
+        "decision": "Малка начална буква и завършек ';'",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 30,
+        "role": "impact-fixed",
+        "editorial_review": true,
+        "source": "KT76-02 §30",
+        "decision": "Малка начална буква и завършек ';'",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 31,
+        "role": "impact-fixed",
+        "editorial_review": true,
+        "source": "KT76-02 §31",
+        "decision": "Завършек ';'",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 32,
+        "role": "impact-fixed",
+        "editorial_review": true,
+        "source": "KT76-02 §32",
+        "decision": "Завършек ';'",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 33,
+        "role": "impact-fixed",
+        "editorial_review": true,
+        "source": "KT76-02 §33",
+        "decision": "Завършек '.'",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 34,
+        "role": "legal-conclusion",
+        "editorial_review": true,
+        "source": "KT76-02 §34 и обобщаваща проверка",
+        "decision": "Правният извод е case-specific; само изводът bold според крайното текстово указание; стиловата история в документа съдържа противоречие, необходимо е сверяване с еталона",
+        "candidate_variable": true,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": true
+      },
+      {
+        "paragraph": 35,
+        "role": "fixed",
+        "editorial_review": true,
+        "source": "KT76-02 §35",
+        "decision": "Bold само 'Общ устройствен план.'",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 36,
+        "role": "fixed",
+        "editorial_review": true,
+        "source": "KT76-02 §36",
+        "decision": "Bold само 'настоящото писмо'",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 37,
+        "role": "blank-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 38,
+        "role": "blank-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 39,
+        "role": "blank-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 40,
+        "role": "blank-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 41,
+        "role": "closing",
+        "editorial_review": true,
+        "source": "KT76-02 §41",
+        "decision": "Bold 'С уважение,' без промени; празни №37–40 и №42–43",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 42,
+        "role": "blank-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      },
+      {
+        "paragraph": 43,
+        "role": "blank-locked",
+        "editorial_review": false,
+        "source": "KT39-B.docx — еталон",
+        "decision": "Възпроизвежда се оригиналният абзац/OOXML; без свободно пренаписване",
+        "candidate_variable": false,
+        "auto_rewrite_allowed": false,
+        "needs_case_evidence": false
+      }
+    ]
+  }
+}
