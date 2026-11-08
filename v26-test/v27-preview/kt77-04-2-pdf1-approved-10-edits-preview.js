@@ -244,7 +244,7 @@ function gisPdf(results,options={}){
   const nearest=r.nearest_verified_zone||r.nearestZoneVerified;
   const code=String(nearest?.sitecode||nearest?.code||'').trim(),name=String(nearest?.name_bg||nearest?.name||'').trim();
   const dist=Number(nearest?.distance_m??nearest?.distanceMeters);
-  content.push({text:'Най-близка защитена зона до '+parcelLabel(f)+': '+(/^BG\\d{7}$/.test(code)&&name?code+' — '+name+(Number.isFinite(dist)&&dist>=0?' ('+fmt(dist)+' м)':''):'НЯМА ДАННИ за потвърдено разстояние'),fontSize:9,margin:[0,3,0,3]});
+  content.push({text:'Най-близка защитена зона до '+parcelLabel(f)+': '+(/^BG\d{7}$/.test(code)&&name?code+' — '+name+(Number.isFinite(dist)&&dist>=0?' ('+fmt(dist)+' м)':''):'НЯМА ДАННИ за потвърдено разстояние'),fontSize:9,margin:[0,3,0,3]});
  }
  content.push({text:'А. Защитени зони от мрежата „Натура 2000“ (ЗБР)',style:'sub'});
  const zzRows=[['Поземлен имот','Код и наименование на ЗЗ','Пресичане (кв. м)','Дял от имота']];
