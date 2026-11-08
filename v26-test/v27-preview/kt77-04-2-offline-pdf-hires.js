@@ -50,8 +50,20 @@ function drawSVG(ctx,svg,x,y,w){
 async function generate(def){
  const pages=[];let canvas,ctx,y;
  const normativePdf=String((def.content||[])[0]?.text||'').includes('Нормативни и документални референции');
- const runningHeader=normativePdf?'ТПУ Пловдив · Нормативни референции':'ТПУ Пловдив · ГИС анализ';
- const runningFooter=normativePdf?'ТПУ Пловдив · Нормативна справка · проект за експертна проверка':'ТПУ Пловдив · ГИС справка · източниците и ограниченията са посочени в документа';
+ const runningHeader=normativePdf?'ТПУ Пловдив · Нормативни референции':'РИОСВ – Пловдив · ГИС анализ';
+ const runningFooter=normativePdf?'ТПУ Пловдив · Нормативна справка · проект за експертна проверка':'РИОСВ – Пловдив · ГИС справка · източниците и ограниченията са посочени в документа';
+ // GIS PDF1 only: emphasize cadastral IDs, Natura codes and 'Забележка:' without changing text wrapping or PDF2.
+ function drawGISStrongText(line,x,baseline){
+  const str=String(line||''),baseFont=ctx.font,pattern=/(?:Забележка:|\\b\\d{5}\\.\\d+\\.\\d+\\b|\\bBG\\d{7}\\b)/g;
+  let start=0,cursor=x,m;
+  function drawSegment(part,strong){
+   if(!part)return;
+   ctx.font=strong?(baseFont.startsWith('bold ')?baseFont:'bold '+baseFont):baseFont;
+   ctx.fillText(part,cursor,baseline);cursor+=ctx.measureText(part).width;
+  }
+  while((m=pattern.exec(str))!==null){drawSegment(str.slice(start,m.index),false);drawSegment(m[0],true);start=m.index+m[0].length;}
+  drawSegment(str.slice(start),false);ctx.font=baseFont;
+ }
  function start(){canvas=document.createElement('canvas');canvas.width=IMG_W;canvas.height=IMG_H;ctx=canvas.getContext('2d');ctx.setTransform(PIXEL_SCALE,0,0,PIXEL_SCALE,0,0);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.fillStyle='#183b2d';ctx.font='bold 24px Arial';ctx.fillText(runningHeader,M,48);ctx.strokeStyle='#c4d9ce';ctx.beginPath();ctx.moveTo(M,65);ctx.lineTo(W-M,65);ctx.stroke();y=95}
  function finish(){ctx.font='18px Arial';ctx.fillStyle='#667';ctx.fillText(runningFooter,M,H-45);ctx.textAlign='right';ctx.fillText('Стр. '+(pages.length+1),W-M,H-45);ctx.textAlign='left';pages.push(canvas.toDataURL('image/jpeg',0.97))}
  start();
@@ -60,7 +72,7 @@ async function generate(def){
   if(item.pageBreak==='before'&&y>95){finish();start()}
   if(item.table){
    const rows=item.table.body||[],cols=rows[0]?.length||1,available=W-2*M,cellW=available/cols;
-   const drawRow=(cells,header)=>{ctx.font=(header?'bold 17px':'17px')+' Arial';const lines=cells.map(v=>wrap(ctx,String(v??''),cellW-14));const rh=Math.max(37,...lines.map(x=>x.length*24+14));if(y+rh>H-100){finish();start();if(!header&&rows.length){drawRow(rows[0],true)}}ctx.fillStyle=header?'#e3efe8':'#ffffff';ctx.fillRect(M,y,available,rh);ctx.strokeStyle='#b6c9bf';ctx.strokeRect(M,y,available,rh);ctx.fillStyle='#173d30';for(let c=0;c<cols;c++){if(c)ctx.beginPath(),ctx.moveTo(M+c*cellW,y),ctx.lineTo(M+c*cellW,y+rh),ctx.stroke();(lines[c]||[]).forEach((line,k)=>ctx.fillText(line,M+c*cellW+7,y+23+k*24))}y+=rh};
+   const drawRow=(cells,header)=>{ctx.font=(header?'bold 17px':'17px')+' Arial';const lines=cells.map(v=>wrap(ctx,String(v??''),cellW-14));const rh=Math.max(37,...lines.map(x=>x.length*24+14));if(y+rh>H-100){finish();start();if(!header&&rows.length){drawRow(rows[0],true)}}ctx.fillStyle=header?'#e3efe8':'#ffffff';ctx.fillRect(M,y,available,rh);ctx.strokeStyle='#b6c9bf';ctx.strokeRect(M,y,available,rh);ctx.fillStyle='#173d30';for(let c=0;c<cols;c++){if(c)ctx.beginPath(),ctx.moveTo(M+c*cellW,y),ctx.lineTo(M+c*cellW,y+rh),ctx.stroke();(lines[c]||[]).forEach((line,k)=>normativePdf?ctx.fillText(line,M+c*cellW+7,y+23+k*24):drawGISStrongText(line,M+c*cellW+7,y+23+k*24))}y+=rh};
    rows.forEach((cells,i)=>drawRow(cells,i===0));y+=12;continue;
   }
   if(item.columns){
@@ -85,7 +97,7 @@ async function generate(def){
   ctx.font=(title?'bold 35px':sub?'bold 26px':item.bold?'bold 22px':'22px')+' Arial';
   ctx.fillStyle='#173d30';
   const lines=wrap(ctx,item.text||'',W-2*M-36);
-  for(const line of lines){if(y+LINE>H-95){finish();start()}ctx.fillText(line,M,y+LINE,W-2*M-36);y+=title?42:sub?36:LINE}
+  for(const line of lines){if(y+LINE>H-95){finish();start()}if(normativePdf||title||sub)ctx.fillText(line,M,y+LINE,W-2*M-36);else drawGISStrongText(line,M,y+LINE);y+=title?42:sub?36:LINE}
   y+=title?26:sub?17:12;
  }
  finish();return pdf(pages);
