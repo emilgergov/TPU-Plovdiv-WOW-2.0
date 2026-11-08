@@ -166,7 +166,7 @@ async function kt77041Findings(results){
 function gisPdf(results,options={}){
  if(results.length>1)options={...options,mapSvg:null};
  const leadingId=String(options.leadingParcelId||options.leadingParcel||options.verifiedCaseMetadata?.leadingParcelId||'').trim();
- const bgDate=new Intl.DateTimeFormat('bg-BG',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date());
+ const bgDate=new Intl.DateTimeFormat('bg-BG',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date()).replace(/\s*г\.\s*$/u,'');
  const content=[{text:'Източник на пространствените данни: ГИС база на РИОСВ – Пловдив. Дата на изготвяне: '+bgDate+' г.',fontSize:9,margin:[0,0,0,8]}];
  if(options.mapSvg&&String(options.mapSvg).includes('<svg')){
   const clean=options.mapSvg;
