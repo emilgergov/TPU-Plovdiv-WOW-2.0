@@ -5,7 +5,7 @@ const W=1240,H=1754,M=88,LINE=29,PIXEL_SCALE=2,IMG_W=W*PIXEL_SCALE,IMG_H=H*PIXEL
 const enc=new TextEncoder();
 function bytes(s){return enc.encode(s)}
 function base64Bytes(data){const raw=atob(data.split(',')[1]),a=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)a[i]=raw.charCodeAt(i);return a}
-function pdf(images){
+function pdf(images,annotations=[]){
  const objects=[],push=s=>{objects.push(s);return objects.length};
  const catalog=push(''),pages=push('');
  const pageIds=[];
@@ -14,7 +14,13 @@ function pdf(images){
   const im=push({head:'<< /Type /XObject /Subtype /Image /Width '+IMG_W+' /Height '+IMG_H+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+stream.length+' >>',stream});
   const commands=bytes('q 595 0 0 842 0 0 cm /Im1 Do Q');
   const contents=push({head:'<< /Length '+commands.length+' >>',stream:commands});
-  const page=push('<< /Type /Page /Parent '+pages+' 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Im1 '+im+' 0 R >> >> /Contents '+contents+' 0 R >>');
+  const links=(annotations[pageIds.length]||[]).filter(a=>/^https:\/\//.test(a.uri));
+  const annotIds=links.map(a=>{
+   const coords=[a.x1*595/W,(H-a.y2)*842/H,a.x2*595/W,(H-a.y1)*842/H].map(n=>n.toFixed(2)).join(' ');
+   const safe=encodeURI(a.uri).replace(/([\\()])/g,'\\$1');
+   return push('<< /Type /Annot /Subtype /Link /Rect ['+coords+'] /Border [0 0 0] /A << /S /URI /URI ('+safe+') >> >>');
+  });
+  const page=push('<< /Type /Page /Parent '+pages+' 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Im1 '+im+' 0 R >> >> /Contents '+contents+' 0 R '+(annotIds.length?'/Annots ['+annotIds.map(i=>i+' 0 R').join(' ')+'] ':'')+'>>');
   pageIds.push(page);
  }
  objects[catalog-1]='<< /Type /Catalog /Pages '+pages+' 0 R >>';
@@ -48,7 +54,7 @@ function drawSVG(ctx,svg,x,y,w){
  });
 }
 async function generate(def){
- const pages=[];let canvas,ctx,y;
+ const pages=[],annotations=[];let canvas,ctx,y,links=[];
  const normativePdf=def.kt77045Normative===true||String((def.content||[])[0]?.text||'').includes('Нормативни и документални референции');
  const runningHeader=normativePdf?'РИОСВ – Пловдив · Нормативни и документални референции':'РИОСВ – Пловдив · ГИС анализ';
  const runningFooter=normativePdf?'РИОСВ – Пловдив · Нормативна справка · проект за експертна проверка':'РИОСВ – Пловдив · ГИС справка · източниците и ограниченията са посочени в документа';
@@ -73,8 +79,8 @@ async function generate(def){
   while((match=tokens.exec(str))!==null){segment(str.slice(start,match.index),false);segment(match[0],true);start=match.index+match[0].length;}
   segment(str.slice(start),false);ctx.font=baseFont;
  }
- function start(){canvas=document.createElement('canvas');canvas.width=IMG_W;canvas.height=IMG_H;ctx=canvas.getContext('2d');ctx.setTransform(PIXEL_SCALE,0,0,PIXEL_SCALE,0,0);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.fillStyle='#183b2d';ctx.font='bold 24px Arial';ctx.fillText(runningHeader,M,48);ctx.strokeStyle='#c4d9ce';ctx.beginPath();ctx.moveTo(M,65);ctx.lineTo(W-M,65);ctx.stroke();y=95}
- function finish(){ctx.font='18px Arial';ctx.fillStyle='#667';ctx.fillText(runningFooter,M,H-45);ctx.textAlign='right';ctx.fillText('Стр. '+(pages.length+1),W-M,H-45);ctx.textAlign='left';pages.push(canvas.toDataURL('image/jpeg',0.97))}
+ function start(){links=[];canvas=document.createElement('canvas');canvas.width=IMG_W;canvas.height=IMG_H;ctx=canvas.getContext('2d');ctx.setTransform(PIXEL_SCALE,0,0,PIXEL_SCALE,0,0);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.fillStyle='#183b2d';ctx.font='bold 24px Arial';ctx.fillText(runningHeader,M,48);ctx.strokeStyle='#c4d9ce';ctx.beginPath();ctx.moveTo(M,65);ctx.lineTo(W-M,65);ctx.stroke();y=95}
+ function finish(){ctx.font='18px Arial';ctx.fillStyle='#667';ctx.fillText(runningFooter,M,H-45);ctx.textAlign='right';ctx.fillText('Стр. '+(pages.length+1),W-M,H-45);ctx.textAlign='left';pages.push(canvas.toDataURL('image/jpeg',0.97));annotations.push(links)}
  start();
  const items=def.content||[];
  // KT77 PDF1 pagination only: keep each section caption with its table header and first data row.
@@ -137,10 +143,10 @@ async function generate(def){
   ctx.font=(title?'bold 35px':sub?'bold 26px':item.bold?'bold 22px':'22px')+' Arial';
   ctx.fillStyle='#173d30';
   const lines=wrap(ctx,item.text||'',W-2*M-36);
-  for(const line of lines){if(y+LINE>H-95){finish();start();ctx.font=(title?'bold 35px':sub?'bold 26px':item.bold?'bold 22px':'22px')+' Arial'}if(normativePdf&&!title&&!sub)drawLegalStrongText(line,M,y+LINE);else if(normativePdf||title||sub)ctx.fillText(line,M,y+LINE,W-2*M-36);else drawGISStrongText(line,M,y+LINE);y+=title?42:sub?36:LINE}
+  for(const line of lines){if(y+LINE>H-95){finish();start();ctx.font=(title?'bold 35px':sub?'bold 26px':item.bold?'bold 22px':'22px')+' Arial'}if(normativePdf&&item.link&&/^https:\/\//.test(item.link)){links.push({x1:M,y1:y+7,x2:Math.min(W-M,M+ctx.measureText(line).width+10),y2:y+LINE+6,uri:item.link})}if(normativePdf&&!title&&!sub)drawLegalStrongText(line,M,y+LINE);else if(normativePdf||title||sub)ctx.fillText(line,M,y+LINE,W-2*M-36);else drawGISStrongText(line,M,y+LINE);y+=title?42:sub?36:LINE}
   y+=title?26:sub?17:12;
  }
- finish();return pdf(pages);
+ finish();return pdf(pages,annotations);
 }
 window.V26OfflinePDF=Object.freeze({generate});
 })();
