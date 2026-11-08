@@ -1,0 +1,24 @@
+name: KT77 04-5 PDF2 source labels and architecture
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'v26-test/v27-preview/kt77-04-5-pdf2-document-regression.cjs'
+      - 'v26-test/v27-preview/kt77-04-5-pdf2-verified-metadata-preview.js'
+      - 'v26-test/v27-preview/kt77-04-5-pdf2-strong-legal-renderer.js'
+      - 'v26-test/v27-preview/kt77-04-5-legislation-provenance.js'
+      - 'v26-test/v27-preview/V27_27_KT77_04_5_PDF2_LEGAL_REQUISITES_PREVIEW.html'
+      - '.github/workflows/kt77-04-5-pdf2-document.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify PDF2 source labels, approved PDF1 and DOCX boundaries
+        run: node v26-test/v27-preview/kt77-04-5-pdf2-document-regression.cjs
+      - name: Confirm spatial and normative baseline regression
+        run: |
+          node v26-test/v27-preview/kt77-04-5-pdf2-baseline-regression.cjs
+          node v26-test/v27-preview/kt77-04-4d-admin-pagekeep-regression.cjs
