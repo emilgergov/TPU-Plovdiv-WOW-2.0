@@ -26,7 +26,7 @@ const content=[...Array.from({length:51},(_,i)=>({text:'Проверен тек�
 {text:'ПИ 36676.129.457 по КККР на с. Катуница. Площ на имота: 16 609,10 кв. м'}];
 await win.V26OfflinePDF.generate({content});
 const title='Административна принадлежност на поземлените имоти';
-const titlePage=pages.findIndex(p=>p.some(x=>x.text===title)),firstPage=pages.findIndex(p=>p.some(x=>x.text.startsWith('ПИ 56784.13.102')));
+const titlePage=pages.findIndex(p=>p.some(x=>x.text.startsWith('Административна принадлежност'))),firstPage=pages.findIndex(p=>p.some(x=>x.text.startsWith('ПИ 56784.13.102')));
 assert(titlePage>=0&&firstPage>=0);
 assert.equal(titlePage,firstPage,'Orphan administrative heading');
 const txt=pages[firstPage].find(x=>x.text.startsWith('ПИ 56784.13.102'));
