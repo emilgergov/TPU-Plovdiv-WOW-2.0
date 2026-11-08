@@ -234,8 +234,7 @@ function gisPdf(results,options={}){
  for(const f of facts){
   const area=Number(f.admin.area_m2);
   if(!Number.isFinite(area)||area<=0)throw Error('КТ77-04.2: липсва проверена площ на имот '+f.cadnum+' в ПИ MASTER');
-  content.push({text:parcelLabel(f),fontSize:9,margin:[0,1,0,2]});
-  content.push({text:'Площ на имота: '+fmt(area)+' кв. м',fontSize:9,margin:[0,0,0,7]});
+  content.push({text:parcelLabel(f)+'. Площ на имота: '+fmt(area)+' кв. м',fontSize:9,margin:[0,1,0,7]});
  }
  for(let i=0;i<results.length;i++){
   const r=results[i],f=facts[i];
