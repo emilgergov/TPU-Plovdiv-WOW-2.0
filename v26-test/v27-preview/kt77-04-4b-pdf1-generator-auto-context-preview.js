@@ -163,9 +163,9 @@ async function kt77041Findings(results){
  return Object.freeze(findings);
 }
 
-function kt77044RequiredContextSvg(results,zoneFeatures){
+function kt77044RequiredContextSvg(results,zoneFeatures,findings){
  if(typeof window.KT77044AutoContext?.buildSVG!=='function')throw Error('КТ77-04.4: модулът за автоматичен ГИС контекст не е зареден.');
- const svg=window.KT77044AutoContext.buildSVG(results,zoneFeatures||[]);
+ const svg=window.KT77044AutoContext.buildSVG(results,zoneFeatures||[],findings);
  if(typeof svg!=='string'||!svg.startsWith('<svg'))throw Error('КТ77-04.4: не може да бъде създаден валиден общ контекст на имотите.');
  return svg;
 }
@@ -451,7 +451,7 @@ async function make(results,roles,register){
  z.file('02_Proekt_na_stanovishte_Eksperten.docx',expertWord);
  await ensurePDF();
  const kt77041ZtFindings=await kt77041Findings(results);
- const kt77044ContextSvg=kt77044RequiredContextSvg(results,register?.zoneFeatures||[]);
+ const kt77044ContextSvg=kt77044RequiredContextSvg(results,register?.zoneFeatures||[],kt77041ZtFindings);
  const pdf1=await pdfBlob(gisPdf(results,{...register,kt77041ZtFindings,kt77044ContextSvg}));if(pdf1.size<100||await pdf1.slice(0,4).text()!=='%PDF')throw Error('ГИС анализът не е валиден PDF.');z.file('03_GIS_analiz.pdf',pdf1);
  if(includeAnnex2){const pdf2=await pdfBlob(normativePdf(results,register));if(pdf2.size<100||await pdf2.slice(0,4).text()!=='%PDF')throw Error('Нормативните и документалните референции не са валиден PDF.');z.file('04_Normativni_i_dokumentalni_referencii.pdf',pdf2);}
  const evidenceLines=['РАБОТЕН ПАКЕТ — НЕ Е ОФИЦИАЛНО СТАНОВИЩЕ.','ВНИМАНИЕ: Полетата [ЗА ЕКСПЕРТНА ПРОВЕРКА] са незавършени и изискват проверка от компетентен експерт преди подписване или изпращане.','Съдържа два отделни DOCX проекта (класически и експертен), задължителното PDF приложение №1; приложение №2 е задължително във V27.1 и опционално в наследения V26 маршрут.','Правната приложимост и изводите подлежат на експертна проверка.','','ТЕХНИЧЕСКА ПРОСЛЕДИМОСТ — САМО ЗА ВЪТРЕШНА ПРОВЕРКА'];
@@ -490,6 +490,6 @@ async function make(results,roles,register){
  if(actualFiles.length!==packageFiles.length||packageFiles.some(name=>!actualFiles.includes(name)))throw Error('V27.1: ZIP пакетът има неочакван състав.');
  const packageBlob=await z.generateAsync({type:'blob'});if(packageBlob.size<300||new TextDecoder().decode(await packageBlob.slice(0,2).arrayBuffer())!=='PK')throw Error('Неуспешно пакетиране в ZIP.');return packageBlob;
 }
-async function standalonePDF(results,kind,register){if(!results?.length)throw Error('Първо изпълнете ГИС справката.');if(kind!==2&&!results.some(r=>r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type))))throw Error('Липсва имотна геометрия за PDF №1. Заредете архивната геометрия и изпълнете справката отново.');await ensurePDF();return kind===2?pdfBlob(normativePdf(results,register)):pdfBlob(gisPdf(results,{...register,kt77041ZtFindings:await kt77041Findings(results),kt77044ContextSvg:kt77044RequiredContextSvg(results,register?.zoneFeatures||[])}))}
+async function standalonePDF(results,kind,register){if(!results?.length)throw Error('Първо изпълнете ГИС справката.');if(kind!==2&&!results.some(r=>r.geojson?.features?.some(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type))))throw Error('Липсва имотна геометрия за PDF №1. Заредете архивната геометрия и изпълнете справката отново.');await ensurePDF();if(kind===2)return pdfBlob(normativePdf(results,register));const findings=await kt77041Findings(results);return pdfBlob(gisPdf(results,{...register,kt77041ZtFindings:findings,kt77044ContextSvg:kt77044RequiredContextSvg(results,register?.zoneFeatures||[],findings)}))}
 window.V26DraftPackage=Object.freeze({make,standalonePDF});
 })();
