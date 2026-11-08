@@ -313,7 +313,7 @@ function normativePdf(results,register){
    ztLines.push({text:'ПИ '+f.cadnum+' — '+z.category+' „'+z.name+'“: '+order+'; '+pub+'.'+change});
   }else ztLines.push({text:'ПИ '+f.cadnum+' — '+z.category+' „'+z.name+'“: заповедта не е потвърдена в наличния документален архив.'});
   const source=doc?.url||'https://pdbase.eea.government.bg/zpo/bg/index_search.jsp';
-  ztLines.push({text:'Източник за проверка: ИАОС, сайт на ИАОС — '+new URL(source).hostname,link:source,fontSize:8,color:'#165c86'});
+  ztLines.push({text:'Източник за проверка: ИАОС',link:source,fontSize:8,color:'#165c86'});
  }
 
  function authorityLabel(url){
@@ -342,7 +342,7 @@ function normativePdf(results,register){
   }
   const source='https://www.moew.government.bg/bg/priroda/natura-2000/zastiteni-zoni/';
   return [{text:label+': заповедта за обявяване не е потвърдена в наличния документален архив.'},
-   {text:'Източник за проверка: МОСВ, сайт на МОСВ — '+new URL(source).hostname,link:source,color:'#165c86',fontSize:8}];
+   {text:'Източник за проверка: МОСВ',link:source,color:'#165c86',fontSize:8}];
  });
  const gisEvidence=results.map(r=>{const id=String(r.input||r.cadnum||'');const verified=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z:String(z?.sitecode||z?.code||'')).filter(z=>/^BG\d{7}$/.test(z));const overlays=[...(r.archived_overlay_records||[]),...(r.archived_zones||[])];const archived=overlays.map(z=>typeof z==='string'?z:String(z?.sitecode||z?.code||'')).filter(z=>/^BG\d{7}$/.test(z));return {id,codes:[...new Set(verified)],archivedCodes:[...new Set(archived)],outside:r.intersection_verified_outside===true};});
  const gisZoneCodes=[...new Set(gisEvidence.flatMap(x=>x.codes))];
