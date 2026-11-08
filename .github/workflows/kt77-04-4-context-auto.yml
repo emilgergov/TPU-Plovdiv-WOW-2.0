@@ -1,0 +1,26 @@
+name: KT77 04-4 multi-context points and automatic PDF1 context
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'v26-test/v27-preview/kt77-04-4a-multi-context-red-points.js'
+      - 'v26-test/v27-preview/kt77-04-4b-pdf1-auto-context.js'
+      - 'v26-test/v27-preview/kt77-04-4b-pdf1-generator-auto-context-preview.js'
+      - 'v26-test/v27-preview/V27_27_KT77_04_4_CONTEXT_ALL_AND_PDF1_AUTO_PREVIEW.html'
+      - 'v26-test/v27-preview/kt77-04-4-context-auto-regression.cjs'
+      - '.github/workflows/kt77-04-4-context-auto.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate four red context markers and autonomous PDF1 image; protect locked baseline
+        run: node v26-test/v27-preview/kt77-04-4-context-auto-regression.cjs
+      - name: Preserve approved PDF1 pagination and full cadastral source
+        run: |
+          node v26-test/v27-preview/kt77-04-3-pagination-regression.cjs
+          node v26-test/v27-preview/kt77-04-2-approved-regression.cjs
+          node v26-test/v27-preview/kt77-r11-zzt-regression.cjs
+          node v26-test/gis-data/pi-master/verify-browser-index.cjs v26-test/gis-data/pi-master/browser-index
