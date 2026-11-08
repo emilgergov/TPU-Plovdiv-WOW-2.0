@@ -307,12 +307,15 @@ function normativePdf(results,register){
  const ztLines=[];
  for(const f of facts)for(const z of f.territories||[]){
   const doc=ztRegistry.find(x=>x.kind==='protected_territory_site'&&x.source_verified===true&&canonical(x.title).includes(canonical(z.name))&&canonical(z.name));
-  const order=doc?.declaration_order||'НЯМА ДАННИ',pub=doc?.published_in||'НЯМА ДАННИ';
-  const change=doc?.area_change_order?' Изменение: '+doc.area_change_order+(doc.area_change_publication?' ('+doc.area_change_publication+')':'')+'.':'';
-  ztLines.push({text:'ПИ '+f.cadnum+' — '+z.category+' „'+z.name+'“: заповед за обявяване: '+order+'; обнародване: '+pub+'.'+change});
-  if(doc?.url)ztLines.push({text:'ИАОС — '+new URL(doc.url).hostname,link:doc.url,fontSize:8,color:'#165c86'});
+  if(doc?.declaration_order){
+   const order=doc.declaration_order,pub=doc.published_in||'обнародване: НЯМА ДАННИ';
+   const change=doc.area_change_order?' Изменение: '+doc.area_change_order+(doc.area_change_publication?' ('+doc.area_change_publication+')':'')+'.':'';
+   ztLines.push({text:'ПИ '+f.cadnum+' — '+z.category+' „'+z.name+'“: '+order+'; '+pub+'.'+change});
+  }else ztLines.push({text:'ПИ '+f.cadnum+' — '+z.category+' „'+z.name+'“: заповедта не е потвърдена в наличния документален архив.'});
+  const source=doc?.url||'https://pdbase.eea.government.bg/zpo/bg/index_search.jsp';
+  ztLines.push({text:'Източник за проверка: ИАОС, сайт на ИАОС — '+new URL(source).hostname,link:source,fontSize:8,color:'#165c86'});
  }
- const zzLines=zones.map(z=>({text:'Защитена зона '+z.code+(z.name?' „'+z.name+'“':'')+': заповед за обявяване: '+(z.order||'НЯМА ДАННИ')+'. Номер, дата и изменение се цитират само при потвърден първоизточник.'}));
+
  function authorityLabel(url){
   try{const h=new URL(url).hostname.toLowerCase();if(h==='eea.government.bg'||h.endsWith('.eea.government.bg')||h==='pdbase.eea.government.bg')return 'ИАОС — '+h;
    if(h==='moew.government.bg'||h.endsWith('.moew.government.bg'))return 'МОСВ — '+h;
@@ -329,6 +332,18 @@ function normativePdf(results,register){
   }
  }
  const zones=[...zoneMap.values()].sort((a,b)=>a.code.localeCompare(b.code));
+ const zzLines=zones.flatMap(z=>{
+  const label='Защитена зона '+z.code+(z.name?' „'+z.name+'“':'');
+  // A GIS metadata order number alone is not proof of signed and officially published order.
+  const confirmed=register?.verifiedZoneOrders?.[z.code];
+  if(confirmed?.verified===true&&confirmed?.number&&confirmed?.date&&confirmed?.source_url){
+   return [{text:label+': заповед за обявяване № '+confirmed.number+' от '+confirmed.date+(confirmed.gazette?', '+confirmed.gazette:'')+'.'},
+    {text:'МОСВ — сайт на МОСВ ('+new URL(confirmed.source_url).hostname+')',link:confirmed.source_url,color:'#165c86',fontSize:8}];
+  }
+  const source='https://www.moew.government.bg/bg/priroda/natura-2000/zastiteni-zoni/';
+  return [{text:label+': заповедта за обявяване не е потвърдена в наличния документален архив.'},
+   {text:'Източник за проверка: МОСВ, сайт на МОСВ — '+new URL(source).hostname,link:source,color:'#165c86',fontSize:8}];
+ });
  const gisEvidence=results.map(r=>{const id=String(r.input||r.cadnum||'');const verified=(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?z:String(z?.sitecode||z?.code||'')).filter(z=>/^BG\d{7}$/.test(z));const overlays=[...(r.archived_overlay_records||[]),...(r.archived_zones||[])];const archived=overlays.map(z=>typeof z==='string'?z:String(z?.sitecode||z?.code||'')).filter(z=>/^BG\d{7}$/.test(z));return {id,codes:[...new Set(verified)],archivedCodes:[...new Set(archived)],outside:r.intersection_verified_outside===true};});
  const gisZoneCodes=[...new Set(gisEvidence.flatMap(x=>x.codes))];
  const gisSummary=gisEvidence.map(x=>'Имот '+x.id+': '+(x.codes.length?'отчетена зона '+x.codes.join(', '):x.outside?'без пресичане със защитена зона':'пространственият резултат изисква сверяване с ГИС анализа')).join('; ')+'.';
