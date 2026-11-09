@@ -20,9 +20,12 @@ Status: user-approved editorial rules. This record does not modify binary DOCX e
 - Classic A paragraph 29: APPROVED AND LOCKED. Preserve the KT35-A original third impact direction „Нарушаване целостта и целите на опазване на защитената зона;“. Assess possible effects on the integrity and conservation objectives of relevant Natura 2000 protected zones, irrespective of the absence of spatial overlap. Conclusions must be based on case-specific evidence. Preserve Word paragraph, listing, emphasis and styling.
 - Classic B paragraph 30: APPROVED AND LOCKED. Preserve the second impact-direction wording in the KT76-03 generator register: „трансформация на местообитания на видове, безпокойство или прогонване на видове, предмет на опазване в засегнатата защитена зона;“. Assess these effects in ALL actually intersected Natura 2000 zones, for their relevant conservation features. Preserve the independent list paragraph and Word formatting. Exact KT39-B exemplar wording remains to be verified.
 
+- Classic A paragraph 30: APPROVED AND LOCKED. Preserve the exact KT35-A fourth impact-direction text „Нарушаване кохерентността между съседни защитени зони;“. Assess possible effects on ecological connectivity and coherence between Natura 2000 protected zones, including when the parcel is outside their boundaries, based on verified case-specific facts. Preserve independent list item and original DOCX styling.
+- Classic B paragraph 31: APPROVED AND LOCKED. Retain the KT76-03 generator-register third impact-direction wording „нарушаване на целостта и целите на опазване на защитената зона;“. Assess possible effects on integrity and conservation objectives of EACH actually intersected protected zone, based on confirmed GIS and conservation evidence. Preserve independent list paragraph and DOCX styling. Exact KT39-B source wording still requires verbatim check.
+
 ## Next paragraphs to review — NOT YET APPROVED
-- Classic A paragraph 30: fourth impact direction „Нарушаване кохерентността между съседни защитени зони;“ — original KT35-A.
-- Classic B paragraph 31: third impact direction „нарушаване на целостта и целите на опазване на защитената зона;“ — KT76-03 generator register, not independently verified verbatim against KT39-B.
+- Classic A paragraph 31: fifth impact direction „Въздействие на предложените дейности причинени поотделно или във взаимодействие с други инвестиционни предложения/планове, програми, проекти (ИП/ППП).“ — original uploaded KT35-A.
+- Classic B paragraph 32: fourth impact direction „нарушаване на кохерентността между съседни защитени зони;“ — KT76-03 generator register; not verified verbatim against KT39-B.
 
 ## Protection / status
 No edits to KT35-A.docx, KT39-B.docx, or any deployed generator. This is a decision register only. Await paragraph-specific approval before further edits.
