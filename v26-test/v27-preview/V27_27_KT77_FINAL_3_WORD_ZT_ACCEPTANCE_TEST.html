@@ -62,7 +62,7 @@ function deepDocxQA(original,modified,parcelIds,isExpert){
  if(oldZT.length)throw Error('Входният Word вече съдържа ЗТ абзац; повторното добавяне е блокирано');
  if(zt.length!==1)throw Error('Не е намерен точно един ЗТ абзац');
  const index=zt[0];
- const anchored=before.texts.map((s,i)=>/BG\\d{7}|защитен(?:а|и|ите)\\s+зон/i.test(s)&&/заповед/i.test(s)?i:-1).filter(i=>i>=12);
+ const anchored=before.texts.map((s,i)=>/BG\d{7}|защитен(?:а|и|ите)\s+зон/i.test(s)&&/заповед/i.test(s)?i:-1).filter(i=>i>=12);
  if(!anchored.length||index!==anchored[0]+1)throw Error('ЗТ абзацът не е непосредствено след заповедта за ЗЗ');
  const restored=after.texts.slice(0,index).concat(after.texts.slice(index+1));
  if(restored.some((text,i)=>text!==before.texts[i]))throw Error('Променен е стар абзац');
