@@ -17,6 +17,18 @@ for(const mode of ['A','B']){
  accepted(mode,8,'Адрес: гр. Пловдив','Адрес: гр. Асеновград','Пловдив','Асеновград','address');
  accepted(mode,11,'Относно: ИП „Складове“','Относно: ИП „Посетителски пункт“','Складове','Посетителски пункт','subject');
  accepted(mode,19,'Предвижда се сграда 40 кв. м.','Предвижда се сграда 20 кв. м.','40','20','characterization');
+ const oldMany='Относно: ИП в имоти 56784.13.102 и 56784.13.105';
+ const newMany='Относно: ИП в имоти 46989.205.218 и 46989.205.219';
+ const many=m.proposeMany({paragraph:11,original:oldMany,primary:newMany,runTexts:[oldMany],
+  confirmedParcelIds:['46989.205.218','46989.205.219'],
+  documents:[{source_file:'dossier.txt',text:'Имот 46989.205.218\nИмот 46989.205.219'}]});
+ assert.equal(many.ok,true,JSON.stringify(many));
+ assert.equal(many.patches.length,2);
+ assert.deepEqual(many.patches.map(x=>x.value),['46989.205.218','46989.205.219']);
+ const unsafeMany=m.proposeMany({paragraph:11,original:oldMany,primary:newMany,runTexts:[oldMany],
+  confirmedParcelIds:['46989.205.218'],
+  documents:[{source_file:'dossier.txt',text:'Имот 46989.205.218\nИмот 46989.205.219'}]});
+ assert.equal(unsafeMany.ok,false,'Both parcel IDs must be GIS-confirmed');
  const missing=m.propose({paragraph:11,original:'Имот 56784.13.102',primary:'Имот 46989.205.218',runTexts:['Имот 56784.13.102'],documents:[],confirmedParcelIds:['46989.205.218']});
  assert.equal(missing.ok,false);
  const ambiguous=m.propose({paragraph:11,original:'Имот 56784.13.102',primary:'Имот 46989.205.218',runTexts:['Имот 56784.13.102'],documents:[
