@@ -27,6 +27,8 @@ jobs:
         run: |
           node --check v26-test/v27-preview/kt77-11/kt77-11-4-browser-secondary-editor.js
           node --check v26-test/v27-preview/kt77-11/kt77-11-4-case-evidence-bridge.js
+          node --check v26-test/v27-preview/kt77-11/kt77-11-4-evidence-span-matcher.js
+          node v26-test/v27-preview/kt77-11/test_evidence_span_matcher.js
           python3 - <<'PY'
           from pathlib import Path
           p=Path("v26-test/v27-preview/V27_27_KT77_11_4_A_B_SECONDARY_EDITOR_INTEGRATION_TEST.html")
@@ -37,6 +39,7 @@ jobs:
           assert "КТ77-11.4 · ИЗОЛИРАН ИНТЕГРАЦИОНЕН ТЕСТ" in html
           assert "kt77-11/kt77-11-4-browser-secondary-editor.js" in html
           assert "kt77-11/kt77-11-4-case-evidence-bridge.js" in html
+          assert "kt77-11/kt77-11-4-evidence-span-matcher.js" in html
           print("PASS: isolated A/B ZIP interception before ZT and explicit evidence gate")
           PY
       - name: Upload read-only audit report
