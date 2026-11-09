@@ -47,6 +47,9 @@ jobs:
         run: |
           npm install --no-save --no-package-lock --ignore-scripts fflate@0.8.2 @xmldom/xmldom@0.9.8
           node v26-test/v27-preview/kt77-11/test_browser_secondary_editor.cjs
+      - name: Print first Classic A/B original paragraphs and exact run styles for review
+        run: |
+          python3 v26-test/v27-preview/kt77-11/kt77_11_5_print_classic_first_review.py
       - name: Upload read-only audit report
         uses: actions/upload-artifact@v4
         with:
