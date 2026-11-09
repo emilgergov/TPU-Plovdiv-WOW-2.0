@@ -55,6 +55,16 @@ async function transform(blob,{scenario,patches,evidence}={}){
  const resultXml=new XMLSerializer().serializeToString(refDoc),recheck=parse(encode(resultXml)),changed=words(recheck);
  const originalXml=parse(original['word/document.xml']),baseline=words(originalXml),modified=new Set(changes.map(c=>c.paragraph));
  if(changed.length!==spec.n)error('променен брой абзаци');
+ // Every material variable difference must be fully reconciled. A partial set of
+ // patches must NEVER silently restore the specimen's historical parcel/subject.
+ for(let i=0;i<spec.n;i++)if(ALLOWED.has(i+1)&&content(changed[i])!==content(pps[i]))
+  error('непопълнена фактическа разлика в абзац '+(i+1)+'; изходът би съдържал примерни данни');
+ const cadastral=s=>new Set((s.match(/\\b\\d{5}\\.\\d+\\.\\d+\\b/g)||[]));
+ const primaryIds=cadastral(pps.map(content).join(' '));
+ const outputIds=cadastral(changed.map(content).join(' '));
+ if(primaryIds.size!==outputIds.size||[...primaryIds].some(id=>!outputIds.has(id)))
+  error('идентификаторите в вторичния Word не съвпадат с първичния; възможно пренасяне на еталонен имот');
+
  const serializer=new XMLSerializer();
  for(let i=0;i<spec.n;i++)if(!modified.has(i+1)&&serializer.serializeToString(baseline[i])!==serializer.serializeToString(changed[i]))error('променен заключен абзац '+(i+1));
  for(const c of changes){if(!content(changed[c.paragraph-1]).includes(c.after)||content(changed[c.paragraph-1]).includes(c.before))error('неуспешна конкретна подмяна');}
