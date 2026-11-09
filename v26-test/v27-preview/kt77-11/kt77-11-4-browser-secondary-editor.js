@@ -6,7 +6,7 @@
 const W='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const DOC='01_Proekt_na_stanovishte_Klasicheski.docx';
 const SPEC={A:{name:'KT35-A.docx',n:41},B:{name:'KT39-B.docx',n:43}};
-const KINDS=new Set(['parcel_id','settlement','municipality','region','subject','recipient','address','reference','locality']);
+const KINDS=new Set(['parcel_id','settlement','municipality','region','subject','recipient','address','reference','locality','characterization']);
 const ALLOWED=new Set([7,8,11,17,19,20,21,22,23,24]);
 const DANGER=/не е необходимо провеждане|не подлежи на|допустимо спрямо|няма вероятност от отрицателно/iu;
 const words=doc=>Array.from(doc.getElementsByTagNameNS(W,'body')[0]?.childNodes||[]).filter(n=>n.nodeType===1&&n.namespaceURI===W&&n.localName==='p');
@@ -65,7 +65,7 @@ async function transform(blob,{scenario,patches,evidence}={}){
  if(primaryIds.size!==outputIds.size||[...primaryIds].some(id=>!outputIds.has(id)))
   error('идентификаторите в вторичния Word не съвпадат с първичния; възможно пренасяне на еталонен имот');
 
- const zones=t=>new Set((String(t||'').match(/BG\\d{7}/g)||[]));
+ const zones=t=>new Set((String(t||'').match(/BG\d{7}/g)||[]));
  const primaryZones=zones(pps.map(content).join(' ')),outputZones=zones(changed.map(content).join(' '));
  if(primaryZones.size!==outputZones.size||[...primaryZones].some(id=>!outputZones.has(id)))
   error('кодът на защитена зона в вторичния Word не съвпада с първичния; възможно пренасяне на тестова зона');
