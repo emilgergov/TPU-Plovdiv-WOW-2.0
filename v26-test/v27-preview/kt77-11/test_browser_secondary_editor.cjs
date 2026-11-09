@@ -20,6 +20,8 @@ global.fetch=async url=>{
  const data=bytes(fn);
  return {ok:true,arrayBuffer:async()=>data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength)};
 };
+require('./kt77-11-4-evidence-span-matcher.js');
+require('./kt77-11-4-case-evidence-bridge.js');
 require('./kt77-11-4-browser-secondary-editor.js');
 const W='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const DOC='01_Proekt_na_stanovishte_Klasicheski.docx';
@@ -63,6 +65,20 @@ async function test(mode){
  const quote='Имотът с идентификатор '+val+' се намира в преписката.';
  const patch={paragraph:target.i,kind:'parcel_id',template_literal:target.old,value:val,
   source_file:'source.txt',source_quote:quote};
+ const allConfirmed=[...new Set(ps.map(ptxt).join(' ').match(/\\b\\d{5}\\.\\d+\\.\\d+\\b/g)||[])];
+ global.V26ArchiveTextPreview={files:[{path:'source.txt',text:quote}]};
+ const verifiedPlan=await global.KT7711CaseEvidenceBridge.getVerifiedPlan({
+  scenario:mode,primaryBlob:new Blob([primaryZip]),parcelIds:allConfirmed
+ });
+ assert.equal(verifiedPlan.verified,true,JSON.stringify(verifiedPlan.unresolved));
+ assert.deepEqual(verifiedPlan.patches.map(x=>x.paragraph),[target.i]);
+ assert.equal(verifiedPlan.patches[0].value,val);
+ global.V26ArchiveTextPreview={files:[]};
+ const missingSource=await global.KT7711CaseEvidenceBridge.getVerifiedPlan({
+  scenario:mode,primaryBlob:new Blob([primaryZip]),parcelIds:allConfirmed
+ });
+ assert.equal(missingSource.verified,false,'No dossier source must block A/B');
+ global.V26ArchiveTextPreview={files:[{path:'source.txt',text:quote}]};
  const opts={scenario:mode,patches:[patch],evidence:[{source_file:'source.txt',text:quote}]};
  const built=await global.KT7711SecondaryEditor.transform(new Blob([primaryZip]),opts);
  assert.equal(built.report.status,'PASS');
