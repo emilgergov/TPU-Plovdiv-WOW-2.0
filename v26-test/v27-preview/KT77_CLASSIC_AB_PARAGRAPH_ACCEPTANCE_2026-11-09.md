@@ -48,8 +48,18 @@ APPROVED AND LOCKED by user: both GIS-confirmed cases in Classic A. This is a co
 4. **Unchanged logic**: A/B scenario solely determined by Natura 2000 zone intersections (ZZ), NOT ZT. A ZT finding does not modify other approved paragraphs or their procedural conclusions.
 5. **Evidence**: PI MASTER + GIS + officially verified orders. The two sample paragraphs presented for acceptance are conditional templates, NOT actual verified GIS findings for arbitrary parcels. Live generated DOCX visual/regression PASS is still PENDING.
 
+## ZT independent constatation — Classic B acceptance (09.11.2026)
+
+APPROVED AND LOCKED by user for BOTH GIS-verified cases. This acceptance concerns rules and content, not a verified generated DOCX.
+
+1. **No ZT intersection**: one standalone paragraph after the Natura 2000 zone and designation-order paragraph, confirming no intersection with protected territories (ZT) under the Protected Territories Act, ONLY where the parcel-by-parcel PI MASTER/GIS results demonstrate this. The test ID 36676.129.457 is an illustrative placeholder, not a hard-coded factual finding.
+2. **One or more ZT intersections**: one standalone paragraph covering all confirmed parcel-to-ZT intersections. Include each verified parcel identifier, category and official ZT name, verified designation order, State Gazette publication and applicable amendments when confirmed from official records. Never fabricate missing requisites; fail closed when required records lack verification.
+3. **Format and placement**: bold parcel identifiers and ZT category/name; place immediately after the Natura 2000 zone(s) and their order paragraph. Preserve all other Classic B paragraphs, signatures, formatting and conclusion.
+4. **Scope**: ZZ (Natura 2000) intersections alone determine Classic scenario A/B; ZT constatation does NOT produce automatic ZZT admissibility or procedural conclusions. Preserve ZZ vs ZT distinction.
+5. **Remaining validation**: independently verify resulting DOCX in a real ZIP, including no unintended paragraph or formatting changes. No end-to-end PASS yet.
+
 ## Next ZT acceptance — NOT YET APPROVED
-- Classic B: the same two cases, but using all GIS-confirmed parcel-to-ZT relationships, without conflating protected territory (ZT) and Natura 2000 protected zone (ZZ); same exact Word insertion point and bold structure. Await user's separate acceptance.
+- Expert Word: use the independent factual ZT paragraph from the KT77-06.1 module, both no-intersection and verified intersection variants; distinct expert opening and GIS evidence sentence; no changes to existing Expert conclusion, legal reasoning or formatting until explicit approval.
 
 ## Final verification — PENDING
 - Compare uploaded KT35-A and repository KT39-B actual DOCX paragraphs against the accepted decision register. Check body numbering, original styling, headers, footers, signatures, institutional contact details and absence of unwanted changes; separately verify B36 verbatim text.
