@@ -75,3 +75,7 @@ All three Word families (Classic A, Classic B, Expert) have user-approved condit
 
 ## Protection / status
 No edits to KT35-A.docx, KT39-B.docx, or any deployed generator. This is a decision register only. Await paragraph-specific approval before further edits.
+
+## KT77-12 — superseding style acceptance (09.11.2026)
+
+User correction explicitly SUPERSEDES the earlier approved bold parcel IDs in the ZT paragraphs. For Classic A, Classic B and Expert Word, cadastral identifiers in ZT must be NORMAL WEIGHT, exactly as in ZZ spatial paragraphs. Protected-territory category and official name remain bold for confirmed intersection cases. This applies to both no-ZT-intersection and ZT-intersection scenarios. Preserve original Word templates, all old paragraphs and all other evidence requirements. Working screen now references existing kt77-06-6-zt-word-normal-identifiers.js module, which differs from the previous bold-ID module in exactly two run-level bold flags. Test screen: V27_27_KT77_12_EXPERT_WORKSPACE_ZZ_ZT_STYLE_TEST.html. Real generated ZIP and visual PASS remains PENDING.
