@@ -2,7 +2,7 @@
   "schema": "kt77-11-paragraph-inventory-v1",
   "checkpoint_sha": "f407b176b477afb699643b73ce82ddf2e83badb0",
   "work_branch": "work/KT77-11-two-stage-editor",
-  "status": "stage-11.5-p11-p17-p18-p19-approved-AB-p20-pending",
+  "status": "stage-11.5-p11-p17-p18-p19-p20-approved-AB-p21-pending",
   "priority": [
     "latest explicit accepted decision",
     "locked OOXML specimen",
@@ -286,11 +286,20 @@
         "role": "electricity-access",
         "editorial_review": true,
         "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
-        "decision": "Електроснабдяване и транспортен достъп — само по заявените факти",
+        "decision": "Единна фактическа рамка за електроснабдяване и транспортен достъп, само доказани инженерни данни, без предположения или копиране на тестови факти. Запазен оригинален един w:r без bold/italic.",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
         "needs_case_evidence": true,
-        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending",
+        "editorial_acceptance": "APPROVED_P20_EVIDENCE_ONLY_ELECTRICITY_ACCESS_AB",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md; user's explicit approval",
+        "accepted_word_runs": [
+          {
+            "role": "доказани данни за електроснабдяване и транспортен достъп",
+            "bold": false,
+            "italic": false
+          }
+        ]
       },
       {
         "paragraph": 21,
@@ -814,10 +823,19 @@
         "role": "evidence-electricity-access",
         "editorial_review": true,
         "source": "KT76-02 §20",
-        "decision": "Изложение само по данните от уведомлението",
+        "decision": "Единна фактическа рамка за електроснабдяване и транспортен достъп, само доказани инженерни данни, без предположения или копиране на тестови факти. Запазен оригинален един w:r без bold/italic.",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "editorial_acceptance": "APPROVED_P20_EVIDENCE_ONLY_ELECTRICITY_ACCESS_AB",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md; user's explicit approval",
+        "accepted_word_runs": [
+          {
+            "role": "доказани данни за електроснабдяване и транспортен достъп",
+            "bold": false,
+            "italic": false
+          }
+        ]
       },
       {
         "paragraph": 21,
