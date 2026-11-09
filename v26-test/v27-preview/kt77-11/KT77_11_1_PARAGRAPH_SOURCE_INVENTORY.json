@@ -2,7 +2,7 @@
   "schema": "kt77-11-paragraph-inventory-v1",
   "checkpoint_sha": "f407b176b477afb699643b73ce82ddf2e83badb0",
   "work_branch": "work/KT77-11-two-stage-editor",
-  "status": "stage-11.5-paragraph11-approved-A-B-paragraph17-pending",
+  "status": "stage-11.5-p11-p17-approved-AB-p18-review-pending",
   "priority": [
     "latest explicit accepted decision",
     "locked OOXML specimen",
@@ -224,11 +224,30 @@
         "role": "administrative-intro",
         "editorial_review": true,
         "source": "KT48_PARAGRAPH_CONTRACT.md + КТ35-А + КТ24.3",
-        "decision": "Нормативен/административен увод по оригиналния КТ35-А; входящ номер/дата само по преписка или точен X формат",
+        "decision": "По-късната дословна формулировка за нормативния увод от КТ76-02 е обща за A и Б. Запазени 3 оригинални run стилови сегмента; само действителен Вх. №/дата или Х заместители.",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
         "needs_case_evidence": true,
-        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending",
+        "editorial_acceptance": "APPROVED_KT76_02_LATER_TEXT_COMMON_AB",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md — explicit user approval 2026-11-09",
+        "accepted_word_runs": [
+          {
+            "role": "основен увод",
+            "bold": false,
+            "italic": false
+          },
+          {
+            "role": "нормативна скоба (Наредбата за ОС, обн., ДВ...)",
+            "bold": false,
+            "italic": true
+          },
+          {
+            "role": ", Ви уведомявам следното:",
+            "bold": false,
+            "italic": false
+          }
+        ]
       },
       {
         "paragraph": 18,
@@ -724,10 +743,29 @@
         "role": "fixed",
         "editorial_review": true,
         "source": "KT76-02 §17",
-        "decision": "Нормативният увод се пази дословно, включително чл. 6а, т. 2 и реквизити",
+        "decision": "По-късната дословна формулировка за нормативния увод от КТ76-02 е обща за A и Б. Запазени 3 оригинални run стилови сегмента; само действителен Вх. №/дата или Х заместители.",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": false
+        "needs_case_evidence": true,
+        "editorial_acceptance": "APPROVED_KT76_02_LATER_TEXT_COMMON_AB",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md — explicit user approval 2026-11-09",
+        "accepted_word_runs": [
+          {
+            "role": "основен увод",
+            "bold": false,
+            "italic": false
+          },
+          {
+            "role": "нормативна скоба (Наредбата за ОС, обн., ДВ...)",
+            "bold": false,
+            "italic": true
+          },
+          {
+            "role": ", Ви уведомявам следното:",
+            "bold": false,
+            "italic": false
+          }
+        ]
       },
       {
         "paragraph": 18,
