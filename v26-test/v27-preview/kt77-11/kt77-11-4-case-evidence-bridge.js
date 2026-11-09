@@ -1,52 +1,55 @@
-/* KT77-11.4 — cautious source-fact bridge for BOTH classic A and B.
- * Reads ONLY browser-extracted original dossier text (not AI response).
- * Builds cadastral-identifier patches iff dossier and first Word literally agree.
- * All missing or unresolved facts are returned as blockers, never guessed.
+/* KT77-11.4 — evidence bridge, same rules for A 41 / B 43.
+ * Uses only original ZIP text preview (no AI text) and a confirmed parcel set.
+ * Never fabricates facts, allows legal conclusions, or silently copies specimen data.
  */
 (function(root){'use strict';
 const W='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const DOC='01_Proekt_na_stanovishte_Klasicheski.docx';
 const EXPECTED={A:41,B:43};
-const text=p=>Array.from(p.getElementsByTagNameNS(W,'t')).map(x=>x.textContent||'').join('');
-const paragraphs=d=>Array.from(d.getElementsByTagNameNS(W,'body')[0]?.childNodes||[]).filter(n=>n.nodeType===1&&n.namespaceURI===W&&n.localName==='p');
-const ids=t=>[...new Set(String(t||'').match(/\b\d{5}\.\d+\.\d+\b/g)||[])];
+const MATCH=root.KT7711SpanMatcher;
+const ps=d=>Array.from(d.getElementsByTagNameNS(W,'body')[0]?.childNodes||[]).filter(n=>n.nodeType===1&&n.namespaceURI===W&&n.localName==='p');
+const ts=p=>Array.from(p.getElementsByTagNameNS(W,'t')).map(t=>t.textContent||'');
+const text=p=>ts(p).join('');
 async function getVerifiedPlan({scenario,primaryBlob,parcelIds}={}){
+ if(!MATCH?.propose)throw Error('КТ77-11.4: липсва модулът за доказателствени текстови замени');
  const mode=String(scenario||'').replace('А','A').replace('Б','B').toUpperCase(),n=EXPECTED[mode];
  if(!n)throw Error('КТ77-11.4: непознат сценарий А/Б');
- if(!primaryBlob)throw Error('КТ77-11.4: липсва първичният ZIP');
- const entries=root.fflate.unzipSync(new Uint8Array(await primaryBlob.arrayBuffer()));
- const primaryFile=entries[DOC];if(!primaryFile)throw Error('КТ77-11.4: няма Classic Word в ZIP');
- const originalFile=mode==='A'?'KT35-A.docx':'KT39-B.docx';
- const r=await fetch(new URL('v27-preview/etalon/'+originalFile,document.baseURI),{cache:'no-store'});
- if(!r.ok)throw Error('КТ77-11.4: не е наличен оригиналният образец');
- const archive=root.fflate.unzipSync(new Uint8Array(await r.arrayBuffer()));
- const parsed=b=>new DOMParser().parseFromString(new TextDecoder().decode(b),'application/xml');
- const reference=paragraphs(parsed(archive['word/document.xml']));
- const primary=paragraphs(parsed(root.fflate.unzipSync(primaryFile)['word/document.xml']));
- if(reference.length!==n||primary.length!==n)throw Error('КТ77-11.4: неочакван брой абзаци в А или Б');
- const source=root.V26ArchiveTextPreview?.files||[];
- const evidence=source.filter(f=>f&&typeof f.path==='string'&&typeof f.text==='string'&&!f.error&&!f.truncated).map(f=>({source_file:f.path,text:f.text}));
- const patches=[],unresolved=[];
- const actualIds=new Set((Array.isArray(parcelIds)?parcelIds:[]).map(String).filter(Boolean));
- const allowed=[7,8,11,17,19,20,21,22,23,24];
- for(const index of allowed){
-  const old=text(reference[index-1]),newText=text(primary[index-1]);
-  if(old===newText)continue;
-  const oldIDs=ids(old),newIDs=ids(newText);
-  const newUnique=newIDs.filter(id=>actualIds.has(id)&&!oldIDs.includes(id));
-  const oldUnique=oldIDs.filter(id=>!newIDs.includes(id));
-  if(newUnique.length===1&&oldUnique.length===1){
-   const newId=newUnique[0],oldId=oldUnique[0];
-   const matched=evidence.filter(e=>e.text.includes(newId));
-   const quote=(matched.length===1?matched[0].text.split(/\r?\n/).find(line=>line.includes(newId))||'':'').trim().slice(0,800);
-   if(matched.length===1&&quote.includes(newId)){
-    patches.push({paragraph:index,kind:'parcel_id',template_literal:oldId,value:newId,source_file:matched[0].source_file,source_quote:quote});
-    continue;
-   }
-  }
-  unresolved.push({paragraph:index,issue:'Разлика между първичния Word и еталона без еднозначно доказана замяна',original:old.slice(0,120),primary:newText.slice(0,120)});
+ if(!primaryBlob||!root.fflate?.unzipSync)throw Error('КТ77-11.4: липсва първичният ZIP/библиотеката');
+ const archive=root.fflate.unzipSync(new Uint8Array(await primaryBlob.arrayBuffer()));
+ const doc=archive[DOC];if(!doc)throw Error('КТ77-11.4: липсва първичен Classic Word');
+ const filename=mode==='A'?'KT35-A.docx':'KT39-B.docx';
+ const response=await fetch(new URL('v27-preview/etalon/'+filename,document.baseURI),{cache:'no-store'});
+ if(!response.ok)throw Error('КТ77-11.4: недостъпен заключен еталон '+filename);
+ const original=root.fflate.unzipSync(new Uint8Array(await response.arrayBuffer()));
+ const parse=b=>new DOMParser().parseFromString(new TextDecoder().decode(b),'application/xml');
+ const a=ps(parse(original['word/document.xml']));
+ const b=ps(parse(root.fflate.unzipSync(doc)['word/document.xml']));
+ if(a.length!==n||b.length!==n)throw Error('КТ77-11.4: невалиден брой абзаци в '+mode);
+ const preview=root.V26ArchiveTextPreview;
+ const documents=Array.isArray(preview?.files)?preview.files:[];
+ const evidence=documents.filter(d=>d&&typeof d.path==='string'&&typeof d.text==='string'&&!d.error&&!d.truncated)
+  .map(d=>({source_file:d.path,text:d.text}));
+ const patches=[],unresolved=[],confirmed=Array.isArray(parcelIds)?parcelIds.map(String):[];
+ // Old-case identifiers should never be accepted as verified merely because
+ // they appear in the specimen; the registered parcel list comes from GIS.
+ const primaryIds=MATCH.ids(b.map(text).join(' '));
+ const unrelated=primaryIds.filter(id=>!confirmed.includes(id));
+ if(unrelated.length)unresolved.push({scope:'all',issue:'Първичният Word съдържа неподтвърдени имотни идентификатори',values:unrelated});
+ for(const index of [7,8,11,17,19,20,21,22,23,24]){
+  const old=text(a[index-1]),newText=text(b[index-1]);
+  const candidate=MATCH.propose({paragraph:index,original:old,primary:newText,runTexts:ts(a[index-1]),documents:evidence,confirmedParcelIds:confirmed});
+  if(candidate.ok&&!candidate.unchanged)patches.push(candidate.patch);
+  else if(!candidate.ok)unresolved.push({paragraph:index,reason:candidate.reason,original:old.slice(0,150),primary:newText.slice(0,150)});
  }
- return {scenario:mode,patches,evidence,unresolved,extraction:'BROWSER_ARCHIVE_TEXT_PREVIEW',verified:unresolved.length===0&&patches.length>0&&evidence.length>0};
+ // No changes in legal or protected fixed slots unless the exact old specimen
+ // is valid for current evidence; this is NOT yet a universal finding.
+ const differenceOutside=[...a.keys()].map(i=>i+1).filter(i=>![7,8,11,17,19,20,21,22,23,24].includes(i)&&text(a[i-1])!==text(b[i-1]));
+ if(differenceOutside.length)unresolved.push({scope:'other',issue:'Променени юридически или фиксирани позиции без разрешен редакционен договор',paragraphs:differenceOutside});
+ return {
+  scenario:mode,patches,evidence,unresolved,extraction:'BROWSER_ARCHIVE_TEXT_PREVIEW',
+  verified:!unresolved.length&&patches.length>0&&evidence.length>0,
+  primaryParagraphCount:n,checkedParagraphs:n
+ };
 }
 root.KT7711CaseEvidenceBridge=Object.freeze({getVerifiedPlan});
 })(window);
