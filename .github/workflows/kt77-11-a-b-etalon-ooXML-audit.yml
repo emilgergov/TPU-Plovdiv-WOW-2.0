@@ -42,6 +42,10 @@ jobs:
           assert "kt77-11/kt77-11-4-evidence-span-matcher.js" in html
           print("PASS: isolated A/B ZIP interception before ZT and explicit evidence gate")
           PY
+      - name: Exercise real A and B binary DOCX with browser editor (isolated Node)
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts fflate@0.8.2 @xmldom/xmldom@0.9.8
+          node v26-test/v27-preview/kt77-11/test_browser_secondary_editor.cjs
       - name: Upload read-only audit report
         uses: actions/upload-artifact@v4
         with:
