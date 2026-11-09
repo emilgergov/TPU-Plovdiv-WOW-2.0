@@ -26,9 +26,12 @@ Status: user-approved editorial rules. This record does not modify binary DOCX e
 - Classic A paragraph 31: APPROVED AND LOCKED. Preserve the original fifth impact-direction paragraph from user-supplied KT35-A: „Въздействие на предложените дейности причинени поотделно или във взаимодействие с други инвестиционни предложения/планове, програми, проекти (ИП/ППП).“ Assess individual and possible cumulative effects using verified case-specific data. Preserve its independent list item and DOCX styling.
 - Classic B paragraph 32: APPROVED AND LOCKED. Preserve KT76-03 generator-register wording „нарушаване на кохерентността между съседни защитени зони;“. Assess potential impairment of ecological connectivity and coherence among zones, including off-site pathways where evidence substantiates them, preserving the original separate list paragraph and Word formatting. Verbatim KT39-B exemplar not separately checked.
 
+- Classic A paragraph 32: APPROVED AND LOCKED. Preserve the KT35-A original administrative structure and the case-specific subject, identifiers, and administrative location for the procedural conclusion under Article 2(2) of the Natura 2000 compatibility assessment regulation. The finding that no Chapter Two procedure is necessary must follow a substantiated, dossier-specific competent-authority assessment; never copy the specimen decision into an unverified case. Preserve exact Word paragraph formatting.
+- Classic B paragraph 33: APPROVED AND LOCKED. Preserve the KT76-03 fifth impact direction on individual and cumulative effects in interaction with other investment proposals, plans, programmes and projects, assessing all GIS-confirmed intersected protected zones as relevant to the verified case facts. Retain separate list item and original Word formatting. The verbatim text of KT39-B has not been independently confirmed.
+
 ## Next paragraphs to review — NOT YET APPROVED
-- Classic A paragraph 32: procedural conclusion starting „В тази връзка и на основание чл. 2, ал. 2 от Наредбата за ОС Ви уведомявам...“ — original uploaded KT35-A; the procedural outcome must be dossier-verified.
-- Classic B paragraph 33: fifth impact direction „въздействия, произтичащи от предвидените дейности, самостоятелно или във взаимодействие с други инвестиционни предложения, планове, програми и проекти.“ — KT76-03 register; verify against KT39-B before calling verbatim original.
+- Classic A paragraph 33: specimen caution on the declared parameters, other permitting requirements, and inability to modify a general spatial plan, from the user-uploaded KT35-A.
+- Classic B paragraph 34: procedural conclusion under Article 2(2) of the Natura 2000 compatibility assessment regulation, from the KT76-03 generator register; not yet confirmed verbatim against KT39-B.
 
 ## Protection / status
 No edits to KT35-A.docx, KT39-B.docx, or any deployed generator. This is a decision register only. Await paragraph-specific approval before further edits.
