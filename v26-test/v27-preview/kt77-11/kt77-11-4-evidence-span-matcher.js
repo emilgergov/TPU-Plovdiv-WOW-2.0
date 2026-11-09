@@ -93,9 +93,8 @@ function proposeMany(opts){
   let reconstructed=original;
   for(let i=0;i<oldIds.length;i++){
    if(oldIds[i]===newIds[i])continue;
-   // Reject a "parcel-only" edit if it also changes legal or administrative text.
-   if(LEGAL.test(old)||LEGAL.test(value))return {ok:false,reason:'legal-or-unknown'};
    const old=oldIds[i],value=newIds[i];
+   if(LEGAL.test(old)||LEGAL.test(value))return {ok:false,reason:'legal-or-unknown'};
    const runs=(runTexts||[]).filter(t=>typeof t==='string'&&t.split(old).length===2);
    if(runs.length!==1)return {ok:false,reason:'multi-parcel-run-ambiguous'};
    const sources=(documents||[]).filter(e=>e&&typeof e.source_file==='string'&&typeof e.text==='string'&&!e.error&&!e.truncated&&e.text.includes(value));
