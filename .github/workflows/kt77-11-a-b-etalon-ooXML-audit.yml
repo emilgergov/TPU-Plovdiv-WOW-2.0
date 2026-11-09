@@ -40,6 +40,7 @@ jobs:
           assert "kt77-11/kt77-11-4-browser-secondary-editor.js" in html
           assert "kt77-11/kt77-11-4-case-evidence-bridge.js" in html
           assert "kt77-11/kt77-11-4-evidence-span-matcher.js" in html
+          assert "абзац №" in html and "console.warn('КТ77-11.4: доказателствен контрол" in html
           print("PASS: isolated A/B ZIP interception before ZT and explicit evidence gate")
           PY
       - name: Exercise real A and B binary DOCX with browser editor (isolated Node)
