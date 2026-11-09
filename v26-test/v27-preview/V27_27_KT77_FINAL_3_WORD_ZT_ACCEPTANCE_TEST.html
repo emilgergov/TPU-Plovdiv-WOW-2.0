@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>КТ77 — Финален тест · Classic A / Classic Б / Expert Word · ЗТ</title>
+<style>
+:root{font:16px/1.5 Verdana,Arial,sans-serif;color:#173d31;background:#f5f8f5}*{box-sizing:border-box}
+body{max-width:930px;margin:25px auto;padding:16px}h1{font-size:23px}h2{font-size:18px}
+section{background:white;border:1px solid #cbd9d0;border-radius:12px;padding:20px;margin:15px 0}
+p{margin:8px 0 14px}label{display:block;font-weight:bold;margin:14px 0 5px}
+input[type="file"],input[type="text"],select{display:block;width:100%;padding:12px;border:1px solid #9cb5a9;border-radius:8px;background:#fff;font:inherit}
+button{background:#116045;color:white;border:0;border-radius:9px;padding:14px 24px;font-weight:bold;font-size:17px;cursor:pointer}button:disabled{opacity:.5;cursor:wait}
+pre{white-space:pre-wrap;word-break:break-word;border:1px solid #d4e3d8;background:#f4f8f5;border-radius:8px;padding:14px;font-size:13px}
+.notice{border-left:5px solid #116045;padding:12px;background:#edf6f1}
+a{color:#116045;font-weight:bold}
+</style></head><body>
+<h1>КТ77 — ФИНАЛНА ПРИЕМКА НА ЗТ В WORD · СЦЕНАРИИ A И Б</h1>
+<p class="notice"><strong>Трите Word еталона остават непокътнати.</strong> Този изолиран тест обработва копие на вече генериран ZIP от реална преписка. Не извиква AI автор, не преработва PDF1/PDF2, не променя процедурната логика.</p>
+<section>
+<h2>Вход: предишен работен ZIP от преписка А или Б</h2>
+<label for="source">Избери съществуващ ZIP пакет</label>
+<input id="source" type="file" accept=".zip,application/zip">
+<label for="case">Контролен случай</label>
+<select id="case"><option value="a">А — складове и офиси, три имота в Пловдив</option><option value="b">Б — обслужващ обект, ПИ 36676.129.457</option><option value="zt">ЗЗ + ЗТ — ПИ 46989.205.218 (само ако имаш реална преписка)</option><option value="custom">Друга преписка — въведи имотите</option></select>
+<label for="ids">Потвърдени кадастрални идентификатори от избраната преписка</label>
+<input id="ids" type="text" value="56784.13.102, 56784.13.105, 56784.13.106" spellcheck="false">
+<p>При тест с реална преписка проверяваме идентификаторите срещу текста на Word документите. Несъвпадение блокира обработката.</p>
+<button id="go">Добави констативните ЗТ абзаци и провери ZIP</button>
+</section>
+<section><h2>Резултат от автоматичния контрол</h2>
+<pre id="status" role="status">Избери ZIP от вече преминалата преписка А и натисни бутона.</pre>
+<div id="download"></div></section>
+<p><a href="V27_27_KT77_06_1_ZT_WORD_CONSTATATION_PREVIEW.html">Основен тест с ZIP преписка и AI автор</a></p>
+<script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
+<script src="kt77-pi-master-readonly-index.js?v=kt77062"></script>
+<script src="kt77-r11-zzt-supplement.js?v=kt77062"></script>
+<script src="kt77-06-1-zt-word-constatation.js?v=kt77062"></script>
+<script>
+'use strict';
+const ids=document.getElementById('ids'),selection=document.getElementById('case'),status=document.getElementById('status'),download=document.getElementById('download'),source=document.getElementById('source'),go=document.getElementById('go');
+const cases={a:'56784.13.102, 56784.13.105, 56784.13.106',b:'36676.129.457',zt:'46989.205.218',custom:''};
+selection.addEventListener('change',()=>ids.value=cases[selection.value]);
+const NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+const target=['01_Proekt_na_stanovishte_Klasicheski.docx','02_Proekt_na_stanovishte_Eksperten.docx'];
+const textOf=(bytes)=>{const z=fflate.unzipSync(bytes),raw=z['word/document.xml'];if(!raw)throw Error('Непълен Word пакет: липсва document.xml');const xml=new DOMParser().parseFromString(new TextDecoder().decode(raw),'application/xml');return Array.from(xml.getElementsByTagNameNS(NS,'t')).map(n=>n.textContent).join('')};
+const allParagraphs=bytes=>{
+ const contents=fflate.unzipSync(bytes),raw=contents['word/document.xml'];
+ if(!raw)throw Error('Няма document.xml');
+ const xml=new DOMParser().parseFromString(new TextDecoder().decode(raw),'application/xml');
+ if(xml.getElementsByTagName('parsererror').length)throw Error('Невалиден DOCX XML');
+ const body=xml.getElementsByTagNameNS(NS,'body')[0];
+ const ps=Array.from(body.children).filter(x=>x.localName==='p');
+ const runs=p=>Array.from(p.getElementsByTagNameNS(NS,'r'));
+ const value=p=>Array.from(p.getElementsByTagNameNS(NS,'t')).map(t=>t.textContent).join('');
+ const boldText=p=>runs(p).filter(r=>r.getElementsByTagNameNS(NS,'b').length>0).map(r=>Array.from(r.getElementsByTagNameNS(NS,'t')).map(t=>t.textContent).join('')).join('');
+ return {contents,ps,texts:ps.map(value),bold:ps.map(boldText)};
+};
+const sameBytes=(a,b)=>a&&b&&a.length===b.length&&a.every((x,i)=>x===b[i]);
+function deepDocxQA(original,modified,parcelIds,isExpert){
+ const before=allParagraphs(original),after=allParagraphs(modified);
+ if(after.texts.length!==before.texts.length+1)throw Error('Неправилен брой абзаци');
+ const zt=after.texts.map((s,i)=>s.includes('Закона за защитените територии (ЗЗТ)')?i:-1).filter(i=>i>=0);
+ const oldZT=before.texts.filter(s=>s.includes('Закона за защитените територии (ЗЗТ)'));
+ if(oldZT.length)throw Error('Входният Word вече съдържа ЗТ абзац; повторното добавяне е блокирано');
+ if(zt.length!==1)throw Error('Не е намерен точно един ЗТ абзац');
+ const index=zt[0];
+ const anchored=before.texts.map((s,i)=>/BG\\d{7}|защитен(?:а|и|ите)\\s+зон/i.test(s)&&/заповед/i.test(s)?i:-1).filter(i=>i>=12);
+ if(!anchored.length||index!==anchored[0]+1)throw Error('ЗТ абзацът не е непосредствено след заповедта за ЗЗ');
+ const restored=after.texts.slice(0,index).concat(after.texts.slice(index+1));
+ if(restored.some((text,i)=>text!==before.texts[i]))throw Error('Променен е стар абзац');
+ for(const [name,bytes] of Object.entries(before.contents)){
+  if(name!=='word/document.xml'&&!sameBytes(bytes,after.contents[name]))throw Error('Променен ресурс: '+name);
+ }
+ const paragraph=after.texts[index],bold=after.bold[index];
+ for(const id of parcelIds){
+  if(!paragraph.includes(id))throw Error('Липсва ПИ '+id+' в ЗТ констатацията');
+  if(!bold.includes(id))throw Error('Идентификаторът '+id+' не е удебелен според одобрената приемка');
+ }
+ if(!paragraph.startsWith(isExpert?'При извършения пространствен анализ ':'При извършената пространствена проверка '))throw Error('Грешна формулировка за Classic/Expert');
+ if(/попада(?:т)? в границите на/i.test(paragraph)&&!/обявена със/.test(paragraph))throw Error('Пресичане със ЗТ без проверена заповед');
+ return {paragraph:index+1,total:after.texts.length,text:paragraph,bold};
+}
+
+go.addEventListener('click',async()=>{
+go.disabled=true;download.replaceChildren();status.textContent='Проверявам документите, имотите и ПИ MASTER…';
+try{
+if(!source.files?.length)throw Error('Избери вече генерирания ZIP на преписката. Този тест няма да създава примерни Word документи.');
+const parcelIds=[...new Set((ids.value.match(/\d{5}\.\d+\.\d+/g)||[]))];
+if(!parcelIds.length)throw Error('Липсват потвърдени идентификатори.');
+if(!window.fflate?.unzipSync||!window.KT7706ZTConstatation?.fix)throw Error('Неуспешно зареждане на тестовия модул/ZIP библиотеката.');
+const buf=new Uint8Array(await source.files[0].arrayBuffer());
+const archive=fflate.unzipSync(buf);
+const names=Object.keys(archive);
+if(!target.every(n=>archive[n]))throw Error('Трябва ZIP с Classic и Expert Word от една преписка.');
+const prior={};
+for(const name of target)prior[name]=textOf(archive[name]);
+for(const id of parcelIds)if(!prior[target[0]].includes(id)||!prior[target[1]].includes(id))throw Error('Имот '+id+' не присъства и в двата Word файла. Провери дали ZIP принадлежи на избраната преписка.');
+if(selection.value==='a'&&!parcelIds.includes('56784.13.102'))throw Error('Избран е случай А, но идентификаторите не съвпадат.');
+if(selection.value==='b'&&!parcelIds.includes('36676.129.457'))throw Error('Избран е случай Б, но идентификаторите не съвпадат.');
+const report=await window.KT7706ZTConstatation.fix(new Blob([buf],{type:'application/zip'}),{parcelIds});
+const outer=fflate.unzipSync(new Uint8Array(await report.blob.arrayBuffer()));
+const validation=[];
+for(const name of target)validation.push({name,...deepDocxQA(archive[name],outer[name],parcelIds,name===target[1])});
+for(const [name,data] of Object.entries(archive))if(!target.includes(name)&&!sameBytes(data,outer[name]))throw Error('Променен файл извън двата Word: '+name);
+const link=document.createElement('a');link.href=URL.createObjectURL(report.blob);link.download='KT77_06_2_ZT_KONSTATIVNO_'+source.files[0].name.replace(/\.zip$/i,'')+'.zip';link.textContent='Изтегли проверения ZIP с новите ЗТ абзаци';download.appendChild(link);
+status.textContent='PASS — добавен е точно един констативен ЗТ абзац във всеки Word.\n'+report.edits.map(x=>x.file+' | абзац №'+x.paragraph+' | '+x.oldCount+' → '+x.newCount).join('\n')+'\n\nВсички предишни Word абзаци: непроменени.\nВсички останали ZIP файлове и DOCX ресурси: непроменени.\nТова е автоматичен контрол на реален ZIP, а не потвърждение на визуално оформление. Изтегли ZIP и го изпрати за преглед.';
+}catch(e){status.textContent='ТЕСТЪТ НЕ Е ПРЕМИНАЛ: '+String(e.message||e)+'\nНищо в избрания оригинален ZIP не е изменено.';console.error(e)}
+finally{go.disabled=false}
+});
+</script></body></html>
