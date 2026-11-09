@@ -35,9 +35,12 @@ Status: user-approved editorial rules. This record does not modify binary DOCX e
 - Classic A paragraph 34: APPROVED AND LOCKED. Preserve original KT35-A wording that on changes to the parameters of the investment proposal or the circumstances under which the letter was issued, the proponent must promptly inform RIOSV–Plovdiv. Maintain established DOCX formatting and refrain from inventing changes or modifying the institutional recipient.
 - Classic B paragraph 35: APPROVED AND LOCKED. Apply the same rule approved for Classic A paragraph 33: the letter concerns only the proposal parameters stated, does not substitute for permits or coordination under other laws, and cannot serve as an amendment of the General Spatial Plan. Preserve the wording/structure of the KT76-03 register and Word formatting. Original KT39-B wording still requires independent verbatim verification.
 
-## Next paragraphs to review — NOT YET APPROVED
-- Classic A paragraph 35 onward: verify remaining structure and paragraph numbering directly against the user-provided KT35-A DOCX before presenting further substantive paragraphs; paragraph 34 is the final substantive paragraph in its available extracted text, followed by the signature/footer.
-- Classic B paragraph 36: KT76-03 generator register: „При промяна в параметрите на инвестиционното предложение или в обстоятелствата, при които е изготвено настоящото писмо, възложителят е длъжен незабавно да уведоми РИОСВ – Пловдив за настъпилите промени.“ Still needs verification against original KT39-B binary.
+- Classic B paragraph 36: APPROVED AND LOCKED (user confirmation 09.11.2026). Preserve the KT76-03 register provision requiring the proponent to notify RIOSV–Plovdiv immediately when the investment proposal parameters or circumstances of the issued letter change. Apply the rule previously accepted for Classic A paragraph 34; retain established DOCX presentation. The verbatim KT39-B exemplar paragraph still requires source comparison.
+- Classic A: SUBSTANTIVE PARAGRAPH ACCEPTANCE CLOSED by explicit user approval (09.11.2026). This means all reviewed substantive A paragraph rules are accepted; this does NOT yet constitute a passed final DOCX rendering, generation-regression, or release test. Preserve signatures, header, footer, confidentiality and institutional metadata; verify against original uploaded KT35-A before claiming complete technical acceptance.
+
+## Final verification — PENDING
+- Compare uploaded KT35-A and repository KT39-B actual DOCX paragraphs against the accepted decision register. Check body numbering, original styling, headers, footers, signatures, institutional contact details and absence of unwanted changes; separately verify B36 verbatim text.
+- Run sample A/B generated DOCX regression only if corresponding current generated ZIPs are available. Until this happens, do not claim production deployment or end-to-end PASS.
 
 ## Protection / status
 No edits to KT35-A.docx, KT39-B.docx, or any deployed generator. This is a decision register only. Await paragraph-specific approval before further edits.
