@@ -71,6 +71,35 @@ function propose({paragraph,original,primary,runTexts,documents,confirmedParcelI
  if(zones(d.old).length||zones(d.value).length)return {ok:false,reason:'zone-update-requires-independent-gis-gate'};
  return {ok:true,unchanged:false,patch:{paragraph,kind,template_literal:d.old,value:d.value,source_file:doc.source_file,source_quote:quote.trim()}};
 }
-root.KT7711SpanMatcher=Object.freeze({difference,propose,ids,zones,factKind});
+
+function proposeMany(opts){
+ const {paragraph,original,primary,runTexts,documents,confirmedParcelIds}=opts||{};
+ if(original===primary)return {ok:true,unchanged:true,patches:[]};
+ const oldIds=ids(original),newIds=ids(primary);
+ if(oldIds.length>1&&oldIds.length===newIds.length&&oldIds.length<=20){
+  const patches=[],confirmed=new Set((confirmedParcelIds||[]).map(String));
+  if(newIds.some(x=>!confirmed.has(x)))return {ok:false,reason:'multi-parcel-not-confirmed'};
+  if(zones(original).join('|')!==zones(primary).join('|'))return {ok:false,reason:'zone-change-not-authorized'};
+  let reconstructed=original;
+  for(let i=0;i<oldIds.length;i++){
+   if(oldIds[i]===newIds[i])continue;
+   const old=oldIds[i],value=newIds[i];
+   const runs=(runTexts||[]).filter(t=>typeof t==='string'&&t.split(old).length===2);
+   if(runs.length!==1)return {ok:false,reason:'multi-parcel-run-ambiguous'};
+   const sources=(documents||[]).filter(e=>e&&typeof e.source_file==='string'&&typeof e.text==='string'&&!e.error&&!e.truncated&&e.text.includes(value));
+   if(new Set(sources.map(e=>e.source_file)).size!==1)return {ok:false,reason:'multi-parcel-source-ambiguous'};
+   const doc=sources[0],quote=doc.text.split(/\r?\n/).find(line=>line.includes(value))||'';
+   if(!quote.trim()||quote.length>1200)return {ok:false,reason:'multi-parcel-quote-unusable'};
+   patches.push({paragraph,kind:'parcel_id',template_literal:old,value,source_file:doc.source_file,source_quote:quote.trim()});
+   if(reconstructed.split(old).length!==2)return {ok:false,reason:'multi-parcel-template-nonunique'};
+   reconstructed=reconstructed.replace(old,value);
+  }
+  if(patches.length&&reconstructed===primary&&SLOTS.has(paragraph))
+   return {ok:true,unchanged:false,patches};
+ }
+ const single=propose(opts);
+ return single.ok?{...single,patches:single.unchanged?[]:[single.patch]}:single;
+}
+root.KT7711SpanMatcher=Object.freeze({difference,propose,proposeMany,ids,zones,factKind});
 if(typeof module!=='undefined'&&module.exports)module.exports=root.KT7711SpanMatcher;
 })(typeof window!=='undefined'?window:globalThis);
