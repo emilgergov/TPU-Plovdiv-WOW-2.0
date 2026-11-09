@@ -65,6 +65,10 @@ async function transform(blob,{scenario,patches,evidence}={}){
  if(primaryIds.size!==outputIds.size||[...primaryIds].some(id=>!outputIds.has(id)))
   error('идентификаторите в вторичния Word не съвпадат с първичния; възможно пренасяне на еталонен имот');
 
+ const zones=t=>new Set((String(t||'').match(/BG\\d{7}/g)||[]));
+ const primaryZones=zones(pps.map(content).join(' ')),outputZones=zones(changed.map(content).join(' '));
+ if(primaryZones.size!==outputZones.size||[...primaryZones].some(id=>!outputZones.has(id)))
+  error('кодът на защитена зона в вторичния Word не съвпада с първичния; възможно пренасяне на тестова зона');
  const serializer=new XMLSerializer();
  for(let i=0;i<spec.n;i++)if(!modified.has(i+1)&&serializer.serializeToString(baseline[i])!==serializer.serializeToString(changed[i]))error('променен заключен абзац '+(i+1));
  for(const c of changes){if(!content(changed[c.paragraph-1]).includes(c.after)||content(changed[c.paragraph-1]).includes(c.before))error('неуспешна конкретна подмяна');}
