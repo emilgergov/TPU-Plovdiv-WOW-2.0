@@ -11,9 +11,12 @@ Status: user-approved editorial rules. This record does not modify binary DOCX e
 - Classic A paragraph 26: APPROVED AND LOCKED. Keep the KT35-A original introductory impact assessment structure, referring to the nearest Natura 2000 protected zone determined from verified GIS data (not a hard-coded example BG0000578). A conclusion that negative impacts are unlikely is case-specific and must be supported by the documented investment proposal and evidence; otherwise it must not be automatically asserted. Preserve Word formatting and the following impact-list structure.
 - Classic B paragraph 27: APPROVED AND LOCKED. Apply the same rule as Classic A paragraph 25: maintain the original ZOOS applicability phrasing and established Word formatting, with a fact-specific check of the investment proposal against Annexes 1 and 2 of ZOOS before any procedural determination. The KT76-03 register is a working source, not a verbatim verified KT39-B binary extract.
 
+- Classic A paragraph 27: APPROVED AND LOCKED. Preserve the original KT35-A first impact-direction paragraph on direct or indirect destruction, damage or fragmentation of natural habitats and species habitats, including protected bird species; the relevant habitats/species and zone are case-specific, substantiated by the available dossier and official source data. Keep the original five-direction list, bullet format, paragraph order, and Word styling.
+- Classic B paragraph 28: APPROVED AND LOCKED. Preserve the opening impact-assessment paragraph structure in the KT76-03 working register, referring to ALL Natura 2000 zones actually intersected according to verified GIS data. Never copy the example BG0000194 as a case fact. A finding of no likelihood of adverse impact requires case-specific substantiation. Preserve Word format and continuation into five separate impact directions; verbatim fidelity to KT39-B remains to be checked.
+
 ## Next paragraphs to review — NOT YET APPROVED
-- Classic A paragraph 27: first impact direction (direct/indirect destruction, damage or fragmentation of protected habitats and species habitats), from the user-supplied KT35-A original.
-- Classic B paragraph 28: opening assessment of likelihood of negative impact, per KT76-03 register; verify verbatim against KT39-B before describing as original.
+- Classic A paragraph 28: second impact direction (habitat transformation, disturbance or displacement of protected species), according to the user-uploaded KT35-A original.
+- Classic B paragraph 29: first impact direction (direct/indirect destruction, damage or fragmentation), according to the KT76-03 generator register; do not label a verbatim KT39-B original until DOCX verification.
 
 ## Protection / status
 No edits to KT35-A.docx, KT39-B.docx, or any deployed generator. This is a decision register only. Await paragraph-specific approval before further edits.
