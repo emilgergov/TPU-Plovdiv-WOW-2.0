@@ -65,7 +65,7 @@ async function test(mode){
  const quote='Имотът с идентификатор '+val+' се намира в преписката.';
  const patch={paragraph:target.i,kind:'parcel_id',template_literal:target.old,value:val,
   source_file:'source.txt',source_quote:quote};
- const allConfirmed=[...new Set(ps.map(ptxt).join(' ').match(/\\b\\d{5}\\.\\d+\\.\\d+\\b/g)||[])];
+ const allConfirmed=[...new Set(ps.map(ptxt).join(' ').match(/\b\d{5}\.\d+\.\d+\b/g)||[])];
  global.V26ArchiveTextPreview={files:[{path:'source.txt',text:quote}]};
  const verifiedPlan=await global.KT7711CaseEvidenceBridge.getVerifiedPlan({
   scenario:mode,primaryBlob:new Blob([primaryZip]),parcelIds:allConfirmed
