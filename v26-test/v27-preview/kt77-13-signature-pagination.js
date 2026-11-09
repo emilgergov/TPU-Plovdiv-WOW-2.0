@@ -11,7 +11,7 @@ function add(xml,parent,name){const n=xml.createElementNS(NS,'w:'+name);parent.a
 function formatting(p,xml){let pr=direct(p,'pPr')[0];if(!pr){pr=xml.createElementNS(NS,'w:pPr');p.insertBefore(pr,p.firstChild);}return pr;}
 function compactBlank(p,xml){
  const pr=formatting(p,xml);
- let spacing=direct(pr,'spacing')[0];if(!spacing)spacing=add(xml,pr,'spacing');
+ let spacing=direct(pr,'spacing')[0];if(!spacing){spacing=xml.createElementNS(NS,'w:spacing');const anchor=Array.from(pr.children).find(n=>['ind','contextualSpacing','mirrorIndents','suppressOverlap','jc','textDirection','textAlignment','rPr'].includes(n.localName));if(anchor)pr.insertBefore(spacing,anchor);else pr.appendChild(spacing);}
  spacing.setAttributeNS(NS,'w:before','0');
  spacing.setAttributeNS(NS,'w:after','0');
  spacing.setAttributeNS(NS,'w:line','40');
