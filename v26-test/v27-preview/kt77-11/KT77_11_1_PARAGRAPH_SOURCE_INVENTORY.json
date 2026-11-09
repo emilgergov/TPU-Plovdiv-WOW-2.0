@@ -2,7 +2,7 @@
   "schema": "kt77-11-paragraph-inventory-v1",
   "checkpoint_sha": "f407b176b477afb699643b73ce82ddf2e83badb0",
   "work_branch": "work/KT77-11-two-stage-editor",
-  "status": "stage-11.5-p11-p17-approved-AB-p18-review-pending",
+  "status": "stage-11.5-p11-p17-p18-approved-AB-p19-pending",
   "priority": [
     "latest explicit accepted decision",
     "locked OOXML specimen",
@@ -252,12 +252,14 @@
       {
         "paragraph": 18,
         "role": "baseline-locked-until-reviewed",
-        "editorial_review": false,
+        "editorial_review": true,
         "source": "KT35-A.docx + КТ24.3 К01–К13 + KT66 broad exception set",
-        "decision": "Без автоматично разрешение за редакция: одобрената позиция трябва да се докаже от еталона/историята на въпроси и отговори.",
+        "decision": "Променя се единствено 'чл. 10, ал. 1. от' -> 'чл. 10, ал. 1 от'; всички останали думи и OOXML стилове остават непроменени, incl. bold на 'чл. 2, ал. 2'.",
         "candidate_variable": false,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": false
+        "needs_case_evidence": true,
+        "editorial_acceptance": "APPROVED_P18_SINGLE_PUNCTUATION_FIX_AB",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md; explicit user approval"
       },
       {
         "paragraph": 19,
@@ -772,10 +774,12 @@
         "role": "fixed-conditional",
         "editorial_review": true,
         "source": "KT76-02 §18",
-        "decision": "Одобрена единствено пунктуация 'чл. 10, ал. 1 от'; без други промени",
+        "decision": "Променя се единствено 'чл. 10, ал. 1. от' -> 'чл. 10, ал. 1 от'; всички останали думи и OOXML стилове остават непроменени, incl. bold на 'чл. 2, ал. 2'.",
         "candidate_variable": false,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": false
+        "needs_case_evidence": true,
+        "editorial_acceptance": "APPROVED_P18_SINGLE_PUNCTUATION_FIX_AB",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md; explicit user approval"
       },
       {
         "paragraph": 19,
