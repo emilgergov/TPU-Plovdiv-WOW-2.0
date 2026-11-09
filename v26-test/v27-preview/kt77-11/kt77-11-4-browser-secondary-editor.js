@@ -35,7 +35,7 @@ async function transform(blob,{scenario,patches,evidence}={}){
  const report={scenario:mode,baseline:spec.name,paragraphs:spec.n,primaryDifferences:differences,edits:[],status:'BLOCKED',readOnly:false};
  if(!Array.isArray(patches)||!patches.length)error('няма потвърдени доказателствени полета; не генерирам примерен Word');
  if(!Array.isArray(evidence)||!evidence.length)error('липсват първични документални доказателства');
- const seen=new Set(),changes=[];
+ const seen=new Set(),changes=[],pendingByRun=new Map();
  for(const patch of patches){
   if(!Number.isInteger(patch?.paragraph)||!ALLOWED.has(patch.paragraph))error('неразрешен абзац за редакция');
   if(!KINDS.has(patch.kind))error('забранен вид промяна '+patch.kind);
@@ -48,9 +48,13 @@ async function transform(blob,{scenario,patches,evidence}={}){
   if(matching.length!==1)error('цитатът не е потвърден еднозначно в първичния архив: '+source);
   const candidates=nodes(rps[index-1],'t').filter(t=>(t.textContent||'').includes(old));
   if(candidates.length!==1||(candidates[0].textContent||'').split(old).length!==2)error('оригиналната стойност не е един текстов Word сегмент');
-  changes.push({node:candidates[0],before:candidates[0].textContent,after:candidates[0].textContent.replace(old,value),paragraph:index,kind:patch.kind,source_file:source});
+  const target=candidates[0],current=pendingByRun.has(target)?pendingByRun.get(target):target.textContent;
+  if(current.split(old).length!==2)error('нееднозначна повторна замяна на Word run');
+  pendingByRun.set(target,current.replace(old,value));
+  changes.push({node:target,oldLiteral:old,newValue:value,paragraph:index,kind:patch.kind,source_file:source});
  }
- for(const change of changes){change.node.textContent=change.after;report.edits.push({paragraph:change.paragraph,kind:change.kind,source_file:change.source_file});}
+ for(const [node,newText] of pendingByRun)node.textContent=newText;
+ for(const change of changes)report.edits.push({paragraph:change.paragraph,kind:change.kind,source_file:change.source_file});
  // Recheck untouched OOXML paragraphs and all original package resources.
  const resultXml=new XMLSerializer().serializeToString(refDoc),recheck=parse(encode(resultXml)),changed=words(recheck);
  const originalXml=parse(original['word/document.xml']),baseline=words(originalXml),modified=new Set(changes.map(c=>c.paragraph));
@@ -71,7 +75,7 @@ async function transform(blob,{scenario,patches,evidence}={}){
   error('кодът на защитена зона в вторичния Word не съвпада с първичния; възможно пренасяне на тестова зона');
  const serializer=new XMLSerializer();
  for(let i=0;i<spec.n;i++)if(!modified.has(i+1)&&serializer.serializeToString(baseline[i])!==serializer.serializeToString(changed[i]))error('променен заключен абзац '+(i+1));
- for(const c of changes){if(!content(changed[c.paragraph-1]).includes(c.after)||content(changed[c.paragraph-1]).includes(c.before))error('неуспешна конкретна подмяна');}
+ for(const c of changes){if(!content(changed[c.paragraph-1]).includes(c.newValue)||content(changed[c.paragraph-1]).includes(c.oldLiteral))error('неуспешна конкретна подмяна');}
  const secondary={...original,'word/document.xml':encode(resultXml)};
  const outgoing={...raw,[DOC]:root.fflate.zipSync(secondary,{level:6})};
  for(const [filename,bytes] of Object.entries(raw))if(filename!==DOC){
