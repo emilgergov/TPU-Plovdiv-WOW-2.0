@@ -2,7 +2,7 @@
   "schema": "kt77-11-paragraph-inventory-v1",
   "checkpoint_sha": "f407b176b477afb699643b73ce82ddf2e83badb0",
   "work_branch": "work/KT77-11-two-stage-editor",
-  "status": "stage-11.5-corrected-A23-B24-GIS-p23B-mandatory-no-generator-changes",
+  "status": "stage-11.5-A23-B24-PDF1-approved-B23-mandatory-A24-B25-pending",
   "priority": [
     "latest explicit accepted decision",
     "locked OOXML specimen",
@@ -346,7 +346,7 @@
         "role": "gis-outside",
         "editorial_review": true,
         "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
-        "decision": "Извън ЗЗ: действителен ГИС анализ; няма автоматичен извод за липса на въздействие",
+        "decision": "ГИС извън: PDF1 за всички ПИ; bold само „не попада/не попадат“; непотвърдено/пресичане блокира А заключение.",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
         "needs_case_evidence": true,
@@ -356,7 +356,9 @@
           "function": "GIS spatial relation",
           "original_bold": "не попадат",
           "proof": "GIS/PDF1"
-        }
+        },
+        "editorial_acceptance": "APPROVED_GIS_A23_PDF1_OUTSIDE_BOLD_RELATION",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md — user's explicit agreement after A23 ↔ B24 review"
       },
       {
         "paragraph": 24,
@@ -904,7 +906,7 @@
         "role": "evidence-land-use",
         "editorial_review": true,
         "source": "KT76-02 §23",
-        "decision": "Задължителен абзац непосредствено след №22; целият текст bold",
+        "decision": "Самостоятелен задължителен Б №23 след №22, целият bold; конкретната отрицателна констатация за НТП само при доказателства.",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
         "needs_case_evidence": true,
@@ -916,14 +918,16 @@
           "mandatory_structure": true,
           "source": "KT76-02 editorial approval + exact KT39-B OOXML",
           "case_evidence_required": true
-        }
+        },
+        "editorial_acceptance": "MANDATORY_B23_BOLD_LAND_USE_ALREADY_LOCKED",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md — user's explicit agreement after A23 ↔ B24 review"
       },
       {
         "paragraph": 24,
         "role": "gis-condition",
         "editorial_review": true,
         "source": "KT76-02 §24",
-        "decision": "Точно GIS изцяло/частично/извън; цялата пространствена формула bold, съгласие с PDF1",
+        "decision": "ГИС пресичане от PDF1 за всеки ПИ; правилни попада/попада частично; bold отношение и код+име зона; сценарий Б проверен с PDF1.",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
         "needs_case_evidence": true,
@@ -932,7 +936,9 @@
           "function": "GIS spatial relation",
           "original_bold": "попада частично and BG0000578 „Река Марица“ in original sample; current KT76-02 conditional GIS phrase full bold",
           "proof": "GIS/PDF1"
-        }
+        },
+        "editorial_acceptance": "APPROVED_GIS_B24_PDF1_RELATION_AND_ZONE_BOLD",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md — user's explicit agreement after A23 ↔ B24 review"
       },
       {
         "paragraph": 25,
