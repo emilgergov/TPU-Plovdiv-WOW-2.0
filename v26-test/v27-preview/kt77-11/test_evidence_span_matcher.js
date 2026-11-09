@@ -39,6 +39,17 @@ for(const mode of ['A','B']){
   {source_file:'a.txt',text:'46989.205.218'},{source_file:'b.txt',text:'46989.205.218'}
  ],confirmedParcelIds:['46989.205.218']});
  assert.equal(ambiguous.ok,false);
+ for(const entry of [
+  ['Правна обосновка: Наредбата за ОС','Правна обосновка: Наредбата за ЗТ'],
+  ['Основание: чл. 2 от Наредбата','Основание: чл. 6 от Наредбата'],
+  ['На основание ал. 1','На основание ал. 2'],
+  ['Заповед РД-688/2020','Заповед РД-648/2024'],
+  ['Правният извод е допустимо спрямо режимите','Правният извод е недопустимо спрямо режимите']
+ ]){
+  const old=entry[0],value=entry[1],p=m.propose({paragraph:19,original:old,primary:value,
+   runTexts:[old],documents:[{source_file:'legal.txt',text:value}],confirmedParcelIds:[]});
+  assert.equal(p.ok,false,JSON.stringify({mode,old,value,p}));
+ }
  const legal=m.propose({paragraph:25,original:'Извод: по ЗООС',primary:'Извод: не подлежи на ОВОС',runTexts:['Извод: по ЗООС'],documents:[{source_file:'a.txt',text:'не подлежи на ОВОС'}],confirmedParcelIds:[]});
  assert.equal(legal.ok,false);
  const unknown=m.propose({paragraph:11,original:'Имот 56784.13.102',primary:'Имот 46989.205.218',runTexts:['Имот 56784.13.102'],documents:[{source_file:'a.txt',text:'46989.205.218'}],confirmedParcelIds:['11111.1.1']});
