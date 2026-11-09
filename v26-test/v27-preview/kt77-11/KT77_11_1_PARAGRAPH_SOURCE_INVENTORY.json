@@ -2,7 +2,7 @@
   "schema": "kt77-11-paragraph-inventory-v1",
   "checkpoint_sha": "f407b176b477afb699643b73ce82ddf2e83badb0",
   "work_branch": "work/KT77-11-two-stage-editor",
-  "status": "stage-11.5-p11-p17-p18-p19-p20-approved-AB-p21-pending",
+  "status": "stage-11.5-p11-p17-p18-p19-p20-p21-approved-AB-p22-pending",
   "priority": [
     "latest explicit accepted decision",
     "locked OOXML specimen",
@@ -306,11 +306,20 @@
         "role": "water",
         "editorial_review": true,
         "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
-        "decision": "Водоснабдяване — само по заявените факти",
+        "decision": "Позиция 21: начинът на водоснабдяване само от доказани обстоятелства за конкретната преписка, без механично възпроизвеждане на еталонен водопровод или доставка в съдове; оригинален един Word run без bold/italic.",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
         "needs_case_evidence": true,
-        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending",
+        "editorial_acceptance": "APPROVED_P21_EVIDENCE_ONLY_WATER_SUPPLY_AB",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md — explicit user approval",
+        "accepted_word_runs": [
+          {
+            "role": "доказани факти за водоснабдяване",
+            "bold": false,
+            "italic": false
+          }
+        ]
       },
       {
         "paragraph": 22,
@@ -842,10 +851,19 @@
         "role": "evidence-water",
         "editorial_review": true,
         "source": "KT76-02 §21",
-        "decision": "Изложение само по данните от уведомлението",
+        "decision": "Позиция 21: начинът на водоснабдяване само от доказани обстоятелства за конкретната преписка, без механично възпроизвеждане на еталонен водопровод или доставка в съдове; оригинален един Word run без bold/italic.",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "editorial_acceptance": "APPROVED_P21_EVIDENCE_ONLY_WATER_SUPPLY_AB",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md — explicit user approval",
+        "accepted_word_runs": [
+          {
+            "role": "доказани факти за водоснабдяване",
+            "bold": false,
+            "italic": false
+          }
+        ]
       },
       {
         "paragraph": 22,
