@@ -4,7 +4,8 @@
  */
 (function(root){'use strict';
 const SLOTS=new Set([7,8,11,17,19,20,21,22,23,24]);
-const LEGAL=/\b(?:чл\.|ал\.|Наредб|ЗООС|ЗБР|ЗЗТ|ОВОС|РД-\d+|ДВ,\s*бр\.)|(?:не\s+е\s+необходимо|няма\s+вероятност|допустим(?:о|а)\s+спрямо)/iu;
+// JS \b is ASCII-centric: do NOT use it to guard Cyrillic legal tokens.
+const LEGAL=/(?:чл\.?\s*\d+|ал\.?\s*\d+|т\.\s*\d+|наредб[а-я]*|закон[а-я]*|ЗООС|ЗБР|ЗЗТ|ОВОС|ЕО\b|РД-\d+|ДВ,\s*бр\.?|заповед[а-я]*|не\s+е\s+необходимо|няма\s+вероятност|допустим(?:о|а)\s+спрямо|не\s+подлежи|няма\s+отрицателно\s+въздействие)/iu;
 const RE_ID=/\b\d{5}\.\d+\.\d+\b/g;
 const RE_ZONE=/BG\d{7}/g;
 const norm=x=>String(x??'').trim();
@@ -88,6 +89,8 @@ function proposeMany(opts){
   let reconstructed=original;
   for(let i=0;i<oldIds.length;i++){
    if(oldIds[i]===newIds[i])continue;
+   // Reject a "parcel-only" edit if it also changes legal or administrative text.
+   if(LEGAL.test(old)||LEGAL.test(value))return {ok:false,reason:'legal-or-unknown'};
    const old=oldIds[i],value=newIds[i];
    const runs=(runTexts||[]).filter(t=>typeof t==='string'&&t.split(old).length===2);
    if(runs.length!==1)return {ok:false,reason:'multi-parcel-run-ambiguous'};
