@@ -23,11 +23,16 @@ function difference(oldText,newText){
  while(a<oldText.length&&b<newText.length&&word(oldText[a])&&word(newText[b])){a++;b++;}
  return {old:oldText.slice(i,a),value:newText.slice(i,b),prefix:i,suffix:oldText.length-a};
 }
-function factKind(i,old,value){
+function factKind(i,old,value,preceding=''){
+ const before=String(preceding).slice(-70);
  if(i===7)return 'recipient';
  if(i===8)return 'address';
  if(i===17)return 'reference';
  if(i===11){
+  if(/община\\s+$/iu.test(before))return 'municipality';
+  if(/област\\s+$/iu.test(before))return 'region';
+  if(/местност\\s+[„"']?$/iu.test(before))return 'locality';
+  if(/(?:гр\\.|с\\.)\\s+$/iu.test(before))return 'settlement';
   if(ids(value).length)return 'parcel_id';
   if(/^(?:гр\.|с\.)\s/u.test(value))return 'settlement';
   if(/община\s+/iu.test(value))return 'municipality';
@@ -49,7 +54,7 @@ function propose({paragraph,original,primary,runTexts,documents,confirmedParcelI
  const d=difference(original,primary);
  if(!d||!d.old.trim()||!d.value.trim()||d.old===d.value||d.old.length>600||d.value.length>600)
   return {ok:false,reason:'non-atomic-or-too-long'};
- const kind=factKind(paragraph,d.old,d.value);
+ const kind=factKind(paragraph,d.old,d.value,original.slice(0,d.prefix));
  if(kind==='unknown'||LEGAL.test(d.old)||LEGAL.test(d.value))return {ok:false,reason:'legal-or-unknown'};
  const runs=Array.isArray(runTexts)?runTexts:[];
  if(runs.filter(t=>typeof t==='string'&&t.split(d.old).length===2).length!==1)
