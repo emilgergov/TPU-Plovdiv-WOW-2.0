@@ -2,7 +2,7 @@
   "schema": "kt77-11-paragraph-inventory-v1",
   "checkpoint_sha": "f407b176b477afb699643b73ce82ddf2e83badb0",
   "work_branch": "work/KT77-11-two-stage-editor",
-  "status": "stage-11.5-p11-p17-p18-p19-p20-p21-approved-AB-p22-pending",
+  "status": "stage-11.5-p11-p17-p18-p19-p20-p21-p22-approved-AB-p23-pending",
   "priority": [
     "latest explicit accepted decision",
     "locked OOXML specimen",
@@ -326,11 +326,20 @@
         "role": "wastewater",
         "editorial_review": true,
         "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
-        "decision": "Отпадъчни води — само по заявените факти",
+        "decision": "Единна фактическа рамка за отпадъчни води A/Б, само доказани обстоятелства за образуване/събиране/третиране/заустване; без измислени ями, канализация, пречистване, воден обект или схеми. Един оригинален Word run без bold/italic.",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
         "needs_case_evidence": true,
-        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending",
+        "editorial_acceptance": "APPROVED_P22_EVIDENCE_ONLY_WASTEWATER_AB",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md — explicit user approval",
+        "accepted_word_runs": [
+          {
+            "role": "доказани обстоятелства за отпадъчни води",
+            "bold": false,
+            "italic": false
+          }
+        ]
       },
       {
         "paragraph": 23,
@@ -870,10 +879,19 @@
         "role": "evidence-wastewater",
         "editorial_review": true,
         "source": "KT76-02 §22",
-        "decision": "Изложение само по данните от уведомлението",
+        "decision": "Единна фактическа рамка за отпадъчни води A/Б, само доказани обстоятелства за образуване/събиране/третиране/заустване; без измислени ями, канализация, пречистване, воден обект или схеми. Един оригинален Word run без bold/italic.",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "editorial_acceptance": "APPROVED_P22_EVIDENCE_ONLY_WASTEWATER_AB",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md — explicit user approval",
+        "accepted_word_runs": [
+          {
+            "role": "доказани обстоятелства за отпадъчни води",
+            "bold": false,
+            "italic": false
+          }
+        ]
       },
       {
         "paragraph": 23,
