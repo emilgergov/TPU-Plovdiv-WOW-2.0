@@ -2,7 +2,7 @@
   "schema": "kt77-11-paragraph-inventory-v1",
   "checkpoint_sha": "f407b176b477afb699643b73ce82ddf2e83badb0",
   "work_branch": "work/KT77-11-two-stage-editor",
-  "status": "stage-11.5-p11-p17-p18-p19-p20-p21-p22-approved-AB-p23-pending",
+  "status": "stage-11.5-corrected-A23-B24-GIS-p23B-mandatory-no-generator-changes",
   "priority": [
     "latest explicit accepted decision",
     "locked OOXML specimen",
@@ -350,7 +350,13 @@
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
         "needs_case_evidence": true,
-        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending",
+        "semantic_alignment": {
+          "counterpart": "classic_B:24",
+          "function": "GIS spatial relation",
+          "original_bold": "не попадат",
+          "proof": "GIS/PDF1"
+        }
       },
       {
         "paragraph": 24,
@@ -901,7 +907,16 @@
         "decision": "Задължителен абзац непосредствено след №22; целият текст bold",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "semantic_alignment": {
+          "counterpart": null,
+          "function": "mandatory extra B land-use/NTP paragraph",
+          "position": "after B22 before B24",
+          "original_bold": "whole paragraph",
+          "mandatory_structure": true,
+          "source": "KT76-02 editorial approval + exact KT39-B OOXML",
+          "case_evidence_required": true
+        }
       },
       {
         "paragraph": 24,
@@ -911,7 +926,13 @@
         "decision": "Точно GIS изцяло/частично/извън; цялата пространствена формула bold, съгласие с PDF1",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "semantic_alignment": {
+          "counterpart": "classic_A:23",
+          "function": "GIS spatial relation",
+          "original_bold": "попада частично and BG0000578 „Река Марица“ in original sample; current KT76-02 conditional GIS phrase full bold",
+          "proof": "GIS/PDF1"
+        }
       },
       {
         "paragraph": 25,
@@ -1126,5 +1147,6 @@
       33,
       34
     ]
-  }
+  },
+  "semantic_alignment_version": "KT77-11.5-corrected-A23-B24-plus-mandatory-B23"
 }
