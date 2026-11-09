@@ -12,7 +12,7 @@ for label,filename,expected in [("A","KT35-A.docx",41),("B","KT39-B.docx",43)]:
   body=document.find(".//"+W+"body")
   ps=[p for p in body if p.tag==W+"p"]
   assert len(ps)==expected,(label,len(ps))
-  for num in (7,8,11,17,18,19,20,21,22,23):
+  for num in (7,8,11,17,18,19,20,21,22,23,24):
    p=ps[num-1]
    runs=[]
    for r in p.findall(W+"r"):
