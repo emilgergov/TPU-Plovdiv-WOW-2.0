@@ -101,7 +101,7 @@ const validation=[];
 for(const name of target)validation.push({name,...deepDocxQA(archive[name],outer[name],parcelIds,name===target[1])});
 for(const [name,data] of Object.entries(archive))if(!target.includes(name)&&!sameBytes(data,outer[name]))throw Error('Променен файл извън двата Word: '+name);
 const link=document.createElement('a');link.href=URL.createObjectURL(report.blob);link.download='KT77_06_2_ZT_KONSTATIVNO_'+source.files[0].name.replace(/\.zip$/i,'')+'.zip';link.textContent='Изтегли проверения ZIP с новите ЗТ абзаци';download.appendChild(link);
-status.textContent='PASS — добавен е точно един констативен ЗТ абзац във всеки Word.\n'+report.edits.map(x=>x.file+' | абзац №'+x.paragraph+' | '+x.oldCount+' → '+x.newCount).join('\n')+'\n\nВсички предишни Word абзаци: непроменени.\nВсички останали ZIP файлове и DOCX ресурси: непроменени.\nТова е автоматичен контрол на реален ZIP, а не потвърждение на визуално оформление. Изтегли ZIP и го изпрати за преглед.';
+status.textContent='PASS — автоматична структурна проверка на двата Word файла.\n'+validation.map(x=>x.name+' | ЗТ абзац №'+x.paragraph+' | общо '+x.total+' | удебеляване: '+x.bold).join('\n')+'\n\nВсички предишни Word абзаци: непроменени.\nВсички останали ZIP файлове и DOCX ресурси: непроменени.\nТова е автоматичен контрол на реален ZIP, а не потвърждение на визуално оформление. Изтегли ZIP и го изпрати за преглед.';
 }catch(e){status.textContent='ТЕСТЪТ НЕ Е ПРЕМИНАЛ: '+String(e.message||e)+'\nНищо в избрания оригинален ZIP не е изменено.';console.error(e)}
 finally{go.disabled=false}
 });
