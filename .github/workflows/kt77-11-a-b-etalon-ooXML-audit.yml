@@ -23,6 +23,20 @@ jobs:
       - name: Verify both deterministic secondary editors fail closed
         run: |
           python3 v26-test/v27-preview/kt77-11/test_secondary_editor.py
+      - name: Syntax-check browser A/B editor and isolated route, verify no bypass
+        run: |
+          node --check v26-test/v27-preview/kt77-11/kt77-11-4-browser-secondary-editor.js
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("v26-test/v27-preview/V27_27_KT77_11_4_A_B_SECONDARY_EDITOR_INTEGRATION_TEST.html")
+          html=p.read_text(encoding="utf-8")
+          assert "KT7711SecondaryEditor.transform(kt7606.blob" in html
+          assert html.index("KT7711SecondaryEditor.transform(kt7606.blob") < html.index("KT7706ZTConstatation.fix(kt7711.blob")
+          assert "if(!evidencePlan?.patches?.length||!evidencePlan?.evidence?.length)" in html
+          assert "КТ77-11.4 · ИЗОЛИРАН ИНТЕГРАЦИОНЕН ТЕСТ" in html
+          assert "kt77-11/kt77-11-4-browser-secondary-editor.js" in html
+          print("PASS: isolated A/B ZIP interception before ZT and explicit evidence gate")
+          PY
       - name: Upload read-only audit report
         uses: actions/upload-artifact@v4
         with:
