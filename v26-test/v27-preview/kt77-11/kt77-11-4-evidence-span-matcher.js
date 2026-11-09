@@ -16,6 +16,11 @@ function difference(oldText,newText){
  let i=0;while(i<oldText.length&&i<newText.length&&oldText[i]===newText[i])i++;
  let a=oldText.length,b=newText.length;
  while(a>i&&b>i&&oldText[a-1]===newText[b-1]){a--;b--;}
+ // Never patch only the differing letters inside a surname, place name or
+ // cadastral number. Extend a minimal edit to full lexical tokens in both texts.
+ const word=c=>/[\\p{L}\\p{N}._-]/u.test(c||'');
+ while(i>0&&word(oldText[i-1])&&word(newText[i-1]))i--;
+ while(a<oldText.length&&b<newText.length&&word(oldText[a])&&word(newText[b])){a++;b++;}
  return {old:oldText.slice(i,a),value:newText.slice(i,b),prefix:i,suffix:oldText.length-a};
 }
 function factKind(i,old,value){
