@@ -59,7 +59,7 @@ async function transform(blob,{scenario,patches,evidence}={}){
  // patches must NEVER silently restore the specimen's historical parcel/subject.
  for(let i=0;i<spec.n;i++)if(ALLOWED.has(i+1)&&content(changed[i])!==content(pps[i]))
   error('непопълнена фактическа разлика в абзац '+(i+1)+'; изходът би съдържал примерни данни');
- const cadastral=s=>new Set((s.match(/\\b\\d{5}\\.\\d+\\.\\d+\\b/g)||[]));
+ const cadastral=s=>new Set((s.match(/\b\d{5}\.\d+\.\d+\b/g)||[]));
  const primaryIds=cadastral(pps.map(content).join(' '));
  const outputIds=cadastral(changed.map(content).join(' '));
  if(primaryIds.size!==outputIds.size||[...primaryIds].some(id=>!outputIds.has(id)))
