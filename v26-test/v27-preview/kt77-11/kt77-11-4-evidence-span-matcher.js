@@ -55,6 +55,9 @@ function propose({paragraph,original,primary,runTexts,documents,confirmedParcelI
  const d=difference(original,primary);
  if(!d||!d.old.trim()||!d.value.trim()||d.old===d.value||d.old.length>600||d.value.length>600)
   return {ok:false,reason:'non-atomic-or-too-long'};
+ // A changed fragment like "ОС" -> "ЗТ" may be embedded in a legal citation.
+ // A factual editor cannot reinterpret that context as a subject/characterization edit.
+ if(paragraph!==17&&(LEGAL.test(original)||LEGAL.test(primary)))return {ok:false,reason:'protected-legal-context'};
  const kind=factKind(paragraph,d.old,d.value,original.slice(0,d.prefix));
  if(kind==='unknown'||LEGAL.test(d.old)||LEGAL.test(d.value))return {ok:false,reason:'legal-or-unknown'};
  const runs=Array.isArray(runTexts)?runTexts:[];
@@ -82,6 +85,7 @@ function proposeMany(opts){
  const {paragraph,original,primary,runTexts,documents,confirmedParcelIds}=opts||{};
  if(original===primary)return {ok:true,unchanged:true,patches:[]};
  const oldIds=ids(original),newIds=ids(primary);
+ if(paragraph!==17&&(LEGAL.test(original)||LEGAL.test(primary)))return {ok:false,reason:'protected-legal-context'};
  if(oldIds.length>1&&oldIds.length===newIds.length&&oldIds.length<=20){
   const patches=[],confirmed=new Set((confirmedParcelIds||[]).map(String));
   if(newIds.some(x=>!confirmed.has(x)))return {ok:false,reason:'multi-parcel-not-confirmed'};
