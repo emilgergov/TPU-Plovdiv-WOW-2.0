@@ -1,11 +1,12 @@
-# KT77-01 DEPLOY-FIX — publication scope only.
-# Preserve all source files in the repository. Only omit two duplicate
-# historical GIS datasets from the GitHub Pages/Jekyll output.
-# Current expert module continues using v26-test/gis-data (NOT excluded).
+# KT77-14: GitHub Pages publication scope only (2026-11-09).
+# Repository files remain intact. Current Expert Analysis, PI MASTER,
+# normative archive, public WOW presentation, photos and video are retained.
+# Historical self-contained V26 snapshots are NOT current public routes.
 exclude:
-  - v26-4/gis-data
-  - expert-v26/gis-data
+  - v26-4
+  - expert-v26
   - Gemfile
   - Gemfile.lock
   - node_modules
   - vendor
+  - Thumbs.db
