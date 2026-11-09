@@ -11,7 +11,7 @@ const ps=d=>Array.from(d.getElementsByTagNameNS(W,'body')[0]?.childNodes||[]).fi
 const ts=p=>Array.from(p.getElementsByTagNameNS(W,'t')).map(t=>t.textContent||'');
 const text=p=>ts(p).join('');
 async function getVerifiedPlan({scenario,primaryBlob,parcelIds}={}){
- if(!MATCH?.propose)throw Error('КТ77-11.4: липсва модулът за доказателствени текстови замени');
+ if(!MATCH?.proposeMany)throw Error('КТ77-11.4: липсва модулът за доказателствени текстови замени');
  const mode=String(scenario||'').replace('А','A').replace('Б','B').toUpperCase(),n=EXPECTED[mode];
  if(!n)throw Error('КТ77-11.4: непознат сценарий А/Б');
  if(!primaryBlob||!root.fflate?.unzipSync)throw Error('КТ77-11.4: липсва първичният ZIP/библиотеката');
@@ -37,8 +37,8 @@ async function getVerifiedPlan({scenario,primaryBlob,parcelIds}={}){
  if(unrelated.length)unresolved.push({scope:'all',issue:'Първичният Word съдържа неподтвърдени имотни идентификатори',values:unrelated});
  for(const index of [7,8,11,17,19,20,21,22,23,24]){
   const old=text(a[index-1]),newText=text(b[index-1]);
-  const candidate=MATCH.propose({paragraph:index,original:old,primary:newText,runTexts:ts(a[index-1]),documents:evidence,confirmedParcelIds:confirmed});
-  if(candidate.ok&&!candidate.unchanged)patches.push(candidate.patch);
+  const candidate=MATCH.proposeMany({paragraph:index,original:old,primary:newText,runTexts:ts(a[index-1]),documents:evidence,confirmedParcelIds:confirmed});
+  if(candidate.ok&&!candidate.unchanged)patches.push(...candidate.patches);
   else if(!candidate.ok)unresolved.push({paragraph:index,reason:candidate.reason,original:old.slice(0,150),primary:newText.slice(0,150)});
  }
  // No changes in legal or protected fixed slots unless the exact old specimen
