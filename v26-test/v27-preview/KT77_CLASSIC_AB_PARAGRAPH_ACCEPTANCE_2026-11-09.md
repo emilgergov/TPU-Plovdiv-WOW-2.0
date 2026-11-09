@@ -58,8 +58,16 @@ APPROVED AND LOCKED by user for BOTH GIS-verified cases. This acceptance concern
 4. **Scope**: ZZ (Natura 2000) intersections alone determine Classic scenario A/B; ZT constatation does NOT produce automatic ZZT admissibility or procedural conclusions. Preserve ZZ vs ZT distinction.
 5. **Remaining validation**: independently verify resulting DOCX in a real ZIP, including no unintended paragraph or formatting changes. No end-to-end PASS yet.
 
-## Next ZT acceptance — NOT YET APPROVED
-- Expert Word: use the independent factual ZT paragraph from the KT77-06.1 module, both no-intersection and verified intersection variants; distinct expert opening and GIS evidence sentence; no changes to existing Expert conclusion, legal reasoning or formatting until explicit approval.
+## ZT independent constatation — Expert Word acceptance (09.11.2026)
+APPROVED AND LOCKED by user for BOTH GIS-confirmed cases, only as conditional content rules, not proof of a successful real generated DOCX.
+
+- No ZT intersection: one independent paragraph starting „При извършения пространствен анализ е установено, че ...“ with dynamically supplied confirmed parcel IDs, stating the lack of overlap with protected territories under ZZT only where the GIS evidence establishes this.
+- Confirmed ZT intersection: one independent paragraph starting „При извършения пространствен анализ е установено, че ...“, including ALL GIS-confirmed parcel–ZT intersections, official category/name, verified declaration orders, State Gazette references and verified applicable amendments; add „Констатацията се основава на пространствените данни от ПИ MASTER и е отразена в самостоятелния ГИС анализ.“ No invented legal requisites.
+- One paragraph directly after the ZZ order paragraph, with bold parcel IDs and ZT names/categories. Existing Expert Word four-section argument, procedural conclusion, formatting, signatures, and 49-paragraph etalon remain unchanged; the extra ZT paragraph is an insertion in a generated copy only.
+- ZZ spatial intersection, not ZT, determines A/B. No automatic ZZT admissibility/procedural finding. Exact output needs real ZIP + visual and regression checks.
+
+## Next ZT acceptance
+All three Word families (Classic A, Classic B, Expert) have user-approved conditional ZT paragraph rules. Final generated-DOCX and ZIP integration acceptance is PENDING.
 
 ## Final verification — PENDING
 - Compare uploaded KT35-A and repository KT39-B actual DOCX paragraphs against the accepted decision register. Check body numbering, original styling, headers, footers, signatures, institutional contact details and absence of unwanted changes; separately verify B36 verbatim text.
