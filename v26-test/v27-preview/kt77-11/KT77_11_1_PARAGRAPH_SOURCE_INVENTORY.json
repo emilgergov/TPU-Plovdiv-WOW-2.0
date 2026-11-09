@@ -2,7 +2,7 @@
   "schema": "kt77-11-paragraph-inventory-v1",
   "checkpoint_sha": "f407b176b477afb699643b73ce82ddf2e83badb0",
   "work_branch": "work/KT77-11-two-stage-editor",
-  "status": "stage-11.5-p11-p17-p18-approved-AB-p19-pending",
+  "status": "stage-11.5-p11-p17-p18-p19-approved-AB-p20-pending",
   "priority": [
     "latest explicit accepted decision",
     "locked OOXML specimen",
@@ -266,11 +266,20 @@
         "role": "characterization",
         "editorial_review": true,
         "source": "KT48_PARAGRAPH_CONTRACT.md (p-index + 1) + КТ35-А",
-        "decision": "Фактическо описание на ИП — доказан предмет, площи и дейности",
+        "decision": "Общо начало „С инвестиционното предложение се предвижда…“; индивидуален доказан предмет, потвърдени имоти и местоположение; само доказани параметри и дейности, без пренасяне на тестови данни между A/B. Една оригинална Word run без bold или italic.",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
         "needs_case_evidence": true,
-        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending",
+        "editorial_acceptance": "APPROVED_P19_COMMON_EVIDENCE_BASED_STRUCTURE_AB",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md — explicit user decision",
+        "accepted_word_runs": [
+          {
+            "role": "доказана фактическа характеристика за конкретна преписка",
+            "bold": false,
+            "italic": false
+          }
+        ]
       },
       {
         "paragraph": 20,
@@ -786,10 +795,19 @@
         "role": "evidence-characterization",
         "editorial_review": true,
         "source": "KT76-02 §19",
-        "decision": "Фактическа характеристика; структурата е приета за пример Б, не се пренасят обект, площи и дейности",
+        "decision": "Общо начало „С инвестиционното предложение се предвижда…“; индивидуален доказан предмет, потвърдени имоти и местоположение; само доказани параметри и дейности, без пренасяне на тестови данни между A/B. Една оригинална Word run без bold или italic.",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": true
+        "needs_case_evidence": true,
+        "editorial_acceptance": "APPROVED_P19_COMMON_EVIDENCE_BASED_STRUCTURE_AB",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md — explicit user decision",
+        "accepted_word_runs": [
+          {
+            "role": "доказана фактическа характеристика за конкретна преписка",
+            "bold": false,
+            "italic": false
+          }
+        ]
       },
       {
         "paragraph": 20,
