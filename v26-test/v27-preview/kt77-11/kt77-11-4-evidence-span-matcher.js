@@ -29,10 +29,10 @@ function factKind(i,old,value,preceding=''){
  if(i===8)return 'address';
  if(i===17)return 'reference';
  if(i===11){
-  if(/община\\s+$/iu.test(before))return 'municipality';
-  if(/област\\s+$/iu.test(before))return 'region';
-  if(/местност\\s+[„"']?$/iu.test(before))return 'locality';
-  if(/(?:гр\\.|с\\.)\\s+$/iu.test(before))return 'settlement';
+  if(/община\s+$/iu.test(before))return 'municipality';
+  if(/област\s+$/iu.test(before))return 'region';
+  if(/местност\s+[„"']?$/iu.test(before))return 'locality';
+  if(/(?:гр\.|с\.)\s+$/iu.test(before))return 'settlement';
   if(ids(value).length)return 'parcel_id';
   if(/^(?:гр\.|с\.)\s/u.test(value))return 'settlement';
   if(/община\s+/iu.test(value))return 'municipality';
