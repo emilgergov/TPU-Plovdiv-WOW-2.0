@@ -2,7 +2,7 @@
   "schema": "kt77-11-paragraph-inventory-v1",
   "checkpoint_sha": "f407b176b477afb699643b73ce82ddf2e83badb0",
   "work_branch": "work/KT77-11-two-stage-editor",
-  "status": "stage-11.2-parallel-A-B-contract-mapping-dry-run-pending",
+  "status": "stage-11.5-paragraph11-approved-A-B-paragraph17-pending",
   "priority": [
     "latest explicit accepted decision",
     "locked OOXML specimen",
@@ -143,7 +143,31 @@
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
         "needs_case_evidence": true,
-        "source_rule_status": "documented positional contract; exact run-level acceptance pending"
+        "source_rule_status": "documented positional contract; exact run-level acceptance pending",
+        "editorial_acceptance": "APPROVED_LOCKED_STRUCTURAL_AND_FORMATTING_CONTRACT_AB",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md — explicit user approval 09.11.2026",
+        "accepted_word_runs": [
+          {
+            "fragment": "Относно",
+            "bold": true,
+            "italic": true
+          },
+          {
+            "fragment": "Уведомление за инвестиционно предложение (ИП):",
+            "bold": false,
+            "italic": true
+          },
+          {
+            "fragment": "„предмет на ИП“",
+            "bold": true,
+            "italic": true
+          },
+          {
+            "fragment": "имоти и местоположение",
+            "bold": false,
+            "italic": true
+          }
+        ]
       },
       {
         "paragraph": 12,
@@ -619,7 +643,31 @@
         "decision": "Единствено местност ПОПСКОТО → местност „Попското“ в одобрения тест; други факти се подават от преписката",
         "candidate_variable": true,
         "auto_rewrite_allowed": false,
-        "needs_case_evidence": false
+        "needs_case_evidence": true,
+        "editorial_acceptance": "APPROVED_LOCKED_STRUCTURAL_AND_FORMATTING_CONTRACT_AB",
+        "acceptance_source": "KT77_11_5_EDITORIAL_ACCEPTANCE_REGISTER_AB.md — explicit user approval 09.11.2026",
+        "accepted_word_runs": [
+          {
+            "fragment": "Относно",
+            "bold": true,
+            "italic": true
+          },
+          {
+            "fragment": "Уведомление за инвестиционно предложение (ИП):",
+            "bold": false,
+            "italic": true
+          },
+          {
+            "fragment": "„предмет на ИП“",
+            "bold": true,
+            "italic": true
+          },
+          {
+            "fragment": "имоти и местоположение",
+            "bold": false,
+            "italic": true
+          }
+        ]
       },
       {
         "paragraph": 12,
