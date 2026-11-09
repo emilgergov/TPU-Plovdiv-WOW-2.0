@@ -38,6 +38,19 @@ Status: user-approved editorial rules. This record does not modify binary DOCX e
 - Classic B paragraph 36: APPROVED AND LOCKED (user confirmation 09.11.2026). Preserve the KT76-03 register provision requiring the proponent to notify RIOSV–Plovdiv immediately when the investment proposal parameters or circumstances of the issued letter change. Apply the rule previously accepted for Classic A paragraph 34; retain established DOCX presentation. The verbatim KT39-B exemplar paragraph still requires source comparison.
 - Classic A: SUBSTANTIVE PARAGRAPH ACCEPTANCE CLOSED by explicit user approval (09.11.2026). This means all reviewed substantive A paragraph rules are accepted; this does NOT yet constitute a passed final DOCX rendering, generation-regression, or release test. Preserve signatures, header, footer, confidentiality and institutional metadata; verify against original uploaded KT35-A before claiming complete technical acceptance.
 
+## ZT independent constatation — Classic A acceptance (09.11.2026)
+
+APPROVED AND LOCKED by user: both GIS-confirmed cases in Classic A. This is a content/rule acceptance, not an end-to-end generated DOCX PASS.
+
+1. **No intersection with a protected territory (ZT)**: insert a single standalone constatative paragraph that, based on verified PI MASTER/GIS results for all confirmed parcel IDs, the parcels do not fall within protected territories under the Protected Territories Act (ZZT). Sample: “При извършената пространствена проверка е установено, че поземлените имоти с идентификатори 56784.13.102, 56784.13.105 и 56784.13.106 не попадат в границите на защитени територии по смисъла на Закона за защитените територии (ЗЗТ).” Example parcel IDs must NOT be hardcoded for arbitrary cases.
+2. **Verified intersection with one or more ZT**: insert one standalone paragraph covering each relevant confirmed parcel and ZT, official category/name, verified designation orders, State Gazette publications, and amendments where available. Unverified legal requisites MUST NOT be invented. Only claim supported intersections and orders; missing verified order data must block the positive claim rather than fabricate documents.
+3. **Placement and layout**: immediately AFTER the paragraph listing the protected Natura 2000 zone(s) and their official orders; preserve every pre-existing paragraph, signatures and document styling. Bold parcel identifiers and the category/name of each protected territory; do not expand into a new legal analysis.
+4. **Unchanged logic**: A/B scenario solely determined by Natura 2000 zone intersections (ZZ), NOT ZT. A ZT finding does not modify other approved paragraphs or their procedural conclusions.
+5. **Evidence**: PI MASTER + GIS + officially verified orders. The two sample paragraphs presented for acceptance are conditional templates, NOT actual verified GIS findings for arbitrary parcels. Live generated DOCX visual/regression PASS is still PENDING.
+
+## Next ZT acceptance — NOT YET APPROVED
+- Classic B: the same two cases, but using all GIS-confirmed parcel-to-ZT relationships, without conflating protected territory (ZT) and Natura 2000 protected zone (ZZ); same exact Word insertion point and bold structure. Await user's separate acceptance.
+
 ## Final verification — PENDING
 - Compare uploaded KT35-A and repository KT39-B actual DOCX paragraphs against the accepted decision register. Check body numbering, original styling, headers, footers, signatures, institutional contact details and absence of unwanted changes; separately verify B36 verbatim text.
 - Run sample A/B generated DOCX regression only if corresponding current generated ZIPs are available. Until this happens, do not claim production deployment or end-to-end PASS.
