@@ -802,7 +802,7 @@ const initialBlob=await window.V26DraftPackage.make(kt76ZipResults,confirmedRole
 'ОГРАНИЧЕНИЯ',
 'Пакетът не е официално становище, решение или административен акт. Положителен процедурен изход, допълнителна информация, консултация с институция или друга процедура се обработват извън настоящия ограничен тестов генератор.',
 'Генерирането на ZIP не удостоверява фактическата или правната правилност на предварително избрания извод. Всички документи подлежат на експертен преглед, подписване и официален ред за изпращане.'
-].join('\\n');
+].join('\n');
 const kt80Files=window.fflate.unzipSync(new Uint8Array(await kt79Final.blob.arrayBuffer()));
 kt80Files['README_KT80_TEST_CHL2_AL2.txt']=new TextEncoder().encode(kt80Readme);
 const kt80FinalBlob=new Blob([window.fflate.zipSync(kt80Files,{level:6})],{type:'application/zip'});
