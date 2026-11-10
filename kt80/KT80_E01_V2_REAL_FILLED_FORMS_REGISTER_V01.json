@@ -1,0 +1,123 @@
+{
+  "schema": "kt80-e01-v2-real-official-form-examples-v1",
+  "date": "2026-11-11",
+  "scope": "Official legally named entry forms and authentic publicly posted filled examples (examples not necessarily same cases as output demos)",
+  "form_entries": 7,
+  "real_published_filled_examples": 2,
+  "archiving_status": "LINKED_OFFICIAL_SOURCES_ONLY_NO_NEW_PHYSICAL_PDF_COPY",
+  "items": [
+    {
+      "id": "FORM-OVOS-APP5",
+      "routes": [
+        4,
+        7,
+        8
+      ],
+      "form_name": "Уведомление за инвестиционно предложение",
+      "legal_basis": "Приложение №5 към чл.4, ал.1 Наредба ОВОС",
+      "official_catalog": "https://www.moew.government.bg/bg/prevantivna-dejnost/ovos/obrazci-na-zayavleniya-ovos/",
+      "source_kind": "normative_template",
+      "source_status": "OFFICIAL_CATALOG_CONFIRMED",
+      "edition_status": "FINAL_VERSION_PENDING",
+      "archived_full_form": false,
+      "exemplar_url": null,
+      "notes": "Образец, предоставен и от експерта в DOCX, цитира редакции до ДВ бр.62/2022; необходима проверка на действаща редакция."
+    },
+    {
+      "id": "FORM-OVOS-APP6",
+      "routes": [
+        7
+      ],
+      "form_name": "Искане за преценяване необходимостта от ОВОС",
+      "legal_basis": "Приложение №6 към чл.6, ал.1 Наредба ОВОС",
+      "official_catalog": "https://www.moew.government.bg/bg/prevantivna-dejnost/ovos/obrazci-na-zayavleniya-ovos/",
+      "source_kind": "normative_template",
+      "source_status": "OFFICIAL_CATALOG_CONFIRMED",
+      "edition_status": "FINAL_VERSION_PENDING",
+      "archived_full_form": false,
+      "exemplar_url": "https://www.moew.government.bg/static/media/ups/articles/attachments/iskane_OVOS_48-22-20250a360d1f96582e83f545c15088e5dbec.pdf",
+      "exemplar_title": "Публикувано действително искане за проучвателно сондиране в Блок 1-21 Хан Аспарух",
+      "exemplar_year": 2025,
+      "exemplar_status": "REAL_PUBLISHED_FILLED_DOCUMENT_CONFIRMED",
+      "notes": "Файлът има приложението и попълнен предмет; публикуван от МОСВ, пример за форма, а не еталон за положително/отрицателно административно решение; различна компетентност и география от Пловдив."
+    },
+    {
+      "id": "FORM-EO-APP3",
+      "routes": [
+        10,
+        11,
+        12
+      ],
+      "form_name": "Уведомление за изготвяне на план/програма",
+      "legal_basis": "Приложение №3 към чл.8, ал.1 Наредба ЕО",
+      "official_catalog": "https://www.moew.government.bg/bg/prevantivna-dejnost/ekologichna-ocenka/obrazci-na-zayavleniya/",
+      "source_kind": "normative_template",
+      "source_status": "OFFICIAL_CATALOG_CONFIRMED",
+      "edition_status": "FINAL_VERSION_PENDING",
+      "archived_full_form": false,
+      "exemplar_url": null
+    },
+    {
+      "id": "FORM-EO-APP4",
+      "routes": [
+        11
+      ],
+      "form_name": "Искане за преценяване необходимостта от ЕО",
+      "legal_basis": "Приложение №4 към чл.8а, ал.1 Наредба ЕО",
+      "official_catalog": "https://www.moew.government.bg/bg/prevantivna-dejnost/ekologichna-ocenka/obrazci-na-zayavleniya/",
+      "source_kind": "normative_template",
+      "source_status": "OFFICIAL_CATALOG_CONFIRMED",
+      "edition_status": "FINAL_VERSION_PENDING",
+      "archived_full_form": false,
+      "exemplar_url": "https://www.moew.government.bg/static/media/ups/articles/attachments/%D0%95%D0%9E-28%20%D0%98%D1%81%D0%BA%D0%B0%D0%BD%D0%B5%20%D0%BF%D1%80%D0%B5%D1%86%D0%B5%D0%BD%D0%BA%D0%B0%20%D0%9C%D0%98%D0%93%20%D0%9A%D1%80%D0%B8%D0%B2%D0%BE%D0%B4%D0%BE%D0%BB-%D0%91%D0%BE%D0%B9%D1%87%D0%B8%D0%BD%D0%BE%D0%B2%D1%86%D0%B832cfe12e701764b5e20265a55a544b9d.pdf",
+      "exemplar_title": "Публикувано действително искане за стратегия ВОМР 2023–2027, МИГ Криводол–Бойчиновци",
+      "exemplar_year": 2025,
+      "exemplar_status": "REAL_PUBLISHED_FILLED_DOCUMENT_CONFIRMED",
+      "notes": "Публичен конкретен казус с действително попълнени раздели; не е доказателство за окончателен резултат."
+    },
+    {
+      "id": "FORM-EO-APP5",
+      "routes": [
+        12
+      ],
+      "form_name": "Искане за издаване на становище по ЕО",
+      "legal_basis": "Приложение №5 към чл.23, ал.1 Наредба ЕО",
+      "official_catalog": "https://www.moew.government.bg/bg/prevantivna-dejnost/ekologichna-ocenka/obrazci-na-zayavleniya/",
+      "source_kind": "normative_template",
+      "source_status": "OFFICIAL_CATALOG_CONFIRMED",
+      "edition_status": "FINAL_VERSION_PENDING",
+      "archived_full_form": false,
+      "exemplar_url": null
+    },
+    {
+      "id": "FORM-OS-ANNEX1",
+      "routes": [
+        5,
+        6
+      ],
+      "form_name": "Уведомление за планове, програми, проекти и ИП по самостоятелна ОС",
+      "legal_basis": "Приложение №1 към чл.10, ал.1, части А и Б, Наредба ОС",
+      "official_catalog": "https://www.moew.government.bg/bg/1839-izdavane-na-reshenie-po-ocenka-za-suvmestimostta-na-planove-programi-proekti-i-investicionni-predlojeniya-s-predmeta-i-celite-na-opazvane-na-zastitenite-zoni/",
+      "source_kind": "normative_template",
+      "source_status": "OFFICIAL_PROCEDURE_DESCRIPTION_CONFIRMED",
+      "edition_status": "FINAL_VERSION_PENDING",
+      "archived_full_form": false,
+      "exemplar_url": null
+    },
+    {
+      "id": "FORM-OS-ANNEX2",
+      "routes": [
+        5,
+        6
+      ],
+      "form_name": "Информация и документация по самостоятелна ОС",
+      "legal_basis": "Приложение №2 към чл.10, ал.2, части А и Б, Наредба ОС",
+      "official_catalog": "https://www.moew.government.bg/bg/1839-izdavane-na-reshenie-po-ocenka-za-suvmestimostta-na-planove-programi-proekti-i-investicionni-predlojeniya-s-predmeta-i-celite-na-opazvane-na-zastitenite-zoni/",
+      "source_kind": "required_information_annex",
+      "source_status": "OFFICIAL_PROCEDURE_DESCRIPTION_CONFIRMED",
+      "edition_status": "FINAL_VERSION_PENDING",
+      "archived_full_form": false,
+      "exemplar_url": null
+    }
+  ]
+}
