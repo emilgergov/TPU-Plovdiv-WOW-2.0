@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "date": "2026-11-10",
+  "purpose": "Candidates used in KT80 legal analysis, pending comparison with existing normative archive; source URLs are not stored document copies.",
+  "records": [
+    {
+      "id": "BG-NOS",
+      "kind": "ordinance",
+      "name": "Наредба за условията и реда за извършване на оценка за съвместимостта на планове, програми, проекти и инвестиционни предложения с предмета и целите на опазване на защитените зони",
+      "source_url": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Naredbi/NAREDBA_za_usl_reda_za_izvarshvane_na_ocenka_za_savmestimostta_na_PPPIP_2025.pdf",
+      "used_by": [
+        "KT80 passports 01,02,05"
+      ],
+      "status": "EXISTENCE_CHECK_PENDING"
+    },
+    {
+      "id": "BG-NAREDBA-OVOS",
+      "kind": "ordinance",
+      "name": "Наредба за условията и реда за извършване на оценка на въздействието върху околната среда",
+      "source_url": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ocenka-na-vuzdejstvieto-vurhu-okolnata-sreda/",
+      "used_by": [
+        "KT80 passport 04"
+      ],
+      "status": "EXISTENCE_CHECK_PENDING"
+    },
+    {
+      "id": "BG-ZOOS",
+      "kind": "law",
+      "name": "Закон за опазване на околната среда",
+      "source_url": "https://www.moew.government.bg/bg/zakon-za-opazvane-na-okolnata-sreda-8793/",
+      "used_by": [
+        "KT80 passports 01–05"
+      ],
+      "status": "EXISTENCE_CHECK_PENDING"
+    },
+    {
+      "id": "BG-APK",
+      "kind": "code",
+      "name": "Административнопроцесуален кодекс",
+      "source_url": "https://justice.government.bg/home/normdoc/2135521015",
+      "used_by": [
+        "KT80 preliminary review routes 17–22"
+      ],
+      "status": "EXISTENCE_CHECK_PENDING"
+    },
+    {
+      "id": "BG-RIOSV-RULES",
+      "kind": "rules",
+      "name": "Правилник за устройството и дейността на регионалните инспекции по околната среда и водите",
+      "source_url": "https://www.moew.government.bg/static/media/ups/tiny/%D0%9D%D0%A1%D0%97%D0%9F/PRAVILNIK_RIOSV.pdf",
+      "used_by": [
+        "KT80 competence review"
+      ],
+      "status": "EXISTENCE_CHECK_PENDING"
+    },
+    {
+      "id": "BG-NAREDBA-EO",
+      "kind": "ordinance",
+      "name": "Наредба за условията и реда за извършване на екологична оценка на планове и програми",
+      "source_url": null,
+      "used_by": [
+        "KT80 planned routes 10–12"
+      ],
+      "status": "EXISTENCE_CHECK_PENDING",
+      "notes": "Official current source still needs confirmed."
+    },
+    {
+      "id": "BG-ZBR",
+      "kind": "law",
+      "name": "Закон за биологичното разнообразие",
+      "source_url": null,
+      "used_by": [
+        "KT80 future legal master"
+      ],
+      "status": "EXISTENCE_CHECK_PENDING",
+      "notes": "Locate and confirm current official text."
+    },
+    {
+      "id": "BG-ZZT",
+      "kind": "law",
+      "name": "Закон за защитените територии",
+      "source_url": null,
+      "used_by": [
+        "KT80 future legal master"
+      ],
+      "status": "EXISTENCE_CHECK_PENDING",
+      "notes": "Locate and confirm current official text."
+    }
+  ],
+  "non_normative_references": [
+    {
+      "id": "MOEW-SERVICE-1650",
+      "kind": "administrative_service_info",
+      "source_url": "https://portal.moew.government.bg/bg/Home/Service?admUnitServiceId=7",
+      "notes": "Supporting official service description; NOT the ordinance."
+    }
+  ]
+}
