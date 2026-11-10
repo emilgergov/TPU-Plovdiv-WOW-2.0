@@ -1,0 +1,236 @@
+{
+  "schema": "kt80-e01-d-v09-five-step-evidence-chain",
+  "updated": "2026-11-11",
+  "route_id": 7,
+  "case_id": "MOEW-2025-13PR-PLOVDIV-RING-1460-4120",
+  "records": [
+    {
+      "id": "N1",
+      "date": "2024-11-14",
+      "type": "Първоначално уведомление",
+      "url": "https://www.moew.government.bg/static/media/ups/articles/attachments/%D0%A3%D0%B2%D0%B5%D0%B4%D0%BE%D0%BC%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%9E%D0%92%D0%9E%D0%A1-11535fa4d20c488e88244d96877ec0e16e3.pdf",
+      "part": "Приложение №5 / чл.4, ал.1 Наредба ОВОС (уведомление по съдържание)",
+      "source_status": "PRIMARY_PDF_REVIEWED"
+    },
+    {
+      "id": "N2",
+      "date": "2025-01-03",
+      "type": "Официален отговор на уведомлението",
+      "url": "https://www.moew.government.bg/static/media/ups/articles/attachments/%D0%9E%D0%92%D0%9E%D0%A1-115%20%D0%9E%D1%82%D0%B3%D0%BE%D0%B2%D0%BE%D1%80%20%D0%BD%D0%B0%20%D1%83%D0%B2%D0%B5%D0%B4%D0%BE%D0%BC%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5ddb34e10af5262ee7db2cbd167a8bfea.pdf",
+      "part": "Чл.5, ал.1 Наредба ОВОС, интегрирана преценка по ОС",
+      "source_status": "PRIMARY_PDF_REVIEWED"
+    },
+    {
+      "id": "N3",
+      "date": "2025-06-17",
+      "type": "Искане за преценяване необходимостта от ОВОС",
+      "url": "https://www.moew.government.bg/static/media/ups/articles/attachments/%D0%98%D1%81%D0%BA%D0%B0%D0%BD%D0%B5%20%D0%BF%D1%80%D0%B5%D1%86%D0%B5%D0%BD%D1%8F%D0%B2%D0%B0%D0%BD%D0%B5%20%D0%9E%D0%B1%D1%85%D0%BE%D0%B4%20%D0%BD%D0%B0%20%D0%9F%D0%BB%D0%BE%D0%B2%D0%B4%D0%B8%D0%B2106dcd799b6f58729e21b38845facc8b.pdf",
+      "part": "Приложение №6 към чл.6, ал.1 Наредба ОВОС",
+      "source_status": "PRIMARY_PDF_TEXT_REVIEWED"
+    },
+    {
+      "id": "N4",
+      "date": "2025-06-19",
+      "type": "Обществен достъп до информация по Приложение №2",
+      "url": "https://www.moew.government.bg/bg/okolovrusten-put-na-gr-plovdiv-privejdane-kum-gabarit-g23-5-put-iii-805-put-i-8-pazardjik-plovdiv-p-v-caracovo-suedinenie-uchastuk-ot-km-1-460-do-km-4-120-19492/",
+      "part": "Чл.6, ал.9, т.1 Наредба ОВОС",
+      "source_status": "OFFICIAL_WEB_NOTICE_REVIEWED; ATTACHED_ZIP_UNREAD"
+    },
+    {
+      "id": "N5",
+      "date": "2025-08-06",
+      "type": "Решение №13-ПР/2025 — да не се извършва ОВОС",
+      "url": "https://www.moew.government.bg/bg/reshenie-13-pr-06-08-2025-g-za-investicionno-predlojenie-okolovrusten-put-na-gr-plovdiv-privejdane-kum-gabarit-g23-5-put-iii-805-put-i-8-pazardjik-plovdiv-p-v-caracovo-suedinenie-uchastuk-ot-km-1-460-do-km-4-120/",
+      "part": "Решение за преценяване; официално съобщен диспозитив",
+      "source_status": "OFFICIAL_WEB_NOTICE_REVIEWED; FULL_DECISION_PDF_UNREAD"
+    }
+  ],
+  "technical_and_legal_facts": [
+    {
+      "id": "F01",
+      "name": "Възложител",
+      "value": "Агенция „Пътна инфраструктура“",
+      "source_doc_id": "N1",
+      "decision_relation": "идентификация на възложителя",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F02",
+      "name": "Предмет",
+      "value": "Привеждане към габарит Г23.5 на участък км 1+460–4+120 от път III-805, включително ПВ „Царацово“",
+      "source_doc_id": "N1",
+      "decision_relation": "индивидуализация на ИП",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F03",
+      "name": "Четирилентов профил",
+      "value": "2 х 2 х 3,75 м ленти; средна разделителна ивица 3,50 м; банкети 2 х 1,50 м",
+      "source_doc_id": "N2",
+      "decision_relation": "обхват и физически характеристики",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F04",
+      "name": "Локални платна",
+      "value": "Двустранни локални платна и осигуряване на достъп до прилежащи имоти",
+      "source_doc_id": "N2",
+      "decision_relation": "свързана инфраструктура и транспорт",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F05",
+      "name": "Кръгово кръстовище",
+      "value": "Ново кръгово кръстовище при км 3+000",
+      "source_doc_id": "N2",
+      "decision_relation": "компонент на ИП",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F06",
+      "name": "Пътен възел",
+      "value": "Рехабилитация и допълване на ПВ „Царацово“; нова директна връзка към гр. Пловдив",
+      "source_doc_id": "N2",
+      "decision_relation": "инженерна свързаност",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F07",
+      "name": "ТИР паркинг",
+      "value": "41 паркоместа за тежкотоварни автомобили",
+      "source_doc_id": "N2",
+      "decision_relation": "съпътстваща дейност с капацитет",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F08",
+      "name": "Мостови конструкции",
+      "value": "Премахване на съществуващ мост над канал при км 2+609; две нови конструкции",
+      "source_doc_id": "N2",
+      "decision_relation": "потенциални водни и строителни въздействия",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F09",
+      "name": "Осветление",
+      "value": "Предвидено изграждане на осветление",
+      "source_doc_id": "N2",
+      "decision_relation": "енергийна инфраструктура, детайли за трасета не са установени",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F10",
+      "name": "Пътна ос",
+      "value": "Разширение вдясно, новата ос приблизително 6,5 м вдясно от съществуващата",
+      "source_doc_id": "N2",
+      "decision_relation": "пространствено въздействие",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F11",
+      "name": "Правна квалификация за ОВОС",
+      "value": "Приложение №2, т.10, буква „б“ ЗООС; чл.93, ал.1, т.2 ЗООС",
+      "source_doc_id": "N2",
+      "decision_relation": "МОСВ установява приложимост на скрининга",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F12",
+      "name": "Компетентен орган",
+      "value": "Министърът на околната среда и водите по чл.93, ал.2, т.4 ЗООС; национален обект по Решение №302/20.04.2012 МС",
+      "source_doc_id": "N2",
+      "decision_relation": "органът не може да бъде подменен с РИОСВ – Пловдив",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F13",
+      "name": "Водни режими",
+      "value": "Становище на БД ИБР изх.№ПУ-01-230-(1)/21.11.2024: допустимост при условия по т.2.2",
+      "source_doc_id": "N2",
+      "decision_relation": "секторен воден контрол, не заменя пълните условия",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F14",
+      "name": "ЗЗ и ЗТ",
+      "value": "По проверка, отразена от МОСВ на 03.01.2025, заявеното трасе не попада в граници на ЗЗ или ЗТ",
+      "source_doc_id": "N2",
+      "decision_relation": "пространствена констатация на органа; не самостоятелен ГИС анализ",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F15",
+      "name": "ОС преценка",
+      "value": "МОСВ: чл.40, ал.3 Наредба ОС във връзка с критерии по чл.16; няма вероятност от значително отрицателно въздействие",
+      "source_doc_id": "N2",
+      "decision_relation": "отделна правна преценка в рамките на интегрирания ред",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F16",
+      "name": "Информация по Приложение №2",
+      "value": "Публичното съобщение сочи, че има предоставена информация и ZIP",
+      "source_doc_id": "N4",
+      "decision_relation": "самият ZIP не е прочетен и техническите подробности не са потвърдени",
+      "evidence_status": "PUBLICATION_VERIFIED_CONTENT_UNREAD"
+    },
+    {
+      "id": "F17",
+      "name": "Обществен достъп",
+      "value": "19.06.2025–03.07.2025, 14-дневен срок за становища",
+      "source_doc_id": "N4",
+      "decision_relation": "процесуална публичност; дали има становища остава неизвестно",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F18",
+      "name": "Краен диспозитив",
+      "value": "Решение №13-ПР/06.08.2025: да не се извършва ОВОС",
+      "source_doc_id": "N5",
+      "decision_relation": "потвърден публично изход; не е извършен преглед на мотивите от пълния PDF",
+      "evidence_status": "DOCUMENT_VERIFIED_FACT"
+    },
+    {
+      "id": "F19",
+      "name": "Приложими мотиви в пълния краен акт",
+      "value": null,
+      "source_doc_id": "N5",
+      "decision_relation": "не може да се свържат конкретните мотиви без PDF на решението",
+      "evidence_status": "UNVERIFIED_SOURCE_UNREAD"
+    },
+    {
+      "id": "F20",
+      "name": "Заустване / отпадъчни води",
+      "value": null,
+      "source_doc_id": "N4",
+      "decision_relation": "не се извежда предположение само от типа обект",
+      "evidence_status": "UNVERIFIED_SOURCE_UNREAD"
+    },
+    {
+      "id": "F21",
+      "name": "Съвкупни въздействия и консултации",
+      "value": null,
+      "source_doc_id": "N4",
+      "decision_relation": "преглед на приложената информация, становища и мотиви предстои",
+      "evidence_status": "UNVERIFIED_SOURCE_UNREAD"
+    }
+  ],
+  "verification_count": {
+    "documents": 5,
+    "fields": 21,
+    "unverified_fields": 3
+  },
+  "source_assurance": "N1 and N2 primary PDFs reviewed, N3 request text reviewed, N4/N5 official public announcements reviewed; attached ZIP and full decision PDF NOT independently read",
+  "critical_guardrails": [
+    "Same subject and road section km 1+460 to 4+120",
+    "Do not extrapolate other road segments",
+    "Do not substitute MOEW competence with RIOSV-Plovdiv",
+    "Do not treat MOEW ZЗ/ЗТ statement as independently computed GIS",
+    "Do not interpret decision's operative result as validated reasoning",
+    "Never invent missing water/wastewater or cumulative impact facts"
+  ],
+  "decision_full_pdf_reviewed": false,
+  "annex2_zip_reviewed": false,
+  "normative_edition_2026_fully_verified": false,
+  "official_act_reproduction_approved": false
+}
