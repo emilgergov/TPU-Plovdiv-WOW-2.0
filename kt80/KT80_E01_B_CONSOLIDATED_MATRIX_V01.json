@@ -13,7 +13,7 @@
   "records": [
     {
       "id": 1,
-      "label": "Тест по чл. 2, ал. 2 Наредба ОС",
+      "label": "Писмо по чл. 2, ал. 2 от Наредбата за ОС",
       "category": "restricted_legacy_test",
       "document_type": "letter",
       "legal_family": "OS",
