@@ -11,7 +11,10 @@
       "used_by": [
         "KT80 passports 01,02,05"
       ],
-      "status": "EXISTENCE_CHECK_PENDING"
+      "status": "EXISTENCE_CHECK_PENDING",
+      "alternate_official_pdf": "https://www.moew.government.bg/static/media/ups/tiny/%D0%9D%D0%A1%D0%97%D0%9F/NAREDBA_za_usloviqta_i_reda_za_izvyrsvane_na_ocenka_za_syvmestimostta_na_planove_programi_proekti_i_.pdf",
+      "official_pdf_known_amendments_through": "ДВ бр.106/2021",
+      "notes": "Official PDF checked, includes amendments only through 2021; do not label current in 2026 without amendment verification. Existing archive presence NOT checked."
     },
     {
       "id": "BG-NAREDBA-OVOS",
@@ -21,7 +24,8 @@
       "used_by": [
         "KT80 passport 04"
       ],
-      "status": "EXISTENCE_CHECK_PENDING"
+      "status": "EXISTENCE_CHECK_PENDING",
+      "notes": "Official МОСВ page checked for чл.5 ал.4 (minimum 7-day deficiency deadline), ал.5 (termination if uncorrected), ал.6 (excluded from 14-day deadline). Physical archival status not checked."
     },
     {
       "id": "BG-ZOOS",
@@ -31,7 +35,8 @@
       "used_by": [
         "KT80 passports 01–05"
       ],
-      "status": "EXISTENCE_CHECK_PENDING"
+      "status": "EXISTENCE_CHECK_PENDING",
+      "notes": "МОСВ OВОС legislation page lists last amendment ДВ бр.16/10.02.2026; independent check for later 2026 amendments still required."
     },
     {
       "id": "BG-APK",
@@ -94,5 +99,8 @@
       "source_url": "https://portal.moew.government.bg/bg/Home/Service?admUnitServiceId=7",
       "notes": "Supporting official service description; NOT the ordinance."
     }
+  ],
+  "audit_notes": [
+    "10.11.2026 B-1 V03: official online review performed, no document binaries added and no local duplicate comparison completed. See kt80/KT80_E01_B1_NORMATIVE_VERIFICATION_V03.md."
   ]
 }
