@@ -1,0 +1,110 @@
+{
+  "schema": "kt80-e01-d-route07-matched-real-case-v01",
+  "date": "2026-11-11",
+  "route_id": 7,
+  "case_id": "MOEW-2025-13PR-PLOVDIV-RING-1460-4120",
+  "case_kind": "REAL_PUBLISHED_INPUT_AND_OUTCOME_SAME_PROJECT",
+  "title": "Околовръстен път на гр. Пловдив — участък км 1+460–4+120",
+  "different_segments_not_same_case": [
+    "участък км 0+000–1+460",
+    "Път II-86 до км 14+962 — друга преписка от 2026"
+  ],
+  "source_documents": {
+    "intake_filled_annex6": "https://www.moew.government.bg/static/media/ups/articles/attachments/%D0%98%D1%81%D0%BA%D0%B0%D0%BD%D0%B5%20%D0%BF%D1%80%D0%B5%D1%86%D0%B5%D0%BD%D1%8F%D0%B2%D0%B0%D0%BD%D0%B5%20%D0%9E%D0%B1%D1%85%D0%BE%D0%B4%20%D0%BD%D0%B0%20%D0%9F%D0%BB%D0%BE%D0%B2%D0%B4%D0%B8%D0%B2106dcd799b6f58729e21b38845facc8b.pdf",
+    "intake_and_annex2_public_access": "https://www.moew.government.bg/bg/okolovrusten-put-na-gr-plovdiv-privejdane-kum-gabarit-g23-5-put-iii-805-put-i-8-pazardjik-plovdiv-p-v-caracovo-suedinenie-uchastuk-ot-km-1-460-do-km-4-120-19492/",
+    "final_official_outcome_notice": "https://www.moew.government.bg/bg/reshenie-13-pr-06-08-2025-g-za-investicionno-predlojenie-okolovrusten-put-na-gr-plovdiv-privejdane-kum-gabarit-g23-5-put-iii-805-put-i-8-pazardjik-plovdiv-p-v-caracovo-suedinenie-uchastuk-ot-km-1-460-do-km-4-120/",
+    "annex2_zip_content_read": false,
+    "final_pdf_full_text_read": false
+  },
+  "document_dates": {
+    "request": "2025-06-17",
+    "public_access": "2025-06-19",
+    "comments_deadline": "2025-07-03",
+    "decision": "2025-08-06"
+  },
+  "outcome": {
+    "result": "NOT_TO_PERFORM_EIA",
+    "decision_reference": "13-ПР/2025",
+    "authority": "Министър на околната среда и водите",
+    "proven_by": "OFFICIAL_MOEW_ANNOUNCEMENT",
+    "may_rewrite_as_riosv_plovdiv": false
+  },
+  "field_trace": [
+    {
+      "field": "Предмет",
+      "value": "Околовръстен път на гр. Пловдив – привеждане към габарит Г23.5; Път III-805, участък от км 1+460 до км 4+120",
+      "basis": "публичен вход и съобщение за решение",
+      "verified": "PUBLISHED_MATCH"
+    },
+    {
+      "field": "Възложител",
+      "value": "Агенция „Пътна инфраструктура“",
+      "basis": "публично съобщение на МОСВ за обществен достъп",
+      "verified": "PUBLISHED_MATCH"
+    },
+    {
+      "field": "Подадено искане",
+      "value": "17.06.2025; Приложение №6 към чл.6, ал.1 Наредба ОВОС",
+      "basis": "публикувано попълнено искане",
+      "verified": "PUBLISHED_MATCH"
+    },
+    {
+      "field": "Информация за преценяване",
+      "value": "В искането е посочена като приложена информация по Приложение №2 към чл.6; приложенията са обявени и като ZIP на МОСВ",
+      "basis": "текст на искането и съобщение за обществен достъп",
+      "verified": "LISTED_BUT_CONTENT_NOT_YET_REVIEWED"
+    },
+    {
+      "field": "Обществен достъп",
+      "value": "МОСВ съобщава 19.06.2025, период 14 дни, срок за становища до 03.07.2025",
+      "basis": "публично съобщение на МОСВ",
+      "verified": "PUBLISHED_MATCH"
+    },
+    {
+      "field": "Компетентен орган за този казус",
+      "value": "Министър на околната среда и водите",
+      "basis": "публично решение №13-ПР/2025 на министъра",
+      "verified": "PUBLISHED_MATCH"
+    },
+    {
+      "field": "Решение",
+      "value": "Решение №13-ПР/06.08.2025 — да не се извършва ОВОС",
+      "basis": "официално съобщение на МОСВ",
+      "verified": "PUBLISHED_MATCH"
+    },
+    {
+      "field": "GIS/PI MASTER пространствен контрол",
+      "value": null,
+      "basis": "Не се замества със заключението на МОСВ; нужни са проследими геометрии и версии за самостоятелна оценка",
+      "verified": "NOT_INDEPENDENTLY_CHECKED"
+    },
+    {
+      "field": "Съдържателни мотиви в пълния PDF на решението",
+      "value": null,
+      "basis": "Публикуван е PDF към решението, но пълният мотивировъчен текст не е анализиран и изведен",
+      "verified": "NOT_YET_EXTRACTED"
+    },
+    {
+      "field": "Становища и секторни консултации",
+      "value": null,
+      "basis": "Не е установен пълен комплект и съдържание от официалната преписка",
+      "verified": "NOT_YET_REVIEWED"
+    },
+    {
+      "field": "Инженерна инфраструктура / води / емисии / отпадъци",
+      "value": null,
+      "basis": "Изисква се преглед на реалния ZIP с информация по Приложение №2 и проекта",
+      "verified": "NOT_YET_REVIEWED"
+    },
+    {
+      "field": "Приложима нормативна редакция към 2025",
+      "value": null,
+      "basis": "Пълен исторически контрол на нормативната редакция и правните основания предстои",
+      "verified": "PENDING_STATUTORY_AUDIT"
+    }
+  ],
+  "assurance": "MATCHED_BY_IDENTICAL_PROJECT_DESCRIPTION_AND_CHAIN_IN_OFFICIAL_MOEW_PUBLICATIONS; NOT_FULL_DOSSIER_REVIEW",
+  "use_for": "Еталон за доказателствена трасировка и проверка на логиката на ИП MASTER / Нормативен MASTER, не готов автоматичен генератор на административен акт",
+  "full_legal_approval": false,
+  "registered_archive_originals": false
+}
