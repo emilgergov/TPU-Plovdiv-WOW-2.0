@@ -41,7 +41,7 @@ const input=$('casefile');if(input){input.accept='.zip,.pdf,.docx,.jpg,.jpeg,.pn
 const drop=$('zipDrop');if(drop){drop.setAttribute('aria-label','Пуснете ZIP, PDF, Word или изображение');const strong=drop.querySelector('strong');if(strong)strong.textContent='Пуснете преписката тук';}
 const zipName=$('zipName');if(zipName&&zipName.textContent.includes('архив'))zipName.textContent='Няма избран файл';
 const extract=$('extract');if(extract)extract.textContent='Обработи преписката';
-const proposal=$('proposal');if(proposal){proposal.textContent='Изготви проектите';proposal.classList.add('kt68-primary')}
+const proposal=$('proposal');if(proposal){proposal.textContent='Тест - чл.2, ал.2 от НОС';proposal.classList.add('kt68-primary')}
 const reset=$('reset');if(reset)reset.textContent='Изчисти данните';
 const gisPdf=$('v26pdf');if(gisPdf){
  gisPdf.textContent='Изготви ГИС справка (PDF)';
@@ -69,8 +69,8 @@ const aside=document.querySelector('body>main>aside');if(aside){const foot=docum
 function confirmPackage(){return new Promise(resolve=>{
  const shade=document.createElement('div');shade.className='kt68-modal-shade';
  const panel=document.createElement('div');panel.className='kt68-modal';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','kt68DialogTitle');
- const title=document.createElement('h2');title.id='kt68DialogTitle';title.textContent='EG · Изготвяне на работен пакет';
- const p=document.createElement('p');p.textContent='Ще бъдат създадени два Word проекта, ГИС анализ (PDF), нормативни документи (PDF) и README. Документите са работни проекти, а не официално становище.';
+ const title=document.createElement('h2');title.id='kt68DialogTitle';title.textContent='EG · Тест по чл. 2, ал. 2 от НОС';
+ const p=document.createElement('p');p.textContent='ТЕСТОВ РЕЖИМ — само за предварително експертно филтрирани преписки, при които е обоснован отрицателен извод за необходимостта от процедура по глава втора от Наредбата за ОС. Classic A/Б и Expert използват предварително зададен краен извод: AI авторът НЕ извършва независима процедурна квалификация. При потвърдени имоти и водещ имот, завършен ГИС PDF1, нормативен PDF2, потвърден предмет, наличен AI автор и успешно преминали проверки се подготвя ZIP с класически Word проект, експертен Word проект, ГИС PDF1, нормативен PDF2 и README. Ако обстоятелствата не подкрепят този извод или данните/проверките са недостатъчни, не използвайте тестовия генератор. Всички файлове са работни проекти за експертен преглед, не официални административни актове.';
  const buttons=document.createElement('div');buttons.className='kt68-actions';const cancel=document.createElement('button');cancel.className='kt68-cancel';cancel.textContent='Отказ';const ok=document.createElement('button');ok.textContent='Продължи';
  const done=v=>{shade.remove();resolve(v)};cancel.onclick=()=>done(false);ok.onclick=()=>done(true);shade.onmousedown=e=>{if(e.target===shade)done(false)};
  shade.onkeydown=e=>{if(e.key==='Escape')done(false)};buttons.append(cancel,ok);panel.append(title,p,buttons);shade.append(panel);document.body.append(shade);ok.focus();
