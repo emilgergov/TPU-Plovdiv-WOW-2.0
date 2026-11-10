@@ -1,0 +1,697 @@
+{
+  "schema": "kt80-e01-g-passports-v03",
+  "updated": "2026-11-11",
+  "purpose": "Разширена експертна матрица 22 маршрута: вход, правен клон, необходима информация, блокиращи проверки и статуси",
+  "not_a_legal_certification": true,
+  "stable_files_untouched": true,
+  "count": 22,
+  "accepted_passports": 0,
+  "records": [
+    {
+      "id": 1,
+      "result_label": "Писмо по чл. 2, ал. 2 от Наредбата за ОС",
+      "result_class": "restricted_legacy_test",
+      "procedural_family": "OS",
+      "initiating_document": "Уведомление за намерение по приложимия ред, предхождащо ограничената проверка по чл. 2, ал. 2",
+      "form_class": "conditional_form",
+      "form_reference": "Изисквания за уведомяване се проверяват според чл. 2, чл. 10 и приложимия ред; контролният лист по приложение №1 е вътрешен инструмент, НЕ бланка за възложителя",
+      "official_source": "https://www.moew.government.bg/bg/1839-izdavane-na-reshenie-po-ocenka-za-suvmestimostta-na-planove-programi-proekti-i-investicionni-predlojeniya-s-predmeta-i-celite-na-opazvane-na-zastitenite-zoni/",
+      "applicability_conditions": [
+        "Ограничен вход, при който експертът предварително е квалифицирал ИП по чл.2, ал.2 Наредба ОС",
+        "Потвърден предмет, имоти, инфраструктура (електро-, водоснабдяване, достъп, отпадъчни води), режим и проверени потенциални въздействия"
+      ],
+      "evidentiary_controls": [
+        "input_valid",
+        "subject_confirmed",
+        "parcel_gis_reviewed",
+        "legal_version_reviewed",
+        "expert_route_confirmed"
+      ],
+      "material_risk": "Не използвай като универсална автоматична процедура за отрицателен извод",
+      "example_input_case": "Казус с конкретно описани технически параметри, имоти, електро-, ВиК, отпадъчни води и транспортен достъп",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B_PASSPORTS_01_05_V02.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 2,
+      "result_label": "Искане за допълнителна информация",
+      "result_class": "procedural_action",
+      "procedural_family": "OS/OVOS/EO",
+      "initiating_document": "Постъпил първичен документ с конкретни непълноти",
+      "form_class": "derived_from_parent",
+      "form_reference": "Няма самостоятелна универсална нормативна бланка за отправеното от органа искане; зависи от ОС/ОВОС/ЕО/АПК",
+      "official_source": null,
+      "applicability_conditions": [
+        "Първичен документ със съществена липса, от която зависи квалификацията",
+        "Списък на точно липсващи параметри и основание защо са нужни за съответния ред"
+      ],
+      "evidentiary_controls": [
+        "primary_dossier_exists",
+        "material_gap_identified",
+        "special_rule_confirmed",
+        "deadline_reviewed"
+      ],
+      "material_risk": "Определи приложимата процедура и срок, без измислени задължения",
+      "example_input_case": "Уведомление с липсващ капацитет или неизяснен начин на заустване",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B_PASSPORTS_01_05_V02.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 3,
+      "result_label": "Искане за институционално становище",
+      "result_class": "procedural_action",
+      "procedural_family": "various",
+      "initiating_document": "Вече образувана преписка, която изисква консултация или съгласуване",
+      "form_class": "internal_outgoing",
+      "form_reference": "Вход към действието е преписка, не общ формуляр на заявителя; изискуемата консултация се доказва по конкретния ред",
+      "official_source": null,
+      "applicability_conditions": [
+        "Реална преписка, по която специалният ред налага или допуска междуведомствена консултация",
+        "Конкретна институция, компетентност, въпроси и материали"
+      ],
+      "evidentiary_controls": [
+        "parent_procedure_exists",
+        "consultation_basis_identified",
+        "addressed_authority_confirmed"
+      ],
+      "material_risk": "Искането е действие по родителската преписка, не самостоятелен краен акт",
+      "example_input_case": "Постъпило ИП с обоснована необходимост от становище на друг компетентен орган",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B_PASSPORTS_01_05_V02.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 4,
+      "result_label": "Указания по процедурата за ОВОС",
+      "result_class": "procedural_action",
+      "procedural_family": "OVOS",
+      "initiating_document": "Уведомление за инвестиционно предложение",
+      "form_class": "official_annex",
+      "form_reference": "Приложение №5 към чл. 4, ал. 1 от Наредбата за ОВОС",
+      "official_source": "https://www.moew.government.bg/bg/prevantivna-dejnost/ovos/obrazci-na-zayavleniya-ovos/",
+      "applicability_conditions": [
+        "Първоначално уведомление за ИП — Приложение №5 Наредба ОВОС",
+        "Потвърден предмет, капацитет, ЗООС Приложение №1/№2, инфраструктура, локация и компетентност"
+      ],
+      "evidentiary_controls": [
+        "ovos_annex5_intake",
+        "zoos_annex_classification",
+        "competence_confirmed",
+        "joint_os_checked"
+      ],
+      "material_risk": "Отдели указанията от решение за преценяване",
+      "example_input_case": "Попълнено уведомление с 10-те раздела — предмет, процеси, инфраструктура, води, отпадъци, емисии и приложения",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B_PASSPORTS_01_05_V02.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 5,
+      "result_label": "Указания по процедурата за ОС",
+      "result_class": "procedural_action",
+      "procedural_family": "OS",
+      "initiating_document": "Уведомление за план, програма, проект или инвестиционно предложение по самостоятелния ред ОС",
+      "form_class": "official_annex_conditional",
+      "form_reference": "Приложение №1, част А или Б към чл. 10, ал. 1; документация по приложение №2, част А или Б към чл. 10, ал. 2 от Наредбата за ОС. При съвместена ОС се използва относимият вход по ОВОС/ЕО",
+      "official_source": "https://www.moew.government.bg/bg/1839-izdavane-na-reshenie-po-ocenka-za-suvmestimostta-na-planove-programi-proekti-i-investicionni-predlojeniya-s-predmeta-i-celite-na-opazvane-na-zastitenite-zoni/",
+      "applicability_conditions": [
+        "Уведомление по приложимия самостоятелен ред ОС или вход чрез съвместена ОВОС/ЕО",
+        "Намерение и дейности, зони и опазване, функционални въздействия и правен клон"
+      ],
+      "evidentiary_controls": [
+        "os_intake_route_selected",
+        "protected_zone_effects_checked",
+        "competence_confirmed"
+      ],
+      "material_risk": "Не изисквай самостоятелен образец ОС при съвместена процедура без основание",
+      "example_input_case": "Уведомление за ИП с фактическо описание, локация, ЗЗ и потенциални въздействия",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B_PASSPORTS_01_05_V02.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 6,
+      "result_label": "Решение за преценяване вероятна степен на отрицателно въздействие",
+      "result_class": "administrative_act",
+      "procedural_family": "OS",
+      "initiating_document": "Уведомление и документация по самостоятелен ред за ОС",
+      "form_class": "official_annex_conditional",
+      "form_reference": "Приложение №1 и приложение №2 към чл. 10 от Наредбата за ОС; по-нататък съответните изисквания за преценка",
+      "official_source": "https://www.moew.government.bg/bg/1839-izdavane-na-reshenie-po-ocenka-za-suvmestimostta-na-planove-programi-proekti-i-investicionni-predlojeniya-s-predmeta-i-celite-na-opazvane-na-zastitenite-zoni/",
+      "applicability_conditions": [
+        "Вход по чл.10 Наредба ОС, приложим самостоятелен ред",
+        "Пълни характеристики на предложение и потенциални преки/непреки/съвкупни въздействия; допустимост по режими"
+      ],
+      "evidentiary_controls": [
+        "os_article10_package",
+        "assessment_evidence",
+        "cumulative_effects_checked",
+        "article18_legal_gate"
+      ],
+      "material_risk": "За акт по чл.18 е нужна мотивирана преценка, не GIS пресичане само",
+      "example_input_case": "Пълно уведомление за обект, със зони, параметри, съвкупни въздействия и приложени схеми",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 7,
+      "result_label": "Решение за преценяване необходимостта от ОВОС",
+      "result_class": "administrative_act",
+      "procedural_family": "OVOS",
+      "initiating_document": "Уведомление за ИП, последвано от искане за преценяване необходимостта от ОВОС",
+      "form_class": "official_annex_sequence",
+      "form_reference": "Приложение №5 към чл. 4, ал. 1 → приложение №6 към чл. 6, ал. 1 + информация по приложение №2 към чл. 6 от Наредбата за ОВОС",
+      "official_source": "https://www.moew.government.bg/bg/prevantivna-dejnost/ovos/obrazci-na-zayavleniya-ovos/",
+      "applicability_conditions": [
+        "Уведомление приложение №5 → искане приложение №6 + информация приложение №2",
+        "Критерии на чл.93 ЗООС, консултации/РЗИ, обществен достъп, компетентност, права на уведомителя, такса според реда"
+      ],
+      "evidentiary_controls": [
+        "ovos_annex5_intake",
+        "ovos_annex6_request",
+        "ovos_annex2_information",
+        "consultations_publicity",
+        "screening_decision_gate"
+      ],
+      "material_risk": "Не издавай решение само след уведомление приложение №5",
+      "example_input_case": "Един казус с първоначално уведомление, последващо искане и информация за преценяване",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 8,
+      "result_label": "Решение по ОВОС",
+      "result_class": "administrative_act",
+      "procedural_family": "OVOS",
+      "initiating_document": "Уведомление за ИП и развитие на производство по задължителна или постановена ОВОС",
+      "form_class": "procedure_sequence",
+      "form_reference": "Приложение №5, последвано от документацията и исканията по приложимите раздели на Наредбата за ОВОС; няма основание да се твърди, че едно искане само задейства крайното решение",
+      "official_source": "https://www.moew.government.bg/bg/prevantivna-dejnost/ovos/obrazci-na-zayavleniya-ovos/",
+      "applicability_conditions": [
+        "Уведомление приложение №5 → процедура ОВОС с пълна оценъчна документация",
+        "Доклад ОВОС, обхват, варианти, консултации, обществено обсъждане, становища, мерки"
+      ],
+      "evidentiary_controls": [
+        "ovos_initial_intake",
+        "eia_report",
+        "public_consultations",
+        "competence_decision_gate"
+      ],
+      "material_risk": "Различавай решението по ОВОС от скрининговото решение №07",
+      "example_input_case": "Пълно уведомление, решение за обхват, доклад по ОВОС, консултации и обществено обсъждане — един казус",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 9,
+      "result_label": "Прекратяване на процедура",
+      "result_class": "procedural_action",
+      "procedural_family": "OS/OVOS/EO",
+      "initiating_document": "Преписка с възникнало предвидено от закона основание за прекратяване",
+      "form_class": "derived_from_parent",
+      "form_reference": "Не е самостоятелно входно заявление; възможно е оттегляне или неизпълнение на указания според приложимия ред",
+      "official_source": null,
+      "applicability_conditions": [
+        "Образувано производство и конкретен повод за прекратяване",
+        "Норма, основание, указания, връчване, срок, доказателства и компетентен орган"
+      ],
+      "evidentiary_controls": [
+        "parent_procedure_exists",
+        "termination_legal_ground",
+        "notice_and_deadline_proof",
+        "competence_form"
+      ],
+      "material_risk": "Не допускай общо прекратяване без клон ОС/ОВОС/ЕО/АПК",
+      "example_input_case": "Преписка с надлежно отправени указания и доказателства за неизпълнение",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 10,
+      "result_label": "Писмо за необходимите действия по ЕО",
+      "result_class": "procedural_action",
+      "procedural_family": "EO",
+      "initiating_document": "Уведомление за изготвяне на план или програма",
+      "form_class": "official_annex",
+      "form_reference": "Приложение №3 към чл. 8, ал. 1 от Наредбата за ЕО",
+      "official_source": "https://www.moew.government.bg/bg/prevantivna-dejnost/ekologichna-ocenka/obrazci-na-zayavleniya/",
+      "applicability_conditions": [
+        "Уведомление за план/програма — приложение №3 Наредба ЕО",
+        "Предмет на план/програма, обхват, цел и предвиждания, задание, компетентност"
+      ],
+      "evidentiary_controls": [
+        "eo_annex3_intake",
+        "plan_scope",
+        "competence_confirmed"
+      ],
+      "material_risk": "Не смесвай план/програма с инвестиционно предложение",
+      "example_input_case": "Попълнено уведомление за изменение на план с териториален обхват и цели",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 11,
+      "result_label": "Решение за преценяване необходимостта от ЕО",
+      "result_class": "administrative_act",
+      "procedural_family": "EO",
+      "initiating_document": "Уведомление за план/програма, последвано от искане за преценяване необходимостта от ЕО",
+      "form_class": "official_annex_sequence",
+      "form_reference": "Приложение №3 към чл. 8, ал. 1 → приложение №4 към чл. 8а, ал. 1 от Наредбата за ЕО",
+      "official_source": "https://www.moew.government.bg/bg/prevantivna-dejnost/ekologichna-ocenka/obrazci-na-zayavleniya/",
+      "applicability_conditions": [
+        "Уведомление приложение №3 → искане приложение №4 Наредба ЕО",
+        "Характеристики на плана, вероятни ефекти, консултации и приложим ОС клон"
+      ],
+      "evidentiary_controls": [
+        "eo_annex3_intake",
+        "eo_annex4_request",
+        "consultations_and_os_if_needed",
+        "competence_decision_gate"
+      ],
+      "material_risk": "Не постановявай решение по ЕО само от уведомлението",
+      "example_input_case": "Уведомление за ПУП/програма и обосновано последващо искане по приложение №4",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 12,
+      "result_label": "Становище по ЕО",
+      "result_class": "administrative_act",
+      "procedural_family": "EO",
+      "initiating_document": "Уведомление за план/програма и искане за издаване на становище по ЕО",
+      "form_class": "official_annex_sequence",
+      "form_reference": "Приложение №3 към чл. 8, ал. 1; приложение №5 към чл. 23, ал. 1 от Наредбата за ЕО; доклад и консултации",
+      "official_source": "https://www.moew.government.bg/bg/prevantivna-dejnost/ekologichna-ocenka/obrazci-na-zayavleniya/",
+      "applicability_conditions": [
+        "Уведомление приложение №3 → доклад по ЕО и искане приложение №5",
+        "Завършена процедура по ЕО, доклад, алтернативи, консултации, публичност, мерки"
+      ],
+      "evidentiary_controls": [
+        "eo_annex3_intake",
+        "eo_report_and_consultations",
+        "eo_annex5_request",
+        "special_opinion_gate"
+      ],
+      "material_risk": "Становището е специален административен резултат, а не свободно служебно писмо",
+      "example_input_case": "Уведомление, доклад по ЕО, консултации и искане за становище по един план",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 13,
+      "result_label": "Експертно обобщение",
+      "result_class": "internal_tool",
+      "procedural_family": "all",
+      "initiating_document": "Възложена експертна работа по конкретна преписка",
+      "form_class": "internal_trigger",
+      "form_reference": "Няма самостоятелен нормативен образец; началното основание е възложена задача и регистрирана преписка",
+      "official_source": null,
+      "applicability_conditions": [
+        "Служебна задача за вътрешна експертна справка",
+        "Установен обхват и проверени факти с източници/датировка"
+      ],
+      "evidentiary_controls": [
+        "task_registered",
+        "facts_sources_traceable"
+      ],
+      "material_risk": "Няма външен нормативно задължителен входен образец",
+      "example_input_case": "Писмо/уведомление и комплектовани материали за вътрешна справка",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 14,
+      "result_label": "Проверка на пълнота и допустимост",
+      "result_class": "internal_tool",
+      "procedural_family": "all",
+      "initiating_document": "Получена преписка за контрол на редовност и пълнота",
+      "form_class": "internal_trigger",
+      "form_reference": "Няма универсална бланка за вътрешен контролен лист; конкретните входове следват изискванията за основната процедура",
+      "official_source": null,
+      "applicability_conditions": [
+        "Проверка на регистрирана преписка",
+        "Матрица на реквизити според приложимия първичен образец, липси, несъответствия"
+      ],
+      "evidentiary_controls": [
+        "dossier_registered",
+        "specific_form_requirements_indexed"
+      ],
+      "material_risk": "Не определяй липсата като нарушение без приложимата правна норма",
+      "example_input_case": "Внесено непълно уведомление и матрица за проверка на всички раздели",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 15,
+      "result_label": "ГИС справка за имоти и режими",
+      "result_class": "internal_tool",
+      "procedural_family": "all",
+      "initiating_document": "Заявена или служебно необходима пространствена проверка по преписка",
+      "form_class": "internal_trigger",
+      "form_reference": "Няма нов нормативен входен формуляр; ПИ MASTER и ГИС MASTER се използват повторно",
+      "official_source": null,
+      "applicability_conditions": [
+        "Имотна/пространствена задача в рамките на преписка",
+        "Валидни имотни номера, ЕКАТТЕ, дата на ГИС слоевете, пресичания и размери"
+      ],
+      "evidentiary_controls": [
+        "parcel_identifiers_verified",
+        "gis_layers_dated"
+      ],
+      "material_risk": "Не извеждай процедурен извод само от пресичане; ползвай ГИС и ПИ MASTER",
+      "example_input_case": "Данни за имоти и схема, сверени с официални кадастрални и природозащитни слоеве",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 16,
+      "result_label": "Архивен пакет",
+      "result_class": "internal_tool",
+      "procedural_family": "all",
+      "initiating_document": "Завършена или текуща преписка, подлежаща на подреждане и архивиране",
+      "form_class": "internal_trigger",
+      "form_reference": "Няма отделен универсален нормативен образец за техническата операция",
+      "official_source": null,
+      "applicability_conditions": [
+        "Преписка или нареждане за архивно извлечение",
+        "Версии, хешове, оригинал срещу проект, контрол на достъп и хронология"
+      ],
+      "evidentiary_controls": [
+        "dossier_versions_indexed",
+        "archive_integrity_verified"
+      ],
+      "material_risk": "Не създавай несъществуващи действия и документи",
+      "example_input_case": "Комплектовка на документи и версии с манифест и хешове",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 17,
+      "result_label": "Жалба — квалификация",
+      "result_class": "procedural_intake",
+      "procedural_family": "APK/special",
+      "initiating_document": "Жалба срещу акт, отказ или бездействие — след установяване на правилния ред",
+      "form_class": "regulated_free_form",
+      "form_reference": "Писмена жалба с изискуемо съдържание по АПК чл. 85 или чл. 150 и приложения по чл. 151 при съдебно оспорване; не е установена универсална задължителна бланка",
+      "official_source": "https://portal.justice.government.bg/home/normdoc/2135521015",
+      "applicability_conditions": [
+        "Жалба срещу конкретен акт, отказ или бездействие",
+        "Оспорван предмет, правен интерес, компетентен орган, срок, допустимост"
+      ],
+      "evidentiary_controls": [
+        "challenge_object_qualified",
+        "deadline_interest_checked",
+        "appeal_route_selected"
+      ],
+      "material_risk": "Разграничавай административно и съдебно обжалване",
+      "example_input_case": "Попълнена жалба срещу конкретно решение, с оспорван акт, мотиви, срок и доказателства",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 18,
+      "result_label": "Сигнал — решение или уведомяване",
+      "result_class": "procedural_intake",
+      "procedural_family": "APK/special",
+      "initiating_document": "Сигнал от лице или организация, включително допустим устен/електронен начин",
+      "form_class": "regulated_free_form",
+      "form_reference": "АПК чл. 107 и чл. 111 (ако няма специален ред). Не е установена задължителна единна бланка",
+      "official_source": "https://portal.justice.government.bg/home/normdoc/2135521015",
+      "applicability_conditions": [
+        "Сигнал от физическо или юридическо лице",
+        "Факти, място, време, данни за подателя, специален контролен ред и компетентност"
+      ],
+      "evidentiary_controls": [
+        "signal_facts_registered",
+        "competence_special_law_checked"
+      ],
+      "material_risk": "Не прилагай АПК глава осма механично, ако има специален ред",
+      "example_input_case": "Сигнал с конкретни място, факти, период, участници и приложени доказателства",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 19,
+      "result_label": "Възражение",
+      "result_class": "procedural_intake",
+      "procedural_family": "OS/OVOS/EO/APK",
+      "initiating_document": "Възражение в рамките на текуща преписка",
+      "form_class": "regulated_free_form_conditional",
+      "form_reference": "Не е установен универсален нормативен формуляр; конкретният ред определя изисквания и срок",
+      "official_source": null,
+      "applicability_conditions": [
+        "Възражение в основна процедура",
+        "Процедура, етап, автор, факти, срок и приложими права за участие"
+      ],
+      "evidentiary_controls": [
+        "parent_proceeding_identified",
+        "objection_timely",
+        "participation_right_verified"
+      ],
+      "material_risk": "Не създавай отделен административен акт при липса на основание",
+      "example_input_case": "Възражение срещу данни от процедура с относимо доказателство и правен интерес",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 20,
+      "result_label": "Препращане по компетентност",
+      "result_class": "procedural_action",
+      "procedural_family": "APK/special",
+      "initiating_document": "Постъпило до некомпетентен орган искане, жалба, сигнал или предложение",
+      "form_class": "derived_from_parent",
+      "form_reference": "За предложения/сигнали АПК чл. 112, за други входове съответният чл. 31 или специална норма. Няма единен отделен формуляр за препращане",
+      "official_source": "https://portal.justice.government.bg/home/normdoc/2135521015",
+      "applicability_conditions": [
+        "Сезиране до орган без компетентност",
+        "Разграничен вход (искане/жалба/сигнал), надлежен орган, срок, известяване"
+      ],
+      "evidentiary_controls": [
+        "original_intake_classified",
+        "competent_recipient_identified",
+        "transfer_rule_verified"
+      ],
+      "material_risk": "Препращането наследява реда на първоначалния документ",
+      "example_input_case": "Постъпил сигнал, препратен с придружително писмо до компетентен орган",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 21,
+      "result_label": "Уведомяване за проверка",
+      "result_class": "procedural_action",
+      "procedural_family": "control/signal",
+      "initiating_document": "Подаден сигнал, контролно основание или служебно разпореждане за проверка",
+      "form_class": "mixed_trigger",
+      "form_reference": "Няма универсален входен формуляр; възможен сигнал в свободна форма и служебно начало",
+      "official_source": "https://portal.justice.government.bg/home/normdoc/2135521015",
+      "applicability_conditions": [
+        "Сигнал, планова проверка или служебно основание",
+        "Контролни правомощия, задания, протокол/констатации, доказателства"
+      ],
+      "evidentiary_controls": [
+        "control_basis_registered",
+        "inspection_evidence_recorded"
+      ],
+      "material_risk": "Не подменяй проверка с автоматично уведомление без реални констатации",
+      "example_input_case": "Сигнал за конкретно събитие и последващо възлагане и протокол за проверка",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    },
+    {
+      "id": 22,
+      "result_label": "Предложение — решение",
+      "result_class": "procedural_intake",
+      "procedural_family": "APK/special",
+      "initiating_document": "Предложение от лице или организация по АПК",
+      "form_class": "regulated_free_form",
+      "form_reference": "АПК чл. 107, 111, 117–118, когато няма специален ред; допустима писмена или устна форма, без универсално задължително заявление",
+      "official_source": "https://portal.justice.government.bg/home/normdoc/2135521015",
+      "applicability_conditions": [
+        "Предложение по АПК (не инвестиционно предложение)",
+        "Предмет, автор, компетентност, възможност за разглеждане и специална процедура"
+      ],
+      "evidentiary_controls": [
+        "proposal_type_qualified",
+        "competence_special_rule_checked"
+      ],
+      "material_risk": "Не представяй предложението за инвестиционно уведомление",
+      "example_input_case": "Предложение за подобряване на организацията на конкретна административна дейност",
+      "example_output_link_status": "NOT_YET_MATCHED",
+      "relevant_legal_version_status": "PENDING_FINAL_DV_AND_ARCHIVE_CHECK",
+      "competent_authority_status": "NEEDS_CASE_SPECIFIC_CONFIRMATION",
+      "can_generate_official_act": false,
+      "expert_acceptance": "PENDING",
+      "legal_status": "PRELIMINARY_WORKING_PASSPORT",
+      "source_documents": [
+        "kt80/KT80_E01_B2_PASSPORTS_06_22_V01.md",
+        "kt80/KT80_E01_V2_22_NORMATIVE_INPUTS_MATRIX_V01.json"
+      ]
+    }
+  ]
+}
