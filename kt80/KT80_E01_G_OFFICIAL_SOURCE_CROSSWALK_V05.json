@@ -1,0 +1,161 @@
+{
+  "schema": "kt80-e01-g-legal-crosswalk-v05",
+  "date": "2026-11-11",
+  "source_scope": "МОСВ официални каталози и текст Наредба ЕО; Министерство на правосъдието АПК",
+  "scope_count": 8,
+  "limitations": "Потвърдено съществуване и идентификатори на образци и чл. АПК. Не е пълна верификация по ДВ на актуална редакция, не означава юридически приет маршрут.",
+  "records": [
+    {
+      "id": 4,
+      "anchors": [
+        {
+          "rule": "Наредба ОВОС, приложение №5 към чл.4, ал.1",
+          "status": "OFFICIAL_CATALOG_CONFIRMED",
+          "uri": "https://www.moew.government.bg/bg/prevantivna-dejnost/ovos/obrazci-na-zayavleniya-ovos/"
+        }
+      ],
+      "gate": "Предварително уведомление не е искане за решение по преценяване.",
+      "full_revision_to_2026_verified": false,
+      "underlying_source_archived_physically": false,
+      "expert_acceptance": "PENDING"
+    },
+    {
+      "id": 7,
+      "anchors": [
+        {
+          "rule": "Наредба ОВОС, приложение №5 към чл.4, ал.1",
+          "status": "OFFICIAL_CATALOG_CONFIRMED",
+          "uri": "https://www.moew.government.bg/bg/prevantivna-dejnost/ovos/obrazci-na-zayavleniya-ovos/"
+        },
+        {
+          "rule": "Наредба ОВОС, приложение №6 към чл.6, ал.1",
+          "status": "OFFICIAL_CATALOG_CONFIRMED",
+          "uri": "https://www.moew.government.bg/bg/prevantivna-dejnost/ovos/obrazci-na-zayavleniya-ovos/"
+        },
+        {
+          "rule": "Наредба ОВОС, приложение №2 към чл.6",
+          "status": "OFFICIAL_CATALOG_CONFIRMED",
+          "uri": "https://www.moew.government.bg/bg/prevantivna-dejnost/ovos/obrazci-na-zayavleniya-ovos/"
+        }
+      ],
+      "gate": "Трите документа имат различни функции и не се заместват един друг.",
+      "full_revision_to_2026_verified": false,
+      "underlying_source_archived_physically": false,
+      "expert_acceptance": "PENDING"
+    },
+    {
+      "id": 10,
+      "anchors": [
+        {
+          "rule": "Наредба ЕО, приложение №3 към чл.8, ал.1",
+          "status": "OFFICIAL_RULE_AND_CATALOG_CONFIRMED",
+          "uri": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ekologichna-ocenka-na-planove-i-programi/"
+        }
+      ],
+      "gate": "Изисква се установяване, че предметът действително е план/програма.",
+      "full_revision_to_2026_verified": false,
+      "underlying_source_archived_physically": false,
+      "expert_acceptance": "PENDING"
+    },
+    {
+      "id": 11,
+      "anchors": [
+        {
+          "rule": "Наредба ЕО, приложение №3 към чл.8, ал.1",
+          "status": "OFFICIAL_RULE_AND_CATALOG_CONFIRMED",
+          "uri": "https://www.moew.government.bg/bg/prevantivna-dejnost/ekologichna-ocenka/obrazci-na-zayavleniya/"
+        },
+        {
+          "rule": "Наредба ЕО, приложение №4 към чл.8а, ал.1",
+          "status": "OFFICIAL_CATALOG_CONFIRMED",
+          "uri": "https://www.moew.government.bg/bg/prevantivna-dejnost/ekologichna-ocenka/obrazci-na-zayavleniya/"
+        }
+      ],
+      "gate": "Уведомление и искане са последователни етапи, не един и същ документ.",
+      "full_revision_to_2026_verified": false,
+      "underlying_source_archived_physically": false,
+      "expert_acceptance": "PENDING"
+    },
+    {
+      "id": 12,
+      "anchors": [
+        {
+          "rule": "Наредба ЕО, приложение №3 към чл.8, ал.1",
+          "status": "OFFICIAL_RULE_AND_CATALOG_CONFIRMED",
+          "uri": "https://www.moew.government.bg/bg/prevantivna-dejnost/ekologichna-ocenka/obrazci-na-zayavleniya/"
+        },
+        {
+          "rule": "Наредба ЕО, приложение №5 към чл.23, ал.1",
+          "status": "OFFICIAL_CATALOG_CONFIRMED",
+          "uri": "https://www.moew.government.bg/bg/prevantivna-dejnost/ekologichna-ocenka/obrazci-na-zayavleniya/"
+        }
+      ],
+      "gate": "Самият образец не е достатъчен за становище по ЕО без изискуемата оценъчна процедура.",
+      "full_revision_to_2026_verified": false,
+      "underlying_source_archived_physically": false,
+      "expert_acceptance": "PENDING"
+    },
+    {
+      "id": 18,
+      "anchors": [
+        {
+          "rule": "АПК чл.107, ал.2 — специален закон с различен ред има приоритет",
+          "status": "OFFICIAL_STATUTE_TEXT_CONFIRMED",
+          "uri": "https://justice.government.bg/home/normdoc/2135521015"
+        },
+        {
+          "rule": "АПК чл.111, ал.1–4 — писмени или устни предложения/сигнали, ред за регистрация и ограничения",
+          "status": "OFFICIAL_STATUTE_TEXT_CONFIRMED",
+          "uri": "https://justice.government.bg/home/normdoc/2135521015"
+        }
+      ],
+      "gate": "Няма универсално задължителен нормативен формуляр за сигнал по общия ред на АПК.",
+      "full_revision_to_2026_verified": false,
+      "underlying_source_archived_physically": false,
+      "expert_acceptance": "PENDING"
+    },
+    {
+      "id": 20,
+      "anchors": [
+        {
+          "rule": "АПК чл.112 — предложения и сигнали, препращане до 7 дни и уведомяване",
+          "status": "OFFICIAL_STATUTE_TEXT_CONFIRMED",
+          "uri": "https://justice.government.bg/home/normdoc/2135521015"
+        },
+        {
+          "rule": "АПК чл.31 — проверява се отделно за заявления и искания",
+          "status": "REFERENCE_NEEDS_DETAILED_CHECK",
+          "uri": "https://justice.government.bg/home/normdoc/2135521015"
+        }
+      ],
+      "gate": "Срокът по чл.112 не се пренася механично към всеки тип сезиране.",
+      "full_revision_to_2026_verified": false,
+      "underlying_source_archived_physically": false,
+      "expert_acceptance": "PENDING"
+    },
+    {
+      "id": 22,
+      "anchors": [
+        {
+          "rule": "АПК чл.107, ал.3 — предмет на предложение; изключение при специален ред, ал.2",
+          "status": "OFFICIAL_STATUTE_TEXT_CONFIRMED",
+          "uri": "https://justice.government.bg/home/normdoc/2135521015"
+        },
+        {
+          "rule": "АПК чл.111 — допустима писмена/устна форма",
+          "status": "OFFICIAL_STATUTE_TEXT_CONFIRMED",
+          "uri": "https://justice.government.bg/home/normdoc/2135521015"
+        },
+        {
+          "rule": "АПК чл.118 — решение по предложение, общи срокове и уведомяване",
+          "status": "OFFICIAL_STATUTE_TEXT_CONFIRMED",
+          "uri": "https://justice.government.bg/home/normdoc/2135521015"
+        }
+      ],
+      "gate": "Предложение по АПК е различно от инвестиционно предложение по ЗООС.",
+      "full_revision_to_2026_verified": false,
+      "underlying_source_archived_physically": false,
+      "expert_acceptance": "PENDING"
+    }
+  ]
+}
