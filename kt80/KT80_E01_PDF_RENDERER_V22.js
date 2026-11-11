@@ -39,10 +39,10 @@ function wrap(ctx,text,maxWidth){
   let line='';for(const word of paragraph.split(/\s+/)){const next=line?line+' '+word:word;if(ctx.measureText(next).width>maxWidth&&line){out.push(line);line=word}else line=next}out.push(line);
  }return out;
 }
-function drawSVG(ctx,svg,x,y,w){
+function drawSVG(ctx,svg,x,y,w,maxHeight){
  return new Promise((resolve,reject)=>{
   const blob=new Blob([svg],{type:'image/svg+xml'}),url=URL.createObjectURL(blob),im=new Image();
-  im.onload=()=>{try{const h=w*(im.naturalHeight||410)/(im.naturalWidth||700);ctx.drawImage(im,x,y,w,h);resolve(h)}catch(e){reject(Error('Неуспешно изчертаване на имотната геометрия: '+e.message))}finally{URL.revokeObjectURL(url)}};
+  im.onload=()=>{try{const naturalW=im.naturalWidth||700,naturalH=im.naturalHeight||410;const factor=maxHeight?Math.min(1,maxHeight/(w*naturalH/naturalW)):1;const drawW=w*factor,h=drawW*naturalH/naturalW;ctx.drawImage(im,x+(w-drawW)/2,y,drawW,h);resolve(h)}catch(e){reject(Error('Неуспешно изчертаване на имотната геометрия: '+e.message))}finally{URL.revokeObjectURL(url)}};
   im.onerror=()=>{URL.revokeObjectURL(url);reject(Error('SVG геометрията не може да бъде заредена като изображение.'))};
   im.src=url;
  });
@@ -80,7 +80,7 @@ async function generate(def){
    }
    y=top+cardHeight+12;continue;
   }
-  if(item.svg){const h=680;if(y+h>H-100){finish();start()}const drawn=await drawSVG(ctx,item.svg,M,y,W-2*M);y+=drawn+20;continue}
+  if(item.svg){const maxHeight=Number(item.maxHeight)||680;if(y+maxHeight>H-105){finish();start()}const drawn=await drawSVG(ctx,item.svg,M,y,W-2*M,maxHeight);y+=drawn+20;continue}
   const title=item.style==='heading',sub=item.style==='sub';
   ctx.font=(title?'bold 35px':sub?'bold 26px':item.bold?'bold 22px':'22px')+' Arial';
   ctx.fillStyle='#173d30';
