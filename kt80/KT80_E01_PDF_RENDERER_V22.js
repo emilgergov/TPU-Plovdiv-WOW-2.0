@@ -63,6 +63,27 @@ async function generate(def){
    const drawRow=(cells,header)=>{ctx.font=(header?'bold 17px':'17px')+' Arial';const lines=cells.map(v=>wrap(ctx,String(v??''),cellW-14));const rh=Math.max(37,...lines.map(x=>x.length*24+14));if(y+rh>H-100){finish();start();if(!header&&rows.length){drawRow(rows[0],true)}}ctx.fillStyle=header?'#e3efe8':'#ffffff';ctx.fillRect(M,y,available,rh);ctx.strokeStyle='#b6c9bf';ctx.strokeRect(M,y,available,rh);ctx.fillStyle='#153e2e';for(let c=0;c<cols;c++){if(c)ctx.beginPath(),ctx.moveTo(M+c*cellW,y),ctx.lineTo(M+c*cellW,y+rh),ctx.stroke();(lines[c]||[]).forEach((line,k)=>ctx.fillText(line,M+c*cellW+7,y+23+k*24))}y+=rh};
    rows.forEach((cells,i)=>drawRow(cells,i===0));y+=12;continue;
   }
+  if(item.parcelGrid){
+   // Compact GIS-only multi-parcel panels. Two columns; page breaks only when a whole row does not fit.
+   const cards=item.parcelGrid, gap=18, cardW=(W-2*M-gap)/2,cardH=410;
+   for(let i=0;i<cards.length;i+=2){
+    if(y+cardH>H-105){finish();start()}
+    const top=y;
+    for(let j=0;j<2&&i+j<cards.length;j++){
+     const card=cards[i+j],x=M+j*(cardW+gap);
+     ctx.fillStyle='#f2f8f3';ctx.fillRect(x,top,cardW,cardH-7);
+     ctx.strokeStyle='#bfd3c5';ctx.strokeRect(x,top,cardW,cardH-7);
+     ctx.font='bold 19px Arial';ctx.fillStyle='#173d30';ctx.fillText('ПИ '+String(card.id||''),x+12,top+28,cardW-24);
+     await drawSVG(ctx,card.svg,x+11,top+43,cardW-22,270);
+     ctx.font='15px Arial';ctx.fillStyle='#173d30';let rowY=top+348;
+     for(const line of wrap(ctx,String(card.caption||''),cardW-25).slice(0,2)){
+      ctx.fillText(line,x+12,rowY);rowY+=21;
+     }
+    }
+    y=top+cardH+9;
+   }
+   continue;
+  }
   if(item.columns){
    const cards=item.columns.filter(c=>c&&Array.isArray(c.stack));
    const cardHeight=360;
