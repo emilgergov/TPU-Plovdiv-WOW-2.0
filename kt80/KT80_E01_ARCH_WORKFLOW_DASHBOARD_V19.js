@@ -51,6 +51,7 @@ async function process(){
   if(!isCurrent())return;
   intakeResults(result);
   if(root.KT80IPMaster){const draft=root.KT80IPMaster.build(result);if(!isCurrent())return;root.KT80IPMasterDraft=draft;root.KT80IPMaster.render(draft);}
+  if(root.KT80SubjectMaster){const subject=root.KT80SubjectMaster.propose(result);if(isCurrent())root.KT80SubjectMaster.show(subject,{apply:true});}
   if(typeof root.KT80FormMatcher?.compare==='function')await root.KT80FormMatcher.compare(result,{isCurrent,signal:state.abort.signal});
   if(!isCurrent())return;
   say('Прочитът приключи. Следва проверка на предмета и имотите от експерта.');
@@ -64,7 +65,10 @@ function confirmSubject(){
  const value=$('kt80SubjectText').value.trim();
  if(!value)return say('Въведете или редактирайте предмета.');
  if(!$('kt80SubjectConfirmation').checked)return say('Потвърдете предмета като експерт.');
- invalidate(3);state.subjectConfirmed={text:value,source:state.fileName,expertConfirmed:true};go(3);
+ invalidate(3);
+ const accepted=root.KT80SubjectMaster?.confirmedSubject?.();
+ state.subjectConfirmed={text:value,source:accepted?.source||state.fileName,expertConfirmed:true,mode:accepted?.mode||'EXPERT_ENTERED'};
+ go(3);
 }
 function confirmParcels(){
  const raw=$('kt80ParcelInput').value.trim();
@@ -144,7 +148,7 @@ function init(){
  $('kt80ParcelInput').addEventListener('input',()=>invalidate(3));
  $('kt80LegalNotes').addEventListener('input',()=>invalidate(4));
  $('kt80Authority').addEventListener('change',()=>invalidate(4));
- $('kt80InputFile').addEventListener('change',()=>{++state.generation;if(state.abort){state.abort.abort();state.abort=null}$('kt80ProcessFile').disabled=false;state.fileName=null;state.intake=null;invalidate(2);$('kt80InputStatus').textContent='Избран файл: '+($('kt80InputFile').files?.[0]?.name||'няма')+'. Натиснете „Обработи преписката“.'});
+ $('kt80InputFile').addEventListener('change',()=>{root.KT80SubjectMaster?.reset?.();++state.generation;if(state.abort){state.abort.abort();state.abort=null}$('kt80ProcessFile').disabled=false;state.fileName=null;state.intake=null;invalidate(2);$('kt80InputStatus').textContent='Избран файл: '+($('kt80InputFile').files?.[0]?.name||'няма')+'. Натиснете „Обработи преписката“.'});
  go(1);root.KT80WorkflowState=state;root.KT80ResetCurrentCase=resetAll;
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
