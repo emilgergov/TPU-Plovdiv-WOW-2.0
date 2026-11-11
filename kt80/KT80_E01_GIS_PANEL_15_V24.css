@@ -84,3 +84,10 @@ body[data-kt80-view="gis"] #kt80FreeGISScreen{display:block}
 @media(max-width:430px){
  #kt80FreeGISScreen #kt80GISDetail,#kt80FreeGISScreen .kt80-pi-card{grid-template-columns:1fr}
 }
+
+/* KT80 V26: visible validation feedback, red GIS context marker, no duplicate spatial heading. */
+#kt80FreeGISScreen #kt80GISFreeCheckStatus[data-check="valid"]{color:#f6e5aa;font-weight:650}
+#kt80FreeGISScreen #kt80GISFreeCheckStatus[data-check="invalid"]{color:#ffd5c3;font-weight:700}
+#kt80FreeGISScreen .kt80-parcel-locator{pointer-events:none}
+#kt80FreeGISScreen .kt80-parcel-locator-label{fill:#ba1224;stroke:#fff;stroke-width:4;paint-order:stroke;font:bold 18px Arial,sans-serif;pointer-events:none}
+#kt80FreeGISScreen .kt80-gis-detail>strong{display:none}
