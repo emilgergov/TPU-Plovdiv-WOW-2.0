@@ -1,0 +1,119 @@
+{
+  "schema": "kt80-e01-arch-v10",
+  "date": "2026-11-11",
+  "status": "ARCHITECTURE_IMPLEMENTED_CONNECTORS_PENDING",
+  "decisions": [
+    {
+      "id": "A01",
+      "status": "ACCEPTED",
+      "rule": "V27.35 is separate read-only reference application; KT80 is independent main workflow"
+    },
+    {
+      "id": "A02",
+      "status": "ACCEPTED",
+      "rule": "Route 01 developed natively in common KT80, not by copying Classic A/B or Expert locked paragraphs"
+    },
+    {
+      "id": "A03",
+      "status": "ACCEPTED",
+      "rule": "All incoming IN case documents preserve original form; user-created official OUT documents use RIOSV Plovdiv letterhead; technical products exempt"
+    },
+    {
+      "id": "A04",
+      "status": "ACCEPTED",
+      "rule": "Reusable functions via adapters and contracts only; no direct legacy app scripting or speculative API fields"
+    },
+    {
+      "id": "A05",
+      "status": "ACCEPTED",
+      "rule": "AI can compose expert reasoning only from cited verified evidence and verified law; expert approval required"
+    },
+    {
+      "id": "A06",
+      "status": "ACCEPTED",
+      "rule": "22 catalogue entries are provisional paths, not 22 approved independent administrative acts"
+    }
+  ],
+  "legacy": {
+    "canonical_path": "v26-test/v27-preview/KT79_25_V27_35_STABLE_WORKING_BLOCK06.html",
+    "sha": "1dcd099823fb76f207d8b950d66bb26f1201b666",
+    "support_script": "v26-test/v27-preview/kt68-eg-workspace.js",
+    "support_sha": "7d87ca77f8baeacf8bf34858f05a76511b165e3a",
+    "capsule": "kt80/legacy/KT80_V27_35_REFERENCE_CAPSULE_V10.html",
+    "isolation": "iframe separate page; canonical source unchanged"
+  },
+  "ports": [
+    {
+      "id": "CASE_IN",
+      "source": "v26-test/v27-preview/KT79_25_V27_35_STABLE_WORKING_BLOCK06.html",
+      "purpose": "Upload/read ZIP, PDF, DOCX, images; retain originals and provenance",
+      "status": "INVENTORY_ONLY"
+    },
+    {
+      "id": "SUBJECT_MASTER",
+      "source": "new KT80",
+      "purpose": "Derive expert-confirmable subject and technical attributes from case documents",
+      "status": "DESIGN_PENDING"
+    },
+    {
+      "id": "PI_MASTER",
+      "source": "existing V27 estate and cadastral data",
+      "purpose": "Normalize parcel IDs, EKATTE and administrative attributes, verify cadastral geometry",
+      "status": "ADAPTER_PENDING"
+    },
+    {
+      "id": "GIS_MASTER",
+      "source": "existing V27 estate and spatial layers",
+      "purpose": "Reproduce intersecting Natura/territory facts with authoritative layer and date",
+      "status": "ADAPTER_PENDING"
+    },
+    {
+      "id": "NORMATIVE_MASTER",
+      "source": "v26-test/normative/offline/TPU_Plovdiv_Normative_Archive_KT77_R11.zip",
+      "purpose": "Check citations, effective date, competent body, specific legal gates; no invention",
+      "status": "ARCHIVE_INCOMPLETE_55_OF_60"
+    },
+    {
+      "id": "OUT_GENERATION",
+      "source": "new KT80; V27.35 output used only as visual reference",
+      "purpose": "Output only validated draft on confirmed RIOSV Plovdiv letterhead",
+      "status": "LETTERHEAD_BINARY_NOT_VERIFIED"
+    }
+  ],
+  "contracts": {
+    "document": {
+      "direction": [
+        "IN",
+        "OUT",
+        "INTERNAL"
+      ],
+      "original_immutable": true,
+      "source_uri": "required_for_IN",
+      "sha256": "when available",
+      "legal_provenance": "required_for_OUT_legal_claims",
+      "template_policy": "OUT_OFFICIAL_RIOSV_FORM_ONLY"
+    },
+    "evidence": {
+      "value": "nullable",
+      "source_id": "nullable",
+      "status": [
+        "VERIFIED",
+        "UNVERIFIED",
+        "MISSING"
+      ],
+      "expert_override": "separate_versioned_record"
+    },
+    "generator": {
+      "route": "verified_route_id",
+      "authority": "verified_competent_body",
+      "output_kind": [
+        "LETTER",
+        "DECISION",
+        "OPINION",
+        "INTERNAL"
+      ],
+      "allow_final_export": "false_until_legal_evidence_and_template_pass"
+    }
+  },
+  "protected_stable_untouched": true
+}
