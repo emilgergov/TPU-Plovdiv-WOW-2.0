@@ -108,7 +108,12 @@ function build(intake,ip,semantic,parameterQA,opts={}){
  const reliableTypeCandidates=types.filter(k=>byRule.get(k).some(f=>!neg.test(f.excerpt)&&determineTense(f.excerpt)!=='СЪЩЕСТВУВАЩО — КАНДИДАТ'));
  const isMixed=reliableTypeCandidates.length>1;
  const sourceTitle=ip?.proposedSubject&&ip.proposedSubject!=='НЯМА ДАННИ'?ip.proposedSubject:(intake?.subject_candidates||[]).map(x=>typeof x==='string'?x:x?.title).find(Boolean)||'';
- const subjectCandidate=sourceTitle?normalizeSubject(sourceTitle):'НЯМА ДАННИ';
+ const excludedSubject=sourceTitle&&issues.some(x=>{
+  const source=lc(sourceTitle),origin=lc(x.original);
+  if(x.document&&ip?.subjectSource&&x.document!==ip.subjectSource)return false;
+  return !!origin&&(origin===source||origin.includes(source)||source.includes(origin));
+ });
+ const subjectCandidate=excludedSubject?'НЯМА НАДЕЖДЕН КАНДИДАТ — ОСПОРЕН ИЗТОЧНИК':sourceTitle?normalizeSubject(sourceTitle):'НЯМА ДАННИ';
  const technical=Array.isArray(parameterQA?.entries)?parameterQA.entries:[];
  const approved=(opts.parameterMaster||root.KT80ParameterQA)?.allowed?.()||[];
  const rejectedIds=new Set(technical.filter(x=>x.evidenceExcluded).map(x=>x.id));
@@ -120,6 +125,7 @@ function build(intake,ip,semantic,parameterQA,opts={}){
  const confirmedParameters=approved.filter(x=>!rejectedIds.has(x.id)).map(x=>({...x}));
  const outstanding=[
   ...(issues.length?['Има оспорени/игнорирани доказателства; повторната оценка трябва да изключи съответните откъси.']:[]),
+  ...(excludedSubject?['Първоначалното предложение за предмет е основано на оспорен източник и е изключено от кандидатите.']:[]),
   ...(rejectedParameters.length?['Има експертно изключени технически стойности и свързаните с тях откъси се изключват от реконструкцията.']:[]),
   ...(isMixed?['Едновременно са засечени различни видове основна намеса; необходим е контекстен експертен преглед.']:[]),
   ...(files.some(x=>x.state==='UNSUPPORTED'||x.state==='NOT_READ')?['Има непрочетени материали. Преписката не може да бъде приета за изчерпателно анализирана.']:[]),
