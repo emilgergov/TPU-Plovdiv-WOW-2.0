@@ -52,6 +52,36 @@ function makeContext(checked,zoneFeatures){
  // Fail closed: the approved context builder must be available for the PDF1 overview.
  throw Error('Контекстната карта от еталона V27.35 не е заредена.');
 }
+// Multi-parcel PDF1: independent, geographically fitted parcel map for each input parcel.
+// The underlying geometry and source measurements remain unchanged.
+function separateMap(parcel,zones){
+ const parcelFeatures=geom(parcel),id=String(parcel.input||parcel.cadnum||'');
+ const coords=g=>{const out=[];function walk(v){if(!Array.isArray(v))return;if(typeof v[0]==='number'&&typeof v[1]==='number'){if(Number.isFinite(v[0])&&Number.isFinite(v[1]))out.push(v);return}v.forEach(walk)}walk(g?.coordinates);return out};
+ const all=parcelFeatures.flatMap(f=>coords(f.geometry));if(!all.length)throw Error('Липсва геометрия за индивидуалната карта на '+id);
+ const xs=all.map(p=>p[0]),ys=all.map(p=>p[1]);
+ const b={minX:Math.min(...xs),maxX:Math.max(...xs),minY:Math.min(...ys),maxY:Math.max(...ys)};
+ const lat=(b.minY+b.maxY)/2*Math.PI/180,cos=Math.max(.3,Math.cos(lat));
+ const ww=Math.max((b.maxX-b.minX)*1.9,.0003),hh=Math.max((b.maxY-b.minY)*1.9,.0002);
+ const ratio=1000/650;let w=ww,h=hh;
+ if(w*cos/h>ratio)h=w*cos/ratio;else w=h*ratio/cos;
+ const midX=(b.minX+b.maxX)/2,midY=(b.minY+b.maxY)/2;
+ const project=p=>[500+(p[0]-midX)/w*1000,325-(p[1]-midY)/h*650];
+ const path=g=>{const parts=g?.type==='Polygon'?[g.coordinates]:g?.type==='MultiPolygon'?g.coordinates:[];return parts.map(poly=>poly.map(ring=>ring.map((p,i)=>(i?'L':'M')+project(p).map(n=>n.toFixed(2)).join(' ')).join(' ')+'Z').join(' ')).join(' ')};
+ const inView=p=>p[0]>=midX-w/2&&p[0]<=midX+w/2&&p[1]>=midY-h/2&&p[1]<=midY+h/2;
+ const elements=['<rect width="1000" height="650" fill="#e9f2ed"/>'];
+ for(const z of zones){if(!['Polygon','MultiPolygon'].includes(z.geometry?.type))continue;
+  const zz=coords(z.geometry);if(!zz.length)continue;
+  const minX=Math.min(...zz.map(p=>p[0])),maxX=Math.max(...zz.map(p=>p[0]));
+  const minY=Math.min(...zz.map(p=>p[1])),maxY=Math.max(...zz.map(p=>p[1]));
+  if(maxX<midX-w/2||minX>midX+w/2||maxY<midY-h/2||minY>midY+h/2)continue;
+  const d=path(z.geometry);if(d)elements.push('<path d="'+d+'" fill="#b0d6e1" fill-opacity=".13" stroke="#247fa5" stroke-width="2" stroke-dasharray="5 4"/>');
+ }
+ for(const f of parcelFeatures){const d=path(f.geometry);if(d)elements.push('<path d="'+d+'" fill="#a6d9be" stroke="#0c6440" stroke-width="4"/>')}
+ const center=project([midX,midY]);
+ elements.push('<circle cx="'+center[0]+'" cy="'+center[1]+'" r="8" fill="#df1e30" stroke="white" stroke-width="3"/>');
+ elements.push('<text x="'+(center[0]+16)+'" y="'+(center[1]-15)+'" font-family="Arial" font-size="24" font-weight="bold" fill="#b70f28" stroke="white" stroke-width="5" paint-order="stroke">'+id+'</text>');
+ return '<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="650" viewBox="0 0 1000 650">'+elements.join('')+'</svg>';
+}
 function bodyContent(checked,profiles,zones){
  const count=checked.length,date=new Date().toLocaleDateString('bg-BG');
  const overview=makeContext(checked,zones);
@@ -68,6 +98,17 @@ function bodyContent(checked,profiles,zones){
   {text:'Административна принадлежност на поземлените имоти',style:'sub',pageBreak:'before'},
   ...list.map(x=>({text:x})),
  ];
+ if(count>1){
+  // Each parcel receives a distinct map, never a duplicate of the common map.
+  // Keep the administrative/ZZ/ZT tables as a separate coherent final section.
+  content.push({text:'Индивидуални картографски извлечения по поземлени имоти',style:'sub',pageBreak:'before'});
+  for(let i=0;i<count;i++){
+   const id=String(checked[i].input||checked[i].cadnum);
+   content.push({text:'ПИ '+id+' · индивидуална карта',style:'sub',...(i?{pageBreak:'before'}:{})});
+   content.push({svg:separateMap(checked[i],zones),maxHeight:640});
+   content.push({text:list[i]});
+  }
+ }
  for(let i=0;i<checked.length;i++){
   const n=checked[i].intersection_verified_outside===true?nearestZone(checked[i],zones):null;
   if(n)content.push({text:'Най-близка защитена зона до ПИ '+String(checked[i].input||checked[i].cadnum)+': '+n.code+' — '+n.name+' ('+n.meters.toLocaleString('bg-BG',{maximumFractionDigits:2})+' м).'});
