@@ -55,11 +55,21 @@ function render(analysis){
  host.append(e('p','Извлечени теми: '+analysis.unverifiedFieldCount+' · НЯМА ДАННИ: '+analysis.missingFieldCount+'. Нито един откъс не е автоматично доказан.'));
  for(const field of analysis.fields){
   const box=document.createElement('details');box.className='kt80-ip-topic';
-  const summary=e('summary',field.label+' · '+(field.status==='НЯМА ДАННИ'?'НЯМА ДАННИ':'има непотвърден откъс'));
-  box.append(summary);
-  if(!field.evidence.length)box.append(e('p','НЯМА ДАННИ — не означава, че въздействие или инфраструктура липсва.'));
-  else for(const x of field.evidence)box.append(e('p','Документ: '+x.document+' · Откъс: '+x.excerpt+' · Статус: непотвърден'));
-  if(field.hasMultipleStatements)box.append(e('p','Има повече от един източен откъс — необходим е контрол за противоречия и редакции.'));
+  const coverage=root.KT80EvidenceCoverage?.summarize(root.KT80DossierAudit,field.evidence.map(x=>x.document))||null;
+  const caption=coverage?root.KT80EvidenceCoverage.statusLabel(coverage,field.evidence.length>0):(field.status==='НЯМА ДАННИ'?'НЯМА ДАННИ В ИЗВЛЕЧЕНОТО':'ИМА НЕПОТВЪРДЕНИ ОТКЪСИ');
+  const summary=e('summary',field.label+' · '+caption);box.append(summary);
+  if(coverage){const hint=e('p',root.KT80EvidenceCoverage.brief(coverage));hint.className='kt80-coverage-detail';box.append(hint)}
+  if(!field.evidence.length)box.append(e('p','НЯМА ДАННИ само в извлечените откъси. Това не доказва липса на дейност, инфраструктура или въздействие. В Ч2 използвайте „Провери документи“.'));
+  else for(const x of field.evidence){
+   const card=document.createElement('div');card.className='kt80-ip-evidence-entry';
+   card.append(e('p','Документ: '+x.document+' · Откъс: '+x.excerpt+' · статус: непотвърден'));
+   const matching=root.KT80DossierAudit?.records?.find(f=>f.file===x.document);
+   const marker=e('span',matching?.state==='TEXT_EXTRACTED'?'🟢 ПРОЧЕТЕН':matching?.state==='REVIEW_REQUIRED'?'🟡 ЗА ПРОВЕРКА':matching?.state==='NOT_READ'||matching?.state==='UNSUPPORTED'?'🔴 НЕПРОЧЕТЕН':'◌ НЕУСТАНОВЕН ИЗТОЧНИК');marker.className='kt80-coverage-marker';card.prepend(marker);
+   if(matching&&root.KT80DossierOriginals?.openOriginal){
+    const btn=e('button','◉ Отвори оригинала');btn.type='button';btn.className='kt80-ch2-open';btn.addEventListener('click',()=>root.KT80DossierOriginals.openOriginal(x.document));card.append(btn);
+   }box.append(card);
+  }
+  if(field.hasMultipleStatements)box.append(e('p','Има повече от един изходен откъс — проверете дали това са повторения, редакции или противоречия.'));
   host.append(box);
  }
 }
