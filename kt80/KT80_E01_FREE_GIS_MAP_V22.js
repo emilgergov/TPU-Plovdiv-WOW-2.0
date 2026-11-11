@@ -82,7 +82,7 @@ function details(){
  const item=selected()||S.results[0];
  if(!item){host.textContent='Няма избран имот.';return}
  const head=document.createElement('strong');head.textContent='Избран имот: '+String(item.cadnum||item.input);host.append(head);
- const div=document.createElement('p');div.textContent='ГИС площ по източник: '+(item.area_m2_source??'НЯМА ДАННИ')+' кв. м';host.append(div);
+ const div=document.createElement('p');div.textContent='ГИС площ по източник: '+root.KT80Display.area(item.area_m2_source)+' кв. м';host.append(div);
  const zs=verified(item);const z=document.createElement('p');
  z.textContent=Array.isArray(item.verified_zone_intersections)?(zs.size?'Геометрично проверени ЗЗ: '+[...zs].join(', '):item.intersection_verified_outside===true?'Проверено отсъствие на пресичане с архивните ЗЗ':'НЯМА ДАННИ за потвърдени пресичания'):'Пресичанията не са проверени; визуализацията сама не е достатъчна.';
  host.append(z);
@@ -114,7 +114,7 @@ function status(t){const e=$('kt80GISStatus');if(e)e.textContent=t}
 function rows(){const el=$('kt80GISResults');if(!el)return;el.replaceChildren();
  for(const r of S.results){const row=document.createElement('button');row.type='button';row.className='kt80-gis-row';
  const id=String(r.cadnum||r.input);const strong=document.createElement('strong');strong.textContent=id;
- const span=document.createElement('span');span.textContent=featuresOf(r).length?'Имотна геометрия · '+(r.area_m2_source||'НЯМА ДАННИ')+' кв. м':'Няма потвърдена геометрия';
+ const span=document.createElement('span');span.textContent=featuresOf(r).length?'Имотна геометрия · '+root.KT80Display.area(r.area_m2_source)+' кв. м':'Няма потвърдена геометрия';
  row.append(strong,span);row.addEventListener('click',()=>{choose(id);showSelected()});el.append(row)}
 }
 async function loadZones(epoch){
