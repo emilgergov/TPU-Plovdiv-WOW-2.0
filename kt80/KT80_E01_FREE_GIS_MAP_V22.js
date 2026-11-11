@@ -103,7 +103,7 @@ function details(){
  const ov=document.createElement('p');ov.textContent='Архивни пресичащи полигони: '+overlaysOf(item).length;host.append(ov);
  const info=document.createElement('p');info.textContent='Пространствените проценти, ЗТ и административните реквизити се сверяват чрез ПИ MASTER и отделната проверка.';host.append(info);
 }
-function choose(id){S.chosen=id;render()}
+function choose(id){S.chosen=id;render();document.dispatchEvent(new CustomEvent('kt80:parcel-selected',{detail:{id}}))}
 function zoom(k){if(!S.view)return;S.view.w*=k;S.view.h*=k;render()}
 function fit(){fitView(bbox(S.results.flatMap(featuresOf)))}
 function showSelected(){const r=selected()||S.results[0];fitView(bbox(featuresOf(r)))}
