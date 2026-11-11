@@ -194,3 +194,45 @@
  .kt80-compact-details>summary{font-size:15px}
  .kt80-compact-nav-title{font-size:16px}
 }
+
+/* KT80 V55 — sober administrative layout. Stage 2 prioritizes the expert decision.
+   Evidence is collapsed in native HTML, independent of scripts and screen size. */
+.kt80-workflow .kt80-stage-panel.kt80-administrative-panel{
+ font-family:Arial,system-ui,sans-serif!important;line-height:1.48!important;
+ max-width:100%;padding:16px!important;
+}
+.kt80-administrative-panel .kt80-admin-head h2{font-family:Georgia,serif!important;font-size:21px!important;font-weight:700!important;margin:0 0 6px!important}
+.kt80-administrative-panel .kt80-admin-head p{font-size:15px!important;font-weight:400!important;line-height:1.5!important;margin:0 0 12px!important;color:#e3e7df!important}
+.kt80-administrative-panel .kt80-subject-controls{display:flex;gap:8px;flex-wrap:wrap;margin:7px 0 10px!important}
+.kt80-administrative-panel .kt80-subject-controls button,.kt80-administrative-panel #kt80ToParcels{font-size:14px!important;font-weight:650!important;padding:10px 14px!important;min-height:40px;box-shadow:none!important}
+.kt80-administrative-panel #kt80SubjectProposalStatus{font-size:14px!important;line-height:1.45!important;padding:8px 10px!important;margin:5px 0 10px!important;background:transparent!important;color:#d9e4dc!important}
+.kt80-administrative-panel>label:not(.kt80-check){font-size:15px!important;font-weight:650!important;margin:7px 0!important;display:block}
+.kt80-administrative-panel #kt80SubjectText{min-height:88px!important;height:94px;resize:vertical;font-family:Arial,system-ui,sans-serif!important;font-size:16px!important;line-height:1.5!important;padding:11px!important}
+.kt80-administrative-panel #kt80SubjectHint{font-size:13px!important;font-weight:400!important;padding:7px 10px!important;margin:6px 0 12px!important;line-height:1.45!important}
+.kt80-administrative-panel .kt80-kt53-composer{display:block!important;background:transparent!important;padding:0!important;border:0!important;margin:8px 0!important}
+.kt80-administrative-panel .kt80-kt53-composer h3{font-family:Arial,system-ui,sans-serif!important;font-size:16px!important;font-weight:700!important;line-height:1.4!important;color:#f0d59b!important;margin:2px 0 6px!important}
+.kt80-administrative-panel #kt80KT53Status{font-size:13px!important;font-weight:500!important;background:transparent!important;border-left:2px solid #b4a57d!important;padding:6px 9px!important;margin:5px 0!important}
+.kt80-administrative-panel .kt80-kt53-composer label{font-size:15px!important;font-weight:650!important;display:block;margin:8px 0!important}
+.kt80-administrative-panel #kt80ScopeText{font-family:Arial,system-ui,sans-serif!important;font-size:15px!important;min-height:128px!important;height:146px!important;line-height:1.5!important;padding:11px!important}
+.kt80-administrative-panel #kt80KT53Warnings{font-size:13px!important;line-height:1.45!important;font-weight:400!important;margin:7px 0!important;color:#e4cfab!important;max-height:65px;overflow:auto}
+.kt80-administrative-panel .kt80-kt53-evidence{margin:8px 0!important;padding:8px 10px!important;border-color:#637962!important}
+.kt80-administrative-panel .kt80-kt53-evidence>summary{font-size:14px!important;font-weight:600!important;line-height:1.45!important}
+.kt80-administrative-panel .kt80-kt53-disclaimer{font-size:12.5px!important;line-height:1.4!important;font-weight:400!important;margin:6px 0!important}
+.kt80-administrative-panel .kt80-kt53-composer .kt80-check{font-size:14px!important;font-weight:500!important}
+.kt80-administrative-panel .kt80-admin-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:10px 0 6px;border-top:1px solid #4d6a58;margin:9px 0}
+.kt80-administrative-panel .kt80-admin-actions label{font-size:14px!important;font-weight:550!important}
+.kt80-administrative-panel .kt80-admin-evidence{margin:10px 0 4px;border:1px solid #708576;border-radius:7px;background:#163d2e}
+.kt80-administrative-panel .kt80-admin-evidence>summary{padding:12px 14px;cursor:pointer;font-family:Arial,system-ui,sans-serif!important;font-size:15px!important;font-weight:700!important;line-height:1.45!important;color:#f0d69f!important}
+.kt80-administrative-panel .kt80-admin-sublabel{font-size:12px;font-weight:400;color:#cfdbce;margin-left:7px;white-space:normal}
+.kt80-administrative-panel .kt80-admin-evidence-body{padding:8px 12px 14px;border-top:1px solid #4c6b56}
+.kt80-administrative-panel .kt80-admin-evidence-help{font-size:13px!important;line-height:1.45!important;color:#d3dfd6!important;margin:4px 0 8px!important}
+.kt80-administrative-panel .kt80-admin-subsection{margin:7px 0;border:1px solid #708473;border-radius:6px;background:#1b4332}
+.kt80-administrative-panel .kt80-admin-subsection>summary{font-family:Arial,system-ui,sans-serif!important;cursor:pointer;font-size:14px!important;font-weight:650!important;line-height:1.5!important;color:#e9d6a8!important;padding:10px 12px!important}
+.kt80-administrative-panel .kt80-admin-subsection[open]>summary{border-bottom:1px solid #59735c}
+.kt80-administrative-panel .kt80-admin-subsection>section,.kt80-administrative-panel .kt80-admin-subsection>div{margin:9px!important}
+@media(max-width:900px){
+ .kt80-workflow .kt80-stage-panel.kt80-administrative-panel{padding:12px!important}
+ .kt80-administrative-panel .kt80-admin-actions{align-items:stretch;flex-direction:column}
+ .kt80-administrative-panel #kt80ToParcels{align-self:flex-start}
+ .kt80-administrative-panel .kt80-admin-sublabel{display:block;margin:3px 0 0}
+}
