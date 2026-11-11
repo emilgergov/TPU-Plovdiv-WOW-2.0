@@ -173,7 +173,7 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 .kt80-pi-card{background:#173d2b;border:1px solid #82a283;border-radius:8px;padding:12px}
 .kt80-pi-card h4{color:#f2d089;margin:0 0 8px}.kt80-pi-card p{margin:4px 0}
 .kt80-pi-zones{display:grid;gap:4px;margin:8px 0}.kt80-pi-zones strong{margin-top:7px;color:#f7d489}
-</style><style>
+</style><link rel="stylesheet" href="KT80_E01_GIS_PANEL_15_V24.css"/><style>
 /* V22 GIS parity controls, rendered entirely in the established KT80 green/gold visual system. */
 #kt80GISMapWrap{position:relative;background:#e6f0eb}
 .kt80-gis-toolbar{position:relative;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;padding:10px;background:#f8f8ee;border-bottom:1px solid #8da797;color:#153c2d}
@@ -223,7 +223,7 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 <section class="kt80-stages" aria-label="Пет работни етапа">
 <button class="kt80-step" type="button" data-step="1">1. Приемане</button>
 <button class="kt80-step" type="button" data-step="2">2. Предмет · ИП MASTER</button>
-<button class="kt80-step" type="button" data-step="3">3. Имоти · ПИ/ГИС</button>
+<button class="kt80-step" type="button" data-step="3">3. Имоти · Автоматизиран ГИС</button>
 <button class="kt80-step" type="button" data-step="4">4. Правна квалификация</button>
 <button class="kt80-step" type="button" data-step="5">5. Предложена процедура</button>
 </section><main class="catalog">
@@ -338,6 +338,7 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 <div class="controls"><input id="search" type="search" placeholder="Търсене по резултат или правно основание"/><select id="family"><option value="">Всички групи</option><option value="acts">Административни актове</option><option value="procedures">Писма и процесуални действия</option><option value="tools">Експертни инструменти</option></select></div>
 <div id="groups"></div></details>
 </main></div>
+<section id="kt80FreeGISScreen" aria-label="№15 — Свободна ГИС справка за имоти и режими"></section>
 <div class="kt80-reset-backdrop" id="kt80ResetDialog" role="dialog" aria-modal="true" aria-labelledby="kt80ResetTitle" aria-describedby="kt80ResetDescription" hidden>
 <div class="kt80-reset-panel">
 <h2 id="kt80ResetTitle">Да започнем ли нова преписка?</h2>
@@ -413,4 +414,4 @@ function open(c){
 }
 function close(){document.getElementById("overlay").classList.remove("open");document.getElementById("overlay").setAttribute("aria-hidden","true")}
 document.getElementById("close").onclick=close;document.getElementById("overlay").onclick=e=>{if(e.target===e.currentTarget)close()};document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});window.KT80RouteCatalog=cards;window.KT80OpenRoute=open;document.getElementById("search").oninput=render;document.getElementById("family").onchange=render;render();
-</script><script src="../v26-test/v26-parcel-editor.js"></script><script src="KT80_E01_ARCH_PARCEL_ADAPTER_V11.js"></script><script src="KT80_V17_V26_GIS_ENGINE_PATH_ADAPTER.js"></script><script src="../v26-test/v26-approved-gis-zip.js"></script><script src="KT80_E01_APPROVED_FULL_GIS_V20.js"></script><script src="../v26-test/v27-preview/kt77-pi-master-readonly-index.js"></script><script src="KT80_E01_DISPLAY_FORMAT_V23.js"></script><script src="KT80_E01_PI_MASTER_BRIDGE_V22.js"></script><script src="KT80_E01_FREE_GIS_MAP_V22.js"></script><script src="../v26-test/v27-preview/kt77-04-4c-pdf1-context-labels-only.js"></script><script src="KT80_E01_PDF_RENDERER_V22.js"></script><script src="../v26-test/v26-draft-package.js"></script><script src="KT80_V18_V26_OVERLAY_PATH_ADAPTER.js"></script><script src="KT80_E01_GIS_PDF1_V22.js"></script><script src="../v26-test/v26-dossier-evidence.js"></script><script src="../v26-test/v26-local-intake.js"></script><script src="KT80_E01_VISUAL_NAV_V14.js"></script><script src="KT80_E01_IN_FORM_MATCHER_RESET_V16.js"></script><script src="KT80_E01_IP_MASTER_EVIDENCE_V15.js"></script><script src="KT80_E01_ARCH_WORKFLOW_DASHBOARD_V19.js"></script><script src="KT80_E01_RESET_DIALOG_V16.js"></script><script src="KT80_E01_DASHBOARD_27_V19.js"></script></body></html>
+</script><script src="../v26-test/v26-parcel-editor.js"></script><script src="KT80_E01_ARCH_PARCEL_ADAPTER_V11.js"></script><script src="KT80_V17_V26_GIS_ENGINE_PATH_ADAPTER.js"></script><script src="../v26-test/v26-approved-gis-zip.js"></script><script src="KT80_E01_APPROVED_FULL_GIS_V20.js"></script><script src="../v26-test/v27-preview/kt77-pi-master-readonly-index.js"></script><script src="KT80_E01_DISPLAY_FORMAT_V23.js"></script><script src="KT80_E01_PI_MASTER_BRIDGE_V22.js"></script><script src="KT80_E01_FREE_GIS_MAP_V22.js"></script><script src="../v26-test/v27-preview/kt77-04-4c-pdf1-context-labels-only.js"></script><script src="KT80_E01_PDF_RENDERER_V22.js"></script><script src="../v26-test/v26-draft-package.js"></script><script src="KT80_V18_V26_OVERLAY_PATH_ADAPTER.js"></script><script src="KT80_E01_GIS_PDF1_V22.js"></script><script src="../v26-test/v26-dossier-evidence.js"></script><script src="../v26-test/v26-local-intake.js"></script><script src="KT80_E01_VISUAL_NAV_V14.js"></script><script src="KT80_E01_IN_FORM_MATCHER_RESET_V16.js"></script><script src="KT80_E01_IP_MASTER_EVIDENCE_V15.js"></script><script src="KT80_E01_ARCH_WORKFLOW_DASHBOARD_V19.js"></script><script src="KT80_E01_RESET_DIALOG_V16.js"></script><script src="KT80_E01_DASHBOARD_27_V19.js"></script><script src="KT80_E01_GIS_PANEL_15_V24.js"></script></body></html>
