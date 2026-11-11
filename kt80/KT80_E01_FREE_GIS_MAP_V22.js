@@ -138,6 +138,27 @@ async function loadZones(epoch){
   await S.loading;if(epoch===S.epoch)render();
  }catch(e){if(epoch===S.epoch)status('Имотите са намерени, но границите на ЗЗ не са заредени. Няма основание за извод по пресичания.')}
 }
+async function verifyIntersections(run){
+ if(typeof root.V26KT12Overlay?.verify!=='function')return;
+ try{
+  const snapshot=S.results.map(r=>({...r}));
+  await root.V26KT12Overlay.verify(snapshot);
+  if(run!==S.epoch||snapshot.length!==S.results.length)return;
+  for(let i=0;i<snapshot.length;i++){
+   const v=snapshot[i],current=S.results[i];
+   if(String(v.input||v.cadnum)!==String(current.input||current.cadnum))return;
+   if(Array.isArray(v.verified_zone_intersections)&&typeof v.intersection_verified_outside==='boolean'){
+    current.verified_zone_intersections=v.verified_zone_intersections;
+    current.intersection_verified_outside=v.intersection_verified_outside;
+   }
+  }
+  render();
+  const count=S.results.reduce((n,r)=>n+(r.verified_zone_intersections?.length||0),0);
+  status('Имотни геометрии: '+S.results.filter(r=>featuresOf(r).length).length+' · Геометрично проверени ЗЗ пресичания: '+count+'.');
+ }catch(e){
+  if(run===S.epoch)status('Имотите са намерени, но проверката на пресичанията не е завършена: '+String(e?.message||e));
+ }
+}
 async function find(){
  const norm=root.V26ParcelEditor?.normalize($('kt80ParcelInput')?.value||'');
  if(!norm||norm.invalid?.length||norm.uncertain?.length||!norm.ids?.length||norm.ids.length>100)
@@ -154,6 +175,7 @@ async function find(){
   rows();fit();
   status('Геометрия за '+S.results.filter(r=>featuresOf(r).length).length+' от '+norm.ids.length+' имота. Картата е обновена.');
   void loadZones(gen);
+  void verifyIntersections(gen);
  }catch(e){if(gen!==S.epoch)return;status('Не успяхме да заредим ГИС данните: '+String(e?.message||e))}
  finally{if(gen===S.epoch)$('kt80FindParcels').disabled=false}
 }
