@@ -240,7 +240,7 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 .kt80-original-viewer{width:100%;height:min(65vh,740px);object-fit:contain;border:1px solid #968b65;border-radius:5px;background:#fff}
 .kt80-original-text{max-height:62vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#f7f4e9;color:#152e20;padding:12px}
 @media(max-width:600px){.kt80-file-status-row{grid-template-columns:1fr auto}.kt80-file-status{grid-column:1/3}.kt80-file-name{grid-column:1}.kt80-file-reason{grid-column:1/3}}
-</style><link rel="stylesheet" href="KT80_V42_WOW_READABILITY.css?v=54-type-compact-20261111"></head><body>
+</style><link rel="stylesheet" href="KT80_V42_WOW_READABILITY.css?v=55-administrative-20261111"></head><body>
 <header><div><h1>WOW · Административен пътеводител</h1><small>КТ80 · Ч1/V33 · контрол на пълнотата · ИП MASTER · V31 визуална основа</small></div><div class="kt80-header-actions"><button id="kt80ClearAll" type="button" aria-haspopup="dialog" aria-controls="kt80ResetDialog" aria-expanded="false">↺ Изчисти всичко</button><a class="kt80-legacy-float" href="legacy/KT80_V27_35_REFERENCE_CAPSULE_V10.html" title="Отвори независимия пример V27.35 в нов прозорец" target="_blank" rel="noopener">🔴 V27.35 · Тестов пример ↗</a></div></header>
 <section id="kt80Dashboard" class="kt80-dashboard" aria-labelledby="kt80DashboardTitle">
 <div class="kt80-dashboard-intro">
@@ -285,18 +285,20 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 </details>
 <button id="kt80ToSubject" type="button">Продължи към предмета</button>
 </div>
-<div class="kt80-stage-panel" data-panel="2" hidden>
-<h2>2. Предмет · ИП MASTER</h2>
-<p>ИП MASTER използва прочетените откъси за доказателствено предложение за предмет. Алгоритъмът не добавя липсващи обстоятелства. Експертът може да избере източник, да коригира текста и да го потвърди; AI редакция се включва само след отделна проверена интеграция.</p>
+<div class="kt80-stage-panel kt80-administrative-panel" data-panel="2" hidden>
+<div class="kt80-admin-head">
+<h2>2. Предмет и обхват на преписката</h2>
+<p>Проект от прочетените документи. Проверете съдържанието и източниците преди експертно потвърждение.</p>
+</div>
 <div class="kt80-subject-controls" role="group" aria-label="Конструиране и корекция на предмета">
 <button id="kt80ConstructSubject" type="button">Конструирай предмет от преписката</button>
 <button id="kt80EditSubject" type="button">Корекция на предмета</button>
 </div>
 <p id="kt80SubjectProposalStatus" role="status" aria-live="polite">Обработете преписката или въведете предмет ръчно.</p>
-<details class="kt80-template-help"><summary>Източници и предложения за предмет</summary><div id="kt80SubjectProposalSources"></div></details>
-<label for="kt80SubjectText">Предмет на инвестиционното предложение или преписката</label>
-<textarea id="kt80SubjectText" rows="4" placeholder="Предмет, дейности, капацитет, инфраструктура..."></textarea>
-<p id="kt80SubjectHint" class="kt80-hint">Предметът не е потвърден. Редактирайте при необходимост.</p><div id="kt80IPMasterEvidence" class="kt80-ip-evidence" aria-live="polite"><p>Доказателствените полета на ИП MASTER ще се появят след прочит на входящата преписка.</p></div><section id="kt80CH2Passport" class="kt80-ch2-passport" aria-live="polite">Доказателственият паспорт ще се изгради след обработка на преписката.</section><section id="kt80CH21Reader" class="kt80-ch21-reader" aria-live="polite"><h3>Ч2.1 · Интелигентен анализ на съдържанието</h3><p>Резултатите ще се покажат след обработката на преписката.</p></section><section id="kt80CH21ParameterQA" class="kt80-param-review" aria-live="polite"><h3>КТ51 · Контрол на техническите параметри</h3><p>Проверка по стойност, документ и страница след обработката.</p></section><section id="kt80KT52Reconstruction" class="kt80-kt52-reconstruction" aria-live="polite"><h3>КТ52 · Реконструкция на инвестиционното намерение</h3><p>Извлича се от доказателствените откъси след обработката на преписката.</p></section><section id="kt80KT53Composer" class="kt80-kt53-composer">
+<label for="kt80SubjectText">Предмет на инвестиционното предложение</label>
+<textarea id="kt80SubjectText" rows="3" placeholder="Кратка формулировка на действителната основна дейност"></textarea>
+<p id="kt80SubjectHint" class="kt80-hint">Предметът не е потвърден. Редактирайте при необходимост.</p>
+<section id="kt80KT53Composer" class="kt80-kt53-composer">
 <h3>КТ53 · Предмет + обхват · единен доказателствен конструктор</h3>
 <p id="kt80KT53Status" class="kt80-kt53-status" role="status">Кандидатите се изграждат след обработката на преписката.</p>
 <label for="kt80ScopeText">Обхват на дейностите · отделен от краткия предмет</label>
@@ -306,8 +308,22 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 <label class="kt80-check"><input id="kt80ScopeConfirmation" type="checkbox"/> Потвърждавам обхвата като експерт след проверка на доказателствата.</label>
 <p class="kt80-kt53-disclaimer">Алгоритмична реконструкция, не AI генериране и не правно заключение. Експертът може да редактира и двата текста. Непотвърдени стойности не се представят като доказани.</p>
 </section>
-<label class="kt80-check"><input id="kt80SubjectConfirmation" type="checkbox"/> Потвърждавам конструирания предмет като експерт.</label>
+<div class="kt80-admin-actions">
+<label class="kt80-check"><input id="kt80SubjectConfirmation" type="checkbox"/> Потвърждавам предмета като експерт.</label>
 <button id="kt80ToParcels" type="button">Продължи към имотите</button>
+</div>
+<details class="kt80-admin-evidence" id="kt80AdminEvidence" >
+<summary>Доказателствен анализ <span class="kt80-admin-sublabel">ИП MASTER · Ч2 · Ч2.1 · КТ51 · КТ52</span></summary>
+<div class="kt80-admin-evidence-body">
+<p class="kt80-admin-evidence-help">Пълните източници, OCR статуси, технически параметри и експертни решения се преглеждат тук при необходимост.</p>
+<details class="kt80-template-help"><summary>Източници и предложения за предмет</summary><div id="kt80SubjectProposalSources"></div></details>
+<details class="kt80-admin-subsection"><summary>ИП MASTER · доказателствена картина</summary><div id="kt80IPMasterEvidence" class="kt80-ip-evidence" aria-live="polite"><p>Доказателствените полета на ИП MASTER ще се появят след прочит на входящата преписка.</p></div></details>
+<details class="kt80-admin-subsection"><summary>Ч2 · доказателствен паспорт</summary><section id="kt80CH2Passport" class="kt80-ch2-passport" aria-live="polite">Доказателственият паспорт ще се изгради след обработка на преписката.</section></details>
+<details class="kt80-admin-subsection"><summary>Ч2.1 · прочит и извличане</summary><section id="kt80CH21Reader" class="kt80-ch21-reader" aria-live="polite"><h3>Ч2.1 · Интелигентен анализ на съдържанието</h3><p>Резултатите ще се покажат след обработката на преписката.</p></section></details>
+<details class="kt80-admin-subsection"><summary>КТ51 · технически параметри</summary><section id="kt80CH21ParameterQA" class="kt80-param-review" aria-live="polite"><h3>КТ51 · Контрол на техническите параметри</h3><p>Проверка по стойност, документ и страница след обработката.</p></section></details>
+<details class="kt80-admin-subsection"><summary>КТ52 · реконструкция</summary><section id="kt80KT52Reconstruction" class="kt80-kt52-reconstruction" aria-live="polite"><h3>КТ52 · Реконструкция на инвестиционното намерение</h3><p>Извлича се от доказателствените откъси след обработката на преписката.</p></section></details>
+</div>
+</details>
 </div>
 <div class="kt80-stage-panel" data-panel="3" hidden>
 <h2>3. Имоти · ПИ и ГИС MASTER</h2>
@@ -480,4 +496,4 @@ function refresh(){const file=input.files&&input.files[0];out.textContent=file?f
 input.addEventListener('change',refresh);
 document.addEventListener('kt80:case-reset',()=>{out.textContent='Няма избран файл';out.title=''});
 refresh();
-})();</script><script src="KT80_E01_KT54_COMPACT_WORKSCREEN_V54.js?v=54-20261111"></script></body></html>
+})();</script></body></html>
