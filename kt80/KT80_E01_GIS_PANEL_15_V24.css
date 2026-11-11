@@ -103,3 +103,10 @@ body[data-kt80-view="gis"] #kt80FreeGISScreen{display:block}
 #kt80FreeGISScreen .kt80-pi-card[hidden]{display:none!important}
 #kt80FreeGISScreen .kt80-pi-card.kt80-pi-active{display:grid!important}
 #kt80FreeGISScreen .kt80-parcel-locator-label{fill:#b60b25!important;stroke:#fff!important;stroke-width:5!important;paint-order:stroke;font:bold 21px Arial,sans-serif}
+
+/* KT80 V28: map parcel selector is visually and semantically a single active selection. */
+#kt80FreeGISScreen .kt80-gis-row{cursor:pointer;transition:background-color .15s,box-shadow .15s}
+#kt80FreeGISScreen .kt80-gis-row.kt80-gis-row-selected,#kt80FreeGISScreen .kt80-gis-row[aria-pressed="true"]{background:#e4b95f!important;color:#193927!important;box-shadow:inset 0 0 0 2px #0c6542}
+#kt80FreeGISScreen #kt80GISResults{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+#kt80FreeGISScreen .kt80-gis-spatial-v24 h4{margin:0 0 6px}
+#kt80FreeGISScreen .kt80-gis-detail{border:1px solid #cad9cd}
