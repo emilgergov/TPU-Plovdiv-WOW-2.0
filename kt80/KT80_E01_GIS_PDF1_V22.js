@@ -57,7 +57,7 @@ function bodyContent(checked,profiles,zones){
  const overview=makeContext(checked,zones);
  const mapSvg=svgFromMap();
  const list=checked.map((r,i)=>{const p=profiles[i],id=String(r.input||r.cadnum);
-  return 'ПИ '+id+' (ЕКАТТЕ '+id.split('.')[0]+') по КККР на '+clean(keys(p,'settlement','settlement_name'))+', местност „'+clean(keys(p,'locality','mestnost'))+'“, община '+clean(keys(p,'municipality','obshtina'))+', област '+clean(keys(p,'province','region','oblast'))+'. Площ на имота: '+clean(keys(p,'area_m2','parcel_area_m2','area'))+' кв. м.'});
+  return 'ПИ '+id+' (ЕКАТТЕ '+root.KT80Display.ekatte(id,p)+') по КККР на '+clean(keys(p,'settlement','settlement_name'))+', местност „'+root.KT80Display.locality(keys(p,'locality','mestnost'))+'“, община '+clean(keys(p,'municipality','obshtina'))+', област '+clean(keys(p,'province','region','oblast'))+'. Площ на имота: '+root.KT80Display.area(keys(p,'area_m2','area_m2_source','parcel_area_m2','area'))+' кв. м.'});
  const content=[
   {text:'Източник на пространствените данни: ГИС база на РИОСВ – Пловдив. Дата на изготвяне: '+date+' г.'},
   {text:'Общ пространствен контекст на анализираните поземлени имоти',style:'sub'},
@@ -86,10 +86,10 @@ function bodyContent(checked,profiles,zones){
    const preciseArea=keys(measure,'area_m2')??keys(record,'intersect_m2','area_m2');
    const landArea=Number(keys(p,'area_m2','parcel_area_m2','area')??r.area_m2_source);
    const ratio=Number.isFinite(Number(preciseArea))&&Number.isFinite(landArea)&&landArea>0
-     ?(100*Number(preciseArea)/landArea).toLocaleString('bg-BG',{maximumFractionDigits:3})+' %'
-     :clean(keys(record,'percent_parcel','pct_parcel','percent'));
+     ?root.KT80Display.percent(100*Number(preciseArea)/landArea)
+     :root.KT80Display.percent(keys(record,'percent_parcel','pct_parcel','percent'));
    zzBody.push([String(r.input||r.cadnum),code+' — '+clean(keys(measure,'name_bg','name')??keys(record,'name_bg','name')??keys(geoName,'NAME_BG','name_bg','name')),
-    clean(preciseArea),ratio]);
+    root.KT80Display.area(preciseArea),ratio]);
   }
  }
  content.push({table:{body:zzBody}});
@@ -99,7 +99,7 @@ function bodyContent(checked,profiles,zones){
   const r=checked[i],p=profiles[i],zt=Array.isArray(p.zt)?p.zt:[];
   if(!zt.length){ztBody.push([String(r.input||r.cadnum),'Няма архивен запис за пресичане със ЗТ','—','—']);continue}
   for(const z of zt)ztBody.push([String(r.input||r.cadnum),clean(keys(z,'category','category_bg'))+' '+clean(keys(z,'name_bg','name')),
-   clean(keys(z,'intersect_m2','area_m2')),clean(keys(z,'percent_parcel','pct_parcel','percent'))]);
+   root.KT80Display.area(keys(z,'intersect_m2','area_m2')),root.KT80Display.percent(keys(z,'percent_parcel','pct_parcel','percent'))]);
  }
  content.push({table:{body:ztBody}});
  content.push({text:'Забележка: Посочените площи и пространствени пресичания са определени въз основа на ГИС базата на РИОСВ – Пловдив и валидирания архив на ПИ MASTER. Резултатите имат пространствено-информационен характер и не представляват самостоятелна правна преценка.'});
