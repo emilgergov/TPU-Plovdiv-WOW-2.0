@@ -95,8 +95,6 @@ function bodyContent(checked,profiles,zones){
   {text:'Пространствено положение на поземлените имоти спрямо защитените зони и защитените територии',style:'sub'},
   {svg:mapSvg,width:950,maxHeight:570},
   {text:'Картата представя имотите и наличните архивни граници от мрежата „Натура 2000“. Пространствените пресичания се определят чрез отделния геометричен контрол; отобразяването на граница не доказва пресичане.',fontSize:9},
-  {text:'Административна принадлежност на поземлените имоти',style:'sub',pageBreak:'before'},
-  ...list.map(x=>({text:x})),
  ];
  if(count>1){
   // Each parcel receives a distinct map, never a duplicate of the common map.
@@ -109,6 +107,7 @@ function bodyContent(checked,profiles,zones){
    content.push({text:list[i]});
   }
  }
+ content.push({text:'Административна принадлежност на поземлените имоти',style:'sub',pageBreak:'before'},...list.map(x=>({text:x})));
  for(let i=0;i<checked.length;i++){
   const n=checked[i].intersection_verified_outside===true?nearestZone(checked[i],zones):null;
   if(n)content.push({text:'Най-близка защитена зона до ПИ '+String(checked[i].input||checked[i].cadnum)+': '+n.code+' — '+n.name+' ('+n.meters.toLocaleString('bg-BG',{maximumFractionDigits:2})+' м).'});
