@@ -17,6 +17,7 @@ const TOPICS=[
 const t=x=>String(x??'').replace(/\s+/gu,' ').trim();
 const norm=x=>t(x).toLocaleLowerCase('bg');
 const reviewIssues=new Map();
+const reviewHistory=[];
 let currentPassport=null;
 const evidenceId=(topic,document,excerpt)=>JSON.stringify([topic,document,excerpt]);
 function reportIssue(id,record){
@@ -24,8 +25,18 @@ function reportIssue(id,record){
  if(typeof root.KT80InvalidateEvidenceConclusions==='function')root.KT80InvalidateEvidenceConclusions();
  if(currentPassport)render(currentPassport);
 }
+function ignoreEvidence(id,record){
+ const prior=reviewIssues.get(id);
+ const current={...record,id,status:'ЕКСПЕРТНО ИГНОРИРАН',decision:'EXPERT_IGNORED',excludedFromAI:true,expertResponsibility:true,actor:'ЕКСПЕРТ (локална сесия)',time:new Date().toISOString()};
+ reviewIssues.set(id,current);reviewHistory.push({previous:prior||null,current:{...current}});
+ if(typeof root.KT80InvalidateEvidenceConclusions==='function')root.KT80InvalidateEvidenceConclusions();
+ if(currentPassport)render(currentPassport);
+}
 function issues(){return [...reviewIssues.values()].map(x=>({...x}))}
-function resetIssues(){reviewIssues.clear();currentPassport=null;}
+function history(){return reviewHistory.map(x=>({...x,current:{...x.current}}))}
+function isExcluded(topic,document,excerpt){const x=reviewIssues.get(evidenceId(topic,document,excerpt));return !!(x&&x.excludedFromAI)}
+function usableEvidence(topic){const field=currentPassport?.topics.find(x=>x.key===topic);return (field?.sources||[]).filter(x=>!isExcluded(topic,x.document,x.excerpt)).map(x=>({...x}))}
+function resetIssues(){reviewIssues.clear();reviewHistory.length=0;currentPassport=null;}
 
 function polarity(text){
  const x=norm(text);
@@ -99,7 +110,8 @@ function render(result){
  host.append(node('p','Теми с откъси: '+result.withEvidence+'/'+result.topics.length+' · Изходни откъси: '+result.uniqueExcerpts+
  ' · Непрочетени файлове: '+result.unreadCount+' · За OCR/документна проверка: '+result.ocrReviewCount+'.','kt80-ch2-summary'));
  host.append(node('p',result.requiredStatement,'kt80-ch2-warning'));
- if(reviewIssues.size)host.append(node('p','БЛОКИРАНО: '+reviewIssues.size+' оспорени откъса. Изходните доказателства не са надеждни за автоматично конструиране. Предстои повторна проверка/обработка след корекция.','kt80-ch2-critical'));
+ if(reviewIssues.size){const ignored=[...reviewIssues.values()].filter(x=>x.decision==='EXPERT_IGNORED').length;
+ host.append(node('p','ДОКАЗАТЕЛСТВЕН КОНТРОЛ: '+reviewIssues.size+' изключени/оспорени откъса, от които '+ignored+' експертно игнорирани. AI няма право да ги използва в следващи изводи. Старият кандидат за предмет е обезсилен до нов анализ или изрично самостоятелно експертно формулиране.','kt80-ch2-critical'));}
 
  if(result.unreadCount)host.append(node('p','КРИТИЧНО: Има непрочетени материали. Не може да се приема, че предметът и обхватът са пълно доказани.','kt80-ch2-critical'));
  if(result.limitations.leadingParcelCandidates===0)host.append(node('p','Няма автоматично установен водещ ПИ. Това не доказва, че ИП няма териториален обхват; проверете вида на преписката и документите.','kt80-ch2-warning'));
@@ -143,7 +155,7 @@ function render(result){
    const flagged=reviewIssues.get(src.issueId);
    card.append(head,node('p','„'+src.excerpt+'“'));
    if(flagged){
-    card.append(node('p','🔴 ОСПОРЕН ПРОЧИТ — откъсът не може да бъде използван като доказателство.','kt80-ch2-critical'));
+    card.append(node('p',flagged.decision==='EXPERT_IGNORED'?'🔴 ЕКСПЕРТНО ИГНОРИРАН — изключен от AI доказателствата. Отговорност за това изключване: експертът.':'🔴 ОСПОРЕН ПРОЧИТ — откъсът не може да бъде използван като доказателство.','kt80-ch2-critical'));
     if(flagged.corrected)card.append(node('p','Експертно предложен верен текст (неинтегриран): „'+flagged.corrected+'“','kt80-ch2-correction'));
     card.append(node('p','Причина: '+flagged.reason,'kt80-ch2-correction'));
    }
@@ -160,7 +172,13 @@ function render(result){
     if(!t(reason.value)){feedback.textContent='Необходимо е да опишете проблема с прочита.';return}
     reportIssue(src.issueId,{topic:item.key,document:src.document,page:src.page,original:src.excerpt,reason:t(reason.value).slice(0,1000),corrected:t(correction.value).slice(0,3000)});
    });
-   edit.append(hint,reason,correction,submit,feedback);
+   const ignore=node('button','Експертно игнориране','kt80-ch2-open kt80-ch2-ignore');ignore.type='button';
+   const note=node('p','Изрично експертно решение: посоченият откъс ще бъде изключен от автоматичните доказателства. Първичният файл се запазва. Старият AI проект се обезсилва; не се приема автоматично за достоверен.','kt80-ch2-footnote');
+   ignore.addEventListener('click',()=>{
+    if(!t(reason.value)){feedback.textContent='Посочете причина за експертното игнориране.';return}
+    ignoreEvidence(src.issueId,{topic:item.key,document:src.document,page:src.page,original:src.excerpt,reason:t(reason.value).slice(0,1000),corrected:t(correction.value).slice(0,3000)});
+   });
+   edit.append(hint,reason,correction,submit,ignore,note,feedback);
    flag.addEventListener('click',()=>{edit.hidden=!edit.hidden;flag.setAttribute('aria-expanded',String(!edit.hidden))});
    card.append(flag,edit);d.append(card);
   }
@@ -171,6 +189,6 @@ function render(result){
  host.append(footer);
 }
 function reset(){resetIssues();const host=document.getElementById('kt80CH2Passport');if(host){host.replaceChildren();host.textContent='Доказателственият паспорт ще се изгради след обработка на преписката.'}}
-root.KT80CH2Evidence=Object.freeze({build,render,reset,issues,hasBlockingIssues:()=>reviewIssues.size>0});
+root.KT80CH2Evidence=Object.freeze({build,render,reset,issues,history,isExcluded,usableEvidence,ignoreEvidence,hasBlockingIssues:()=>reviewIssues.size>0});
 document.addEventListener('kt80:case-reset',reset);
 })(window);
