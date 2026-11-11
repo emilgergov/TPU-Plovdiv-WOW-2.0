@@ -95,7 +95,7 @@ function bodyContent(checked,profiles,zones){
   {text:'Картата представя имотите и наличните архивни граници от мрежата „Натура 2000“. Пространствените пресичания се определят чрез отделния геометричен контрол; отобразяването на граница не доказва пресичане.',fontSize:9},
  ];
  if(count>1){
-  content.push({text:'Индивидуални карти на поземлените имоти',style:'sub'});
+  content.push({text:'Индивидуални карти на поземлените имоти',style:'sub',pageBreak:'before'});
   content.push({parcelGrid:checked.map((r,i)=>({
    id:String(r.input||r.cadnum),
    svg:separateMap(r,zones),
