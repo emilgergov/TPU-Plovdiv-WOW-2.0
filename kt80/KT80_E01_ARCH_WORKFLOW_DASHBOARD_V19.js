@@ -185,7 +185,7 @@ function init(){
  $('kt80ParcelInput').addEventListener('input',()=>invalidate(3));
  $('kt80LegalNotes').addEventListener('input',()=>invalidate(4));
  $('kt80Authority').addEventListener('change',()=>invalidate(4));
- $('kt80InputFile').addEventListener('change',()=>{root.KT80SubjectMaster?.reset?.();++state.generation;if(state.abort){state.abort.abort();state.abort=null}$('kt80ProcessFile').disabled=false;state.fileName=null;state.intake=null;invalidate(2);$('kt80InputStatus').textContent='Избран файл: '+($('kt80InputFile').files?.[0]?.name||'няма')+'. Натиснете „Обработи преписката“.'});
+ $('kt80InputFile').addEventListener('change',()=>{root.KT80SubjectMaster?.reset?.();root.KT80KT53?.reset?.();++state.generation;if(state.abort){state.abort.abort();state.abort=null}$('kt80ProcessFile').disabled=false;state.fileName=null;state.intake=null;invalidate(2);$('kt80InputStatus').textContent='Избран файл: '+($('kt80InputFile').files?.[0]?.name||'няма')+'. Натиснете „Обработи преписката“.'});
  go(1);root.KT80WorkflowState=state;root.KT80ResetCurrentCase=resetAll;
  root.KT80RebuildKT52=()=>{
   if(!state.intake||!root.KT80KT52||!root.KT80CH21Draft)return null;
@@ -193,10 +193,10 @@ function init(){
   if(qa)root.KT80KT51Draft=qa;
   const reconstruction=root.KT80KT52.build(state.intake,root.KT80IPMasterDraft,root.KT80CH21Draft,qa,{audit:root.KT80DossierAudit});
   root.KT80KT52Draft=reconstruction;root.KT80KT52.render(reconstruction);
-  root.KT80KT53?.construct?.({force:true});
+  root.KT80KT53?.construct?.({force:false});
   return reconstruction;
  };
- root.KT80InvalidateEvidenceConclusions=()=>{invalidate(2);root.KT80RebuildKT52?.();root.KT80KT53?.construct?.({force:true});say('Доказателствата са оспорени. Предметът и обхватът се изграждат наново и подлежат на експертна проверка.');};
+ root.KT80InvalidateEvidenceConclusions=()=>{invalidate(2);root.KT80RebuildKT52?.();say('Доказателствата са оспорени. Предметът и обхватът се изграждат наново и подлежат на експертна проверка.');};
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })(window);
