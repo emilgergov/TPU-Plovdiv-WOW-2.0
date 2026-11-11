@@ -62,6 +62,7 @@ function recordDecision(p,status,reason){
  auditTrail.push(event);
  if(typeof root.KT80InvalidateEvidenceConclusions==='function')root.KT80InvalidateEvidenceConclusions();
  if(root.KT80CH21Draft){current=evaluate(root.KT80CH21Draft,root.KT80DossierAudit);render(current)}
+ root.KT80RebuildKT52?.();
  return true;
 }
 function render(qa){
