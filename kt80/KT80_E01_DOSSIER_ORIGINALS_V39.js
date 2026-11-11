@@ -3,7 +3,7 @@
  * Never executes HTML/SVG/scripts from an archive. */
 (function(root){'use strict';
 const $=id=>document.getElementById(id);
-let activeUrl=null,openToken=0;
+let activeUrl=null,openToken=0,activePdf=null,pdfPage=1,pdfTask=null;
 const types={pdf:'application/pdf',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',bmp:'image/bmp',gif:'image/gif',tif:'image/tiff',tiff:'image/tiff',txt:'text/plain',csv:'text/plain',md:'text/plain',json:'text/plain',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation'};
 const ext=x=>(String(x).match(/\.([a-z0-9]+)$/i)?.[1]||'').toLowerCase();
 const u16=(d,p)=>d.getUint16(p,true),u32=(d,p)=>d.getUint32(p,true);
@@ -58,8 +58,55 @@ function shell(){
  modal.addEventListener('click',e=>{if(e.target===modal)close()});
  return modal;
 }
-function close(){openToken++;const modal=$('kt80OriginalPreview');if(modal)modal.hidden=true;if(activeUrl){URL.revokeObjectURL(activeUrl);activeUrl=null}const body=$('kt80OriginalContent');if(body)body.replaceChildren()}
-function previewContent(data,name,page){
+function close(){
+ openToken++;
+ const modal=$('kt80OriginalPreview');if(modal)modal.hidden=true;
+ if(pdfTask){try{pdfTask.cancel()}catch(e){}pdfTask=null}
+ if(activePdf){const old=activePdf;activePdf=null;old.destroy().catch(()=>{})}
+ if(activeUrl){URL.revokeObjectURL(activeUrl);activeUrl=null}
+ const body=$('kt80OriginalContent');if(body)body.replaceChildren();
+}
+async function showPdfPage(page,token){
+ const pdf=activePdf;if(!pdf||token!==openToken)return;
+ pdfPage=Math.max(1,Math.min(pdf.numPages,page));
+ const body=$('kt80OriginalContent'),nav=$('kt80PdfNav'),label=$('kt80PdfPageLabel');
+ if(label)label.textContent='Страница '+pdfPage+' от '+pdf.numPages;
+ const prev=$('kt80PdfPrev'),next=$('kt80PdfNext');
+ if(prev)prev.disabled=pdfPage<=1;if(next)next.disabled=pdfPage>=pdf.numPages;
+ if(pdfTask){try{pdfTask.cancel();await pdfTask.promise}catch(e){}pdfTask=null}
+ const current=pdfPage;
+ const pdfPageObj=await pdf.getPage(current);
+ if(token!==openToken||pdf!==activePdf||current!==pdfPage)return;
+ const availableWidth=Math.max(300,Math.min(920,body.clientWidth||900)-32);
+ const original=pdfPageObj.getViewport({scale:1});
+ const scale=Math.min(2.2,Math.max(0.4,availableWidth/original.width));
+ const viewport=pdfPageObj.getViewport({scale});
+ let canvas=$('kt80PdfCanvas');
+ if(!canvas){canvas=document.createElement('canvas');canvas.id='kt80PdfCanvas';canvas.className='kt80-pdf-canvas';body.append(canvas)}
+ canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
+ const ctx=canvas.getContext('2d',{alpha:false});
+ pdfTask=pdfPageObj.render({canvasContext:ctx,viewport});
+ try{await pdfTask.promise;if(token===openToken&&pdf===activePdf)$('kt80OriginalMessage').textContent='PDF преглед в WOW · страница '+current+' от '+pdf.numPages+'.';}
+ catch(e){if(e?.name!=='RenderingCancelledException'&&token===openToken)$('kt80OriginalMessage').textContent='Неуспешна визуализация на PDF страница: '+(e?.message||e)}
+ finally{pdfTask=null}
+}
+async function showPdf(data,page,token){
+ const body=$('kt80OriginalContent');body.replaceChildren();
+ const nav=document.createElement('div');nav.id='kt80PdfNav';nav.className='kt80-pdf-nav';
+ const prev=document.createElement('button');prev.id='kt80PdfPrev';prev.type='button';prev.textContent='← Предишна';
+ const label=document.createElement('strong');label.id='kt80PdfPageLabel';
+ const next=document.createElement('button');next.id='kt80PdfNext';next.type='button';next.textContent='Следваща →';
+ nav.append(prev,label,next);body.append(nav);
+ if(!root.pdfjsLib){throw Error('PDF.js не е зареден — използвайте „В нов раздел“ или „Изтегли оригинала“.')}
+ // PDF.js uses its own renderer instead of an Edge-blocked blob iframe.
+ const pdf=await root.pdfjsLib.getDocument({data:new Uint8Array(data)}).promise;
+ if(token!==openToken){await pdf.destroy();return}
+ activePdf=pdf;
+ prev.addEventListener('click',()=>showPdfPage(pdfPage-1,token));
+ next.addEventListener('click',()=>showPdfPage(pdfPage+1,token));
+ await showPdfPage(Number.isInteger(page)&&page>0?page:1,token);
+}
+async function previewContent(data,name,page,token){
  if(activeUrl){URL.revokeObjectURL(activeUrl);activeUrl=null}
  const media=types[ext(name)]||'application/octet-stream';
  const blob=new Blob([data],{type:media});activeUrl=URL.createObjectURL(blob);
@@ -67,12 +114,11 @@ function previewContent(data,name,page){
  const viewUrl=media==='application/pdf'&&Number.isInteger(page)&&page>0?activeUrl+'#page='+page:activeUrl;
  const newTab=$('kt80OriginalNewTab');newTab.hidden=!(media==='application/pdf'||media.startsWith('image/'));newTab.href=viewUrl;
  const body=$('kt80OriginalContent');body.replaceChildren();
- if(media==='application/pdf'||media.startsWith('image/')){
-  const viewer=document.createElement(media==='application/pdf'?'iframe':'img');
-  viewer.src=viewUrl;viewer.className='kt80-original-viewer';
-  if(viewer.tagName==='IFRAME'){viewer.title='Преглед на оригиналния PDF';viewer.setAttribute('sandbox','allow-same-origin');}
-  else viewer.alt='Изображение от оригиналния файл';
-  body.append(viewer);
+ if(media==='application/pdf'){
+  await showPdf(data,page,token);
+ }else if(media.startsWith('image/')){
+  const viewer=document.createElement('img');viewer.src=viewUrl;viewer.className='kt80-original-viewer';
+  viewer.alt='Изображение от оригиналния файл';body.append(viewer);
   $('kt80OriginalMessage').textContent='Преглед на оригинала. При нужда използвайте „Изтегли оригинала“.';
  }else if(['txt','csv','md','json'].includes(ext(name))){
   const pre=document.createElement('pre');pre.textContent=decode(new Uint8Array(data)).slice(0,300000);
@@ -90,8 +136,8 @@ async function openOriginal(filename,page){
  try{
   const data=/\.zip$/i.test(source.name)?await extractZIP(source,normalize(filename)):await source.arrayBuffer();
   if(token!==openToken)return;
-  previewContent(data,filename,page);
- }catch(e){if(token!==openToken)return;$('kt80OriginalMessage').textContent='Не може да се отвори: '+(e?.message||e)}
+  await previewContent(data,filename,page,token);
+ }catch(e){if(token!==openToken)return;$('kt80OriginalMessage').textContent='Не може да се визуализира: '+(e?.message||e)+' · Използвайте „В нов раздел“ или „Изтегли оригинала“.'}
 }
 document.addEventListener('kt80:case-reset',close);
 root.KT80DossierOriginals=Object.freeze({openOriginal,close});
