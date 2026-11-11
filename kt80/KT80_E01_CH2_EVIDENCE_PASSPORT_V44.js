@@ -26,6 +26,14 @@ function build(intake,ip,audit){
  const files=Array.isArray(audit?.records)?audit.records:[];
  const byFile=new Map(files.map(x=>[x.file,x]));
  const fields=Array.isArray(ip?.fields)?ip.fields:[];
+ const pages=Array.isArray(intake?.page_text_index)?intake.page_text_index:[];
+ function pageCandidate(document,excerpt){
+  const sample=norm(excerpt);
+  if(sample.length<28)return null;
+  const hint=sample.slice(0,Math.min(75,sample.length));
+  const match=pages.find(p=>p.file===document&&norm(p.text).includes(hint));
+  return match?.page||null;
+ }
  const byTopic=new Map(fields.map(x=>[x.key,x]));
  const topics=TOPICS.map(([key,label])=>{
   const field=byTopic.get(key);
@@ -34,7 +42,7 @@ function build(intake,ip,audit){
    const excerpt=t(e.excerpt),document=t(e.document)||'НЕУСТАНОВЕН ДОКУМЕНТ';
    if(!excerpt)continue;
    const id=document+'|'+norm(excerpt);
-   if(!unique.has(id))unique.set(id,{document,excerpt,kind:t(e.kind),polarity:polarity(excerpt),readStatus:byFile.get(document)?.state||'UNKNOWN',page:null,verified:false});
+   if(!unique.has(id))unique.set(id,{document,excerpt,kind:t(e.kind),polarity:polarity(excerpt),readStatus:byFile.get(document)?.state||'UNKNOWN',page:pageCandidate(document,excerpt),verified:false});
   }
   const sources=[...unique.values()].slice(0,16);
   const documents=[...new Set(sources.map(x=>x.document))];
@@ -54,7 +62,7 @@ function build(intake,ip,audit){
  const leading=intake?.classification?.leading_candidates||[];
  const notice={blocked:unread.length>0,unread:unread.map(x=>({file:x.file,reason:x.readerStatus})),review:caution.map(x=>x.file),
   missingTopics:topics.filter(x=>!x.sources.length).map(x=>x.label),leadingParcelCandidates:leading.length,
-  pageTraceVerified:false};
+  pageTraceVerified:false,pageCandidateCount:topics.reduce((n,x)=>n+x.sources.filter(y=>y.page!==null).length,0)};
  return Object.freeze({
   schema:'KT80-CH2-EVIDENCE-PASSPORT-V44',caseName:t(intake?.archive_name),generatedFrom:'V26 IN + IP MASTER V15 + Ч1',
   topics,filesCount:files.length,withEvidence:topics.filter(x=>x.sources.length).length,missingTopics:notice.missingTopics.length,
@@ -95,14 +103,14 @@ function render(result){
   if(!item.sources.length)d.append(node('p','НЯМА ДАННИ в извлеченото. Липсата на откъс не означава отсъствие на дейност или въздействие.'));
   for(const src of item.sources){
    const card=node('div',undefined,'kt80-ch2-evidence');
-   const head=node('div','Източник: '+src.document+' · '+(src.readStatus==='TEXT_EXTRACTED'?'текстово извличане':'изисква допълнителна проверка'),'kt80-ch2-source');
+   const head=node('div','Източник: '+src.document+(src.page?' · стр. '+src.page+' (предварително установена)':' · страница: НЯМА ДАННИ')+' · '+(src.readStatus==='TEXT_EXTRACTED'?'текстово извличане':'изисква допълнителна проверка'),'kt80-ch2-source');
    card.append(head,node('p','„'+src.excerpt+'“'));
    addOriginalButton(card,src.document);d.append(card);
   }
   if(item.possibleOpposition)d.append(node('p','ВЪЗМОЖНО ПРОТИВОРЕЧИЕ — установени са утвърдителна и отрицателна формулировка; необходим е контекстен преглед.','kt80-ch2-critical'));
   host.append(d);
  }
- const footer=node('p','Проследимост до документ и откъс: налична. Проверена страница, таблица, приложение, ревизия и точност на OCR: все още НЕ са установени.','kt80-ch2-footnote');
+ const footer=node('p','Проследимост до документ и откъс: налична. Предварително намерени PDF страници: '+result.limitations.pageCandidateCount+'. Страниците, таблиците, приложенията, редакциите и точността на OCR все още изискват експертна проверка.','kt80-ch2-footnote');
  host.append(footer);
 }
 function reset(){const host=document.getElementById('kt80CH2Passport');if(host){host.replaceChildren();host.textContent='Доказателственият паспорт ще се изгради след обработка на преписката.'}}
