@@ -29,7 +29,9 @@ function evaluate(reader,audit){
  const records=Array.isArray(audit?.records)?audit.records:[];
  const entries=source.map(p=>{
   const c=context(p.excerpt,p.original),key=identifier(p),file=records.find(r=>r.file===p.file);
+  const compound=p.unit==='kV'?p.excerpt.match(/(\d{1,3}(?:[.,]\d+)?)\s*\/\s*(\d{1,3}(?:[.,]\d+)?)\s*(?:kV|кВ)/iu):null;
   return {...p,...c,id:key,type:categoryByUnit[p.unit]||'Непозната мерна единица',
+    compoundDesignation:compound?compound[0]:null,
     readerState:file?.state||p.readerStatus||'UNKNOWN',
     reviewStatus:decisions.get(key)?.status||'НЕПОТВЪРДЕНО',duplicateGroup:null,
     evidenceExcluded:decisions.get(key)?.status==='EXPERT_REJECTED',
@@ -78,6 +80,7 @@ function render(qa){
   row.append(element('p',p.file+' · стр. '+p.page+' · '+(p.readerState==='TEXT_EXTRACTED'?'🟢 ПРОЧЕТЕН':'🟡/🔴 ПРИ ПРОЧИТ С РИСК')+' · '+(chosen?'ЕКСПЕРТ: '+(chosen.status==='EXPERT_CONFIRMED'?'ПОТВЪРДЕН':'ИЗКЛЮЧЕН'):'НЕПОТВЪРДЕН'),'kt80-ch21-source'));
   row.append(element('p','Контекст: „'+p.localContext+'“'));
   if(p.duplicateGroup)row.append(element('p','⚠ Повторение на същата числова стойност в този файл. Не е доказано дали представлява отделен параметър.','kt80-param-warning'));
+  if(p.compoundDesignation)row.append(element('p','⚠ Съставно означение '+p.compoundDesignation+'. Извлечената '+p.original+' е само една част от обозначението; не я използвайте самостоятелно за извод.','kt80-param-warning'));
   if(p.hasMixedTense)row.append(element('p','⚠ В един откъс има съществуващи и проектни характеристики — ролята на тази стойност не може да бъде определена сигурно.','kt80-param-warning'));
   const open=element('button','◉ Оригинал · стр. '+p.page,'kt80-ch2-open');open.type='button';
   open.addEventListener('click',()=>root.KT80DossierOriginals?.openOriginal?.(p.file,p.page));row.append(open);
