@@ -21,7 +21,7 @@ const reviewHistory=[];
 let currentPassport=null;
 const evidenceId=(topic,document,excerpt)=>JSON.stringify([topic,document,excerpt]);
 function reportIssue(id,record){
- reviewIssues.set(id,{...record,id,status:'ИЗКЛЮЧЕНО ОТ АВТОМАТИЧНИ ИЗВОДИ',time:new Date().toISOString()});
+ reviewIssues.set(id,{...record,id,status:'ИЗКЛЮЧЕНО ОТ АВТОМАТИЧНИ ИЗВОДИ',excludedFromAI:true,time:new Date().toISOString()});
  if(typeof root.KT80InvalidateEvidenceConclusions==='function')root.KT80InvalidateEvidenceConclusions();
  if(currentPassport)render(currentPassport);
  root.KT80RebuildKT52?.();
