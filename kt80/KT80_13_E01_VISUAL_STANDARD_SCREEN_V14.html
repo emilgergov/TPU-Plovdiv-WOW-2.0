@@ -83,7 +83,7 @@ header{background:#081f18;border-bottom:1px solid #ad9157;padding:20px 24px;disp
 @media(max-width:900px){.kt80-stages{grid-template-columns:repeat(5,minmax(0,1fr));overflow-x:auto}.kt80-stages>.kt80-step{min-width:130px;font-size:12px}}
 @media(max-width:560px){.kt80-stages{grid-template-columns:repeat(5,minmax(130px,1fr))}#overlay .tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.kt80-guide .card h4{min-height:0}}
 @media(prefers-reduced-motion:reduce){.kt80-stages>.kt80-step,#overlay .tabs button,.kt80-guide .card{transition:none!important}.kt80-stage-panel:not([hidden]),.kt80-stages>.kt80-step[aria-current="step"],#overlay .tabs button[aria-selected="true"],#kt80RoutePanels:not([hidden]){animation:none!important}}
-</style></head><body>
+</style><style>.kt80-match-result{display:flex;flex-direction:column;gap:5px;margin:9px 0;padding:10px;border:1px solid #77966b;background:#1a4431;border-radius:8px}.kt80-match-result small{color:#d7e3d2}.kt80-match-result a{align-self:flex-start;color:#ffdf93}</style></head><body>
 <header><div><h1>WOW · Административен пътеводител</h1><small>КТ80 · Е01-ВИЗ V14 · единни панели · визуален стандарт · 21 доказателствени полета №07</small></div><a class="kt80-legacy-float" href="legacy/KT80_V27_35_REFERENCE_CAPSULE_V10.html" title="Отвори независимия пример V27.35 в нов прозорец" target="_blank" rel="noopener">🔴 V27.35 · Тестов пример ↗</a></header>
 <div class="frame">
 <section class="kt80-stages" aria-label="Пет работни етапа">
@@ -230,4 +230,4 @@ function open(c){
 }
 function close(){document.getElementById("overlay").classList.remove("open");document.getElementById("overlay").setAttribute("aria-hidden","true")}
 document.getElementById("close").onclick=close;document.getElementById("overlay").onclick=e=>{if(e.target===e.currentTarget)close()};document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});window.KT80RouteCatalog=cards;window.KT80OpenRoute=open;document.getElementById("search").oninput=render;document.getElementById("family").onchange=render;render();
-</script><script src="../v26-test/v26-parcel-editor.js"></script><script src="KT80_E01_ARCH_PARCEL_ADAPTER_V11.js"></script><script src="../v26-test/v26-dossier-evidence.js"></script><script src="../v26-test/v26-local-intake.js"></script><script src="KT80_E01_VISUAL_NAV_V14.js"></script><script src="KT80_E01_ARCH_WORKFLOW_V13.js"></script></body></html>
+</script><script src="../v26-test/v26-parcel-editor.js"></script><script src="KT80_E01_ARCH_PARCEL_ADAPTER_V11.js"></script><script src="../v26-test/v26-dossier-evidence.js"></script><script src="../v26-test/v26-local-intake.js"></script><script src="KT80_E01_VISUAL_NAV_V14.js"></script><script src="KT80_E01_IN_FORM_MATCHER_V14.js"></script><script src="KT80_E01_ARCH_WORKFLOW_V14.js"></script></body></html>
