@@ -31,7 +31,9 @@ function tile(label,kind,index,action){
  const arrow=document.createElement('span');arrow.className='kt80-dashboard-tile-arrow';arrow.textContent='➜';arrow.setAttribute('aria-hidden','true');
  b.append(number,text,arrow);
  b.addEventListener('click',()=>{
-  lastTile=b;b.classList.add('kt80-dashboard-depart');
+  lastTile=b;
+  const notice=$('kt80DashboardNotice');if(notice)notice.textContent='';
+  b.classList.add('kt80-dashboard-depart');
   const reduce=root.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   // Animation is a navigational cue only, not a legal status.
   if(reduce){action();return}
@@ -55,6 +57,9 @@ function init(){
  $('close')?.addEventListener('click',()=>{if(view==='candidate')home()});
  $('overlay')?.addEventListener('click',e=>{if(e.target===e.currentTarget&&view==='candidate')home()});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&view==='candidate')root.setTimeout(home,0)});
+ document.addEventListener('kt80:case-reset',()=>{
+  const notice=$('kt80DashboardNotice');if(notice)notice.textContent='Готово! Всичко е изчистено. Можем да започнем нова преписка.';
+ });
  root.KT80DashboardOpenStage=stage;
  root.KT80DashboardHome=home;
  root.KT80DashboardOpenCandidate=route;
