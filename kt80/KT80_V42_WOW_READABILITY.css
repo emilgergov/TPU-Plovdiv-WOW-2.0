@@ -98,3 +98,12 @@
 .kt80-pdf-nav button:disabled{opacity:.38;cursor:not-allowed}
 .kt80-pdf-nav strong{font-size:16px;color:#ffe3a8}
 .kt80-pdf-canvas{display:block;margin:0 auto 12px;max-width:100%;height:auto;background:#fff;box-shadow:0 4px 20px #0006;border-radius:3px}
+
+/* KT80 V48 — evidence/source file status everywhere, consistent with WOW. */
+.kt80-coverage-detail{font-size:15px!important;line-height:1.6!important;color:#ffebbd!important;padding:9px 11px;border-left:3px solid #d2b96e;background:#224333;border-radius:4px;margin:9px 0!important}
+.kt80-coverage-marker{display:inline-block;font-size:14px;font-weight:800;padding:4px 8px;margin:5px 0;color:#ffe8ab;border:1px solid #ae9362;border-radius:6px;background:#214c33}
+.kt80-ip-evidence-entry{padding:12px;border:1px solid #728765;border-radius:7px;background:#204532;margin:9px 0;font-size:16px;line-height:1.5}
+.kt80-ip-evidence-entry p{font-size:16px!important;line-height:1.6!important;overflow-wrap:anywhere}
+.kt80-ip-evidence-entry button{font-size:15px!important;padding:9px 13px;margin:4px 0}
+.kt80-ip-topic summary{font-size:17px!important;line-height:1.5;font-weight:800;color:#ffe2a6}
+.kt80-ip-topic{border:1px solid #78906f;border-radius:7px;padding:11px;margin:8px 0;background:#204935}
