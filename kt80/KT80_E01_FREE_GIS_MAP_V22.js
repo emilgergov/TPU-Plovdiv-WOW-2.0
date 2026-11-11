@@ -132,7 +132,16 @@ function syncSelectedRow(){
   row.setAttribute('aria-pressed',String(active));
  }
 }
-function choose(id){S.chosen=id;render();syncSelectedRow();document.dispatchEvent(new CustomEvent('kt80:parcel-selected',{detail:{id}}))}
+function choose(id){
+ id=String(id);
+ if(!S.results.some(r=>String(r.cadnum||r.input)===id))return;
+ S.chosen=id;
+ render();
+ syncSelectedRow();
+ document.dispatchEvent(new CustomEvent('kt80:parcel-selected',{detail:{id}}));
+ const statusBox=$('kt80GISStatus');
+ if(statusBox)statusBox.textContent='Избран ПИ '+id+' · Показани са пространствените данни за този имот.';
+}
 function zoom(k){if(!S.view)return;S.view.w*=k;S.view.h*=k;render()}
 function fit(){fitView(bbox(S.results.flatMap(featuresOf)))}
 function showSelected(){const r=selected()||S.results[0];fitView(bbox(featuresOf(r)))}
@@ -158,7 +167,7 @@ function rows(){const el=$('kt80GISResults');if(!el)return;el.replaceChildren();
  for(const r of S.results){const row=document.createElement('button');row.type='button';row.className='kt80-gis-row';
  const id=String(r.cadnum||r.input);row.dataset.parcelId=id;row.setAttribute('aria-pressed',String(id===S.chosen));const strong=document.createElement('strong');strong.textContent=id;
  const span=document.createElement('span');span.textContent=featuresOf(r).length?'Имотна геометрия · '+root.KT80Display.area(r.area_m2_source)+' кв. м':'Няма потвърдена геометрия';
- row.append(strong,span);row.addEventListener('click',()=>{choose(id);showSelected()});el.append(row)}
+ row.append(strong,span);row.addEventListener('click',()=>choose(id));el.append(row)}
 }
 async function loadZones(epoch){
  if(S.zones){render();return}
@@ -222,7 +231,14 @@ function init(){
  $('kt80GISLabelsMode')?.addEventListener('change',e=>{S.labels=e.target.value;render()});
  const map=$('kt80GISMap');
  map?.addEventListener('wheel',e=>{if(!S.view)return;e.preventDefault();zoom(e.deltaY<0?.85:1.15)},{passive:false});
- map?.addEventListener('pointerdown',e=>{if(!S.view||e.button!==0)return;S.pointer=[e.clientX,e.clientY,S.view.x,S.view.y];map.setPointerCapture?.(e.pointerId)});
+ map?.addEventListener('pointerdown',e=>{
+  if(!S.view||e.button!==0)return;
+  const target=e.target.closest?.('[data-parcel-select],[data-parcel]');
+  const id=target?.getAttribute('data-parcel-select')||target?.getAttribute('data-parcel');
+  if(id){e.preventDefault();e.stopPropagation();S.pointer=null;choose(id);return}
+  S.pointer=[e.clientX,e.clientY,S.view.x,S.view.y];
+  map.setPointerCapture?.(e.pointerId);
+ });
  map?.addEventListener('pointermove',e=>{if(!S.pointer||!S.view)return;
   const rect=map.getBoundingClientRect(),sx=rect.width||W,sy=rect.height||H;
   S.view.x=S.pointer[2]-(e.clientX-S.pointer[0])/sx*S.view.w;
