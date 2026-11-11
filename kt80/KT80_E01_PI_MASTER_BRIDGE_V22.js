@@ -15,6 +15,8 @@ function render(ids,items){
  for(let i=0;i<ids.length;i++){
   const id=ids[i],info=items[i],card=document.createElement('section');card.className='kt80-pi-card';
   const title=document.createElement('h4');title.textContent='ПИ '+id;card.append(title);
+  card.dataset.parcelId=id;
+  if(ids.length>1&&i>0)card.classList.add('kt80-pi-secondary');
   if(!info||info.status!=='FOUND'||!info.profile){
    line(card,'ПИ MASTER',info?.status==='NOT_IN_VALIDATED_CADASTRE'?'Няма запис в проверения индекс':'НЯМА ДАННИ');
    line(card,'Пространствен статус','Не е определен от ПИ MASTER');host.append(card);continue;
@@ -68,6 +70,16 @@ async function find(ids,run){
   status('ПИ MASTER не можа да зареди проверените данни: '+String(e?.message||e)+'. Това НЕ означава, че имотът или защитената зона липсва.');
  }
 }
+function selectParcel(id){
+ const host=$('kt80PIMasterResults');if(!host)return;
+ const cards=[...host.querySelectorAll('.kt80-pi-card')];
+ for(const c of cards){
+  const active=c.dataset.parcelId===id;
+  c.classList.toggle('kt80-pi-active',active);
+  if(cards.length>1)c.classList.toggle('kt80-pi-secondary',!active);
+ }
+}
+document.addEventListener('kt80:parcel-selected',e=>selectParcel(String(e.detail?.id||'')));
 function reset(){epoch++;latest=null;$('kt80PIMasterResults')?.replaceChildren();status('ПИ MASTER: въведете имоти и натиснете „Намери имотите“.')}
 function init(){
  if(!$('kt80PIMasterResults'))return;
