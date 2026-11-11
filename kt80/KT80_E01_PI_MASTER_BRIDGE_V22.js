@@ -16,7 +16,7 @@ function render(ids,items){
   const id=ids[i],info=items[i],card=document.createElement('section');card.className='kt80-pi-card';
   const title=document.createElement('h4');title.textContent='ПИ '+id;card.append(title);
   card.dataset.parcelId=id;
-  if(ids.length>1&&i>0)card.classList.add('kt80-pi-secondary');
+  if(ids.length>1){card.classList.toggle('kt80-pi-secondary',i>0);card.tabIndex=0;card.setAttribute('role','button');card.setAttribute('aria-label','Покажи пространствените данни за ПИ '+id);card.addEventListener('click',()=>root.KT80FreeGIS?.selectParcel?.(id));card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();root.KT80FreeGIS?.selectParcel?.(id)}})}
   if(!info||info.status!=='FOUND'||!info.profile){
    line(card,'ПИ MASTER',info?.status==='NOT_IN_VALIDATED_CADASTRE'?'Няма запис в проверения индекс':'НЯМА ДАННИ');
    line(card,'Пространствен статус','Не е определен от ПИ MASTER');host.append(card);continue;
