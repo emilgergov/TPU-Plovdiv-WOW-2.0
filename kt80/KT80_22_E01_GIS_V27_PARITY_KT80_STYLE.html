@@ -217,6 +217,7 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 .kt80-file-reason{grid-column:2;color:#e0e3d6;line-height:1.4;font-size:12px}
 .kt80-file-status-summary{font-size:15px;font-weight:700;line-height:1.7}
 @media(max-width:600px){.kt80-file-status-row{grid-template-columns:1fr}.kt80-file-status{justify-self:start}.kt80-file-reason{grid-column:1}}
+.kt80-input-formats-note{font-size:13px;line-height:1.55;color:#e5e0c8;margin:7px 0 12px;padding:8px 11px;border-left:3px solid #d6b967;background:rgba(255,255,255,.035);border-radius:3px}.kt80-input-formats-note strong{color:#f6d584}
 </style></head><body>
 <header><div><h1>WOW · Административен пътеводител</h1><small>КТ80 · Ч1/V33 · контрол на пълнотата · ИП MASTER · V31 визуална основа</small></div><div class="kt80-header-actions"><button id="kt80ClearAll" type="button" aria-haspopup="dialog" aria-controls="kt80ResetDialog" aria-expanded="false">↺ Изчисти всичко</button><a class="kt80-legacy-float" href="legacy/KT80_V27_35_REFERENCE_CAPSULE_V10.html" title="Отвори независимия пример V27.35 в нов прозорец" target="_blank" rel="noopener">🔴 V27.35 · Тестов пример ↗</a></div></header>
 <section id="kt80Dashboard" class="kt80-dashboard" aria-labelledby="kt80DashboardTitle">
@@ -249,6 +250,7 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 <h2>1. Приемане · IN документи</h2><p>Въведете преписка или изберете документ. Първичните файлове не се променят.</p>
 <label for="kt80InputFile">Преписка (ZIP, PDF, DOCX, изображение, TXT)</label>
 <input id="kt80InputFile" type="file" accept=".zip,.pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,.tif,.tiff"/>
+<p id="kt80AcceptedFormatsNote" class="kt80-input-formats-note"><strong>Допустими файлове:</strong> ZIP архив или отделен PDF, DOCX, TXT, JPG/JPEG, PNG, WEBP, BMP, TIF/TIFF. <strong>В ZIP:</strong> PDF, DOCX, TXT, изображения и текстови CSV/JSON/MD файлове; допустими са вложени папки. <strong>Ограничения:</strong> до 40 MB за преписката, до 20 MB за отделен документ при прочит; ZIP с до 500 файла и общ разархивиран размер до 80 MB. Стари Word <strong>.doc</strong> файлове не се прочитат — преобразувайте ги в DOCX или PDF. Сканираните документи се отбелязват „ЗА ПРОВЕРКА“ след OCR.</p>
 <button id="kt80ProcessFile" type="button">Обработи преписката</button>
 <div id="kt80InputStatus" role="status" aria-live="polite">Няма заредена преписка. Може да въведете предмет и имоти ръчно.</div>
 <section id="kt80DossierAudit" class="kt80-workflow-audit" aria-live="polite">Документният инвентар ще се появи след обработка на преписката.</section>
