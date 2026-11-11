@@ -1,0 +1,60 @@
+/* KT80 V42 — shared readability baseline. No changes to frozen V31 core CSS.
+   Applied to KT80 work screens; minimum comfortable sizes for important facts. */
+:root{--kt80-body-readable:16px;--kt80-meta-readable:14px;--kt80-heading-readable:20px}
+.kt80-workflow,.kt80-stages,.kt80-tiny-status{font-size:var(--kt80-body-readable);line-height:1.55}
+.kt80-workflow .kt80-stage-panel{font-size:var(--kt80-body-readable);line-height:1.6}
+.kt80-workflow .kt80-stage-panel h2{font-size:22px;line-height:1.35}
+.kt80-workflow .kt80-stage-panel p,
+.kt80-workflow .kt80-stage-panel li,
+.kt80-workflow .kt80-stage-panel label,
+.kt80-workflow .kt80-stage-panel summary{font-size:16px;line-height:1.6}
+.kt80-workflow .kt80-stage-panel label:not(.kt80-check){font-size:16px;font-weight:700}
+.kt80-workflow .kt80-stage-panel button,
+.kt80-workflow .kt80-stage-panel input,
+.kt80-workflow .kt80-stage-panel select,
+.kt80-workflow .kt80-stage-panel textarea{font-size:16px;line-height:1.45}
+.kt80-workflow .kt80-stage-panel button{font-weight:750}
+.kt80-workflow .kt80-stage-panel .kt80-template-help,
+.kt80-workflow .kt80-stage-panel .kt80-guide{padding:15px;border-color:#c0a566}
+.kt80-workflow .kt80-template-help summary,
+.kt80-workflow .kt80-guide summary{font-size:18px;font-weight:800;color:#ffe19a;padding:6px 2px}
+.kt80-workflow .kt80-template-help p,
+.kt80-workflow .kt80-template-help div,
+.kt80-workflow .kt80-template-help span,
+.kt80-workflow .kt80-guide p,
+.kt80-workflow .kt80-guide div{font-size:16px;line-height:1.65;color:#f4eddd}
+.kt80-workflow #kt80FormMatches,
+.kt80-workflow #kt80InputStatus,
+.kt80-workflow #kt80ReviewSummary,
+.kt80-workflow #kt80SubjectProposalStatus,
+.kt80-workflow .kt80-hint,
+.kt80-workflow .kt80-flow-message{font-size:16px;line-height:1.65;color:#f7f1df;padding:15px}
+.kt80-workflow #kt80FormMatches > *,
+.kt80-workflow #kt80FormMatches p,
+.kt80-workflow #kt80FormMatches li,
+.kt80-workflow #kt80FormMatches small{font-size:15px;line-height:1.65}
+.kt80-workflow #kt80FormMatches a{color:#ffe29c;text-decoration:underline;text-underline-offset:3px}
+.kt80-workflow .kt80-workflow-audit{font-size:16px;line-height:1.6}
+.kt80-workflow .kt80-workflow-audit h3{font-size:20px}
+.kt80-workflow .kt80-workflow-audit summary{font-size:17px;color:#ffe6a4}
+.kt80-workflow .kt80-workflow-audit p,
+.kt80-workflow .kt80-workflow-audit small{font-size:15px;line-height:1.6}
+.kt80-workflow .kt80-file-status{font-size:14px}
+.kt80-workflow .kt80-file-name{font-size:17px;line-height:1.5}
+.kt80-workflow .kt80-file-reason{font-size:15px;line-height:1.55;color:#ecebdd}
+.kt80-workflow .kt80-file-status-summary{font-size:17px;font-weight:800}
+.kt80-workflow .kt80-input-formats-note{font-size:15px;line-height:1.65;color:#f3e8cf}
+.kt80-workflow .kt80-input-formats-note strong{color:#ffe4a5}
+.kt80-workflow .kt80-custom-file-name{font-size:16px}
+.kt80-workflow .kt80-original-open{font-size:15px}
+.kt80-tiny-status,.kt80-tiny-status span,.kt80-tiny-status strong{font-size:15px;line-height:1.5}
+.kt80-stages .kt80-step{font-size:15px;line-height:1.4}
+.kt80-original-panel,.kt80-original-panel p,
+.kt80-original-panel .kt80-original-head{font-size:16px;line-height:1.6}
+.kt80-original-panel small{font-size:14px}
+@media(max-width:700px){
+.kt80-workflow .kt80-file-status-row{gap:8px}
+.kt80-workflow .kt80-file-name{font-size:16px}
+.kt80-workflow .kt80-file-reason{font-size:14px}
+.kt80-workflow .kt80-stage-panel h2{font-size:20px}
+}
