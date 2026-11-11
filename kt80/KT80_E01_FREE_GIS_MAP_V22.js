@@ -84,12 +84,24 @@ function render(){
   const m=markers[i];
   const halo=shape('circle',{cx:m.x,cy:m.y,r:m.chosen?13:10,fill:'#ffffff',stroke:'#a60f20','stroke-width':1.8,class:'kt80-parcel-locator-halo'});
   const dot=shape('circle',{cx:m.x,cy:m.y,r:m.chosen?8:6.5,fill:'#e0182d',stroke:'#ffffff','stroke-width':1.5,class:'kt80-parcel-locator'});
+  // Clicking the point selects the matching cadastral parcel directly.
+  for(const pin of [halo,dot]){
+   pin.setAttribute('data-parcel-select',m.id);
+   pin.setAttribute('role','button');
+   pin.setAttribute('tabindex','0');
+   pin.setAttribute('aria-label','Покажи данните за ПИ '+m.id);
+   pin.addEventListener('click',e=>{e.stopPropagation();choose(m.id)});
+   pin.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choose(m.id)}});
+  }
   labels.append(halo,dot);
   const close=markers.filter((x,j)=>j!==i&&Math.hypot(x.x-m.x,x.y-m.y)<145).length;
   const dy=close?(-16-(i%3)*23):-14;
   const dx=close?(14+(i%2)*4):14;
   const tag=shape('text',{x:m.x+dx,y:m.y+dy,class:'kt80-parcel-locator-label','text-anchor':'start'});
   tag.textContent=m.id;
+  tag.setAttribute('data-parcel-select',m.id);tag.setAttribute('role','button');tag.setAttribute('tabindex','0');
+  tag.addEventListener('click',e=>{e.stopPropagation();choose(m.id)});
+  tag.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choose(m.id)}});
   if(!wideContext||m.chosen||close===0||S.labels==='all')labels.append(tag);
  }
  $('kt80GISMapCaption').textContent='Имотни геометрии: '+S.results.filter(r=>featuresOf(r).length).length+
