@@ -59,16 +59,17 @@ function shell(){
  return modal;
 }
 function close(){openToken++;const modal=$('kt80OriginalPreview');if(modal)modal.hidden=true;if(activeUrl){URL.revokeObjectURL(activeUrl);activeUrl=null}const body=$('kt80OriginalContent');if(body)body.replaceChildren()}
-function previewContent(data,name){
+function previewContent(data,name,page){
  if(activeUrl){URL.revokeObjectURL(activeUrl);activeUrl=null}
  const media=types[ext(name)]||'application/octet-stream';
  const blob=new Blob([data],{type:media});activeUrl=URL.createObjectURL(blob);
  const download=$('kt80OriginalDownload');download.href=activeUrl;download.download=name.split('/').pop();
- const newTab=$('kt80OriginalNewTab');newTab.hidden=!(media==='application/pdf'||media.startsWith('image/'));newTab.href=activeUrl;
+ const viewUrl=media==='application/pdf'&&Number.isInteger(page)&&page>0?activeUrl+'#page='+page:activeUrl;
+ const newTab=$('kt80OriginalNewTab');newTab.hidden=!(media==='application/pdf'||media.startsWith('image/'));newTab.href=viewUrl;
  const body=$('kt80OriginalContent');body.replaceChildren();
  if(media==='application/pdf'||media.startsWith('image/')){
   const viewer=document.createElement(media==='application/pdf'?'iframe':'img');
-  viewer.src=activeUrl;viewer.className='kt80-original-viewer';
+  viewer.src=viewUrl;viewer.className='kt80-original-viewer';
   if(viewer.tagName==='IFRAME'){viewer.title='Преглед на оригиналния PDF';viewer.setAttribute('sandbox','allow-same-origin');}
   else viewer.alt='Изображение от оригиналния файл';
   body.append(viewer);
@@ -81,7 +82,7 @@ function previewContent(data,name){
   $('kt80OriginalMessage').textContent='Този формат не се визуализира надеждно в браузъра. Използвайте „Изтегли оригинала“ и го отворете с подходящото приложение.';
  }
 }
-async function openOriginal(filename){
+async function openOriginal(filename,page){
  const input=$('kt80InputFile'),source=input?.files?.[0];if(!source)throw Error('Първо изберете оригиналната преписка');
  const token=++openToken;
  const modal=shell();modal.hidden=false;$('kt80OriginalTitle').textContent='Оригинал · '+filename;$('kt80OriginalMessage').textContent='Отваряне на документа…';
@@ -89,7 +90,7 @@ async function openOriginal(filename){
  try{
   const data=/\.zip$/i.test(source.name)?await extractZIP(source,normalize(filename)):await source.arrayBuffer();
   if(token!==openToken)return;
-  previewContent(data,filename);
+  previewContent(data,filename,page);
  }catch(e){if(token!==openToken)return;$('kt80OriginalMessage').textContent='Не може да се отвори: '+(e?.message||e)}
 }
 document.addEventListener('kt80:case-reset',close);
