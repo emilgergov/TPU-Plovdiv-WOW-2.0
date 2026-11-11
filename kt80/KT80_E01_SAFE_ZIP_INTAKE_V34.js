@@ -39,7 +39,7 @@ async function extractText(data,name,options={}){
   window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const doc=await window.pdfjsLib.getDocument({data:new Uint8Array(data)}).promise;
   extractText.lastOcrPages=0;extractText.lastOcrError='';extractText.lastPageWarnings=[];
-  const parts=[];let worker=null;
+  const parts=[];let worker=null;extractText.lastPageText=[];
   try{for(let i=1;i<=doc.numPages;i++){intakeProgress('PDF: страница '+i+' от '+doc.numPages+' · '+name,{page:i,pages:doc.numPages});
    const page=await doc.getPage(i),content=await page.getTextContent();
    // Preserve PDF.js word boundaries for notification headings. A PDF text item
@@ -72,6 +72,7 @@ async function extractText(data,name,options={}){
    }
    if(pageText.replace(/[^\p{L}\p{N}]/gu,'').length<25)extractText.lastPageWarnings.push('стр. '+i+' — недостатъчно разчетен текст');
    parts.push(pageText);
+   extractText.lastPageText.push({page:i,text:pageText.slice(0,12000)});
   }}finally{if(worker)await worker.terminate()}
   return parts.join('\n');
  }
@@ -195,7 +196,7 @@ async function process(file){
   return rank(a)-rank(b);
  });
  const docs=[],all=new Set(),leading=new Set(),other=new Set(),subjects=[],documentTexts=[];let earlyGisSent=false;const dossierParcelEvidence=[];const startedAt=performance.now();
- const dossierDocuments=[];
+ const dossierDocuments=[];const pageIndex=[];
  for(const item of list){
   intakeProgress('Прочит на документ '+(docs.length+1)+' от '+list.length+' · '+item.name,{document:docs.length+1,documents:list.length,page:0,pages:0});
   let status='описан',text='';const entryStartedAt=performance.now();
@@ -206,8 +207,9 @@ async function process(file){
    try{
     const unpacked=await readEntry(bytes,v,item);
     if(unpacked.byteLength!==item.size)throw Error('Несъответствие в ZIP размер.');
-    extractText.lastOcrPages=0;extractText.lastOcrError='';extractText.lastPageWarnings=[];text=await withDeadline(extractText(unpacked,item.name,{allowOcr:/уведомлен|uvedomlen|notification/i.test(item.name)||(!leading.size&&!all.size&&/\.pdf$/i.test(item.name))}),90000,'Прочит на документ '+item.name);
+    extractText.lastOcrPages=0;extractText.lastOcrError='';extractText.lastPageWarnings=[];extractText.lastPageText=[];text=await withDeadline(extractText(unpacked,item.name,{allowOcr:/уведомлен|uvedomlen|notification/i.test(item.name)||(!leading.size&&!all.size&&/\.pdf$/i.test(item.name))}),90000,'Прочит на документ '+item.name);
     status=text.trim()?(extractText.lastOcrPages?'OCR: '+extractText.lastOcrPages+' сканирани страници; експертна проверка':'текстът е прочетен'):(extractText.lastOcrError?'НЕПРОЧЕТЕН: OCR неуспешен — '+extractText.lastOcrError:'НЕПРОЧЕТЕН: няма извлекаем текст (възможно сканиран документ)');if(extractText.lastPageWarnings?.length)status+='; ПРОВЕРКА: '+extractText.lastPageWarnings.join(', ');if(/\.pdf$/i.test(item.name)&&!/уведомлен|notification/i.test(item.name)&&extractText.lastPageWarnings?.length)status+='; OCR на приложението е отложен за документален анализ';if(text.trim())documentTexts.push({source:item.name,text:text.slice(0,150000)});
+    if(/\.pdf$/i.test(item.name)&&Array.isArray(extractText.lastPageText))for(const pg of extractText.lastPageText)pageIndex.push({file:item.name,page:pg.page,text:pg.text});
     // Distinguish cadastral context: neighbours and former IDs are evidence, not project parcels.
     const contextualIds=[];
     for(const line of text.split(/\r?\n/)){
@@ -392,7 +394,7 @@ async function process(file){
  for(const id of leading)other.delete(id);
  const editorialBrief=(window.V26EditorialAnalysis&&typeof window.V26EditorialAnalysis.brief==='function')?
   window.V26EditorialAnalysis.brief(subjects):null;
- return {editorial_brief:editorialBrief,archive_name:file.name,archive_entries:list.length,elapsed_ms:Math.round(performance.now()-startedAt),files:docs,dossier_documents:dossierDocuments,dossier_analysis:dossierAnalysis,dossier_characterization:dossierCharacterization,dossier_draft:dossierDraft,evidence:dossierParcelEvidence,subject_candidates:subjects,semantic_review:semanticReview(subjects,documentTexts),all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[],mentioned_candidates:[...other],warnings:['Кандидатите за предмет на ИП са предварителни и изискват експертно потвърждение.','Другите срещнати идентификатори НЕ са автоматично съпътстващи имоти.','PDF и изображения се разчитат с OCR при необходимост; проверете качеството и пълнотата на извличането.']}};
+ return {editorial_brief:editorialBrief,archive_name:file.name,archive_entries:list.length,elapsed_ms:Math.round(performance.now()-startedAt),files:docs,page_text_index:pageIndex,dossier_documents:dossierDocuments,dossier_analysis:dossierAnalysis,dossier_characterization:dossierCharacterization,dossier_draft:dossierDraft,evidence:dossierParcelEvidence,subject_candidates:subjects,semantic_review:semanticReview(subjects,documentTexts),all_parcels:[...all],classification:{leading_candidates:[...leading],ancillary_candidates:[],mentioned_candidates:[...other],warnings:['Кандидатите за предмет на ИП са предварителни и изискват експертно потвърждение.','Другите срещнати идентификатори НЕ са автоматично съпътстващи имоти.','PDF и изображения се разчитат с OCR при необходимост; проверете качеството и пълнотата на извличането.']}};
 }
 window.V26LocalIntake={process};
 })();
