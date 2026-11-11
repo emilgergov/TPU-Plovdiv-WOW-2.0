@@ -117,13 +117,13 @@ async function generate(){
   const profiles=sourceRows(live);
   const zoneFeatures=root.KT80FreeGIS?.getMap?.().zones||[];
   if(zoneFeatures.length!==32)throw Error('Заредени са непълни граници на ЗЗ. PDF1 не е изготвен.');
-  if(typeof root.V26KT12Overlay?.verify!=='function'||typeof root.V26OfflinePDF?.generate!=='function')throw Error('Липсват ГИС проверката или PDF модулът.');
+  if(typeof root.V26KT12Overlay?.verify!=='function'||typeof root.KT80V22PDF?.generate!=='function')throw Error('Липсват ГИС проверката или PDF модулът.');
   const checked=live.results.map(r=>({...r}));await root.V26KT12Overlay.verify(checked);
   if(gen!==epoch||root.KT80FreeGISResults!==live)return;
   verified(checked);
   const content=bodyContent(checked,profiles,zoneFeatures);
   // The source PDF template is the V27.35 two-part structure rendered with the KT80 green/gold UI identity.
-  const blob=await root.V26OfflinePDF.generate({content});
+  const blob=await root.KT80V22PDF.generate({content});
   if(gen!==epoch||root.KT80FreeGISResults!==live)return;
   if(!(blob instanceof Blob)||blob.size<100||await blob.slice(0,4).text()!=='%PDF')throw Error('PDF1 не е генериран успешно.');
   if(gen!==epoch||root.KT80FreeGISResults!==live)return;
