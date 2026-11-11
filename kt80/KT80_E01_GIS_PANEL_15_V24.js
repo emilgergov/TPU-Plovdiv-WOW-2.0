@@ -18,9 +18,22 @@ function init(){
  input.value=caseInput.value;
  const check=el('button','','Провери имотите');check.type='button';check.id='kt80GISFreeCheck';
  check.addEventListener('click',()=>{
-  caseInput.value=input.value;
-  $('kt80ParcelNormalize')?.click();
-  const notice=$('kt80GISFreeCheckStatus');if(notice)notice.textContent='Текстовата проверка е изпълнена. За ГИС резултати натиснете „Намери имотите“.';
+  const notice=$('kt80GISFreeCheckStatus');
+  const result=root.V26ParcelEditor?.normalize(input.value);
+  if(!result){if(notice)notice.textContent='Модулът за проверка не е зареден.';return}
+  const valid=result.ids.length>0&&result.ids.length<=100&&!result.invalid.length&&!result.uncertain.length;
+  if(!valid){
+   const issues=[result.invalid.length?'Невалидни: '+result.invalid.join(', '):'',result.uncertain.length?'За уточняване: '+result.uncertain.join(', '):'',!result.ids.length?'Не са разпознати имоти.':'',result.ids.length>100?'Над 100 имота.':''].filter(Boolean);
+   if(notice)notice.textContent='Проверката откри проблем: '+issues.join(' · ');
+   notice?.setAttribute('data-check','invalid');return;
+  }
+  const normalized=result.ids.join('; ');
+  input.value=normalized;
+  if(caseInput.value!==normalized){
+   caseInput.value=normalized;
+   caseInput.dispatchEvent(new Event('input',{bubbles:true}));
+  }
+  if(notice){notice.textContent='Проверени '+result.ids.length+' имота: '+result.ids.join(' · ')+(result.changes.length?' · Корекции: '+result.changes.join('; '):'')+'. За ГИС резултати натиснете „Намери имотите“.';notice.setAttribute('data-check','valid')}
  });
  const controls=el('div','kt80-gis-intake-actions');controls.append(check,find);
  form.append(label,input,controls);
@@ -52,9 +65,9 @@ function init(){
    const spatial=el('section','kt80-gis-spatial-v24');
    const spatialTitle=el('h4','','Пространствени данни');spatial.append(spatialTitle);
    const detail=map.querySelector('.kt80-gis-detail');
-   if(detail)spatial.append(detail);
+   if(detail){const repeated=detail.querySelector(':scope > strong');if(repeated)repeated.remove();spatial.append(detail)}
    const profile=gis.querySelector('.kt80-pi-master-profile');
-   if(profile){profile.classList.add('kt80-pi-master-compact');spatial.append(profile)}
+   if(profile){profile.classList.add('kt80-pi-master-compact');const lead=profile.querySelector(':scope > p');if(lead){lead.textContent='Проверени атрибути от ПИ MASTER; наличието на данни само по себе си не удостоверява пресичане.'}spatial.append(profile)}
    layout.append(list,spatial);
   }
  }
