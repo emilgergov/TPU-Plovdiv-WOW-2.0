@@ -1,0 +1,48 @@
+name: V26 isolated Word draft checks
+on:
+  push:
+    branches:
+      - work/v26-auto-word-evidence-20261028
+  workflow_dispatch:
+jobs:
+  word-draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install test-only DOCX dependencies
+        run: npm install --no-save --no-package-lock --ignore-scripts fflate@0.8.2 jsdom@25
+      - name: JavaScript syntax
+        run: |
+          node --check expert-v26/v26-word-review.js
+          node --check expert-v26/v26-template-word.js
+          node --check expert-v26/v26-draft-package.js
+          node --check expert-v26/v26-dossier-evidence.js
+          node --check expert-v26/v26-full-gis-bridge.js
+          node --check expert-v26/v26-approved-gis-zip.js
+      - name: GIS archive picker regression
+        run: node expert-v26/tests/v26-gis-archive-picker.test.cjs
+      - name: Evidence regression
+        run: node expert-v26/tests/evidence-reconciliation.cjs
+      - name: Confirmed fields regression
+        run: node expert-v26/tests/word-confirmed-fields.cjs
+      - name: Generate both original Word templates
+        run: node expert-v26/tests/word-real-templates.cjs
+      - name: Verify original Word templates exist
+        run: |
+          test -s expert-v26/templates/V26_3_Obrazec_A.docx
+          test -s expert-v26/templates/V26_3_Obrazec_B.docx
+
+      - name: Package isolated browser test
+        run: |
+          mkdir -p v26-browser-test
+          cp -a expert-v26 v26-browser-test/
+          python3 -m zipfile -c v26-browser-test.zip v26-browser-test
+      - name: Upload isolated browser test ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: V26-isolated-browser-test
+          path: v26-browser-test.zip
+          retention-days: 14

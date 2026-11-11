@@ -1,0 +1,21 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const bridge=fs.readFileSync(path.join(__dirname,'..','v26-full-gis-bridge.js'),'utf8');
+const gis=fs.readFileSync(path.join(__dirname,'..','v26-approved-gis-zip.js'),'utf8');
+assert.match(bridge,/input\.addEventListener\('change'/,'Full GIS picker must have change handler');
+assert.match(bridge,/const selected=input\.files&&input\.files\[0\]/,'Selected file must be read from input');
+assert.match(bridge,/if\(!selected\)/,'Cancelled picker must not call GIS loader');
+assert.match(bridge,/selected\.name/,'Selected filename must be shown');
+assert.match(bridge,/api\.openArchive\(selected\)/,'Selected archive must be opened');
+assert.match(bridge,/remember\(selected\)/,'Selected archive must be stored for reuse');
+assert.match(bridge,/v26:gis-invalidated/,'GIS result must invalidate stale view');
+assert.match(gis,/parcelgeom_04\.json\.gz/,'GIS package completeness guard must remain');
+assert.match(gis,/overlays_04\.json\.gz/,'Overlay completeness guard must remain');
+console.log('PASS: V26 GIS archive picker regression (static wiring)');
+
+assert.match(bridge,/panel\.style\.display='none'/, 'Full GIS picker should collapse after activation');
+assert.match(bridge,/Архив: '\+selected\.name/, 'Successful load must identify archive');
+
+assert.equal((bridge.match(/new Event\('v26:index-ready'\)/g)||[]).length,3,'Hosted, restored and manually loaded GIS must all notify the existing parcel lookup');

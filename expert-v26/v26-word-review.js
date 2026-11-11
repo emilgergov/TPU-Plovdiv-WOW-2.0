@@ -21,23 +21,42 @@ function mount(){
  const impactTitle=document.createElement('h4');impactTitle.textContent='Пет констатации за въздействията — поотделно';box.append(impactTitle);
  impactFields=['Местообитания','Видове','Цялост и цели','Кохерентност','Кумулативни въздействия'].map(label=>{const wrap=document.createElement('div');const caption=document.createElement('label');caption.textContent=label;caption.style.display='block';const area=document.createElement('textarea');area.rows=2;area.style.cssText='width:100%;box-sizing:border-box';area.addEventListener('input',()=>{confirmed.checked=false});wrap.append(caption,area);box.append(wrap);return area});
  const check=document.createElement('label');confirmed=document.createElement('input');confirmed.type='checkbox';check.append(confirmed,document.createTextNode(' Потвърждавам проверката на описанията, административните данни и правните констатации по преписката.'));box.append(check);
- button.parentNode.insertBefore(box,button);
+ box.hidden=true;button.parentNode.insertBefore(box,button);
+}
+function autoEvidence(){
+ const ctx=window.V26WorkingContext||{};
+ const sections=ctx.characterization?.sections||[];
+ const topics=['construction','electricity','water_supply','wastewater'];
+ const note='ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва проверено описание в преписката.';
+ const paragraphs=topics.map((key,i)=>{
+  const section=sections.find(s=>s.key===key);
+  const verified=(section?.sources||[]).filter(s=>s.status==='verified'&&s.excerpt);
+  return verified.length?verified.map(s=>String(s.excerpt)+' (Източник: '+s.file+')').join(' '):note;
+ });
+ const ids=(document.getElementById('ids')?.value||'').match(/\\b\\d{5}\\.\\d+\\.\\d+(?:\\.\\d+){0,2}\\b/g)||[];
+ const subject=window.V26SubjectContext;
+ return {paragraphs,ids:[...new Set(ids)].join(', '),subject:subject?.confirmed?(subject.wordHeading||subject.title):null};
 }
 function getConfirmedParagraphs(){
- if(!confirmed||!confirmed.checked)throw Error('Отворете „Проверка на четирите абзаца“ и потвърдете съдържанието.');
- const values=fields.map(f=>f.value.trim());if(values.some(x=>!x))throw Error('Попълнете четирите абзаца за Word предложението.');return values;
+ const fallback='ЗА ЕКСПЕРТНА ПРОВЕРКА — липсва достатъчно потвърдена информация от преписката.';
+ const auto=autoEvidence();return fields.map((f,i)=>f.value.trim()||auto.paragraphs[i]||fallback);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 function getConfirmedMetadata(){
- if(!confirmed?.checked)throw Error('Потвърдете данните за Word предложението.');
+ // Working proposal: unresolved fields remain explicit review notes in DOCX.
  if(Object.keys(caseFields).length!==6)throw Error('Формулярът за административни данни не е зареден.');
  const result=Object.fromEntries(Object.entries(caseFields).map(([k,v])=>[k,v.value.trim()]));
  result.legalParagraphs=legalFields.map(f=>f.value.trim());
  result.procedureFinding=procedureField?.value.trim()||'';
  result.impactFindings=impactFields.map(f=>f.value.trim());
- if(!result.procedureFinding||result.impactFindings.length!==5||result.impactFindings.some(v=>!v))throw Error('Попълнете приложимата процедура и петте констатации за въздействията.');
- if(result.legalParagraphs.slice(0,5).some(v=>!v))throw Error('Попълнете петте основни фактически и правни констатации.');
- if(['recipient','address','subject','incomingReference','salutation','parcelIds'].some(k=>!result[k]))throw Error('Попълнете адресат, адрес, предмет, входящ номер и обръщение.');
+ const note='ЗА ЕКСПЕРТНА ПРОВЕРКА — не е установено от преписката.';
+ result.legalParagraphs=result.legalParagraphs.map(v=>v||note);
+ result.impactFindings=result.impactFindings.map(v=>v||note);
+ result.procedureFinding=result.procedureFinding||note;
+ for(const k of ['recipient','address','subject','incomingReference','salutation'])result[k]=result[k]||note;
+ const auto=autoEvidence();
+ if(auto.subject)result.subject=auto.subject.replace(/^Относно:\s*/i,'').trim();
+ if(!result.parcelIds)result.parcelIds=auto.ids;
  return result;
 }
 document.addEventListener('v26:dossier-loaded',event=>{

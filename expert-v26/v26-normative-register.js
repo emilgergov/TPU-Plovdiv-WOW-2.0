@@ -20,6 +20,12 @@ async function load(){
    if(records.some(r=>r.source===item.url&&r.title===item.title))continue;
    records.push({id:'B'+String(item.id).padStart(3,'0'),title:item.title,source:item.url,purpose:item.category||'Официален източник',source_status:'Браузърен каталог на официални източници; текстът и редакцията не са проверени в този модул',page:'ПРЕДСТОИ',date:'ПРЕДСТОИ',verified:false,zone_code:item.zone_code||null});
   }
+  // Supplement, never overwrite, the existing archive with source-traceable article excerpts.
+  const legalResponse=await fetch(new URL('data/verified-legal-excerpts-20261028.json',document.currentScript?.src||location.href),{cache:'no-store'});
+  if(!legalResponse.ok)throw Error('Липсва регистърът с проверени разпоредби: HTTP '+legalResponse.status);
+  const legal=await legalResponse.json();
+  if(!Array.isArray(legal.records)||!legal.records.every(r=>r.id&&r.source&&r.article&&r.page&&r.verified_scope&&r.revision_verified===false))throw Error('Невалидна проследимост на правните разпоредби');
+  for(const excerpt of legal.records)if(!records.some(r=>r.id===excerpt.id))records.push(excerpt);
   if(token!==generation)return;
   state.records=records;state.status='ready';state.error=null;
   document.dispatchEvent(new CustomEvent('v26:normative-register-ready',{detail:{records,verified:records.filter(r=>r.verified===true).length,pending:records.filter(r=>r.verified!==true).length}}));
