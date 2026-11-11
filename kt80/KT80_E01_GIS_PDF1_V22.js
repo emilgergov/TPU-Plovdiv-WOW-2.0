@@ -91,11 +91,11 @@ function bodyContent(checked,profiles,zones){
  const content=[
   {text:'Източник на пространствените данни: ГИС база на РИОСВ – Пловдив. Дата на изготвяне: '+date+' г.'},
   {text:'Пространствено положение на имотите спрямо защитените зони и защитените територии',style:'sub'},
-  {svg:mapSvg,width:950,maxHeight:710},
+  {svg:mapSvg,width:950,maxHeight:455},
   {text:'Картата представя имотите и наличните архивни граници от мрежата „Натура 2000“. Пространствените пресичания се определят чрез отделния геометричен контрол; отобразяването на граница не доказва пресичане.',fontSize:9},
  ];
  if(count>1){
-  content.push({text:'Индивидуални карти на поземлените имоти',style:'sub',pageBreak:'before'});
+  content.push({text:'Индивидуални карти на поземлените имоти',style:'sub'});
   content.push({parcelGrid:checked.map((r,i)=>({
    id:String(r.input||r.cadnum),
    svg:separateMap(r,zones),
