@@ -63,6 +63,7 @@ async function find(ids,run){
    items.push(result);
   }
   latest={ids:[...ids],items};render(ids,items);
+  selectParcel(String(root.KT80FreeGIS?.getMap?.()?.selected||ids[0]));
   status('ПИ MASTER: проверени '+ids.length+' имотни идентификатора. Архивните ЗЗ/ЗТ се сверяват с ГИС анализа.');
  }catch(e){
   if(run!==epoch)return;
@@ -76,7 +77,7 @@ function selectParcel(id){
  for(const c of cards){
   const active=c.dataset.parcelId===id;
   c.classList.toggle('kt80-pi-active',active);
-  if(cards.length>1)c.classList.toggle('kt80-pi-secondary',!active);
+  if(cards.length>1){c.classList.toggle('kt80-pi-secondary',!active);c.hidden=!active;c.setAttribute('aria-hidden',String(!active))}
  }
 }
 document.addEventListener('kt80:parcel-selected',e=>selectParcel(String(e.detail?.id||'')));
