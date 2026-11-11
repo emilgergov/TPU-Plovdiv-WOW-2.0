@@ -69,6 +69,20 @@ function render(){
    t.textContent=id;labels.append(t);
   }
  }
+ // Highly visible parcel locator in wide context views: red point + contrasting identifier.
+ // This is a cartographic marker only, never an intersection determination.
+ const parcelBounds=bbox(S.results.flatMap(featuresOf));
+ const wideContext=parcelBounds&&S.view&&S.view.w>Math.max(parcelBounds.maxX-parcelBounds.minX,.00001)*5;
+ if(wideContext)for(const r of S.results){
+  const id=String(r.cadnum||r.input||'');
+  const b=bbox(featuresOf(r));if(!b)continue;
+  const xy=proj([(b.minX+b.maxX)/2,(b.minY+b.maxY)/2]);
+  if(!Number.isFinite(xy[0])||!Number.isFinite(xy[1]))continue;
+  const dot=shape('circle',{cx:xy[0],cy:xy[1],r:8,fill:'#e3262e',stroke:'#ffffff','stroke-width':3,class:'kt80-parcel-locator'});
+  labels.append(dot);
+  const label=shape('text',{x:xy[0]+12,y:xy[1]-12,class:'kt80-parcel-locator-label','text-anchor':'start'});
+  label.textContent=id;labels.append(label);
+ }
  $('kt80GISMapCaption').textContent='Имотни геометрии: '+S.results.filter(r=>featuresOf(r).length).length+
   ' · ЗЗ в картографския обхват: '+zonesInView+' · Щриховани архивни пресичания: '+overlayCount+
   ' · Самото изобразяване НЕ удостоверява пресичане или правен режим.';
@@ -81,7 +95,7 @@ function details(){
  const host=$('kt80GISDetail');if(!host)return;host.replaceChildren();
  const item=selected()||S.results[0];
  if(!item){host.textContent='Няма избран имот.';return}
- const head=document.createElement('strong');head.textContent='Избран имот: '+String(item.cadnum||item.input);host.append(head);
+ const head=document.createElement('p');head.textContent='Имот: '+String(item.cadnum||item.input);host.append(head);
  const div=document.createElement('p');div.textContent='ГИС площ по източник: '+root.KT80Display.area(item.area_m2_source)+' кв. м';host.append(div);
  const zs=verified(item);const z=document.createElement('p');
  z.textContent=Array.isArray(item.verified_zone_intersections)?(zs.size?'Геометрично проверени ЗЗ: '+[...zs].join(', '):item.intersection_verified_outside===true?'Проверено отсъствие на пресичане с архивните ЗЗ':'НЯМА ДАННИ за потвърдени пресичания'):'Пресичанията не са проверени; визуализацията сама не е достатъчна.';
