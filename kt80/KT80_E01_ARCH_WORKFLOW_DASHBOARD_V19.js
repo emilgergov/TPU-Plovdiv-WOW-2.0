@@ -183,6 +183,14 @@ function init(){
  $('kt80Authority').addEventListener('change',()=>invalidate(4));
  $('kt80InputFile').addEventListener('change',()=>{root.KT80SubjectMaster?.reset?.();++state.generation;if(state.abort){state.abort.abort();state.abort=null}$('kt80ProcessFile').disabled=false;state.fileName=null;state.intake=null;invalidate(2);$('kt80InputStatus').textContent='Избран файл: '+($('kt80InputFile').files?.[0]?.name||'няма')+'. Натиснете „Обработи преписката“.'});
  go(1);root.KT80WorkflowState=state;root.KT80ResetCurrentCase=resetAll;
+ root.KT80RebuildKT52=()=>{
+  if(!state.intake||!root.KT80KT52||!root.KT80CH21Draft)return null;
+  const qa=root.KT80ParameterQA?.evaluate?.(root.KT80CH21Draft,root.KT80DossierAudit)||root.KT80KT51Draft;
+  if(qa)root.KT80KT51Draft=qa;
+  const reconstruction=root.KT80KT52.build(state.intake,root.KT80IPMasterDraft,root.KT80CH21Draft,qa,{audit:root.KT80DossierAudit});
+  root.KT80KT52Draft=reconstruction;root.KT80KT52.render(reconstruction);
+  return reconstruction;
+ };
  root.KT80InvalidateEvidenceConclusions=()=>{invalidate(2);say('Доказателствата са оспорени. Предметът и последващите процедурни потвърждения са обезсилени до повторна проверка.');};
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
