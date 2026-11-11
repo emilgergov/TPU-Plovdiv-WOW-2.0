@@ -199,7 +199,7 @@ function init(){
   S.view.x=S.pointer[2]-(e.clientX-S.pointer[0])/sx*S.view.w;
   S.view.y=S.pointer[3]+(e.clientY-S.pointer[1])/sy*S.view.h;render()});
  map?.addEventListener('pointerup',()=>{S.pointer=null});map?.addEventListener('pointercancel',()=>{S.pointer=null});
- root.KT80FreeGIS=Object.freeze({find,clear,getResults:()=>[...S.results],getMap:()=>({
+ root.KT80FreeGIS=Object.freeze({find,clear,selectParcel:id=>{if(S.results.some(r=>String(r.cadnum||r.input)===String(id)))choose(String(id))},getResults:()=>[...S.results],getMap:()=>({
   zones:(S.zones?.features||[]),results:[...S.results],selected:S.chosen,labels:S.labels,
   boundingBox:viewLimits(),verifiedZones:S.results.flatMap(r=>[...verified(r)])})});
 }
