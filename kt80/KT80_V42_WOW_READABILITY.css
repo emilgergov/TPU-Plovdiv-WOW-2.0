@@ -63,3 +63,18 @@
 .kt80-workflow .kt80-back-navigation{display:flex;justify-content:flex-start;align-items:center;margin:0 0 13px;padding:0 0 10px;border-bottom:1px solid rgba(220,188,111,.32)}
 .kt80-workflow .kt80-step-back{background:#204a34;color:#ffe0a0;border:1px solid #d5b66e;border-radius:8px;padding:10px 16px;cursor:pointer;font-size:16px;font-weight:800;line-height:1.3}
 .kt80-workflow .kt80-step-back:hover,.kt80-workflow .kt80-step-back:focus-visible{background:#326749;color:#fff1c7;outline:2px solid #ffe1a1;outline-offset:2px}
+
+/* KT80 CH2 V44 — evidence passport follows approved expert-readability standard. */
+.kt80-ch2-passport{padding:17px;background:#153b2b;border:1px solid #b9a06e;border-radius:10px;margin:15px 0;color:#f5edd9}
+.kt80-ch2-passport h3{font:700 21px Georgia,serif;color:#ffe0a0;margin:0 0 13px}
+.kt80-ch2-passport .kt80-ch2-summary{font-size:16px;font-weight:750;color:#ffebc0}
+.kt80-ch2-passport .kt80-ch2-warning{border-left:4px solid #d6ba75;background:#25432c;padding:10px 13px;font-size:15px;line-height:1.55}
+.kt80-ch2-passport .kt80-ch2-critical{border-left:4px solid #df8b65;background:#50311f;padding:10px 13px;color:#ffe5c8;font-size:16px;font-weight:700}
+.kt80-ch2-passport .kt80-ch2-topic,.kt80-ch2-passport .kt80-ch2-alert{margin:10px 0;border:1px solid #7f875b;border-radius:8px;padding:11px;background:#1b4531}
+.kt80-ch2-passport details summary{font-size:17px;color:#ffe2a6;font-weight:800;cursor:pointer;line-height:1.55}
+.kt80-ch2-passport .kt80-ch2-evidence{padding:10px 13px;margin:10px 0;border:1px solid #698466;border-radius:7px;background:#234d38}
+.kt80-ch2-passport .kt80-ch2-evidence p{font-size:16px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.kt80-ch2-passport .kt80-ch2-source{font-size:15px;font-weight:800;color:#ffdf99;overflow-wrap:anywhere}
+.kt80-ch2-passport .kt80-ch2-open{background:#d5b569;color:#193a2a;border:1px solid #f5d890;border-radius:7px;padding:9px 12px;cursor:pointer;font-size:15px;font-weight:800}
+.kt80-ch2-passport .kt80-ch2-open:hover,.kt80-ch2-passport .kt80-ch2-open:focus-visible{filter:brightness(1.1);outline:2px solid #fff2c5}
+.kt80-ch2-passport .kt80-ch2-footnote{font-size:15px;color:#f3e4c0;line-height:1.5}
