@@ -154,7 +154,8 @@ async function verifyIntersections(run){
   }
   render();
   const count=S.results.reduce((n,r)=>n+(r.verified_zone_intersections?.length||0),0);
-  status('Имотни геометрии: '+S.results.filter(r=>featuresOf(r).length).length+' · Геометрично проверени ЗЗ пресичания: '+count+'.');
+  const checked=S.results.filter(r=>Array.isArray(r.verified_zone_intersections)&&typeof r.intersection_verified_outside==='boolean').length;
+  status('Имотни геометрии: '+S.results.filter(r=>featuresOf(r).length).length+' · ГИС проверка: '+checked+' от '+S.results.length+' имота · Доказани пресичания със ЗЗ: '+count+'.');
  }catch(e){
   if(run===S.epoch)status('Имотите са намерени, но проверката на пресичанията не е завършена: '+String(e?.message||e));
  }
