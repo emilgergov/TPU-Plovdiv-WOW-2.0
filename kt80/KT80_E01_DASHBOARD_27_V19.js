@@ -25,12 +25,14 @@ function route(c){
  root.KT80OpenRoute(c);
  viewMode('candidate','№'+String(c.id).padStart(2,'0')+' · '+c.title);
 }
-function tile(label,kind,index,action){
+function tile(label,kind,index,action,legal=''){
  const b=document.createElement('button');b.type='button';b.className='kt80-dashboard-tile';b.dataset.kt80Kind=kind;b.dataset.kt80Index=String(index);
  const number=document.createElement('span');number.className='kt80-dashboard-tile-number';number.textContent=kind==='step'?'ЕТАП '+index:'№'+String(index).padStart(2,'0');
  const text=document.createElement('span');text.className='kt80-dashboard-tile-text';text.textContent=label;
  const arrow=document.createElement('span');arrow.className='kt80-dashboard-tile-arrow';arrow.textContent='➜';arrow.setAttribute('aria-hidden','true');
- b.append(number,text,arrow);
+ b.append(number,text);
+ if(kind==='route'&&legal){const reference=document.createElement('span');reference.className='kt80-dashboard-tile-legal';reference.textContent=legal;reference.setAttribute('aria-label','Нормативна референция: '+legal);b.append(reference)}
+ b.append(arrow);
  b.addEventListener('click',()=>{
   lastTile=b;
   const notice=$('kt80DashboardNotice');if(notice)notice.textContent='';
@@ -52,7 +54,7 @@ function init(){
   const num=Number(b.dataset.step);
   five.append(tile(b.textContent.replace(/^\d+\.\s*/,'').trim(),'step',num,()=>b.click()));
  }
- for(const c of routes)twentyTwo.append(tile(c.id===15?'Свободна ГИС справка за имоти и режими':c.title,'route',c.id,()=>route(c)));
+ for(const c of routes)twentyTwo.append(tile(c.id===15?'Свободна ГИС справка за имоти и режими':c.title,'route',c.id,()=>route(c),c.legal||''));
  $('kt80DashboardBack')?.addEventListener('click',home);
  // Original candidate content is retained in its full sub-screen; close returns home.
  $('close')?.addEventListener('click',()=>{if(view==='candidate')home()});
