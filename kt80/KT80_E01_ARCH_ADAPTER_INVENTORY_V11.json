@@ -1,0 +1,56 @@
+{
+  "schema": "kt80-e01-arch-v11-adapters",
+  "date": "2026-11-11",
+  "status": "PARCEL_ADAPTER_CONNECTED;ZIP_ONLY_INVENTORIED",
+  "verified_legacy_sources": [
+    {
+      "path": "v26-test/v26-parcel-editor.js",
+      "sha": "ae49973f17fdb78951a7c2e8a2394ea7dafa2df9",
+      "api": "window.V26ParcelEditor.normalize(raw)",
+      "status": "REUSED_DIRECTLY"
+    },
+    {
+      "path": "v26-test/v26-local-intake.js",
+      "sha": "45be666203efb162373951dfbd146d85a8685ec0",
+      "api": "window.V26LocalIntake.process(file)",
+      "status": "INVENTORIED_NOT_CONNECTED",
+      "risks": [
+        "OCR external dependencies",
+        "ZIP decompression dependencies",
+        "subject extraction must stay unverified until expert review"
+      ]
+    },
+    {
+      "path": "v26-test/v26-dossier-evidence.js",
+      "sha": "ea8bd7d986ff6705a2f69d9a9c9df70e94cd9faf",
+      "api": "window.V26DossierEvidence.analyze(documents)",
+      "status": "INVENTORIED_NOT_CONNECTED"
+    },
+    {
+      "path": "v26-test/v26-unified-context.js",
+      "sha": "45ff743fb93e0d3c0ea73fd1b27b7bc122bf5f51",
+      "api": "window.V26UnifiedContext.build(intake,roles,gis)",
+      "status": "INVENTORIED_NOT_CONNECTED",
+      "risk": "Depends on verified GIS and roles"
+    }
+  ],
+  "adapter": {
+    "path": "kt80/KT80_E01_ARCH_PARCEL_ADAPTER_V11.js",
+    "uses_existing_module": true,
+    "changes_original": false,
+    "output": "window.KT80ParcelDraft",
+    "claims": [
+      "text normalization only",
+      "not cadastral verification",
+      "not GIS proof",
+      "not expert confirmation"
+    ]
+  },
+  "screen": "kt80/KT80_10_E01_ARCH_PARCEL_INTEGRATION_SCREEN_V11.html",
+  "rules": {
+    "IN": "preserve source originals",
+    "OUT": "RIOSV Plovdiv official letterhead, physical template pending",
+    "route01": "develop in common KT80, no locked paragraph inheritance"
+  },
+  "accepted_passports": 0
+}
