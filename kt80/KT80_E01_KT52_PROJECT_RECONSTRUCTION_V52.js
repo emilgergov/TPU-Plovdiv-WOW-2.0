@@ -117,12 +117,12 @@ function build(intake,ip,semantic,parameterQA,opts={}){
  const technical=Array.isArray(parameterQA?.entries)?parameterQA.entries:[];
  const approved=(opts.parameterMaster||root.KT80ParameterQA)?.allowed?.()||[];
  const rejectedIds=new Set(technical.filter(x=>x.evidenceExcluded).map(x=>x.id));
- const parameterCandidates=technical.filter(x=>!rejectedIds.has(x.id)).map(x=>({
+ const parameterCandidates=technical.filter(x=>!rejectedIds.has(x.id)&&!affectedByIgnored(x.file,x.excerpt,issues)).map(x=>({
   id:x.id,file:x.file,page:x.page,original:x.original,value:x.value,unit:x.unit,
   role:x.role,roleStatus:x.label,context:x.localContext,reviewStatus:x.reviewStatus,
   compoundDesignation:x.compoundDesignation||null,verified:false
  }));
- const confirmedParameters=approved.filter(x=>!rejectedIds.has(x.id)).map(x=>({...x}));
+ const confirmedParameters=approved.filter(x=>!rejectedIds.has(x.id)&&!affectedByIgnored(x.file,x.excerpt,issues)).map(x=>({...x}));
  const outstanding=[
   ...(issues.length?['Има оспорени/игнорирани доказателства; повторната оценка трябва да изключи съответните откъси.']:[]),
   ...(excludedSubject?['Първоначалното предложение за предмет е основано на оспорен източник и е изключено от кандидатите.']:[]),
