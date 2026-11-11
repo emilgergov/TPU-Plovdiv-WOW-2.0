@@ -75,6 +75,14 @@ async function extractText(data,name,options={}){
   }}finally{if(worker)await worker.terminate()}
   return parts.join('\n');
  }
+ if(/\.doc$/i.test(name)){
+  if(!window.docToText)throw Error('DOC прочит: липсва локалният модул');
+  const extracted=window.docToText(new Uint8Array(data));
+  if(!extracted||!String(extracted).trim())throw Error('DOC прочит: защитен, повреден или с неподдържана версия на формата');
+  extractText.lastOcrPages=0;extractText.lastOcrError='';
+  extractText.lastPageWarnings=['DOC: проверете таблиците, графичните обекти и оформлението в оригинала'];
+  return String(extracted);
+ }
  if(/\.docx$/i.test(name)){
   if(!window.mammoth)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js');
   return (await window.mammoth.extractRawText({arrayBuffer:data})).value||'';
@@ -139,7 +147,7 @@ function semanticReview(subjects,documents){
 // ONLY inside the existing intake engine; no changes to downstream evidence logic.
 async function singleDocumentZip(file){
  const name=String(file.name||'document').split(/[\\/]/).pop();
- if(!/\.(pdf|docx|jpe?g|png|tiff?|bmp|webp|txt)$/i.test(name))throw Error('Поддържат се ZIP, PDF, DOCX и изображения (JPG, PNG, TIFF, BMP, WEBP).');
+ if(!/\.(pdf|docx?|jpe?g|png|tiff?|bmp|webp|txt|csv|json|md)$/i.test(name))throw Error('Неподдържан самостоятелен формат. Подайте ZIP, PDF, DOC, DOCX, TXT, CSV, JSON, MD или изображение.');
  const content=new Uint8Array(await file.arrayBuffer()),fn=new TextEncoder().encode(name);
  if(fn.length>65535)throw Error('Твърде дълго име на файла.');
  let crc=-1;for(const b of content){crc^=b;for(let i=0;i<8;i++)crc=(crc>>>1)^((crc&1)?0xedb88320:0);}
@@ -191,12 +199,15 @@ async function process(file){
  for(const item of list){
   intakeProgress('Прочит на документ '+(docs.length+1)+' от '+list.length+' · '+item.name,{document:docs.length+1,documents:list.length,page:0,pages:0});
   let status='описан',text='';const entryStartedAt=performance.now();
-  if(/\.(txt|csv|json|md|pdf|docx|jpe?g|png|webp|bmp|tiff?)$/i.test(item.name)&&item.size<=20*1024*1024){
+  const supportedFormat=/\.(txt|csv|json|md|pdf|docx?|jpe?g|png|webp|bmp|tiff?)$/i.test(item.name);
+  if(item.size>20*1024*1024)status='НЕПРОЧЕТЕН: размерът е над лимита от 20 MB за отделен документ';
+  else if(!supportedFormat)status='НЕПРОЧЕТЕН: форматът не се поддържа ('+(item.name.match(/\.[^.]+$/)?.[0]||'липсва разширение')+')';
+  if(supportedFormat&&item.size<=20*1024*1024){
    try{
     const unpacked=await readEntry(bytes,v,item);
     if(unpacked.byteLength!==item.size)throw Error('Несъответствие в ZIP размер.');
     extractText.lastOcrPages=0;extractText.lastOcrError='';extractText.lastPageWarnings=[];text=await withDeadline(extractText(unpacked,item.name,{allowOcr:/уведомлен|uvedomlen|notification/i.test(item.name)||(!leading.size&&!all.size&&/\.pdf$/i.test(item.name))}),90000,'Прочит на документ '+item.name);
-    status=text.trim()?(extractText.lastOcrPages?'OCR: '+extractText.lastOcrPages+' сканирани страници; експертна проверка':'текстът е прочетен'):(extractText.lastOcrError?'OCR неуспешен: '+extractText.lastOcrError:'няма извлекаем текст (възможно сканиран документ)');if(extractText.lastPageWarnings?.length)status+='; ПРОВЕРКА: '+extractText.lastPageWarnings.join(', ');if(/\.pdf$/i.test(item.name)&&!/уведомлен|notification/i.test(item.name)&&extractText.lastPageWarnings?.length)status+='; OCR на приложението е отложен за документален анализ';if(text.trim())documentTexts.push({source:item.name,text:text.slice(0,150000)});
+    status=text.trim()?(extractText.lastOcrPages?'OCR: '+extractText.lastOcrPages+' сканирани страници; експертна проверка':'текстът е прочетен'):(extractText.lastOcrError?'НЕПРОЧЕТЕН: OCR неуспешен — '+extractText.lastOcrError:'НЕПРОЧЕТЕН: няма извлекаем текст (възможно сканиран документ)');if(extractText.lastPageWarnings?.length)status+='; ПРОВЕРКА: '+extractText.lastPageWarnings.join(', ');if(/\.pdf$/i.test(item.name)&&!/уведомлен|notification/i.test(item.name)&&extractText.lastPageWarnings?.length)status+='; OCR на приложението е отложен за документален анализ';if(text.trim())documentTexts.push({source:item.name,text:text.slice(0,150000)});
     // Distinguish cadastral context: neighbours and former IDs are evidence, not project parcels.
     const contextualIds=[];
     for(const line of text.split(/\r?\n/)){
@@ -288,7 +299,7 @@ async function process(file){
      subjects.push({title,source:item.name,evidence:title?'Автоматично извлечен откъс от текст':'Текст е прочетен; заглавието не е надеждно установено',activities,sections:foundSections,infrastructure});
     }
     if(isNotice){for(const entry of contextualIds){if(entry.role!=='mentioned')continue;const line=entry.excerpt;const idsOnLine=[...new Set(normalizedIds(line))];const siteContext=/(?:местоположение|площадка|предмет\s+на\s+(?:инвестиционното\s+)?предложение|предвижда\s+се\s+в\s+(?:поземлен\s+)?имот)/i.test(line);const negative=/(?:съсед|граничи|предишен|стар\s+идентификатор|прилежащи\s+имоти)/i.test(line);if(siteContext&&!negative&&idsOnLine.length===1)leading.add(entry.id)}}
-   }catch(err){status='неуспешно извличане: '+err.message}
+   }catch(err){status='НЕПРОЧЕТЕН: '+(err&&err.message?err.message:String(err))}
   }
   // Extract only text-supported, traceable claims; never infer facts from filenames.
   const referenceMatches=[...text.matchAll(/(?:вх\.?\s*(?:№|номер)?\s*|входящ\s*(?:№|номер)\s*)([А-ЯA-Z0-9][А-ЯA-Z0-9\-\/\. ]{0,45}?)\s*(?:от\s*|\/\s*)(\d{1,2}[.\-/]\d{1,2}[.\-/]\d{4})/giu)].slice(0,30).map(m=>({number:m[1].trim(),date:m[2],source:item.name}));
