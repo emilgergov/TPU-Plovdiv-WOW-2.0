@@ -78,3 +78,16 @@
 .kt80-ch2-passport .kt80-ch2-open{background:#d5b569;color:#193a2a;border:1px solid #f5d890;border-radius:7px;padding:9px 12px;cursor:pointer;font-size:15px;font-weight:800}
 .kt80-ch2-passport .kt80-ch2-open:hover,.kt80-ch2-passport .kt80-ch2-open:focus-visible{filter:brightness(1.1);outline:2px solid #fff2c5}
 .kt80-ch2-passport .kt80-ch2-footnote{font-size:15px;color:#f3e4c0;line-height:1.5}
+
+/* KT80 CH2 V46: row-level evidence access + explicit expert-ignored trace. */
+.kt80-ch2-passport .kt80-ch2-topic-wrap{margin:10px 0;border:1px solid #84936a;border-radius:9px;padding:9px;background:#1c4330}
+.kt80-ch2-passport .kt80-ch2-topic-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.kt80-ch2-passport .kt80-ch2-topic{flex:1;min-width:min(100%,320px);margin:0;background:transparent;border:0;padding:4px}
+.kt80-ch2-passport .kt80-ch2-missing-files{padding:12px;border-top:1px solid #84936a;margin-top:8px}
+.kt80-ch2-passport .kt80-ch2-missing-files[hidden],.kt80-ch2-passport .kt80-ch2-correction-editor[hidden]{display:none}
+.kt80-ch2-passport .kt80-ch2-missing-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid #597459;padding:10px 2px;font-size:15px}
+.kt80-ch2-passport .kt80-ch2-correction-editor{padding:13px;background:#103325;border:1px solid #d5b76b;border-radius:8px;margin-top:9px}
+.kt80-ch2-passport .kt80-ch2-correction-editor textarea{display:block;width:100%;min-height:72px;padding:11px;border:1px solid #d2bc7e;border-radius:7px;background:#f9f7ed;color:#173628;font-size:16px;line-height:1.5;margin:9px 0}
+.kt80-ch2-passport .kt80-ch2-ignore{background:#6d3d24;color:#fff0d3;border-color:#e0a872}
+.kt80-ch2-passport .kt80-ch2-flag{margin:7px 9px 7px 0}
+.kt80-ch2-passport .kt80-ch2-correction{font-size:15px;color:#f5e0aa}
