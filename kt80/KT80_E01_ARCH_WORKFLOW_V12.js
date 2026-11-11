@@ -47,7 +47,8 @@ function requireSubject(){
  const s=$('kt80SubjectText').value.trim();
  if(!s)return message('Въведете или редактирайте предмета преди преминаване към правната квалификация.');
  if(!$('kt80SubjectConfirmation').checked)return message('Необходимо е експертно потвърждение на предмета и преглед на имотите.');
- const parcels=root.KT80ParcelDraft||null;
+ if($('kt80ParcelInput').value.trim())$('kt80ParcelNormalize').click(); // Refresh draft against current input; never trust an earlier normalization.
+ const parcels=$('kt80ParcelInput').value.trim()?(root.KT80ParcelDraft||null):null;
  if($('kt80ParcelInput').value.trim()&&!parcels)return message('Проверете имотите чрез бутона за нормализация.');
  if(parcels&&(parcels.invalid.length||parcels.uncertain.length))return message('Има невалидни или нееднозначни кадастрални идентификатори. Коригирайте ги или изчистете полето.');
  state.subjectConfirmed={text:s,parcels:parcels?.ids||[],file:state.fileName,expertConfirmed:true};resetFrom(3);go(3);
