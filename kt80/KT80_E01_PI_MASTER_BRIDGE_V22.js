@@ -20,19 +20,19 @@ function render(ids,items){
    line(card,'Пространствен статус','Не е определен от ПИ MASTER');host.append(card);continue;
   }
   const r=info.profile;
-  line(card,'ЕКАТТЕ',field(r,['ekatte','EKATTE','ekattefn']));
+  line(card,'ЕКАТТЕ',root.KT80Display.ekatte(id,r));
   line(card,'Населено място',field(r,['settlement','settlement_name','naseleno_myasto']));
   line(card,'Община',field(r,['municipality','obshtina']));
   line(card,'Област',field(r,['province','region','oblast']));
-  line(card,'Местност',field(r,['locality','mestnost']));
-  line(card,'Площ на имота (кв. м)',field(r,['area_m2','area_m2_source','parcel_area_m2','area']));
+  line(card,'Местност',root.KT80Display.locality(field(r,['locality','mestnost'])));
+  line(card,'Площ на имота (кв. м)',root.KT80Display.area(field(r,['area_m2','area_m2_source','parcel_area_m2','area'])));
   const zz=Array.isArray(r.zz)?r.zz:[],zt=Array.isArray(r.zt)?r.zt:[];
   const hz=document.createElement('div');hz.className='kt80-pi-zones';
   const a=document.createElement('strong');a.textContent='ЗЗ (ЗБР) · '+zz.length+' архивни записа';hz.append(a);
   if(!zz.length)line(hz,'ЗЗ','Няма запис в проверения индекс; необходим е отделен ГИС контрол');
   for(const x of zz){
    const p=document.createElement('p');
-   p.textContent=clean(field(x,['sitecode','code']))+' · '+clean(field(x,['name_bg','name']))+' · пресечена площ: '+clean(field(x,['intersect_m2','area_m2']))+' кв. м';
+   p.textContent=clean(field(x,['sitecode','code']))+' · '+clean(field(x,['name_bg','name']))+' · пресечена площ: '+root.KT80Display.area(field(x,['intersect_m2','area_m2']))+' кв. м';
    hz.append(p);
   }
   const t=document.createElement('strong');t.textContent='ЗТ (ЗЗТ) · '+zt.length+' архивни записа';hz.append(t);
