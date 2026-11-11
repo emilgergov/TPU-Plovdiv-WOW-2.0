@@ -91,3 +91,10 @@
 .kt80-ch2-passport .kt80-ch2-ignore{background:#6d3d24;color:#fff0d3;border-color:#e0a872}
 .kt80-ch2-passport .kt80-ch2-flag{margin:7px 9px 7px 0}
 .kt80-ch2-passport .kt80-ch2-correction{font-size:15px;color:#f5e0aa}
+
+/* KT80 V47: PDF.js in-WOW original view, independent of Edge iframe restrictions. */
+.kt80-pdf-nav{display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap;margin:2px 0 14px;padding:11px;background:#1e4934;border:1px solid #bfa362;border-radius:9px}
+.kt80-pdf-nav button{font-size:16px;font-weight:800;padding:10px 15px;border-radius:7px;background:#dfbe70;color:#153528;border:1px solid #f6dda2;cursor:pointer}
+.kt80-pdf-nav button:disabled{opacity:.38;cursor:not-allowed}
+.kt80-pdf-nav strong{font-size:16px;color:#ffe3a8}
+.kt80-pdf-canvas{display:block;margin:0 auto 12px;max-width:100%;height:auto;background:#fff;box-shadow:0 4px 20px #0006;border-radius:3px}
