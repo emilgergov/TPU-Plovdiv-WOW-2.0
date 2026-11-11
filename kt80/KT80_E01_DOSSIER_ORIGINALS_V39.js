@@ -52,7 +52,7 @@ function shell(){
  let modal=$('kt80OriginalPreview');
  if(modal)return modal;
  modal=document.createElement('section');modal.id='kt80OriginalPreview';modal.className='kt80-original-preview';modal.hidden=true;modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby','kt80OriginalTitle');
- modal.innerHTML='<div class="kt80-original-panel"><div class="kt80-original-head"><strong id="kt80OriginalTitle">Оригинален документ</strong><button type="button" id="kt80OriginalClose" aria-label="Затвори прегледа">✕ Затвори</button></div><p id="kt80OriginalMessage" role="status"></p><div id="kt80OriginalContent"></div><a id="kt80OriginalDownload" download>↓ Изтегли оригинала</a></div>';
+ modal.innerHTML='<div class="kt80-original-panel"><div class="kt80-original-head"><strong id="kt80OriginalTitle">Оригинален документ</strong><button type="button" id="kt80OriginalClose" aria-label="Затвори прегледа">✕ Затвори</button></div><p id="kt80OriginalMessage" role="status"></p><div id="kt80OriginalContent"></div><div class="kt80-original-actions"><a id="kt80OriginalNewTab" target="_blank" rel="noopener noreferrer" hidden>↗ В нов раздел</a><a id="kt80OriginalDownload" download>↓ Изтегли оригинала</a></div></div>';
  document.body.append(modal);
  $('kt80OriginalClose').addEventListener('click',close);
  modal.addEventListener('click',e=>{if(e.target===modal)close()});
@@ -64,11 +64,12 @@ function previewContent(data,name){
  const media=types[ext(name)]||'application/octet-stream';
  const blob=new Blob([data],{type:media});activeUrl=URL.createObjectURL(blob);
  const download=$('kt80OriginalDownload');download.href=activeUrl;download.download=name.split('/').pop();
+ const newTab=$('kt80OriginalNewTab');newTab.hidden=!(media==='application/pdf'||media.startsWith('image/'));newTab.href=activeUrl;
  const body=$('kt80OriginalContent');body.replaceChildren();
  if(media==='application/pdf'||media.startsWith('image/')){
   const viewer=document.createElement(media==='application/pdf'?'iframe':'img');
   viewer.src=activeUrl;viewer.className='kt80-original-viewer';
-  if(viewer.tagName==='IFRAME'){viewer.title='Преглед на оригиналния PDF';viewer.setAttribute('sandbox','');}
+  if(viewer.tagName==='IFRAME'){viewer.title='Преглед на оригиналния PDF';viewer.setAttribute('sandbox','allow-same-origin');}
   else viewer.alt='Изображение от оригиналния файл';
   body.append(viewer);
   $('kt80OriginalMessage').textContent='Преглед на оригинала. При нужда използвайте „Изтегли оригинала“.';
@@ -84,7 +85,7 @@ async function openOriginal(filename){
  const input=$('kt80InputFile'),source=input?.files?.[0];if(!source)throw Error('Първо изберете оригиналната преписка');
  const token=++openToken;
  const modal=shell();modal.hidden=false;$('kt80OriginalTitle').textContent='Оригинал · '+filename;$('kt80OriginalMessage').textContent='Отваряне на документа…';
- $('kt80OriginalContent').replaceChildren();$('kt80OriginalDownload').removeAttribute('href');
+ $('kt80OriginalContent').replaceChildren();$('kt80OriginalDownload').removeAttribute('href');$('kt80OriginalNewTab').hidden=true;
  try{
   const data=/\.zip$/i.test(source.name)?await extractZIP(source,normalize(filename)):await source.arrayBuffer();
   if(token!==openToken)return;
