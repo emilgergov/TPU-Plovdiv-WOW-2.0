@@ -68,11 +68,13 @@ function build(intake,ip,audit){
   }
   const sources=[...unique.values()].slice(0,16);
   const documents=[...new Set(sources.map(x=>x.document))];
+  const coverage=root.KT80EvidenceCoverage?.summarize(audit,documents)||null;
+  const coverageLabel=coverage?root.KT80EvidenceCoverage.statusLabel(coverage,sources.length>0):(sources.length?'ИМА ОТКЪСИ · НЕПОТВЪРДЕНИ':'НЯМА ДАННИ В ИЗВЛЕЧЕНОТО');
   // Do not treat different statements as contradictions merely because there are multiple texts.
   // Opposite explicit assertions across excerpts are only a candidate for expert review.
   const possibleOpposition=sources.some(x=>x.polarity==='positive')&&sources.some(x=>x.polarity==='negative');
   return {key,label,status:sources.length?'ИМА ОТКЪСИ · НЕПОТВЪРДЕНИ':'НЯМА ДАННИ',
-    sources,documentCount:documents.length,possibleOpposition,
+    sources,documentCount:documents.length,possibleOpposition,coverage,coverageLabel,
     reviewRequired:possibleOpposition||sources.some(x=>x.readStatus!=='TEXT_EXTRACTED'),
     verified:false};
  });
@@ -127,7 +129,8 @@ function render(result){
   const wrap=node('div',undefined,'kt80-ch2-topic-wrap');
   const quick=node('div',undefined,'kt80-ch2-topic-header');
   const d=document.createElement('details');d.className='kt80-ch2-topic';
-  d.append(node('summary',item.label+' · '+item.status+' · '+item.sources.length+' откъса'));
+  d.append(node('summary',item.label+' · '+item.coverageLabel+' · '+item.sources.length+' откъса'));
+  if(item.coverage){const cover=node('p',root.KT80EvidenceCoverage.brief(item.coverage),'kt80-coverage-detail');d.append(cover)}
   quick.append(d);
   if(item.sources.length){
    const known=item.sources.find(x=>result.fileInventory.some(f=>f.file===x.document));
@@ -151,7 +154,8 @@ function render(result){
   if(!item.sources.length)d.append(node('p','НЯМА ДАННИ в извлеченото. Липсата на откъс не означава отсъствие на дейност или въздействие.'));
   for(const src of item.sources){
    const card=node('div',undefined,'kt80-ch2-evidence');
-   const head=node('div','Източник: '+src.document+(src.page?' · стр. '+src.page+' (предварително установена)':' · страница: НЯМА ДАННИ')+' · '+(src.readStatus==='TEXT_EXTRACTED'?'текстово извличане':'изисква допълнителна проверка'),'kt80-ch2-source');
+   const sourceLabel=src.readStatus==='TEXT_EXTRACTED'?'🟢 ПРОЧЕТЕН (извлечен текст)':src.readStatus==='REVIEW_REQUIRED'?'🟡 ЗА ПРОВЕРКА (OCR или частичен прочит)':src.readStatus==='NOT_READ'||src.readStatus==='UNSUPPORTED'?'🔴 НЕПРОЧЕТЕН':'◌ НЕУСТАНОВЕН СТАТУС НА ИЗТОЧНИКА';
+   const head=node('div','Източник: '+src.document+(src.page?' · стр. '+src.page+' (предварително установена)':' · страница: НЯМА ДАННИ')+' · '+sourceLabel,'kt80-ch2-source');
    const flagged=reviewIssues.get(src.issueId);
    card.append(head,node('p','„'+src.excerpt+'“'));
    if(flagged){
