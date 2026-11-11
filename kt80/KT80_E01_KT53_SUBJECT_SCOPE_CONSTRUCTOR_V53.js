@@ -5,7 +5,7 @@
 (function(root){'use strict';
 const $=id=>document.getElementById(id);
 const tidy=s=>String(s??'').replace(/\s+/gu,' ').trim();
-const bad=/^(?:изграждането|изграждане)\s+на\s+(?:основен\s+ремонт|текущ\s+ремонт|реконструкция)\b/iu;
+const bad=/^(?:изграждането|изграждане)\s+на\s+(?:основен\s+ремонт|текущ\s+ремонт|реконструкция)(?=\s|[.,;:]|$)/iu;
 const labelType={major_repair:'Основен ремонт',current_repair:'Текущ ремонт',reconstruction:'Реконструкция',construction:'Изграждане'};
 let current=null,manualSubject=false,manualScope=false,suspend=false;
 function listSources(reconstruction){
