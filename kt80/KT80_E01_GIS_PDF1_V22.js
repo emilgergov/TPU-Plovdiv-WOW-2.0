@@ -84,30 +84,25 @@ function separateMap(parcel,zones){
 }
 function bodyContent(checked,profiles,zones){
  const count=checked.length,date=new Date().toLocaleDateString('bg-BG');
- const overview=makeContext(checked,zones);
+ // One full-size contextual map only. Retain the detailed Natura 2000/parcel view.
  const mapSvg=svgFromMap();
  const list=checked.map((r,i)=>{const p=profiles[i],id=String(r.input||r.cadnum);
   return 'ПИ '+id+' (ЕКАТТЕ '+root.KT80Display.ekatte(id,p)+') по КККР на '+clean(keys(p,'settlement','settlement_name'))+', местност „'+root.KT80Display.locality(keys(p,'locality','mestnost'))+'“, община '+clean(keys(p,'municipality','obshtina'))+', област '+clean(keys(p,'province','region','oblast'))+'. Площ на имота: '+root.KT80Display.area(keys(p,'area_m2','area_m2_source','parcel_area_m2','area'))+' кв. м.'});
  const content=[
   {text:'Източник на пространствените данни: ГИС база на РИОСВ – Пловдив. Дата на изготвяне: '+date+' г.'},
-  {text:'Общ пространствен контекст на анализираните поземлени имоти',style:'sub'},
-  {svg:overview,width:950,maxHeight:450},
-  {text:'Пространствено положение на поземлените имоти спрямо защитените зони и защитените територии',style:'sub'},
-  {svg:mapSvg,width:950,maxHeight:570},
+  {text:'Пространствено положение на имотите спрямо защитените зони и защитените територии',style:'sub'},
+  {svg:mapSvg,width:950,maxHeight:710},
   {text:'Картата представя имотите и наличните архивни граници от мрежата „Натура 2000“. Пространствените пресичания се определят чрез отделния геометричен контрол; отобразяването на граница не доказва пресичане.',fontSize:9},
  ];
  if(count>1){
-  // Each parcel receives a distinct map, never a duplicate of the common map.
-  // Keep the administrative/ZZ/ZT tables as a separate coherent final section.
-  content.push({text:'Индивидуални картографски извлечения по поземлени имоти',style:'sub',pageBreak:'before'});
-  for(let i=0;i<count;i++){
-   const id=String(checked[i].input||checked[i].cadnum);
-   content.push({text:'ПИ '+id+' · индивидуална карта',style:'sub',...(i?{pageBreak:'before'}:{})});
-   content.push({svg:separateMap(checked[i],zones),maxHeight:640});
-   content.push({text:list[i]});
-  }
+  content.push({text:'Индивидуални карти на поземлените имоти',style:'sub'});
+  content.push({parcelGrid:checked.map((r,i)=>({
+   id:String(r.input||r.cadnum),
+   svg:separateMap(r,zones),
+   caption:'Площ: '+root.KT80Display.area(keys(profiles[i],'area_m2','area_m2_source','parcel_area_m2','area'))+' кв. м · '+clean(keys(profiles[i],'settlement','settlement_name'))
+  }))});
  }
- content.push({text:'Административна принадлежност на поземлените имоти',style:'sub',pageBreak:'before'},...list.map(x=>({text:x})));
+ content.push({text:'Административна принадлежност на поземлените имоти',style:'sub'},...list.map(x=>({text:x})));
  for(let i=0;i<checked.length;i++){
   const n=checked[i].intersection_verified_outside===true?nearestZone(checked[i],zones):null;
   if(n)content.push({text:'Най-близка защитена зона до ПИ '+String(checked[i].input||checked[i].cadnum)+': '+n.code+' — '+n.name+' ('+n.meters.toLocaleString('bg-BG',{maximumFractionDigits:2})+' м).'});
