@@ -1,0 +1,155 @@
+{
+  "schema": "kt80-e01-v14-intake-form-evidence-registry",
+  "date": "2026-11-11",
+  "authority": "Source anchors are informational; operative legal edition and completeness must be expert verified.",
+  "confidence_policy": "Template similarity does not determine applicable procedure, competence, or legal sufficiency.",
+  "forms": [
+    {
+      "id": "OVOS-5",
+      "title": "Уведомление за инвестиционно предложение",
+      "family": "OVOS",
+      "official_basis": "Приложение №5 към чл.4, ал.1 от Наредбата за ОВОС",
+      "source": "https://www.moew.government.bg/bg/prevantivna-dejnost/ovos/obrazci-na-zayavleniya-ovos/",
+      "source_status": "OFFICIAL_CATALOG_ONLY",
+      "edition_verified": false,
+      "keywords": [
+        "уведомление за инвестиционно предложение",
+        "уведомяваме ви че",
+        "местоположение на инвестиционното предложение",
+        "информация за преценяване"
+      ],
+      "strong": [
+        "приложение №5",
+        "чл. 4, ал. 1"
+      ],
+      "required_review": [
+        "точен вид на предложението",
+        "местоположение, имоти",
+        "инфраструктура и технически данни",
+        "реквизити на възложител"
+      ]
+    },
+    {
+      "id": "OVOS-6",
+      "title": "Искане за преценяване необходимостта от ОВОС",
+      "family": "OVOS",
+      "official_basis": "Приложение №6 към чл.6, ал.1 от Наредбата за ОВОС",
+      "source": "https://www.moew.government.bg/bg/prevantivna-dejnost/ovos/obrazci-na-zayavleniya-ovos/",
+      "source_status": "OFFICIAL_CATALOG_ONLY",
+      "edition_verified": false,
+      "keywords": [
+        "искане за преценяване необходимостта от овос",
+        "искане за преценяване на необходимостта от извършване на овос",
+        "информация по приложение №2"
+      ],
+      "strong": [
+        "приложение №6",
+        "чл. 6, ал. 1"
+      ],
+      "required_review": [
+        "известяване и съответствие на искане с предмета",
+        "информация по приложение №2",
+        "компетентен орган и приложения"
+      ]
+    },
+    {
+      "id": "EO-3",
+      "title": "Уведомление за план или програма",
+      "family": "EO",
+      "official_basis": "Приложение №3 към чл.8, ал.1 от Наредбата за ЕО",
+      "source": "https://www.moew.government.bg/bg/prevantivna-dejnost/ekologichna-ocenka/obrazci-na-zayavleniya/",
+      "source_status": "OFFICIAL_CATALOG_ONLY",
+      "edition_verified": false,
+      "keywords": [
+        "уведомление за изготвяне на план",
+        "уведомление за изготвяне на програма",
+        "план или програма",
+        "план/програма"
+      ],
+      "strong": [
+        "приложение №3",
+        "чл. 8, ал. 1"
+      ],
+      "required_review": [
+        "вид план/програма",
+        "орган по одобряване",
+        "обхват и цели",
+        "актуален образец"
+      ]
+    },
+    {
+      "id": "EO-4",
+      "title": "Искане за преценяване необходимостта от ЕО",
+      "family": "EO",
+      "official_basis": "Приложение №4 към чл.8а, ал.1 от Наредбата за ЕО",
+      "source": "https://www.moew.government.bg/bg/prevantivna-dejnost/ekologichna-ocenka/obrazci-na-zayavleniya/",
+      "source_status": "OFFICIAL_CATALOG_ONLY",
+      "edition_verified": false,
+      "keywords": [
+        "искане за преценяване необходимостта от екологична оценка",
+        "искане за преценяване необходимостта от ео"
+      ],
+      "strong": [
+        "приложение №4",
+        "чл. 8а, ал. 1"
+      ],
+      "required_review": [
+        "обхват на плана/програмата",
+        "процедурни основания",
+        "входни приложения"
+      ]
+    },
+    {
+      "id": "EO-5",
+      "title": "Искане за издаване на становище по ЕО",
+      "family": "EO",
+      "official_basis": "Приложение №5 към чл.23, ал.1 от Наредбата за ЕО",
+      "source": "https://www.moew.government.bg/bg/prevantivna-dejnost/ekologichna-ocenka/obrazci-na-zayavleniya/",
+      "source_status": "OFFICIAL_CATALOG_ONLY",
+      "edition_verified": false,
+      "keywords": [
+        "искане за издаване на становище по екологична оценка",
+        "искане за издаване на становище по ео"
+      ],
+      "strong": [
+        "чл. 23, ал. 1"
+      ],
+      "required_review": [
+        "доклад по ЕО",
+        "проведени консултации",
+        "съответни приложения"
+      ]
+    },
+    {
+      "id": "OS-2B",
+      "title": "Уведомление с данни по приложение №2 (част Б) от Наредбата за ОС",
+      "family": "OS",
+      "official_basis": "Чл.2, ал.3 и приложение №2, част Б; самостоятелният ред по чл.10 има отделни изисквания",
+      "source": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Naredbi/NAREDBA_za_usl_reda_za_izvarshvane_na_ocenka_za_savmestimostta_na_PPPIP_2025.pdf",
+      "source_status": "PRIMARY_2025_OS_REFERENCE_PARTIALLY_REVIEWED",
+      "edition_verified": false,
+      "keywords": [
+        "наредбата за оценка за съвместимост",
+        "предмета и целите на опазване",
+        "защитени зони от натура 2000"
+      ],
+      "strong": [
+        "приложение №2",
+        "чл. 2, ал. 3"
+      ],
+      "required_review": [
+        "правен клон по чл.2 или чл.10",
+        "част Б данни за ИП",
+        "контролен лист по приложение №1 е вътрешен, не входен формуляр"
+      ],
+      "note": "Do not conflate applicant info Annex2 and authority checklist Annex1 or assume Annex3 under Art2."
+    }
+  ],
+  "boundaries": {
+    "status_unmatched": "NO_RELIABLE_TEMPLATE_MATCH",
+    "status_candidate": "POTENTIAL_FORM_MATCH_REQUIRES_EXPERT",
+    "status_ambiguous": "MULTIPLE_POTENTIAL_MATCHES",
+    "never_automatic_procedure": true,
+    "never_form_completeness_assertion": true
+  }
+}
