@@ -64,24 +64,33 @@ function render(){
   const b=bbox(featuresOf(r));if(!b||S.labels==='none')continue;
   if(S.labels==='auto'&&S.results.length>12&&S.chosen!==id)continue;
   const xy=proj([(b.minX+b.maxX)/2,(b.minY+b.maxY)/2]);
-  if(xy[0]>-30&&xy[0]<W+30&&xy[1]>-30&&xy[1]<H+30){
-   const t=shape('text',{x:xy[0],y:xy[1],class:'kt80-map-label','text-anchor':'middle'});
-   t.textContent=id;labels.append(t);
-  }
+  // Parcel labels are handled by the contrasting marker layer below.
+  // This avoids duplicated dark labels over red context labels.
  }
- // Highly visible parcel locator in wide context views: red point + contrasting identifier.
- // This is a cartographic marker only, never an intersection determination.
- const parcelBounds=bbox(S.results.flatMap(featuresOf));
- const wideContext=parcelBounds&&S.view&&S.view.w>Math.max(parcelBounds.maxX-parcelBounds.minX,.00001)*5;
- if(wideContext)for(const r of S.results){
+ // The parcel locator is ALWAYS drawn on top of every zone and parcel.
+ // Use a clear red point at wide and near views; the geometry itself remains untouched.
+ // Offsets resolve adjacent identifiers in wide context, without moving the actual points.
+ const markers=[];
+ for(const r of S.results){
   const id=String(r.cadnum||r.input||'');
   const b=bbox(featuresOf(r));if(!b)continue;
   const xy=proj([(b.minX+b.maxX)/2,(b.minY+b.maxY)/2]);
   if(!Number.isFinite(xy[0])||!Number.isFinite(xy[1]))continue;
-  const dot=shape('circle',{cx:xy[0],cy:xy[1],r:8,fill:'#e3262e',stroke:'#ffffff','stroke-width':3,class:'kt80-parcel-locator'});
-  labels.append(dot);
-  const label=shape('text',{x:xy[0]+12,y:xy[1]-12,class:'kt80-parcel-locator-label','text-anchor':'start'});
-  label.textContent=id;labels.append(label);
+  if(xy[0]<-30||xy[0]>W+30||xy[1]<-30||xy[1]>H+30)continue;
+  markers.push({id,x:xy[0],y:xy[1],chosen:id===S.chosen});
+ }
+ const wideContext=S.view&&S.results.length>0&&S.view.w>Math.max((bbox(S.results.flatMap(featuresOf))?.maxX||0)-(bbox(S.results.flatMap(featuresOf))?.minX||0),.00001)*2;
+ for(let i=0;i<markers.length;i++){
+  const m=markers[i];
+  const halo=shape('circle',{cx:m.x,cy:m.y,r:m.chosen?13:10,fill:'#ffffff',stroke:'#a60f20','stroke-width':1.8,class:'kt80-parcel-locator-halo'});
+  const dot=shape('circle',{cx:m.x,cy:m.y,r:m.chosen?8:6.5,fill:'#e0182d',stroke:'#ffffff','stroke-width':1.5,class:'kt80-parcel-locator'});
+  labels.append(halo,dot);
+  const close=markers.filter((x,j)=>j!==i&&Math.hypot(x.x-m.x,x.y-m.y)<145).length;
+  const dy=close?(-16-(i%3)*23):-14;
+  const dx=close?(14+(i%2)*4):14;
+  const tag=shape('text',{x:m.x+dx,y:m.y+dy,class:'kt80-parcel-locator-label','text-anchor':'start'});
+  tag.textContent=m.id;
+  if(!wideContext||m.chosen||close===0||S.labels==='all')labels.append(tag);
  }
  $('kt80GISMapCaption').textContent='Имотни геометрии: '+S.results.filter(r=>featuresOf(r).length).length+
   ' · ЗЗ в картографския обхват: '+zonesInView+' · Щриховани архивни пресичания: '+overlayCount+
