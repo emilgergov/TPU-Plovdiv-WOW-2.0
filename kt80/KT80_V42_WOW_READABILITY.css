@@ -107,3 +107,15 @@
 .kt80-ip-evidence-entry button{font-size:15px!important;padding:9px 13px;margin:4px 0}
 .kt80-ip-topic summary{font-size:17px!important;line-height:1.5;font-weight:800;color:#ffe2a6}
 .kt80-ip-topic{border:1px solid #78906f;border-radius:7px;padding:11px;margin:8px 0;background:#204935}
+
+/* KT80 CH2.1 V50 — specialist technical evidence, matching approved V49 typography. */
+.kt80-ch21-reader{padding:18px;margin:15px 0;border:1px solid #b9a06e;border-radius:10px;background:#173d2c;color:#f4ecd8}
+.kt80-ch21-reader h3{font:700 21px Georgia,serif;color:#ffe0a0;margin:0 0 12px}
+.kt80-ch21-reader .kt80-ch21-summary{font-size:16px;line-height:1.7;font-weight:750}
+.kt80-ch21-reader .kt80-ch21-notice{font-size:15px;line-height:1.65;background:#284637;border-left:4px solid #d5b66e;padding:12px}
+.kt80-ch21-reader details{border:1px solid #819068;border-radius:8px;padding:12px;margin:10px 0;background:#1c4734}
+.kt80-ch21-reader summary{font-size:17px;font-weight:800;color:#ffe1a3;cursor:pointer}
+.kt80-ch21-reader .kt80-ch21-row{padding:12px 6px;border-bottom:1px solid #708568;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.kt80-ch21-reader .kt80-ch21-row p{font-size:16px;line-height:1.6;margin:3px 0;flex-basis:100%}
+.kt80-ch21-reader .kt80-ch21-source{font-size:15px;color:#f9e6b5;overflow-wrap:anywhere}
+.kt80-ch21-reader .kt80-ch21-row button{flex-shrink:0}
