@@ -91,3 +91,10 @@ body[data-kt80-view="gis"] #kt80FreeGISScreen{display:block}
 #kt80FreeGISScreen .kt80-parcel-locator{pointer-events:none}
 #kt80FreeGISScreen .kt80-parcel-locator-label{fill:#ba1224;stroke:#fff;stroke-width:4;paint-order:stroke;font:bold 18px Arial,sans-serif;pointer-events:none}
 #kt80FreeGISScreen .kt80-gis-detail>strong{display:none}
+
+/* KT80 V26 multi-parcel selection: active parcel clear; remaining records collapsed without information loss. */
+#kt80FreeGISScreen .kt80-pi-card.kt80-pi-active{border-color:#e5bd64;box-shadow:inset 0 0 0 1px rgba(229,189,100,.65)}
+#kt80FreeGISScreen .kt80-pi-card.kt80-pi-secondary{display:block;opacity:.92;padding:7px 10px}
+#kt80FreeGISScreen .kt80-pi-card.kt80-pi-secondary>p,#kt80FreeGISScreen .kt80-pi-card.kt80-pi-secondary>.kt80-pi-zones{display:none}
+#kt80FreeGISScreen .kt80-pi-card.kt80-pi-secondary h4{margin:0;font-size:12px}
+#kt80FreeGISScreen .kt80-gis-row:focus-visible{outline:3px solid #e8c36f}
