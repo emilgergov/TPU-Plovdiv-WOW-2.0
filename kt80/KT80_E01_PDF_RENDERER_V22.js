@@ -106,7 +106,10 @@ async function generate(def){
   ctx.font=(title?'bold 35px':sub?'bold 26px':item.bold?'bold 22px':'22px')+' Arial';
   ctx.fillStyle='#173d30';
   const lines=wrap(ctx,item.text||'',W-2*M-36);
-  for(const line of lines){if(y+LINE>H-95){finish();start()}ctx.fillText(line,M,y+LINE,W-2*M-36);y+=title?42:sub?36:LINE}
+  // Keep short paragraphs together: never split a cadastral record across pages.
+  const advance=title?42:sub?36:LINE;
+  if(lines.length*advance<=H-220&&y+lines.length*advance>H-95){finish();start()}
+  for(const line of lines){if(y+advance>H-95){finish();start()}ctx.fillText(line,M,y+LINE,W-2*M-36);y+=advance}
   y+=title?26:sub?17:12;
  }
  finish();return pdf(pages);
