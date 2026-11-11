@@ -55,7 +55,12 @@ async function process(){
    root.KT80DossierCompleteness.render(audit);
    root.KT80DossierAudit=audit;
   }
-  if(root.KT80IPMaster){const draft=root.KT80IPMaster.build(result);if(!isCurrent())return;root.KT80IPMasterDraft=draft;root.KT80IPMaster.render(draft);}
+  if(root.KT80IPMaster){
+   const draft=root.KT80IPMaster.build(result);if(!isCurrent())return;
+   root.KT80IPMasterDraft=draft;root.KT80IPMaster.render(draft);
+   if(root.KT80CH2Evidence){const passport=root.KT80CH2Evidence.build(result,draft,root.KT80DossierAudit);
+    root.KT80CH2Passport=passport;root.KT80CH2Evidence.render(passport);}
+  }
   if(root.KT80SubjectMaster){const subject=root.KT80SubjectMaster.propose(result);if(isCurrent())root.KT80SubjectMaster.show(subject,{apply:true});}
   if(typeof root.KT80FormMatcher?.compare==='function')await root.KT80FormMatcher.compare(result,{isCurrent,signal:state.abort.signal});
   if(!isCurrent())return;
@@ -126,7 +131,7 @@ function resetAll(){
  $('kt80ProposalInfo').textContent='Няма потвърдена процедура.';
  $('kt80ReviewSummary').textContent='';
  $('kt80RoutePanels').hidden=true;
- delete root.KT80IPMasterDraft;delete root.KT80ParcelDraft;delete root.KT80DossierAudit;
+ delete root.KT80IPMasterDraft;delete root.KT80ParcelDraft;delete root.KT80DossierAudit;delete root.KT80CH2Passport;
  // Clear pending overlays and opened case-related guide panels; the catalogue itself remains intact.
  const overlay=$('overlay');overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');
  for(const id of ['tabs','rows','source'])$(id)?.replaceChildren();
