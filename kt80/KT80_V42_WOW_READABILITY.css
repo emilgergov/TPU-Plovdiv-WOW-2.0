@@ -160,3 +160,37 @@
 .kt80-kt53-composer .kt80-kt53-disclaimer{font-size:15px;line-height:1.6;color:#f4dfb6}
 .kt80-kt53-composer .kt80-check{display:flex;align-items:center;gap:12px;cursor:pointer}
 .kt80-kt53-composer input[type=checkbox]{width:20px;height:20px;accent-color:#d4ad5d}
+
+/* KT80 V54 — balanced desktop type scale and a compact evidence work screen.
+   Reduce oversized gold/bold rows while keeping accessible body text and controls. */
+.kt80-ip-topic summary,.kt80-ch2-passport .kt80-ch2-topic,
+.kt80-ch21-reader summary,.kt80-param-review summary,
+.kt80-kt52-reconstruction summary{font-size:16px!important;font-weight:650!important;line-height:1.48!important;letter-spacing:0!important}
+.kt80-ch2-passport .kt80-ch2-topic-header{gap:9px!important}
+.kt80-ch2-passport .kt80-ch2-topic-wrap{padding:7px!important;margin:7px 0!important}
+.kt80-ip-topic{padding:8px!important;margin:6px 0!important}
+.kt80-ch2-passport h3,.kt80-ch21-reader h3,.kt80-param-review h3,.kt80-kt52-reconstruction h3,.kt80-kt53-composer h3{font-size:20px!important;font-weight:700!important;line-height:1.4!important}
+.kt80-ch21-reader,.kt80-param-review,.kt80-kt52-reconstruction,.kt80-kt53-composer{padding:14px!important;margin:10px 0!important}
+.kt80-kt53-composer textarea{font-size:16px!important;line-height:1.5!important;min-height:144px!important}
+.kt80-compact-heading{font-weight:700;font-size:18px;color:#f2d28c;margin:12px 0 4px}
+.kt80-compact-nav{border:1px solid #a68e62;background:#163f2f;padding:11px;border-radius:9px;display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.kt80-compact-nav-title{flex-basis:100%;font-weight:750;font-size:17px;color:#f3d18b;margin-bottom:3px}
+.kt80-compact-shortcut,.kt80-compact-controls button{font-size:14px!important;font-weight:650!important;padding:9px 12px!important;border-radius:7px!important}
+.kt80-compact-controls{display:flex;gap:7px;flex-wrap:wrap}
+.kt80-compact-details{margin:7px 0;border:1px solid #7e9270;border-radius:9px;background:#1c4332;overflow:clip}
+.kt80-compact-details>summary{list-style:revert;font-size:16px;font-weight:700;color:#f2d18e;cursor:pointer;padding:12px 14px;line-height:1.5}
+.kt80-compact-details[open]>summary{border-bottom:1px solid #79916e}
+.kt80-compact-details>section,.kt80-compact-details>div{margin:9px!important}
+.kt80-compact-diagnostic{font-size:14px!important;font-weight:650!important;margin:10px 0!important;padding:9px 12px!important}
+@media(max-width:1100px){
+ .kt80-compact-nav{gap:6px;padding:9px}
+ .kt80-compact-shortcut{flex:1 1 170px;white-space:normal}
+ .kt80-compact-details>summary{font-size:15.5px}
+ .kt80-ch2-passport .kt80-ch2-topic-wrap{flex-wrap:wrap}
+ .kt80-kt53-composer textarea{min-height:130px!important}
+}
+@media(max-width:660px){
+ .kt80-compact-shortcut{flex-basis:calc(50% - 8px);font-size:13.5px!important}
+ .kt80-compact-details>summary{font-size:15px}
+ .kt80-compact-nav-title{font-size:16px}
+}
