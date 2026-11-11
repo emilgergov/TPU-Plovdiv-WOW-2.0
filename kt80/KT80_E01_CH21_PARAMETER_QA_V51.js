@@ -15,10 +15,14 @@ const decisions=new Map();
 const auditTrail=[];
 function identifier(p){return JSON.stringify([p.file,p.page,p.value,p.unit,tidy(p.excerpt)])}
 function context(excerpt,original){
- const t=tidy(excerpt),idx=t.indexOf(original),span=idx>=0?t.slice(Math.max(0,idx-110),Math.min(t.length,idx+original.length+110)):t.slice(0,240);
- const hasExisting=existing.test(span),hasProject=proposal.test(span),hasReplacement=replace.test(span);
+ const t=tidy(excerpt),idx=t.indexOf(original),span=idx>=0?t.slice(Math.max(0,idx-130),Math.min(t.length,idx+original.length+90)):t.slice(0,240);
+ // Split distinct clauses so the old and proposed values in the same sentence do not
+ // accidentally inherit each other's role. Ambiguous clauses still remain unverified.
+ const clauses=t.split(/(?<=[,;])\s*(?=(?:а\s+|при\s+|заявена|проектна|съществуваща|доставяна))|\s+—\s+/iu);
+ const clause=clauses.find(part=>part.includes(original))||span;
+ const hasExisting=existing.test(clause),hasProject=proposal.test(clause),hasReplacement=replace.test(clause);
  const role=hasExisting&&hasProject?'ambiguous':hasProject?'project':hasExisting?'existing':hasReplacement?'replacement':'ambiguous';
- return {role,label:titleByRole[role],localContext:span,hasMixedTense:hasExisting&&hasProject,caution:weak.test(span),requiresReview:true};
+ return {role,label:titleByRole[role],localContext:clause.slice(0,260),hasMixedTense:hasExisting&&hasProject,caution:weak.test(clause),requiresReview:true};
 }
 function evaluate(reader,audit){
  const source=Array.isArray(reader?.parameters)?reader.parameters:[];
