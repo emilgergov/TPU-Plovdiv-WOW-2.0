@@ -71,6 +71,7 @@ async function process(){
    }
   }
   if(root.KT80SubjectMaster){const subject=root.KT80SubjectMaster.propose(result);if(isCurrent())root.KT80SubjectMaster.show(subject,{apply:true});}
+  if(isCurrent())root.KT80KT53?.construct?.({force:true});
   if(typeof root.KT80FormMatcher?.compare==='function')await root.KT80FormMatcher.compare(result,{isCurrent,signal:state.abort.signal});
   if(!isCurrent())return;
   say('Прочитът приключи. Следва проверка на предмета и имотите от експерта.');
@@ -81,13 +82,14 @@ async function process(){
  }finally{if(isCurrent()){$('kt80ProcessFile').disabled=false;state.abort=null}}
 }
 function confirmSubject(){
+ const scopeCheck=root.KT80KT53?.validate?.();if(scopeCheck&&!scopeCheck.ok)return say(scopeCheck.reason);
  if(root.KT80CH2Evidence?.hasBlockingIssues?.())return say('Има оспорени доказателствени откъси. Прегледайте оригиналите и извършете коригиран анализ, преди потвърждаване на предмета.');
  const value=$('kt80SubjectText').value.trim();
  if(!value)return say('Въведете или редактирайте предмета.');
  if(!$('kt80SubjectConfirmation').checked)return say('Потвърдете предмета като експерт.');
  invalidate(3);
  const accepted=root.KT80SubjectMaster?.confirmedSubject?.();
- state.subjectConfirmed={text:value,source:accepted?.source||state.fileName,expertConfirmed:true,mode:accepted?.mode||'EXPERT_ENTERED'};
+ state.subjectConfirmed={text:value,scope:scopeCheck?.scope||'',scopeConfirmed:!!scopeCheck?.expertConfirmed,source:accepted?.source||state.fileName,expertConfirmed:true,mode:accepted?.mode||'EXPERT_ENTERED'};
  go(3);
 }
 function confirmParcels(){
@@ -141,7 +143,7 @@ function resetAll(){
  $('kt80ProposalInfo').textContent='Няма потвърдена процедура.';
  $('kt80ReviewSummary').textContent='';
  $('kt80RoutePanels').hidden=true;
- delete root.KT80IPMasterDraft;delete root.KT80ParcelDraft;delete root.KT80DossierAudit;delete root.KT80CH2Passport;delete root.KT80CH21Draft;delete root.KT80KT51Draft;delete root.KT80KT52Draft;root.KT80ParameterQA?.reset?.();
+ delete root.KT80IPMasterDraft;delete root.KT80ParcelDraft;delete root.KT80DossierAudit;delete root.KT80CH2Passport;delete root.KT80CH21Draft;delete root.KT80KT51Draft;delete root.KT80KT52Draft;root.KT80KT53?.reset?.();root.KT80ParameterQA?.reset?.();
   root.KT80CH2Evidence?.reset?.();
  // Clear pending overlays and opened case-related guide panels; the catalogue itself remains intact.
  const overlay=$('overlay');overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');
@@ -178,6 +180,8 @@ function init(){
  $('kt80OpenConditions').addEventListener('click',()=>{if(state.routeConfirmed&&typeof root.KT80OpenRoute==='function')root.KT80OpenRoute(state.activeRoute)});
  document.querySelectorAll('.kt80-step').forEach(b=>b.addEventListener('click',()=>{const target=Number(b.dataset.step);go(target)}));
  $('kt80SubjectText').addEventListener('input',()=>invalidate(2));
+ $('kt80ScopeText')?.addEventListener('input',()=>invalidate(2));
+ $('kt80ScopeConfirmation')?.addEventListener('change',()=>invalidate(2));
  $('kt80ParcelInput').addEventListener('input',()=>invalidate(3));
  $('kt80LegalNotes').addEventListener('input',()=>invalidate(4));
  $('kt80Authority').addEventListener('change',()=>invalidate(4));
@@ -189,9 +193,10 @@ function init(){
   if(qa)root.KT80KT51Draft=qa;
   const reconstruction=root.KT80KT52.build(state.intake,root.KT80IPMasterDraft,root.KT80CH21Draft,qa,{audit:root.KT80DossierAudit});
   root.KT80KT52Draft=reconstruction;root.KT80KT52.render(reconstruction);
+  root.KT80KT53?.construct?.({force:true});
   return reconstruction;
  };
- root.KT80InvalidateEvidenceConclusions=()=>{invalidate(2);say('Доказателствата са оспорени. Предметът и последващите процедурни потвърждения са обезсилени до повторна проверка.');};
+ root.KT80InvalidateEvidenceConclusions=()=>{invalidate(2);root.KT80RebuildKT52?.();root.KT80KT53?.construct?.({force:true});say('Доказателствата са оспорени. Предметът и обхватът се изграждат наново и подлежат на експертна проверка.');};
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })(window);
