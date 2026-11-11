@@ -24,7 +24,7 @@ function svgFromMap(){
  svg.setAttribute('xmlns','http://www.w3.org/2000/svg');svg.setAttribute('width','1000');svg.setAttribute('height','650');
  svg.setAttribute('viewBox','0 0 1000 650');
  const style=document.createElementNS('http://www.w3.org/2000/svg','style');
- style.textContent='.kt80-map-zone{stroke:#176f95;stroke-width:2;fill:#8bc4d1;fill-opacity:.13;stroke-dasharray:5 4}.kt80-map-parcel{stroke:#116347;stroke-width:3;fill:#79c4a0;fill-opacity:.6}.kt80-map-selected{stroke:#07583b;stroke-width:4}.kt80-map-overlap{fill:#efb66a;fill-opacity:.45;stroke:#bb7527;stroke-width:2}.kt80-map-label{font:700 13px Arial;fill:#123b2b;stroke:white;stroke-width:3;paint-order:stroke}.kt80-map-zone-label{font:700 12px Arial;fill:#165779;stroke:white;stroke-width:2;paint-order:stroke}';
+ style.textContent='.kt80-map-zone{stroke:#176f95;stroke-width:2;fill:#8bc4d1;fill-opacity:.13;stroke-dasharray:5 4}.kt80-map-parcel{stroke:#116347;stroke-width:3;fill:#79c4a0;fill-opacity:.6}.kt80-map-selected{stroke:#07583b;stroke-width:4}.kt80-map-overlap{fill:#efb66a;fill-opacity:.45;stroke:#bb7527;stroke-width:2}.kt80-map-label{font:700 13px Arial;fill:#123b2b;stroke:white;stroke-width:3;paint-order:stroke}.kt80-map-zone-label{font:700 12px Arial;fill:#165779;stroke:white;stroke-width:2;paint-order:stroke}.kt80-parcel-locator-label{font:bold 21px Arial;fill:#bd1327;stroke:#fff;stroke-width:5;paint-order:stroke}';
  svg.insertBefore(style,svg.firstChild);
  return new XMLSerializer().serializeToString(svg);
 }
