@@ -24,6 +24,7 @@ function reportIssue(id,record){
  reviewIssues.set(id,{...record,id,status:'ИЗКЛЮЧЕНО ОТ АВТОМАТИЧНИ ИЗВОДИ',time:new Date().toISOString()});
  if(typeof root.KT80InvalidateEvidenceConclusions==='function')root.KT80InvalidateEvidenceConclusions();
  if(currentPassport)render(currentPassport);
+ root.KT80RebuildKT52?.();
 }
 function ignoreEvidence(id,record){
  const prior=reviewIssues.get(id);
@@ -31,6 +32,7 @@ function ignoreEvidence(id,record){
  reviewIssues.set(id,current);reviewHistory.push({previous:prior||null,current:{...current}});
  if(typeof root.KT80InvalidateEvidenceConclusions==='function')root.KT80InvalidateEvidenceConclusions();
  if(currentPassport)render(currentPassport);
+ root.KT80RebuildKT52?.();
 }
 function issues(){return [...reviewIssues.values()].map(x=>({...x}))}
 function history(){return reviewHistory.map(x=>({...x,current:{...x.current}}))}
