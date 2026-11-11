@@ -1,0 +1,47 @@
+/* KT80 V24: focused full-width GIS map. Green/gold KT80, V27.35 controls retained. */
+#kt80FreeGISScreen{display:none;max-width:1740px;margin:0 auto;padding:16px 22px 32px;box-sizing:border-box}
+body[data-kt80-view="gis"] .kt80-dashboard,body[data-kt80-view="gis"] .frame{display:none!important}
+body[data-kt80-view="gis"] .kt80-dashboard-subnav{display:flex}
+body[data-kt80-view="gis"] #kt80FreeGISScreen{display:block}
+#kt80FreeGISScreen .kt80-free-gis{margin:0;background:#123a2a;padding:15px 18px 20px;border-color:#987c43}
+#kt80FreeGISScreen .kt80-free-gis>h3{font-size:21px;margin:0 0 4px}
+#kt80FreeGISScreen .kt80-free-gis>p{margin:4px 0 12px;color:#dae6d9}
+.kt80-gis-intake-compact{border:1px solid #ac9762;background:#1c4b37;border-radius:11px;padding:12px;margin:9px 0}
+.kt80-gis-intake-row{display:grid;grid-template-columns:115px minmax(170px,1fr) auto;gap:10px;align-items:center}
+.kt80-gis-intake-row label{font-weight:750;color:#f4db9c;font-size:13px}
+#kt80GISFreeInput{width:100%;min-height:48px;max-height:100px;resize:vertical;box-sizing:border-box;background:#fbfaf3;border:1px solid #ad996c;border-radius:7px;color:#1a3d2c;padding:10px;font:14px "Segoe UI",sans-serif}
+.kt80-gis-intake-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#kt80FreeGISScreen .kt80-gis-intake-actions button{padding:10px 14px;white-space:nowrap;border-radius:7px}
+#kt80FreeGISScreen #kt80GISFreeCheck{background:#244f3a;color:#f4dfab}
+.kt80-gis-intake-foot{font-size:12px;color:#d9e6d6;margin-top:6px}
+.kt80-gis-compact-status{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 9px}
+#kt80FreeGISScreen #kt80GISStatus,#kt80FreeGISScreen #kt80FullGISReady{font-size:12px;padding:7px 10px;margin:0;border-radius:6px}
+.kt80-gis-backup-compact{font-size:12px;flex-basis:100%;opacity:.92}
+.kt80-gis-index-compact{font-size:12px;flex-basis:100%}
+#kt80FreeGISScreen .kt80-gis-layout-v24{display:flex;flex-direction:column;gap:9px;align-items:stretch}
+#kt80FreeGISScreen #kt80GISMapWrap{width:100%;box-sizing:border-box;min-width:0;border-radius:11px}
+#kt80FreeGISScreen #kt80GISMap{width:100%;height:auto;aspect-ratio:1000/590;min-height:410px;max-height:72vh;background:#e7f0e7}
+#kt80FreeGISScreen .kt80-gis-toolbar{padding:9px 13px;gap:5px}
+#kt80FreeGISScreen .kt80-map-legend{gap:9px}
+#kt80FreeGISScreen .kt80-map-actions{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
+#kt80FreeGISScreen .kt80-map-actions button{padding:7px 10px}
+#kt80FreeGISScreen #kt80GISResults{display:flex;flex-wrap:wrap;gap:6px;max-height:115px;overflow:auto}
+#kt80FreeGISScreen .kt80-gis-row{flex:1 1 180px;padding:6px 10px}
+.kt80-gis-spatial-v24{border:1px solid #799b7c;border-radius:10px;background:#1b4634;padding:11px 14px}
+.kt80-gis-spatial-v24 h4{margin:0 0 7px;color:#f4d58f;font-size:17px}
+#kt80FreeGISScreen .kt80-gis-detail{margin:0;padding:8px 10px;border-radius:7px;display:block}
+#kt80FreeGISScreen #kt80GISDetail{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:4px 15px}
+#kt80FreeGISScreen #kt80GISDetail p{margin:3px 0;font-size:13px}
+#kt80FreeGISScreen .kt80-pi-master-compact{padding:8px 0 0;margin:8px 0 0;border:0;border-top:1px solid #64856a;background:transparent}
+#kt80FreeGISScreen .kt80-pi-master-compact h3{font-size:15px;margin:2px 0 4px}
+#kt80FreeGISScreen .kt80-pi-master-compact>p{margin:2px 0 7px}
+#kt80FreeGISScreen #kt80PIMasterStatus{padding:6px 8px;margin:5px 0}
+#kt80FreeGISScreen #kt80PIMasterResults{grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:7px}
+#kt80FreeGISScreen .kt80-pi-card{padding:9px}
+#kt80FreeGISScreen .kt80-pi-card p{font-size:12px}
+#kt80FreeGISScreen .kt80-pdf1-v24{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;margin:10px 0 0;border-radius:9px}
+#kt80FreeGISScreen .kt80-pdf1-v24>strong{color:#f4d58f}
+#kt80FreeGISScreen .kt80-pdf1-v24>p:not([id]){flex:1 1 220px;margin:0}
+#kt80FreeGISScreen #kt80PDF1Status{flex-basis:100%;margin:0;font-size:12px}
+.kt80-case-gis-note{font-size:12px;color:#d9e6d9}
+@media(max-width:900px){.kt80-gis-intake-row{grid-template-columns:1fr}.kt80-gis-intake-actions{justify-content:flex-start}#kt80FreeGISScreen{padding:9px}#kt80FreeGISScreen #kt80GISMap{min-height:290px;max-height:none}}
