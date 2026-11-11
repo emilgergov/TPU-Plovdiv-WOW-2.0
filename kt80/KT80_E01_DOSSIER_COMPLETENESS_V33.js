@@ -59,7 +59,13 @@ function render(a){
   body.textContent='№'+r.index+' · '+r.file;
   const info=document.createElement('small');info.className='kt80-file-reason';
   info.textContent=r.note+' · '+r.readerStatus;
-  row.append(marker,body,info);details.append(row);
+  const open=document.createElement('button');
+  open.type='button';open.className='kt80-original-open';open.textContent='◉ Отвори';
+  open.title='Бърз преглед на оригиналния документ от текущата преписка';
+  open.addEventListener('click',()=>{const viewer=root.KT80DossierOriginals;
+   if(viewer?.openOriginal)viewer.openOriginal(r.file).catch(err=>{console.error(err)});
+   else alert('Прегледът на оригинали не е зареден.');});
+  row.append(marker,body,open,info);details.append(row);
  }
  if(a.missingInventory)details.append(node('p','Липсващи записи в отчетения инвентар: '+a.missingInventory));
  host.append(details);host.append(node('small',a.claim));
