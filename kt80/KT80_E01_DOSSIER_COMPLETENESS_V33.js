@@ -40,13 +40,27 @@ function render(a){
  host.replaceChildren();
  const node=(tag,text)=>{const e=document.createElement(tag);e.textContent=text;return e};
  host.append(node('h3','Ч1 · Контрол на пълнотата на прочита'));
- host.append(node('p','Отчетени файлове: '+a.filesEnumerated+'/'+a.filesExpected+' · Текст с извличане: '+a.filesExtracted+' · Без OCR предупреждения: '+a.filesVerifiedWithoutReview+' · За проверка/непрочетени: '+a.filesNeedReview+'.'));
+ const totals={read:a.records.filter(r=>r.state==='TEXT_EXTRACTED').length,review:a.records.filter(r=>r.state==='REVIEW_REQUIRED').length,unread:a.records.filter(r=>r.state==='NOT_READ'||r.state==='UNSUPPORTED').length};
+ const summary=node('p','Общо: '+a.filesEnumerated+'/'+a.filesExpected+' · 🟢 ПРОЧЕТЕН: '+totals.read+' · 🟡 ЗА ПРОВЕРКА: '+totals.review+' · 🔴 НЕПРОЧЕТЕН: '+totals.unread);
+ summary.className='kt80-file-status-summary';host.append(summary);
  if(a.leadingParcelCandidates===0)host.append(node('p','КРИТИЧНА ЛИПСА: не е установен водещ ПИ от документите. Не извеждайте автоматична пространствена или процедурна квалификация.'));
  host.append(node('p',a.status==='INCOMPLETE'?'ВНИМАНИЕ: има непрочетени или неподдържани материали — предметът и процедурата не бива да се приемат за напълно доказани.':
  a.status==='REVIEW_REQUIRED'?'Налични са текстови откъси с предупреждения. Проверете оригиналните файлове.':'Текстовият прочит е отчетен; необходима е съдържателна експертна проверка.'));
  const details=document.createElement('details');details.open=a.filesNeedReview>0||a.missingInventory>0;
  details.append(node('summary','Документен инвентар и рискове ('+a.records.length+' файла)'));
- for(const r of a.records){const row=node('p','№'+r.index+' · '+r.file+' · '+r.state+' · '+r.readerStatus+' · '+r.note);row.className=r.state==='TEXT_EXTRACTED'?'kt80-read-ok':'kt80-read-review';details.append(row)}
+ for(const r of a.records){
+  const row=document.createElement('div');row.className='kt80-file-status-row';
+  const marker=document.createElement('span');
+  const isRead=r.state==='TEXT_EXTRACTED',isReview=r.state==='REVIEW_REQUIRED';
+  marker.className='kt80-file-status '+(isRead?'kt80-file-read':isReview?'kt80-file-check':'kt80-file-unread');
+  marker.textContent=isRead?'🟢 ПРОЧЕТЕН':isReview?'🟡 ЗА ПРОВЕРКА':'🔴 НЕПРОЧЕТЕН';
+  marker.setAttribute('aria-label',marker.textContent);
+  const body=document.createElement('span');body.className='kt80-file-name';
+  body.textContent='№'+r.index+' · '+r.file;
+  const info=document.createElement('small');info.className='kt80-file-reason';
+  info.textContent=r.note+' · '+r.readerStatus;
+  row.append(marker,body,info);details.append(row);
+ }
  if(a.missingInventory)details.append(node('p','Липсващи записи в отчетения инвентар: '+a.missingInventory));
  host.append(details);host.append(node('small',a.claim));
 }
