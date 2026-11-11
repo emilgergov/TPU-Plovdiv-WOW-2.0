@@ -59,6 +59,8 @@ function show(proposal,{apply=false}={}){
  status(proposal.text?'Извлечен кандидат за предмет · източник: '+proposal.source+'. Проверете съдържанието и местоположението.':'Няма доказан кандидат от преписката. Допустимо е ръчно въвеждане.');
 }
 function constructed(){
+ // KT53 is the sole evidence-aware construction route; V32 remains a source-picker.
+ if(root.KT80KT53?.construct)return root.KT80KT53.construct({force:true});
  const workflow=root.KT80WorkflowState;
  const proposal=propose(workflow?.intake);
  show(proposal,{apply:false});
