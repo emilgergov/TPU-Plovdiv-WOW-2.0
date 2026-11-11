@@ -110,3 +110,11 @@ body[data-kt80-view="gis"] #kt80FreeGISScreen{display:block}
 #kt80FreeGISScreen #kt80GISResults{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
 #kt80FreeGISScreen .kt80-gis-spatial-v24 h4{margin:0 0 6px}
 #kt80FreeGISScreen .kt80-gis-detail{border:1px solid #cad9cd}
+
+/* V29: Increase dashboard legibility without changing card dimensions or grid. */
+.kt80-dashboard-tile-text{font-size:15.5px!important;line-height:1.31!important}
+.kt80-dashboard-tile-legal{font-size:12.5px!important;line-height:1.31!important}
+.kt80-dashboard-tile-number{font-size:12px!important}
+.kt80-dashboard-tile{gap:8px!important;padding:13px 13px 12px!important}
+.kt80-dashboard-tile-arrow{font-size:23px!important}
+@media(max-width:1250px){.kt80-dashboard-tile-text{font-size:15px!important}.kt80-dashboard-tile-legal{font-size:12px!important}}
