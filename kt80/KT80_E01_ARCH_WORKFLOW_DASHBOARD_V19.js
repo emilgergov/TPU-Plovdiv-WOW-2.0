@@ -55,6 +55,7 @@ async function process(){
    root.KT80DossierCompleteness.render(audit);
    root.KT80DossierAudit=audit;
   }
+  root.KT80CH2Evidence?.reset?.();
   if(root.KT80IPMaster){
    const draft=root.KT80IPMaster.build(result);if(!isCurrent())return;
    root.KT80IPMasterDraft=draft;root.KT80IPMaster.render(draft);
@@ -72,6 +73,7 @@ async function process(){
  }finally{if(isCurrent()){$('kt80ProcessFile').disabled=false;state.abort=null}}
 }
 function confirmSubject(){
+ if(root.KT80CH2Evidence?.hasBlockingIssues?.())return say('Има оспорени доказателствени откъси. Прегледайте оригиналите и извършете коригиран анализ, преди потвърждаване на предмета.');
  const value=$('kt80SubjectText').value.trim();
  if(!value)return say('Въведете или редактирайте предмета.');
  if(!$('kt80SubjectConfirmation').checked)return say('Потвърдете предмета като експерт.');
@@ -132,6 +134,7 @@ function resetAll(){
  $('kt80ReviewSummary').textContent='';
  $('kt80RoutePanels').hidden=true;
  delete root.KT80IPMasterDraft;delete root.KT80ParcelDraft;delete root.KT80DossierAudit;delete root.KT80CH2Passport;
+  root.KT80CH2Evidence?.reset?.();
  // Clear pending overlays and opened case-related guide panels; the catalogue itself remains intact.
  const overlay=$('overlay');overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');
  for(const id of ['tabs','rows','source'])$(id)?.replaceChildren();
@@ -172,6 +175,7 @@ function init(){
  $('kt80Authority').addEventListener('change',()=>invalidate(4));
  $('kt80InputFile').addEventListener('change',()=>{root.KT80SubjectMaster?.reset?.();++state.generation;if(state.abort){state.abort.abort();state.abort=null}$('kt80ProcessFile').disabled=false;state.fileName=null;state.intake=null;invalidate(2);$('kt80InputStatus').textContent='Избран файл: '+($('kt80InputFile').files?.[0]?.name||'няма')+'. Натиснете „Обработи преписката“.'});
  go(1);root.KT80WorkflowState=state;root.KT80ResetCurrentCase=resetAll;
+ root.KT80InvalidateEvidenceConclusions=()=>{invalidate(2);say('Доказателствата са оспорени. Предметът и последващите процедурни потвърждения са обезсилени до повторна проверка.');};
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })(window);
