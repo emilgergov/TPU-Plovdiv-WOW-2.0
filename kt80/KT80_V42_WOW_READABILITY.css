@@ -119,3 +119,18 @@
 .kt80-ch21-reader .kt80-ch21-row p{font-size:16px;line-height:1.6;margin:3px 0;flex-basis:100%}
 .kt80-ch21-reader .kt80-ch21-source{font-size:15px;color:#f9e6b5;overflow-wrap:anywhere}
 .kt80-ch21-reader .kt80-ch21-row button{flex-shrink:0}
+
+/* KT51 V51 — parameter-by-parameter, expert-controlled technical QA. */
+.kt80-param-review{margin:16px 0;padding:18px;background:#163d2d;border:1px solid #b8a16c;border-radius:10px;color:#f5eddc}
+.kt80-param-review h3{font:700 21px Georgia,serif;color:#ffe4a0;margin:0 0 12px}
+.kt80-param-review .kt80-ch21-summary{font-size:16px;font-weight:750;line-height:1.7}
+.kt80-param-review .kt80-ch21-notice{font-size:15px;line-height:1.65;padding:12px;border-left:4px solid #dbc079;background:#2a4935}
+.kt80-param-review .kt80-ch21-details{padding:13px;border:1px solid #8f9b6a;border-radius:8px;background:#204632}
+.kt80-param-review summary{font-size:17px;font-weight:800;color:#ffe2a3;cursor:pointer}
+.kt80-param-review .kt80-param-review-row{margin:12px 0;padding:12px;border:1px solid #79906a;border-radius:8px;background:#244b38}
+.kt80-param-review .kt80-param-review-title{font-size:17px;display:block;line-height:1.5;color:#fff0bc;overflow-wrap:anywhere}
+.kt80-param-review .kt80-param-review-row p{font-size:16px;line-height:1.6;overflow-wrap:anywhere}
+.kt80-param-review .kt80-param-warning{padding:8px;border-left:3px solid #d6ae5e;background:#513e24;color:#ffe5a4}
+.kt80-param-review .kt80-param-expert{margin:10px 0;border-top:1px solid #7b906d;padding:12px 0}
+.kt80-param-review .kt80-param-reason{display:block;width:100%;min-height:74px;box-sizing:border-box;background:#faf7ee;color:#153524;border-radius:7px;border:1px solid #bfa46b;padding:12px;font-size:16px;margin:10px 0}
+.kt80-param-review button{margin:7px 12px 5px 0;font-size:15px}
