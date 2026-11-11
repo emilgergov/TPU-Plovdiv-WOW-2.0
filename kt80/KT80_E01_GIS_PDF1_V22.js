@@ -57,7 +57,7 @@ function bodyContent(checked,profiles,zones){
  const overview=makeContext(checked,zones);
  const mapSvg=svgFromMap();
  const list=checked.map((r,i)=>{const p=profiles[i],id=String(r.input||r.cadnum);
-  return 'ПИ '+id+' по КККР на '+clean(keys(p,'settlement','settlement_name'))+', местност „'+clean(keys(p,'locality','mestnost'))+'“, община '+clean(keys(p,'municipality','obshtina'))+', област '+clean(keys(p,'province','region','oblast'))+'. Площ на имота: '+clean(keys(p,'area_m2','parcel_area_m2','area'))+' кв. м.'});
+  return 'ПИ '+id+' (ЕКАТТЕ '+id.split('.')[0]+') по КККР на '+clean(keys(p,'settlement','settlement_name'))+', местност „'+clean(keys(p,'locality','mestnost'))+'“, община '+clean(keys(p,'municipality','obshtina'))+', област '+clean(keys(p,'province','region','oblast'))+'. Площ на имота: '+clean(keys(p,'area_m2','parcel_area_m2','area'))+' кв. м.'});
  const content=[
   {text:'Източник на пространствените данни: ГИС база на РИОСВ – Пловдив. Дата на изготвяне: '+date+' г.'},
   {text:'Общ пространствен контекст на анализираните поземлени имоти',style:'sub'},
@@ -70,7 +70,7 @@ function bodyContent(checked,profiles,zones){
   ...list.map(x=>({text:x})),
  ];
  for(let i=0;i<checked.length;i++){
-  const n=nearestZone(checked[i],zones);
+  const n=checked[i].intersection_verified_outside===true?nearestZone(checked[i],zones):null;
   if(n)content.push({text:'Най-близка защитена зона до ПИ '+String(checked[i].input||checked[i].cadnum)+': '+n.code+' — '+n.name+' ('+n.meters.toLocaleString('bg-BG',{maximumFractionDigits:2})+' м).'});
  }
  content.push({text:'А. Защитени зони от мрежата „Натура 2000“ (ЗБР)',style:'sub'});
@@ -81,9 +81,15 @@ function bodyContent(checked,profiles,zones){
   if(!verifiedSet.size){zzBody.push([String(r.input||r.cadnum),r.intersection_verified_outside===true?'Не е установено пресичане със ЗЗ':'НЯМА ДАННИ','—','—']);continue}
   for(const code of verifiedSet){
    const record=z.find(a=>String(keys(a,'sitecode','code'))===code);
-   zzBody.push([String(r.input||r.cadnum),code+' — '+clean(keys(record,'name_bg','name')),
-    clean(keys(record,'intersect_m2','area_m2')),
-    clean(keys(record,'percent_parcel','pct_parcel','percent'))]);
+   const measure=(r.verified_zone_intersections||[]).find(a=>String(keys(a,'sitecode','code'))===code);
+   const geoName=zones.find(a=>zzCode(a)===code)?.properties;
+   const preciseArea=keys(measure,'area_m2')??keys(record,'intersect_m2','area_m2');
+   const landArea=Number(keys(p,'area_m2','parcel_area_m2','area')??r.area_m2_source);
+   const ratio=Number.isFinite(Number(preciseArea))&&Number.isFinite(landArea)&&landArea>0
+     ?(100*Number(preciseArea)/landArea).toLocaleString('bg-BG',{maximumFractionDigits:3})+' %'
+     :clean(keys(record,'percent_parcel','pct_parcel','percent'));
+   zzBody.push([String(r.input||r.cadnum),code+' — '+clean(keys(measure,'name_bg','name')??keys(record,'name_bg','name')??keys(geoName,'NAME_BG','name_bg','name')),
+    clean(preciseArea),ratio]);
   }
  }
  content.push({table:{body:zzBody}});
