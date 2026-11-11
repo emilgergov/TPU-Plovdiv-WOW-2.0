@@ -84,13 +84,14 @@ function separateMap(parcel,zones){
 }
 function bodyContent(checked,profiles,zones){
  const count=checked.length,date=new Date().toLocaleDateString('bg-BG');
- // One full-size contextual map only. Retain the detailed Natura 2000/parcel view.
- const mapSvg=svgFromMap();
+ // Auto-prepared validated context: independent of user zoom, pan and Context button.
+ // Never export the incidental browser viewport as PDF1's main spatial context.
+ const mapSvg=makeContext(checked,zones);
  const list=checked.map((r,i)=>{const p=profiles[i],id=String(r.input||r.cadnum);
   return 'ПИ '+id+' (ЕКАТТЕ '+root.KT80Display.ekatte(id,p)+') по КККР на '+clean(keys(p,'settlement','settlement_name'))+', местност „'+root.KT80Display.locality(keys(p,'locality','mestnost'))+'“, община '+clean(keys(p,'municipality','obshtina'))+', област '+clean(keys(p,'province','region','oblast'))+'. Площ на имота: '+root.KT80Display.area(keys(p,'area_m2','area_m2_source','parcel_area_m2','area'))+' кв. м.'});
  const content=[
   {text:'Източник на пространствените данни: ГИС база на РИОСВ – Пловдив. Дата на изготвяне: '+date+' г.'},
-  {text:'Пространствено положение на имотите спрямо защитените зони и защитените територии',style:'sub'},
+  {text:'Автоматично изготвен пространствен контекст на анализираните имоти',style:'sub'},
   {svg:mapSvg,width:950,maxHeight:455},
   {text:'Картата представя имотите и наличните архивни граници от мрежата „Натура 2000“. Пространствените пресичания се определят чрез отделния геометричен контрол; отобразяването на граница не доказва пресичане.',fontSize:9},
  ];
