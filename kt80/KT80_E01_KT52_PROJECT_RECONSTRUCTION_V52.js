@@ -56,6 +56,7 @@ function factFromEvidence(key,text,file,page,state,kind){
 }
 function build(intake,ip,semantic,parameterQA,opts={}){
  const issues=getIgnored(opts.evidenceMaster);
+ const rejectedParameters=(parameterQA?.entries||[]).filter(x=>x.evidenceExcluded);
  const evidence=[];
  const sourcePages=Array.isArray(intake?.page_text_index)?intake.page_text_index:[];
  const pageMatch=(file,excerpt)=>{
@@ -65,7 +66,12 @@ function build(intake,ip,semantic,parameterQA,opts={}){
  const seen=new Set();
  const push=(key,text,file,page,state,kind)=>{
   const f=factFromEvidence(key,text,file,page,state,kind);
-  if(!f.excerpt||BARE_FORM.test(f.excerpt)||affectedByIgnored(f.file,f.excerpt,issues))return;
+  // Reject a source span containing an explicitly excluded technical value,
+  // rather than silently re-introducing that value through another topic.
+  const conflictsWithRejected=rejectedParameters.some(p=>p.file===f.file &&
+    (p.page===null||f.page===null||p.page===f.page) &&
+    p.excerpt && (lc(p.excerpt)===lc(f.excerpt)||lc(f.excerpt).includes(lc(p.excerpt))));
+  if(!f.excerpt||BARE_FORM.test(f.excerpt)||affectedByIgnored(f.file,f.excerpt,issues)||conflictsWithRejected)return;
   const fingerprint=[f.key,f.file,lc(f.excerpt)].join('|');
   if(seen.has(fingerprint))return;
   seen.add(fingerprint);evidence.push(f);
@@ -114,6 +120,7 @@ function build(intake,ip,semantic,parameterQA,opts={}){
  const confirmedParameters=approved.filter(x=>!rejectedIds.has(x.id)).map(x=>({...x}));
  const outstanding=[
   ...(issues.length?['Има оспорени/игнорирани доказателства; повторната оценка трябва да изключи съответните откъси.']:[]),
+  ...(rejectedParameters.length?['Има експертно изключени технически стойности и свързаните с тях откъси се изключват от реконструкцията.']:[]),
   ...(isMixed?['Едновременно са засечени различни видове основна намеса; необходим е контекстен експертен преглед.']:[]),
   ...(files.some(x=>x.state==='UNSUPPORTED'||x.state==='NOT_READ')?['Има непрочетени материали. Преписката не може да бъде приета за изчерпателно анализирана.']:[]),
   ...(files.some(x=>x.state==='REVIEW_REQUIRED')?['Има документи с OCR/частичен прочит. Необходимо е сравнение с оригиналите.']:[]),
