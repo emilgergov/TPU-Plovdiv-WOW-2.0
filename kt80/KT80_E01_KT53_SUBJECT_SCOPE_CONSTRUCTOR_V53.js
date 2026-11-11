@@ -34,8 +34,17 @@ function proposition(reconstruction){
   for(const item of section.items||[]){
    const sources=(item.evidence||[]).filter(x=>x.excerpt&&x.file);
    if(!sources.length)continue;
-   const distinct=[...new Set(sources.map(x=>x.file+(x.page?' · стр. '+x.page:'')))];
-   lines.push('• '+item.label+' — открити са '+sources.length+' непотвърдени откъса; източник: '+distinct.slice(0,3).join('; ')+(distinct.length>3?' и още '+(distinct.length-3):'')+'.');
+   const examples=[],used=new Set();
+   for(const fact of sources){
+    const excerpt=tidy(fact.excerpt);
+    if(!excerpt||used.has(excerpt))continue;
+    used.add(excerpt);
+    examples.push('  – „'+excerpt.slice(0,360)+(excerpt.length>360?'…':'')+'“ ('+fact.file+(fact.page?' · стр. '+fact.page:'')+'; '+(fact.readerState||'СТАТУС НЕУСТАНОВЕН')+').');
+    if(examples.length>=3)break;
+   }
+   lines.push('• '+item.label+' — предварително установени сведения, за проверка в оригинала:');
+   lines.push(...examples);
+   if(sources.length>examples.length)lines.push('  – Още '+(sources.length-examples.length)+' откъса в доказателствената карта.');
    evidenceMap[item.key]=sources.map(x=>({file:x.file,page:x.page,excerpt:x.excerpt,readerState:x.readerState}));
   }
   if(lines.length)blocks.push(section.label+':\n'+lines.join('\n'));
