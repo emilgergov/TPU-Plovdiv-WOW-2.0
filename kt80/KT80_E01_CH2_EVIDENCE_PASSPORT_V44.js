@@ -16,6 +16,17 @@ const TOPICS=[
 ];
 const t=x=>String(x??'').replace(/\s+/gu,' ').trim();
 const norm=x=>t(x).toLocaleLowerCase('bg');
+const reviewIssues=new Map();
+let currentPassport=null;
+const evidenceId=(topic,document,excerpt)=>JSON.stringify([topic,document,excerpt]);
+function reportIssue(id,record){
+ reviewIssues.set(id,{...record,id,status:'ИЗКЛЮЧЕНО ОТ АВТОМАТИЧНИ ИЗВОДИ',time:new Date().toISOString()});
+ if(typeof root.KT80InvalidateEvidenceConclusions==='function')root.KT80InvalidateEvidenceConclusions();
+ if(currentPassport)render(currentPassport);
+}
+function issues(){return [...reviewIssues.values()].map(x=>({...x}))}
+function resetIssues(){reviewIssues.clear();currentPassport=null;}
+
 function polarity(text){
  const x=norm(text);
  const neg=/(?:не се предвижда|няма да|не се изгражда|не се използва|не е предвидено|не са предвидени|не се осъществява|без заустване)/u.test(x);
@@ -42,7 +53,7 @@ function build(intake,ip,audit){
    const excerpt=t(e.excerpt),document=t(e.document)||'НЕУСТАНОВЕН ДОКУМЕНТ';
    if(!excerpt)continue;
    const id=document+'|'+norm(excerpt);
-   if(!unique.has(id))unique.set(id,{document,excerpt,kind:t(e.kind),polarity:polarity(excerpt),readStatus:byFile.get(document)?.state||'UNKNOWN',page:pageCandidate(document,excerpt),verified:false});
+   if(!unique.has(id))unique.set(id,{document,excerpt,kind:t(e.kind),polarity:polarity(excerpt),readStatus:byFile.get(document)?.state||'UNKNOWN',page:pageCandidate(document,excerpt),verified:false,issueId:evidenceId(key,document,excerpt)});
   }
   const sources=[...unique.values()].slice(0,16);
   const documents=[...new Set(sources.map(x=>x.document))];
@@ -82,11 +93,14 @@ function addOriginalButton(parent,file,page,label){
  parent.append(btn);
 }
 function render(result){
+ currentPassport=result;
  const host=document.getElementById('kt80CH2Passport');if(!host)return;
  host.replaceChildren();host.append(node('h3','Ч2 · Доказателствен паспорт на преписката'));
  host.append(node('p','Теми с откъси: '+result.withEvidence+'/'+result.topics.length+' · Изходни откъси: '+result.uniqueExcerpts+
  ' · Непрочетени файлове: '+result.unreadCount+' · За OCR/документна проверка: '+result.ocrReviewCount+'.','kt80-ch2-summary'));
  host.append(node('p',result.requiredStatement,'kt80-ch2-warning'));
+ if(reviewIssues.size)host.append(node('p','БЛОКИРАНО: '+reviewIssues.size+' оспорени откъса. Изходните доказателства не са надеждни за автоматично конструиране. Предстои повторна проверка/обработка след корекция.','kt80-ch2-critical'));
+
  if(result.unreadCount)host.append(node('p','КРИТИЧНО: Има непрочетени материали. Не може да се приема, че предметът и обхватът са пълно доказани.','kt80-ch2-critical'));
  if(result.limitations.leadingParcelCandidates===0)host.append(node('p','Няма автоматично установен водещ ПИ. Това не доказва, че ИП няма териториален обхват; проверете вида на преписката и документите.','kt80-ch2-warning'));
  if(result.reviewFlags.oppositePhrasing.length||result.reviewFlags.existingDossierConflicts.length||result.reviewFlags.semantic.length){
@@ -126,8 +140,29 @@ function render(result){
   for(const src of item.sources){
    const card=node('div',undefined,'kt80-ch2-evidence');
    const head=node('div','Източник: '+src.document+(src.page?' · стр. '+src.page+' (предварително установена)':' · страница: НЯМА ДАННИ')+' · '+(src.readStatus==='TEXT_EXTRACTED'?'текстово извличане':'изисква допълнителна проверка'),'kt80-ch2-source');
+   const flagged=reviewIssues.get(src.issueId);
    card.append(head,node('p','„'+src.excerpt+'“'));
-   addOriginalButton(card,src.document,src.page);d.append(card);
+   if(flagged){
+    card.append(node('p','🔴 ОСПОРЕН ПРОЧИТ — откъсът не може да бъде използван като доказателство.','kt80-ch2-critical'));
+    if(flagged.corrected)card.append(node('p','Експертно предложен верен текст (неинтегриран): „'+flagged.corrected+'“','kt80-ch2-correction'));
+    card.append(node('p','Причина: '+flagged.reason,'kt80-ch2-correction'));
+   }
+   addOriginalButton(card,src.document,src.page);
+   const flag=node('button',flagged?'✎ Редакция на сигнала':'⚑ Проблем с прочита','kt80-ch2-open kt80-ch2-flag');
+   flag.type='button';flag.setAttribute('aria-expanded','false');
+   const edit=node('div',undefined,'kt80-ch2-correction-editor');edit.hidden=true;
+   const hint=node('p','Сравнете с оригинала. Посочете проблема; при възможност въведете вярното изписване. Първичният документ и извлеченият OCR текст не се променят.','kt80-ch2-footnote');
+   const reason=node('textarea',undefined,'kt80-ch2-reason');reason.rows=2;reason.placeholder='Каква е грешката в прочита?';reason.setAttribute('aria-label','Причина за оспорване');reason.value=flagged?.reason||'';
+   const correction=node('textarea',undefined,'kt80-ch2-corrected');correction.rows=3;correction.placeholder='Коректен откъс от оригинала (по избор)';correction.setAttribute('aria-label','Коригиран текст от оригинала');correction.value=flagged?.corrected||'';
+   const submit=node('button','Запиши проблем · блокирай изводите','kt80-ch2-open kt80-ch2-flag');submit.type='button';
+   const feedback=node('p','', 'kt80-ch2-footnote');
+   submit.addEventListener('click',()=>{
+    if(!t(reason.value)){feedback.textContent='Необходимо е да опишете проблема с прочита.';return}
+    reportIssue(src.issueId,{topic:item.key,document:src.document,page:src.page,original:src.excerpt,reason:t(reason.value).slice(0,1000),corrected:t(correction.value).slice(0,3000)});
+   });
+   edit.append(hint,reason,correction,submit,feedback);
+   flag.addEventListener('click',()=>{edit.hidden=!edit.hidden;flag.setAttribute('aria-expanded',String(!edit.hidden))});
+   card.append(flag,edit);d.append(card);
   }
   if(item.possibleOpposition)d.append(node('p','ВЪЗМОЖНО ПРОТИВОРЕЧИЕ — установени са утвърдителна и отрицателна формулировка; необходим е контекстен преглед.','kt80-ch2-critical'));
   host.append(wrap);
@@ -135,7 +170,7 @@ function render(result){
  const footer=node('p','Проследимост до документ и откъс: налична. Предварително намерени PDF страници: '+result.limitations.pageCandidateCount+'. Страниците, таблиците, приложенията, редакциите и точността на OCR все още изискват експертна проверка.','kt80-ch2-footnote');
  host.append(footer);
 }
-function reset(){const host=document.getElementById('kt80CH2Passport');if(host){host.replaceChildren();host.textContent='Доказателственият паспорт ще се изгради след обработка на преписката.'}}
-root.KT80CH2Evidence=Object.freeze({build,render,reset});
+function reset(){resetIssues();const host=document.getElementById('kt80CH2Passport');if(host){host.replaceChildren();host.textContent='Доказателственият паспорт ще се изгради след обработка на преписката.'}}
+root.KT80CH2Evidence=Object.freeze({build,render,reset,issues,hasBlockingIssues:()=>reviewIssues.size>0});
 document.addEventListener('kt80:case-reset',reset);
 })(window);
