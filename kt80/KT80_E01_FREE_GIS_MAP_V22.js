@@ -112,7 +112,15 @@ function details(){
  const ov=document.createElement('p');ov.textContent='Архивни пресичащи полигони: '+overlaysOf(item).length;host.append(ov);
  const info=document.createElement('p');info.textContent='Пространствените проценти, ЗТ и административните реквизити се сверяват чрез ПИ MASTER и отделната проверка.';host.append(info);
 }
-function choose(id){S.chosen=id;render();document.dispatchEvent(new CustomEvent('kt80:parcel-selected',{detail:{id}}))}
+function syncSelectedRow(){
+ const holder=$('kt80GISResults');if(!holder)return;
+ for(const row of holder.querySelectorAll('.kt80-gis-row')){
+  const active=row.dataset.parcelId===S.chosen;
+  row.classList.toggle('kt80-gis-row-selected',active);
+  row.setAttribute('aria-pressed',String(active));
+ }
+}
+function choose(id){S.chosen=id;render();syncSelectedRow();document.dispatchEvent(new CustomEvent('kt80:parcel-selected',{detail:{id}}))}
 function zoom(k){if(!S.view)return;S.view.w*=k;S.view.h*=k;render()}
 function fit(){fitView(bbox(S.results.flatMap(featuresOf)))}
 function showSelected(){const r=selected()||S.results[0];fitView(bbox(featuresOf(r)))}
@@ -136,7 +144,7 @@ function clear(){
 function status(t){const e=$('kt80GISStatus');if(e)e.textContent=t}
 function rows(){const el=$('kt80GISResults');if(!el)return;el.replaceChildren();
  for(const r of S.results){const row=document.createElement('button');row.type='button';row.className='kt80-gis-row';
- const id=String(r.cadnum||r.input);const strong=document.createElement('strong');strong.textContent=id;
+ const id=String(r.cadnum||r.input);row.dataset.parcelId=id;row.setAttribute('aria-pressed',String(id===S.chosen));const strong=document.createElement('strong');strong.textContent=id;
  const span=document.createElement('span');span.textContent=featuresOf(r).length?'Имотна геометрия · '+root.KT80Display.area(r.area_m2_source)+' кв. м':'Няма потвърдена геометрия';
  row.append(strong,span);row.addEventListener('click',()=>{choose(id);showSelected()});el.append(row)}
 }
@@ -182,7 +190,7 @@ async function find(){
   if(S.results.length!==norm.ids.length)throw Error('ГИС отговорът не включва всички имоти');
   root.KT80FreeGISResults=Object.freeze({ids:[...norm.ids],results:S.results,source:'FULL_GIS_MASTER',verified:false,procedureId:null});
   S.chosen=String(S.results[0]?.cadnum||S.results[0]?.input||'');
-  rows();fit();
+  rows();syncSelectedRow();fit();document.dispatchEvent(new CustomEvent('kt80:parcel-selected',{detail:{id:S.chosen}}));
   status('Геометрия за '+S.results.filter(r=>featuresOf(r).length).length+' от '+norm.ids.length+' имота. Картата е обновена.');
   void loadZones(gen);
   void verifyIntersections(gen);
