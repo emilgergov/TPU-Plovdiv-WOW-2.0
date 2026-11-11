@@ -20,6 +20,7 @@ function stage(step){
  viewMode('stage',b?.textContent?.trim()||('Етап '+step));
 }
 function route(c){
+ if(c.id===15){viewMode('gis','№15 · Свободна ГИС справка за имоти и режими');return;}
  if(typeof root.KT80OpenRoute!=='function')return;
  root.KT80OpenRoute(c);
  viewMode('candidate','№'+String(c.id).padStart(2,'0')+' · '+c.title);
@@ -51,7 +52,7 @@ function init(){
   const num=Number(b.dataset.step);
   five.append(tile(b.textContent.replace(/^\d+\.\s*/,'').trim(),'step',num,()=>b.click()));
  }
- for(const c of routes)twentyTwo.append(tile(c.title,'route',c.id,()=>route(c)));
+ for(const c of routes)twentyTwo.append(tile(c.id===15?'Свободна ГИС справка за имоти и режими':c.title,'route',c.id,()=>route(c)));
  $('kt80DashboardBack')?.addEventListener('click',home);
  // Original candidate content is retained in its full sub-screen; close returns home.
  $('close')?.addEventListener('click',()=>{if(view==='candidate')home()});
