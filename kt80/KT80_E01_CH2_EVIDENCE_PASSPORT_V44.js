@@ -65,7 +65,7 @@ function build(intake,ip,audit){
   pageTraceVerified:false,pageCandidateCount:topics.reduce((n,x)=>n+x.sources.filter(y=>y.page!==null).length,0)};
  return Object.freeze({
   schema:'KT80-CH2-EVIDENCE-PASSPORT-V44',caseName:t(intake?.archive_name),generatedFrom:'V26 IN + IP MASTER V15 + Ч1',
-  topics,filesCount:files.length,withEvidence:topics.filter(x=>x.sources.length).length,missingTopics:notice.missingTopics.length,
+  topics,fileInventory:files.map(x=>({file:x.file,state:x.state,reason:x.readerStatus||''})),filesCount:files.length,withEvidence:topics.filter(x=>x.sources.length).length,missingTopics:notice.missingTopics.length,
   uniqueExcerpts:topics.reduce((n,x)=>n+x.sources.length,0),unreadCount:unread.length,ocrReviewCount:caution.length,
   reviewFlags:{oppositePhrasing:possibleConflicts.map(x=>x.label),existingDossierConflicts:dossierConflicts.map(x=>({topic:x.key,status:x.status})),semantic:semanticFlags.map(x=>x.label)},
   limitations:notice,
@@ -75,10 +75,10 @@ function build(intake,ip,audit){
  });
 }
 function node(tag,text,css){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(css)e.className=css;return e}
-function addOriginalButton(parent,file){
- const btn=node('button','◉ Оригинал','kt80-ch2-open');btn.type='button';
+function addOriginalButton(parent,file,page,label){
+ const btn=node('button',label||('◉ Оригинал'+(page?' · стр. '+page:'')),'kt80-ch2-open');btn.type='button';
  btn.title='Отвори първичния документ за проверка';
- btn.addEventListener('click',()=>{if(root.KT80DossierOriginals?.openOriginal)root.KT80DossierOriginals.openOriginal(file);});
+ btn.addEventListener('click',()=>{if(root.KT80DossierOriginals?.openOriginal)root.KT80DossierOriginals.openOriginal(file,page||null);});
  parent.append(btn);
 }
 function render(result){
@@ -98,17 +98,39 @@ function render(result){
   host.append(d);
  }
  for(const item of result.topics){
+  const wrap=node('div',undefined,'kt80-ch2-topic-wrap');
+  const quick=node('div',undefined,'kt80-ch2-topic-header');
   const d=document.createElement('details');d.className='kt80-ch2-topic';
   d.append(node('summary',item.label+' · '+item.status+' · '+item.sources.length+' откъса'));
+  quick.append(d);
+  if(item.sources.length){
+   const known=item.sources.find(x=>result.fileInventory.some(f=>f.file===x.document));
+   if(known)addOriginalButton(quick,known.document,known.page,'◉ Към източника'+(known.page?' · стр. '+known.page:''));
+  }else{
+   const toggle=node('button','⌕ Провери документи','kt80-ch2-open kt80-ch2-check');toggle.type='button';
+   const suggestions=node('div',undefined,'kt80-ch2-missing-files');suggestions.hidden=true;
+   suggestions.append(node('p','НЯМА ДАННИ означава, че не е открит надежден откъс по темата. Не е установен конкретен източник. Проверете оригиналите, без да приемате липса на дейност.'));
+   if(!result.fileInventory.length)suggestions.append(node('p','Няма зареден документен инвентар.'));
+   for(const f of result.fileInventory){
+    const row=node('div',undefined,'kt80-ch2-missing-row');
+    row.append(node('span',f.file+' · '+(f.state==='TEXT_EXTRACTED'?'прочетен':f.state==='REVIEW_REQUIRED'?'за проверка':'непрочетен')));
+    addOriginalButton(row,f.file,null,'◉ Отвори');
+    suggestions.append(row);
+   }
+   toggle.setAttribute('aria-expanded','false');
+   toggle.addEventListener('click',()=>{suggestions.hidden=!suggestions.hidden;toggle.setAttribute('aria-expanded',String(!suggestions.hidden))});
+   quick.append(toggle);wrap.append(quick,suggestions);
+  }
+  if(item.sources.length)wrap.append(quick);
   if(!item.sources.length)d.append(node('p','НЯМА ДАННИ в извлеченото. Липсата на откъс не означава отсъствие на дейност или въздействие.'));
   for(const src of item.sources){
    const card=node('div',undefined,'kt80-ch2-evidence');
    const head=node('div','Източник: '+src.document+(src.page?' · стр. '+src.page+' (предварително установена)':' · страница: НЯМА ДАННИ')+' · '+(src.readStatus==='TEXT_EXTRACTED'?'текстово извличане':'изисква допълнителна проверка'),'kt80-ch2-source');
    card.append(head,node('p','„'+src.excerpt+'“'));
-   addOriginalButton(card,src.document);d.append(card);
+   addOriginalButton(card,src.document,src.page);d.append(card);
   }
   if(item.possibleOpposition)d.append(node('p','ВЪЗМОЖНО ПРОТИВОРЕЧИЕ — установени са утвърдителна и отрицателна формулировка; необходим е контекстен преглед.','kt80-ch2-critical'));
-  host.append(d);
+  host.append(wrap);
  }
  const footer=node('p','Проследимост до документ и откъс: налична. Предварително намерени PDF страници: '+result.limitations.pageCandidateCount+'. Страниците, таблиците, приложенията, редакциите и точността на OCR все още изискват експертна проверка.','kt80-ch2-footnote');
  host.append(footer);
