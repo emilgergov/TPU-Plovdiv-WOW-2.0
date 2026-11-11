@@ -58,3 +58,8 @@
 .kt80-workflow .kt80-file-reason{font-size:14px}
 .kt80-workflow .kt80-stage-panel h2{font-size:20px}
 }
+
+/* KT80 V43 — visible, safe workflow-back navigation, consistent with WOW. */
+.kt80-workflow .kt80-back-navigation{display:flex;justify-content:flex-start;align-items:center;margin:0 0 13px;padding:0 0 10px;border-bottom:1px solid rgba(220,188,111,.32)}
+.kt80-workflow .kt80-step-back{background:#204a34;color:#ffe0a0;border:1px solid #d5b66e;border-radius:8px;padding:10px 16px;cursor:pointer;font-size:16px;font-weight:800;line-height:1.3}
+.kt80-workflow .kt80-step-back:hover,.kt80-workflow .kt80-step-back:focus-visible{background:#326749;color:#fff1c7;outline:2px solid #ffe1a1;outline-offset:2px}
