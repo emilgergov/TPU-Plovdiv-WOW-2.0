@@ -145,3 +145,18 @@
 .kt80-kt52-reconstruction .kt80-kt52-topic{padding:9px;border:1px solid #6d8668;border-radius:7px;margin:9px 0}
 .kt80-kt52-reconstruction .kt80-kt52-fact{padding:12px;margin:9px 0;background:#204432;border-left:3px solid #c9a968;border-radius:5px}
 .kt80-kt52-reconstruction p{font-size:16px;line-height:1.65;overflow-wrap:anywhere}
+
+/* KT53: subject and scope in the accepted WOW type scale and gold-on-green scheme. */
+.kt80-kt53-composer{background:#153d2d;color:#f8efd8;border:1px solid #c9aa6c;border-radius:10px;padding:18px;margin:16px 0;display:grid;gap:11px}
+.kt80-kt53-composer h3{font:700 21px Georgia,serif;color:#ffe0a0;margin:0}
+.kt80-kt53-composer label{font-size:17px;font-weight:800;color:#ffe5b3}
+.kt80-kt53-composer textarea{display:block;box-sizing:border-box;width:100%;min-height:190px;background:#fcf9ef;color:#173527;border:1px solid #d5b56a;border-radius:8px;padding:14px;font-size:17px;line-height:1.6}
+.kt80-kt53-composer .kt80-kt53-status{font-size:16px;font-weight:750;line-height:1.6;background:#234b37;padding:11px;border-left:4px solid #e2ba70}
+.kt80-kt53-composer .kt80-kt53-warnings{font-size:15px;line-height:1.65;color:#f8ddad}
+.kt80-kt53-composer details{border:1px solid #80966f;border-radius:8px;padding:10px;background:#1e4534}
+.kt80-kt53-composer details summary{font-size:16px;font-weight:800;cursor:pointer;color:#ffdf9d}
+.kt80-kt53-composer .kt80-kt53-evidence-line{border-bottom:1px solid #708665;padding:10px 4px}
+.kt80-kt53-composer .kt80-kt53-evidence-line p{font-size:15px;line-height:1.6}
+.kt80-kt53-composer .kt80-kt53-disclaimer{font-size:15px;line-height:1.6;color:#f4dfb6}
+.kt80-kt53-composer .kt80-check{display:flex;align-items:center;gap:12px;cursor:pointer}
+.kt80-kt53-composer input[type=checkbox]{width:20px;height:20px;accent-color:#d4ad5d}
