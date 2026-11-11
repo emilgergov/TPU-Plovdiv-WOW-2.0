@@ -111,7 +111,7 @@ async function find(){
 function init(){
  if(!$('kt80FindParcels'))return;
  $('kt80FindParcels').addEventListener('click',find);
- $('kt80ParcelInput').addEventListener('input',()=>{if(state.results.length)clear()});
+ $('kt80ParcelInput').addEventListener('input',clear);
  document.addEventListener('kt80:case-reset',clear);
  root.KT80FreeGIS=Object.freeze({find,clear,getResults:()=>[...state.results]});
 }
