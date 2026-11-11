@@ -139,7 +139,19 @@ function resetAll(){
  go(1);root.KT80DashboardHome?.();setBadge();say('Готово! Всичко е изчистено. Можем да започнем нова преписка.');
  return {reset:true,generation:state.generation};
 }
+function installBackNavigation(){
+ document.querySelectorAll('.kt80-stage-panel[data-panel]').forEach(panel=>{
+  const step=Number(panel.dataset.panel);
+  if(!Number.isInteger(step)||step<=1||panel.querySelector('.kt80-step-back'))return;
+  const bar=document.createElement('div');bar.className='kt80-back-navigation';
+  const btn=document.createElement('button');btn.type='button';btn.className='kt80-step-back';
+  btn.textContent='← Назад';btn.setAttribute('aria-label','Назад към предишната стъпка');
+  btn.addEventListener('click',()=>go(Math.max(1,state.step-1)));
+  bar.append(btn);panel.insertBefore(bar,panel.firstChild);
+ });
+}
 function init(){
+ installBackNavigation();
  routes();$('kt80ProcessFile').addEventListener('click',process);
  $('kt80ToSubject').addEventListener('click',()=>go(2));
  $('kt80ToParcels').addEventListener('click',confirmSubject);
