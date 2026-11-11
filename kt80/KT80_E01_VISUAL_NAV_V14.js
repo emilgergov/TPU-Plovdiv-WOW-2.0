@@ -8,7 +8,7 @@ function init(){
  const getState=()=>root.KT80WorkflowState||null;
  function refresh(){
   const state=getState();if(!state)return;
-  const completed=[true,Boolean(state.intake),Boolean(state.subjectConfirmed),Boolean(state.parcelsConfirmed),Boolean(state.lawConfirmed)];
+  const completed=[false,Boolean(state.subjectConfirmed),Boolean(state.parcelsConfirmed),Boolean(state.lawConfirmed),Boolean(state.routeConfirmed)];
   // IN can be legitimately manual; completion of stage 1 requires an actual input, not just visit.
   const fileDone=Boolean(state.intake)||Boolean(state.subjectConfirmed?.text);
   completed[0]=fileDone;
