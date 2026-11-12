@@ -10,8 +10,47 @@ const text=(tag,value,cls)=>{
  if(cls)node.className=cls;
  return node;
 };
+/* Preview is in the very same scope editor position, never a second writable value.
+ * The original textarea remains the only source of truth. */
+function hidePreview(){
+ const scope=$('kt80ScopeText'),pane=$('kt80ScopeInlinePreview');
+ if(pane)pane.hidden=true;
+ if(scope)scope.classList.remove('kt80-scope-text-preview-hidden');
+}
+function inlinePreview(action){
+ const scope=$('kt80ScopeText');
+ if(!scope||!$('kt80SubjectConfirmation')?.checked)return false;
+ let pane=$('kt80ScopeInlinePreview');
+ if(!pane){
+  pane=document.createElement('div');pane.id='kt80ScopeInlinePreview';pane.className='kt80-scope-inline-preview';
+  scope.insertAdjacentElement('afterend',pane);
+ }
+ pane.replaceChildren();pane.hidden=false;
+ scope.classList.add('kt80-scope-text-preview-hidden');
+ pane.append(text('p','Преглед на проекта · отбелязани са местата за уточняване','kt80-inline-legend'));
+ const original=scope.value;
+ const general=/(Сведения за експертна проверка в оригиналните документи:[^\n]*)/iu;
+ const match=general.exec(original);
+ const content=document.createElement('div');content.className='kt80-inline-original';
+ if(match){
+  content.append(document.createTextNode(original.slice(0,match.index)));
+  const flagged=text('mark',match[0],'kt80-inline-vague');
+  flagged.title='Общо описание — не уточнява конкретната проектна дейност.';
+  content.append(flagged);
+  content.append(document.createTextNode(original.slice(match.index+match[0].length)));
+ }else content.textContent=original;
+ pane.append(content);
+ const addition=document.createElement('div');addition.className='kt80-inline-addition';
+ addition.append(text('strong','Предложено уточнение · още не е включено'));
+ addition.append(text('p',action.text));
+ pane.append(addition);
+ const edit=text('button','Редактирай текста','kt80-inline-edit');edit.type='button';
+ edit.addEventListener('click',()=>{hidePreview();scope.focus()});pane.append(edit);
+ return true;
+}
 function reset(){
  serial++;
+ hidePreview();
  const host=$('kt80RelevanceProposals');if(host)host.replaceChildren();
  const status=$('kt80RelevanceDecisionStatus');if(status)status.textContent='Няма активни предложения.';
 }
@@ -25,10 +64,12 @@ function render(assessment){
  if(!suggestions)return;
  const actions=suggestions.actions||[];
  if(status)status.textContent=actions.length?actions.length+' мотивирано предложение за обхвата · Предметът остава фиксиран.':'Няма предложена редакция на обхвата · Предметът остава фиксиран.';
+ const annotated=actions.length===1&&inlinePreview(actions[0]);
  for(const action of actions){
   const card=text('section',undefined,'kt80-relevance-proposal');
   card.append(text('strong',action.action+' в '+action.target,'kt80-relevance-proposal-label'));
-  card.append(text('p',action.text,'kt80-relevance-proposal-text'));
+  if(!annotated)card.append(text('p',action.text,'kt80-relevance-proposal-text'));
+  else card.append(text('p','Предложеното уточнение е показано в полето „Обхват“.','kt80-relevance-proposal-text'));
   card.append(text('p','Мотив: '+action.reason,'kt80-relevance-proposal-reason'));
   const source=action.source||{};
   const origin=source.file+(source.page?' · стр. '+source.page:'');
@@ -50,7 +91,7 @@ function render(assessment){
   const initial=scope?.value;
   const fixedSubject=subject?.value;
   const finish=message=>{apply.disabled=true;reject.disabled=true;feedback.textContent=message};
-  reject.addEventListener('click',()=>{if(token!==serial)return;finish('Отхвърлено от експерта. Текстът не е променен.')});
+  reject.addEventListener('click',()=>{if(token!==serial)return;hidePreview();finish('Отхвърлено от експерта. Текстът не е променен.')});
   apply.addEventListener('click',()=>{
    if(token!==serial)return;
    if(!scope||!subject){feedback.textContent='Липсва поле за редакцията.';return}
@@ -63,6 +104,7 @@ function render(assessment){
    if(action.effect!=='append-scope'){feedback.textContent='За това предложение е необходима ръчна редакция.';return}
    if(scope.value.includes(action.text)){finish('Сведението вече присъства в обхвата.');return}
    scope.value=scope.value.replace(/\s+$/u,'')+'\n\n'+action.text;
+   hidePreview();
    scope.dispatchEvent(new Event('input',{bubbles:true}));
    const approval=$('kt80ScopeConfirmation');if(approval)approval.checked=false;
    finish('Включено в проекта на обхват. Проверете оригинала и потвърдете окончателно.');
@@ -74,8 +116,10 @@ function render(assessment){
  if(suggestions.gapCount)parts.push(suggestions.gapCount+' съществени въпроса остават за проверка');
  tail.textContent=parts.join(' · ')+(parts.length?'. ':'')+'Подробните основания са в разгъваемата проверка.';
  host.append(tail);
+ $('kt80EditScope')?.addEventListener('click',hidePreview,{once:true});
+ $('kt80ScopeText')?.addEventListener('input',hidePreview,{once:true});
 }
-root.KT80RelevanceActions=Object.freeze({render,reset});
+root.KT80RelevanceActions=Object.freeze({render,reset,hidePreview});
 document.addEventListener('kt80:case-reset',reset);
 document.addEventListener('kt80:case-change',reset);
 })(window);
