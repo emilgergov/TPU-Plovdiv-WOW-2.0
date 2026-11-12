@@ -272,3 +272,20 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
    max-height:400px!important;
  }
 }
+
+/* КТ80 V57.8: scoped, high-specificity height fix for the right editor only. */
+@media (min-width:1051px){
+ body .kt80-stage-panel.kt80-v56-stage .kt80-v56-fields #kt80KT53Composer textarea#kt80ScopeText{
+  height:260px!important;min-height:240px!important;max-height:520px!important;resize:vertical!important;
+ }
+}
+@media (min-width:671px) and (max-width:1050px){
+ body .kt80-stage-panel.kt80-v56-stage #kt80KT53Composer textarea#kt80ScopeText{
+  height:200px!important;min-height:180px!important;max-height:480px!important;resize:vertical!important;
+ }
+}
+@media (max-width:670px){
+ body .kt80-stage-panel.kt80-v56-stage #kt80KT53Composer textarea#kt80ScopeText{
+  height:165px!important;min-height:145px!important;max-height:400px!important;resize:vertical!important;
+ }
+}
