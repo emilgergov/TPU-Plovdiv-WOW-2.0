@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+'use strict';
+/* KT81 strict archive reconciliation and no-false-negative regression. */
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const root=path.join(__dirname);
+const data=JSON.parse(fs.readFileSync(path.join(root,'ekatte_212_archive_screen.json'),'utf8'));
+const entries=data.entries;
+assert.equal(data.schema,'kt81-ekatte-archive-screen-v1');
+assert.equal(data.status,'ARCHIVE_COMPLETE_GEOMETRIC_EXCLUSION_NOT_VERIFIED');
+assert.deepEqual(data.counts,{ekatte:212,parcels:917417,zz_pairs:176553,zt_pairs:2746});
+assert.equal(entries.length,212);
+assert.equal(new Set(entries.map(e=>e.ekatte)).size,212);
+assert.equal(entries.reduce((n,e)=>n+e.parcels,0),917417);
+assert.equal(entries.reduce((n,e)=>n+e.zz_pairs,0),176553);
+assert.equal(entries.reduce((n,e)=>n+e.zt_pairs,0),2746);
+assert.ok(entries.every(e=>e.geometry_exclusion_proven===false),'No false geometric proof');
+assert.ok(entries.every(e=>e.boundary_geometry_verified===false),'No invented boundary geometry');
+assert.ok(entries.every(e=>e.zt_complete_polygon_layer_verified===false),'No invented ZT polygons');
+assert.ok(entries.every(e=>e.parcels===e.archived_parcel_count),'Per-EKATTE count mismatch');
+const noPositive=entries.filter(e=>!e.zz_pairs&&!e.zt_pairs);
+assert.equal(noPositive.length,59);
+assert.ok(noPositive.every(e=>e.overlap_class==='NO_RECORDED_PARCEL_OVERLAP_NOT_PROOF'));
+assert.ok(entries.filter(e=>e.zz_pairs||e.zt_pairs).every(e=>e.overlap_class==='RECORDED_OVERLAP_SOMEWHERE_IN_EKATTE'));
+const byId=new Map(entries.map(e=>[e.ekatte,e]));
+assert.deepEqual([byId.get('02035').parcels,byId.get('02035').zz_pairs,byId.get('02035').zt_pairs],[2253,0,0]);
+assert.deepEqual([byId.get('36676').parcels,byId.get('36676').zz_pairs,byId.get('36676').zt_pairs],[3019,181,0]);
+assert.deepEqual([byId.get('46989').zt_pairs],[2]);
+const front=fs.readFileSync(path.join(__dirname,'..','KT80_STAGE3_CONTEXT_SCREEN_V581.js'),'utf8');
+assert.ok(front.includes('geometryExclusionProven:false'));
+assert.ok(front.includes('Контекстният индекс временно не е достъпен'));
+assert.ok(!front.includes('geometryExclusionProven:true'));
+console.log('KT81 context regression PASS: 67 SHA-verified source parts, 212 EKATTE, 59 archive-only candidates, 0 geometric exclusion claims.');
