@@ -127,7 +127,7 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
 .kt80-ai-subject-review p{white-space:pre-wrap;margin:8px 0}
 .kt80-ai-subject-review button{font:600 13px Arial,"Segoe UI",sans-serif;padding:7px 12px;margin:3px 7px 3px 0;border-radius:5px}
 /* KT80 V57.6 — EG authentication dialog in the approved administrative palette. */
-#kt80AISubjectDialog{
+:is(#kt80AISubjectDialog,#kt80EGScopeDialog){
  box-sizing:border-box;
  width:min(440px,calc(100vw - 28px));
  max-width:none;
@@ -143,14 +143,14 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
  box-shadow:0 12px 34px rgba(0,0,0,.35);
  font:14px/1.5 Arial,"Segoe UI",sans-serif;
 }
-#kt80AISubjectDialog::backdrop{background:rgba(5,16,13,.72)}
-#kt80AISubjectDialog form{margin:0;display:block}
-#kt80AISubjectDialog label{
+:is(#kt80AISubjectDialog,#kt80EGScopeDialog)::backdrop{background:rgba(5,16,13,.72)}
+:is(#kt80AISubjectDialog,#kt80EGScopeDialog) form{margin:0;display:block}
+:is(#kt80AISubjectDialog,#kt80EGScopeDialog) label{
  display:block;
  font:650 14px/1.45 Arial,"Segoe UI",sans-serif;
  color:#f0d59b;
 }
-#kt80AISubjectDialog input{
+:is(#kt80AISubjectDialog,#kt80EGScopeDialog) input{
  display:block;
  box-sizing:border-box;
  width:100%;
@@ -164,14 +164,14 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
  color-scheme:light;
  font:14px Arial,"Segoe UI",sans-serif;
 }
-#kt80AISubjectDialog input::placeholder{color:#53675b;opacity:1}
-#kt80AISubjectDialog input:focus-visible{outline:2px solid #e6c778;outline-offset:2px}
-#kt80AISubjectDialog p{
+:is(#kt80AISubjectDialog,#kt80EGScopeDialog) input::placeholder{color:#53675b;opacity:1}
+:is(#kt80AISubjectDialog,#kt80EGScopeDialog) input:focus-visible{outline:2px solid #e6c778;outline-offset:2px}
+:is(#kt80AISubjectDialog,#kt80EGScopeDialog) p{
  color:#e4e8de;
  font:13px/1.5 Arial,"Segoe UI",sans-serif;
  margin:10px 0 14px;
 }
-#kt80AISubjectDialog button{
+:is(#kt80AISubjectDialog,#kt80EGScopeDialog) button{
  box-sizing:border-box;
  min-height:34px;
  padding:7px 12px;
@@ -183,13 +183,13 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
  font:600 13px/1.4 Arial,"Segoe UI",sans-serif;
  cursor:pointer;
 }
-#kt80AISubjectDialog button:hover{background:#efd08d}
-#kt80AISubjectDialog button[type="button"]{
+:is(#kt80AISubjectDialog,#kt80EGScopeDialog) button:hover{background:#efd08d}
+:is(#kt80AISubjectDialog,#kt80EGScopeDialog) button[type="button"]{
  background:#24473b;
  border-color:#8a987c;
  color:#f1f0e8;
 }
-#kt80AISubjectDialog button[type="button"]:hover{background:#315646}
+:is(#kt80AISubjectDialog,#kt80EGScopeDialog) button[type="button"]:hover{background:#315646}
 
 /* KT80 V57.2: concise EG proposal, using the same compact administrative typography. */
 .kt80-v56-stage .kt80-ai-subject-review{
@@ -238,7 +238,7 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
 }
 
 /* KT80 V57.5: high legibility for editorial additions, no extra panels or badges. */
-.kt80-v56-stage #kt80AISubjectReview p strong.kt80-eg-changed{
+.kt80-v56-stage :is(#kt80AISubjectReview,#kt80EGScopeReview) p strong.kt80-eg-changed{
  color:#1c3027!important;
  background:#f3d68b!important;
  font-weight:800!important;
@@ -321,4 +321,27 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
  background:#c7ab6a!important;
  border-color:#24543f!important;
  border-left-color:#183d30!important;
+}
+
+/* КТ53.1 — one visual language for Предмет and Обхват. */
+.kt80-v56-stage #kt80ScopeProposalStatus{
+ font:400 13px/1.35 Arial,"Segoe UI",sans-serif!important;
+ color:#e4e8de!important;
+ background:transparent!important;
+ border:0!important;
+ padding:0!important;
+ margin:2px 0!important;
+}
+.kt80-v56-stage #kt80EGScopeReview{
+ margin:8px 0!important;
+ font:13.5px/1.45 Arial,"Segoe UI",sans-serif!important;
+}
+.kt80-v56-stage #kt80EGScopeReview .kt80-eg-changed{
+ color:#17362b!important;
+ background:#f3d68b!important;
+ font-weight:800!important;
+ padding:1px 3px!important;
+ border-radius:2px!important;
+ box-decoration-break:clone;
+ -webkit-box-decoration-break:clone;
 }
