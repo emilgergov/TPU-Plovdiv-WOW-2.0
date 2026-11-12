@@ -144,7 +144,7 @@ async function handleSubjectImprove(request,env){
   if(!upstream.ok)return reply({error:"AI provider request failed",providerStatus:upstream.status},502);
   const data=await upstream.json();
   const proposal=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join(" ").trim();
-  if(!proposal||proposal.length>450||/\[\[|^s*[`#]/u.test(proposal)||proposal.includes("\n"))return reply({error:"AI proposal did not pass format validation"},422);
+  if(!proposal||proposal.length>450||/\[\[|^[`#]/u.test(proposal)||proposal.includes("\n"))return reply({error:"AI proposal did not pass format validation"},422);
   return reply({proposal,reviewRequired:true,expertAcceptanceRequired:true,source:"AI proposal based only on supplied subject and scope"});
  }catch{return reply({error:"AI request failed or timed out"},504)}finally{clearTimeout(timer)}
 }
