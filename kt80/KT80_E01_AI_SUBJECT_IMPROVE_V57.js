@@ -10,19 +10,19 @@ function reset(){serial++;pending=null;const box=$('kt80AISubjectReview');if(box
 function render(proposal,baseline){
  const box=$('kt80AISubjectReview');if(!box)return;
  box.replaceChildren();box.hidden=false;
- const heading=document.createElement('strong');heading.textContent='Предложение от EG автора — непотвърдено';
+ const heading=document.createElement('strong');heading.textContent='EG автор · Предложена редакция';
  const preview=document.createElement('p');preview.textContent=proposal;
  const accept=document.createElement('button');accept.type='button';accept.textContent='Приеми предложението';
  const dismiss=document.createElement('button');dismiss.type='button';dismiss.textContent='Отхвърли предложението';
  accept.addEventListener('click',()=>{
   const subject=$('kt80SubjectText');
-  if(!pending||pending.proposal!==proposal||!subject||subject.value!==baseline){status('Предметът е променен след заявката към EG автора. Предложението не е приложено.');reset();return;}
+  if(!pending||pending.proposal!==proposal||!subject||subject.value!==baseline){status('Предметът е променен. Предложението не е приложено.');reset();return;}
   subject.value=proposal;subject.dispatchEvent(new Event('input',{bubbles:true}));
   const confirm=$('kt80SubjectConfirmation');if(confirm)confirm.checked=false;
-  status('Предложението от EG автора е прието като непотвърден проект. Проверете го и потвърдете предмета.');
+  status('Редакцията е приложена. За продължаване потвърдете предмета.');
   reset();
  });
- dismiss.addEventListener('click',()=>{reset();status('Предложението от EG автора е отхвърлено. Предметът остава непроменен.')});
+ dismiss.addEventListener('click',()=>{reset();status('Предложението е отхвърлено. Предметът е запазен.')});
  box.append(heading,preview,accept,dismiss);
 }
 function init(){
@@ -52,17 +52,17 @@ function init(){
   const payload=JSON.stringify({subject});
   if(new TextEncoder().encode(payload).length>6000){status('Текстът на предмета надвишава допустимия размер. EG авторът не е извикан.');return}
   reset();const currentId=++serial;
-  action.disabled=true;status('EG авторът подготвя предложение. Предметът не се променя.');
+  action.disabled=true;status('EG автор · Изготвяне на редакция…');
   try{
    const response=await fetch(ENDPOINT,{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:payload});
    const data=await response.json();
    if(currentId!==serial)return;
    if(!response.ok)throw Error('EG услугата върна код '+response.status+(data.providerStatus?' ('+data.providerStatus+')':''));
    if(data.reviewRequired!==true||data.expertAcceptanceRequired!==true||typeof data.proposal!=='string'||!data.proposal.trim())throw Error('Невалидно предложение от EG автора.');
-   if(($('kt80SubjectText')?.value||'').trim()!==subject){status('Предметът е редактиран по време на заявката. Предложението от EG автора не се прилага.');return}
+   if(($('kt80SubjectText')?.value||'').trim()!==subject){status('Предметът е редактиран. Предложението не е приложено.');return}
    pending={proposal:data.proposal.trim()};
    render(pending.proposal,$('kt80SubjectText').value);
-   status('Предложението от EG автора е готово за експертен преглед. Няма автоматично потвърждение.');
+   status('Изготвена е редакция на предмета. Прегледайте предложението.');
   }catch(e){if(currentId===serial)status('Интелигентното подобряване не успя: '+String(e.message||e)+'. Предметът е запазен.')}
   finally{action.disabled=false}
  });
