@@ -43,7 +43,7 @@ function init(){
  const form=document.createElement('form');form.method='dialog';
  const label=document.createElement('label');label.textContent='Парола за EG автора';
  const password=document.createElement('input');password.type='password';password.autocomplete='off';password.required=true;password.placeholder='Временен защитен достъп';label.append(password);
- const note=document.createElement('p');note.textContent='Изпращат се единствено проектът на обхват и текущият предмет. Пълната преписка и доказателствата остават в модула. Паролата не се запазва.';
+ const note=document.createElement('p');note.textContent='Изпращат се единствено проектът на обхват и текущият предмет. Пълната преписка и доказателствата остават в модула. Паролата се пази само в оперативната памет за текущата преписка и се изчиства при приключване или смяна на преписката.';
  const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Отказ';
  const send=document.createElement('button');send.type='submit';send.textContent='Предложи подобрение';
  cancel.addEventListener('click',()=>{password.value='';dialog.close()});
@@ -73,7 +73,7 @@ function init(){
   const scope=field.value.trim(),subject=$('kt80SubjectText')?.value.trim()||'';
   if(!scope||scope.length>2400){say('Обхватът липсва или надвишава допустимата дължина за редакция.');return}
   if(!subject){say('Необходим е предмет, за да се провери съответствието на обхвата.');return}
-  if(!token){say('Липсва парола за EG автора.');return}
+  if(!token&&!root.KT80EGSession?.hasAccess()){say('Липсва парола за EG автора.');return}
   const payload=JSON.stringify({scope,subject:subject.slice(0,450)});
   if(new TextEncoder().encode(payload).length>6500){say('Заявката е твърде голяма. Обхватът е запазен.');return}
   clearProposal();const requestId=++serial;improve.disabled=true;say('EG автор · Изготвяне на редакция на обхвата…');
