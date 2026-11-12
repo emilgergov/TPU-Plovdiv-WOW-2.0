@@ -158,6 +158,7 @@ function fill(p,{force=false}={}){
  // Any reconstructed candidate invalidates both prior approvals.
  const checkbox=$('kt80ScopeConfirmation');if(checkbox)checkbox.checked=false;
  const prior=$('kt80SubjectConfirmation');if(prior)prior.checked=false;
+ root.KT80ScopeLock?.sync?.();
  const sources=$('kt80KT53Evidence');
  if(sources){
   sources.replaceChildren();
@@ -214,6 +215,8 @@ function statusReset(){
  root.KT80RelevanceActions?.reset?.();
  const scope=$('kt80ScopeText');if(scope)scope.value='';
  const check=$('kt80ScopeConfirmation');if(check)check.checked=false;
+ const subjectCheck=$('kt80SubjectConfirmation');if(subjectCheck)subjectCheck.checked=false;
+ root.KT80ScopeLock?.sync?.();
  const evidence=$('kt80KT53Evidence');if(evidence)evidence.replaceChildren();
  promptStatus('КТ53 · След обработка на преписката ще бъде предложен предмет и отделен обхват.');
  const warning=$('kt80KT53Warnings');if(warning)warning.textContent='';
