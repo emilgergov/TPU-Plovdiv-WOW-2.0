@@ -35,9 +35,19 @@ function render(assessment){
  const actions=(suggestions.actions||[]).filter(a=>a?.text&&a.effect==='append-scope');
  const initial=scope?.value||'', fixedSubject=subject?.value||'';
  if(status)status.textContent=actions.length?
-  'Установено е относимо сведение за конкретизиране на проекта на обхват.':
-  'Няма нова конкретна редакция, подкрепена от текущия предварителен филтър.';
- if(!actions.length)return;
+  'Предлагаме конкретизиране на проекта на обхват въз основа на относимо сведение.':
+  'Предлагаме проверка и приемане на наличния проект на обхват; при липса на надеждни данни — конкретна проверка на основната дейност и техническите характеристики.';
+ if(!actions.length){
+  const guidance=node('section',undefined,'kt80-relevance-proposal kt81-comparison');
+  guidance.append(node('h3','Какво предлагаме','kt81-result-heading'));
+  const current=String(scope?.value||'').trim();
+  guidance.append(node('p',current?
+   'Запазете наличния проект на обхват като работна основа. Проверете дали включва конкретната основна дейност, обекта и доказаните технически характеристики; коригирайте само установените непълноти.':
+   'Изградете проект на обхват от установените в преписката основна дейност и обект; ако те не са доказуеми, изискайте точното им описание от приложените първични документи.',
+   'kt81-result-caution'));
+  guidance.append(node('p','Причина: предварителният филтър не е открил нова достатъчно конкретна и проследима редакция. Това не означава, че дейността отсъства.','kt81-result-caution'));
+  host.append(guidance);return;
+ }
  const draft=buildDraft(initial,actions);
  if(!draft||draft===initial.trimEnd())return;
  const card=node('section',undefined,'kt80-relevance-proposal kt81-comparison');
