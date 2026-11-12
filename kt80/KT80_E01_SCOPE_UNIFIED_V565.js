@@ -23,10 +23,10 @@ function init(){
  evidence.append(relevance);
  if(extra)evidence.append(extra);
  const metadata=$('kt80KT53Status');if(metadata)evidence.append(metadata);
- const label=$('kt80ScopeProposalStatus');if(label)evidence.append(label);
+ const label=$('kt80ScopeProposalStatus');if(label)panel.insertAdjacentElement('afterend',label);
  const sync=()=>{
    const aiVisible=!review.hidden&&Boolean(review.textContent.trim());
-   const algoVisible=Boolean(proposals.textContent.trim());
+   const algoVisible=Boolean(proposals.textContent.trim())&&algo.dataset.stale!=='true';
    algo.hidden=aiVisible||!algoVisible;
    panel.hidden=!aiVisible&&!algoVisible;
    panel.dataset.active=aiVisible?'eg':algoVisible?'algorithm':'none';
@@ -37,6 +37,9 @@ function init(){
  const observer=new MutationObserver(sync);
  observer.observe(review,{attributes:true,attributeFilter:['hidden'],childList:true,subtree:true});
  observer.observe(proposals,{childList:true,subtree:true});
+ scope.addEventListener('input',()=>{algo.dataset.stale='true';sync()});
+ document.addEventListener('kt80:case-reset',()=>{algo.dataset.stale='false';sync()});
+ document.addEventListener('kt80:case-change',()=>{algo.dataset.stale='false';sync()});
  sync();
  const dialog=document.createElement('dialog');dialog.id='kt80V562Confirm';dialog.className='kt80-v562-dialog';
  const heading=document.createElement('h3');heading.textContent='Потвърждение на окончателния обхват';
