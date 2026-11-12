@@ -182,6 +182,7 @@ function init(){
  $('kt80OpenConditions').addEventListener('click',()=>{if(state.routeConfirmed&&typeof root.KT80OpenRoute==='function')root.KT80OpenRoute(state.activeRoute)});
  document.querySelectorAll('.kt80-step').forEach(b=>b.addEventListener('click',()=>{const target=Number(b.dataset.step);go(target)}));
  $('kt80SubjectText').addEventListener('input',()=>invalidate(2));
+ $('kt80SubjectConfirmation').addEventListener('change',()=>{if(!$('kt80SubjectConfirmation').checked)invalidate(2)});
  $('kt80ScopeText')?.addEventListener('input',()=>invalidate(3));
  $('kt80ScopeConfirmation')?.addEventListener('change',()=>invalidate(3));
  $('kt80ParcelInput').addEventListener('input',()=>invalidate(3));
