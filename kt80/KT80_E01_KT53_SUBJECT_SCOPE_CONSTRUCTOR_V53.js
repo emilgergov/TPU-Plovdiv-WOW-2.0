@@ -7,6 +7,20 @@ const $=id=>document.getElementById(id);
 const tidy=s=>String(s??'').replace(/\s+/gu,' ').trim();
 const bad=/^(?:изграждането|изграждане)\s+на\s+(?:основен\s+ремонт|текущ\s+ремонт|реконструкция)(?=\s|[.,;:]|$)/iu;
 const labelType={major_repair:'Основен ремонт',current_repair:'Текущ ремонт',reconstruction:'Реконструкция',construction:'Изграждане'};
+const displayKeys={
+ major_repair:'Основен ремонт',current_repair:'Текущ ремонт',reconstruction:'Реконструкция',
+ construction:'Изграждане',replacement:'Подмяна на съоръжения',installation:'Монтаж и оборудване',
+ electrical_equipment:'Електрически съоръжения и инсталации',water_connection:'Водоснабдяване',
+ wastewater_connection:'Отпадъчни води и заустване',electricity_connection:'Електрическо присъединяване',
+ access:'Транспортен достъп',site:'Териториално местоположение',
+ TEXT_EXTRACTED:'ПРОЧЕТЕН',REVIEW_REQUIRED:'ЗА ПРОВЕРКА',UNSUPPORTED:'НЕПРОЧЕТЕН — НЕПОДДЪРЖАН ФОРМАТ',
+ NOT_READ:'НЕПРОЧЕТЕН',UNKNOWN:'СТАТУСЪТ НЕ Е УСТАНОВЕН',
+ OCR_EXTRACTED:'ЗА ПРОВЕРКА — OCR',OCR_REQUIRED:'ЗА ПРОВЕРКА — OCR',
+ EXPERT_CONFIRMED:'ЕКСПЕРТНО ПОТВЪРДЕН',EXPERT_REJECTED:'ЕКСПЕРТНО ИЗКЛЮЧЕН',
+ EXTRACTED_UNVERIFIED:'ИЗВЛЕЧЕН, НЕПОТВЪРДЕН'
+};
+function readable(value){const code=tidy(value);return displayKeys[code]||code.replace(/\b(?:REVIEW_REQUIRED|TEXT_EXTRACTED|UNSUPPORTED|NOT_READ|UNKNOWN|OCR_REQUIRED|OCR_EXTRACTED)\b/g,m=>displayKeys[m]||m);}
+
 let current=null,manualSubject=false,manualScope=false,suspend=false;
 function listSources(reconstruction){
  const out=[];for(const section of reconstruction?.sections||[])for(const item of section.items||[])
@@ -39,7 +53,7 @@ function proposition(reconstruction){
     const excerpt=tidy(fact.excerpt);
     if(!excerpt||used.has(excerpt))continue;
     used.add(excerpt);
-    examples.push('  – „'+excerpt.slice(0,360)+(excerpt.length>360?'…':'')+'“ ('+fact.file+(fact.page?' · стр. '+fact.page:'')+'; '+(fact.readerState||'СТАТУС НЕУСТАНОВЕН')+').');
+    examples.push('  – „'+excerpt.slice(0,360)+(excerpt.length>360?'…':'')+'“ ('+fact.file+(fact.page?' · стр. '+fact.page:'')+'; '+readable(fact.readerState||'UNKNOWN')+').');
     if(examples.length>=3)break;
    }
    lines.push('• '+item.label+' — предварително установени сведения, за проверка в оригинала:');
@@ -85,10 +99,10 @@ function fill(p,{force=false}={}){
   sources.append(para);
   for(const [key,values] of Object.entries(p.evidence)){
    const line=document.createElement('details');const summary=document.createElement('summary');
-   summary.textContent=key+' · '+values.length+' откъса';line.append(summary);
+   summary.textContent=readable(key)+' · '+values.length+' откъса';line.append(summary);
    for(const item of values.slice(0,20)){
     const div=document.createElement('div');div.className='kt80-kt53-evidence-line';
-    const text=document.createElement('p');text.textContent='„'+item.excerpt+'“ · '+item.file+(item.page?' · стр. '+item.page:'')+' · '+item.readerState;div.append(text);
+    const text=document.createElement('p');text.textContent='„'+item.excerpt+'“ · '+item.file+(item.page?' · стр. '+item.page:'')+' · '+readable(item.readerState);div.append(text);
     if(item.page){const open=document.createElement('button');open.type='button';open.className='kt80-ch2-open';open.textContent='◉ Оригинал · стр. '+item.page;
       open.addEventListener('click',()=>root.KT80DossierOriginals?.openOriginal?.(item.file,item.page));div.append(open)}
     line.append(div);
