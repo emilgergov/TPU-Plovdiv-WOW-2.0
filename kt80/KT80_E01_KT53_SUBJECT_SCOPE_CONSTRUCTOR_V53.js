@@ -110,7 +110,7 @@ function fill(p,{force=false}={}){
    sources.append(line);
   }
  }
- promptStatus('КТ53 · '+p.subjectStatus+' · '+p.unresolved.length+' въпроса за експертен контрол. Няма извикване на AI услуга.');
+ promptStatus('КТ53 · '+p.subjectStatus+' · '+p.unresolved.length+' въпроса за експертен контрол. EG авторът не е извикан.');
  const warning=$('kt80KT53Warnings');if(warning)warning.textContent=p.unresolved.length?'За проверка: '+p.unresolved.join(' | '):'Няма допълнителни алгоритмични сигнали. Всеки факт остава за експертна проверка.';
 }
 function construct({force=false}={}){
