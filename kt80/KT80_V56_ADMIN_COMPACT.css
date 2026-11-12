@@ -178,3 +178,15 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
  background:transparent!important;
  text-decoration:none!important;
 }
+
+/* KT80 V57.5: high legibility for editorial additions, no extra panels or badges. */
+.kt80-v56-stage #kt80AISubjectReview p strong.kt80-eg-changed{
+ color:#1c3027!important;
+ background:#f3d68b!important;
+ font-weight:800!important;
+ padding:1px 3px!important;
+ border-radius:2px!important;
+ text-decoration:none!important;
+ box-decoration-break:clone;
+ -webkit-box-decoration-break:clone;
+}
