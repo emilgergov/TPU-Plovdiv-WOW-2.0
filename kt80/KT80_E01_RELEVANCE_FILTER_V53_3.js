@@ -5,10 +5,11 @@
 (function(root){'use strict';
 const norm=s=>String(s??'').replace(/\s+/gu,' ').trim();
 const test=(re,s)=>re.test(s);
-const TEMPLATE=/(?:посочете|посочва\s+се|опишете|описва\s+се|информация\s+за|данни\s+за|при\s+необходимост|ако\s+е\s+приложимо|необходимо\s+е\s+да\s+се\s+(?:посочи|представи)|представете|да\s+се\s+представи|приложение\s+№|формуляр|образец|въпросник|изисквания\s+към|дали\s+се|следва\s+ли)/iu;
+const TEMPLATE=/(?:посочете|посочва\s+се|опишете|описва\s+се|информация\s+за|данни\s+за|при\s+необходимост|ако\s+е\s+приложимо|необходимо\s+е\s+да\s+се\s+(?:посочи|представи)|представете|да\s+се\s+представи|формуляр|образец|въпросник|изисквания\s+към|дали\s+се|следва\s+ли|необходимост\s+от\s+(?:изграждане|други|свързани)|предвидени\s+изкопни\s+работи.*(?:площ|дълбочина)|очаквано\s+трансгранично|обща\s+използвана\s+площ|свързани\s+с\s+основния\s+предмет\s+спомагателни)/iu;
 const NEGATIVE=/(?:не\s+се\s+предвижда|няма\s+да\s+се|не\s+е\s+предвиден|не\s+се\s+изгражда|без\s+заустване)/iu;
-const INTENTION=/(?:предвижда\s+се|ще\s+се|предвиден[а-я]*|проектн[а-я]*|инвестиционното\s+предложение\s+включва|дейностите\s+включват|ще\s+бъдат|предстои\s+да)/iu;
-const MAIN=/\b(?:основен|текущ)\s+ремонт\b|реконструкц|изграждане\s+на\s+нов/iu;
+const INTENTION=/(?:предвижда\s+се|ще\s+се|предвиден[а-я]*|проектн[а-я]*|инвестиционното\s+предложение\s+включва|дейностите\s+включват|ще\s+бъдат|предстои\s+да|да\s+се\s+подмени|предмет\s+на\s+настоящия\s+проект\s+е)/iu;
+const PROJECT_SPECIFIC=/(?:предмет\s+на\s+настоящия\s+проект\s+е|инвестиционното\s+предложение\s+предвижда|предвижда\s+се\s+(?:подмяна|ремонт|монтаж|изграждане)|да\s+се\s+подмени\s+(?:съществуващ|наличен|мрежов)|ще\s+се\s+подмени\s+(?:съществуващ|наличен|мрежов))/iu;
+const MAIN=/(?:основен|текущ)\s+ремонт|реконструкц|изграждане\s+на\s+нов/iu;
 const TOPICS={
  replacement:{name:'Подмяна на съоръжения',weight:'съществено при доказване'},
  installation:{name:'Монтаж и оборудване',weight:'съществено при доказване'},
@@ -22,20 +23,23 @@ const INFRA=new Set(['water_connection','wastewater_connection','electricity_con
 function classify(fact,key){
  const excerpt=norm(fact?.excerpt);
  if(!excerpt)return 'NO_EVIDENCE';
- if(TEMPLATE.test(excerpt)||NEGATIVE.test(excerpt))return 'TEMPLATE_OR_NEGATIVE';
  const reliable=fact?.readerState==='TEXT_EXTRACTED'&&!fact?.evidenceExcluded;
  if(!reliable)return 'REVIEW_SOURCE';
- // Even a positive explicit phrase in an OCR/excerpt stays a candidate, never a verified fact.
- if(INTENTION.test(excerpt)){
-  // Generic mentions of infrastructure in an unrelated equipment clause are not project links.
+ // Project-specific assertion takes priority over generic questionnaire terms.
+ if(PROJECT_SPECIFIC.test(excerpt)){
   if(INFRA.has(key)){
-   const direct=/\b(?:водоснабдяван[а-я]*|водопровод[а-я]*|заустван[а-я]*|отпадъчни\s+води|канализац[а-я]*|електрическ[а-я]*\s+присъединяван[а-я]*|електрозахранван[а-я]*|нов\s+път|транспортен\s+достъп)\b/iu.test(excerpt);
-   if(!direct)return 'REVIEW_SOURCE';
+   const actual=/(?:предвижда\s+се|ще\s+се|предмет\s+на\s+настоящия\s+проект\s+е|инвестиционното\s+предложение\s+предвижда)[^.!?]{0,100}(?:водоснабдяван|водопровод|заустван|отпадъчни\s+води|канализац|присъединяван|достъп|нов\s+път)/iu.test(excerpt);
+   return actual?'EXPLICIT_UNVERIFIED':'MENTION_ONLY';
   }
-  return 'EXPLICIT_UNVERIFIED';
+  if(key==='replacement'||key==='electrical_equipment'||key==='installation')return 'EXPLICIT_UNVERIFIED';
  }
- // Activity titles can help establish the main work but not ancillary infrastructure.
- if(key==='electrical_equipment'&&MAIN.test(excerpt))return 'EXPLICIT_UNVERIFIED';
+ if(TEMPLATE.test(excerpt)||NEGATIVE.test(excerpt))return 'TEMPLATE_OR_NEGATIVE';
+ if(INTENTION.test(excerpt)){
+  // A generic form field with the word 'предвидени' is not sufficient evidence.
+  if(INFRA.has(key))return 'MENTION_ONLY';
+  if(key==='replacement'||key==='electrical_equipment'||key==='installation')return 'REVIEW_SOURCE';
+ }
+ if(key==='electrical_equipment'&&MAIN.test(excerpt))return 'REVIEW_SOURCE';
  return 'MENTION_ONLY';
 }
 function assess(reconstruction,subject){
