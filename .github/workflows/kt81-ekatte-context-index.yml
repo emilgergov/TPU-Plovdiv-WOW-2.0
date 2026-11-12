@@ -1,0 +1,44 @@
+name: KT81 EKATTE contextual archive screening
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/kt81-ekatte-context-index.yml'
+      - 'kt80/context_gis/build_ekatte_archive_screen.py'
+permissions:
+  contents: write
+jobs:
+  verified-archive-screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Validate archived EKATTE administrative index
+        run: python kt80/context_gis/build_ekatte_archive_screen.py --selftest
+      - name: Verify all 67 source shards and build 212 EKATTE contextual screen
+        run: python kt80/context_gis/build_ekatte_archive_screen.py
+      - name: Assert complete source and no ungrounded geometric exclusions
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('kt80/context_gis/ekatte_212_archive_screen.json').read_text(encoding='utf8'))
+          assert x['status']=='ARCHIVE_COMPLETE_GEOMETRIC_EXCLUSION_NOT_VERIFIED'
+          assert x['counts']=={'ekatte':212,'parcels':917417,'zz_pairs':176553,'zt_pairs':2746}
+          assert len(x['entries'])==212
+          assert all(not e['geometry_exclusion_proven'] for e in x['entries'])
+          print('PASS: all 212 groups verified; no unsubstantiated NO-OVERLAP conclusions.')
+          PY
+      - name: Publish verified read-only browser index
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kt80/context_gis/ekatte_212_archive_screen.json
+          if ! git diff --cached --quiet; then
+            git commit -m "KT81: verified 212-EKATTE archival screening; all geometric exclusions unproven"
+            git push
+          else
+            echo "Context index unchanged"
+          fi
