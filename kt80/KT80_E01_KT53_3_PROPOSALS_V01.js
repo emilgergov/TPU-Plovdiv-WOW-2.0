@@ -48,6 +48,7 @@ function render(assessment){
   const feedback=text('p','','kt80-relevance-proposal-feedback');
   controls.append(apply,reject);card.append(controls,feedback);host.append(card);
   const initial=scope?.value;
+  const fixedSubject=subject?.value;
   const finish=message=>{apply.disabled=true;reject.disabled=true;feedback.textContent=message};
   reject.addEventListener('click',()=>{if(token!==serial)return;finish('Отхвърлено от експерта. Текстът не е променен.')});
   apply.addEventListener('click',()=>{
@@ -56,6 +57,7 @@ function render(assessment){
    if(root.KT80WorkflowState?.routeConfirmed||root.KT80WorkflowState?.scopeConfirmed||$('kt80ScopeConfirmation')?.checked){
     feedback.textContent='Обхватът или процедурата вече са потвърдени. Отменете потвърждението преди редакция.';return;
    }
+   if(subject.value!==fixedSubject){feedback.textContent='Предметът е променен. Предложението за обхвата вече не е валидно. Повторете проверката при фиксиран предмет.';return}
    if(scope.value!==initial){feedback.textContent='Междувременно обхватът е редактиран. Реконструирайте анализа преди приемане.';return}
    if(action.effect!=='append-scope'){feedback.textContent='За това предложение е необходима ръчна редакция.';return}
    if(scope.value.includes(action.text)){finish('Сведението вече присъства в обхвата.');return}
