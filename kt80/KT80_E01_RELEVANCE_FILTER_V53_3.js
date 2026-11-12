@@ -72,5 +72,21 @@ function assess(reconstruction,subject){
   proceduralDecision:null,mayDetermineProcedure:false,
   note:'Това е предварителен филтър за факти и съществени липси, а не правна квалификация. Непосоченото не е доказано отсъстващо.'});
 }
-root.KT80Relevance=Object.freeze({assess,classify});
+/* KT53.3 — concise, source-linked correction, not an automatic finding. */
+function suggestions(assessment,subject,scope){
+ const proposed=[],current=norm(scope);
+ for(const topic of assessment?.review||[]){
+  if(topic.key!=='replacement')continue;
+  const source=(topic.sources||[]).find(x=>/(?:предмет\s+на\s+настоящия\s+проект\s+е|да\s+се\s+подмени|предвижда\s+се\s+подмяна)/iu.test(x.excerpt)&&/(?:мрежов\s+)?трансформатор/iu.test(x.excerpt));
+  if(!source)continue;
+  const explicit=norm(source.excerpt);
+  const tail=/(?:автоматично\s+регулиране\s+на\s+напрежението|МТАРН)/iu.test(explicit)?' с автоматично регулиране на напрежението':'';
+  const sentence='Предвижда се подмяна на съществуващ мрежови трансформатор с нов мрежови трансформатор'+tail+'.';
+  if(/подмяна\s+на\s+съществуващ\s+мрежови\s+трансформатор/iu.test(current)||/подмени\s+съществуващ\s+мрежови\s+трансформатор/iu.test(current))continue;
+  proposed.push({id:'replacement-transformer',action:'Включване',target:'Обхват',text:sentence,reason:'Проектният документ описва конкретна подмяна на трансформатор, която уточнява характера на намесата.',source:{file:source.file,page:source.page,excerpt:source.excerpt,readerState:source.readerState},effect:'append-scope',expertReviewRequired:true});
+ }
+ const missing=(assessment?.crucial||[]).filter(x=>x.status.includes('НЕУСТАНОВЕНО'));
+ return {actions:proposed.slice(0,2),excludedCount:(assessment?.excluded||[]).length,gapCount:missing.length,noProcedure:true,guidance:missing.length?'Съществени неясноти остават за експертна проверка; липсата на сведения не означава отсъствие на дейност.':''};
+}
+root.KT80Relevance=Object.freeze({assess,classify,suggestions});
 })(window);
