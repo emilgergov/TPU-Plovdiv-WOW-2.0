@@ -1,0 +1,42 @@
+/* KT80 V56 — distinct isolated visual layer; no workflow or evidence logic.
+ * Administrative work area: two fields, one decision row, one evidence disclosure.
+ * Only stage 2; no impacts on V31 maps, PDF/Word or accepted stage 1.
+ */
+.kt80-workflow:has(.kt80-v56-stage:not([hidden])){min-height:0; padding:12px; margin-top:6px}
+.kt80-stage-panel.kt80-v56-stage{padding:2px 4px 7px!important;font-family:Arial,"Segoe UI",sans-serif!important;line-height:1.42!important}
+.kt80-v56-stage .kt80-v56-title-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid #567360;padding:3px 0 9px;margin-bottom:10px}
+.kt80-v56-stage .kt80-v56-title-row h2{font:700 18px/1.25 Georgia,serif!important;color:#efd29a!important;margin:0!important}
+.kt80-v56-stage .kt80-v56-title-row p{font-size:13.5px!important;line-height:1.45!important;color:#d3dfd4!important;margin:0!important}
+.kt80-v56-stage .kt80-v56-fields{display:grid;grid-template-columns:minmax(0,0.88fr) minmax(0,1.12fr);gap:18px;align-items:start}
+.kt80-v56-stage .kt80-v56-field{min-width:0;display:flex;flex-direction:column;gap:5px}
+.kt80-v56-stage .kt80-v56-field label{font-size:15px!important;font-weight:700!important;margin:2px 0 3px!important;color:#f4dfb0}
+.kt80-v56-stage .kt80-v56-field .kt80-subject-controls{display:flex;gap:6px!important;flex-wrap:wrap;margin:4px 0 3px!important;order:3}
+.kt80-v56-stage .kt80-v56-field .kt80-subject-controls button{font:600 13.5px/1.35 Arial,sans-serif!important;padding:8px 11px!important;margin:0!important;border-radius:5px!important;min-height:34px!important}
+.kt80-v56-stage .kt80-v56-field textarea{display:block;box-sizing:border-box;width:100%;min-width:0;resize:vertical;font-family:Arial,"Segoe UI",sans-serif!important;font-size:15px!important;line-height:1.45!important;color:#16362c;background:#fcfaf3;border:1px solid #b4a67c;border-radius:5px;padding:10px!important}
+.kt80-v56-stage #kt80SubjectText{min-height:94px!important;height:114px!important;max-height:300px}
+.kt80-v56-stage #kt80ScopeText{min-height:94px!important;height:114px!important;max-height:320px}
+.kt80-v56-stage #kt80SubjectProposalStatus,.kt80-v56-stage #kt80SubjectHint{font:400 13px/1.35 Arial,sans-serif!important;background:transparent!important;border:none!important;padding:1px 0!important;margin:1px 0!important;color:#d1ddcf!important}
+.kt80-v56-stage #kt80SubjectProposalStatus:empty,.kt80-v56-stage #kt80SubjectHint:empty{display:none}
+.kt80-v56-stage #kt80KT53Composer{display:contents!important;background:transparent!important;border:0!important;padding:0!important;margin:0!important}
+.kt80-v56-stage #kt80KT53Status{font:500 13px/1.35 Arial,sans-serif!important;margin:2px 0!important;padding:0 0 0 7px!important;background:transparent!important;border-left:2px solid #bdaa7b!important;color:#d7e2d7}
+.kt80-v56-stage .kt80-v56-extra{margin:5px 0 0;border:1px solid #60796a;border-radius:5px;background:#1b4030;padding:5px 9px}
+.kt80-v56-stage .kt80-v56-extra>summary{cursor:pointer;font-size:13.5px!important;font-weight:600!important;color:#e5d5ad!important;padding:5px 0!important}
+.kt80-v56-stage .kt80-v56-extra .kt80-v56-detail{padding:6px 2px;border-top:1px solid #4a6655}
+.kt80-v56-stage #kt80KT53Warnings{font-size:13.5px!important;line-height:1.5!important;max-height:none!important;overflow:visible!important;margin:5px 0!important}
+.kt80-v56-stage .kt80-kt53-evidence{padding:7px!important;margin:5px 0!important}
+.kt80-v56-stage .kt80-kt53-evidence>summary{font-size:13.5px!important}
+.kt80-v56-stage .kt80-kt53-disclaimer{font-size:12.5px!important;margin:5px 0!important;line-height:1.45!important}
+.kt80-v56-stage .kt80-v56-approvals{display:flex;flex-wrap:wrap;gap:7px 16px;align-items:center;justify-content:space-between;border-top:1px solid #50725c;margin:12px 0 4px;padding:10px 0 3px}
+.kt80-v56-stage .kt80-v56-approval-labels{display:flex;gap:8px 20px;align-items:center;flex-wrap:wrap}
+.kt80-v56-stage .kt80-v56-approval-labels .kt80-check{display:inline-flex!important;gap:7px;align-items:center;padding:0!important;margin:0!important;font-size:13.5px!important;font-weight:500!important;line-height:1.4!important;max-width:100%}
+.kt80-v56-stage .kt80-v56-approval-labels input{width:18px;height:18px;flex:0 0 auto}
+.kt80-v56-stage #kt80ToParcels{padding:9px 15px!important;margin:0!important;font:700 14px/1.4 Arial,sans-serif!important;min-height:39px!important}
+.kt80-v56-stage .kt80-admin-evidence{margin:8px 0 2px!important;padding:0!important;background:#173b2d;border:1px solid #5b7864;border-radius:5px}
+.kt80-v56-stage .kt80-admin-evidence>summary{font:650 14px/1.45 Arial,sans-serif!important;color:#e9d3a2!important;padding:9px 12px!important}
+.kt80-v56-stage .kt80-admin-evidence .kt80-admin-sublabel{font:400 12px/1.4 Arial,sans-serif!important;color:#c8d6ca}
+.kt80-v56-stage .kt80-admin-evidence-body{padding:7px 10px!important}
+.kt80-v56-stage .kt80-admin-subsection{margin:5px 0!important;padding:0!important}
+.kt80-v56-stage .kt80-admin-subsection>summary{padding:7px 10px!important;font:600 13.5px/1.45 Arial,sans-serif!important}
+.kt80-v56-stage .kt80-v56-field *, .kt80-v56-stage .kt80-v56-approvals *{min-width:0}
+@media(max-width:1050px){.kt80-v56-stage .kt80-v56-fields{grid-template-columns:1fr;gap:12px}.kt80-v56-stage #kt80SubjectText{height:84px!important;min-height:84px!important}.kt80-v56-stage #kt80ScopeText{height:112px!important;min-height:112px!important}}
+@media(max-width:670px){.kt80-v56-stage .kt80-v56-title-row h2{font-size:17px!important}.kt80-v56-stage .kt80-v56-approvals{align-items:stretch}.kt80-v56-stage .kt80-v56-approval-labels{display:grid;grid-template-columns:1fr;gap:7px}.kt80-v56-stage #kt80ToParcels{width:100%;max-width:100%}.kt80-v56-stage .kt80-subject-controls{display:grid!important;grid-template-columns:1fr}.kt80-v56-stage .kt80-admin-sublabel{display:block}}
