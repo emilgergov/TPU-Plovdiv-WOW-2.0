@@ -168,3 +168,13 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
   min-height:31px;
   margin:2px 6px 2px 0;
 }
+
+/* KT80 V57.4 — subtle, accessible inline emphasis for EG editorial changes. */
+.kt80-v56-stage .kt80-ai-subject-review .kt80-eg-changed{
+ font-family:inherit!important;
+ font-size:inherit!important;
+ font-weight:750!important;
+ color:#ffe4a0!important;
+ background:transparent!important;
+ text-decoration:none!important;
+}
