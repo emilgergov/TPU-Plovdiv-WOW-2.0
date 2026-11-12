@@ -18,20 +18,21 @@ function highlight(node,oldText,newText){
  node.replaceChildren();
  let index=0;for(const part of String(newText).match(/\s+|\S+/gu)||[]){if(/^\s+$/u.test(part)){node.append(document.createTextNode(part));continue}if(kept.has(index))node.append(document.createTextNode(part));else{const strong=document.createElement('strong');strong.className='kt80-eg-changed';strong.textContent=part;node.append(strong)}index++}
 }
-function applyDraft(text,old){
+function applyDraft(text,old,subjectBaseline){
+ if(!$('kt80SubjectConfirmation')?.checked||($('kt80SubjectText')?.value||'').trim()!==subjectBaseline){say('Предметът не е фиксиран или е променен. Предложението не може да се приложи.');clearProposal();return}
  const scope=$('kt80ScopeText');
  if(!scope||scope.value!==old){say('Обхватът е променен. Предложението не е приложено.');clearProposal();return}
  scope.value=text;scope.dispatchEvent(new Event('input',{bubbles:true}));
  const check=$('kt80ScopeConfirmation');if(check)check.checked=false;
  clearProposal();say('Редакцията е приложена. За продължаване потвърдете обхвата.');
 }
-function render(proposal,baseline){
+function render(proposal,baseline,subjectBaseline){
  const host=$('kt80EGScopeReview');if(!host)return;host.replaceChildren();host.hidden=false;
  const title=document.createElement('strong');title.textContent='EG автор · Предложена редакция на обхвата';
  const text=document.createElement('p');highlight(text,baseline,proposal);
  const accept=document.createElement('button');accept.type='button';accept.textContent='Приеми предложението';
  const reject=document.createElement('button');reject.type='button';reject.textContent='Отхвърли предложението';
- accept.addEventListener('click',()=>{if(!pending||pending.proposal!==proposal){clearProposal();return}applyDraft(proposal,baseline)});
+ accept.addEventListener('click',()=>{if(!pending||pending.proposal!==proposal){clearProposal();return}applyDraft(proposal,baseline,subjectBaseline)});
  reject.addEventListener('click',()=>{clearProposal();say('Предложението е отхвърлено. Обхватът е запазен.')});
  host.append(title,text,accept,reject);
 }
@@ -48,8 +49,9 @@ function init(){
  const send=document.createElement('button');send.type='submit';send.textContent='Предложи подобрение';
  cancel.addEventListener('click',()=>{password.value='';dialog.close()});
  form.append(label,note,cancel,send);dialog.append(form);document.body.append(dialog);
- edit.addEventListener('click',()=>{field.readOnly=false;field.focus();say('Ръчна редакция на обхвата — проверете източниците и потвърдете текста.')});
+ edit.addEventListener('click',()=>{if(!$('kt80SubjectConfirmation')?.checked){say('Първо потвърдете предмета, за да отключите обхвата.');return}field.readOnly=false;field.focus();say('Ръчна редакция на обхвата — проверете източниците и потвърдете текста.')});
  rebuild.addEventListener('click',()=>{
+  if(!$('kt80SubjectConfirmation')?.checked){say('Първо потвърдете предмета, за да реконструирате обхвата.');return}
   const draft=root.KT80KT52Draft;
   if(!draft){say('Няма прочетена преписка за реконструкция на обхвата.');return}
   const currentSubject=$('kt80SubjectText')?.value.trim()||draft.subjectCandidate||'';
@@ -63,6 +65,7 @@ function init(){
   say('Обхватът е реконструиран от преписката. Необходима е експертна проверка и потвърждение.');
  });
  improve.addEventListener('click',()=>{
+  if(!$('kt80SubjectConfirmation')?.checked){say('Първо потвърдете предмета, за да използвате EG автора за обхвата.');return}
   if(!field.value.trim()){say('Първо конструирайте или въведете обхват.');return}
   if($('kt80ScopeConfirmation')?.checked||root.KT80WorkflowState?.scopeConfirmed){say('Обхватът вече е потвърден. За нова редакция първо отменете потвърждението.');return}
   if(root.KT80WorkflowState?.routeConfirmed){say('Процедурата е потвърдена. Достъпът до EG автора за тази преписка е приключен.');return}
@@ -70,6 +73,7 @@ function init(){
   dialog.showModal();
  });
  async function runImprovement(token){
+  if(!$('kt80SubjectConfirmation')?.checked){say('Първо потвърдете предмета.');return}
   const scope=field.value.trim(),subject=$('kt80SubjectText')?.value.trim()||'';
   if(!scope||scope.length>2400){say('Обхватът липсва или надвишава допустимата дължина за редакция.');return}
   if(!subject){say('Необходим е предмет, за да се провери съответствието на обхвата.');return}
@@ -82,19 +86,22 @@ function init(){
    const data=await response.json();if(requestId!==serial)return;
    if(!response.ok)throw Error('EG услугата върна код '+response.status);
    if(data.reviewRequired!==true||data.expertAcceptanceRequired!==true||typeof data.proposal!=='string'||!data.proposal.trim())throw Error('Невалидно предложение от EG автора.');
-   if(field.value.trim()!==scope||($('kt80SubjectText')?.value||'').trim().slice(0,450)!==subject.slice(0,450)){
+   if(!$('kt80SubjectConfirmation')?.checked||field.value.trim()!==scope||($('kt80SubjectText')?.value||'').trim()!==subject){
     say('Данните са променени по време на заявката. Предложението не се прилага.');return;
    }
    const normalized=t=>t.toLocaleLowerCase('bg').replace(/[.,;:!?\s–—-]+/gu,' ').trim();
    if(normalized(data.proposal)===normalized(scope)){say('Обхватът не се нуждае от редакция.');return}
    pending={proposal:data.proposal.trim()};
-   render(pending.proposal,field.value);
+   render(pending.proposal,field.value,subject);
    say('Изготвена е редакция на обхвата. Прегледайте предложението.');
   }catch(e){if(requestId===serial)say('Интелигентното подобряване не успя: '+String(e.message||e)+'. Обхватът е запазен.')}
   finally{improve.disabled=false}
 }
  form.addEventListener('submit',event=>{event.preventDefault();const token=password.value;password.value='';dialog.close();runImprovement(token);});
  field.addEventListener('input',()=>{if(pending)clearProposal()});
+ $('kt80SubjectText')?.addEventListener('input',clearProposal);
+ $('kt80SubjectConfirmation')?.addEventListener('change',()=>{if(!$('kt80SubjectConfirmation')?.checked)clearProposal()});
+ document.addEventListener('kt80:case-change',clearProposal);
  document.addEventListener('kt80:case-reset',()=>{clearProposal();say('Проектът на обхват подлежи на експертна проверка.')});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
