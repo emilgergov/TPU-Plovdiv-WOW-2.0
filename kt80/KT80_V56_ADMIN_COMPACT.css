@@ -403,3 +403,50 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
 .kt80-v56-stage #kt80SubjectText[readonly]{background:#e9eee7!important;color:#223c31!important;border-color:#79a187!important;cursor:default}
 .kt80-v56-stage #kt80AISubjectReview.kt80-subject-proposal-fixed{opacity:.55;filter:saturate(.6)}
 .kt80-v56-stage .kt80-subject-controls button:disabled{opacity:.5!important;cursor:not-allowed!important}
+
+/* KT81: evidence is tertiary administrative text, never a headline. */
+body .kt80-stage-panel.kt80-v56-stage #kt80RelevancePanel .kt80-relevance-group{
+ padding:7px 9px!important;margin:7px 0!important;
+ border-color:#466658!important;background:#173b30!important;
+}
+body .kt80-stage-panel.kt80-v56-stage #kt80RelevancePanel .kt80-relevance-group > strong{
+ display:block!important;font:600 12.5px/1.45 Arial,"Segoe UI",sans-serif!important;
+ color:#d9c69a!important;letter-spacing:0!important;text-transform:none!important;
+}
+body .kt80-stage-panel.kt80-v56-stage #kt80RelevancePanel .kt80-relevance-group > p{
+ margin:3px 0!important;font:400 12px/1.4 Arial,"Segoe UI",sans-serif!important;
+ color:#c8d8ce!important;
+}
+body .kt80-stage-panel.kt80-v56-stage #kt80RelevancePanel details.kt80-relevance-entry{
+ padding:0!important;margin:0!important;border:0!important;
+ border-top:1px solid #365a4b!important;border-radius:0!important;
+ background:transparent!important;box-shadow:none!important;
+}
+body .kt80-stage-panel.kt80-v56-stage #kt80RelevancePanel details.kt80-relevance-entry > summary{
+ display:list-item!important;margin:0!important;padding:6px 3px!important;
+ font:400 12.5px/1.4 Arial,"Segoe UI",sans-serif!important;
+ color:#d5ded3!important;letter-spacing:0!important;text-transform:none!important;
+ text-shadow:none!important;word-break:normal!important;overflow-wrap:anywhere!important;
+ background:transparent!important;border:0!important;box-shadow:none!important;
+}
+body .kt80-stage-panel.kt80-v56-stage #kt80RelevancePanel details.kt80-relevance-entry > summary::marker{
+ color:#9eaf9b!important;font-size:10px!important;
+}
+body .kt80-stage-panel.kt80-v56-stage #kt80RelevancePanel details.kt80-relevance-entry[open] > summary{
+ color:#eddaa7!important;font-weight:600!important;
+}
+body .kt80-stage-panel.kt80-v56-stage #kt80RelevancePanel .kt80-relevance-entry-status,
+body .kt80-stage-panel.kt80-v56-stage #kt80RelevancePanel .kt80-relevance-evidence p{
+ padding:1px 0!important;margin:4px 5px!important;
+ font:400 12px/1.45 Arial,"Segoe UI",sans-serif!important;color:#d0ddd2!important;
+}
+body .kt80-stage-panel.kt80-v56-stage #kt80RelevancePanel .kt80-relevance-evidence{
+ padding:4px 5px 8px!important;border-bottom:1px solid #355746!important;
+}
+body .kt80-stage-panel.kt80-v56-stage #kt80RelevancePanel .kt80-relevance-evidence button{
+ padding:5px 8px!important;margin:4px 0!important;min-height:0!important;
+ font:600 12px/1.35 Arial,"Segoe UI",sans-serif!important;
+}
+body .kt80-stage-panel.kt80-v56-stage #kt80RelevancePanel .kt80-relevance-footer{
+ font:400 12px/1.45 Arial,"Segoe UI",sans-serif!important;color:#bdcfc2!important;
+}
