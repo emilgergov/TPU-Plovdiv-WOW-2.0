@@ -11,7 +11,6 @@ function sync(){
  if(!subject||!approval||!scope||!section||!notice)return;
  // The checked approval is explicit expert acceptance of the current subject text.
  const confirmed=!!approval.checked&&!!subject.value.trim();
- const wasLocked=locked;
  locked=!confirmed;
  section.inert=locked;
  section.classList.toggle('kt80-scope-locked',locked);
@@ -20,7 +19,6 @@ function sync(){
  notice.dataset.locked=String(locked);
  if(scopeApproval)scopeApproval.disabled=locked;
  if(locked&&scopeApproval?.checked){scopeApproval.checked=false}
- if(!wasLocked&&locked){root.KT80RelevanceActions?.reset?.()}
 }
 function init(){
  $('kt80SubjectText')?.addEventListener('input',sync);
