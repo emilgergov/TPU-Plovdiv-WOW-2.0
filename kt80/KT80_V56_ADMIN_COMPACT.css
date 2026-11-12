@@ -289,3 +289,35 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
   height:165px!important;min-height:145px!important;max-height:400px!important;resize:vertical!important;
  }
 }
+
+/* КТ80 V57.9 — five main workflow stages distinct from 22 specialized results.
+   Presentation only. No card handlers, IDs, or expert content are changed. */
+#kt80DashboardFive .kt80-dashboard-tile{
+ background:linear-gradient(145deg,#12312f 0%,#173d37 100%)!important;
+ border:1px solid #c5aa72!important;
+ border-left:4px solid #d6b874!important;
+ border-radius:8px!important;
+ color:#f8f0dc!important;
+ box-shadow:inset 0 1px 0 rgba(247,224,166,.12)!important;
+}
+#kt80DashboardFive .kt80-dashboard-tile-number{
+ color:#f0ce83!important;
+ font-weight:750!important;
+ letter-spacing:.06em;
+}
+#kt80DashboardFive .kt80-dashboard-tile-text{
+ color:#fff7e4!important;
+ font-weight:700!important;
+}
+#kt80DashboardFive .kt80-dashboard-tile-arrow{color:#f3cb75!important}
+#kt80DashboardFive .kt80-dashboard-tile:hover,
+#kt80DashboardFive .kt80-dashboard-tile:focus-visible{
+ background:linear-gradient(145deg,#19443d 0%,#205044 100%)!important;
+ border-color:#eed08d!important;
+ border-left-color:#f0cf81!important;
+ box-shadow:0 0 0 2px rgba(234,199,119,.16)!important;
+}
+#kt80DashboardFive .kt80-dashboard-tile.kt80-dashboard-depart{
+ background:#265345!important;
+ border-color:#f1d18d!important;
+}
