@@ -43,6 +43,7 @@ async function process(){
  const file=$('kt80InputFile').files?.[0];if(!file)return say('Изберете преписка.');
  if(typeof root.V26LocalIntake?.process!=='function')return say('Наличният модул за обработка на преписки не е зареден.');
  const generation=++state.generation;
+ document.dispatchEvent(new Event('kt80:case-change'));
  if(state.abort)state.abort.abort();state.abort=new AbortController();
  const isCurrent=()=>generation===state.generation&&!state.abort?.signal.aborted;
  $('kt80ProcessFile').disabled=true;state.fileName=file.name;setBadge();$('kt80InputStatus').textContent='Обработка: '+file.name+'…';
@@ -118,6 +119,7 @@ function confirmProcedure(){
  if(!r||!$('kt80RouteConfirmation').checked)return say('Изберете маршрут и потвърдете експертната приемка.');
  state.routeConfirmed={routeId:r.id,label:r.title,expertConfirmed:true,legalReadiness:false,finalAdministrativeAct:false};
  state.activeRoute=r;$('kt80RoutePanels').hidden=false;setBadge();
+ document.dispatchEvent(new Event('kt80:procedure-confirmed'));
  say('Приет е работен маршрут №'+r.id+'. Тепърва се проверяват специализираните доказателства. Изходящ документ НЕ е разрешен.');
 }
 /* Reset is one central operation, independent of the currently selected stage. */
@@ -185,7 +187,7 @@ function init(){
  $('kt80ParcelInput').addEventListener('input',()=>invalidate(3));
  $('kt80LegalNotes').addEventListener('input',()=>invalidate(4));
  $('kt80Authority').addEventListener('change',()=>invalidate(4));
- $('kt80InputFile').addEventListener('change',()=>{root.KT80SubjectMaster?.reset?.();root.KT80KT53?.reset?.();++state.generation;if(state.abort){state.abort.abort();state.abort=null}$('kt80ProcessFile').disabled=false;state.fileName=null;state.intake=null;invalidate(2);$('kt80InputStatus').textContent='Избран файл: '+($('kt80InputFile').files?.[0]?.name||'няма')+'. Натиснете „Обработи преписката“.'});
+ $('kt80InputFile').addEventListener('change',()=>{document.dispatchEvent(new Event('kt80:case-change'));root.KT80SubjectMaster?.reset?.();root.KT80KT53?.reset?.();++state.generation;if(state.abort){state.abort.abort();state.abort=null}$('kt80ProcessFile').disabled=false;state.fileName=null;state.intake=null;invalidate(2);$('kt80InputStatus').textContent='Избран файл: '+($('kt80InputFile').files?.[0]?.name||'няма')+'. Натиснете „Обработи преписката“.'});
  go(1);root.KT80WorkflowState=state;root.KT80ResetCurrentCase=resetAll;
  root.KT80RebuildKT52=()=>{
   if(!state.intake||!root.KT80KT52||!root.KT80CH21Draft)return null;
