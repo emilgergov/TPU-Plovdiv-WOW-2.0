@@ -148,6 +148,7 @@ function renderRelevance(result){
 function fill(p,{force=false}={}){
  current=p;
  renderRelevance(p.relevance);
+ root.KT80RelevanceActions?.render?.(p.relevance);
  const subject=$('kt80SubjectText'),scope=$('kt80ScopeText');
  if(!subject||!scope)return;
  suspend=true;
@@ -210,6 +211,7 @@ function validate(){
 function statusReset(){
  current=null;manualSubject=false;manualScope=false;
  renderRelevance(null);
+ root.KT80RelevanceActions?.reset?.();
  const scope=$('kt80ScopeText');if(scope)scope.value='';
  const check=$('kt80ScopeConfirmation');if(check)check.checked=false;
  const evidence=$('kt80KT53Evidence');if(evidence)evidence.replaceChildren();
