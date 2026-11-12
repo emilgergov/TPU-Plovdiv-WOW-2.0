@@ -126,12 +126,70 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
 .kt80-ai-subject-review{border:1px solid #657d72;border-radius:6px;padding:12px;margin:10px 0;font-family:Arial,"Segoe UI",sans-serif;font-size:14px;line-height:1.5}
 .kt80-ai-subject-review p{white-space:pre-wrap;margin:8px 0}
 .kt80-ai-subject-review button{font:600 13px Arial,"Segoe UI",sans-serif;padding:7px 12px;margin:3px 7px 3px 0;border-radius:5px}
-#kt80AISubjectDialog{max-width:min(440px,90vw);border:1px solid #64776c;border-radius:7px;padding:20px;background:#f8f7f2;color:#27372e;font:14px Arial,"Segoe UI",sans-serif}
-#kt80AISubjectDialog::backdrop{background:rgba(10,20,18,.65)}
-#kt80AISubjectDialog label{display:block;font-weight:600}
-#kt80AISubjectDialog input{display:block;box-sizing:border-box;width:100%;min-height:38px;margin:9px 0 13px;padding:7px;border:1px solid #778c80;border-radius:4px;font:14px Arial,"Segoe UI",sans-serif}
-#kt80AISubjectDialog p{font-size:13px;line-height:1.5}
-#kt80AISubjectDialog button{font:600 13px Arial,"Segoe UI",sans-serif;margin:5px 9px 0 0;padding:8px 12px}
+/* KT80 V57.6 — EG authentication dialog in the approved administrative palette. */
+#kt80AISubjectDialog{
+ box-sizing:border-box;
+ width:min(440px,calc(100vw - 28px));
+ max-width:none;
+ max-height:calc(100vh - 32px);
+ overflow:auto;
+ margin:auto;
+ border:1px solid #bca36b;
+ border-radius:7px;
+ padding:18px 20px;
+ background:#15362c;
+ color:#f1f0e8;
+ color-scheme:dark;
+ box-shadow:0 12px 34px rgba(0,0,0,.35);
+ font:14px/1.5 Arial,"Segoe UI",sans-serif;
+}
+#kt80AISubjectDialog::backdrop{background:rgba(5,16,13,.72)}
+#kt80AISubjectDialog form{margin:0;display:block}
+#kt80AISubjectDialog label{
+ display:block;
+ font:650 14px/1.45 Arial,"Segoe UI",sans-serif;
+ color:#f0d59b;
+}
+#kt80AISubjectDialog input{
+ display:block;
+ box-sizing:border-box;
+ width:100%;
+ min-height:38px;
+ margin:9px 0 11px;
+ padding:8px 10px;
+ border:1px solid #8ba494;
+ border-radius:5px;
+ background:#f7f6ef;
+ color:#21392e;
+ color-scheme:light;
+ font:14px Arial,"Segoe UI",sans-serif;
+}
+#kt80AISubjectDialog input::placeholder{color:#53675b;opacity:1}
+#kt80AISubjectDialog input:focus-visible{outline:2px solid #e6c778;outline-offset:2px}
+#kt80AISubjectDialog p{
+ color:#e4e8de;
+ font:13px/1.5 Arial,"Segoe UI",sans-serif;
+ margin:10px 0 14px;
+}
+#kt80AISubjectDialog button{
+ box-sizing:border-box;
+ min-height:34px;
+ padding:7px 12px;
+ margin:3px 7px 0 0;
+ border:1px solid #a38b55;
+ border-radius:5px;
+ background:#dbb96d;
+ color:#18332a;
+ font:600 13px/1.4 Arial,"Segoe UI",sans-serif;
+ cursor:pointer;
+}
+#kt80AISubjectDialog button:hover{background:#efd08d}
+#kt80AISubjectDialog button[type="button"]{
+ background:#24473b;
+ border-color:#8a987c;
+ color:#f1f0e8;
+}
+#kt80AISubjectDialog button[type="button"]:hover{background:#315646}
 
 /* KT80 V57.2: concise EG proposal, using the same compact administrative typography. */
 .kt80-v56-stage .kt80-ai-subject-review{
