@@ -22,28 +22,30 @@ const TOPICS={
 const INFRA=new Set(['water_connection','wastewater_connection','electricity_connection','access']);
 function classify(fact,key){
  const excerpt=norm(fact?.excerpt);
- if(!excerpt)return 'NO_EVIDENCE';
- const reliable=fact?.readerState==='TEXT_EXTRACTED'&&!fact?.evidenceExcluded;
- if(!reliable)return 'REVIEW_SOURCE';
- // Project-specific assertion takes priority over generic questionnaire terms.
- if(PROJECT_SPECIFIC.test(excerpt)){
+ if(!excerpt||fact?.evidenceExcluded)return 'NO_EVIDENCE';
+ // Source-specific assertions are review candidates even when DOC/OCR has
+ // readerState REVIEW_REQUIRED. No candidate becomes a verified fact.
+ const specific=PROJECT_SPECIFIC.test(excerpt);
+ const hasReplacement=/(?:подмян[а-я]*|подмени|замен[а-я]*|нов[а-я]*\s+(?:мрежов\s+)?трансформатор)/iu.test(excerpt);
+ const hasEquipment=/(?:трансформатор|трафопост|електрическ[а-я]*\s+съоръжен)/iu.test(excerpt);
+ const hasInstallation=/(?:монтаж|монтиране|инсталиране)/iu.test(excerpt);
+ if(specific&&!NEGATIVE.test(excerpt)){
+  if(key==='replacement'&&hasReplacement)return 'EXPLICIT_UNVERIFIED';
+  if(key==='electrical_equipment'&&hasEquipment)return 'EXPLICIT_UNVERIFIED';
+  if(key==='installation'&&hasInstallation&&!TEMPLATE.test(excerpt))return 'EXPLICIT_UNVERIFIED';
   if(INFRA.has(key)){
    const actual=/(?:предвижда\s+се|ще\s+се|предмет\s+на\s+настоящия\s+проект\s+е|инвестиционното\s+предложение\s+предвижда)[^.!?]{0,100}(?:водоснабдяван|водопровод|заустван|отпадъчни\s+води|канализац|присъединяван|достъп|нов\s+път)/iu.test(excerpt);
-   return actual?'EXPLICIT_UNVERIFIED':'MENTION_ONLY';
+   if(actual&&!TEMPLATE.test(excerpt))return 'EXPLICIT_UNVERIFIED';
   }
-  if(key==='replacement'||key==='electrical_equipment'||key==='installation')return 'EXPLICIT_UNVERIFIED';
  }
  if(TEMPLATE.test(excerpt)||NEGATIVE.test(excerpt))return 'TEMPLATE_OR_NEGATIVE';
- if(INTENTION.test(excerpt)){
-  // A generic form field with the word 'предвидени' is not sufficient evidence.
-  if(INFRA.has(key))return 'MENTION_ONLY';
-  if(key==='replacement'||key==='electrical_equipment'||key==='installation')return 'REVIEW_SOURCE';
- }
+ if(fact?.readerState!=='TEXT_EXTRACTED')return 'REVIEW_SOURCE';
+ if(INTENTION.test(excerpt))return 'REVIEW_SOURCE';
  if(key==='electrical_equipment'&&MAIN.test(excerpt))return 'REVIEW_SOURCE';
  return 'MENTION_ONLY';
 }
 function assess(reconstruction,subject){
- const topics=[],excluded=[],review=[],verified=[];
+ const excluded=[],review=[],verified=[];
  for(const section of reconstruction?.sections||[])for(const item of section.items||[]){
   const rule=TOPICS[item.key];if(!rule)continue;
   const evidence=item.evidence||[];
@@ -52,8 +54,8 @@ function assess(reconstruction,subject){
   const mentions=evidence.filter((f,i)=>kinds[i]==='MENTION_ONLY'||kinds[i]==='REVIEW_SOURCE');
   if(!evidence.length)continue;
   const entry={key:item.key,name:rule.name,proceduralWeight:rule.weight,positives:positive.length,mentions:mentions.length,all:evidence.length,
-   sources:positive.slice(0,3).map(f=>({file:f.file,page:f.page,excerpt:f.excerpt}))};
-  if(positive.length){review.push(entry);topics.push(entry)}
+   sources:positive.slice(0,3).map(f=>({file:f.file,page:f.page,excerpt:f.excerpt,readerState:f.readerState}))};
+  if(positive.length){review.push(entry)}
   else excluded.push({...entry,sources:evidence.slice(0,3).map(f=>({file:f.file,page:f.page,excerpt:f.excerpt})),reason:'Не е установена предвидена дейност: откъсът може да е шаблон, въпрос, отрицателно твърдение или споменаване без необходимия контекст. Това НЕ доказва отсъствие на дейността.'});
  }
  const approved=(reconstruction?.confirmedParameters||[]).filter(p=>p?.original&&!p.evidenceExcluded&&p.role!=='ambiguous'&&!p.compoundDesignation);
