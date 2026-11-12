@@ -121,19 +121,27 @@ function renderRelevance(result){
  summary.textContent='За експертна проверка: '+review.length+' теми · Непотвърдени споменавания, невключени в обхвата: '+excluded.length+' · Съществени въпроси: '+gaps.length+'.';
  const section=(heading,description,items,makeLine)=>{
   const group=document.createElement('section');group.className='kt80-relevance-group';
-  const h=document.createElement('strong');h.textContent=heading;group.append(h);
+  const h=document.createElement('strong');h.textContent=heading+' · '+items.length;group.append(h);
   const desc=document.createElement('p');desc.textContent=description;group.append(desc);
   if(!items.length){const empty=document.createElement('p');empty.textContent='Няма установени кандидати в тази група.';group.append(empty)}
-  for(const item of items){const line=document.createElement('div');line.className='kt80-relevance-entry';const title=document.createElement('p');title.textContent=makeLine(item);line.append(title);
-   for(const src of (item.sources||[])){const source=document.createElement('p');source.className='kt80-relevance-source';source.textContent='Източник: '+src.file+(src.page?' · стр. '+src.page:'')+' · „'+String(src.excerpt).slice(0,180)+'“';line.append(source);
-    if(src.page){const button=document.createElement('button');button.type='button';button.className='kt80-ch2-open';button.textContent='Оригинал · стр. '+src.page;button.addEventListener('click',()=>root.KT80DossierOriginals?.openOriginal?.(src.file,src.page));line.append(button)}
+  for(const item of items){
+   const row=document.createElement('details');row.className='kt80-relevance-entry';
+   const heading=document.createElement('summary');heading.textContent=makeLine(item);row.append(heading);
+   const sources=item.sources||[];
+   if(!sources.length){const note=document.createElement('p');note.textContent='Не са налични допълнителни изходни откъси.';row.append(note)}
+   for(const src of sources){
+    const origin=document.createElement('div');origin.className='kt80-relevance-evidence';
+    const where=document.createElement('p');where.className='kt80-relevance-source';where.textContent=src.file+(src.page?' · стр. '+src.page:'')+(src.readerState&&src.readerState!=='TEXT_EXTRACTED'?' · статус за проверка: '+readable(src.readerState):'');origin.append(where);
+    const quote=document.createElement('p');quote.textContent='„'+String(src.excerpt).slice(0,350)+(String(src.excerpt).length>350?'…':'')+'“';origin.append(quote);
+    if(src.page){const button=document.createElement('button');button.type='button';button.className='kt80-ch2-open';button.textContent='Оригинал · стр. '+src.page;button.addEventListener('click',()=>root.KT80DossierOriginals?.openOriginal?.(src.file,src.page));origin.append(button)}
+    row.append(origin);
    }
-   group.append(line);
+   group.append(row);
   }
   body.append(group);
  };
  section('1. Кандидати за проверка','Тези сведения имат изричен кандидат-източник, но още не са доказани и не са автоматично включени като предвидени дейности.',review,x=>x.name+' · '+x.proceduralWeight+' · '+x.positives+' изрични откъса');
- section('2. Изключени от проекта на обхват','Откъси от шаблони, въпроси, отрицателни текстове или споменавания без достатъчно основание. Изключването не доказва, че съответната дейност липсва.',excluded,x=>x.name+' · '+x.reason);
+ section('2. Неподкрепени споменавания','Откъси от шаблони, въпроси, отрицателни текстове или споменавания без достатъчно основание. Изключването не доказва, че съответната дейност липсва.',excluded,x=>x.name+' · виж основанието и източника');
  section('3. Съществени въпроси за процедурата','Сведенията са необходими за последваща правна квалификация. Празно поле или липса на данни не е отрицателен факт.',gaps,x=>x.label+' · '+x.status);
  const foot=document.createElement('p');foot.className='kt80-relevance-footer';foot.textContent='Експертът проверява доказателствата и потвърждава предмета и обхвата. Процедурата се определя по-късно с ПИ MASTER, ГИС и нормативните основания.';body.append(foot);
 }
