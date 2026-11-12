@@ -53,3 +53,68 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
  body:has(.kt80-v56-stage:not([hidden]))>header h1{font-size:20px}
  body:has(.kt80-v56-stage:not([hidden])) .kt80-stages>.kt80-step{min-width:124px}
 }
+
+/* KT80 V57: typographic unity across all nested administrative evidence menus.
+   Override the inherited large Georgia headings and over-bold gold summaries only in stage 2. */
+.kt80-v56-stage .kt80-v56-extra summary,
+.kt80-v56-stage .kt80-kt53-evidence summary,
+.kt80-v56-stage #kt80KT53Evidence summary,
+.kt80-v56-stage .kt80-admin-evidence summary,
+.kt80-v56-stage .kt80-admin-evidence-body summary,
+.kt80-v56-stage .kt80-admin-subsection summary,
+.kt80-v56-stage .kt80-ip-evidence summary,
+.kt80-v56-stage .kt80-ch2-passport summary,
+.kt80-v56-stage .kt80-ch21-reader summary,
+.kt80-v56-stage .kt80-param-review summary,
+.kt80-v56-stage .kt80-kt52-reconstruction summary,
+.kt80-v56-stage .kt80-kt52-topic summary,
+.kt80-v56-stage .kt80-kt52-section summary,
+.kt80-v56-stage .kt80-kt53-evidence-line summary {
+  font-family:Arial,"Segoe UI",sans-serif!important;
+  font-size:14px!important;
+  font-weight:600!important;
+  line-height:1.45!important;
+  letter-spacing:normal!important;
+  text-shadow:none!important;
+  text-transform:none!important;
+  color:#e6ddc7!important;
+}
+.kt80-v56-stage .kt80-admin-evidence>summary{
+  font-size:14.5px!important;
+  font-weight:650!important;
+  color:#f0d7a1!important;
+}
+.kt80-v56-stage .kt80-admin-evidence-body h3,
+.kt80-v56-stage .kt80-ip-evidence h3,
+.kt80-v56-stage .kt80-ch2-passport h3,
+.kt80-v56-stage .kt80-ch21-reader h3,
+.kt80-v56-stage .kt80-param-review h3,
+.kt80-v56-stage .kt80-kt52-reconstruction h3{
+  font-family:Arial,"Segoe UI",sans-serif!important;
+  font-size:15px!important;
+  font-weight:650!important;
+  line-height:1.45!important;
+  color:#e9d7af!important;
+  text-shadow:none!important;
+}
+.kt80-v56-stage .kt80-admin-evidence-body p,
+.kt80-v56-stage .kt80-kt53-evidence-line p,
+.kt80-v56-stage .kt80-kt52-fact p,
+.kt80-v56-stage .kt80-ch2-passport p{
+  font-family:Arial,"Segoe UI",sans-serif!important;
+  font-size:13.5px!important;
+  line-height:1.5!important;
+  font-weight:400!important;
+}
+.kt80-v56-stage .kt80-admin-evidence-body .kt80-admin-subsection,
+.kt80-v56-stage .kt80-kt53-evidence details{
+  border-color:#536e60!important;
+  border-radius:5px!important;
+  padding:0!important;
+}
+.kt80-v56-stage .kt80-admin-evidence-body .kt80-admin-subsection>summary{
+  padding:8px 10px!important;
+}
+.kt80-v56-stage #kt80KT53Evidence>details>summary{
+  padding:7px 9px!important;
+}
