@@ -40,7 +40,7 @@ function init(){
      if(previous)previous.replaceWith(content);else evidence.append(content);
    }else if(!proposals.textContent.trim()&&previous)previous.remove();
  };
- const observer=new MutationObserver(sync);
+ const observer=new MutationObserver(records=>{if(records.some(m=>m.target===proposals&&m.type==='childList'))algo.dataset.stale='false';sync()});
  observer.observe(review,{attributes:true,attributeFilter:['hidden'],childList:true,subtree:true});
  observer.observe(proposals,{childList:true,subtree:true});
  scope.addEventListener('input',()=>{algo.dataset.stale='true';sync()});
@@ -52,10 +52,11 @@ function init(){
  root.KT80ScopeEvidence=Object.freeze({
    snapshot:()=>{
      const r=root.KT80KT53?.getCurrent?.();
-     const a=r?.relevance||null;
+     const subject=$('kt80SubjectText')?.value.trim()||'';
+     const a=root.KT80Relevance?.assess?.(root.KT80KT52Draft,subject)||r?.relevance||null;
      return Object.freeze({
        schema:'KT80-SCOPE-EVIDENCE-V1',
-       subject:$('kt80SubjectText')?.value.trim()||'',
+       subject,
        scope:scope.value.trim(),
        subjectConfirmed:Boolean($('kt80SubjectConfirmation')?.checked),
        scopeConfirmed:Boolean(confirmation.checked),
