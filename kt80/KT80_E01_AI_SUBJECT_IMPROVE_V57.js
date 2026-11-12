@@ -56,7 +56,7 @@ function init(){
  const label=document.createElement('label');label.textContent='Парола за EG автора';
  const password=document.createElement('input');password.type='password';password.autocomplete='off';password.required=true;password.placeholder='Временен защитен достъп';
  label.append(password);
- const note=document.createElement('p');note.textContent='Изпращат се предметът и до три експертно потвърдени технически сведения, когато има такива. Преписката и пълният обхват остават в модула. Паролата не се запазва.';
+ const note=document.createElement('p');note.textContent='Изпращат се предметът и до три експертно потвърдени технически сведения, когато има такива. Преписката и пълният обхват остават в модула. Паролата се пази само в оперативната памет за текущата преписка и се изчиства при приключване или смяна на преписката.';
  const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Отказ';
  const submit=document.createElement('button');submit.type='submit';submit.textContent='Предложи подобрение';
  cancel.addEventListener('click',()=>{password.value='';dialog.close()});
@@ -65,7 +65,7 @@ function init(){
   const subject=$('kt80SubjectText')?.value.trim()||'';
   if(!subject){status('Няма предмет за интелигентно подобряване.');return}
   if(subject.length>1500){status('Предметът е твърде дълъг за EG редакция.');return}
-  if(!token){status('Липсва парола за EG автора.');return}
+  if(!token&&!root.KT80EGSession?.hasAccess()){status('Липсва парола за EG автора.');return}
   const facts=conciseVerifiedFacts();
   const payload=JSON.stringify({subject,facts});
   if(new TextEncoder().encode(payload).length>6000){status('Текстът на предмета надвишава допустимия размер. EG авторът не е извикан.');return}
