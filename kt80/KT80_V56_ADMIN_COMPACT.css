@@ -40,3 +40,16 @@
 .kt80-v56-stage .kt80-v56-field *, .kt80-v56-stage .kt80-v56-approvals *{min-width:0}
 @media(max-width:1050px){.kt80-v56-stage .kt80-v56-fields{grid-template-columns:1fr;gap:12px}.kt80-v56-stage #kt80SubjectText{height:84px!important;min-height:84px!important}.kt80-v56-stage #kt80ScopeText{height:112px!important;min-height:112px!important}}
 @media(max-width:670px){.kt80-v56-stage .kt80-v56-title-row h2{font-size:17px!important}.kt80-v56-stage .kt80-v56-approvals{align-items:stretch}.kt80-v56-stage .kt80-v56-approval-labels{display:grid;grid-template-columns:1fr;gap:7px}.kt80-v56-stage #kt80ToParcels{width:100%;max-width:100%}.kt80-v56-stage .kt80-subject-controls{display:grid!important;grid-template-columns:1fr}.kt80-v56-stage .kt80-admin-sublabel{display:block}}
+
+/* Keep the navigation visible but subordinate to the expert work area on stage 2. */
+body:has(.kt80-v56-stage:not([hidden]))>header{padding:10px 18px;gap:12px}
+body:has(.kt80-v56-stage:not([hidden]))>header h1{font-size:23px;line-height:1.25}
+body:has(.kt80-v56-stage:not([hidden]))>header small{font-size:12px}
+body:has(.kt80-v56-stage:not([hidden])) .frame{padding:9px 12px}
+body:has(.kt80-v56-stage:not([hidden])) .kt80-stages{padding:6px;gap:6px;margin-bottom:7px}
+body:has(.kt80-v56-stage:not([hidden])) .kt80-stages>.kt80-step{height:47px;min-height:47px;padding:5px 8px;font-size:12.5px;border-width:1px}
+body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-size:12.5px;margin-bottom:7px;gap:10px}
+@media(max-width:670px){
+ body:has(.kt80-v56-stage:not([hidden]))>header h1{font-size:20px}
+ body:has(.kt80-v56-stage:not([hidden])) .kt80-stages>.kt80-step{min-width:124px}
+}
