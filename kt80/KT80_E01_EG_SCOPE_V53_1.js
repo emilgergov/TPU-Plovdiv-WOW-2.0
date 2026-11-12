@@ -16,7 +16,7 @@ function highlight(node,oldText,newText){
  const kept=new Set();let i=0,j=0;
  while(i<n&&j<m){if(norm(a[i])===norm(b[j])){kept.add(j);i++;j++}else if(dp[i+1][j]>=dp[i][j+1])i++;else j++}
  node.replaceChildren();
- b.forEach((word,index)=>{if(index)node.append(document.createTextNode(' '));if(kept.has(index))node.append(document.createTextNode(word));else{const strong=document.createElement('strong');strong.className='kt80-eg-changed';strong.textContent=word;node.append(strong)}});
+ let index=0;for(const part of String(newText).match(/\s+|\S+/gu)||[]){if(/^\s+$/u.test(part)){node.append(document.createTextNode(part));continue}if(kept.has(index))node.append(document.createTextNode(part));else{const strong=document.createElement('strong');strong.className='kt80-eg-changed';strong.textContent=part;node.append(strong)}index++}
 }
 function applyDraft(text,old){
  const scope=$('kt80ScopeText');
@@ -43,7 +43,7 @@ function init(){
  const form=document.createElement('form');form.method='dialog';
  const label=document.createElement('label');label.textContent='Парола за EG автора';
  const password=document.createElement('input');password.type='password';password.autocomplete='off';password.required=true;password.placeholder='Временен защитен достъп';label.append(password);
- const note=document.createElement('p');note.textContent='Изпращат се единствено проектът на обхват и потвърденият предмет. Пълната преписка и доказателствата остават в модула. Паролата не се запазва.';
+ const note=document.createElement('p');note.textContent='Изпращат се единствено проектът на обхват и текущият предмет. Пълната преписка и доказателствата остават в модула. Паролата не се запазва.';
  const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Отказ';
  const send=document.createElement('button');send.type='submit';send.textContent='Предложи подобрение';
  cancel.addEventListener('click',()=>{password.value='';dialog.close()});
