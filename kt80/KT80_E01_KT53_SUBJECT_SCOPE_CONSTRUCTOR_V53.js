@@ -46,24 +46,15 @@ function conciseScopeDraft(subject,reconstruction){
   descriptors.push((x.type||'Технически параметър')+': '+tidy(x.original)+' ('+classification+')');
   if(descriptors.length===8)break;
  }
- const candidates=[],keys=new Set();
- const names={
-  replacement:'подмяна на съоръжения',installation:'монтажни работи и оборудване',
-  electrical_equipment:'електрически съоръжения и инсталации',
-  water_connection:'водоснабдяване',wastewater_connection:'отпадъчни води и заустване',
-  electricity_connection:'електрическо присъединяване',access:'транспортен достъп'
- };
- for(const section of reconstruction?.sections||[]){
-  for(const item of section.items||[]){
-   if(!names[item.key]||keys.has(item.key)||!(item.evidence||[]).length)continue;
-   keys.add(item.key);candidates.push(names[item.key]);
-  }
- }
+ const relevance=root.KT80Relevance?.assess?.(reconstruction,t)||null;
+ // Never display every keyword in a template as a proposed activity.
+ // Only explicit source-backed project statements appear, and still as unverified.
+ const candidates=(relevance?.review||[]).map(x=>x.name);
  const pieces=['Основна дейност и обект: '+t+'.'];
  if(descriptors.length)pieces.push('Експертно потвърдени технически характеристики: '+descriptors.join('; ')+'.');
  if(candidates.length)pieces.push('Сведения за експертна проверка в оригиналните документи: '+candidates.join('; ')+'.');
  if(!descriptors.length)pieces.push('Конкретните технически характеристики и видът на съпътстващите дейности се уточняват след проверка на изходните документи.');
- return {text:pieces.join('\n\n'),pending:candidates.length,approved:descriptors.length};
+ return {text:pieces.join('\n\n'),pending:candidates.length,approved:descriptors.length,relevance};
 }
 
 function proposition(reconstruction){
@@ -113,7 +104,7 @@ function proposition(reconstruction){
  if(unsupported)reasons.push('Няма проверими извлечени факти с оригинален документ.');
  return Object.freeze({schema:'KT80-KT53-SUBJECT-SCOPE-V53',
   subject:usableSubject?subject:'',subjectStatus,
-  scope:unsupported?'':scope,scopeSummary:{approvedParameters:concise.approved,pendingTopics:concise.pending},
+  scope:unsupported?'':scope,scopeSummary:{approvedParameters:concise.approved,pendingTopics:concise.pending},relevance:concise.relevance,
   evidence:evidenceMap,sourceCount:facts.length,
   unresolved:[...new Set(reasons)],expertConfirmed:false,aiGenerated:false,
   evidenceReliability:'НЕПОТВЪРДЕНИ КАНДИДАТ-ДОКАЗАТЕЛСТВА',
@@ -137,6 +128,21 @@ function fill(p,{force=false}={}){
   const para=document.createElement('p');
   para.textContent='Доказателствени откъси: '+p.sourceCount+' · Статус: '+p.evidenceReliability+'. Документите с експертно игнориране и изключените технически стойности не се използват.';
   sources.append(para);
+  if(p.relevance){
+   const report=document.createElement('details');report.className='kt80-kt53-relevance';
+   const header=document.createElement('summary');header.textContent='Релевантност за процедурната преценка · '+p.relevance.review.length+' теми за проверка · '+p.relevance.excluded.length+' непотвърдени споменавания';report.append(header);
+   const intro=document.createElement('p');intro.textContent=p.relevance.note;report.append(intro);
+   for(const item of p.relevance.review){
+    const line=document.createElement('p');line.textContent='За експертна проверка: '+item.name+' · '+item.proceduralWeight+' · '+item.positives+' изрични кандидата';report.append(line);
+   }
+   for(const item of p.relevance.excluded){
+    const line=document.createElement('p');line.textContent='Не е включено в проекта: '+item.name+' · '+item.reason;report.append(line);
+   }
+   for(const issue of p.relevance.crucial){
+    const line=document.createElement('p');line.textContent='Съществен въпрос: '+issue.label+' · '+issue.status;report.append(line);
+   }
+   sources.append(report);
+  }
   for(const [key,values] of Object.entries(p.evidence)){
    const line=document.createElement('details');const summary=document.createElement('summary');
    summary.textContent=readable(key)+' · '+values.length+' откъса';line.append(summary);
