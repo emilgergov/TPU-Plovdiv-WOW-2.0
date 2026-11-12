@@ -27,6 +27,45 @@ function listSources(reconstruction){
   for(const fact of item.evidence||[])out.push({...fact,rule:item.key,group:section.key});
  return out;
 }
+
+/* КТ53.1 — concise administrative scope candidate.
+ * Excerpts and file/page metadata stay exclusively in the evidence disclosure.
+ * Only explicit expert-approved parameters become positive technical assertions.
+ * Other activity classifications are review cues, NEVER claimed planned works.
+ */
+function conciseScopeDraft(subject,reconstruction){
+ const t=tidy(subject).replace(/[.\s]+$/u,'');
+ if(!t)return {text:'',pending:0,approved:0};
+ const approved=(reconstruction?.confirmedParameters||[]).filter(x=>x&&x.original&&!x.evidenceExcluded&&x.role!=='ambiguous'&&!x.compoundDesignation);
+ const descriptors=[];
+ const seen=new Set();
+ for(const x of approved){
+  const key=tidy([x.type||'',x.original,x.role].join('|')).toLocaleLowerCase('bg');
+  if(seen.has(key))continue;seen.add(key);
+  const classification=x.role==='existing'?'съществуващо':x.role==='project'?'проектно':x.role==='replacement'?'ремонт/подмяна':'експертно проверено';
+  descriptors.push((x.type||'Технически параметър')+': '+tidy(x.original)+' ('+classification+')');
+  if(descriptors.length===8)break;
+ }
+ const candidates=[],keys=new Set();
+ const names={
+  replacement:'подмяна на съоръжения',installation:'монтажни работи и оборудване',
+  electrical_equipment:'електрически съоръжения и инсталации',
+  water_connection:'водоснабдяване',wastewater_connection:'отпадъчни води и заустване',
+  electricity_connection:'електрическо присъединяване',access:'транспортен достъп'
+ };
+ for(const section of reconstruction?.sections||[]){
+  for(const item of section.items||[]){
+   if(!names[item.key]||keys.has(item.key)||!(item.evidence||[]).length)continue;
+   keys.add(item.key);candidates.push(names[item.key]);
+  }
+ }
+ const pieces=['Основна дейност и обект: '+t+'.'];
+ if(descriptors.length)pieces.push('Експертно потвърдени технически характеристики: '+descriptors.join('; ')+'.');
+ if(candidates.length)pieces.push('Сведения за експертна проверка в оригиналните документи: '+candidates.join('; ')+'.');
+ if(!descriptors.length)pieces.push('Конкретните технически характеристики и видът на съпътстващите дейности се уточняват след проверка на изходните документи.');
+ return {text:pieces.join('\n\n'),pending:candidates.length,approved:descriptors.length};
+}
+
 function proposition(reconstruction){
  const reasons=[...(reconstruction?.unresolved||[])];
  const facts=listSources(reconstruction);
@@ -68,12 +107,13 @@ function proposition(reconstruction){
   blocks.push('Експертно проверени технически стойности:\n'+parameters.slice(0,12).map(x=>
    '• '+x.original+' — '+x.file+(x.page?' · стр. '+x.page:'')+'; категория: '+(x.label||x.role||'неизяснена')+'.').join('\n'));
  }
- const scope=blocks.length?blocks.join('\n\n'):'НЯМА ДОСТАТЪЧНО ДОКАЗАТЕЛСТВА ЗА АВТОМАТИЧНО ПРЕДЛОЖЕНИЕ ЗА ОБХВАТ';
+ const concise=conciseScopeDraft(usableSubject?subject:'',reconstruction);
+ const scope=concise.text;
  const unsupported=!facts.length;
  if(unsupported)reasons.push('Няма проверими извлечени факти с оригинален документ.');
  return Object.freeze({schema:'KT80-KT53-SUBJECT-SCOPE-V53',
   subject:usableSubject?subject:'',subjectStatus,
-  scope:unsupported?'':scope,
+  scope:unsupported?'':scope,scopeSummary:{approvedParameters:concise.approved,pendingTopics:concise.pending},
   evidence:evidenceMap,sourceCount:facts.length,
   unresolved:[...new Set(reasons)],expertConfirmed:false,aiGenerated:false,
   evidenceReliability:'НЕПОТВЪРДЕНИ КАНДИДАТ-ДОКАЗАТЕЛСТВА',
@@ -110,7 +150,7 @@ function fill(p,{force=false}={}){
    sources.append(line);
   }
  }
- promptStatus('КТ53 · '+p.subjectStatus+' · '+p.unresolved.length+' въпроса за експертен контрол. EG авторът не е извикан.');
+ promptStatus('КТ53.1 · Проект на обхват за експертна проверка · '+(p.scopeSummary?.approvedParameters||0)+' потвърдени характеристики · '+(p.scopeSummary?.pendingTopics||0)+' теми за проверка.');
  const warning=$('kt80KT53Warnings');if(warning)warning.textContent=p.unresolved.length?'За проверка: '+p.unresolved.join(' | '):'Няма допълнителни алгоритмични сигнали. Всеки факт остава за експертна проверка.';
 }
 function construct({force=false}={}){
