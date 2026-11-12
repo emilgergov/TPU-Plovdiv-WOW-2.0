@@ -77,7 +77,7 @@ function init(){
    const response=await fetch(ENDPOINT,{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:payload});
    const data=await response.json();
    if(currentId!==serial)return;
-   if(!response.ok){if(data.issue==='LOT_DESIGNATION_NOT_OBJECT_PURPOSE')throw Error('EG предложението неправилно свързва отреждането на имота с предназначението на съоръжението');throw Error('EG услугата върна код '+response.status+(data.providerStatus?' ('+data.providerStatus+')':''));}
+   if(!response.ok){if(data.issue==='LOT_DESIGNATION_NOT_OBJECT_PURPOSE'){status('Предложението не е приложено: отреждането на УПИ не доказва предназначението на трафопоста.');return;}throw Error('EG услугата върна код '+response.status+(data.providerStatus?' ('+data.providerStatus+')':''));}
    if(data.reviewRequired!==true||data.expertAcceptanceRequired!==true||typeof data.proposal!=='string'||!data.proposal.trim())throw Error('Невалидно предложение от EG автора.');
    if(($('kt80SubjectText')?.value||'').trim()!==subject){status('Предметът е редактиран. Предложението не е приложено.');return}
    const cleaned=t=>t.toLocaleLowerCase('bg').replace(/[.,;:!\s–—-]+/gu,' ').trim();
