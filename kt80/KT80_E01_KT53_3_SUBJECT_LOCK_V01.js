@@ -10,7 +10,9 @@ function sync(){
  const notice=$('kt80ScopeLockNotice'),scopeApproval=$('kt80ScopeConfirmation');
  if(!subject||!approval||!scope||!section||!notice)return;
  // The checked approval is explicit expert acceptance of the current subject text.
+ if(approval.checked&&!subject.value.trim())approval.checked=false;
  const confirmed=!!approval.checked&&!!subject.value.trim();
+ const wasLocked=locked;
  locked=!confirmed;
  section.inert=locked;
  section.classList.toggle('kt80-scope-locked',locked);
@@ -19,6 +21,10 @@ function sync(){
  notice.dataset.locked=String(locked);
  if(scopeApproval)scopeApproval.disabled=locked;
  if(locked&&scopeApproval?.checked){scopeApproval.checked=false}
+ if(confirmed&&wasLocked&&root.KT80KT52Draft&&root.KT80Relevance?.assess){
+  const analysis=root.KT80Relevance.assess(root.KT80KT52Draft,subject.value);
+  root.KT80RelevanceActions?.render?.(analysis);
+ }
 }
 function init(){
  $('kt80SubjectText')?.addEventListener('input',sync);
