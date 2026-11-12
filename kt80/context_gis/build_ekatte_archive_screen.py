@@ -23,7 +23,7 @@ def administrative():
     mapping={}
     for municipality,codes in mapdata['municipalities'].items():
         for code in codes:
-            require(re.fullmatch(r'\\d{5}',code) and code not in mapping,'дублиран ЕКАТТЕ '+str(code))
+            require(re.fullmatch(r'\d{5}',code) and code not in mapping,'дублиран ЕКАТТЕ '+str(code))
             mapping[code]=municipality
     require(len(mapping)==EXPECTED['codes'],'212 ЕКАТТЕ непълни')
     with CSV.open(encoding='utf-8-sig',newline='') as f: table=list(csv.DictReader(f))
@@ -46,14 +46,14 @@ def aggregate():
     require(m['total_unique_parcels']==EXPECTED['parcels'] and m['zz_pairs']==EXPECTED['zz'] and m['zt_pairs']==EXPECTED['zt'],'декларирани суми')
     catalog=administrative();ids=set();by_prefix=set()
     for part in m['parts']:
-        fname=part['file'];require(bool(re.fullmatch(r'pi-master-\\d{2}\\.json\\.gz',fname)) and fname not in by_prefix,'дублиран сегмент '+fname)
+        fname=part['file'];require(bool(re.fullmatch(r'pi-master-\d{2}\.json\.gz',fname)) and fname not in by_prefix,'дублиран сегмент '+fname)
         by_prefix.add(fname)
         blob=(INDEX/fname).read_bytes()
         require(hashlib.sha256(blob).hexdigest()==part['sha256'],'SHA256 '+fname)
         rows=json.loads(gzip.decompress(blob).decode('utf8'))
         require(isinstance(rows,list) and len(rows)==part['records'],'брой записи '+fname)
         for r in rows:
-            cad=r.get('cadnum');require(isinstance(cad,str) and bool(re.fullmatch(r'\\d{5}\\.\\d+\\.\\d+',cad)),'невалиден идентификатор')
+            cad=r.get('cadnum');require(isinstance(cad,str) and bool(re.fullmatch(r'\d{5}\.\d+\.\d+',cad)),'невалиден идентификатор')
             require(cad not in ids and cad[:2]==fname[10:12],'дублиран/погрешен идентификатор '+cad)
             ids.add(cad);code=cad[:5];require(code in catalog,'неизвестен ЕКАТТЕ '+code)
             require(r.get('municipality')==catalog[code]['municipality'] and r.get('province')=='Пловдив','несъответстващ административен профил '+cad)
@@ -76,7 +76,7 @@ def aggregate():
       'evidence_rule':'НУЛА архивни пресичания НЕ означава доказано отсъствие на ЗЗ/ЗТ; териториалните граници и пълните ЗТ геометрии липсват.',
       'entries':[catalog[k] for k in sorted(catalog)]}
     OUTPUT.parent.mkdir(parents=True,exist_ok=True)
-    OUTPUT.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\\n',encoding='utf8')
+    OUTPUT.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
     print('КТ81 архивен предфилтър: PASS, ЕКАТТЕ',len(catalog),'ПИ',len(ids),'ЗЗ',EXPECTED['zz'],'ЗТ',EXPECTED['zt'])
     print('Категорично НЕ ПРЕСИЧА: 0 (липсват необходимите гранични слоеве)')
     return result
