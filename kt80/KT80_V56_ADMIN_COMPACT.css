@@ -345,3 +345,28 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
  box-decoration-break:clone;
  -webkit-box-decoration-break:clone;
 }
+
+/* KT53.3 — expert-visible relevance control, consistent with administrative palette. */
+.kt80-v56-stage .kt80-relevance-panel{
+ margin:9px 0 12px;
+ padding:10px 12px;
+ border:1px solid #8b986f;
+ border-left:3px solid #d6b874;
+ border-radius:5px;
+ background:#1c4236;
+ color:#f3f0e5;
+ font:13px/1.5 Arial,"Segoe UI",sans-serif;
+}
+.kt80-v56-stage .kt80-relevance-title{
+ display:block;color:#f5d68e;font:700 14px/1.45 Arial,"Segoe UI",sans-serif;
+}
+.kt80-v56-stage .kt80-relevance-summary{margin:4px 0!important;color:#fff6e3!important;font:600 13px/1.45 Arial,"Segoe UI",sans-serif!important}
+.kt80-v56-stage .kt80-relevance-disclaimer{margin:4px 0 6px!important;color:#dbe5da!important;font:12px/1.45 Arial,"Segoe UI",sans-serif!important}
+.kt80-v56-stage .kt80-relevance-details{padding-top:5px;border-top:1px solid #547766}
+.kt80-v56-stage .kt80-relevance-details>summary{cursor:pointer;color:#f3d590;font:600 13px/1.5 Arial,"Segoe UI",sans-serif}
+.kt80-v56-stage .kt80-relevance-group{margin:10px 0;padding:8px 10px;border:1px solid #547666;border-radius:4px;background:#173a30}
+.kt80-v56-stage .kt80-relevance-group>strong{color:#efd092}
+.kt80-v56-stage .kt80-relevance-group p{margin:4px 0!important;color:#eef1e9!important;font:13px/1.5 Arial,"Segoe UI",sans-serif!important}
+.kt80-v56-stage .kt80-relevance-entry{padding:6px 0;border-top:1px solid #436658}
+.kt80-v56-stage .kt80-relevance-source{color:#d0ddd3!important;font-size:12px!important}
+.kt80-v56-stage .kt80-relevance-footer{font-size:12px!important;color:#d8e5da!important}
