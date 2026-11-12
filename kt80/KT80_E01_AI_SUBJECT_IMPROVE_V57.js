@@ -5,6 +5,11 @@
 const $=id=>document.getElementById(id);
 const ENDPOINT='https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/subject-improve';
 let pending=null,serial=0;
+function conciseVerifiedFacts(){
+ const approved=root.KT80ParameterQA?.allowed?.()||[];
+ return approved.filter(x=>x.role!=='ambiguous'&&!x.compoundDesignation&&x.original&&x.type)
+   .slice(0,3).map(x=>(String(x.type)+' — '+String(x.original)+' ('+(x.role==='existing'?'съществуващо':x.role==='project'?'предвидено':'ремонт/подмяна')+')').slice(0,140));
+}
 function status(s){const node=$('kt80SubjectProposalStatus');if(node)node.textContent=s}
 function reset(){serial++;pending=null;const box=$('kt80AISubjectReview');if(box){box.hidden=true;box.replaceChildren()}}
 function render(proposal,baseline){
@@ -37,7 +42,7 @@ function init(){
  const label=document.createElement('label');label.textContent='Парола за EG автора';
  const password=document.createElement('input');password.type='password';password.autocomplete='off';password.required=true;password.placeholder='Временен защитен достъп';
  label.append(password);
- const note=document.createElement('p');note.textContent='Изпраща се само текстът на предмета. Обхватът, доказателствата и файловете от преписката не се изпращат. Паролата не се запазва.';
+ const note=document.createElement('p');note.textContent='Изпращат се предметът и до три експертно потвърдени технически сведения, когато има такива. Преписката и пълният обхват остават в модула. Паролата не се запазва.';
  const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Отказ';
  const submit=document.createElement('button');submit.type='submit';submit.textContent='Предложи подобрение';
  cancel.addEventListener('click',()=>{password.value='';dialog.close()});
@@ -49,7 +54,8 @@ function init(){
   if(!subject){status('Няма предмет за интелигентно подобряване.');return}
   if(subject.length>1500){status('Предметът е твърде дълъг за EG редакция.');return}
   if(!token){status('Липсва парола за EG автора.');return}
-  const payload=JSON.stringify({subject});
+  const facts=conciseVerifiedFacts();
+  const payload=JSON.stringify({subject,facts});
   if(new TextEncoder().encode(payload).length>6000){status('Текстът на предмета надвишава допустимия размер. EG авторът не е извикан.');return}
   reset();const currentId=++serial;
   action.disabled=true;status('EG автор · Изготвяне на редакция…');
@@ -60,6 +66,8 @@ function init(){
    if(!response.ok)throw Error('EG услугата върна код '+response.status+(data.providerStatus?' ('+data.providerStatus+')':''));
    if(data.reviewRequired!==true||data.expertAcceptanceRequired!==true||typeof data.proposal!=='string'||!data.proposal.trim())throw Error('Невалидно предложение от EG автора.');
    if(($('kt80SubjectText')?.value||'').trim()!==subject){status('Предметът е редактиран. Предложението не е приложено.');return}
+   const cleaned=t=>t.toLocaleLowerCase('bg').replace(/[.,;:!\s–—-]+/gu,' ').trim();
+   if(cleaned(data.proposal.trim())===cleaned(subject)){status('Предметът не се нуждае от редакция.');return}
    pending={proposal:data.proposal.trim()};
    render(pending.proposal,$('kt80SubjectText').value);
    status('Изготвена е редакция на предмета. Прегледайте предложението.');
