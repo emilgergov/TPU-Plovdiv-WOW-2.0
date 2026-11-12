@@ -41,8 +41,6 @@ function render(assessment){
  const draft=buildDraft(initial,actions);
  if(!draft||draft===initial.trimEnd())return;
  const card=node('section',undefined,'kt80-relevance-proposal kt81-comparison');
- card.append(node('h3','Какво открихме','kt81-result-heading'));
- card.append(node('p',initial.trim()||'В преписката не е изграден проект на обхват.','kt81-result-original'));
  card.append(node('h3','Какво предлагаме','kt81-result-heading'));
  const result=node('div',undefined,'kt81-proposed-result');
  result.append(node('p',initial.trim()||'','kt81-result-unchanged'));
