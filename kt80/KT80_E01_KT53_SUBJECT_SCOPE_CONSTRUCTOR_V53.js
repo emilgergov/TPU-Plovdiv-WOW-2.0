@@ -127,6 +127,7 @@ function renderRelevance(result){
   for(const item of items){
    const row=document.createElement('details');row.className='kt80-relevance-entry';
    const heading=document.createElement('summary');heading.textContent=makeLine(item);row.append(heading);
+   if(item.status){const detail=document.createElement('p');detail.className='kt80-relevance-entry-status';detail.textContent='Статус: '+item.status;row.append(detail)}
    const sources=item.sources||[];
    if(!sources.length){const note=document.createElement('p');note.textContent='Не са налични допълнителни изходни откъси.';row.append(note)}
    for(const src of sources){
@@ -142,7 +143,7 @@ function renderRelevance(result){
  };
  section('1. Кандидати за проверка','Тези сведения имат изричен кандидат-източник, но още не са доказани и не са автоматично включени като предвидени дейности.',review,x=>x.name+' · '+x.proceduralWeight+' · '+x.positives+' изрични откъса');
  section('2. Неподкрепени споменавания','Откъси от шаблони, въпроси, отрицателни текстове или споменавания без достатъчно основание. Изключването не доказва, че съответната дейност липсва.',excluded,x=>x.name+' · виж основанието и източника');
- section('3. Съществени въпроси за процедурата','Сведенията са необходими за последваща правна квалификация. Празно поле или липса на данни не е отрицателен факт.',gaps,x=>x.label+' · '+x.status);
+ section('3. Съществени въпроси за процедурата','Сведенията са необходими за последваща правна квалификация. Празно поле или липса на данни не е отрицателен факт.',gaps,x=>x.label);
  const foot=document.createElement('p');foot.className='kt80-relevance-footer';foot.textContent='Експертът проверява доказателствата и потвърждава предмета и обхвата. Процедурата се определя по-късно с ПИ MASTER, ГИС и нормативните основания.';body.append(foot);
 }
 function fill(p,{force=false}={}){
