@@ -75,7 +75,7 @@ function proofUpdate(ids,mode){
  for(const [a,b] of rows){const p=el('p');p.append(el('strong','',a+': '),document.createTextNode(b));proofBody.append(p)}
 }
 function renderFallback(){
- fallback.hidden=false;inline.hidden=true;overview.hidden=false;mode='context';
+ fallback.hidden=false;inline.hidden=true;overview.hidden=false;mode='context';if($('kt80PDF1'))$('kt80PDF1').disabled=true;
  const parsed=root.V26ParcelEditor?.normalize($('kt80ParcelInput')?.value||'');
  const uncertain=[...(parsed?.invalid||[]),...(parsed?.uncertain||[])];
  result.textContent='Не е установен достатъчно надежден комплект кадастрални идентификатори. Точни имотни пресичания, площи и PDF1 не могат да бъдат удостоверени.'+(uncertain.length?' За проверка: '+uncertain.join('; ')+'.':'');
@@ -115,12 +115,12 @@ function entered(){
  mode='case';
  const normalized=ids.join('; ');
  const key=normalized+'|'+l.subject+'|'+l.scope;
- if(lastKey===key&&root.KT80FreeGISResults?.ids?.join('; ')===normalized){status.textContent='Проверени имоти: '+ids.length+'. Общите ГИС резултати са заредени.';proofUpdate(ids,'ГИС по идентификатори');return}
+ if(lastKey===key&&root.KT80FreeGISResults?.ids?.join('; ')===normalized){status.textContent='Намерени имоти: '+ids.length+'. Прегледайте проверките на общия ГИС резултат.';proofUpdate(ids,'ГИС по идентификатори');return}
  lastKey=key;const generation=++openGeneration;
  const caseInput=$('kt80ParcelInput');if(caseInput.value!==normalized){caseInput.value=normalized;caseInput.dispatchEvent(new Event('input',{bubbles:true}))}
  const free=$('kt80GISFreeInput');if(free)free.value=normalized;
  $('kt80ParcelNormalize')?.click();
- status.textContent='Автоматично стартираме проверката за '+ids.length+' имота чрез общия ГИС двигател на №15.';
+ status.textContent='Автоматично стартираме проверката за '+ids.length+' имота чрез общия ГИС двигател на №15.';if($('kt80PDF1'))$('kt80PDF1').disabled=true;
  proofUpdate(ids,'Автоматична проверка по имотни идентификатори');
  const work=root.KT80Busy?.start('ГИС анализ на имотите от преписката…');
  const workDeadline=Date.now()+18000;
@@ -133,8 +133,8 @@ function entered(){
   const live=root.KT80FreeGISResults,matched=live?.ids?.join('; ')==normalized;
   if(matched&&live.results?.length===ids.length){
    const missing=live.results.filter(r=>r.status!=='Намерен'||!(r.geojson?.features||[]).length);
-   status.textContent=missing.length?'За '+missing.length+' имота няма потвърдена геометрия. Пространствените заключения остават ограничени.':'ГИС анализът е зареден за '+ids.length+' имота. Прегледайте картата и пространствените данни.';
-   root.KT80Stage3Result=Object.freeze({status:missing.length?'INCOMPLETE_GIS':'GIS_RETURNED',parcelVerified:!missing.length,ids:[...ids],needsAdditionalInformation:!!missing.length,procedureHypothesis:l.title});
+   status.textContent=missing.length?'За '+missing.length+' имота няма потвърдена геометрия. Пространствените заключения остават ограничени.':'Геометрията е намерена за '+ids.length+' имота. Крайният контрол на пресичанията се извършва от общия ГИС/PDF1 механизъм.';if($('kt80PDF1'))$('kt80PDF1').disabled=!!missing.length;
+   root.KT80Stage3Result=Object.freeze({status:missing.length?'INCOMPLETE_GIS':'GIS_RETURNED',parcelVerified:false,geometryAvailable:!missing.length,spatialVerificationPending:true,ids:[...ids],needsAdditionalInformation:!!missing.length,procedureHypothesis:l.title});
    finishWork();return;
   }
   if(Date.now()>=workDeadline){status.textContent='ГИС заявката все още не е приключила. Проверете съобщенията за наличност на ГИС базата; резултатите не се приемат за потвърдени.';lastKey='';finishWork();return}
@@ -145,7 +145,7 @@ function entered(){
 function restoreFreeGIS(){
  mode='free';openGeneration++;
  gis.querySelector('h3').textContent=originalTitle;
- origin.append(gis);gis.querySelector('.kt80-gis-intake-compact')?.removeAttribute('hidden');
+ origin.append(gis);if($('kt80PDF1'))$('kt80PDF1').disabled=false;gis.querySelector('.kt80-gis-intake-compact')?.removeAttribute('hidden');
  const controls=gis.querySelector('.kt80-gis-intake-compact');if(controls)controls.hidden=false;
  inline.hidden=true;fallback.hidden=true;
 }
