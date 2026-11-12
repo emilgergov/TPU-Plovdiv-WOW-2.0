@@ -61,10 +61,8 @@ function init(){
  const submit=document.createElement('button');submit.type='submit';submit.textContent='Предложи подобрение';
  cancel.addEventListener('click',()=>{password.value='';dialog.close()});
  form.append(label,note,cancel,submit);dialog.append(form);document.body.append(dialog);
- form.addEventListener('submit',async event=>{
-  event.preventDefault();
+ async function runImprovement(token){
   const subject=$('kt80SubjectText')?.value.trim()||'';
-  const token=password.value;password.value='';dialog.close();
   if(!subject){status('Няма предмет за интелигентно подобряване.');return}
   if(subject.length>1500){status('Предметът е твърде дълъг за EG редакция.');return}
   if(!token){status('Липсва парола за EG автора.');return}
@@ -74,7 +72,7 @@ function init(){
   reset();const currentId=++serial;
   action.disabled=true;status('EG автор · Изготвяне на редакция…');
   try{
-   const response=await fetch(ENDPOINT,{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:payload});
+   const response=await root.KT80EGSession.request(ENDPOINT,payload,token);
    const data=await response.json();
    if(currentId!==serial)return;
    if(!response.ok){if(data.issue==='LOT_DESIGNATION_NOT_OBJECT_PURPOSE'){status('Предложението не е приложено: отреждането на УПИ не доказва предназначението на трафопоста.');return;}throw Error('EG услугата върна код '+response.status+(data.providerStatus?' ('+data.providerStatus+')':''));}
@@ -87,10 +85,13 @@ function init(){
    status('Изготвена е редакция на предмета. Прегледайте предложението.');
   }catch(e){if(currentId===serial)status('Интелигентното подобряване не успя: '+String(e.message||e)+'. Предметът е запазен.')}
   finally{action.disabled=false}
- });
+}
+ form.addEventListener('submit',event=>{event.preventDefault();const token=password.value;password.value='';dialog.close();runImprovement(token);});
  action.addEventListener('click',()=>{
   if(!$('kt80SubjectText')?.value.trim()){status('Първо конструирайте или въведете предмет.');return}
   if(root.KT80WorkflowState?.subjectConfirmed){status('Вече има експертно потвърден предмет. За редакция започнете нов етап с изрично повторно потвърждение.');return}
+  if(root.KT80WorkflowState?.routeConfirmed){status('Процедурата е потвърдена. Достъпът до EG автора за тази преписка е приключен.');return}
+  if(root.KT80EGSession?.hasAccess()){runImprovement(null);return}
   dialog.showModal();
  });
  document.addEventListener('kt80:case-reset',reset);
