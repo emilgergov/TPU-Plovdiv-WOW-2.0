@@ -58,6 +58,7 @@ function render(assessment){
     feedback.textContent='Обхватът или процедурата вече са потвърдени. Отменете потвърждението преди редакция.';return;
    }
    if(subject.value!==fixedSubject){feedback.textContent='Предметът е променен. Предложението за обхвата вече не е валидно. Повторете проверката при фиксиран предмет.';return}
+   if(!$('kt80SubjectConfirmation')?.checked){feedback.textContent='Първо потвърдете предмета. Предложенията за обхвата се прилагат само при фиксиран предмет.';return}
    if(scope.value!==initial){feedback.textContent='Междувременно обхватът е редактиран. Реконструирайте анализа преди приемане.';return}
    if(action.effect!=='append-scope'){feedback.textContent='За това предложение е необходима ръчна редакция.';return}
    if(scope.value.includes(action.text)){finish('Сведението вече присъства в обхвата.');return}
