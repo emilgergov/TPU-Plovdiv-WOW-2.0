@@ -123,19 +123,24 @@ function entered(){
  status.textContent='Автоматично стартираме проверката за '+ids.length+' имота чрез общия ГИС двигател на №15.';
  proofUpdate(ids,'Автоматична проверка по имотни идентификатори');
  const work=root.KT80Busy?.start('ГИС анализ на имотите от преписката…');
- try{$('kt80FindParcels')?.click()}catch(e){status.textContent='Неуспешен старт на ГИС: '+String(e.message||e);lastKey=''}
- finally{root.KT80Busy?.finish(work)}
+ const workDeadline=Date.now()+18000;
+ let workComplete=false;
+ const finishWork=()=>{if(workComplete)return;workComplete=true;root.KT80Busy?.finish(work)};
+ try{$('kt80FindParcels')?.click()}catch(e){status.textContent='Неуспешен старт на ГИС: '+String(e.message||e);lastKey='';finishWork()}
  root.KT80Stage3Result=Object.freeze({status:'GIS_REQUESTED',parcelVerified:false,ids:[...ids],procedureHypothesis:l.title,needsAdditionalInformation:false});
  const monitor=()=>{
-  if(generation!==openGeneration||mode!=='case')return;
+  if(generation!==openGeneration||mode!=='case'){finishWork();return}
   const live=root.KT80FreeGISResults,matched=live?.ids?.join('; ')==normalized;
   if(matched&&live.results?.length===ids.length){
    const missing=live.results.filter(r=>r.status!=='Намерен'||!(r.geojson?.features||[]).length);
    status.textContent=missing.length?'За '+missing.length+' имота няма потвърдена геометрия. Пространствените заключения остават ограничени.':'ГИС анализът е зареден за '+ids.length+' имота. Прегледайте картата и пространствените данни.';
    root.KT80Stage3Result=Object.freeze({status:missing.length?'INCOMPLETE_GIS':'GIS_RETURNED',parcelVerified:!missing.length,ids:[...ids],needsAdditionalInformation:!!missing.length,procedureHypothesis:l.title});
+   finishWork();return;
   }
+  if(Date.now()>=workDeadline){status.textContent='ГИС заявката все още не е приключила. Проверете съобщенията за наличност на ГИС базата; резултатите не се приемат за потвърдени.';lastKey='';finishWork();return}
+  setTimeout(monitor,500);
  };
- setTimeout(monitor,900);setTimeout(monitor,3200);
+ setTimeout(monitor,400);
 }
 function restoreFreeGIS(){
  mode='free';openGeneration++;
