@@ -159,7 +159,7 @@ function init(){
     say('Данните са променени по време на заявката. Предложението не се прилага.');return;
    }
    const filtered=safeScopeProposal(data.proposal,scope);
-   const normalize=t=>String(t||'').toLocaleLowerCase('bg').replace(/[.,;:!?\\s–—-]+/gu,' ').trim();
+   const normalize=t=>String(t||'').toLocaleLowerCase('bg').replace(/\s+/gu,' ').replace(/[.,;:!?–—-]+/gu,' ').trim();
    if(!filtered.text||normalize(filtered.text)===normalize(scope)){
      clearProposal();
      say('EG авторът извърши проверката, но не установи обоснована промяна. Текущият обхват се запазва. Можете да редактирате ръчно или да реконструирате от преписката.');
