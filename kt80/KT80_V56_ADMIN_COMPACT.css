@@ -450,3 +450,29 @@ body .kt80-stage-panel.kt80-v56-stage #kt80RelevancePanel .kt80-relevance-eviden
 body .kt80-stage-panel.kt80-v56-stage #kt80RelevancePanel .kt80-relevance-footer{
  font:400 12px/1.45 Arial,"Segoe UI",sans-serif!important;color:#bdcfc2!important;
 }
+
+/* KT81 — only five final expert confirmations: distinct, decisive red.
+   Applies strictly to labels bearing .kt80-alert-confirm, not general actions. */
+body .kt80-stage-panel label.kt80-check.kt80-alert-confirm{
+ display:flex!important;align-items:center!important;gap:10px!important;
+ margin:9px 0!important;padding:11px 13px!important;
+ background:#8f252a!important;border:2px solid #ea9e9d!important;
+ border-left:5px solid #f8bdb8!important;border-radius:5px!important;
+ color:#fff5f1!important;font:700 13.5px/1.45 Arial,"Segoe UI",sans-serif!important;
+ box-shadow:0 1px 3px rgba(0,0,0,.16)!important;
+ cursor:pointer!important;max-width:100%!important;
+}
+body .kt80-stage-panel label.kt80-check.kt80-alert-confirm input[type="checkbox"]{
+ width:19px!important;height:19px!important;flex:0 0 19px!important;
+ accent-color:#f5b7ac!important;cursor:pointer!important;
+}
+body .kt80-stage-panel label.kt80-check.kt80-alert-confirm:has(input:checked){
+ background:#5d141c!important;border-color:#ffb4ad!important;
+ border-left-color:#ffe0d6!important;color:#fff!important;
+}
+body .kt80-stage-panel label.kt80-check.kt80-alert-confirm:has(input:disabled){
+ opacity:.58!important;cursor:not-allowed!important;
+}
+body .kt80-stage-panel label.kt80-check.kt80-alert-confirm:focus-within{
+ outline:2px solid #ffd3ca!important;outline-offset:2px!important;
+}
