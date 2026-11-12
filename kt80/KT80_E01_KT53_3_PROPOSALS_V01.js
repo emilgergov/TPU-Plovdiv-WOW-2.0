@@ -24,7 +24,7 @@ function render(assessment){
  const suggestions=root.KT80Relevance?.suggestions?.(assessment,subject?.value,scope?.value);
  if(!suggestions)return;
  const actions=suggestions.actions||[];
- if(status)status.textContent=actions.length?actions.length+' мотивирано предложение за редакция. Само експертът може да го приложи.':'Не са установени достатъчно конкретни предложения за автоматично редактиране.';
+ if(status)status.textContent=actions.length?actions.length+' мотивирано предложение за обхвата · Предметът остава фиксиран.':'Няма предложена редакция на обхвата · Предметът остава фиксиран.';
  for(const action of actions){
   const card=text('section',undefined,'kt80-relevance-proposal');
   card.append(text('strong',action.action+' в '+action.target,'kt80-relevance-proposal-label'));
