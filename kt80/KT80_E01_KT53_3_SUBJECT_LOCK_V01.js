@@ -14,6 +14,18 @@ function sync(){
  const confirmed=!!approval.checked&&!!subject.value.trim();
  const wasLocked=locked;
  locked=!confirmed;
+ // The fixed subject is truly read-only. The checkbox alone can unfix it.
+ subject.readOnly=confirmed;
+ for(const id of ['kt80ImproveSubject','kt80EditSubject','kt80ConstructSubject']){
+  const button=$(id);if(button)button.disabled=confirmed;
+ }
+ const proposal=$('kt80AISubjectReview');
+ if(proposal){
+  proposal.classList.toggle('kt80-subject-proposal-fixed',confirmed);
+  proposal.querySelectorAll('button').forEach(button=>{button.disabled=confirmed});
+ }
+ const subjectHint=$('kt80SubjectHint');
+ if(subjectHint)subjectHint.textContent=confirmed?'Предметът е фиксиран. За редакция първо отменете потвърждението.':'Предметът не е потвърден. Редактирайте при необходимост.';
  section.inert=locked;
  section.classList.toggle('kt80-scope-locked',locked);
  section.setAttribute('aria-label',locked?'Обхват — заключен до потвърждение на предмета':'Обхват — редакция при фиксиран предмет');
