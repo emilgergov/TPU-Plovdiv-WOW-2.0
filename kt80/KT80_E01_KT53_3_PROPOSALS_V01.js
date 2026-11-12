@@ -6,7 +6,7 @@
 const $=id=>document.getElementById(id);
 let serial=0;
 const text=(tag,value,cls)=>{
- const node=document.createElement(tag);node.textContent=value;
+ const node=document.createElement(tag);if(value!==undefined)node.textContent=value;
  if(cls)node.className=cls;
  return node;
 };
