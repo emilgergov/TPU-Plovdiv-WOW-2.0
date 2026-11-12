@@ -127,6 +127,11 @@ Each paragraph must contain substantive text (at least 45 characters) and must n
 
 
 // KT80: distinct, authenticated subject improvement; no dossier ZIP or parcel IDs needed.
+
+function inventsFacilityPurposeFromSubject(subject){
+ return /(?:трафопост|съоръжен[а-я]*)[^.]{0,95}(?:предназначен\s+за\s+(?:нуждите\s+на\s+)?кметств|обслужва\s+кметств|за\s+нуждите\s+на\s+кметств)/iu.test(subject);
+}
+
 async function handleSubjectImprove(request,env){
  if(request.method!=="POST")return reply({error:"Method not allowed"},405);
  const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN].filter(x=>typeof x==="string"&&x.length>0);
@@ -147,6 +152,12 @@ async function handleSubjectImprove(request,env){
   const data=await upstream.json();
   const proposal=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join(" ").trim();
   if(!proposal||proposal.length>450||/\[\[|^[`#]/u.test(proposal)||proposal.includes("\n"))return reply({error:"AI proposal did not pass format validation"},422);
+  // Fail closed: the planning designation "УПИ ... – за кметство" does not
+  // establish that the electrical installation itself serves the municipality.
+  const hasPlanningDesignation=/УПИ\s*[IVXLCDM0-9]+\s*[-–—]\s*за\s+кметство/iu.test(subject);
+  const inventsFacilityPurpose=/(?:който\s+е\s+)?предназначен\s+за\s+(?:нуждите\s+на\s+)?кметств|обслужва\s+кметств|за\s+нуждите\s+на\s+кметств/iu.test(proposal);
+  if(hasPlanningDesignation&&inventsFacilityPurpose&&!inventsFacilityPurposeFromSubject(subject))
+   return reply({error:"Planning designation is not facility purpose",issue:"LOT_DESIGNATION_NOT_OBJECT_PURPOSE"},422);
   return reply({proposal,reviewRequired:true,expertAcceptanceRequired:true,source:"EG proposal based only on supplied subject"});
  }catch{return reply({error:"AI request failed or timed out"},504)}finally{clearTimeout(timer)}
 }
