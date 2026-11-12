@@ -50,7 +50,7 @@ function assess(reconstruction,subject){
   const entry={key:item.key,name:rule.name,proceduralWeight:rule.weight,positives:positive.length,mentions:mentions.length,all:evidence.length,
    sources:positive.slice(0,3).map(f=>({file:f.file,page:f.page,excerpt:f.excerpt}))};
   if(positive.length){review.push(entry);topics.push(entry)}
-  else excluded.push({...entry,reason:'Няма изрично доказана предвидена дейност; само споменаване, въпрос, шаблон или неясен контекст.'});
+  else excluded.push({...entry,sources:evidence.slice(0,3).map(f=>({file:f.file,page:f.page,excerpt:f.excerpt})),reason:'Не е установена предвидена дейност: откъсът може да е шаблон, въпрос, отрицателно твърдение или споменаване без необходимия контекст. Това НЕ доказва отсъствие на дейността.'});
  }
  const approved=(reconstruction?.confirmedParameters||[]).filter(p=>p?.original&&!p.evidenceExcluded&&p.role!=='ambiguous'&&!p.compoundDesignation);
  for(const p of approved)verified.push({label:String(p.type||'Технически параметър'),value:String(p.original),role:p.role});
