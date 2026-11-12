@@ -248,3 +248,27 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
  box-decoration-break:clone;
  -webkit-box-decoration-break:clone;
 }
+
+/* КТ80 V57.7 — more readable technical scope while using the free vertical space.
+   Only stage 2 and only the right-hand editor; manual resize is preserved. */
+@media (min-width:1051px){
+ .kt80-v56-stage #kt80ScopeText{
+   height:260px!important;
+   min-height:220px!important;
+   max-height:520px!important;
+ }
+}
+@media (min-width:671px) and (max-width:1050px){
+ .kt80-v56-stage #kt80ScopeText{
+   height:200px!important;
+   min-height:160px!important;
+   max-height:480px!important;
+ }
+}
+@media (max-width:670px){
+ .kt80-v56-stage #kt80ScopeText{
+   height:165px!important;
+   min-height:140px!important;
+   max-height:400px!important;
+ }
+}
