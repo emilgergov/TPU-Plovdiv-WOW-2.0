@@ -301,6 +301,7 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 </div>
 <p id="kt80SubjectProposalStatus" role="status" aria-live="polite">Обработете преписката или въведете предмет ръчно.</p>
 <p id="kt80SubjectHint" class="kt80-hint">Предметът не е потвърден. Редактирайте при необходимост.</p>
+<label class="kt80-check kt80-subscreen-approval"><input id="kt80SubjectConfirmation" type="checkbox"/> Потвърждавам предмета и фиксирам текста</label>
 </div>
 <div class="kt80-v56-scope-container"><p id="kt80ScopeLockNotice" class="kt80-scope-lock-notice" role="status" aria-live="polite">Първо потвърдете предмета на инвестиционното предложение, за да отключите редакцията на обхвата.</p>
 <div class="kt80-v56-field" aria-label="Проект на обхват">
@@ -333,14 +334,12 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 <p class="kt80-kt53-disclaimer">Алгоритмична реконструкция, без използване на EG автора и без правно заключение. Експертът може да редактира и двата текста. Непотвърдени стойности не се представят като доказани.</p>
 </div></details>
 </section>
+<label class="kt80-check kt80-subscreen-approval"><input id="kt80ScopeConfirmation" type="checkbox"/> Потвърждавам обхвата след проверка</label>
 </div>
 </div>
 </div>
 <div class="kt80-v56-approvals">
-<div class="kt80-v56-approval-labels">
-<label class="kt80-check"><input id="kt80SubjectConfirmation" type="checkbox"/> Потвърждавам предмета</label>
-<label class="kt80-check"><input id="kt80ScopeConfirmation" type="checkbox"/> Потвърждавам обхвата след проверка</label>
-</div>
+
 <button id="kt80ToParcels" type="button">Продължи към имотите</button>
 </div>
 <details class="kt80-admin-evidence" id="kt80AdminEvidence">
