@@ -370,3 +370,20 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
 .kt80-v56-stage .kt80-relevance-entry{padding:6px 0;border-top:1px solid #436658}
 .kt80-v56-stage .kt80-relevance-source{color:#d0ddd3!important;font-size:12px!important}
 .kt80-v56-stage .kt80-relevance-footer{font-size:12px!important;color:#d8e5da!important}
+
+/* КТ53.3 — concise expert correction cards, no evidence walls on main screen */
+.kt80-v56-stage .kt80-relevance-decision-status{margin:6px 0!important;color:#f7deb1!important;font:600 13px/1.4 Arial,"Segoe UI",sans-serif!important}
+.kt80-v56-stage .kt80-relevance-proposals{display:grid;gap:8px;margin:5px 0 8px}
+.kt80-v56-stage .kt80-relevance-proposal{background:#17392f;border:1px solid #647d68;border-left:3px solid #dabd75;border-radius:4px;padding:9px 10px}
+.kt80-v56-stage .kt80-relevance-proposal-label{color:#efd393;font:700 13.5px/1.5 Arial,"Segoe UI",sans-serif}
+.kt80-v56-stage .kt80-relevance-proposal-text{color:#faf7ea!important;font:600 13.5px/1.45 Arial,"Segoe UI",sans-serif!important;margin:5px 0!important}
+.kt80-v56-stage .kt80-relevance-proposal-reason{font:13px/1.45 Arial,"Segoe UI",sans-serif!important;color:#edf1e7!important;margin:5px 0!important}
+.kt80-v56-stage .kt80-relevance-proposal-source{margin:7px 0}
+.kt80-v56-stage .kt80-relevance-proposal-source>summary{cursor:pointer;color:#e8c878;font:600 12.5px/1.45 Arial,"Segoe UI",sans-serif}
+.kt80-v56-stage .kt80-relevance-proposal-source p{font:12px/1.45 Arial,"Segoe UI",sans-serif!important;margin:6px 0!important;color:#e4e8da!important}
+.kt80-v56-stage .kt80-relevance-proposal-controls{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0 2px}
+.kt80-v56-stage .kt80-relevance-proposal-controls button{border:1px solid #bfa264;border-radius:4px;background:#ddbd79;color:#163b30;font:700 12px/1.3 Arial,"Segoe UI",sans-serif;padding:8px 10px;cursor:pointer}
+.kt80-v56-stage .kt80-relevance-proposal-controls button:disabled{opacity:.5;cursor:default}
+.kt80-v56-stage .kt80-relevance-proposal-feedback{color:#f7db94!important;font-size:12px!important}
+.kt80-v56-stage .kt80-relevance-proposal-tail{margin:4px 0!important;color:#d7e4d8!important;font:12px/1.4 Arial,"Segoe UI",sans-serif!important}
+.kt80-v56-stage .kt80-relevance-details{margin-top:7px}
