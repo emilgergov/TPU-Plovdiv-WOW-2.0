@@ -25,6 +25,9 @@ const neg=/(?:не\s+се\s+предвижда|няма\s+да|не\s+се\s+и�
 const existing=/(?:съществуващ[а-я]*|наличн[а-я]*|преди\s+ремонт|съществуващия|в\s+момента)/iu;
 const planned=/(?:предвижда\s+се|ще\s+се|проектн[а-я]*|заявен[а-я]*|нов[а-я]*|за\s+монтаж)/iu;
 const qualifier=/(?:предвиден[а-я]*|заявен[а-я]*|проектн[а-я]*|ще\s+се|предвижда\s+се|изпълнява\s+се)/iu;
+const readableActivity=Object.fromEntries(RULES.map(rule=>[rule.id,rule.label]));
+const readableReaderState={TEXT_EXTRACTED:'ПРОЧЕТЕН',REVIEW_REQUIRED:'ЗА ПРОВЕРКА',UNSUPPORTED:'НЕПРОЧЕТЕН — НЕПОДДЪРЖАН ФОРМАТ',NOT_READ:'НЕПРОЧЕТЕН',UNKNOWN:'НЕУСТАНОВЕН СТАТУС',OCR_REQUIRED:'ЗА ПРОВЕРКА — OCR',OCR_EXTRACTED:'ЗА ПРОВЕРКА — OCR'};
+function displayReaderState(value){return readableReaderState[value]||value||'НЕУСТАНОВЕН СТАТУС'}
 const GROUPS=[
  ['main_activity','Основна дейност и характер на намесата'],
  ['technical_scope','Технически обхват и оборудване'],
@@ -150,7 +153,7 @@ function render(data){
  host.replaceChildren();host.append(elem('h3','КТ52 · Реконструкция на инвестиционното намерение'));
  host.append(elem('p',data.disclaimer,'kt80-ch21-notice'));
  host.append(elem('p','Кандидат-факти: '+data.sourceCount+' · Документи с откъси: '+data.sourceDocuments.length+
-  ' · Основна намеса: '+(data.suggestedActivityTypes.join(', ')||'НЕУСТАНОВЕНА')+
+  ' · Основна намеса: '+(data.suggestedActivityTypes.map(k=>readableActivity[k]||'Неустановена дейност').join(', ')||'НЕУСТАНОВЕНА')+
   ' · Технически параметри за проверка: '+data.parameterCandidates.length+'.','kt80-ch21-summary'));
  host.append(elem('p','Предварителен кандидат за предмет (НЕПРИЕТ): '+data.subjectCandidate,'kt80-kt52-candidate'));
  if(data.unresolved.length){
@@ -168,7 +171,7 @@ function render(data){
    for(const fact of item.evidence.slice(0,25)){
     const line=elem('div',undefined,'kt80-kt52-fact');
     line.append(elem('p','„'+fact.excerpt+'“'));
-    line.append(elem('p',fact.file+(fact.page?' · стр. '+fact.page:' · страница НЕУСТАНОВЕНА')+' · '+determineTense(fact.excerpt)+' · '+fact.readerState,'kt80-ch21-source'));
+    line.append(elem('p',fact.file+(fact.page?' · стр. '+fact.page:' · страница НЕУСТАНОВЕНА')+' · '+determineTense(fact.excerpt)+' · '+displayReaderState(fact.readerState),'kt80-ch21-source'));
     if(fact.page){const b=elem('button','◉ Към оригинала · стр. '+fact.page,'kt80-ch2-open');b.type='button';b.addEventListener('click',()=>root.KT80DossierOriginals?.openOriginal?.(fact.file,fact.page));line.append(b)}
     topic.append(line);
    }
