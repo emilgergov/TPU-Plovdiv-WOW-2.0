@@ -12,11 +12,25 @@ function conciseVerifiedFacts(){
 }
 function status(s){const node=$('kt80SubjectProposalStatus');if(node)node.textContent=s}
 function reset(){serial++;pending=null;const box=$('kt80AISubjectReview');if(box){box.hidden=true;box.replaceChildren()}}
+function highlightEdits(node,before,after){
+ const split=t=>String(t).trim().split(/\s+/u);
+ const oldWords=split(before),newWords=split(after);
+ const n=oldWords.length,m=newWords.length;
+ if(n*m>20000){node.textContent=after;return}
+ const normalize=t=>t.toLocaleLowerCase('bg').replace(/[.,;:!?„“"()]/gu,'');
+ const d=Array.from({length:n+1},()=>new Uint16Array(m+1));
+ for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)
+  d[i][j]=normalize(oldWords[i])===normalize(newWords[j])?1+d[i+1][j+1]:Math.max(d[i+1][j],d[i][j+1]);
+ const equal=new Set();let i=0,j=0;
+ while(i<n&&j<m){if(normalize(oldWords[i])===normalize(newWords[j])){equal.add(j);i++;j++}else if(d[i+1][j]>=d[i][j+1])i++;else j++}
+ node.replaceChildren();
+ newWords.forEach((w,k)=>{if(k)node.append(document.createTextNode(' '));if(equal.has(k))node.append(document.createTextNode(w));else{const mark=document.createElement('strong');mark.className='kt80-eg-changed';mark.textContent=w;node.append(mark)}});
+}
 function render(proposal,baseline){
  const box=$('kt80AISubjectReview');if(!box)return;
  box.replaceChildren();box.hidden=false;
  const heading=document.createElement('strong');heading.textContent='EG автор · Предложена редакция';
- const preview=document.createElement('p');preview.textContent=proposal;
+ const preview=document.createElement('p');highlightEdits(preview,baseline,proposal);
  const accept=document.createElement('button');accept.type='button';accept.textContent='Приеми предложението';
  const dismiss=document.createElement('button');dismiss.type='button';dismiss.textContent='Отхвърли предложението';
  accept.addEventListener('click',()=>{
