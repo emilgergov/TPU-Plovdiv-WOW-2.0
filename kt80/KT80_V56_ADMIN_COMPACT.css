@@ -476,3 +476,102 @@ body .kt80-stage-panel label.kt80-check.kt80-alert-confirm:has(input:disabled){
 body .kt80-stage-panel label.kt80-check.kt80-alert-confirm:focus-within{
  outline:2px solid #ffd3ca!important;outline-offset:2px!important;
 }
+
+/* KT81 — finished result first, evidence on direct request; stage 2 only. */
+body .kt80-v56-stage .kt80-v56-field .kt80-subject-controls{
+ order:0!important;
+}
+body .kt80-v56-stage .kt80-v56-field > label.kt80-subscreen-approval{
+ order:8!important;
+ margin-top:11px!important;
+}
+body .kt80-v56-stage #kt80SubjectProposalStatus,
+body .kt80-v56-stage #kt80SubjectHint,
+body .kt80-v56-stage #kt80ScopeProposalStatus,
+body .kt80-v56-stage #kt80KT53Status{
+ font:400 12px/1.35 Arial,"Segoe UI",sans-serif!important;
+ color:#d0dcd3!important;margin:2px 0!important;padding:0!important;
+}
+body .kt80-v56-stage #kt80SubjectHint:has(+ label.kt80-alert-confirm input:checked){display:none!important}
+body .kt80-v56-stage .kt80-relevance-panel{
+ border:1px solid #698575!important;background:#16352b!important;
+ padding:10px!important;border-radius:5px!important;
+}
+body .kt80-v56-stage #kt80RelevancePanel .kt80-relevance-title{
+ display:none!important;
+}
+body .kt80-v56-stage #kt80RelevancePanel .kt80-relevance-summary{
+ font:400 12px/1.4 Arial,"Segoe UI",sans-serif!important;
+ color:#d2ddd3!important;margin:3px 0!important;
+}
+body .kt80-v56-stage #kt80RelevancePanel .kt80-relevance-decision-status{
+ font:500 12px/1.4 Arial,"Segoe UI",sans-serif!important;
+ color:#e4e9de!important;margin:4px 0!important;
+}
+body .kt80-v56-stage #kt80RelevancePanel .kt80-relevance-disclaimer{
+ font:400 11.5px/1.35 Arial,"Segoe UI",sans-serif!important;
+ color:#afc3b2!important;
+}
+body .kt80-v56-stage .kt81-comparison{
+ border:1px solid #8a9786!important;border-left:3px solid #c7bb8a!important;
+ background:#1b3c30!important;padding:11px!important;
+}
+body .kt80-v56-stage .kt81-result-heading{
+ font:700 13px/1.35 Arial,"Segoe UI",sans-serif!important;
+ color:#f1dfb2!important;margin:7px 0 5px!important;
+}
+body .kt80-v56-stage .kt81-result-original,
+body .kt80-v56-stage .kt81-proposed-result{
+ box-sizing:border-box!important;background:#f6f5ef!important;color:#19362c!important;
+ border:1px solid #b5b9a9!important;border-radius:4px!important;
+ font:400 13px/1.5 Arial,"Segoe UI",sans-serif!important;
+ padding:9px 11px!important;margin:3px 0 10px!important;
+ white-space:pre-wrap!important;overflow-wrap:anywhere!important;
+}
+body .kt80-v56-stage .kt81-proposed-result p{
+ font:400 13px/1.5 Arial,"Segoe UI",sans-serif!important;
+ color:#19362c!important;margin:0 0 7px!important;
+ white-space:pre-wrap!important;
+}
+body .kt80-v56-stage .kt81-proposed-result p:last-child{margin-bottom:0!important}
+body .kt80-v56-stage .kt81-proposed-result .kt81-result-added{
+ background:#e6eedb!important;
+ border-left:3px solid #78945d!important;
+ padding:5px 8px!important;
+ font-weight:600!important;
+}
+body .kt80-v56-stage .kt81-why{
+ border-top:1px solid #658274!important;
+ border-bottom:1px solid #658274!important;
+ padding:8px 0!important;margin:8px 0!important;
+}
+body .kt80-v56-stage .kt81-why > summary{
+ cursor:pointer!important;
+ font:600 12.5px/1.45 Arial,"Segoe UI",sans-serif!important;
+ color:#f0dfb5!important;
+}
+body .kt80-v56-stage .kt81-why-item{
+ padding:7px 2px!important;color:#edf1e8!important;
+ font:400 12px/1.5 Arial,"Segoe UI",sans-serif!important;
+}
+body .kt80-v56-stage .kt81-why-item p{
+ font:400 12px/1.5 Arial,"Segoe UI",sans-serif!important;
+ color:#edf1e8!important;margin:5px 0!important;
+}
+body .kt80-v56-stage .kt81-why-item .kt81-source-ref{
+ color:#e2d49f!important;overflow-wrap:anywhere!important;
+}
+body .kt80-v56-stage .kt81-why-item .kt81-excerpt{
+ border-left:2px solid #a7b6a4!important;
+ padding:5px 10px!important;margin:7px 0!important;
+ color:#e2e7dc!important;font:400 12px/1.45 Arial,"Segoe UI",sans-serif!important;
+ white-space:pre-wrap!important;
+}
+body .kt80-v56-stage .kt81-result-caution{
+ color:#c5d4c4!important;
+ font:400 11.5px/1.45 Arial,"Segoe UI",sans-serif!important;
+ margin:4px 0!important;
+}
+body .kt80-v56-stage .kt81-result-actions button{
+ font:600 12.5px/1.35 Arial,"Segoe UI",sans-serif!important;
+}
