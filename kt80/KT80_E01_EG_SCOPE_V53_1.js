@@ -65,12 +65,12 @@ function init(){
  improve.addEventListener('click',()=>{
   if(!field.value.trim()){say('Първо конструирайте или въведете обхват.');return}
   if($('kt80ScopeConfirmation')?.checked||root.KT80WorkflowState?.scopeConfirmed){say('Обхватът вече е потвърден. За нова редакция първо отменете потвърждението.');return}
+  if(root.KT80WorkflowState?.routeConfirmed){say('Процедурата е потвърдена. Достъпът до EG автора за тази преписка е приключен.');return}
+  if(root.KT80EGSession?.hasAccess()){runImprovement(null);return}
   dialog.showModal();
  });
- form.addEventListener('submit',async event=>{
-  event.preventDefault();
-  const scope=field.value.trim(),subject=$('kt80SubjectText')?.value.trim()||'',token=password.value;
-  password.value='';dialog.close();
+ async function runImprovement(token){
+  const scope=field.value.trim(),subject=$('kt80SubjectText')?.value.trim()||'';
   if(!scope||scope.length>2400){say('Обхватът липсва или надвишава допустимата дължина за редакция.');return}
   if(!subject){say('Необходим е предмет, за да се провери съответствието на обхвата.');return}
   if(!token){say('Липсва парола за EG автора.');return}
@@ -78,7 +78,7 @@ function init(){
   if(new TextEncoder().encode(payload).length>6500){say('Заявката е твърде голяма. Обхватът е запазен.');return}
   clearProposal();const requestId=++serial;improve.disabled=true;say('EG автор · Изготвяне на редакция на обхвата…');
   try{
-   const response=await fetch(ENDPOINT,{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:payload});
+   const response=await root.KT80EGSession.request(ENDPOINT,payload,token);
    const data=await response.json();if(requestId!==serial)return;
    if(!response.ok)throw Error('EG услугата върна код '+response.status);
    if(data.reviewRequired!==true||data.expertAcceptanceRequired!==true||typeof data.proposal!=='string'||!data.proposal.trim())throw Error('Невалидно предложение от EG автора.');
@@ -92,7 +92,8 @@ function init(){
    say('Изготвена е редакция на обхвата. Прегледайте предложението.');
   }catch(e){if(requestId===serial)say('Интелигентното подобряване не успя: '+String(e.message||e)+'. Обхватът е запазен.')}
   finally{improve.disabled=false}
- });
+}
+ form.addEventListener('submit',event=>{event.preventDefault();const token=password.value;password.value='';dialog.close();runImprovement(token);});
  field.addEventListener('input',()=>{if(pending)clearProposal()});
  document.addEventListener('kt80:case-reset',()=>{clearProposal();say('Проектът на обхват подлежи на експертна проверка.')});
 }
