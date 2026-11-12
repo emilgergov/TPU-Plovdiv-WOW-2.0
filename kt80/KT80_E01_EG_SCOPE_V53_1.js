@@ -52,7 +52,8 @@ function init(){
  rebuild.addEventListener('click',()=>{
   const draft=root.KT80KT52Draft;
   if(!draft){say('Няма прочетена преписка за реконструкция на обхвата.');return}
-  const revised=root.KT80KT53?.proposition?.(draft)?.scope||'';
+  const currentSubject=$('kt80SubjectText')?.value.trim()||draft.subjectCandidate||'';
+  const revised=root.KT80KT53?.proposition?.({...draft,subjectCandidate:currentSubject})?.scope||'';
   if(!revised){say('Няма достатъчно надежден кандидат за обхват.');return}
   if(field.value||$('kt80ScopeConfirmation')?.checked){
    if(!root.confirm('Реконструкцията ще замени само обхвата и неговото потвърждение. Предметът остава непроменен. Продължавате ли?'))return;
