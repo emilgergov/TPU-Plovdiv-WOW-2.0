@@ -59,6 +59,14 @@ function show(proposal,{apply=false}={}){
  status(proposal.text?'Извлечен кандидат за предмет · източник: '+proposal.source+'. Проверете съдържанието и местоположението.':'Няма доказан кандидат от преписката. Допустимо е ръчно въвеждане.');
 }
 function constructed(){
+ // A repeated deterministic reconstruction must not silently overwrite expert text.
+ const prior=clean($('kt80SubjectText')?.value);
+ const scopePrior=clean($('kt80ScopeText')?.value);
+ const confirmed=Boolean($('kt80SubjectConfirmation')?.checked||$('kt80ScopeConfirmation')?.checked||root.KT80WorkflowState?.subjectConfirmed);
+ if(prior||scopePrior||confirmed){
+  const answer=root.confirm('Реконструкцията ще изготви повторно предмет и обхват от преписката. Съществуващите редакции и отметки за потвърждение ще бъдат заменени. Продължавате ли?');
+  if(!answer){status('Реконструкцията е отменена. Предметът и обхватът са запазени.');return null;}
+ }
  // KT53 is the sole evidence-aware construction route; V32 remains a source-picker.
  if(root.KT80KT53?.construct)return root.KT80KT53.construct({force:true});
  const workflow=root.KT80WorkflowState;
