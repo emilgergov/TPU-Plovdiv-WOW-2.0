@@ -398,3 +398,8 @@ body:has(.kt80-v56-stage:not([hidden])) .kt80-tiny-status{padding:6px 10px;font-
 .kt80-v56-stage .kt80-subscreen-approval input{width:18px;height:18px;flex:0 0 auto;accent-color:#d9b96f}
 .kt80-v56-stage .kt80-subscreen-approval:has(input:disabled){opacity:.5}
 .kt80-v56-stage .kt80-v56-approvals{justify-content:flex-end}
+
+/* KT81: visually fixed subject; editing only after explicit unfix */
+.kt80-v56-stage #kt80SubjectText[readonly]{background:#e9eee7!important;color:#223c31!important;border-color:#79a187!important;cursor:default}
+.kt80-v56-stage #kt80AISubjectReview.kt80-subject-proposal-fixed{opacity:.55;filter:saturate(.6)}
+.kt80-v56-stage .kt80-subject-controls button:disabled{opacity:.5!important;cursor:not-allowed!important}
