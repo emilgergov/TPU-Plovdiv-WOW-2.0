@@ -165,7 +165,7 @@ request.addEventListener('click',()=>{
  if(c&&typeof root.KT80DashboardOpenCandidate==='function'){root.KT80DashboardOpenCandidate(c)}
  else result.textContent='Предложено действие: резултат №2 — мотивирано искане за допълнителна информация. Изберете резултат №2 от началния екран.';
 });
-function changed(){if(mode==='case'){lastKey='';++openGeneration;root.KT80Stage3Result=null;status.textContent='Идентификаторите са променени. Изисква се нова пространствена проверка.';const next=validIds();if(next.length&&stage.hidden===false){setTimeout(()=>{if(!stage.hidden)entered()},0)}else renderFallback()}}
+function changed(){if(mode!=='case'&&mode!=='context')return;lastKey='';++openGeneration;root.KT80Stage3Result=null;status.textContent='Идентификаторите са променени. Пространствените резултати се проверяват наново.';const ids=validIds();if(ids.length&&!stage.hidden){setTimeout(()=>{if(!stage.hidden)entered()},250)}else if(!ids.length)renderFallback()}
 $('kt80ParcelInput')?.addEventListener('input',changed);
 document.addEventListener('kt80:stage-open',e=>{if(e.detail?.step===3){mode='case';entered()}else if(mode==='case'||mode==='context')restoreFreeGIS()});
 document.addEventListener('kt80:case-reset',()=>{lastKey='';lastNotified='';openGeneration++;mode='initial';root.KT80Stage3Result=null;restoreFreeGIS()});
