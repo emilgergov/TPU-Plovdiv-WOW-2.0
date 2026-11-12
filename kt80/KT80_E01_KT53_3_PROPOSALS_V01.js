@@ -1,19 +1,28 @@
-/* KT80 KT53.3 — concise expert-facing proposals.
- * Only expert click applies a specific edit. No auto-confirmation or legal decision.
- * All evidence stays inspectable but collapsed by default.
+/* KT81 — concise evidence-backed scope result, with direct one-step audit.
+ * Provenance is retained; candidates are never silently turned into verified facts.
+ * One expert acceptance applies the full suggested scope, not individual fragments.
  */
 (function(root){'use strict';
 const $=id=>document.getElementById(id);
 let serial=0;
-const text=(tag,value,cls)=>{
- const node=document.createElement(tag);if(value!==undefined)node.textContent=value;
- if(cls)node.className=cls;
- return node;
-};
+function node(tag,content,cls){
+ const el=document.createElement(tag);
+ if(content!==undefined)el.textContent=content;
+ if(cls)el.className=cls;
+ return el;
+}
 function reset(){
  serial++;
  const host=$('kt80RelevanceProposals');if(host)host.replaceChildren();
- const status=$('kt80RelevanceDecisionStatus');if(status)status.textContent='Няма активни предложения.';
+ const status=$('kt80RelevanceDecisionStatus');if(status)status.textContent='';
+}
+function buildDraft(start,actions){
+ let draft=String(start||'').trimEnd();
+ for(const a of actions){
+  if(a.effect!=='append-scope'||!a.text)continue;
+  if(!draft.includes(a.text))draft+=(draft?'\n\n':'')+a.text;
+ }
+ return draft;
 }
 function render(assessment){
  reset();
@@ -23,59 +32,70 @@ function render(assessment){
  const subject=$('kt80SubjectText'),scope=$('kt80ScopeText');
  const suggestions=root.KT80Relevance?.suggestions?.(assessment,subject?.value,scope?.value);
  if(!suggestions)return;
- const actions=suggestions.actions||[];
- if(status)status.textContent=actions.length?actions.length+' мотивирано предложение за обхвата · Предметът остава фиксиран.':'Няма предложена редакция на обхвата · Предметът остава фиксиран.';
- for(const action of actions){
-  const card=text('section',undefined,'kt80-relevance-proposal');
-  card.append(text('strong',action.action+' в '+action.target,'kt80-relevance-proposal-label'));
-  card.append(text('p',action.text,'kt80-relevance-proposal-text'));
-  card.append(text('p','Мотив: '+action.reason,'kt80-relevance-proposal-reason'));
-  const source=action.source||{};
-  const origin=source.file+(source.page?' · стр. '+source.page:'');
-  const details=document.createElement('details');details.className='kt80-relevance-proposal-source';
-  details.append(text('summary','Провери основанието · '+origin));
-  details.append(text('p','„'+String(source.excerpt||'').slice(0,480)+(String(source.excerpt||'').length>480?'…':'')+'“'));
-  if(source.readerState&&source.readerState!=='TEXT_EXTRACTED')details.append(text('p','Прочитът на източника изисква проверка в оригинала.'));
-  if(source.page){
-   const original=text('button','Оригинал · стр. '+source.page);original.type='button';original.className='kt80-ch2-open';
-   original.addEventListener('click',()=>root.KT80DossierOriginals?.openOriginal?.(source.file,source.page));
-   details.append(original);
+ const actions=(suggestions.actions||[]).filter(a=>a?.text&&a.effect==='append-scope');
+ const initial=scope?.value||'', fixedSubject=subject?.value||'';
+ if(status)status.textContent=actions.length?
+  'Установено е относимо сведение за конкретизиране на проекта на обхват.':
+  'Няма нова конкретна редакция, подкрепена от текущия предварителен филтър.';
+ if(!actions.length)return;
+ const draft=buildDraft(initial,actions);
+ if(!draft||draft===initial.trimEnd())return;
+ const card=node('section',undefined,'kt80-relevance-proposal kt81-comparison');
+ card.append(node('h3','Какво открихме','kt81-result-heading'));
+ card.append(node('p',initial.trim()||'В преписката не е изграден проект на обхват.','kt81-result-original'));
+ card.append(node('h3','Какво предлагаме','kt81-result-heading'));
+ const result=node('div',undefined,'kt81-proposed-result');
+ result.append(node('p',initial.trim()||'','kt81-result-unchanged'));
+ actions.forEach(a=>result.append(node('p',a.text,'kt81-result-added')));
+ card.append(result);
+ // Short reason is immediately understandable; full evidence is on-demand.
+ const why=document.createElement('details');why.className='kt81-why';
+ why.append(node('summary','Защо? · Мотиви и доказателства'));
+ actions.forEach((a,i)=>{
+  const section=node('section',undefined,'kt81-why-item');
+  section.append(node('strong',actions.length>1?'Основание '+(i+1):'Мотив'));
+  section.append(node('p',a.reason||'Предложението изисква проверка на източника.'));
+  const src=a.source||{};
+  const label=[src.file||'Източникът не е уточнен',src.page?'стр. '+src.page:''].filter(Boolean).join(' · ');
+  section.append(node('p','Източник: '+label,'kt81-source-ref'));
+  if(src.excerpt)section.append(node('blockquote',String(src.excerpt),'kt81-excerpt'));
+  if(src.readerState&&src.readerState!=='TEXT_EXTRACTED')
+   section.append(node('p','Статус: източникът изисква проверка в оригинала.','kt81-source-warning'));
+  if(src.file&&src.page&&typeof root.KT80DossierOriginals?.openOriginal==='function'){
+   const original=node('button','Отвори оригинала · стр. '+src.page,'kt81-original-link');original.type='button';
+   original.addEventListener('click',()=>root.KT80DossierOriginals.openOriginal(src.file,src.page));
+   section.append(original);
   }
-  card.append(details);
-  const controls=document.createElement('div');controls.className='kt80-relevance-proposal-controls';
-  const apply=text('button','Приеми предложението');apply.type='button';
-  const reject=text('button','Отхвърли');reject.type='button';
-  const feedback=text('p','','kt80-relevance-proposal-feedback');
-  controls.append(apply,reject);card.append(controls,feedback);host.append(card);
-  const initial=scope?.value;
-  const fixedSubject=subject?.value;
-  const finish=message=>{apply.disabled=true;reject.disabled=true;feedback.textContent=message};
-  reject.addEventListener('click',()=>{if(token!==serial)return;finish('Отхвърлено от експерта. Текстът не е променен.')});
-  apply.addEventListener('click',()=>{
-   if(token!==serial)return;
-   if(!scope||!subject){feedback.textContent='Липсва поле за редакцията.';return}
-   if(root.KT80WorkflowState?.routeConfirmed||root.KT80WorkflowState?.scopeConfirmed||$('kt80ScopeConfirmation')?.checked){
-    feedback.textContent='Обхватът или процедурата вече са потвърдени. Отменете потвърждението преди редакция.';return;
-   }
-   if(subject.value!==fixedSubject){feedback.textContent='Предметът е променен. Предложението за обхвата вече не е валидно. Повторете проверката при фиксиран предмет.';return}
-   if(!$('kt80SubjectConfirmation')?.checked){feedback.textContent='Първо потвърдете предмета. Предложенията за обхвата се прилагат само при фиксиран предмет.';return}
-   if(scope.value!==initial){feedback.textContent='Междувременно обхватът е редактиран. Реконструирайте анализа преди приемане.';return}
-   if(action.effect!=='append-scope'){feedback.textContent='За това предложение е необходима ръчна редакция.';return}
-   if(scope.value.includes(action.text)){finish('Сведението вече присъства в обхвата.');return}
-   scope.value=scope.value.replace(/\s+$/u,'')+'\n\n'+action.text;
-   scope.dispatchEvent(new Event('input',{bubbles:true}));
-   const approval=$('kt80ScopeConfirmation');if(approval)approval.checked=false;
-   finish('Включено в проекта на обхват. Проверете оригинала и потвърдете окончателно.');
-  });
- }
- const tail=document.createElement('p');tail.className='kt80-relevance-proposal-tail';
- const parts=[];
- if(suggestions.excludedCount)parts.push(suggestions.excludedCount+' неподкрепени теми не са добавени като дейности');
- if(suggestions.gapCount)parts.push(suggestions.gapCount+' съществени въпроса остават за проверка');
- tail.textContent=parts.join(' · ')+(parts.length?'. ':'')+'Подробните основания са в разгъваемата проверка.';
- host.append(tail);
+  why.append(section);
+ });
+ card.append(why);
+ const warning=node('p','Предложението е за експертна преценка. Не е автоматично потвърден факт или процедурен извод.','kt81-result-caution');
+ card.append(warning);
+ const controls=node('div',undefined,'kt80-relevance-proposal-controls kt81-result-actions');
+ const apply=node('button','Приеми целия предложен обхват');
+ const reject=node('button','Отхвърли предложението');
+ apply.type=reject.type='button';
+ const feedback=node('p','','kt80-relevance-proposal-feedback');
+ controls.append(apply,reject);card.append(controls,feedback);host.append(card);
+ function done(message){apply.disabled=true;reject.disabled=true;feedback.textContent=message;}
+ reject.addEventListener('click',()=>{if(token!==serial)return;done('Предложението е отхвърлено. Обхватът не е променен.');});
+ apply.addEventListener('click',()=>{
+  if(token!==serial)return;
+  if(!scope||!subject){feedback.textContent='Полето за обхват не е достъпно.';return;}
+  if(!$('kt80SubjectConfirmation')?.checked||subject.value!==fixedSubject){
+   feedback.textContent='Предметът не е фиксиран в изходното състояние. Извършете нов анализ.';return;
+  }
+  if(root.KT80WorkflowState?.routeConfirmed||root.KT80WorkflowState?.scopeConfirmed||$('kt80ScopeConfirmation')?.checked){
+   feedback.textContent='Отменете окончателното потвърждение, преди да редактирате обхвата.';return;
+  }
+  if(scope.value!==initial){feedback.textContent='Обхватът е редактиран след анализа. Обновете предложението.';return;}
+  scope.value=draft;
+  scope.dispatchEvent(new Event('input',{bubbles:true}));
+  const approval=$('kt80ScopeConfirmation');if(approval)approval.checked=false;
+  done('Предложението е включено в проекта. Прегледайте текста и потвърдете окончателно.');
+ });
 }
-root.KT80RelevanceActions=Object.freeze({render,reset});
+root.KT80RelevanceActions=Object.freeze({render,reset,buildDraft});
 document.addEventListener('kt80:case-reset',reset);
 document.addEventListener('kt80:case-change',reset);
 })(window);
