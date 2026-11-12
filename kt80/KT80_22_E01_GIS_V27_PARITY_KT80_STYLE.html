@@ -294,9 +294,10 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 <div class="kt80-v56-field" aria-label="Проект на предмет">
 <label for="kt80SubjectText">Предмет на инвестиционното предложение</label>
 <textarea id="kt80SubjectText" rows="3" placeholder="Основна дейност и обект — кратка, точна формулировка"></textarea>
-<div class="kt80-subject-controls" role="group" aria-label="Конструиране и корекция на предмета">
-<button id="kt80ConstructSubject" type="button" title="Изгражда отново предложението за предмет и обхват от прочетените доказателства. Може да замени ръчни промени. Изисква последваща експертна проверка.">Конструирай от преписката</button>
-<button id="kt80EditSubject" type="button" title="Поставя курсора в полето за предмет, за да го поправите лично. Не конструира нов обхват и не потвърждава текста.">Редактирай предмета</button>
+<div class="kt80-subject-controls" role="group" aria-label="Действия за предмета">
+<button id="kt80ImproveSubject" type="button" disabled aria-disabled="true" title="AI подобряване — ще бъде достъпно след проверена връзка с реалната AI услуга. Не се подменя с алгоритмичен резултат.">Интелигентно подобряване</button>
+<button id="kt80EditSubject" type="button" title="Експертна ръчна редакция на предмета.">Редактирай предмета</button>
+<button id="kt80ConstructSubject" type="button" title="Повторно алгоритмично изграждане от прочетената преписка. Преди замяна на текста се изисква съгласие.">Реконструирай от преписката</button>
 </div>
 <p id="kt80SubjectProposalStatus" role="status" aria-live="polite">Обработете преписката или въведете предмет ръчно.</p>
 <p id="kt80SubjectHint" class="kt80-hint">Предметът не е потвърден. Редактирайте при необходимост.</p>
