@@ -17,7 +17,7 @@ card.append(line,input,create('p','Незадължително уточнени
 const archive=create('p','','kt82-archive-result');
 const docs=create('details');docs.append(create('summary','Доказателствени откъси от преписката'));
 const source=fallback.querySelector('.kt80-v580-evidence');if(source)docs.append(source);
-card.append(docs);
+card.append(archive,docs);
 fallback.before(card);
 const identifiers=create('details',undefined,'kt82-identifiers');identifiers.append(create('summary','Въведи проверен кадастрален идентификатор'));
 fallback.before(identifiers);identifiers.append(entry);
@@ -118,7 +118,7 @@ function setMode(){
  if(panel.hidden)return;
  legal();
  const isContext=!fallback.hidden;
- card.hidden=!isContext;identifiers.hidden=!isContext;old.hidden=isContext;archive.hidden=!isContext;
+ card.hidden=!isContext;identifiers.hidden=false;old.hidden=isContext;archive.hidden=!isContext;
  label.classList.toggle('kt82-context-confirm',isContext);
  label.classList.toggle('kt80-alert-confirm',!isContext);
  const desired=isContext?contextConfirmation:oldConfirmation;
