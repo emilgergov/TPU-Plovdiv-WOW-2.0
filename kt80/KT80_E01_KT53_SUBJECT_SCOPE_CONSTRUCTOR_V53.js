@@ -147,14 +147,14 @@ function renderRelevance(result){
 }
 function fill(p,{force=false}={}){
  current=p;
- renderRelevance(p.relevance);
- root.KT80RelevanceActions?.render?.(p.relevance);
  const subject=$('kt80SubjectText'),scope=$('kt80ScopeText');
  if(!subject||!scope)return;
  suspend=true;
  if(force||!manualSubject){subject.value=p.subject||'';manualSubject=false}
  if(force||!manualScope){scope.value=p.scope||'';manualScope=false}
  suspend=false;
+ renderRelevance(p.relevance);
+ root.KT80RelevanceActions?.render?.(p.relevance);
  // Any reconstructed candidate invalidates both prior approvals.
  const checkbox=$('kt80ScopeConfirmation');if(checkbox)checkbox.checked=false;
  const prior=$('kt80SubjectConfirmation');if(prior)prior.checked=false;
