@@ -17,11 +17,18 @@ function reset(){
  const status=$('kt80RelevanceDecisionStatus');if(status)status.textContent='';
 }
 function buildDraft(start,actions){
+ const usable=(actions||[]).filter(a=>a?.effect==='append-scope'&&a.text);
  let draft=String(start||'').trimEnd();
- for(const a of actions){
-  if(a.effect!=='append-scope'||!a.text)continue;
-  if(!draft.includes(a.text))draft+=(draft?'\n\n':'')+a.text;
- }
+ if(!usable.length)return draft;
+ // Remove only exact, known KT53.1 boilerplate; never discard substantive
+ // user-authored paragraphs or unverified source information.
+ const paragraphs=draft.split(/\n\s*\n/u).map(p=>p.trim()).filter(Boolean);
+ const clean=paragraphs.filter(p=>
+  !/^Сведения за експертна проверка в оригиналните документи:\s*/iu.test(p)&&
+  !/^Конкретните технически характеристики и видът на съпътстващите дейности се уточняват след проверка на изходните документи\.?$/iu.test(p)
+ );
+ if(clean.length!==paragraphs.length)draft=clean.join('\n\n');
+ for(const a of usable)if(!draft.includes(a.text))draft+=(draft?'\n\n':'')+a.text;
  return draft;
 }
 function render(assessment){
@@ -53,8 +60,8 @@ function render(assessment){
  const card=node('section',undefined,'kt80-relevance-proposal kt81-comparison');
  card.append(node('h3','Какво предлагаме','kt81-result-heading'));
  const result=node('div',undefined,'kt81-proposed-result');
- result.append(node('p',initial.trim()||'','kt81-result-unchanged'));
- actions.forEach(a=>result.append(node('p',a.text,'kt81-result-added')));
+ const added=new Set(actions.map(a=>a.text));
+ for(const para of draft.split(/\n\s*\n/u).filter(Boolean))result.append(node('p',para,added.has(para)?'kt81-result-added':'kt81-result-unchanged'));
  card.append(result);
  // Short reason is immediately understandable; full evidence is on-demand.
  const why=document.createElement('details');why.className='kt81-why';
