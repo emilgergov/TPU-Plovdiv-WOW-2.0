@@ -575,3 +575,34 @@ body .kt80-v56-stage .kt81-result-caution{
 body .kt80-v56-stage .kt81-result-actions button{
  font:600 12.5px/1.35 Arial,"Segoe UI",sans-serif!important;
 }
+
+/* KT81 compact result hierarchy — original, proposal, decision; evidence optional. */
+body .kt80-v56-stage #kt80KT53Composer{
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;
+ gap:5px!important;
+}
+body .kt80-v56-stage #kt80KT53Composer > label[for="kt80ScopeText"]{order:0!important}
+body .kt80-v56-stage #kt80KT53Composer > #kt80ScopeText{
+ order:1!important;max-height:205px!important;
+}
+body .kt80-v56-stage #kt80KT53Composer > #kt80RelevancePanel{order:2!important;margin:5px 0!important}
+body .kt80-v56-stage #kt80KT53Composer > .kt80-subject-controls{order:3!important}
+body .kt80-v56-stage #kt80KT53Composer > #kt80ScopeProposalStatus{order:4!important}
+body .kt80-v56-stage #kt80KT53Composer > #kt80KT53Status{order:5!important}
+body .kt80-v56-stage #kt80KT53Composer > .kt80-v56-extra{order:6!important}
+body .kt80-v56-stage #kt80RelevancePanel{
+ display:flex!important;flex-direction:column!important;gap:4px!important;
+}
+body .kt80-v56-stage #kt80RelevancePanel > #kt80RelevanceProposals{order:0!important;margin:0!important}
+body .kt80-v56-stage #kt80RelevancePanel > #kt80RelevanceDecisionStatus{order:1!important;margin:1px 0!important}
+body .kt80-v56-stage #kt80RelevancePanel > #kt80RelevanceDetails{order:2!important}
+body .kt80-v56-stage #kt80RelevancePanel > .kt80-relevance-summary{order:3!important;display:none!important}
+body .kt80-v56-stage #kt80RelevancePanel:has(#kt80RelevanceDetails[open]) > .kt80-relevance-summary{display:block!important}
+body .kt80-v56-stage #kt80RelevancePanel > .kt80-relevance-disclaimer{order:4!important;display:none!important}
+body .kt80-v56-stage .kt81-comparison{padding:8px 10px!important}
+body .kt80-v56-stage .kt81-proposed-result{padding:9px 11px!important;margin:2px 0 5px!important}
+body .kt80-v56-stage #kt80RelevancePanel .kt81-result-heading{margin:0 0 5px!important}
+body .kt80-v56-stage .kt81-why{margin:5px 0!important;padding:6px 0!important}
+body .kt80-v56-stage #kt80KT53Composer > #kt80ScopeProposalStatus,
+body .kt80-v56-stage #kt80KT53Composer > #kt80KT53Status{display:none!important}
+body .kt80-v56-stage .kt81-result-actions{margin:5px 0!important}
