@@ -9,6 +9,7 @@ on:
       - 'tests/kt82-a-v602-invalidation.test.cjs'
       - 'tests/kt82-a-v603-gis-race.test.cjs'
       - 'tests/kt82-a-v604-route-contract.test.cjs'
+      - 'tests/kt82-a-pdf1-content.test.cjs'
       - '.github/workflows/kt82-package-a-v604.yml'
   pull_request:
     paths:
@@ -41,3 +42,4 @@ jobs:
           node --test tests/kt82-a-v604-route-contract.test.cjs
           node --test tests/kt82-package-a-v600.test.cjs
           node --test tests/kt82-pdf1-v599.test.cjs
+          node --test tests/kt82-a-pdf1-content.test.cjs
