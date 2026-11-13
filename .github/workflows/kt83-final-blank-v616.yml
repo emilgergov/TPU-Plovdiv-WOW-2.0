@@ -1,0 +1,37 @@
+name: WOW · Финална интеграция · Оригинална бланка V61.6
+on:
+  push:
+    paths:
+      - 'kt80/integration/kt83-v616-original-riosv-blank.mjs'
+      - 'kt80/integration/kt83-v616-original-blank-preview.mjs'
+      - 'kt80/integration/kt83-v616-original-blank.test.mjs'
+      - 'kt80/KT82_25_FINAL_UNIFIED_BLANK_V616_TEST.html'
+      - '.github/workflows/kt83-final-blank-v616.yml'
+  pull_request:
+    paths:
+      - 'kt80/integration/kt83-v616-original-riosv-blank.mjs'
+      - 'kt80/integration/kt83-v616-original-blank.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-letterhead:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: |
+          node --check kt80/integration/kt83-v616-original-riosv-blank.mjs
+          node --check kt80/integration/kt83-v616-original-blank-preview.mjs
+          node --check kt80/integration/kt83-v616-original-blank.test.mjs
+      - name: Install pinned XML and ZIP test libraries
+        run: npm install --no-save --no-package-lock --ignore-scripts fflate@0.8.3 @xmldom/xmldom@0.9.8
+      - name: Original blank and prior independent legal gates
+        run: |
+          node --test kt80/integration/kt83-v616-original-blank.test.mjs
+          node --test kt80/integration/kt83-v615-real-zip.test.mjs
+          node --test kt80/integration/kt83-v615-independent-docx-adapter.test.mjs
+          node --test kt80/integration/kt83-v613-competence-gate.test.mjs
