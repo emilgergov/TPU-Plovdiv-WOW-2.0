@@ -4,6 +4,7 @@ on:
     paths:
       - 'kt80/integration/kt83-v615-independent-docx-adapter.mjs'
       - 'kt80/integration/kt83-v615-independent-docx-adapter.test.mjs'
+      - 'kt80/integration/kt83-v615-real-zip.test.mjs'
       - 'kt80/integration/kt83-v615-docx-preview.mjs'
       - 'kt80/KT82_24_STAGE_V_V615_DOCX_SHELL_TEST.html'
       - '.github/workflows/kt82-stage-v-v615.yml'
@@ -28,8 +29,12 @@ jobs:
           node --check kt80/integration/kt83-v615-independent-docx-adapter.mjs
           node --check kt80/integration/kt83-v615-docx-preview.mjs
           node --check kt80/integration/kt83-v615-independent-docx-adapter.test.mjs
+          node --check kt80/integration/kt83-v615-real-zip.test.mjs
+      - name: Install pinned ZIP dependency for real DOCX roundtrip
+        run: npm install --no-save --no-package-lock --ignore-scripts fflate@0.8.3
       - name: Independent DOCX structural checks
         run: |
+          node --test kt80/integration/kt83-v615-real-zip.test.mjs
           node --test kt80/integration/kt83-v615-independent-docx-adapter.test.mjs
           node --test kt80/integration/kt83-v614-review-document.test.mjs
           node --test kt80/integration/kt83-v613-competence-gate.test.mjs
