@@ -40,3 +40,7 @@ jobs:
           node --check kt80/independence/pni-normative-conditions.mjs
           node --check kt80/independence/pni-independent-review.mjs
           node --test kt80/independence/pni-source-first.test.mjs
+      - name: PNI V2 isolated administrative preview regression
+        run: |
+          node --check kt80/integration/kt83-pni-v2-admin-preview.mjs
+          node --test kt80/independence/pni-preview-v2.test.mjs
