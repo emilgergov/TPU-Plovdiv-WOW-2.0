@@ -17,3 +17,10 @@ jobs:
           node-version: '22'
       - name: Independent V11 legal evidence and fee smoke tests
         run: node --test kt80/integration/stage4-stage5-smoke.test.mjs
+      - name: Isolated KT83 V1.3 preview regression and syntax
+        run: |
+          node --check kt80/integration/kt83-v1-3-admin-preview.mjs
+          node --check kt80/integration/kt80-v598-case-evidence-adapter.mjs
+          node --check kt80/integration/stage4-independent-legal-engine.mjs
+          node --check kt80/integration/stage5-independent-proposal.mjs
+          node --test kt80/integration/kt83-preview-regression.test.mjs
