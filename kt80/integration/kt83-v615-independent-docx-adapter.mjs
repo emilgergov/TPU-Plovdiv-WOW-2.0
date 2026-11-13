@@ -46,10 +46,11 @@ export function inspectBlankDOCX(bytes,zipEngine){
  const header=read(zip[head]),hrels=read(zip[headRelPath]);
  const logoIds=[...header.matchAll(/r:embed=["']([^"']+)["']/g)].map(m=>m[1]);
  const logoFound=logoIds.some(id=>{
-  const rel=hrels.match(new RegExp('<Relationship\\\\b[^>]*Id=["\\\']'+id+'["\\\'][^>]*>','i'))?.[0]||'';
-  const target=rel.match(/Target=["']([^"']+)["']/)?.[1]||'';
-  return /(?:^|\\/)media\\/[^/]+\\.(png|jpe?g)$/i.test(target) &&
-   images.some(p=>p==='word/'+target.replace(/^\\.\\//,''));
+  const relation=hrels.split('<Relationship').slice(1).map(x=>x.split('>')[0])
+   .find(x=>x.includes('Id="'+id+'"')||x.includes("Id='"+id+"'"));
+  const target=relation?.match(/Target=["']([^"']+)["']/)?.[1]||'';
+  return relation?.includes('/image')&&target.startsWith('media/')&&
+   images.some(p=>p==='word/'+target);
  });
  if(!logoFound)error('не е установена действителна вградена връзка към логото');
  const values=[...xml.matchAll(/<w:t(?:\s[^>]*)?>([\s\S]*?)<\/w:t>/g)].map(x=>x[1].trim()).filter(Boolean);
