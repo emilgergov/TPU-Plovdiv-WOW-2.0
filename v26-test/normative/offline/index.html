@@ -42,16 +42,24 @@ try{
  if(!response.ok)throw Error('Няма публикуван локален индекс: HTTP '+response.status);
  const m=await response.json();
  if(m.schema!=='kt77-r11-local-normative-archive-v1'||!Array.isArray(m.sources))throw Error('Невалиден архивен регистър');
- stats.textContent='Копия: '+m.archived_entries+' / '+m.total_registry_entries+' · Без локално копие: '+m.missing_entries+' · Архивна снимка: '+m.archive_snapshot_utc+' · Пълнота: '+(m.complete?'пълна':'частична');
+ // KT82 Б1: един физически документ = една публична референция; оригиналните ID остават алиаси.
+ const grouped=new Map();
+ for(const x of m.sources){
+  const key=x.archived&&x.sha256?'sha256:'+x.sha256:'id:'+x.id;
+  if(!grouped.has(key))grouped.set(key,{...x,aliases:[x.id],searchLabels:[x.title]});
+  else {const g=grouped.get(key);g.aliases.push(x.id);g.searchLabels.push(x.title);}
+ }
+ const unique=[...grouped.values()];
+ stats.textContent='Уникални референции: '+unique.length+' · С локално копие: '+unique.filter(x=>x.archived).length+' · Без локално копие: '+unique.filter(x=>!x.archived).length+' · Архивни идентификатори: '+m.total_registry_entries+' (историята е запазена) · Снимка: '+m.archive_snapshot_utc;
  function render(){
   out.replaceChildren();
   const term=q.value.trim().toLocaleLowerCase('bg');
-  const rows=m.sources.filter(x=>(!f.value||(f.value==='archived'?x.archived:!x.archived))&&[x.id,x.title,x.official_url,x.registry].join(' ').toLocaleLowerCase('bg').includes(term));
+  const rows=unique.filter(x=>(!f.value||(f.value==='archived'?x.archived:!x.archived))&&[...x.aliases,...x.searchLabels,x.official_url,x.registry].join(' ').toLocaleLowerCase('bg').includes(term));
   for(const x of rows){
    const card=document.createElement('article');card.className='card entry';
    const left=document.createElement('div'),right=document.createElement('div');right.className='actions';
    const h=document.createElement('h3');h.textContent=x.title;
-   const tag=document.createElement('div');tag.className='meta';tag.textContent=x.id+' · '+(x.registry==='catalog'?'Публичен каталог':'Основен нормативен регистър');
+   const tag=document.createElement('div');tag.className='meta';tag.textContent=x.aliases.join(' / ')+' · '+(x.registry==='catalog'?'Публичен каталог':'Основен нормативен регистър')+(x.aliases.length>1?' · Един файл, '+x.aliases.length+' архивни номера':'');
    const status=document.createElement('div');status.className='status '+(x.archived?'ok':'pending');
    status.textContent=x.archived?'ЛОКАЛНО КОПИЕ · '+(x.kind==='pdf'?'PDF':'ТЕКСТ'):'НЯМА ЛОКАЛНО КОПИЕ';
    left.append(tag,h,status);
