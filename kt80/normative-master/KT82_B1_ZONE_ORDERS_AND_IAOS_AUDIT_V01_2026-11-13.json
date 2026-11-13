@@ -1,0 +1,429 @@
+{
+  "schema": "KT82_B1_ZONE_PRIMARY_ORDER_AUDIT_V01",
+  "date": "2026-11-13",
+  "basis": "v26-test/normative/offline/archive-manifest.json",
+  "scope": {
+    "historical_zone_portal_entries": 37,
+    "distinct_codes": 32,
+    "expected_project_zones": 32,
+    "warning": "Manifest entries are portal pages and do not prove that all 32 project zone orders are archived."
+  },
+  "official_sources": {
+    "moew_register": "https://www.moew.government.bg/bg/priroda/natura-2000/registri-za-zastiteni-zoni/obnarodvani-zapovedi-po-reda-na-chl-12-ot-zbr/",
+    "natura_site": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/Natura2000ProtectedSites",
+    "agency_register": "https://pdbase.government.bg/zpo/bg/"
+  },
+  "zones": [
+    {
+      "historical_id": "C012",
+      "code": "BG0002015",
+      "title": "BG0002015 — Язовир Конуш",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0002015&siteType=BirdsDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C013",
+      "code": "BG0002086",
+      "title": "BG0002086 — Оризища Цалапица",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0002086&siteType=BirdsDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C014",
+      "code": "BG0000494",
+      "title": "BG0000494 — Централен Балкан",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000494&siteType=BirdsDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C015",
+      "code": "BG0002010",
+      "title": "BG0002010 — Язовир Пясъчник",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0002010&siteType=BirdsDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C016",
+      "code": "BG0002105",
+      "title": "BG0002105 — Персенк",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0002105&siteType=BirdsDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C017",
+      "code": "BG0002057",
+      "title": "BG0002057 — Бесапарски ридове",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0002057&siteType=BirdsDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C018",
+      "code": "BG0002087",
+      "title": "BG0002087 — Марица Пловдив",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0002087&siteType=BirdsDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C019",
+      "code": "BG0002081",
+      "title": "BG0002081 — Марица-Първомай",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0002081&siteType=BirdsDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C020",
+      "code": "BG0002016",
+      "title": "BG0002016 — Рибарници Пловдив",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0002016&siteType=BirdsDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C021",
+      "code": "BG0002073",
+      "title": "BG0002073 — Добростан",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0002073&siteType=BirdsDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C022",
+      "code": "BG0002054",
+      "title": "BG0002054 — Средна гора",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0002054&siteType=BirdsDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C023",
+      "code": "BG0002128",
+      "title": "BG0002128 — Централен Балкан буфер",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0002128&siteType=BirdsDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C024",
+      "code": "BG0000194",
+      "title": "BG0000194 — Река Чая",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000194&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C025",
+      "code": "BG0000254",
+      "title": "BG0000254 — Бесапарски възвишения",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000254&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C026",
+      "code": "BG0000255",
+      "title": "BG0000255 — Градинска гора",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000255&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C027",
+      "code": "BG0000289",
+      "title": "BG0000289 — Трилистник",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000289&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C028",
+      "code": "BG0000291",
+      "title": "BG0000291 — Гора-Шишманци",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000291&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C029",
+      "code": "BG0000424",
+      "title": "BG0000424 — Река Въча Тракия",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000424&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C030",
+      "code": "BG0000429",
+      "title": "BG0000429 — Река Стряма",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000429&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C031",
+      "code": "BG0000435",
+      "title": "BG0000435 — Река Каялийка",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000435&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C032",
+      "code": "BG0000437",
+      "title": "BG0000437 — Река Черкезица",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000437&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C033",
+      "code": "BG0000438",
+      "title": "BG0000438 — Река Чинардере",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000438&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C034",
+      "code": "BG0000443",
+      "title": "BG0000443 — Река Омуровска",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000443&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C035",
+      "code": "BG0000444",
+      "title": "BG0000444 — Река Пясъчник",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000444&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C036",
+      "code": "BG0000494",
+      "title": "BG0000494 — Централен Балкан",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000494&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C037",
+      "code": "BG0001033",
+      "title": "BG0001033 — Брестовица",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0001033&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C038",
+      "code": "BG0001030",
+      "title": "BG0001030 — Родопи-Западни",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0001030&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C039",
+      "code": "BG0001031",
+      "title": "BG0001031 — Родопи-Средни",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0001031&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C040",
+      "code": "BG0001039",
+      "title": "BG0001039 — Попинци",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0001039&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C041",
+      "code": "BG0001389",
+      "title": "BG0001389 — Средна гора",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0001389&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C042",
+      "code": "BG0001493",
+      "title": "BG0001493 — Централен Балкан буфер",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0001493&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C043",
+      "code": "BG0000578",
+      "title": "BG0000578 — Река Марица",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000578&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "C044",
+      "code": "BG0000436",
+      "title": "BG0000436 — Река Мечка",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0000436&siteType=HabitatDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "R-Z01",
+      "code": "BG0002057",
+      "title": "BG0002057 Заповед РД-786/29.10.2008 (ДВ 106/2008)",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/PublicDownloads/Auto/PS_SPA/BG0002057/BG0002057_PS_11.pdf",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "R-Z02",
+      "code": "BG0002057",
+      "title": "BG0002057 Заповед РД-78/28.01.2013 (ДВ 10/2013)",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/PublicDownloads/Auto/PS_SPA/BG0002057/BG0002057_PS_13.pdf",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "R-Z03",
+      "code": "BG0002057",
+      "title": "BG0002057 стандартен формуляр",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/PublicDownloads/SDF/Site_BG0002057.pdf",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    },
+    {
+      "historical_id": "R-Z04",
+      "code": "BG0002057",
+      "title": "BG0002057 страница на защитената зона",
+      "portal_url": "https://natura2000.egov.bg/EsriBg.Natura.Public.Web.App/Home/ProtectedSite?code=BG0002057&siteType=BirdsDirective",
+      "portal_page_archived": true,
+      "designation_order_pdf_archived": false,
+      "amendment_orders_verified": false,
+      "legal_ready": false
+    }
+  ],
+  "confirmed_orders_existing": [
+    {
+      "id": "R-Z01",
+      "code": "BG0002057",
+      "descriptor": "РД-786/29.10.2008",
+      "status": "ARCHIVED_PDF_UNVERIFIED_LEGAL_CURRENCY"
+    },
+    {
+      "id": "R-Z02",
+      "code": "BG0002057",
+      "descriptor": "РД-78/28.01.2013",
+      "status": "ARCHIVED_PDF_UNVERIFIED_LEGAL_CURRENCY"
+    }
+  ],
+  "protected_territories": {
+    "historical_aliases": [
+      "C046",
+      "R-R01",
+      "R-T01"
+    ],
+    "agency_registry_live_url": "https://pdbase.government.bg/zpo/bg/",
+    "site_status": "OFFICIAL_LIVE_REGISTER_CONFIRMED",
+    "offline_snapshot": "NOT_ARCHIVED",
+    "sveti_duh": {
+      "historical_aliases": [
+        "C047",
+        "R-T02"
+      ],
+      "agency_index": "СВЕТИ ДУХ — Природна забележителност",
+      "designation_order_number": null,
+      "designation_order_local_pdf": null,
+      "status": "INDEX_RECORD_CONFIRMED_ORIGINAL_ORDER_MISSING",
+      "detail_retrieval": "TIMED_OUT"
+    }
+  },
+  "integration": {
+    "stage4": false,
+    "stage5": false,
+    "generators_untouched": true
+  },
+  "next": "Cross-check 32-row project zone master, gather primary orders and amendments, verify protected-territory order, then mark legal-ready individually"
+}
