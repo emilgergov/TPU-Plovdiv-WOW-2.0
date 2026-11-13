@@ -443,5 +443,10 @@
     "stage5": false,
     "generators_untouched": true
   },
-  "next": "32 distinct BG codes are identified in the historic manifest; verify 37 separate zone portal records as distinct Birds/Habitats entries, including amendments and primary PDFs. Archive two Sveti Duh orders and authoritative register snapshot."
+  "next": "32 distinct BG codes are identified in the historic manifest; verify 37 separate zone portal records as distinct Birds/Habitats entries, including amendments and primary PDFs. Archive two Sveti Duh orders and authoritative register snapshot.",
+  "supersession_notice": {
+    "recorded_at": "2026-11-13",
+    "policy": "kt80/normative-master/KT82_B1_NORMATIVE_VS_TERRITORIAL_ORDERS_POLICY_2026-11-13.json",
+    "note": "Historical audit of legacy archive coverage only. Its mass archival plan is SUPERSEDED by KT82_B1_NORMATIVE_VS_TERRITORIAL_ORDERS_POLICY_2026-11-13.json. Primary orders are resolved case by case, not mandatory bulk normative archive inputs."
+  }
 }
