@@ -75,8 +75,16 @@ function updateTitles(type){
   if(value==='Предмет и обхват на инвестиционното предложение')el.textContent=isIP?value:'Предмет и обхват на преписката';
  });
  // Main heading from the selected step does not decide or constrain the subject.
- const step=document.querySelector('.kt80-step[data-step="2"]');
- if(step&&!isIP)step.setAttribute('data-kt82-dossier-kind',type);
+ const labels={2:'2. Предмет и обхват на преписката',3:'3. Имоти и пространствен анализ',4:'4. Нормативна и процедурна преценка',5:'5. Административен маршрут'};
+ for(const [number,label] of Object.entries(labels)){
+  const step=document.querySelector('.kt80-step[data-step="'+number+'"]');
+  if(!step)continue;
+  if(!step.dataset.kt82OriginalTitle)step.dataset.kt82OriginalTitle=step.textContent;
+  step.textContent=isIP?step.dataset.kt82OriginalTitle:label;
+ }
+ const screenTitle=$('kt80ScreenTitle');
+ if(!isIP&&screenTitle&&/предмет и обхват на инвестиционното предложение/iu.test(screenTitle.textContent))screenTitle.textContent=labels[2];
+ if(isIP&&screenTitle&&screenTitle.textContent===labels[2])screenTitle.textContent=labels[2].replace('на преписката','на инвестиционното предложение');
  const heading=document.querySelector('h2.kt80-stage-title');
  if(heading&&!isIP&&/инвестиционното предложение/i.test(heading.textContent))heading.textContent='2. Предмет и обхват на преписката';
  const panelHeading=stage.querySelector(':scope > h2');if(panelHeading)panelHeading.textContent=isIP?'2. Предмет и обхват на инвестиционното предложение':'2. Предмет и обхват на преписката';
