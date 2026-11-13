@@ -1,0 +1,25 @@
+{
+  "schema": "KT83_PNI_MANIFEST_V1",
+  "policy": "kt80/independence/PNI_KT83_V1_PROTOCOL.md",
+  "source_archive": "KT82_Normative_MASTER_V11_Tariff_Euro_2026-11-13.zip",
+  "archive_sha256": "8d3851affd72fb44b4d663920196e00ec317c8e45d36fc16c6ad6b0ce965226c",
+  "normative_source_roots": [
+    "kt80/integration/v11-trusted-source-registry.mjs",
+    "kt80/integration/v11-verified-fee-schedule.mjs",
+    "kt80/integration/stage4-independent-legal-engine.mjs",
+    "kt80/integration/stage5-independent-proposal.mjs",
+    "kt80/integration/kt83-v1-4-hypothesis-discovery.mjs"
+  ],
+  "expected_git_blob_sha1": {
+    "kt80/integration/v11-trusted-source-registry.mjs": "7067f972d1e3e77514e0d092f9f2f62744a5d1b3",
+    "kt80/integration/v11-verified-fee-schedule.mjs": "dcec0f91f43505f2839a3af9afc9b19012262e28",
+    "kt80/integration/stage4-independent-legal-engine.mjs": "82249a5dcb6fc2cfb0231b6c767d813f6c24d53d",
+    "kt80/integration/stage5-independent-proposal.mjs": "2e93d48170b2950e7b3131066359668a7ff787c1",
+    "kt80/integration/kt83-v1-4-hypothesis-discovery.mjs": "45dd373b8028bbca9d6746c601f934599c06200e"
+  },
+  "test_data_is_normative_source": false,
+  "auto_applicability_enabled": false,
+  "approved_rule_graph": false,
+  "scope_note": "Only code integrity and isolation are checked by the manifest; legal exhaustiveness is NOT certified.",
+  "revision_policy": "Any change of normative source requires explicit new manifest version and expert review; CI fails closed on silent rule changes."
+}
