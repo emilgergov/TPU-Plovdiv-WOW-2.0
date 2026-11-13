@@ -61,7 +61,7 @@ test('не се допуска произволна такса без прило
   assert.throws(()=>proposeStage5({stage4:stage4('false'),fee}));
 });
 test('недоказан нормативен източник не дава такса',()=>{
-  assert.throws(()=>proposeStage5({stage4:stage4('true'),fee:{...fee,tariffSource:{...fee.tariffSource,verifiedAgainstV11:false}}}));
+  assert.throws(()=>proposeStage5({stage4:stage4('true'),fee:{...fee,tariffSource:{...fee.tariffSource,articleSha256:'0000'}}}));
 });
 
 test('архивна разпоредба не позволява произволна такса',()=>{
