@@ -1,0 +1,84 @@
+{
+  "schema": "KT83_V1_4_AUTO_HYPOTHESIS_PREVIEW_CHECKPOINT",
+  "date": "2026-11-13",
+  "parent": "kt80/checkpoints/KT83_V1_3_INDEPENDENT_ADMIN_PREVIEW_QA_2026-11-13.json",
+  "state": "V1.4 ISOLATED PREVIEW ADDED, AUTOMATIC LEGAL CANDIDATE DISCOVERY; CI PASSED; external visual acceptance not yet completed",
+  "immutable_acceptances": {
+    "B1": "V11 locked",
+    "B2": "accepted",
+    "V27_35": "unchanged",
+    "KT80_V598": "unchanged",
+    "V13_preview": "unchanged"
+  },
+  "source_index": {
+    "canonical": "KT82_Normative_MASTER_V11_Tariff_Euro_2026-11-13.zip",
+    "trusted_substantive_ui_candidate_ids": [
+      "ZOOS_93"
+    ],
+    "limit": "Other regulations may be present in V11, but not yet indexed/verified for automated hypothesis discovery."
+  },
+  "change_set": [
+    {
+      "path": "kt80/integration/kt83-v1-4-hypothesis-discovery.mjs",
+      "role": "Search thematic signals in expert-confirmed subject+scope and propose review candidate without concluding applicability."
+    },
+    {
+      "path": "kt80/integration/kt83-v1-4-admin-auto-preview.mjs",
+      "role": "Separate V1.4 independent panel; auto-select legal candidate; on opening stage4 run provisional evidence-safe assessment. Manual article selection disabled."
+    },
+    {
+      "path": "kt80/KT83_02_AUTOMATIC_LEGAL_HYPOTHESES_V14_TEST.html",
+      "role": "Isolated HTML derived from V1.3; unchanged V59.8 base."
+    },
+    {
+      "path": "kt80/integration/kt83-v1-4-auto-discovery.test.mjs",
+      "role": "10 regression tests for mixed components, incomplete scope, non-investment matters, unknown evidence and preview separation."
+    },
+    {
+      "path": ".github/workflows/kt83-independent-normative-engine.yml",
+      "role": "Adds V1.4 syntax and 10 automated tests."
+    }
+  ],
+  "acceptance_test": {
+    "github_actions_url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/43498983006",
+    "result": "SUCCESS",
+    "stage_v14_test_count": 10,
+    "previous_dynamic_tests": 13,
+    "previous_preview_tests": 7,
+    "full_suite_total": 30,
+    "meaning": "Automated code/unit and structural integration checks, NOT visual/end-to-end TEST_2 acceptance."
+  },
+  "preview_url": "https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/kt80/KT83_02_AUTOMATIC_LEGAL_HYPOTHESES_V14_TEST.html",
+  "pages_deploy": "GitHub Pages run 43498983784 in_progress at checkpoint capture; not yet confirmed as live.",
+  "critical_safeguards": [
+    "Confirmed subject/scope mandatory; no keyword-only legal conclusion.",
+    "If textual activity indicators suggest EIA scope, only a candidate under ZOOS art93 is offered; applicability remains unknown without proof of all statutory criteria and annex category.",
+    "Non-investment case does not default to EIA; returns next-action proposal for archival coverage.",
+    "No individual administrative act, competence, fee, or legally binding qualification issued without expert evidence.",
+    "Stage5 fee still requires separately verified tariff category and supported legal finding.",
+    "Legacy catalog and V27.35 not used for independent result."
+  ],
+  "next_work": [
+    {
+      "id": "V1.5",
+      "goal": "Connect structured factual evidence with page/source provenance from actual KT80 intake reader and dossier content; distinguish text mention from verified fact and evidence contradictions."
+    },
+    {
+      "id": "V1.6",
+      "goal": "Audit additional relevant substantive V11 provisions (ZOOS annexes, regulation OS, waters etc) with validated per-article hashes, no web search; expand candidate graph."
+    },
+    {
+      "id": "V2",
+      "goal": "Automatic stage5 reasoned multi-hypothesis proposal and legally justified fee, with confirmed competence."
+    },
+    {
+      "id": "V3",
+      "goal": "RIOSV official Word/PDF editable draft with letterhead; no Classic inheritance."
+    },
+    {
+      "id": "V4_G",
+      "goal": "Run real TEST_2 end-to-end and no-regression automated checks, then controlled visual test."
+    }
+  ],
+  "resume_keyword": "WOW-КТ83-13-В1-В2-ЗАКЛЮЧЕНО-Б-ИНТЕГРАЦИЯ-БЕЗ-РЕГРЕСИИ"
+}
