@@ -1,0 +1,69 @@
+{
+  "schema": "KT82_B1_ZBR_DV88_2023_PRIMARY_AMENDMENT_RECORD_V01",
+  "date": "2026-11-13",
+  "document": {
+    "title": "Закон за изменение и допълнение на Закона за биологичното разнообразие",
+    "gazette_number": 88,
+    "gazette_date": "2023-10-20",
+    "adoption_date": "2023-10-05",
+    "decree": "Указ №189/18.10.2023",
+    "file": "Държавен вестник.pdf",
+    "file_sha256": "92821b2bbb45655da15f53496c1168abca9de64bf86912300be021a7a636a267",
+    "pages": 4,
+    "origin": "User supplied excerpt printed 2026-11-13; statutory promulgation 2023-10-20"
+  },
+  "provisions": [
+    {
+      "section": "§3",
+      "citation": "чл.12а",
+      "impact": "Специфични и подробни цели на опазване за защитените зони"
+    },
+    {
+      "section": "§5",
+      "citation": "чл.27",
+      "impact": "Териториални планове за управление на защитените зони, компетентност/териториален обхват"
+    },
+    {
+      "section": "§6",
+      "citation": "чл.28 ал.2",
+      "impact": "Шестгодишно преразглеждане на плановете"
+    },
+    {
+      "section": "§7",
+      "citation": "чл.29",
+      "impact": "Мерки и съвместимост със ЗЗТ"
+    },
+    {
+      "section": "§10",
+      "citation": "чл.115а",
+      "impact": "Национално управление на Натура 2000"
+    },
+    {
+      "section": "§13",
+      "citation": "чл.117а",
+      "impact": "Регионални органи за управление и комитети на заинтересованите страни"
+    },
+    {
+      "section": "§16–19",
+      "impact": "Преходни задължения за съобразяване на подзаконови актове и планове; не се предполага автоматично изпълнение"
+    }
+  ],
+  "classification": {
+    "primary_amendment_source": true,
+    "full_consolidated_law": false,
+    "latest_edition_proof": false,
+    "not_DV_46_2026": true
+  },
+  "relevance": [
+    "TPU-Plovdiv legal methodology",
+    "Normative MASTER article evidence",
+    "Legal branch planning, without changing AI author templates"
+  ],
+  "gates": {
+    "integrate": false,
+    "automatic_cite": false,
+    "source_file_public_repository_uploaded": false,
+    "classic_ab_capsule_unchanged": true
+  },
+  "next": "Crosswalk §3/5/7/10/13 into verified ZBR consolidated full text and confirm effective-date provisions with statutory sources; retain file in private local normative archive"
+}
