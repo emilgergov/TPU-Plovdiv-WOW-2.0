@@ -1,0 +1,35 @@
+name: WOW · Пакет А · ГИС → PDF1 → Етап 4
+on:
+  push:
+    paths:
+      - 'kt80/KT82_A_PDF1_V600.js'
+      - 'kt80/KT82_STAGE3_CONSOLIDATED_V600.js'
+      - 'kt80/KT82_STAGE4_NORMATIVE_BRIDGE_V600.js'
+      - 'kt80/KT82_17_PACKAGE_A_V600_TEST.html'
+      - 'tests/kt82-package-a-v600.test.cjs'
+      - '.github/workflows/kt82-package-a-v600.yml'
+  pull_request:
+    paths:
+      - 'kt80/KT82_A_PDF1_V600.js'
+      - 'kt80/KT82_STAGE3_CONSOLIDATED_V600.js'
+      - 'kt80/KT82_STAGE4_NORMATIVE_BRIDGE_V600.js'
+      - 'tests/kt82-package-a-v600.test.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax checks
+        run: |
+          node --check kt80/KT82_A_PDF1_V600.js
+          node --check kt80/KT82_STAGE3_CONSOLIDATED_V600.js
+          node --check kt80/KT82_STAGE4_NORMATIVE_BRIDGE_V600.js
+          node --check tests/kt82-package-a-v600.test.cjs
+      - name: Evidence pipeline regression
+        run: node --test tests/kt82-package-a-v600.test.cjs
