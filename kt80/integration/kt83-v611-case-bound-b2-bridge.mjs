@@ -23,7 +23,7 @@ function snapshot(root){
   gisScenario:spatial?.scenario||'CONTEXT',
   ids:spatial?.ids||[],
   gisIdentity:spatial?.live===root.KT80FreeGISResults});
- return {caseId:w.caseCycleId,generation:w.generation,evidenceRevision,signature,record:r};
+ return {caseId:w.caseCycleId,generation:w.generation,evidenceRevision,signature,record:r,liveRef:root.KT80FreeGISResults||null};
 }
 const validEvidence=e=>!!clean(e?.factId)&&
  ['true','false','unknown','conflict'].includes(e?.value)&&
@@ -54,15 +54,15 @@ export function createKT83V611Bridge(root){
   const confirmedRules=buildRules(rules);
   const outcome=assessStage4(stage4RequestFromKT80(record,confirmedRules));
   const now=snapshot(root);
-  if(now.signature!==s.signature)throw new Error('Преписката се промени по време на нормативния анализ');
+  if(now.signature!==s.signature||now.liveRef!==s.liveRef)throw new Error('Преписката или ГИС резултатът се промени по време на нормативния анализ');
   evaluated={signature:s.signature,caseId:s.caseId,generation:s.generation,
-   evidenceRevision:s.evidenceRevision,outcome};
+   evidenceRevision:s.evidenceRevision,liveRef:s.liveRef,outcome};
   return outcome;
  }
  function propose({confirmedCompetence=null,competenceEvidence=[],fee=null}={}){
   if(!evaluated)throw new Error('Няма актуална независима оценка от етап 4');
   const now=snapshot(root);
-  if(evaluated.signature!==now.signature||evaluated.caseId!==now.caseId||
+  if(evaluated.signature!==now.signature||evaluated.liveRef!==now.liveRef||evaluated.caseId!==now.caseId||
      evaluated.generation!==now.generation||evaluated.evidenceRevision!==now.evidenceRevision){
    invalidate();throw new Error('Оценката е остаряла: възобновете етап 4 за текущата преписка');
   }
@@ -70,12 +70,13 @@ export function createKT83V611Bridge(root){
    !clean(e?.sourceId)||!clean(e?.factId)||!clean(e?.archiveOrDossierOrigin)))
    throw new TypeError('Компетентността изисква проверим доказателствен източник');
   const outcome=proposeStage5({stage4:evaluated.outcome,confirmedCompetence,competenceEvidence,fee});
-  if(snapshot(root).signature!==evaluated.signature)throw new Error('Преписката се промени по време на изготвяне на предложението');
+  const after=snapshot(root);
+  if(after.signature!==evaluated.signature||after.liveRef!==evaluated.liveRef)throw new Error('Преписката се промени по време на изготвяне на предложението');
   return outcome;
  }
  function getAssessment(){
   if(!evaluated)return null;
-  try{if(snapshot(root).signature!==evaluated.signature){invalidate();return null;}}
+  try{const now=snapshot(root);if(now.signature!==evaluated.signature||now.liveRef!==evaluated.liveRef){invalidate();return null;}}
   catch{invalidate();return null}
   return evaluated.outcome;
  }
