@@ -8,18 +8,23 @@
     "kt80/integration/v11-verified-fee-schedule.mjs",
     "kt80/integration/stage4-independent-legal-engine.mjs",
     "kt80/integration/stage5-independent-proposal.mjs",
-    "kt80/integration/kt83-v1-4-hypothesis-discovery.mjs"
+    "kt80/integration/kt83-v1-4-hypothesis-discovery.mjs",
+    "kt80/independence/pni-normative-conditions.mjs",
+    "kt80/independence/pni-independent-review.mjs"
   ],
   "expected_git_blob_sha1": {
     "kt80/integration/v11-trusted-source-registry.mjs": "7067f972d1e3e77514e0d092f9f2f62744a5d1b3",
     "kt80/integration/v11-verified-fee-schedule.mjs": "dcec0f91f43505f2839a3af9afc9b19012262e28",
     "kt80/integration/stage4-independent-legal-engine.mjs": "82249a5dcb6fc2cfb0231b6c767d813f6c24d53d",
     "kt80/integration/stage5-independent-proposal.mjs": "2e93d48170b2950e7b3131066359668a7ff787c1",
-    "kt80/integration/kt83-v1-4-hypothesis-discovery.mjs": "45dd373b8028bbca9d6746c601f934599c06200e"
+    "kt80/integration/kt83-v1-4-hypothesis-discovery.mjs": "45dd373b8028bbca9d6746c601f934599c06200e",
+    "kt80/independence/pni-normative-conditions.mjs": "78ed6de8842f6bd90d26fda6d874e5fa8f8d3007",
+    "kt80/independence/pni-independent-review.mjs": "579f8196033a6abf4f661a3513a2a9d735f0a528"
   },
   "test_data_is_normative_source": false,
   "auto_applicability_enabled": false,
   "approved_rule_graph": false,
   "scope_note": "Only code integrity and isolation are checked by the manifest; legal exhaustiveness is NOT certified.",
-  "revision_policy": "Any change of normative source requires explicit new manifest version and expert review; CI fails closed on silent rule changes."
+  "revision_policy": "Any change of normative source requires explicit new manifest version and expert review; CI fails closed on silent rule changes.",
+  "independence_v2": "Source-only empty accepted conditions catalogue; no case-supplied rules through independent entrypoint."
 }
