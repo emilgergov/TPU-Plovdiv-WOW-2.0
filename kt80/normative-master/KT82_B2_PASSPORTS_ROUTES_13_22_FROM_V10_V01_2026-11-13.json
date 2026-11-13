@@ -1,0 +1,242 @@
+{
+  "schema": "KT82_B2_PASSPORTS_13_22_FROM_V10_V01",
+  "date": "2026-11-13",
+  "source_archive": "KT82_B1_Normative_Master_V10_B1_ARCHIVE_FROZEN_2026-11-13.zip",
+  "source_files": [
+    "texts/APK_f79d7532e8ce81b2.txt",
+    "core/ZOOS_2026_51.txt",
+    "core/ZBR_2024.txt",
+    "additions/ZZT_2023.txt",
+    "additions/N_OS_2025.txt",
+    "additions/N_OVOS_2022.txt",
+    "additions/N_EO_2020.txt"
+  ],
+  "passports": [
+    {
+      "route_id": 13,
+      "route_title": "Експертно обобщение",
+      "category": "internal_tool",
+      "basis": [
+        "АПК — доказателства и мотиви, когато са относими"
+      ],
+      "conditions": [
+        "Налични факти и открити противоречия",
+        "Проследимост до конкретни файлове от преписката и разпоредби от V10"
+      ],
+      "output": "Вътрешно експертно обобщение, без диспозитив на административен акт",
+      "risk": "Не маскирай оценка като решение на орган",
+      "accepted_for_live_acts": false
+    },
+    {
+      "route_id": 14,
+      "route_title": "Проверка на пълнота и допустимост",
+      "category": "internal_tool",
+      "basis": [
+        "АПК; съответната Наредба ОС/ОВОС/ЕО по избрания маршрут"
+      ],
+      "conditions": [
+        "Специален процедурен ред",
+        "Проверка за конкретно изискуемата комплектност",
+        "Отделяне на несъществена от съществена липса"
+      ],
+      "output": "Списък на липси и мотивирано предложение за допълване",
+      "risk": "Без фиктивно изискване за всеки възможен документ",
+      "accepted_for_live_acts": false
+    },
+    {
+      "route_id": 15,
+      "route_title": "ГИС справка за имоти и режими",
+      "category": "internal_tool",
+      "basis": [
+        "ЗБР; ЗЗТ; Наредба ОС чл.12, когато се прилага"
+      ],
+      "conditions": [
+        "Имотите са известни или са изрично неприложими",
+        "Актуални за случая ГИС данни и зонални геометрии, когато са налични"
+      ],
+      "output": "Вътрешна ГИС справка с точни източници и ограничения, без самостоятелен процедурен извод",
+      "risk": "Без автоматична процедура от пространствено пресичане; без фиктивни индивидуални заповеди",
+      "accepted_for_live_acts": false
+    },
+    {
+      "route_id": 16,
+      "route_title": "Архивен пакет",
+      "category": "internal_tool",
+      "basis": [
+        "АПК; нормативни изисквания за деловодство и електронни документи в V10"
+      ],
+      "conditions": [
+        "Идентификатори на входящите документи",
+        "Версии, източници, контрол на файловете и приложимите метаданни"
+      ],
+      "output": "Технически архив и опис на преписката",
+      "risk": "Не е издаваем административен акт",
+      "accepted_for_live_acts": false
+    },
+    {
+      "route_id": 17,
+      "route_title": "Жалба — квалификация",
+      "category": "procedural_intake",
+      "basis": [
+        "АПК — ред за оспорване; специален закон при наличен"
+      ],
+      "conditions": [
+        "Установи обжалваем акт, подател, правен интерес и срок когато са приложими",
+        "Разграничи жалба от възражение, сигнал или предложение"
+      ],
+      "output": "Правна квалификация и проект на законосъобразно следващо действие, не автоматично отхвърляне",
+      "risk": "Глава осма АПК не е общ ред за жалби",
+      "accepted_for_live_acts": false
+    },
+    {
+      "route_id": 18,
+      "route_title": "Сигнал — решение или уведомяване",
+      "category": "procedural_intake",
+      "basis": [
+        "АПК чл.107–124"
+      ],
+      "conditions": [
+        "Проверка за специален ред по чл.107 ал.2",
+        "Установен орган по чл.119 и допустимост по чл.111",
+        "При сигнал срещу орган — чл.113 изключение при основателност и уважаване"
+      ],
+      "output": "Мотивирано предложение за разглеждане, препращане или уведомяване",
+      "risk": "Чл.121 до два месеца плюс изключително не повече от един; чл.122 ал.2 — едномесечно изпращане при отказ от орган по чл.119 ал.2",
+      "accepted_for_live_acts": false
+    },
+    {
+      "route_id": 19,
+      "route_title": "Възражение",
+      "category": "procedural_intake",
+      "basis": [
+        "АПК — специално висящо производство; НОС/ОВОС/ЕО при приложимост"
+      ],
+      "conditions": [
+        "Установи кое производство е висящо и какво оспорва подателят",
+        "Установи приложим стадий и дали има специален ред"
+      ],
+      "output": "Квалификация на възражението и обосновано процедурно предложение",
+      "risk": "Не третирай възражение автоматически като жалба или сигнал",
+      "accepted_for_live_acts": false
+    },
+    {
+      "route_id": 20,
+      "route_title": "Препращане по компетентност",
+      "category": "procedural_action",
+      "basis": [
+        "АПК чл.31",
+        "АПК чл.112"
+      ],
+      "conditions": [
+        "Квалифицирай искане за издаване на индивидуален административен акт срещу предложение/сигнал",
+        "Провери специалните правила и компетентния орган"
+      ],
+      "output": "Препращане с конкретен адресат, уведомяване и приложим срок",
+      "risk": "Чл.31 — незабавно; чл.112 — до 7 дни само за предложение/сигнал",
+      "accepted_for_live_acts": false
+    },
+    {
+      "route_id": 21,
+      "route_title": "Уведомяване за проверка",
+      "category": "procedural_action",
+      "basis": [
+        "ЗООС чл.14",
+        "АПК и специални екологични актове по случая"
+      ],
+      "conditions": [
+        "Установи контролна компетентност, предмет и основание за проверка",
+        "Доказани факти за дата, обхват и евентуално изисквания за предизвестие"
+      ],
+      "output": "Проект на уведомление за проверка или мотивирано предложение за друго действие",
+      "risk": "Не се приема универсално, че всяка проверка изисква предварително уведомление",
+      "accepted_for_live_acts": false
+    },
+    {
+      "route_id": 22,
+      "route_title": "Предложение — решение",
+      "category": "procedural_intake",
+      "basis": [
+        "АПК чл.107 ал.3, чл.117–118"
+      ],
+      "conditions": [
+        "Предложение за подобряване на организация или други въпроси от компетентността",
+        "Не е сигнал за нарушение, жалба по акт или възражение по преписка",
+        "Провери специален ред по чл.107 ал.2"
+      ],
+      "output": "Проект на решение/уведомяване по предложение при сроковете на чл.118",
+      "risk": "По чл.118 решение до 2 месеца; по-горестоящ орган може да продължи до 6 месеца, съобщаване до 7 дни",
+      "accepted_for_live_acts": false
+    }
+  ],
+  "regression_cases": [
+    {
+      "id": "INTERNAL_NOT_ACT",
+      "ids": [
+        13,
+        14,
+        15,
+        16
+      ],
+      "expected": "Never produce independent signed administrative acts"
+    },
+    {
+      "id": "NO_PI_REQUIRED",
+      "ids": [
+        15
+      ],
+      "expected": "If no parcel is applicable, no invented GIS or compulsory PDF1"
+    },
+    {
+      "id": "APPEAL_VS_SIGNAL",
+      "ids": [
+        17,
+        18,
+        19
+      ],
+      "expected": "Distinguish complaint, objection, signal"
+    },
+    {
+      "id": "APK_ART113_EXCEPTION",
+      "ids": [
+        18
+      ],
+      "expected": "Signal against authority may be granted by same authority when justified; otherwise independent review"
+    },
+    {
+      "id": "APK_31_112",
+      "ids": [
+        20
+      ],
+      "expected": "Immediate referral vs 7-day proposal/signal referral"
+    },
+    {
+      "id": "INSPECTION_NOTICE",
+      "ids": [
+        21
+      ],
+      "expected": "Prior notice only where legally applicable"
+    },
+    {
+      "id": "PROPOSAL_VS_SIGNAL_CLOCK",
+      "ids": [
+        18,
+        22
+      ],
+      "expected": "Different extension rules: 1 month for signal vs to 6 months for proposal"
+    }
+  ],
+  "QA": {
+    "ten_catalog_labels_match": true,
+    "four_internal_tools_not_acts": true,
+    "regression_scenarios_defined": 7,
+    "actual_functional_tests_executed": false,
+    "expert_acceptance": false,
+    "auto_legal_citations": false
+  },
+  "architecture": {
+    "kt80_independent_author": true,
+    "classic_ab_v27_35_not_templates": true,
+    "existing_generators_unchanged": true
+  },
+  "status": "INITIAL_LEGAL_PASSPORTS_DEVELOPED_REQUIRES_ROUTE_BY_ROUTE_SUBSTANTIVE_FINAL_REVIEW"
+}
