@@ -1,0 +1,65 @@
+{
+  "schema": "KT82_STAGE_V_START_INTEGRATION_CONTRACT",
+  "date": "2026-11-13",
+  "status": "STAGE_V_STARTED_SEPARATE_CODE_MODULES_COMMITTED_NOT_YET_WIRED_TO_KT80_RUNTIME",
+  "acceptance_reference": "kt80/normative-master/KT82_B_FROZEN_V11_B2_ACCEPTED_STAGE_V_OPEN_2026-11-13.json",
+  "canonical_archive": {
+    "file": "KT82_Normative_MASTER_V11_Tariff_Euro_2026-11-13.zip",
+    "sha256": "8d3851affd72fb44b4d663920196e00ec317c8e45d36fc16c6ad6b0ce965226c",
+    "status": "locked_only_documentary_basis"
+  },
+  "created_code": [
+    {
+      "path": "kt80/integration/stage4-independent-legal-engine.mjs",
+      "role": "pure evidence/provenance tri-state multi-hypothesis legal evaluator without hardcoded result catalog"
+    },
+    {
+      "path": "kt80/integration/stage5-independent-proposal.mjs",
+      "role": "independent reasoned proposal, archive-linked tariff and lawful euro rounding; cannot issue official act"
+    },
+    {
+      "path": "kt80/integration/stage4-stage5-smoke.test.mjs",
+      "role": "11 node smoke scenarios ready for CI execution"
+    }
+  ],
+  "model_smoke_checks": {
+    "executed_in_connector_sandbox": 7,
+    "passed": 7,
+    "one_extra_static_check_invalid_due_to_comments": "excluded from dynamic test count",
+    "additional_static_checks": 5,
+    "static_passed": 5,
+    "node_test_file_committed_but_node_ci_not_executed": true
+  },
+  "requirements_before_live_runtime": [
+    {
+      "id": "trusted_V11_source_registry",
+      "description": "The V11 archival source and validated-article identity must be issued by a trusted registry. Current proof flag in model payload is caller-controlled and does not by itself prove source authenticity; block live legal citations until this is resolved."
+    },
+    {
+      "id": "find_current_KT80_stage4_5_entrypoints",
+      "description": "Identify real administrative UI file/entrypoints and its data contract. Root index.html belongs to public WOW 3.4.1 and currently links stable V27.35; do not edit it now."
+    },
+    {
+      "id": "stage4_5_data_bridge",
+      "description": "Map confirmed subject, actual case evidence, optional PI/GIS, competence and verified archive passages into modules; then surface stage4 findings and stage5 proposal."
+    },
+    {
+      "id": "letterhead_output",
+      "description": "Generate independent proposal on standard RIOSV letterhead (Verdana 10, address, logo, footer, confidentiality, two e-signature placeholders), no Classic templates."
+    },
+    {
+      "id": "continuous_tests",
+      "description": "Run committed node regression file and additional complex real dossier tests; only then controlled stage G deployment/visual testing."
+    }
+  ],
+  "architecture_guards": {
+    "V27_35_capsulated": true,
+    "classic_AB_no_inheritance": true,
+    "no_route_first": true,
+    "catalog22_not_decision_engine": true,
+    "source_only_V11": true,
+    "always_reasoned_next_proposal": true,
+    "final_authority_stays_expert": true,
+    "public_deployment_done": false
+  }
+}
