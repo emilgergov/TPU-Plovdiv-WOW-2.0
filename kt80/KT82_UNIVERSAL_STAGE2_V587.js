@@ -22,9 +22,9 @@ function classify(intake){
  let type='CORRESPONDENCE';
  // Start with the documentary genre, NOT incidental terms mentioned later in the dossier.
  if(test(/(?:^|\n)\s*(?:с\s*и\s*г\s*н\s*а\s*л|сигнал)\s*(?:\n|относно|за|$)|\bсигнал\s+относно\b/imu,beginning)||test(/сигнал/iu,filenames))type='SIGNAL';
- else if(test(/(?:^|\n)\s*жалба\b|\bжалба\s+относно\b/imu,beginning)||test(/жалба/iu,filenames))type='COMPLAINT';
- else if(test(/(?:^|\n)\s*заявление\b|\bзаявявам\b/imu,beginning)||test(/заявлени/iu,filenames))type='APPLICATION';
- else if(test(/(?:^|\n)\s*искане\b|\bмоля\s+да\b/imu,head)||test(/искане/iu,filenames))type='REQUEST';
+ else if(test(/(?:^|\n)\s*жалба(?:\s|:|$)|жалба\s+относно/imu,beginning)||test(/жалба/iu,filenames))type='COMPLAINT';
+ else if(test(/(?:^|\n)\s*заявление(?:\s|:|$)|заявявам(?:\s|:|$)/imu,beginning)||test(/заявлени/iu,filenames))type='APPLICATION';
+ else if(test(/(?:^|\n)\s*искане(?:\s|:|$)|моля\s+да(?:\s|$)/imu,head)||test(/искане/iu,filenames))type='REQUEST';
  const investment=test(/(?:уведомление\s+за\s+инвестиционно\s+предложение|инвестиционното\s+предложение\s*[:„]|предмет\s+на\s+(?:инвестиционно(?:то)?\s+)?предложение|предвижда\s+се\s+(?:изграждане|строителство))/iu,beginning);
  if((type==='CORRESPONDENCE'||type==='REQUEST')&&investment)type='INVESTMENT';
  return Object.freeze({type,docs,source:docs[0]?.source||'',fromDocument:!!docs.length,hasHeading:!!expanded});
@@ -48,7 +48,7 @@ function findScope(text,type){
  // An actual request is preferable to speculative technical facts.
  const asks=[...t.matchAll(/(?:^|\n)\s*(?:Моля|моля)\s+([^.\n]{14,480})(?:[.]|\n|$)/gmu)]
    .map(x=>clean(x[1])).filter(x=>!/(?:прилагам|приложение|благодаря)/iu.test(x));
- const request=asks.length?'Да се '+asks[0].replace(/^да\s+/iu,'').replace(/[.;:]$/u,'')+'.':'';
+ const request=asks.length?'Да '+asks[0].replace(/^да\s+/iu,'').replace(/[.;:]$/u,'')+'.':'';
  if(request)return request;
  const generic={SIGNAL:'Проверка на изложените в сигнала обстоятелства и подготовка на мотивиран отговор.',COMPLAINT:'Преглед на оспорените обстоятелства и определяне на приложимия административен ред.',REQUEST:'Изясняване на поисканото действие, допустимостта и компетентността на административния орган.',APPLICATION:'Проверка на заявената услуга, основанията и необходимите документи.',CORRESPONDENCE:'Уточняване на административния въпрос и необходимото последващо действие.'};
  return generic[type]||generic.CORRESPONDENCE;
