@@ -20,14 +20,15 @@ export function createUniversalOutSession({cryptoAPI=globalThis.crypto,zipEngine
   revision:round,retainedAcrossCases:!!original,originalNeverUploaded:true
  });
  async function attach(bytes,{name=''}={}){
-  const next=round+1;
+  const startedAt=round;
   if(!(bytes instanceof Uint8Array)||bytes.length<1000||bytes.length>5000000)
    fail('невалиден размер на оригиналния DOCX');
   const input=clone(bytes);
   const fingerprint=await sha(input,cryptoAPI);
   if(fingerprint!==ORIGINAL_BLANK_SHA256)
    fail('този файл не е приетата „БЛАНКА РИОСВ ПЛОВДИВ.docx“');
-  original=input;identity=String(name||'БЛАНКА РИОСВ ПЛОВДИВ.docx');round=next;
+  if(round!==startedAt)fail('сесията или изборът на бланка се промени по време на проверката');
+  original=input;identity=String(name||'БЛАНКА РИОСВ ПЛОВДИВ.docx');round++;
   return status();
  }
  async function render(record,{currentRecord=null}={}){
