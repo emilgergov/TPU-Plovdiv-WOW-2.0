@@ -7,6 +7,15 @@
 export const LOCKED_ARCHIVE = 'KT82_Normative_MASTER_V11_Tariff_Euro_2026-11-13.zip';
 export const LOCKED_ARCHIVE_SHA256 = '8d3851affd72fb44b4d663920196e00ec317c8e45d36fc16c6ad6b0ce965226c';
 const records = {
+  "TARIFA_8": {
+  "id": "TARIFA_8",
+  "act": "Тарифа за таксите в системата на МОСВ",
+  "article": "чл. 8",
+  "archivePath": "additions_v11/TARIFA_MOEW_2022.txt",
+  "documentSha256": "9e1164276136bd0b90bea878066ebd429fdb11a8fbf7f2288199f17a9ddf5185",
+  "articleSha256": "0c46717cff9ac7b6d7b116650bc5aa5f7633c02ea831076e62a940785071936d",
+  "anchor": "За издаване на разрешения се събират следните такси:"
+},
   "ZOOS_93": {
     "id": "ZOOS_93",
     "act": "Закон за опазване на околната среда",
