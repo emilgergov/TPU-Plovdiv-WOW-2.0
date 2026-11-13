@@ -1,5 +1,5 @@
 {
-  "schema": "KT82_B1_ROUTE_DEPENDENCY_QA_V01",
+  "schema": "KT82_B1_ROUTE_DEPENDENCY_QA_V02",
   "date": "2026-11-13",
   "source": "kt80/KT80_E01_B_CONSOLIDATED_MATRIX_V01.json",
   "source_total": 22,
@@ -43,7 +43,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "LEGACY_V27_35_RESTRICTED_NEGATIVE_ROUTE_ONLY; KT80_REQUIRES_UNFORCED_REQUALIFICATION"
     },
     {
       "route_id": 2,
@@ -65,7 +67,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 3,
@@ -92,7 +96,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 4,
@@ -114,7 +120,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 5,
@@ -134,7 +142,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 6,
@@ -154,7 +164,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 7,
@@ -176,7 +188,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 8,
@@ -198,7 +212,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 9,
@@ -222,7 +238,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 10,
@@ -242,7 +260,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 11,
@@ -262,7 +282,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 12,
@@ -282,7 +304,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 13,
@@ -302,7 +326,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 14,
@@ -328,7 +354,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 15,
@@ -351,7 +379,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 16,
@@ -371,7 +401,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 17,
@@ -392,7 +424,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 18,
@@ -413,7 +447,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 19,
@@ -437,7 +473,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 20,
@@ -458,7 +496,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 21,
@@ -482,7 +522,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     },
     {
       "route_id": 22,
@@ -503,7 +545,9 @@
       "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
       "source_legal_approval": "PENDING",
       "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
-      "publication_authorised": false
+      "publication_authorised": false,
+      "output_template_policy": "KT80_FREE_AUTHOR_BLANK_RIOSV_LETTERHEAD; NO_CLASSIC_A_B_DEPENDENCY",
+      "legacy_route_isolation": "NOT_A_CLASSIC_A_B_TEMPLATE"
     }
   ],
   "coverage": {
@@ -523,7 +567,26 @@
     "automatic_citations": false,
     "stages4_5": false,
     "existing_generators_modified": false,
-    "territorial_orders_on_demand": true
+    "territorial_orders_on_demand": true,
+    "classic_ab_mandatory": false,
+    "legacy_v27_35_capsulated": true,
+    "kt80_ai_author_independent": true
   },
-  "status": "CONTROLLED_REFERENCE_MAPPING_ONLY"
+  "status": "CONTROLLED_REFERENCE_MAPPING_ONLY",
+  "architecture_correction": {
+    "decision_date": "2026-11-13",
+    "decision": "Капсулираната V27.35 включва отделните Classic A/B маршрути и фиксирани еталони. Те НЕ са задължителни образци или ограничения за AI Автора на КТ80.",
+    "legacy_v27_35": "Independent locked test application accessed via red button. Preserve Classic A/B + Expert + existing GIS/PDF output; no auto-inheritance of paragraphs/conclusions into KT80.",
+    "kt80_ai_author": "One free evidence-based author on unified blank RIOSV-Plovdiv letterhead, builds own factual reasoning and legally grounded proposal per confirmed subject/scope, GIS, PI MASTER and Normative MASTER.",
+    "workflow": "Stage 2 confirmed subject/scope -> conditional GIS Stage 3 (block 15 if needed) -> Stage 4 normative/procedural evaluation -> Stage 5 choose supported route from 22 draft catalog; expert approves.",
+    "route01": "Existing Route01 in source 22-catalog is a historical restricted negative branch for V27.35. In KT80, do NOT preselect a negative conclusion or use Classic A/B templates; develop its unforced equivalent from evidence. The 22 candidates remain reviewable.",
+    "policy": "Never without a proposal: suggest the supported next procedural action and indicate evidence gaps; do not fabricate final legal conclusion or cites.",
+    "not_allowed": [
+      "Classic A/B as mandatory models for KT80",
+      "Fixed Classic conclusion for AI author",
+      "Third separate GIS necessity branch for undecided status",
+      "Changing approved V27.35, Word, PDF1 or PDF2",
+      "Auto legal citations prior to expert and version checks"
+    ]
+  }
 }
