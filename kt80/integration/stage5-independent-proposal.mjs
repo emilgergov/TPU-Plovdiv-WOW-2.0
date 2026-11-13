@@ -5,6 +5,7 @@
  */
 import { CANONICAL_ARCHIVE, ARCHIVE_SHA256 } from './stage4-independent-legal-engine.mjs';
 import { assertVerifiedReference } from './v11-trusted-source-registry.mjs';
+import { verifiedFixedFee } from './v11-verified-fee-schedule.mjs';
 
 export function convertTariffBgnToEur(bgn) {
   if (typeof bgn !== 'string' || !/^\d{1,12}(?:\.\d{1,2})?$/.test(bgn)) {
@@ -49,15 +50,20 @@ export function proposeStage5({ stage4, confirmedCompetence, competenceEvidence,
   if (fee !== undefined && fee !== null) {
     const tariffCitation=requireArchiveRule(fee?.tariffSource, 'тарифа');
     const euroCitation=requireArchiveRule(fee?.euroLawSource, 'закон за еврото');
-    if (!['TARIFA_1','TARIFA_22'].includes(tariffCitation.id) ||
-        !['EURO_11','EURO_12','EURO_13','EURO_52'].includes(euroCitation.id)) {
-      throw new TypeError('Неправилна комбинация от архивни правни основания за такса');
+    const registeredFee=verifiedFixedFee(fee?.scheduleId);
+    if (registeredFee.articleId !== tariffCitation.id ||
+        !['EURO_12','EURO_13'].includes(euroCitation.id) ||
+        fee?.bgnAmount !== registeredFee.archivedBgnAmount) {
+      throw new TypeError('Таксата и правното основание не съвпадат с фиксирания архивен размер по V11');
     }
     if (!supported.some(x => x.ruleId === fee?.linkedLegalFindingId)) {
       throw new TypeError('Таксата не е свързана с доказано приложимо правно основание');
     }
     const bgnAmount = fee.bgnAmount;
     tariff = {
+      scheduleId: registeredFee.id,
+      scheduleClause: registeredFee.clause,
+      scheduleLabel: registeredFee.label,
       archivedBgnAmount: bgnAmount,
       calculatedEuroAmount: convertTariffBgnToEur(bgnAmount),
       rate: '1.95583',
