@@ -1,0 +1,25 @@
+name: WOW · Б1 · Официални нормативни източници
+on:
+  push:
+    paths:
+      - 'kt80/normative-master/KT82_B1_OFFICIAL_SOURCE_REGISTER_2026-11-13.json'
+      - 'kt80/normative-master/KT82_B1_OFFICIAL_SOURCE_REGISTER_V02_2026-11-14.json'
+      - 'tests/kt82-b1-source-register-v02.test.cjs'
+      - '.github/workflows/kt82-b1-source-register.yml'
+  pull_request:
+    paths:
+      - 'kt80/normative-master/KT82_B1_OFFICIAL_SOURCE_REGISTER_V02_2026-11-14.json'
+      - 'tests/kt82-b1-source-register-v02.test.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  official-sources:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate source inventory and applicability gate
+        run: node --test tests/kt82-b1-source-register-v02.test.cjs
