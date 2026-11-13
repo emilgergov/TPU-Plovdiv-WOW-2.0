@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'kt80/integration/**'
+      - 'kt80/independence/**'
       - '.github/workflows/kt83-independent-normative-engine.yml'
   workflow_dispatch:
 jobs:
@@ -29,3 +30,8 @@ jobs:
           node --check kt80/integration/kt83-v1-4-hypothesis-discovery.mjs
           node --check kt80/integration/kt83-v1-4-admin-auto-preview.mjs
           node --test kt80/integration/kt83-v1-4-auto-discovery.test.mjs
+      - name: PNI KT83 mandatory normative isolation gate
+        run: |
+          node --check kt80/independence/pni-gate.mjs
+          node kt80/independence/pni-gate.mjs
+          node --test kt80/independence/pni-gate.test.mjs
