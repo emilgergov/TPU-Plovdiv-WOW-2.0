@@ -134,3 +134,48 @@ test('ПНИ-цикъл 10: изчистването не изменя пост�
  assert.ok(!s.includes('v11-'));
  assert.ok(!s.includes('localStorage')&&!s.includes('sessionStorage'));
 });
+
+function fakeWorker(){
+ let n=0;const calls=[];
+ const ctx={Request,Response,Headers,URL,AbortController,TextEncoder,setTimeout,clearTimeout,
+  fetch:async (url,options)=>{
+   assert.equal(url,'https://api.openai.com/v1/responses');
+   calls.push(JSON.parse(options.body));
+   const answer='Редактиран резултат '+(++n);
+   return {ok:true,json:async()=>({output:[{content:[{type:'output_text',text:answer}]}]})};
+  }};
+ vm.runInNewContext(worker.replace('export default {','globalThis.__worker = {'),ctx,{filename:'worker.js'});
+ const env={OPENAI_API_KEY:'dummy-test-key',AI_AUTHOR_PASSWORD_V27:'dummy-test-password'};
+ const request=(route,input)=>new Request('https://worker.example/'+route,{
+  method:'POST',headers:{Origin:'https://emilgergov.github.io',
+   Authorization:'Bearer dummy-test-password','Content-Type':'application/json'},
+  body:JSON.stringify(input)
+ });
+ return {work:ctx.__worker,env,calls,request};
+}
+test('ПНИ-цикъл 11: две реално изпълнени Worker заявки за предмета нямат общ разговор',async()=>{
+ const w=fakeWorker();
+ const a=await w.work.fetch(w.request('subject-improve',{subject:'Проект първа преписка А',facts:[]}),w.env);
+ const b=await w.work.fetch(w.request('subject-improve',{subject:'Проект втора преписка Б',facts:[]}),w.env);
+ assert.equal(a.status,200);assert.equal(b.status,200);
+ assert.equal(w.calls.length,2);
+ assert.equal(w.calls[0].input.length,2);
+ assert.equal(w.calls[1].input.length,2);
+ assert.ok(w.calls[0].input[1].content.includes('първа преписка А'));
+ assert.ok(w.calls[1].input[1].content.includes('втора преписка Б'));
+ assert.ok(!w.calls[1].input[1].content.includes('първа преписка А'));
+ assert.equal(w.calls[0].store,false);
+ assert.equal(w.calls[1].store,false);
+ assert.equal(w.calls[1].previous_response_id,undefined);
+});
+test('ПНИ-цикъл 12: Worker редакцията на обхват не наследява предишния обхват',async()=>{
+ const w=fakeWorker();
+ const a=await w.work.fetch(w.request('scope-improve',{subject:'Предмет А',scope:'Обхват от преписка А'}),w.env);
+ const b=await w.work.fetch(w.request('scope-improve',{subject:'Предмет Б',scope:'Обхват от преписка Б'}),w.env);
+ assert.equal(a.status,200);assert.equal(b.status,200);
+ assert.equal(w.calls.length,2);
+ assert.ok(w.calls[0].input[1].content.includes('преписка А'));
+ assert.ok(w.calls[1].input[1].content.includes('преписка Б'));
+ assert.ok(!w.calls[1].input[1].content.includes('преписка А'));
+ assert.equal(w.calls[0].store,false);assert.equal(w.calls[1].store,false);
+});
