@@ -14,7 +14,9 @@ export const PROTECTED_SOURCES=Object.freeze([
  'kt80/integration/v11-verified-fee-schedule.mjs',
  'kt80/integration/stage4-independent-legal-engine.mjs',
  'kt80/integration/stage5-independent-proposal.mjs',
- 'kt80/integration/kt83-v1-4-hypothesis-discovery.mjs'
+ 'kt80/integration/kt83-v1-4-hypothesis-discovery.mjs',
+ 'kt80/independence/pni-normative-conditions.mjs',
+ 'kt80/independence/pni-independent-review.mjs'
 ]);
 const auditedArchive='8d3851affd72fb44b4d663920196e00ec317c8e45d36fc16c6ad6b0ce965226c';
 
@@ -48,11 +50,29 @@ export function verifyIndependence(manifest,sources){
   // Only the closed production dependencies may be imported from normative modules.
   const withoutComments=stripComments(source);
   const imports=[...withoutComments.matchAll(/\bimport\s+(?:[\s\S]*?\s+from\s+)?['"]([^'"]+)['"]/g)];
-  const allowed=new Set(['./v11-trusted-source-registry.mjs','./v11-verified-fee-schedule.mjs','./stage4-independent-legal-engine.mjs']);
+  const allowed=new Set(['./v11-trusted-source-registry.mjs','./v11-verified-fee-schedule.mjs','./stage4-independent-legal-engine.mjs','../integration/stage4-independent-legal-engine.mjs','../integration/v11-trusted-source-registry.mjs','./pni-normative-conditions.mjs']);
   for(const m of imports)if(!allowed.has(m[1]))
     add('DEPENDENCY_POLLUTION','Недопустим внос в нормативен модул '+p+': '+m[1]);
   if(/\b(?:fetch\s*\(|XMLHttpRequest|localStorage|sessionStorage|indexedDB)\b/.test(withoutComments))
     add('RUNTIME_EXTERNAL_MUTATION','Нормативният модул ползва променящ се външен/локален източник: '+p);
+ }
+ const normativeGraph=sources['kt80/independence/pni-normative-conditions.mjs'];
+ if(typeof normativeGraph==='string'){
+  const graphCode=stripComments(normativeGraph);
+  if(!/APPROVED_CONDITIONS\s*=\s*Object\.freeze\(\[\s*\]\)/.test(graphCode)||
+     !/LEGAL_DOMAINS\s*=\s*Object\.freeze\(\[\s*\]\)/.test(graphCode))
+   add('UNREVIEWED_RULE_GRAPH','Въведени са правни правила или домейни без доказана независима приемка');
+  if(!/statutesExhaustivelyMapped:\s*false/.test(graphCode)||
+     !/reviewedByQualifiedExpert:\s*false/.test(graphCode))
+   add('FORGED_COVERAGE','Пълнотата на нормативния граф е обявена без приемка');
+ }
+ const reviewCode=sources['kt80/independence/pni-independent-review.mjs'];
+ if(typeof reviewCode==='string'){
+  const noComments=stripComments(reviewCode);
+  if(!noComments.includes("exact(data,['confirmedSubject','scopeConfirmed','evidence'])"))
+   add('CASE_RULE_INJECTION','Автоматичният автор може да приеме правила или процедури от преписката');
+  if(!noComments.includes('readyForStage5Draft:eligible && evaluation.readyForStage5Draft'))
+   add('INCOMPLETE_LEGAL_COVERAGE','Проектът може да прескочи проверката на нормативната пълнота');
  }
  const discovery=sources['kt80/integration/kt83-v1-4-hypothesis-discovery.mjs'];
  if(typeof discovery==='string'){
