@@ -1,0 +1,59 @@
+{
+  "schema": "KT82_B1_CLOSEOUT_THREE_TASKS",
+  "date": "2026-11-13",
+  "source": "Consolidated real GitHub B1 audits and private V9 archive",
+  "scope": "B1 only: archive readiness, NOT B2 per-route substantive legal approval",
+  "overall": "B1_OPEN_APPROX_85_TO_90_PERCENT_ARCHIVE_READINESS_ONLY",
+  "completed": [
+    {
+      "id": "CORE",
+      "count": 6,
+      "label": "ZOOS, ZBR, ZZT, OS, OVOS, EO source documents archived"
+    },
+    {
+      "id": "ANNEX",
+      "label": "OVOS annex bodies 2, 2a, 7, 9 recovered from user PDF of official MOEW website in V9; other annexes structurally inspected"
+    },
+    {
+      "id": "ADMIN",
+      "label": "General APK, RIOSV, procedural administrative document sources archived"
+    },
+    {
+      "id": "SEPARATION",
+      "label": "Individual Natura2000 and ZT territory orders are separate case-specific registry, not bulk B1 blocker"
+    }
+  ],
+  "remaining_exactly_3": [
+    {
+      "id": 1,
+      "task": "Final publication chronology and amendments crosscheck for each act in core six plus administrative sources",
+      "exit_criterion": "For each source mark controlling original/official print; last gazette validated or explicit unknown; archival old revisions and article dates; no invented post-2024 ZBR amendment",
+      "priority": "P0"
+    },
+    {
+      "id": 2,
+      "task": "Conditional special act inventory",
+      "exit_criterion": "Per topic water, ZUT, waste, air, industrial accident, building/sector sources identify trigger and official location or explicit case-dependent retrieval; do not indiscriminately archive thousands of laws",
+      "priority": "P1"
+    },
+    {
+      "id": 3,
+      "task": "One coherent reproducible V9 archive manifest + B1 freeze/hand-off",
+      "exit_criterion": "Checksum, file inventory, annex labels and bodies, index nonempty, broken links, provenance, version, duplicate flags; GitHub B1 final status; no runtime changes; unresolved B2 issues moved to B2 register",
+      "priority": "P0"
+    }
+  ],
+  "not_blocking_B1": [
+    "22 legal route passports with individual articles and time limits",
+    "Case-specific territorial orders for 32 Natura2000 sites",
+    "Expert approval of each type of outgoing act",
+    "KT80 runtime integration of stages 4 and 5"
+  ],
+  "belongs_to_B2": "22 routes; 4 internal tools are not administrative acts; per-route legal/article/effective-date/competence/condition/exception verification, final legal citation permission",
+  "architecture": {
+    "classic_A_B_only_frozen_legacy": "V27.35",
+    "kt80_new_author_independent": true,
+    "v27_35_or_runtime_modified": false
+  },
+  "constraint": "No claim of B1 closure until all three exit criteria proven; no user visual test now"
+}
