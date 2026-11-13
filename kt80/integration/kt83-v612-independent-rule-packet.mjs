@@ -7,6 +7,8 @@ import {verifiedReference} from './v11-trusted-source-registry.mjs';
 const trim=s=>typeof s==='string'?s.trim():'';
 const unique=arr=>Array.isArray(arr)&&new Set(arr).size===arr.length;
 const FACT=/^[a-zA-Z0-9_:-]{1,100}$/;
+const ALLOWED_HYPOTHESIS=new Set(['id','title','registryId','requirements','exceptions','exceptionAudit','missingFactProposal','supportedProposal','notSupportedProposal']);
+const ALLOWED_FACT=new Set(['factId','value','sourceId','sourceType','sourceLocation','reason','observedAt']);
 function factIds(input,name){
  if(!Array.isArray(input)||!input.length||!unique(input)||input.some(x=>typeof x!=='string'||!FACT.test(x)))
   throw new TypeError(name+': нужен е непразен списък с уникални идентификатори на факти');
@@ -18,6 +20,8 @@ export function compileExpertHypotheses(entries){
  for(const entry of entries){
   if(!entry||typeof entry!=='object'||Array.isArray(entry))
    throw new TypeError('Правната хипотеза трябва да е обект');
+  if(Object.keys(entry).some(k=>!ALLOWED_HYPOTHESIS.has(k)))
+   throw new TypeError('Недопустими предварително зададени маршрут, такса, тежест или външни свойства');
   const {id,title,registryId,requirements,exceptions,exceptionAudit,missingFactProposal,
    supportedProposal,notSupportedProposal}=entry;
   if(!FACT.test(id||'')||ids.has(id)||!trim(title)||!trim(missingFactProposal))
@@ -57,7 +61,7 @@ export function validateFactLedger(entries,rules){
  }));
  const ledger=[];
  for(const e of entries){
-  if(!e||!all.has(e.factId)||!['true','false','unknown','conflict'].includes(e.value)||
+  if(!e||typeof e!=='object'||Object.keys(e).some(k=>!ALLOWED_FACT.has(k))||!all.has(e.factId)||!['true','false','unknown','conflict'].includes(e.value)||
    !trim(e.sourceId)||!trim(e.sourceType)||!trim(e.sourceLocation)||
    !trim(e.reason))
    throw new TypeError('Недоказан факт, несъществуваща предпоставка или липсващ източник и експертен мотив');
