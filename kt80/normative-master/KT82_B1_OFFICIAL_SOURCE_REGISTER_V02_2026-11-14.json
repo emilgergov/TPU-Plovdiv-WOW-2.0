@@ -122,5 +122,9 @@
     }
   ],
   "not_integrated_into_stage4": true,
-  "not_authorized_for_automatic_legal_citations": true
+  "not_authorized_for_automatic_legal_citations": true,
+  "status": "ИЗВЪН ЗАКЛЮЧЕНИЯ АРХИВ V11 — САМО ИНФОРМАЦИОННО ДОПЪЛНЕНИЕ",
+  "canonical_documentary_basis": "KT82_Normative_MASTER_V11_Tariff_Euro_2026-11-13.zip",
+  "owner_approval_required_before_merge": true,
+  "no_automatic_effect_on_archive_v11": true
 }
