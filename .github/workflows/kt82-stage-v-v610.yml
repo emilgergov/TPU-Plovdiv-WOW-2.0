@@ -1,0 +1,32 @@
+name: WOW · Етап В · Нормативна независимост V61.0
+on:
+  push:
+    paths:
+      - 'kt80/KT82_STAGE4_V11_SOURCE_GATE_V610.js'
+      - 'kt80/KT82_STAGE5_INDEPENDENT_V610.js'
+      - 'kt80/KT82_19_STAGE_V_V610_INTEGRATION_TEST.html'
+      - 'tests/kt82-stage-v-v610.test.cjs'
+      - '.github/workflows/kt82-stage-v-v610.yml'
+  pull_request:
+    paths:
+      - 'kt80/KT82_STAGE4_V11_SOURCE_GATE_V610.js'
+      - 'kt80/KT82_STAGE5_INDEPENDENT_V610.js'
+      - 'tests/kt82-stage-v-v610.test.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  legal-independence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check kt80/KT82_STAGE4_V11_SOURCE_GATE_V610.js
+          node --check kt80/KT82_STAGE5_INDEPENDENT_V610.js
+          node --check tests/kt82-stage-v-v610.test.cjs
+      - name: Frozen archive and independent proposal regression
+        run: node --test tests/kt82-stage-v-v610.test.cjs
