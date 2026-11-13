@@ -1,0 +1,43 @@
+name: WOW · Пакет А · Интеграция А1–А4
+on:
+  push:
+    paths:
+      - 'kt80/KT82_A_EVIDENCE_INVALIDATION_V602.js'
+      - 'kt80/KT82_A_FREE_GIS_V603.js'
+      - 'kt80/KT82_A_STAGE5_ROUTE_ADVISER_V604.js'
+      - 'kt80/KT82_18_PACKAGE_A_V604_INTEGRATION_TEST.html'
+      - 'tests/kt82-a-v602-invalidation.test.cjs'
+      - 'tests/kt82-a-v603-gis-race.test.cjs'
+      - 'tests/kt82-a-v604-route-contract.test.cjs'
+      - '.github/workflows/kt82-package-a-v604.yml'
+  pull_request:
+    paths:
+      - 'kt80/KT82_A_EVIDENCE_INVALIDATION_V602.js'
+      - 'kt80/KT82_A_FREE_GIS_V603.js'
+      - 'kt80/KT82_A_STAGE5_ROUTE_ADVISER_V604.js'
+      - 'tests/kt82-a-v602-invalidation.test.cjs'
+      - 'tests/kt82-a-v603-gis-race.test.cjs'
+      - 'tests/kt82-a-v604-route-contract.test.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence-and-routes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JS syntax
+        run: |
+          node --check kt80/KT82_A_EVIDENCE_INVALIDATION_V602.js
+          node --check kt80/KT82_A_FREE_GIS_V603.js
+          node --check kt80/KT82_A_STAGE5_ROUTE_ADVISER_V604.js
+      - name: Functional and contract tests
+        run: |
+          node --test tests/kt82-a-v602-invalidation.test.cjs
+          node --test tests/kt82-a-v603-gis-race.test.cjs
+          node --test tests/kt82-a-v604-route-contract.test.cjs
+          node --test tests/kt82-package-a-v600.test.cjs
+          node --test tests/kt82-pdf1-v599.test.cjs
