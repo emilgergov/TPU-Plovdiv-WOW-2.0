@@ -238,5 +238,11 @@
     "classic_ab_v27_35_not_templates": true,
     "existing_generators_unchanged": true
   },
-  "status": "INITIAL_LEGAL_PASSPORTS_DEVELOPED_REQUIRES_ROUTE_BY_ROUTE_SUBSTANTIVE_FINAL_REVIEW"
+  "status": "INITIAL_LEGAL_PASSPORTS_DEVELOPED_REQUIRES_ROUTE_BY_ROUTE_SUBSTANTIVE_FINAL_REVIEW",
+  "supersession": {
+    "status": "SUPERSEDED_NOT_APPROVED_NOT_FOR_KT80_INTEGRATION",
+    "reason": "Predefined catalogue document/result routing is not the starting point or governing logic of the independent KT80 AI author. V27.35 is encapsulated and must never determine KT80 outcomes.",
+    "superseded_by": "kt80/normative-master/KT82_B2_SUBJECT_FIRST_INDEPENDENT_AUTHOR_ARCHITECTURE_2026-11-13.json",
+    "date": "2026-11-13"
+  }
 }
