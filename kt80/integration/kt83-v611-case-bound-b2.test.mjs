@@ -68,3 +68,11 @@ test('редакция на предмета или имотите обезси�
  b.assess({evidence:[evidence],rules:[rule]});f.fields.kt80ParcelInput.value='46989.205.218';
  assert.equal(b.getAssessment(),null);
 });
+
+test('нов ГИС обект със същите имоти не наследява правната оценка',()=>{
+ const f=fixture(),b=createKT83V611Bridge(f.root);
+ f.root.KT80FreeGISResults={ids:['36676.129.457'],results:[]};
+ b.assess({evidence:[evidence],rules:[rule]});
+ f.root.KT80FreeGISResults={ids:['36676.129.457'],results:[]};
+ assert.equal(b.getAssessment(),null);
+});
