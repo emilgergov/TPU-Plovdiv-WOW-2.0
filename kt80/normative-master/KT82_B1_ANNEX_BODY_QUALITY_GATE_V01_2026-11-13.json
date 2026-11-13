@@ -1,0 +1,145 @@
+{
+  "schema": "KT82_B1_ANNEX_BODY_QUALITY_GATE_V01",
+  "date": "2026-11-13",
+  "scope": "V7 portable archive substantive annex verification, not just label presence",
+  "source_package": "KT82_B1_Normative_Master_Local_Pack_V7_REVIEW.zip",
+  "method": "Exact text between annex headings in underlying local UTF-8 text; distinguish repeal headings from active annex body and placeholders",
+  "results": [
+    {
+      "act": "ЗБР",
+      "source": "core/ZBR_2024.txt",
+      "verified_nonempty": [
+        "1",
+        "2",
+        "2а",
+        "3",
+        "4",
+        "4а",
+        "5",
+        "6"
+      ],
+      "repealed": [
+        "7",
+        "8"
+      ],
+      "status": "BODY_PRESENT_STRUCTURE_PASS",
+      "caveat": "This verifies archived content, not absolute final legal edition"
+    },
+    {
+      "act": "ЗООС",
+      "source": "core/ZOOS_2026_51.txt",
+      "verified_nonempty": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "8"
+      ],
+      "repealed_or_special": [
+        "6",
+        "7"
+      ],
+      "status": "BODY_PRESENT_STRUCTURE_PASS_WITH_REPEAL_METADATA"
+    },
+    {
+      "act": "Наредба ОС",
+      "source": "additions/N_OS_2025.txt",
+      "verified_nonempty": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "status": "BODY_PRESENT_STRUCTURE_PASS"
+    },
+    {
+      "act": "Наредба ЕО",
+      "source": "additions/N_EO_2020.txt",
+      "verified_nonempty": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "status": "BODY_PRESENT_STRUCTURE_PASS"
+    },
+    {
+      "act": "Наредба ОВОС",
+      "source": "additions/N_OVOS_2022.txt",
+      "verified_nonempty": [
+        "3",
+        "5",
+        "6",
+        "8"
+      ],
+      "repealed": [
+        "1",
+        "4"
+      ],
+      "body_missing_but_annex_heading_present": [
+        "2",
+        "2а",
+        "7",
+        "9"
+      ],
+      "found_placeholder": "--",
+      "status": "CRITICAL_SOURCE_DOCUMENT_GAP",
+      "impact": "Annex references exist in primary ordinance body but the annex forms/text are absent in archived RTF; not sufficient for offline citation or form generation."
+    }
+  ],
+  "official_source_which_contains_missing_annexes": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ocenka-na-vuzdejstvieto-vurhu-okolnata-sreda/",
+  "official_template_source": "https://www.moew.government.bg/bg/prevantivna-dejnost/ovos/obrazci-na-zayavleniya-ovos/",
+  "missing_annex_route_relevance": [
+    {
+      "annex": "2",
+      "hook": "Наредба ОВОС чл.6",
+      "routes": [
+        2,
+        4,
+        7,
+        9
+      ],
+      "priority": "P0",
+      "reason": "Information dossier for screening and associated public access"
+    },
+    {
+      "annex": "2а",
+      "hook": "Наредба ОВОС чл.14 ал.1 т.5",
+      "routes": [
+        8
+      ],
+      "priority": "P1",
+      "reason": "Plan for implementation of impact mitigation measures"
+    },
+    {
+      "annex": "7",
+      "hook": "Наредба ОВОС чл.6 ал.10 т.2",
+      "routes": [
+        3,
+        7
+      ],
+      "priority": "P1",
+      "reason": "Municipal report about public access to screening information"
+    },
+    {
+      "annex": "9",
+      "hook": "Наредба ОВОС чл.16 ал.3",
+      "routes": [
+        8
+      ],
+      "priority": "CONDITIONAL",
+      "reason": "Public notice for integrated permitting scenario under ZOOS Art.94(1)(9)"
+    }
+  ],
+  "next_required_artifact": "Full offline-preserved accurate body of the four OVOS annexes from official MOEW webpage, with a source URL, extraction timestamp, SHA and effective-date verification; do not substitute repealed forms; user may supply full Print-to-PDF of official MOEW page if server content cannot be reliably extracted into archive.",
+  "safety": {
+    "do_not_activate_stage4_5": true,
+    "do_not_modify_AI_author": true,
+    "classic_AB_legacy_only": true,
+    "do_not_generate_forms_from_placeholders": true,
+    "do_not_claim_B1_zero_gaps": true
+  },
+  "control_status": "B1_OPEN_CRITICAL_OVOS_ANNEX_BODIES"
+}
