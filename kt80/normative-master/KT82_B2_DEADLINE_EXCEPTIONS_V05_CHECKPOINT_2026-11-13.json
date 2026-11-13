@@ -1,0 +1,72 @@
+{
+  "schema": "KT82_B2_DEADLINE_EXCEPTIONS_V05",
+  "date": "2026-11-13",
+  "source_policy": "Only normative archive V10, no external sites",
+  "archive": "KT82_B1_Normative_Master_V10_B1_ARCHIVE_FROZEN_2026-11-13.zip",
+  "local_artifacts": [
+    {
+      "file": "/mnt/data/kt82_b2_subject_first/KT82_B2_DEADLINE_EXCEPTION_GATES_V05.json",
+      "sha256": "be0ed9e7ce51885d9ed8b10b2543f52741d6027908759f905b178338c76ed9c7",
+      "bytes": 8983
+    },
+    {
+      "file": "/mnt/data/kt82_b2_subject_first/KT82_B2_DEADLINE_EXCEPTION_QA_V05.json",
+      "sha256": "9382fa1f1bb517dfcd6c51767c803bc5054fbb62b80d41b647bc9baf651eed6d",
+      "bytes": 5043
+    }
+  ],
+  "article_retrieval": {
+    "articles_found_by_own_headings": 18,
+    "acts": [
+      "Наредба ОВОС",
+      "Наредба ОС",
+      "Наредба ЕО",
+      "АПК"
+    ],
+    "text_clause_assertions": 10,
+    "notes": "Multi-line text normalized for exact clause matching; source references anchored to named archive entries."
+  },
+  "rules": {
+    "total": 12,
+    "keys": [
+      "OVOS_NOTICE_INCOMPLETE",
+      "OVOS_SCREENING_INCOMPLETE",
+      "OVOS_TERMINATION_LONG_INACTION",
+      "OVOS_TERMINATION_INADMISSIBLE",
+      "OVOS_EIA_SCREEN_CLOCK",
+      "APK_REQUEST_SIGNATURE",
+      "APK_UNREADABLE_ELECTRONIC",
+      "APK_GENERAL_ACT_CLOCK",
+      "APK_INDIVIDUAL_ACT_REQUISITES",
+      "EO_STANDARD_OPINION_INCOMPLETE",
+      "APK_EVIDENCE_EX_OFFICIO",
+      "OS_SPECIAL_BRANCH"
+    ]
+  },
+  "qa": {
+    "mock_scenarios": 19,
+    "passed": 19,
+    "failed": 0,
+    "not_live_application": true,
+    "not_a_full_legal_acceptance": true
+  },
+  "concrete_safeguards": [
+    "No 12-month inactivity termination without proven enumerated condition plus reminder with response period",
+    "OVOS inadmissibility confirmed by competent authority is an independent termination branch",
+    "Minimum 7-day addition period for OVOS notice and screening under distinct articles",
+    "EO art23(2) special dossier and art23(4) 7-day return of incomplete standard dossier not mistaken for generic suspended deadline",
+    "APK art30(4) unreadable electronic annexes effective 01.07.2026 as represented in V10 and different trigger to clock",
+    "General APK art57 deadlines are fallback, not replacement for special OVOS/EO/OS",
+    "Cannot calculate actual date without event start, interruptions, formal notices and relevant applicable text",
+    "Applicant cannot be asked for administrative evidence already held by authorities as in APK art36"
+  ],
+  "architectural_guards": {
+    "subject_first": true,
+    "no_22_route_based_outcome": true,
+    "classic_AB_capsulated_V27_35": true,
+    "KT80_runtime_unchanged": true,
+    "auto_citation_not_enabled": true,
+    "B2_expert_approval_not_requested": true
+  },
+  "next": "Consolidated independent-model regression and technical B2 expert acceptance document; remaining higher-risk: full clock calendar arithmetic and real dossier competence."
+}
