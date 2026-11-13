@@ -163,7 +163,8 @@ export function assessStage4({ confirmedSubject, scopeConfirmed, evidence, rules
     legalFindings: findings,
     evidence: facts,
     proposals: uniqueProposals,
-    eligibilityForStage5FinalAct: !blocked && rules.length > 0,
+    readyForStage5Draft: !blocked && findings.some(f => f.state === 'supported'),
+    eligibilityForStage5FinalAct: false, // Final act requires stage-5 expert authorization.
     warning: 'Етап 4 не определя предварително документ и не издава акт. Експертният контрол е задължителен.'
   };
 }
