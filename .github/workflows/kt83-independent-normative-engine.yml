@@ -50,3 +50,8 @@ jobs:
           node --check kt80/integration/kt83-pni-v3-exploration-ui.mjs
           node --test kt80/independence/pni-exploration.test.mjs
           node --test kt80/independence/pni-v3-preview.test.mjs
+      - name: KT83 isolated case cycle A-to-B and in-flight AI regression
+        run: |
+          node --check kt80/KT80_E01_ARCH_WORKFLOW_DASHBOARD_V590.js
+          node --check kt80/KT80_E01_AI_SUBJECT_IMPROVE_V571.js
+          node --test kt80/independence/kt83-case-cycle-isolation.test.mjs
