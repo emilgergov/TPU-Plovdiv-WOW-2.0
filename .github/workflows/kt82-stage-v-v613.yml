@@ -1,0 +1,38 @@
+name: WOW · Пакет В · Компетентност V61.3
+on:
+  push:
+    paths:
+      - 'kt80/integration/kt83-v613-competence-gate.mjs'
+      - 'kt80/integration/kt83-v613-case-bound-b2-bridge.mjs'
+      - 'kt80/integration/kt83-v613-legal-preview.mjs'
+      - 'kt80/integration/kt83-v613-competence-gate.test.mjs'
+      - 'kt80/KT82_22_STAGE_V_V613_COMPETENCE_GATE_TEST.html'
+      - '.github/workflows/kt82-stage-v-v613.yml'
+  pull_request:
+    paths:
+      - 'kt80/integration/kt83-v613-competence-gate.mjs'
+      - 'kt80/integration/kt83-v613-case-bound-b2-bridge.mjs'
+      - 'kt80/integration/kt83-v613-competence-gate.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  competence-and-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax checks
+        run: |
+          node --check kt80/integration/kt83-v613-competence-gate.mjs
+          node --check kt80/integration/kt83-v613-case-bound-b2-bridge.mjs
+          node --check kt80/integration/kt83-v613-legal-preview.mjs
+          node --check kt80/integration/kt83-v613-competence-gate.test.mjs
+      - name: Independent competence and V11 evidence tests
+        run: |
+          node --test kt80/integration/kt83-v613-competence-gate.test.mjs
+          node --test kt80/integration/kt83-v612-independent-rule-packet.test.mjs
+          node --test kt80/integration/kt83-v611-case-bound-b2.test.mjs
+          node --test kt80/integration/stage4-stage5-smoke.test.mjs
