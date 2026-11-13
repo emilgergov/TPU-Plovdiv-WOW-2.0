@@ -1,4 +1,5 @@
 import {createUniversalOutSession} from './kt83-v617-universal-out-session.mjs';
+import {ORIGINAL_BLANK_SHA256} from './kt83-v616-original-riosv-blank.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {webcrypto} from 'node:crypto';
@@ -128,5 +129,19 @@ test('release purges cached original, no further DOCX until reattached',async()=
   assert.equal(out.status().hasOriginal,false);
   const currentRecord=()=>({caseId:'test-case-616',generation:2,evidenceRevision:null,confirmedSubject:'Тестов предмет',assessmentCurrent:true});
   await assert.rejects(out.render(record(),{currentRecord}),/изберете веднъж/);
+ });
+});
+
+test('delayed SHA verification cannot restore an original cleared while attachment was pending',async()=>{
+ await withSyntheticFingerprint(async()=>{
+  let release;
+  const delayed=new Promise(resolve=>release=resolve);
+  const cryptoAPI={subtle:{digest:async()=>{await delayed;return Buffer.from(ORIGINAL_BLANK_SHA256,'hex')}}};
+  const out=createUniversalOutSession({cryptoAPI,zipEngine:fflate});
+  const pending=out.attach(fflate.zipSync(pack()));
+  out.clear();
+  release();
+  await assert.rejects(pending,/се промени по време на проверката/);
+  assert.equal(out.status().hasOriginal,false);
  });
 });
