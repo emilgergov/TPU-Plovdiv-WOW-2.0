@@ -1,0 +1,56 @@
+{
+  "schema": "KT83_PNI_V3_FREE_HYPOTHESES_AUDIT_CHECKPOINT",
+  "date": "2026-11-13",
+  "parent": "kt80/checkpoints/KT83_PNI_V2_SOURCE_FIRST_RULE_GATE_2026-11-13.json",
+  "principle": "Максимална свобода при изследване на правните хипотези. Максимална нормативна и доказателствена дисциплина при обосноваване на крайното предложение.",
+  "status": "EXPLORATORY_AUDIT_IMPLEMENTED; PROTECTED_GATES_CI_GREEN; ACTUAL_AI_LEGAL_DRAFT_GENERATION_NOT_CONNECTED; AUTO_PROCEDURAL_DETERMINATION_DISABLED",
+  "modules": {
+    "audit": "kt80/independence/pni-hypothesis-auditor.mjs",
+    "free_hypothesis_ui": "kt80/integration/kt83-pni-v3-exploration-ui.mjs",
+    "standalone_preview": "kt80/KT83_04_PNI_V3_FREE_HYPOTHESIS_AUDIT_TEST.html",
+    "tests": [
+      "kt80/independence/pni-exploration.test.mjs",
+      "kt80/independence/pni-v3-preview.test.mjs"
+    ],
+    "pni_locked_manifest": "kt80/independence/pni-locked-manifest.json"
+  },
+  "ci": {
+    "run": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/43507004317",
+    "result": "success",
+    "suiteCounts": {
+      "stage4_stage5": 13,
+      "v13_preview": 7,
+      "v14_case_isolation": 10,
+      "pni_v1": 12,
+      "pni_v2_source_first": 13,
+      "pni_v2_pilot": 4,
+      "pni_v3_hypotheses": 13,
+      "pni_v3_pilot": 5
+    },
+    "total": 77
+  },
+  "protections": {
+    "protected_modules": 8,
+    "source_first_conditions_approved": 0,
+    "legal_draft_model_endpoint": "NOT_CONNECTED",
+    "allow_exploratory_proposals": true,
+    "allow_automatic_formal_procedure": false,
+    "requires": {
+      "normative_source": "Verified V11 legal reference",
+      "factual_evidence": "Provenance link in dossier",
+      "counterargument": "Required for audit completeness",
+      "alternatives": "Must be investigated without priority",
+      "unknowns": "Must remain explicit",
+      "expert_review": "Must precede administrative act"
+    }
+  },
+  "safe_changes": [
+    "No direct default ZOOS_93 nor canned EIA tax in new V3 preview.",
+    "V3 pilot no longer loads V2 example module containing obsolete fixed law/fee controls.",
+    "New V3 panel accepts structured draft proposals from an expert or FUTURE AI legal generator, audits only; does not claim current AI endpoint is connected.",
+    "The existing subject-improve Worker endpoint was not repurposed to legal analysis because its legal suitability and output contract have not been verified.",
+    "Original V59.8, V27.35, B1 V11 and B2 remains untouched."
+  ],
+  "next": "Implement separate verified legal drafting endpoint and evidence ingestion, feed structurally generated drafts to audit, use independent review gate, test blind diverse cases and approve expert acceptance before formal document output.",
+  "resume_keyword": "WOW-КТ83-ПНИ-V3-СВОБОДНИ-ХИПОТЕЗИ-НЕЗАВИСИМ-КОНТРОЛ"
+}
