@@ -1,0 +1,51 @@
+{
+  "schema": "KT82_B2_SUBJECT_FIRST_CASE_TESTS_V01",
+  "date": "2026-11-13",
+  "source": "Frozen archive V10, 12 article anchors independently located in offline source texts",
+  "scenario_engine": "Stand-alone local proof-of-concept, not production KT80 generator",
+  "cases": [
+    {
+      "id": "NO_SUBJECT",
+      "assert": "Always propose expert subject reconstruction; no final legal outcome"
+    },
+    {
+      "id": "NO_PARCEL",
+      "assert": "No parcel/PDF1 compulsion; still propose legal classification"
+    },
+    {
+      "id": "EIA_ANNEX_1",
+      "assert": "Propose Art92 assessment only when annex applicability proven"
+    },
+    {
+      "id": "EIA_ANNEX_2",
+      "assert": "Propose Art93 assessment only when facts proven"
+    },
+    {
+      "id": "PLAN_PROGRAM",
+      "assert": "EO Art8 notification distinguished from Art8a request"
+    },
+    {
+      "id": "WATER",
+      "assert": "Basin consultation suggested only when water condition is proven"
+    },
+    {
+      "id": "UNKNOWN_KIND",
+      "assert": "Propose kind classification, not a predetermined act"
+    },
+    {
+      "id": "NO_OS_AUTOMATIC",
+      "assert": "Negative OS conclusion not assumed; still reason from ZOOS and project facts"
+    }
+  ],
+  "scenario_total": 8,
+  "passed": 8,
+  "failed": 0,
+  "article_anchor_presence_verified": 12,
+  "qualification": "Structural mock-cases checked by Python script; no functional GitHub/KT80 UI tests executed",
+  "immutable_guards": {
+    "B1_V10_only": true,
+    "classic_AB_not_used": true,
+    "KT80_runtime_untouched": true,
+    "auto_citation_disabled": true
+  }
+}
