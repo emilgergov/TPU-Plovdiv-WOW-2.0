@@ -1,0 +1,54 @@
+{
+  "schema": "KT83_V1_3_ISOLATED_ADMIN_PREVIEW_QA",
+  "date": "2026-11-13",
+  "parent_checkpoint": "kt80/checkpoints/KT83_2026-11-13_V1_1_V1_2_VERIFIED_CI_HANDOFF.json",
+  "status": "V1.3 INDEPENDENT LEGAL ENGINE WIRED INTO SEPARATE KT80 V59.8 HTML PREVIEW; no stable files changed; automatic CI GREEN; external visual acceptance pending",
+  "preview": {
+    "path": "kt80/KT83_01_INDEPENDENT_STAGE4_STAGE5_V13_TEST.html",
+    "url": "https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/kt80/KT83_01_INDEPENDENT_STAGE4_STAGE5_V13_TEST.html",
+    "source": "kt80/KT82_15_PACKAGE_A_V598_TEST.html",
+    "source_untouched": true
+  },
+  "source_files": [
+    "kt80/integration/kt83-v1-3-admin-preview.mjs",
+    "kt80/integration/kt80-v598-case-evidence-adapter.mjs",
+    "kt80/integration/v11-trusted-source-registry.mjs",
+    "kt80/integration/v11-verified-fee-schedule.mjs",
+    "kt80/integration/stage4-independent-legal-engine.mjs",
+    "kt80/integration/stage5-independent-proposal.mjs"
+  ],
+  "new_validation": {
+    "test": "kt80/integration/kt83-preview-regression.test.mjs",
+    "test_cases": 7,
+    "existing_stage4_stage5_test_cases": 13,
+    "syntax_checks": 4,
+    "github_actions_run": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/43497415442",
+    "github_actions_result": "success",
+    "pages_build_status_at_checkpoint": "in_progress; independent visual confirmation pending"
+  },
+  "implementation_notes": [
+    "V1.3 UI adds independent stages 4 and 5 modules without rewriting legacy stage transitions.",
+    "User manually selects legal hypothesis ZOOS_93 and enters fact state and case evidence source; absence yields motivated further proof proposal.",
+    "Stages 4/5 read expert-confirmed subject and scope. Changed case inputs invalidate previous legal findings.",
+    "V11 article citations are verified by immutable local registry with article/document hashes; seven predetermined fixed fees by tariff exact amounts.",
+    "Stage 5 creates reasoned DRAFT, never signs or issues an administrative act.",
+    "Legacy 22-document route selector is hidden from isolated pilot display but existing workflow scripts remain loaded to avoid regressions.",
+    "This version has only one UI-selectable substantive example legal hypothesis (ZOOS_93); it is not a complete legal route engine."
+  ],
+  "limits": [
+    "The V11 registry only covers eight approved article passages, does not cover every rule or special tariff exemption.",
+    "Selected expert fact with source ID is user asserted; source authenticity remains subject to document provenance verification and expert scrutiny.",
+    "Selecting authority with user-entered document ID does not prove statutory competence; it is a working record requiring expert check.",
+    "No case-file reader/TЕСТ_2 live auto integration yet; no PDF/Word output from this page.",
+    "Legacy stage5 catalog may still run background logic but is explicitly not source of independent legal proposal.",
+    "Original V59.8, V27.35 and public index.html are untouched."
+  ],
+  "next_actions": [
+    "After GitHub Pages deployment completes, open pilot page and run visual test on independent panels in steps 4-5.",
+    "Expand trusted V11 index with case relevant normative hypotheses from actual archived act text, include negative / exception / competing alternatives.",
+    "Bind real source provenance from dossier reader and stage1-3 so manual allegation does not masquerade as verified archive/case evidence.",
+    "Test TEST_2 with all components, basin evidence, optional GIS and tariff, and produce a stand-alone Word.",
+    "Then finish V3 and V4 and only afterwards phase G acceptance."
+  ],
+  "resume_keyword": "WOW-КТ83-13-В1-В2-ЗАКЛЮЧЕНО-Б-ИНТЕГРАЦИЯ-БЕЗ-РЕГРЕСИИ"
+}
