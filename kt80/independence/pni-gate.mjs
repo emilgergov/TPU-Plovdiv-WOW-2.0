@@ -16,7 +16,8 @@ export const PROTECTED_SOURCES=Object.freeze([
  'kt80/integration/stage5-independent-proposal.mjs',
  'kt80/integration/kt83-v1-4-hypothesis-discovery.mjs',
  'kt80/independence/pni-normative-conditions.mjs',
- 'kt80/independence/pni-independent-review.mjs'
+ 'kt80/independence/pni-independent-review.mjs',
+ 'kt80/independence/pni-hypothesis-auditor.mjs'
 ]);
 const auditedArchive='8d3851affd72fb44b4d663920196e00ec317c8e45d36fc16c6ad6b0ce965226c';
 
