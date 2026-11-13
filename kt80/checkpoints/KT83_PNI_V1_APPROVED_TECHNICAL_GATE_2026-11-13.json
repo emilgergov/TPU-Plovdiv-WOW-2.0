@@ -1,0 +1,59 @@
+{
+  "schema": "KT83_PNI_TECHNICAL_ISOLATION_ACCEPTANCE_V1",
+  "date": "2026-11-13",
+  "title": "Протокол за нормативна независимост (ПНИ) — първа техническа проверка",
+  "originating_decision": "Тестови преписки САМО за тестване. Никога източник за правни правила, предпочитания, прагове или процедурни заключения.",
+  "state": "TECHNICAL_GATE_VERIFIED; UNIVERSAL_LEGAL_APPLICABILITY_NOT_CERTIFIED",
+  "locked_master": "KT82_Normative_MASTER_V11_Tariff_Euro_2026-11-13.zip",
+  "archive_sha256": "8d3851affd72fb44b4d663920196e00ec317c8e45d36fc16c6ad6b0ce965226c",
+  "artifacts": {
+    "policy": "kt80/independence/PNI_KT83_V1_PROTOCOL.md",
+    "manifest": "kt80/independence/pni-locked-manifest.json",
+    "gate": "kt80/independence/pni-gate.mjs",
+    "adversarial_tests": "kt80/independence/pni-gate.test.mjs",
+    "CI": ".github/workflows/kt83-independent-normative-engine.yml"
+  },
+  "CI": {
+    "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/43502882062",
+    "result": "success",
+    "steps": [
+      "stage 4/5 independent tests",
+      "KT83 V1.3 preview regression and syntax",
+      "KT83 V1.4 source bias and isolation tests",
+      "PNI mandatory SHA and adversarial isolation gate"
+    ],
+    "test_counts": {
+      "stage4_stage5": 13,
+      "preview": 7,
+      "discovery": 10,
+      "pni": 12,
+      "total": 42
+    }
+  },
+  "protected_normative_modules": 5,
+  "guarantees_demonstrated": [
+    "Five normative modules have locked Git-blobs; one-line modifications trigger gate failure until explicit manifest review.",
+    "Changing or replacing test fixtures does not alter the normative module fingerprint.",
+    "Hardcoded favored article / keyword detector / imports from test fixtures are detected and rejected.",
+    "Automatic legal applicability is fail-closed while a complete independent normative conditions graph is missing.",
+    "Undocumented changes in the selected protected modules cause automatic CI failure.",
+    "Existing stable V27.35 and base KT80 V59.8 have not been modified."
+  ],
+  "limits": [
+    "Normative and legal-source completeness cannot be proven from the current 8-article partial V11 register.",
+    "Condition AST in stage4 can presently be caller-supplied; not authorized for automatic procedural decisions until independently approved source-to-condition registry is introduced.",
+    "CI manifest can be changed intentionally along with sources, requiring human code review / branch protection to make deliberate updates non-bypassable; no repository-wide protection was configured.",
+    "Only listed protected modules are hash-frozen; new future modules must be enrolled and reviewed under the PNI.",
+    "UI pilot may contain legacy inactive route selector; it is not authoritative evidence of legal result.",
+    "This is not a certificate that all legal interpretations are unbiased."
+  ],
+  "next_required": [
+    "Expand legal provisions independently from cases, with verified statutory applicability/exceptions and dependencies.",
+    "Approve every legal condition against V11 independently of the regression fixture datasets.",
+    "Move stage4 rule conditions to approved, immutable rule graph; reject caller-composed condition objects in live engine.",
+    "Strengthen GitHub branch controls and review requirements for manifesto/source changes when permissions permit.",
+    "Run blind diverse scenario tests: vary dossier titles but preserve facts; vary test fixtures while rules remain byte-identical; verify omission/exclusion coverage.",
+    "Only then consider enabling automatic hypothesis and stage5 procedure conclusions and carry out expert acceptance."
+  ],
+  "resume_keyword": "WOW-КТ83-ПНИ-V1-ТЕХНИЧЕСКА-НЕЗАВИСИМОСТ-42-ТЕСТА"
+}
