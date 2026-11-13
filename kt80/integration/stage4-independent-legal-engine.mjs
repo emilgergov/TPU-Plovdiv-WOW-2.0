@@ -1,3 +1,4 @@
+import { assertVerifiedReference } from './v11-trusted-source-registry.mjs';
 /**
  * KT82 / KT80 Stage V1 – independent stage-4 legal evaluation.
  * B1 V11 locked; B2 expert-accepted, 2026-11-13.
@@ -112,10 +113,10 @@ function validateRule(rule) {
       !safeText(rule?.legalBasis?.archiveTextAnchor) ||
       rule.legalBasis.archive !== CANONICAL_ARCHIVE ||
       rule.legalBasis.archiveSha256 !== ARCHIVE_SHA256 ||
-      rule.legalBasis?.verifiedAgainstV11 !== true ||
       !rule.condition) {
     throw new TypeError('Правното основание не е удостоверено от заключения V11');
   }
+  assertVerifiedReference(rule.legalBasis);
   if (!safeText(rule?.missingFactProposal)) {
     throw new TypeError('Няма предложение при непълни данни');
   }
