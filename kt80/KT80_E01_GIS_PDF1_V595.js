@@ -87,6 +87,8 @@ function separateMap(parcel,zones){
 // verified parcel area by no more than 1% (inclusive) is represented as 100%.
 // Never promote a true partial intersection to full coverage; retain raw values.
 function areaDecision(raw,parcel,kind,id,code,audit){
+ const available=v=>v!==null&&v!==undefined&&String(v).trim()!=='';
+ if(!available(raw)||!available(parcel))return {effective:raw,known:false};
  const original=Number(raw),land=Number(parcel);
  if(!Number.isFinite(original)||original<0||!Number.isFinite(land)||land<=0)
   return {effective:raw,known:false};
