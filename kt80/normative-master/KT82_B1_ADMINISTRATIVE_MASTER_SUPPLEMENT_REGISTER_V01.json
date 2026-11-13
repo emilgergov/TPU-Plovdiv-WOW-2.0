@@ -1,0 +1,192 @@
+{
+  "schema": "KT82_B1_ADMIN_MASTER_REGISTER_V01",
+  "checkpoint": "2026-11-13",
+  "operational_principle": "Последната приета локална редакция е текущата версия на WOW до следващото контролирано обогатяване. Версия за WOW ≠ независимо удостоверяване на всички по-късни законодателни изменения.",
+  "existing_archive": {
+    "manifest": "v26-test/normative/offline/archive-manifest.json",
+    "canonical_index": "kt80/normative-master/KT82_B1_CANONICAL_REFERENCE_INDEX_V01.json",
+    "historical_ids": 60,
+    "unique_references": 56,
+    "physical_archived_unique": 51
+  },
+  "portable_supplement": {
+    "name": "KT82_B1_Normative_Master_Local_Pack.zip",
+    "sha256": "bc5a5c8b1712c41b6bd2eb334ea322a938a9a0b4b5046258d8f23c5dd081e38e",
+    "contents": "4 user-supplied PDFs + 4 extracted texts + 4 article-page indices + supplement manifest + README",
+    "current_location": "user-conversation artifact; NOT physically uploaded to the public GitHub repository",
+    "files": [
+      {
+        "id": "APK",
+        "title": "Административнопроцесуален кодекс",
+        "pages": 106,
+        "sha256": "f79d7532e8ce81b2e644feb8befe89efc3d104c35122d953903c7d28f44f5662",
+        "latest_amendment_in_copy": "ДВ бр.17/2026",
+        "article_reference": [
+          "1",
+          "4–13",
+          "18а",
+          "21",
+          "24–34",
+          "59",
+          "111–124",
+          "145–150"
+        ],
+        "official_url": "https://justice.government.bg/home/normdoc/2135521015"
+      },
+      {
+        "id": "NAO",
+        "title": "Наредба за административното обслужване",
+        "pages": 63,
+        "sha256": "631396160ccf2afdfd84182bbcd2642a7c5cc909458153715adace626d77fb82",
+        "latest_amendment_in_copy": "ДВ бр.47/2022",
+        "article_reference": [
+          "1–2",
+          "5–8",
+          "11–14е",
+          "15–17",
+          "20"
+        ],
+        "annexes": [
+          "1",
+          "2",
+          "3 (отменено)",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "official_url": "https://iisda.government.bg/adm_services/regulatory/108"
+      },
+      {
+        "id": "PRAVILNIK_RIOSV",
+        "title": "Правилник за устройството и дейността на регионалните инспекции по околната среда и водите",
+        "pages": 18,
+        "sha256": "e847f8bd5279401a2ddcdba99fc3bff442c23cc04081f7c924130839c7b3742a",
+        "latest_amendment_in_copy": "ДВ бр.41/2024",
+        "article_reference": [
+          "1–2",
+          "6",
+          "6а",
+          "10",
+          "15"
+        ],
+        "official_url": "https://www.moew.government.bg/bg/pravilnik-za-ustrojstvoto-i-dejnostta-na-regionalnite-inspekcii-po-okolnata-sreda-i-vodite/"
+      },
+      {
+        "id": "NAREDBA_TPU",
+        "title": "Наредба за условията и реда за разработване и утвърждаване на териториални планове за управление на защитени зони",
+        "pages": 13,
+        "sha256": "234dd8ee737ff3655d1afe307695406880622e6043a82cca16a9774a0399be76",
+        "latest_amendment_in_copy": "ДВ бр.96/2025 (обнародване)",
+        "article_reference": [
+          "1–8",
+          "11–19",
+          "20–28",
+          "приложение към чл.8 ал.2"
+        ],
+        "official_url": "https://www.moew.government.bg/bg/priroda/zakonodatelstvo/nacionalno-zakonodatelstvo/naredbi-pravilnici-instrukcii-tarifi/"
+      }
+    ]
+  },
+  "new_official_act_candidates": [
+    {
+      "id": "ZA",
+      "title": "Закон за администрацията",
+      "priority": "P0",
+      "official_url": "https://iisda.government.bg/ras/regulatory/84",
+      "source_date": "2026-07-31",
+      "repo_full_text": false,
+      "route_use": [
+        "административна компетентност",
+        "организация",
+        "услуги"
+      ],
+      "status": "OFFICIAL_SOURCE_CONFIRMED_FULL_FILE_NOT_ARCHIVED"
+    },
+    {
+      "id": "ZDOI",
+      "title": "Закон за достъп до обществена информация",
+      "priority": "P0",
+      "official_url": "https://justice.government.bg/home/index/51d30b6f-ed82-43ae-971d-4cb7adcefda4",
+      "external_amendment_indication": "ДВ бр.55/2026",
+      "repo_full_text": false,
+      "route_use": [
+        "заявление за обществена информация",
+        "екологична информация по ЗООС"
+      ],
+      "status": "OFFICIAL_SOURCE_CONFIRMED_FULL_FILE_NOT_ARCHIVED"
+    },
+    {
+      "id": "ZEU",
+      "title": "Закон за електронното управление",
+      "priority": "P0",
+      "official_url": "https://justice.government.bg/home/normdoc/2135555445",
+      "external_amendment_indication": "ДВ бр.55/2026",
+      "repo_full_text": false,
+      "route_use": [
+        "електронно подаване",
+        "електронни преписки",
+        "служебен обмен",
+        "електронно връчване"
+      ],
+      "status": "OFFICIAL_FULL_TEXT_ON_GOVERNMENT_SITE_NOT_MIRRORED"
+    },
+    {
+      "id": "NAR",
+      "title": "Наредба за Административния регистър",
+      "priority": "P0",
+      "official_url": "https://iisda.government.bg/regulatory/107",
+      "external_amendment_indication": "ДВ бр.79/2026",
+      "repo_full_text": false,
+      "route_use": [
+        "административни услуги",
+        "регистри на услуги",
+        "реквизити"
+      ],
+      "status": "OFFICIAL_SOURCE_CONFIRMED_FULL_FILE_NOT_ARCHIVED"
+    },
+    {
+      "id": "NOIISREAU",
+      "title": "Наредба за общите изисквания към информационните системи, регистрите и електронните административни услуги",
+      "priority": "P1",
+      "official_url": "https://www.mtc.government.bg/bg/category/166/naredba-za-obschite-iziskvaniya-km-informacionnite-sistemi-registrite-i-elektronnite-administrativni-uslugi",
+      "external_amendment_indication": "ДВ бр.80/2024 (сверка с публикувания по-стар министерски екземпляр)",
+      "repo_full_text": false,
+      "route_use": [
+        "електронни регистри",
+        "електронни услуги",
+        "вътрешен обмен"
+      ],
+      "status": "OFFICIAL_SITE_CONFIRMED_PUBLICATION_MAY_BE_OLDER"
+    }
+  ],
+  "special_acts": [
+    "ЗООС",
+    "ЗБР",
+    "ЗЗТ",
+    "Наредба за ОС",
+    "Наредба за ОВОС",
+    "Наредба за ЕО",
+    "Заповеди за защитени зони и защитени територии"
+  ],
+  "citation_policy": {
+    "archived_first": true,
+    "one_reference_per_act_and_version": true,
+    "retain_old_aliases": true,
+    "no_invented_legal_citations": true,
+    "require_date_specific_effective_version": true,
+    "extra_official_checks_only_when_master_enrichment_or_known_amendment": true
+  },
+  "integration": {
+    "stage4": "NOT_ENABLED",
+    "stage5": "NOT_ENABLED",
+    "pdf2": "NOT_ENABLED",
+    "word_classic_expert": "LOCKED_NO_CHANGE"
+  },
+  "next_steps": [
+    "Осигури разрешено за публикуване локално копие на петте нови акта, след като се сверят редакциите",
+    "Изгради машинен индекс член/алинея/точка, свържи го с конкретния вид преписка (не прави общи заключения)",
+    "Техническо включване след отделен регресионен контрол"
+  ]
+}
