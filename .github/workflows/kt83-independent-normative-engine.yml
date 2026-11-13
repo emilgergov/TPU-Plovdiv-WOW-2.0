@@ -24,3 +24,8 @@ jobs:
           node --check kt80/integration/stage4-independent-legal-engine.mjs
           node --check kt80/integration/stage5-independent-proposal.mjs
           node --test kt80/integration/kt83-preview-regression.test.mjs
+      - name: KT83 V1.4 auto discovery from confirmed subject and evidence
+        run: |
+          node --check kt80/integration/kt83-v1-4-hypothesis-discovery.mjs
+          node --check kt80/integration/kt83-v1-4-admin-auto-preview.mjs
+          node --test kt80/integration/kt83-v1-4-auto-discovery.test.mjs
