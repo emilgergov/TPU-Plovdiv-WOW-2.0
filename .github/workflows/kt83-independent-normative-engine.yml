@@ -35,3 +35,8 @@ jobs:
           node --check kt80/independence/pni-gate.mjs
           node kt80/independence/pni-gate.mjs
           node --test kt80/independence/pni-gate.test.mjs
+      - name: PNI V2 independent legal premise graph - injection and adversarial tests
+        run: |
+          node --check kt80/independence/pni-normative-conditions.mjs
+          node --check kt80/independence/pni-independent-review.mjs
+          node --test kt80/independence/pni-source-first.test.mjs
