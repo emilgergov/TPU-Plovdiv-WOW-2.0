@@ -11,7 +11,7 @@ const base=read('../KT82_15_PACKAGE_A_V598_TEST.html');
 const pilot=read('../KT83_05_INDEPENDENT_CASE_CYCLE_TEST.html');
 
 function fakeUI(){
- const map=new Map(),listeners=new Map(),events=[];
+ const map=new Map(),listeners=new Map(),events=[],created=[];
  const newNode=id=>{
   const listeners=new Map();let val='',files=[];
   return {
@@ -26,10 +26,10 @@ function fakeUI(){
    get files(){return files},set files(v){files=v}
   };
  };
- const get=id=>{if(!map.has(id))map.set(id,newNode(id));return map.get(id)};
+ const get=id=>{const item=created.find(x=>x.id===id);if(item)return item;if(!map.has(id))map.set(id,newNode(id));return map.get(id)};
  const doc={
   readyState:'loading',
-  getElementById:get,createElement:t=>newNode(t),createTextNode:t=>({textContent:t}),
+  body:{append(){}},getElementById:get,createElement:t=>{const item=newNode(t);created.push(item);return item},createTextNode:t=>({textContent:t}),
   querySelectorAll(){return []},querySelector(){return null},
   addEventListener(type,fn){if(!listeners.has(type))listeners.set(type,[]);listeners.get(type).push(fn)},
   dispatchEvent(e){events.push(e.type);for(const f of listeners.get(e.type)||[])f(e);return true}
