@@ -19,7 +19,7 @@ const stage4=value=>assessStage4({
 });
 const competence=[{sourceId:'test-doc',factId:'location',archiveOrDossierOrigin:'Преписка'}];
 const fee={
-  linkedLegalFindingId:'hypothesis',bgnAmount:'500.00',
+  linkedLegalFindingId:'hypothesis',scheduleId:'OVOS_SCREENING',bgnAmount:'500.00',
   tariffSource:legalRef('TARIFA_1'),
   euroLawSource:legalRef('EURO_12')
 };
@@ -62,4 +62,11 @@ test('не се допуска произволна такса без прило
 });
 test('недоказан нормативен източник не дава такса',()=>{
   assert.throws(()=>proposeStage5({stage4:stage4('true'),fee:{...fee,tariffSource:{...fee.tariffSource,verifiedAgainstV11:false}}}));
+});
+
+test('архивна разпоредба не позволява произволна такса',()=>{
+ assert.throws(()=>proposeStage5({stage4:stage4('true'),fee:{...fee,bgnAmount:'505.00'}}));
+});
+test('архивна тарифа не позволява невярна категоризация',()=>{
+ assert.throws(()=>proposeStage5({stage4:stage4('true'),fee:{...fee,scheduleId:'OS_STANDALONE'}}));
 });
