@@ -108,5 +108,10 @@
     "kt80/normative-master/KT82_B1_ZERO_GAPS_PREINTEGRATION_AUDIT_2026-11-13.json",
     "kt80/normative-master/KT82_B1_ADMINISTRATIVE_MASTER_SUPPLEMENT_REGISTER_V01.json"
   ],
-  "next_action": "Complete P0 legal text and 32-zone order inventory before any integration"
+  "next_action": "Complete P0 legal text and 32-zone order inventory before any integration",
+  "supersession_notice": {
+    "recorded_at": "2026-11-13",
+    "policy": "kt80/normative-master/KT82_B1_NORMATIVE_VS_TERRITORIAL_ORDERS_POLICY_2026-11-13.json",
+    "note": "Historical inventory. Requirements to bulk archive all 32 zone orders and Sveti Duh are SUPERSEDED by two-layer policy. ZZT gap was addressed with subsequent 35-page 2023 text, subject to official amendment check. General legal text QA remains required."
+  }
 }
