@@ -1,5 +1,4 @@
 import {createUniversalOutSession} from './kt83-v617-universal-out-session.mjs';
-import {ORIGINAL_BLANK_SHA256} from './kt83-v616-original-riosv-blank.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {webcrypto} from 'node:crypto';
