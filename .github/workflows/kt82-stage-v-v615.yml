@@ -1,0 +1,35 @@
+name: WOW · Пакет В · Защитен Word V61.5
+on:
+  push:
+    paths:
+      - 'kt80/integration/kt83-v615-independent-docx-adapter.mjs'
+      - 'kt80/integration/kt83-v615-independent-docx-adapter.test.mjs'
+      - 'kt80/integration/kt83-v615-docx-preview.mjs'
+      - 'kt80/KT82_24_STAGE_V_V615_DOCX_SHELL_TEST.html'
+      - '.github/workflows/kt82-stage-v-v615.yml'
+  pull_request:
+    paths:
+      - 'kt80/integration/kt83-v615-independent-docx-adapter.mjs'
+      - 'kt80/integration/kt83-v615-independent-docx-adapter.test.mjs'
+      - 'kt80/integration/kt83-v615-docx-preview.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  safe-docx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax verification
+        run: |
+          node --check kt80/integration/kt83-v615-independent-docx-adapter.mjs
+          node --check kt80/integration/kt83-v615-docx-preview.mjs
+          node --check kt80/integration/kt83-v615-independent-docx-adapter.test.mjs
+      - name: Independent DOCX structural checks
+        run: |
+          node --test kt80/integration/kt83-v615-independent-docx-adapter.test.mjs
+          node --test kt80/integration/kt83-v614-review-document.test.mjs
+          node --test kt80/integration/kt83-v613-competence-gate.test.mjs
