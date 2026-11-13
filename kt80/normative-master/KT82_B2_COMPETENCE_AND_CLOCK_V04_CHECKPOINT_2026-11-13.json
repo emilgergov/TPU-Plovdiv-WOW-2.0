@@ -1,0 +1,59 @@
+{
+  "schema": "KT82_B2_COMPETENCE_AND_CLOCK_V04_CHECKPOINT",
+  "date": "2026-11-13",
+  "archive": "KT82_B1_Normative_Master_V10_B1_ARCHIVE_FROZEN_2026-11-13.zip",
+  "archive_only": true,
+  "artifacts": [
+    {
+      "name": "KT82_B2_COMPETENCE_AND_CLOCK_V04.json",
+      "sha256": "9107accfe4a5054e8971806a60212860bcf3d1146ca2c4d982758a3a8adfd244",
+      "bytes": 12927
+    },
+    {
+      "name": "KT82_B2_COMPETENCE_AND_CLOCK_QA_V04.json",
+      "sha256": "a857957b1750ce104b97642ce9c11615238b99f9e53e913106b1d61cc9659529",
+      "bytes": 4822
+    }
+  ],
+  "source_article_heading_checks": {
+    "total": 14,
+    "found": 14,
+    "missing": 0,
+    "acts": [
+      "ЗООС чл.94",
+      "Наредба ОС чл.6а",
+      "Наредба ЕО чл.4,8,8а,12,13,25",
+      "Наредба ОВОС чл.5,6,8",
+      "АПК чл.31,112,113"
+    ]
+  },
+  "legal_logic": {
+    "competence_gates": 7,
+    "deadline_gates": 6,
+    "notes": [
+      "MOEW/RIOSV choice is based on evidenced exceptions, not filing office",
+      "EIA art94(1) conditions include additional exceptions that must be checked; prototype list is not exhaustive",
+      "EO municipality/territorial approval does not by itself establish RIOSV due to ZOOS art10(2) or special law",
+      "APK art31 immediate forwarding differs from art112 seven-day rule for proposals/signals",
+      "14-day EIA notification, 1-month EIA screening, 7-day EO completeness, 14-day EO health consultation, 30-day EO opinion are different stage-specific clocks",
+      "A statutory clock is not an actual deadline without documented trigger, phase and stoppages",
+      "One month must not be substituted by 30 days",
+      "Unknown or contradictory competence => reasoned proposal to establish facts rather than pretend certainty"
+    ]
+  },
+  "offline_qa": {
+    "total": 17,
+    "passed": 17,
+    "failed": 0,
+    "type": "Deterministic local proof-of-concept; not live KT80 functional test"
+  },
+  "gates": {
+    "stage4_5_integrated": false,
+    "auto_citation_enabled": false,
+    "expert_approved": false,
+    "no_route_first": true,
+    "no_classic_ab": true,
+    "v27_35_unchanged": true
+  },
+  "next": "Validate complete article subparagraphs and suspension/restart mechanics per legal process before treating any actual calendar-date computation as reliable."
+}
