@@ -1,0 +1,42 @@
+name: WOW · Финална интеграция А–Б–В–Г · общ автоматичен контрол
+on:
+  push:
+    paths:
+      - 'tests/kt83-final-abvg-integration-contract.test.cjs'
+      - 'kt80/KT82_26_FINAL_OUT_SESSION_V617_TEST.html'
+      - 'kt80/integration/kt83-v617-universal-out-session.mjs'
+      - 'kt80/integration/kt83-v617-universal-out-preview.mjs'
+      - '.github/workflows/kt83-final-abvg-integration.yml'
+  pull_request:
+    paths:
+      - 'tests/kt83-final-abvg-integration-contract.test.cjs'
+      - 'kt80/integration/kt83-v617-universal-out-session.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  abvg-system:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned test-only OOXML dependencies
+        run: npm install --no-save --no-package-lock --ignore-scripts fflate@0.8.3 @xmldom/xmldom@0.9.8
+      - name: Full A — parcel evidence and PDF1 source/content gate
+        run: |
+          node --test tests/kt82-a-v602-invalidation.test.cjs
+          node --test tests/kt82-a-v603-gis-race.test.cjs
+          node --test tests/kt82-pdf1-v599.test.cjs
+          node --test tests/kt82-a-pdf1-content.test.cjs
+      - name: Full B and V — independent legal, competence and original Word gate
+        run: |
+          node --test kt80/integration/kt83-v612-independent-rule-packet.test.mjs
+          node --test kt80/integration/kt83-v613-competence-gate.test.mjs
+          node --test kt80/integration/kt83-v614-review-document.test.mjs
+          node --test kt80/integration/kt83-v617-universal-out-session.test.mjs
+      - name: Full G — isolated administrative screen and bridge contract
+        run: |
+          node --test tests/kt83-final-abvg-integration-contract.test.cjs
+          node --test tests/kt82-stage-v-v610.test.cjs
