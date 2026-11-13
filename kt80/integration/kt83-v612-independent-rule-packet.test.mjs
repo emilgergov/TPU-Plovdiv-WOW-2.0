@@ -71,3 +71,10 @@ test('no confirmed rules yields specific next action but never a final act',()=>
  assert.equal(y.administrativeActIssued,false);
  assert.equal(y.readyForFormalDraft,false);
 });
+
+test('предварително зададени маршрут, приоритет или такса се отказват като замърсяване',()=>{
+ for(const key of ['routeId','priority','fee','classicScenario','weight']){
+  assert.throws(()=>compileExpertHypotheses([{...base,[key]:'предварително'}]),/Недопустими/);
+ }
+ assert.throws(()=>createCaseAssessmentPacket({hypotheses:[base],facts:[{...fact('scope_a','true'),routeId:18}]}),/Недоказан факт/);
+});
