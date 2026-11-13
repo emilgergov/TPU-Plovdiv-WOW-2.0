@@ -1,0 +1,36 @@
+name: WOW · Финална интеграция · Една обща OUT бланка V61.7
+on:
+  push:
+    paths:
+      - 'kt80/integration/kt83-v617-universal-out-session.mjs'
+      - 'kt80/integration/kt83-v617-universal-out-preview.mjs'
+      - 'kt80/integration/kt83-v617-universal-out-session.test.mjs'
+      - 'kt80/KT82_26_FINAL_OUT_SESSION_V617_TEST.html'
+      - '.github/workflows/kt83-final-out-v617.yml'
+  pull_request:
+    paths:
+      - 'kt80/integration/kt83-v617-universal-out-session.mjs'
+      - 'kt80/integration/kt83-v617-universal-out-session.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-session:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check kt80/integration/kt83-v617-universal-out-session.mjs
+          node --check kt80/integration/kt83-v617-universal-out-preview.mjs
+          node --check kt80/integration/kt83-v617-universal-out-session.test.mjs
+      - name: Pinned OOXML and compression dependencies for test
+        run: npm install --no-save --no-package-lock --ignore-scripts fflate@0.8.3 @xmldom/xmldom@0.9.8
+      - name: Session and inherited document safety tests
+        run: |
+          node --test kt80/integration/kt83-v617-universal-out-session.test.mjs
+          node --test kt80/integration/kt83-v615-real-zip.test.mjs
+          node --test kt80/integration/kt83-v613-competence-gate.test.mjs
