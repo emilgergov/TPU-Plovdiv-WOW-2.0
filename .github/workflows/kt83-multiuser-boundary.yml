@@ -1,0 +1,37 @@
+name: KT83 · Независимост на преписките
+on:
+  push:
+    paths:
+      - 'kt80/KT83_CASE_BOUNDARY_V01.js'
+      - 'kt80/KT83_WORKFLOW_CASE_V591.js'
+      - 'kt80/KT83_AI_SUBJECT_V572.js'
+      - 'kt80/KT83_AI_SCOPE_V572.js'
+      - 'tests/kt83-case-boundary.test.cjs'
+      - '.github/workflows/kt83-multiuser-boundary.yml'
+  pull_request:
+    paths:
+      - 'kt80/KT83_CASE_BOUNDARY_V01.js'
+      - 'kt80/KT83_WORKFLOW_CASE_V591.js'
+      - 'kt80/KT83_AI_SUBJECT_V572.js'
+      - 'kt80/KT83_AI_SCOPE_V572.js'
+      - 'tests/kt83-case-boundary.test.cjs'
+      - '.github/workflows/kt83-multiuser-boundary.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  case-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JS parse checks
+        run: |
+          node --check kt80/KT83_CASE_BOUNDARY_V01.js
+          node --check kt80/KT83_WORKFLOW_CASE_V591.js
+          node --check kt80/KT83_AI_SUBJECT_V572.js
+          node --check kt80/KT83_AI_SCOPE_V572.js
+      - name: Concurrent cases and stale-response guards
+        run: node --test tests/kt83-case-boundary.test.cjs
