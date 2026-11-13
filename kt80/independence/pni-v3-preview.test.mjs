@@ -10,6 +10,7 @@ test('ПНИ-V3: не променя V59.8 и ПНИ-V2',()=>{
  assert.ok(!base.includes('kt83-pni-v3-exploration-ui.mjs'));
  assert.ok(!v2.includes('kt83-pni-v3-exploration-ui.mjs'));
  assert.ok(v3.includes('kt83-pni-v3-exploration-ui.mjs'));
+ assert.ok(!v3.includes('kt83-pni-v2-admin-preview.mjs'));
 });
 test('ПНИ-V3: свободната изследователска проверка не дава процедура или акт',()=>{
  assert.ok(module.includes('auditExploratoryHypotheses('));
