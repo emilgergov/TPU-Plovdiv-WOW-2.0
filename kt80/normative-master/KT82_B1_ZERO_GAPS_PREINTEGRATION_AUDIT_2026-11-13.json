@@ -1,0 +1,75 @@
+{
+  "schema": "KT82_B1_NO_GAPS_BEFORE_INTEGRATION_V01",
+  "date": "2026-11-13",
+  "decision": "STOP_INTEGRATION_UNTIL_COMPLETENESS_AND_VERSION_QA",
+  "verified": {
+    "administrative_supplement": {
+      "count": 9,
+      "format": "private local V3 ZIP, full PDFs and text; no public GitHub physical assets",
+      "github_registry": "kt80/normative-master/KT82_B1_ADMINISTRATIVE_MASTER_SUPPLEMENT_REGISTER_V01.json"
+    },
+    "historical_archive": {
+      "entries": 60,
+      "archived": 55,
+      "missing": 5,
+      "content_legal_ready_confirmed": 0,
+      "canonical_refs": 56
+    }
+  },
+  "priority_source_gaps": [
+    {
+      "id": "ZZT",
+      "title": "Закон за защитените територии",
+      "status": "CURRENT_LOCAL_PDF_SUSPECT_ORIGIN_C003_RN05; REQUIRES FULL OFFICIAL_TEXT_AND_ANNEXES",
+      "best_user_assistance": "Full consolidated PDF if official provenance/local archived version cannot be verified"
+    },
+    {
+      "id": "N_OS",
+      "title": "Наредба за оценка за съвместимост",
+      "status": "ARCHIVED_PDF_2021_HEADER; VERIFY_POST_2021_AMENDMENTS_AND_ALL_ANNEXES",
+      "best_user_assistance": "Consolidated PDF with annexes and date visible"
+    },
+    {
+      "id": "N_OVOS",
+      "title": "Наредба за ОВОС",
+      "status": "FULLISH_MOEW_HTML_TEXT_STORED; PAGE_HAS_SITE_NAVIGATION; VERIFY_ANNEX_FULLNESS",
+      "best_user_assistance": "Consolidated PDF with all annexes if current official source not parseable"
+    },
+    {
+      "id": "N_EO",
+      "title": "Наредба за ЕО",
+      "status": "FULLISH_MOEW_HTML_TEXT_STORED; VERIFY_ANNEX_FULLNESS",
+      "best_user_assistance": "Consolidated PDF with all annexes if current official source not parseable"
+    }
+  ],
+  "missing_record_alias_groups": [
+    {
+      "ids": [
+        "C046",
+        "R-R01",
+        "R-T01"
+      ],
+      "primary": "ИАОС Държавен регистър на защитените територии",
+      "url": "https://pdbase.eea.government.bg/zpo/bg/index_search.jsp"
+    },
+    {
+      "ids": [
+        "C047",
+        "R-T02"
+      ],
+      "primary": "Природна забележителност Свети Дух и заповед за обявяване",
+      "url": "https://pdbase.eea.government.bg/zpo/bg/area.jsp?NEM_Partition=1&areaID=97&categoryID=3"
+    }
+  ],
+  "broader_qa": [
+    "32 Natura 2000 zones all original orders and amendments versus portal entries",
+    "Actual local full primary law text vs HTML legal index",
+    "Annex-to-article verification and time validity",
+    "Ancillary rules/fees only when linked to a real procedure",
+    "Copyright-safe public assets and private originals separation",
+    "No automatic legal citation until effective-date verified"
+  ],
+  "user_dependency": "Ask for ZZT, OS, OVOС and EO PDF ONLY if official sources are insufficient; don't ask to reupload ZOOS, ZBR, TPU, or 9 admin acts.",
+  "generator_baselines": "NO_CHANGES",
+  "status": "INVENTORY_IN_PROGRESS_NOT_RELEASE_APPROVAL"
+}
