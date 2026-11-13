@@ -11,12 +11,13 @@ const fromBytes=b=>new TextDecoder().decode(b);
 function zipParts(extra=''){
  const xml='<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'+
   markers.map(m=>'<w:p><w:r><w:t>{{'+m+'}}</w:t></w:r></w:p>').join('')+
-  extra+'</w:body></w:document>';
+  extra+'<w:sectPr><w:headerReference r:id="rIdHdr"/><w:footerReference r:id="rIdFtr"/></w:sectPr></w:body></w:document>';
  return {'[Content_Types].xml':toBytes('test'),
   'word/document.xml':toBytes(xml),
-  'word/header1.xml':toBytes('<w:hdr><w:drawing/></w:hdr>'),
+  'word/header1.xml':toBytes('<w:hdr><w:drawing><a:blip r:embed="rIdLogo"/></w:drawing></w:hdr>'),
   'word/footer1.xml':toBytes('<w:ftr>Официален футър</w:ftr>'),
-  'word/_rels/header1.xml.rels':toBytes('logo.png'),
+  'word/_rels/header1.xml.rels':toBytes('<Relationships><Relationship Id="rIdLogo" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/logo.png"/></Relationships>'),
+  'word/_rels/document.xml.rels':toBytes('<Relationships><Relationship Id="rIdHdr" Target="header1.xml"/><Relationship Id="rIdFtr" Target="footer1.xml"/></Relationships>'),
   'word/media/logo.png':new Uint8Array([1,2,3,4])};
 }
 const codec={
@@ -52,6 +53,7 @@ test('missing logo, footers, broken signature slots and macros fail closed',()=>
   Object.fromEntries(Object.entries(base).filter(([k])=>k!=='word/media/logo.png')),
   Object.fromEntries(Object.entries(base).filter(([k])=>k!=='word/footer1.xml')),
   {...base,'word/vbaProject.bin':toBytes('macro')},
+  {...base,'word/_rels/header1.xml.rels':toBytes('<Relationships><Relationship Id="rIdLogo" Target="https://external.invalid/logo.png" TargetMode="External"/></Relationships>')},
   {...base,'word/document.xml':toBytes(fromBytes(base['word/document.xml']).replace('{{EG_SIGNATURE_2}}','НЕПОДПИСАНО'))}
  ]){
   const c={...codec,unzipSync:()=>modified};
