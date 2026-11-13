@@ -1,0 +1,19 @@
+name: KT83 - Independent normative engine V11
+on:
+  push:
+    paths:
+      - 'kt80/integration/**'
+      - '.github/workflows/kt83-independent-normative-engine.yml'
+  workflow_dispatch:
+jobs:
+  test-stage4-stage5:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Independent V11 legal evidence and fee smoke tests
+        run: node --test kt80/integration/stage4-stage5-smoke.test.mjs
