@@ -1,0 +1,125 @@
+{
+  "schema": "KT82_B1_CROSS_AUDIT_EXCEPTIONS_AND_EFFECTIVITY_GATES_V01",
+  "date": "2026-11-13",
+  "purpose": "Resolve over-broad legal validations before using source documents for procedural routing.",
+  "sources": [
+    {
+      "name": "АПК",
+      "url": "https://www.justice.government.bg/home/normdoc/2135521015",
+      "level": "official_current_html"
+    },
+    {
+      "name": "Наредба за ЕО",
+      "url": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ekologichna-ocenka-na-planove-i-programi/",
+      "level": "official_MOEW_html"
+    },
+    {
+      "name": "Наредба за ОВОС",
+      "url": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ocenka-na-vuzdejstvieto-vurhu-okolnata-sreda/",
+      "level": "official_MOEW_print_user_uploaded"
+    }
+  ],
+  "corrections": [
+    {
+      "id": "APK_113_EXPLICIT_EXCEPTION",
+      "route": 18,
+      "legal": "АПК чл.113",
+      "prior_risk": "Previous draft test said signal against authority must never go to that authority for resolution.",
+      "verified_rule": "Сигналите не могат да се решават от лицето/органа, срещу чиито действия са подадени, ОСВЕН ако приемат сигнала за основателен и го уважат.",
+      "test_positive": "If target authority itself considers signal justified and fully grants it, statutory exception may apply; verify actual authority and procedural evidence.",
+      "test_negative": "Otherwise resolve at appropriate superior/controlling authority; no self-rejection."
+    },
+    {
+      "id": "EO_23_2_ALTERNATE_DOCUMENT_BUNDLE",
+      "route": 12,
+      "legal": "Наредба ЕО чл.23 ал.1–2",
+      "prior_risk": "Prior draft characterized EO report + consultation records as universally mandatory for every art.23 request.",
+      "verified_rule": "Standard route art.23(1): full EO report and consultation documentation; art.23(2) for cases under art.3(3) uses copy of ecological part of plan/program as a special accompanying document.",
+      "test_positive": "When art.3(3) is proved, use statutory art.23(2) dossier; don't falsely demand full standard bundle without checking paragraph.",
+      "test_negative": "Ordinary art.23(1) route still requires complete documentation including consultation results."
+    },
+    {
+      "id": "EO_23_4_RETURN_NOT_GENERIC_SUSPENSION",
+      "route": 12,
+      "legal": "Наредба ЕО чл.23 ал.4",
+      "verified_rule": "Noncompliant/uncomplete application under al.1 returned within seven days with instructions; do not invent an arbitrary universal remedy or assume automatic favorable statement.",
+      "test_positive": "Incomplete standard statement request -> return with instructions within prescribed seven days."
+    },
+    {
+      "id": "EO_25_DECISION_ACTOR",
+      "route": 12,
+      "legal": "Наредба ЕО чл.25 ал.1",
+      "verified_rule": "Competent organ issues opinion within 30 days from art.23(1) request on the basis of a decision of committee/expert ecological council per art.5(1); any documented extensions/checks must be applied case-specifically.",
+      "test_positive": "Proceed to opinion only after competent collegial mechanism and procedural dossier."
+    },
+    {
+      "id": "EO_12_13_SEPARATE_CLOCKS",
+      "route": 11,
+      "legal": "Наредба ЕО чл.12 ал.1–4 и чл.13 ал.1–2",
+      "verified_rule": "Art.12 screening-request completeness check within 7 days; response period for Ministry of Health/RZI consultations up to 14 days; optional local/specialized bodies up to 7 days. Missing information period excluded from art.85(5) ZOOS clock.",
+      "test_positive": "Do not conflate 7 day document check, 14 day health opinions, 7 day optional opinions, or statutory decision deadline."
+    },
+    {
+      "id": "APK_122_ESCALATION",
+      "route": 18,
+      "legal": "АПК чл.122 ал.2",
+      "verified_rule": "If organ under art.119(2) refuses to consider signal justified, sends signal + explanation to higher authority within one month of its submission and notifies submitter; distinguish from art.112 wrong-competence forwarding.",
+      "test_positive": "Target organ rejects merits -> one-month escalation path, not dismiss as already resolved."
+    },
+    {
+      "id": "APK_107_SPECIAL_PROCEDURES",
+      "routes": [
+        17,
+        18,
+        19,
+        22
+      ],
+      "legal": "АПК чл.107 ал.2",
+      "verified_rule": "Chapter eight not applicable when law provides another procedure for the proposals/signals; objection and complaint require independent classification.",
+      "test_positive": "Special law prioritized; not merge appeal, objection and proposal to generic suggestions/signals."
+    }
+  ],
+  "changes_requested_to_prior_QA": [
+    {
+      "file": "KT82_B1_OS_EO_APK_13_RULES_V01_2026-11-13.json",
+      "notes": "Interpret test APK_SIGNAL_CONFLICT as exception-aware (art113); EO_OPINION_WITHOUT_REPORT as art23(1) default with art23(2) alternate."
+    },
+    {
+      "file": "KT82_B1_V9_ROUTE_22_PROVISION_GATES_V01_2026-11-13.json",
+      "notes": "Add exceptions as explicit validation gates for 12 and 18; 22 route count remains unchanged."
+    }
+  ],
+  "new_regression_tests": [
+    {
+      "test": "EO_23_2_SPECIAL_PATH",
+      "expected": "Alternative statutory dossier when art3(3) holds"
+    },
+    {
+      "test": "EO_23_4_RETURN",
+      "expected": "Seven-day return with instructions for incomplete art23(1) request"
+    },
+    {
+      "test": "EO_TIMING_SPLIT",
+      "expected": "Distinct health/local/administrative clocks and exclusion"
+    },
+    {
+      "test": "APK_113_EXCEPTION",
+      "expected": "Target authority may grant justified signal without violating no-self-resolution rule"
+    },
+    {
+      "test": "APK_122_ESCALATION",
+      "expected": "One-month handoff upon unfavorable self-assessment by authority named in signal"
+    }
+  ],
+  "integrity": {
+    "no_existing_quality_gate_replaced": true,
+    "route_count": 22,
+    "internal_tools": 4,
+    "existing_runtime_modified": false,
+    "automatic_legal_citations": false,
+    "kt80_stage4_5_not_enabled": true,
+    "v27_35_capsulated": true,
+    "classic_AB_not_mandatory": true
+  },
+  "status": "LEGAL_EXCEPTION_GATES_VERIFIED; FULL_B1_SIGNOFF_PENDING_EFFECTIVE_DATE_SOURCES_AND_REMAINING_ROUTE_MATERIAL_COMPETENCE"
+}
