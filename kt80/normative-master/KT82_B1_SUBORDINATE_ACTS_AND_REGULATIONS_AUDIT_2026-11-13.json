@@ -1,0 +1,152 @@
+{
+  "schema": "KT82_B1_SUBORDINATE_ACTS_GAP_AND_DEPENDENCY_V01",
+  "date": "2026-11-13",
+  "policy": "Последната приета локална редакция е актуалната работна редакция на WOW до следващото контролирано обогатяване; външен статус и правна приложимост са отделни полета.",
+  "registry_basis": "v26-test/normative/offline/archive-manifest.json",
+  "scope": "Систематична проверка на действително необходимите правилници, наредби и актове за процедури, компетентност, ТПУ, Natura 2000 и ЗТ",
+  "verified_existing": [
+    {
+      "act": "Наредба за ОВОС",
+      "id": "C005",
+      "local_path": "normative/offline/assets/426a170701c2efe9767bf278.txt",
+      "kind": "Официална страница, локално архивиран текст",
+      "article_text_detected": true,
+      "annex_headings": [
+        "1",
+        "2",
+        "2а",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "last_amendment_as_printed": "ДВ, бр. 62/2022",
+      "official_source": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ocenka-na-vuzdejstvieto-vurhu-okolnata-sreda/",
+      "status": "ARCHIVED_CONTENT_INSPECTED",
+      "remaining": "Проверка на пълнотата на всяко приложение и редакцията към датата на нормативния MASTER. HTML/TXT съдържа и навигация на сайта."
+    },
+    {
+      "act": "Наредба за ЕО",
+      "id": "C006",
+      "local_path": "normative/offline/assets/7c60b951a3c8847f40f71ba4.txt",
+      "kind": "Официална страница, локално архивиран текст",
+      "article_text_detected": true,
+      "annex_headings": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "last_amendment_as_printed": "ДВ, бр. 70/2020",
+      "official_source": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ekologichna-ocenka-na-planove-i-programi/",
+      "status": "ARCHIVED_CONTENT_INSPECTED",
+      "remaining": "Проверка на всяко приложение и редакцията. TXT включва навигация на сайта."
+    },
+    {
+      "act": "Наредба за ОС",
+      "ids": [
+        "C004",
+        "R-N02"
+      ],
+      "local_path": "normative/offline/assets/6df9c36be15fb8d13268c724.pdf",
+      "kind": "Локален PDF",
+      "status": "ARCHIVED_BINARY_REGISTERED_CONTENT_NOT_YET_INDEPENDENTLY_INSPECTED",
+      "remaining": "Текстова и визуална сверка на PDF, приложения и изменения ДВ 96/2025"
+    },
+    {
+      "act": "Наредба за ТПУ на ЗЗ",
+      "id": "R-N04",
+      "kind": "Архивен указател на МОСВ, НЕ пълен текст",
+      "status": "ONLY_INDEX_STORED",
+      "remaining": "Добавяне на оригиналния текст и приложенията като нови локални файлове"
+    }
+  ],
+  "subordinate_candidates": [
+    {
+      "id": "P-RIOSV",
+      "title": "Правилник за устройството и дейността на регионалните инспекции по околната среда и водите",
+      "type": "правилник",
+      "priority": "P0",
+      "why": "Компетентност, функции и административен обхват на РИОСВ; задължителен слой за етапи №4–5",
+      "official_url": "https://www.moew.government.bg/bg/pravilnik-za-ustrojstvoto-i-dejnostta-na-regionalnite-inspekcii-po-okolnata-sreda-i-vodite/",
+      "last_amendment_printed": "ДВ, бр. 41/2024",
+      "local_status": "FULL_PRIMARY_TEXT_NOT_IDENTIFIED_IN_60_ENTRY_MASTER",
+      "usage": "COMPETENCE_CONTEXT_REQUIRES_EXPERT_REVIEW"
+    },
+    {
+      "id": "N-TPU",
+      "title": "Наредба за условията и реда за разработване и утвърждаване на териториални планове за управление на защитени зони",
+      "type": "наредба",
+      "priority": "P0",
+      "why": "Правна основа на собствените ТПУ, планове и мерки",
+      "official_url": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Naredbi/NAREDBA_za_usl_reda_za_razrabotvane_i_utvarjdavane_na_TPU_na_ZZ.pdf",
+      "publication": "ПМС № 236/07.11.2025 г., ДВ бр. 96/11.11.2025 г.",
+      "local_status": "ONLY_MOEW_LANDING_PAGE_R-N04"
+    },
+    {
+      "id": "P-DNP",
+      "title": "Правилник за устройството и дейността на дирекциите на националните паркове",
+      "type": "правилник",
+      "priority": "P1",
+      "why": "Разграничаване на компетентност и територия на РИОСВ спрямо ДНП; ЗТ/ТПУ",
+      "official_url": "https://www.moew.government.bg/bg/pravilnik-za-ustrojstvoto-i-dejnostta-na-direkciite-na-nacionalnite-parkove/",
+      "last_amendment_printed": "ДВ, бр. 41/2024",
+      "local_status": "FULL_PRIMARY_TEXT_NOT_IDENTIFIED"
+    },
+    {
+      "id": "P-BD",
+      "title": "Правилник за дейността, организацията на работа и състав на басейновите дирекции",
+      "type": "правилник",
+      "priority": "P1",
+      "why": "Разграничаване на компетентност при води и заустване",
+      "official_url": "https://www.moew.government.bg/bg/ministerstvo/zakonodatelstvo/pravilnici/",
+      "local_status": "FULL_PRIMARY_TEXT_NOT_IDENTIFIED"
+    },
+    {
+      "id": "N-ZT-PLANS",
+      "title": "Наредба за разработване на планове за управление на защитени територии",
+      "type": "наредба",
+      "priority": "P1",
+      "why": "ЗТ, национални и природни паркове, резервати, планове и режими",
+      "official_url": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Protected_areas/NAREDBA_za_razrabotvane_na_planove_za_upravlenie_na_zasiteni_teritorii.pdf",
+      "publication": "ПМС № 7/08.02.2000, ДВ бр. 13/2000, изм. ДВ бр. 55/2012 (по публикувания PDF)",
+      "local_status": "FULL_PRIMARY_TEXT_NOT_IDENTIFIED"
+    },
+    {
+      "id": "P-ZT-STATE",
+      "title": "Правилник за условията и реда за управлението, възлагането на дейностите по поддържане и възстановяване, възлагането на туристически дейности, охраната и контрола в горите, земите и водните площи в защитените територии – изключителна държавна собственост",
+      "type": "правилник",
+      "priority": "P2_CONDITIONAL",
+      "why": "Специални дейности на територии – изключителна държавна собственост; не универсален акт за всяка преписка",
+      "official_url": "https://www.moew.government.bg/bg/priroda/zakonodatelstvo/nacionalno-zakonodatelstvo/naredbi-pravilnici-instrukcii-tarifi/",
+      "publication": "ДВ, бр. 49/2005 (по МОСВ)",
+      "local_status": "FULL_PRIMARY_TEXT_NOT_IDENTIFIED"
+    },
+    {
+      "id": "P-IAOS",
+      "title": "Устройствен правилник на Изпълнителната агенция по околна среда",
+      "type": "правилник",
+      "priority": "P2_CONDITIONAL",
+      "why": "Разпределение на функции с ИАОС и регистри, не заменя специалната компетентност",
+      "official_url": "https://www.moew.government.bg/bg/ministerstvo/zakonodatelstvo/pravilnici/",
+      "last_amendment_printed": "ДВ, бр. 36/2026",
+      "local_status": "FULL_PRIMARY_TEXT_NOT_IDENTIFIED"
+    },
+    {
+      "id": "FEES",
+      "title": "Приложими тарифи за такси при административни услуги и екологични процедури",
+      "type": "тарифа",
+      "priority": "P1_CONDITIONAL",
+      "why": "Такси, когато са относими към избрания правен маршрут; да не се измисля размер",
+      "official_url": "https://www.moew.government.bg/bg/ministerstvo/zakonodatelstvo/",
+      "local_status": "PRIMARY_ACT_AND_APPLICABLE_VERSION_REQUIRE_IDENTIFICATION"
+    }
+  ],
+  "logic": "Разпоредбите на ЗООС/ЗБР не се допълват с измислен универсален „правилник за прилагане“; използват се действително издадени специални наредби, правилници, тарифи и заповеди, според конкретната процедура.",
+  "integration_status": "READ_ONLY_INVENTORY_NOT_LEGAL_AUTHORISATION",
+  "automatic_legal_citation": false
+}
