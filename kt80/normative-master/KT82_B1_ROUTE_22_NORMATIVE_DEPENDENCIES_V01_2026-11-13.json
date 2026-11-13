@@ -1,0 +1,529 @@
+{
+  "schema": "KT82_B1_ROUTE_DEPENDENCY_QA_V01",
+  "date": "2026-11-13",
+  "source": "kt80/KT80_E01_B_CONSOLIDATED_MATRIX_V01.json",
+  "source_total": 22,
+  "source_caveat": "Synthesis of existing draft passports, not an official validation of all normative provisions",
+  "mode": "READ_ONLY_ARCHIVE_AND_ROUTE_INVENTORY_NOT_ACTUAL_LAW_INTERPRETATION",
+  "archived_general_refs": [
+    "APK",
+    "NAO",
+    "PRAVILNIK_RIOSV",
+    "NAREDBA_TPU",
+    "ZEU",
+    "NAR",
+    "ZA",
+    "ZDOI",
+    "NOIISREAU"
+  ],
+  "external_full_text_refs": [
+    "ZBR (old archive original and user PDF)",
+    "ZOOS (user supplied PDF; old archive index only)",
+    "ZZT_2023 (user PDF; official reconciliation open)",
+    "N_OS_2025 (user PDF)",
+    "N_OVOS_2022 (user RTF)",
+    "N_EO_2020 (user PDF)"
+  ],
+  "records": [
+    {
+      "route_id": 1,
+      "label": "Писмо по чл. 2, ал. 2 от Наредбата за ОС",
+      "source_category": "restricted_legacy_test",
+      "source_legal_family": "OS",
+      "source_initial_legal_anchor": "НОС чл.2 ал.2; приложение №1; чл.6а",
+      "source_blocking_validation": "Актуална редакция; контролен лист; компетентност; доказателства за изход",
+      "general_acts_to_check": [
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "conditional_acts_to_check": [],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 2,
+      "label": "Искане за допълнителна информация",
+      "source_category": "procedural_action",
+      "source_legal_family": "OS/OVOS/EO",
+      "source_initial_legal_anchor": "НОС чл.2 ал.4; Наредба ОВОС чл.5 ал.4–6",
+      "source_blocking_validation": "Срокове и последици по всеки специален ред",
+      "general_acts_to_check": [
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "APK",
+        "N_OVOS_2022",
+        "N_EO_2020"
+      ],
+      "conditional_acts_to_check": [],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 3,
+      "label": "Искане за институционално становище",
+      "source_category": "procedural_action",
+      "source_legal_family": "various",
+      "source_initial_legal_anchor": "Специално правно основание се установява за всяка процедура",
+      "source_blocking_validation": "Задължителност на консултацията; адресат; срок",
+      "general_acts_to_check": [
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "APK",
+        "N_OVOS_2022",
+        "N_EO_2020",
+        "NAO",
+        "ZA"
+      ],
+      "conditional_acts_to_check": [
+        "Закон за водите: само при водни обстоятелства и басейнова дирекция",
+        "Друг специален закон за компетентния адресат"
+      ],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 4,
+      "label": "Указания по процедурата за ОВОС",
+      "source_category": "procedural_action",
+      "source_legal_family": "OVOS",
+      "source_initial_legal_anchor": "Наредба ОВОС чл.4–5; услуга №1650",
+      "source_blocking_validation": "Приложения №1/2 ЗООС; компетентност; комбинирана ОС",
+      "general_acts_to_check": [
+        "N_OVOS_2022",
+        "ZOOS",
+        "N_OS_2025",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "conditional_acts_to_check": [
+        "Закон за водите: при водовземане/заустване"
+      ],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 5,
+      "label": "Указания по процедурата за ОС",
+      "source_category": "procedural_action",
+      "source_legal_family": "OS",
+      "source_initial_legal_anchor": "НОС чл.2 ал.1–5; чл.4–6а",
+      "source_blocking_validation": "Разклоняване на чл.2 ал.1/2; самостоятелна/съвместена ОС",
+      "general_acts_to_check": [
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "conditional_acts_to_check": [],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 6,
+      "label": "Решение за преценяване вероятна степен на отрицателно въздействие",
+      "source_category": "administrative_act",
+      "source_legal_family": "OS",
+      "source_initial_legal_anchor": "НОС чл.18; ЗБР чл.31",
+      "source_blocking_validation": "Актуални основания; приложение; орган; допустимост",
+      "general_acts_to_check": [
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "conditional_acts_to_check": [],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 7,
+      "label": "Решение за преценяване необходимостта от ОВОС",
+      "source_category": "administrative_act",
+      "source_legal_family": "OVOS",
+      "source_initial_legal_anchor": "ЗООС чл.93; Наредба ОВОС",
+      "source_blocking_validation": "Пълен ред за уведомяване, консултации, срокове и обжалване",
+      "general_acts_to_check": [
+        "N_OVOS_2022",
+        "ZOOS",
+        "N_OS_2025",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "conditional_acts_to_check": [
+        "Закон за водите: при водни обстоятелства"
+      ],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 8,
+      "label": "Решение по ОВОС",
+      "source_category": "administrative_act",
+      "source_legal_family": "OVOS",
+      "source_initial_legal_anchor": "ЗООС чл.94 и следващи; Наредба ОВОС",
+      "source_blocking_validation": "Доклад, обсъждания, компетентност, условия и съобщаване",
+      "general_acts_to_check": [
+        "N_OVOS_2022",
+        "ZOOS",
+        "N_OS_2025",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "conditional_acts_to_check": [
+        "Закон за водите: при водни обстоятелства"
+      ],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 9,
+      "label": "Прекратяване на процедура",
+      "source_category": "procedural_action",
+      "source_legal_family": "OS/OVOS/EO",
+      "source_initial_legal_anchor": "НОС / Наредба ОВОС / Наредба ЕО / АПК",
+      "source_blocking_validation": "Конкретно основание, срок, вид акт, съобщаване",
+      "general_acts_to_check": [
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "APK",
+        "N_OVOS_2022",
+        "N_EO_2020",
+        "NAO",
+        "ZA"
+      ],
+      "conditional_acts_to_check": [],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 10,
+      "label": "Писмо за необходимите действия по ЕО",
+      "source_category": "procedural_action",
+      "source_legal_family": "EO",
+      "source_initial_legal_anchor": "Наредба ЕО чл.2; услуга №3018",
+      "source_blocking_validation": "План/програма; приемане/одобряване; изключения",
+      "general_acts_to_check": [
+        "N_EO_2020",
+        "ZOOS",
+        "N_OS_2025",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "conditional_acts_to_check": [],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 11,
+      "label": "Решение за преценяване необходимостта от ЕО",
+      "source_category": "administrative_act",
+      "source_legal_family": "EO",
+      "source_initial_legal_anchor": "ЗООС чл.85; Наредба ЕО чл.14",
+      "source_blocking_validation": "Предмет, консултации, критерии, компетентност",
+      "general_acts_to_check": [
+        "N_EO_2020",
+        "ZOOS",
+        "N_OS_2025",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "conditional_acts_to_check": [],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 12,
+      "label": "Становище по ЕО",
+      "source_category": "administrative_act",
+      "source_legal_family": "EO",
+      "source_initial_legal_anchor": "ЗООС чл.82 ал.4; Наредба ЕО",
+      "source_blocking_validation": "Доклад, консултации, ОС, мерки и актова форма",
+      "general_acts_to_check": [
+        "N_EO_2020",
+        "ZOOS",
+        "N_OS_2025",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "conditional_acts_to_check": [],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 13,
+      "label": "Експертно обобщение",
+      "source_category": "internal_tool",
+      "source_legal_family": "all",
+      "source_initial_legal_anchor": "Вътрешен доказателствен продукт",
+      "source_blocking_validation": "Права за достъп, цитиране на архивен източник",
+      "general_acts_to_check": [
+        "APK",
+        "ZA",
+        "NAO",
+        "ZEU",
+        "NAR"
+      ],
+      "conditional_acts_to_check": [],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 14,
+      "label": "Проверка на пълнота и допустимост",
+      "source_category": "internal_tool",
+      "source_legal_family": "all",
+      "source_initial_legal_anchor": "Специалните процедурни изисквания",
+      "source_blocking_validation": "Не изисква документи без основание; различава липси",
+      "general_acts_to_check": [
+        "APK",
+        "ZA",
+        "NAO",
+        "ZEU",
+        "NAR",
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "N_OVOS_2022",
+        "N_EO_2020"
+      ],
+      "conditional_acts_to_check": [],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 15,
+      "label": "ГИС справка за имоти и режими",
+      "source_category": "internal_tool",
+      "source_legal_family": "all",
+      "source_initial_legal_anchor": "ГИС/ПИ MASTER; ЗБР/ЗЗТ и конкретни заповеди",
+      "source_blocking_validation": "Достоверност на пресичанията и актуални заповеди",
+      "general_acts_to_check": [
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "APK",
+        "ZZT_2023"
+      ],
+      "conditional_acts_to_check": [
+        "Конкретни заповеди за ЗЗ/ЗТ: само от динамичния териториален регистър"
+      ],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 16,
+      "label": "Архивен пакет",
+      "source_category": "internal_tool",
+      "source_legal_family": "all",
+      "source_initial_legal_anchor": "Техническа проследимост и достъп",
+      "source_blocking_validation": "Хешове, версии, права, отделяне на проект от издаден акт",
+      "general_acts_to_check": [
+        "APK",
+        "ZA",
+        "NAO",
+        "ZEU",
+        "NAR"
+      ],
+      "conditional_acts_to_check": [],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 17,
+      "label": "Жалба — квалификация",
+      "source_category": "procedural_intake",
+      "source_legal_family": "APK/special",
+      "source_initial_legal_anchor": "АПК; специален ред",
+      "source_blocking_validation": "Обжалваем акт, срок, надлежна страна, компетентен орган",
+      "general_acts_to_check": [
+        "APK",
+        "NAO",
+        "ZA",
+        "PRAVILNIK_RIOSV"
+      ],
+      "conditional_acts_to_check": [
+        "Специален ред за обжалване, ако е предвиден"
+      ],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 18,
+      "label": "Сигнал — решение или уведомяване",
+      "source_category": "procedural_intake",
+      "source_legal_family": "APK/special",
+      "source_initial_legal_anchor": "АПК глава осма чл.107–123",
+      "source_blocking_validation": "Специален режим, проверка, срок, форма",
+      "general_acts_to_check": [
+        "APK",
+        "NAO",
+        "ZA",
+        "PRAVILNIK_RIOSV"
+      ],
+      "conditional_acts_to_check": [
+        "ЗООС или ЗБР за конкретния предмет на сигнала"
+      ],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 19,
+      "label": "Възражение",
+      "source_category": "procedural_intake",
+      "source_legal_family": "OS/OVOS/EO/APK",
+      "source_initial_legal_anchor": "Приложим специален ред и АПК",
+      "source_blocking_validation": "Процесуален етап, право на участие, начин на обсъждане",
+      "general_acts_to_check": [
+        "APK",
+        "NAO",
+        "ZA",
+        "PRAVILNIK_RIOSV",
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "N_OVOS_2022",
+        "N_EO_2020"
+      ],
+      "conditional_acts_to_check": [],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 20,
+      "label": "Препращане по компетентност",
+      "source_category": "procedural_action",
+      "source_legal_family": "APK/special",
+      "source_initial_legal_anchor": "АПК чл.31 или чл.112; специален ред",
+      "source_blocking_validation": "Вид сезиране, орган, срок, уведомяване",
+      "general_acts_to_check": [
+        "APK",
+        "NAO",
+        "ZA",
+        "PRAVILNIK_RIOSV"
+      ],
+      "conditional_acts_to_check": [
+        "Специален ред за препращане според предмета"
+      ],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 21,
+      "label": "Уведомяване за проверка",
+      "source_category": "procedural_action",
+      "source_legal_family": "control/signal",
+      "source_initial_legal_anchor": "Контролни специални закони",
+      "source_blocking_validation": "Протокол/предписание/акт/писмо; компетентност",
+      "general_acts_to_check": [
+        "APK",
+        "NAO",
+        "ZA",
+        "PRAVILNIK_RIOSV",
+        "ZOOS",
+        "ZBR",
+        "ZZT_2023"
+      ],
+      "conditional_acts_to_check": [
+        "ЗООС / ЗБР / ЗЗТ и специален контролен закон според предмета"
+      ],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    },
+    {
+      "route_id": 22,
+      "label": "Предложение — решение",
+      "source_category": "procedural_intake",
+      "source_legal_family": "APK/special",
+      "source_initial_legal_anchor": "АПК чл.107 и чл.117–118",
+      "source_blocking_validation": "Изключение по специален ред, срок, компетентност",
+      "general_acts_to_check": [
+        "APK",
+        "NAO",
+        "ZA",
+        "PRAVILNIK_RIOSV"
+      ],
+      "conditional_acts_to_check": [
+        "Специален ред за предложение, ако има"
+      ],
+      "evidence": "SOURCE_MATRIX_MAPPING_ONLY; not a legal conclusion",
+      "source_legal_approval": "PENDING",
+      "legal_readiness": "PENDING_ACT_ARTICLE_EFFECTIVE_DATE_AND_EXPERT_REVIEW",
+      "publication_authorised": false
+    }
+  ],
+  "coverage": {
+    "mapped": 22,
+    "approved_for_autocitation": 0,
+    "internal_tools": 4,
+    "missing_source_ids": []
+  },
+  "legal_gaps": [
+    "Verify full text + annex + effective date and promulgation for each cited article and claimed branch",
+    "Competence split MOEW / RIOSV / other agency and administrative output kind",
+    "Only when real dossier triggers: Water Act and domain-specific subordinate acts/fees; no blanket dependency",
+    "Reconcile OS 2025, ZZT 2023 and official consolidated text with DV",
+    "The four internal tools (13–16) must not be treated as independent administrative acts"
+  ],
+  "technical_gates": {
+    "automatic_citations": false,
+    "stages4_5": false,
+    "existing_generators_modified": false,
+    "territorial_orders_on_demand": true
+  },
+  "status": "CONTROLLED_REFERENCE_MAPPING_ONLY"
+}
