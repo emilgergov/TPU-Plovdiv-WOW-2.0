@@ -1,0 +1,112 @@
+{
+  "schema": "KT82_B1_PREINTEGRATION_INVENTORY_V02",
+  "date": "2026-11-13",
+  "status": "QA_PERFORMED_GAPS_REMAIN_STOP_INTEGRATION",
+  "local_archive": {
+    "file": "KT82_B1_Normative_Master_Local_Pack_V4_REVIEW.zip",
+    "sha256": "8dbc61aa4365df6176c61415ac50402fac00ec12446cb838d4cffad22420b381",
+    "total_source_documents": 13,
+    "base_administrative": 9,
+    "additional_procedural": 4,
+    "zip_integrity": "PASS",
+    "all_included_original_sha256": "PASS",
+    "publication": "NOT_COPIED_INTO_PUBLIC_GITHUB_REPOSITORY"
+  },
+  "additional_verifications": [
+    {
+      "id": "N_OS_2025",
+      "pages": 29,
+      "annexes": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "last_amendment": "ДВ бр.96/2025",
+      "is_leading": true,
+      "key_revision": "чл.12 ал.2 допуска проверка срещу заповеди по чл.12 ал.6, планове по чл.27 ал.1 и заповеди по чл.19 ал.1 ЗБР",
+      "status": "CONSOLIDATED_2025_DOCUMENT_ACCEPTED_AS_WORKING_REFERENCE_EXPERT_QA_PENDING"
+    },
+    {
+      "id": "N_EO_2020",
+      "pages": 39,
+      "annexes": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "last_amendment": "ДВ бр.70/2020",
+      "status": "COMPLETE_AS_SUPPLIED_VERIFY_LEGAL_CURRENCY"
+    },
+    {
+      "id": "N_OVOS_2022",
+      "format": "RTF",
+      "annexes": [
+        "1",
+        "2",
+        "2а",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "last_amendment": "ДВ бр.62/2022",
+      "status": "FULL_TEXT_AND_ANNEX_HEADINGS_DETECTED_VERIFY_LEGAL_CURRENCY"
+    },
+    {
+      "id": "ZZT_2013",
+      "pages": 40,
+      "annexes": [
+        "1",
+        "2"
+      ],
+      "last_amendment": "ДВ бр.66/2013",
+      "status": "HISTORICAL_NOT_LEGAL_READY_NEED_NEWER_CONSOLIDATION"
+    }
+  ],
+  "unresolved": [
+    {
+      "priority": "P0",
+      "issue": "ЗЗТ: каченото 40-странично PDF е редакция до ДВ 66/2013; необходима актуална пълна редакция",
+      "action": "Find official newer consolidated act; request user upload if official text unavailable"
+    },
+    {
+      "priority": "P0",
+      "issue": "Сверка пълна актуалност ЗООС/ЗБР и ОС/ОВОС/ЕО, приложения и преходни норми",
+      "action": "Verify official amendment history and effectivity date"
+    },
+    {
+      "priority": "P0",
+      "issue": "Заповеди за обявяване/изменения за всички 32 защитени зони",
+      "action": "audit zone code -> official order -> amendments and date"
+    },
+    {
+      "priority": "P1",
+      "issue": "Държавен регистър ЗТ ИАОС и Св. Дух, общо 5 исторически alias записа, 2 underlying resources",
+      "action": "Acquire official local registry and order evidence"
+    },
+    {
+      "priority": "P1",
+      "issue": "Допълнителни правни основания (дирекции на паркове, басейнови дирекции, такси и планове за ЗТ) за 22 маршрута",
+      "action": "Confirm actual relevance then archive primary texts only"
+    }
+  ],
+  "safety_controls": {
+    "generator_change": false,
+    "automatic_legal_citation": false,
+    "stages_4_5": false,
+    "pdf1_pdf2_classic_expert_unchanged": true,
+    "private_APIS_Ciela_pdf_not_publicly_published": true
+  },
+  "repository_basis": [
+    "v26-test/normative/offline/archive-manifest.json",
+    "kt80/normative-master/KT82_B1_ZERO_GAPS_PREINTEGRATION_AUDIT_2026-11-13.json",
+    "kt80/normative-master/KT82_B1_ADMINISTRATIVE_MASTER_SUPPLEMENT_REGISTER_V01.json"
+  ],
+  "next_action": "Complete P0 legal text and 32-zone order inventory before any integration"
+}
