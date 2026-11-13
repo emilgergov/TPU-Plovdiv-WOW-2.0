@@ -1,0 +1,27 @@
+name: WOW · Пакет А · PDF1 контрол
+on:
+  push:
+    paths:
+      - 'kt80/KT82_A_PDF1_V599.js'
+      - 'kt80/KT82_16_PACKAGE_A_V599_TEST.html'
+      - 'tests/kt82-pdf1-v599.test.cjs'
+      - '.github/workflows/kt82-package-a-pdf1.yml'
+  pull_request:
+    paths:
+      - 'kt80/KT82_A_PDF1_V599.js'
+      - 'tests/kt82-pdf1-v599.test.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pdf1-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax verification
+        run: node --check kt80/KT82_A_PDF1_V599.js
+      - name: Verified area, provenance and case-cycle tests
+        run: node --test tests/kt82-pdf1-v599.test.cjs
