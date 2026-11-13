@@ -10,7 +10,7 @@ function refresh(){
  const ip=type==='INVESTMENT',hasSubject=!!normalize($('kt80SubjectText')?.value);
  const next=$('kt80ToParcels');if(next)next.textContent='Продължи към нормативната ориентация';
  const lock=$('kt80ScopeLockNotice');
- if(lock&&!ip&&lock.dataset.locked==='true')lock.textContent='Потвърдете предмета на преписката, за да отключите обхвата.';
+ if(lock&&!ip&&lock.dataset.locked==='true'&&lock.textContent!=='Потвърдете предмета на преписката, за да отключите обхвата.')lock.textContent='Потвърдете предмета на преписката, за да отключите обхвата.';
  const subjectStatus=$('kt80SubjectProposalStatus');
  if(subjectStatus&&!ip&&hasSubject&&/няма доказан кандидат|няма надежден кандидат/iu.test(subjectStatus.textContent)){
   subjectStatus.textContent='Изготвено е предложение за предмет по прочетената преписка. Проверете съдържанието и източника, преди да го потвърдите.';
