@@ -1,5 +1,5 @@
 {
-  "schema": "KT82_B1_ZONE_PRIMARY_ORDER_AUDIT_V01",
+  "schema": "KT82_B1_ZONE_PRIMARY_ORDER_AUDIT_V02",
   "date": "2026-11-13",
   "basis": "v26-test/normative/offline/archive-manifest.json",
   "scope": {
@@ -413,11 +413,29 @@
         "C047",
         "R-T02"
       ],
-      "agency_index": "СВЕТИ ДУХ — Природна забележителност",
-      "designation_order_number": null,
-      "designation_order_local_pdf": null,
-      "status": "INDEX_RECORD_CONFIRMED_ORIGINAL_ORDER_MISSING",
-      "detail_retrieval": "TIMED_OUT"
+      "register_number": 97,
+      "category": "Природна забележителност",
+      "object": "Водопад Свети Дух",
+      "location": "с. Манастир, община Лъки, област Пловдив",
+      "designation": {
+        "number": "3796",
+        "date": "1965-10-11",
+        "promulgation": "ДВ бр. 12/1966",
+        "register_source": "https://pdbase.eea.government.bg/zpo/bg/area.jsp?NEM_Partition=1&areaID=97&categoryID=3"
+      },
+      "area_adjustment": {
+        "number": "РД-629",
+        "date": "2018-10-23",
+        "promulgation": "ДВ бр. 99/2018",
+        "area_before_decares": 5,
+        "area_after_decares": 2.883,
+        "source": "https://www.ciela.net/svobodna-zona-darjaven-vestnik/issue/5880/unofficial"
+      },
+      "current_register_area_ha": 0.29,
+      "original_order_pdf_archived": false,
+      "amendment_order_pdf_archived": false,
+      "legal_ready": false,
+      "qa": "Order numbers confirmed through searchable register and promulgated amendment text; original PDF orders must still be captured, no automatic citations yet"
     }
   },
   "integration": {
@@ -425,5 +443,5 @@
     "stage5": false,
     "generators_untouched": true
   },
-  "next": "Cross-check 32-row project zone master, gather primary orders and amendments, verify protected-territory order, then mark legal-ready individually"
+  "next": "32 distinct BG codes are identified in the historic manifest; verify 37 separate zone portal records as distinct Birds/Habitats entries, including amendments and primary PDFs. Archive two Sveti Duh orders and authoritative register snapshot."
 }
