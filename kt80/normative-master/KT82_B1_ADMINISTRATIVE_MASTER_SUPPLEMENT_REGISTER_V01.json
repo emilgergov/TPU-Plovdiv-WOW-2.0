@@ -1,5 +1,5 @@
 {
-  "schema": "KT82_B1_ADMIN_MASTER_REGISTER_V02",
+  "schema": "KT82_B1_ADMIN_MASTER_REGISTER_V03",
   "checkpoint": "2026-11-13",
   "operational_principle": "Последната приета локална редакция е текущата версия на WOW до следващото контролирано обогатяване. Версия за WOW ≠ независимо удостоверяване на всички по-късни законодателни изменения.",
   "existing_archive": {
@@ -10,10 +10,10 @@
     "physical_archived_unique": 51
   },
   "portable_supplement": {
-    "name": "KT82_B1_Normative_Master_Local_Pack_V2.zip",
-    "sha256": "dd956a32bfc6f307592b83c405623dfd301066718519515ea6d1eb01aa5370ad",
-    "contents": "6 user-supplied PDFs, 6 extracted texts, 6 article page indexes, manifest and README",
-    "current_location": "user-conversation portable file, not physically published to GitHub",
+    "name": "KT82_B1_Normative_Master_Local_Pack_V3.zip",
+    "sha256": "21cf5980a9be42167f26e6dad83b42e4943e9cf17a89ecefb70bde10a6e4b75d",
+    "contents": "9 user-provided PDFs; 9 full text extracts; 9 article-page indexes; manifest; README",
+    "current_location": "Local downloadable conversation artifact; NOT physically hosted in public GitHub",
     "files": [
       {
         "id": "APK",
@@ -106,52 +106,40 @@
         "official_url": "https://iisda.government.bg/regulatory/107",
         "local_status": "IN_PRIVATE_PORTABLE_SUPPLEMENT_V2",
         "public_github_physical_archive_status": "NOT_UPLOADED"
+      },
+      {
+        "id": "ZA",
+        "title": "Закон за администрацията",
+        "pages": 31,
+        "sha256": "0f598165b50cae9909805647892b54cc20debbbd3943ef1fff9f496b27f490aa",
+        "latest_amendment_in_copy": "ДВ, бр. 69/2026",
+        "official_url": "https://iisda.government.bg/ras/regulatory/84",
+        "local_status": "IN_PRIVATE_PORTABLE_SUPPLEMENT_V3",
+        "public_github_physical_archive_status": "NOT_UPLOADED"
+      },
+      {
+        "id": "ZDOI",
+        "title": "Закон за достъп до обществена информация",
+        "pages": 39,
+        "sha256": "3762b655c1fa167d14a09e18f962fe4bfda44df9aeaa8bd4b3557b9cb73aca23",
+        "latest_amendment_in_copy": "ДВ, бр. 55/2026",
+        "official_url": "https://justice.government.bg/home/index/51d30b6f-ed82-43ae-971d-4cb7adcefda4",
+        "local_status": "IN_PRIVATE_PORTABLE_SUPPLEMENT_V3",
+        "public_github_physical_archive_status": "NOT_UPLOADED"
+      },
+      {
+        "id": "NOIISREAU",
+        "title": "Наредба за общите изисквания към информационните системи, регистрите и електронните административни услуги",
+        "pages": 115,
+        "sha256": "23e0f128422dc98f37eb41006a22ac66e57c0d1a311836ba55b9555c5b289f8b",
+        "latest_amendment_in_copy": "ДВ, бр. 80/2024",
+        "official_url": "https://www.mtc.government.bg/bg/category/166/naredba-za-obschite-iziskvaniya-km-informacionnite-sistemi-registrite-i-elektronnite-administrativni-uslugi",
+        "local_status": "IN_PRIVATE_PORTABLE_SUPPLEMENT_V3",
+        "public_github_physical_archive_status": "NOT_UPLOADED"
       }
     ]
   },
-  "new_official_act_candidates": [
-    {
-      "id": "ZA",
-      "title": "Закон за администрацията",
-      "priority": "P0",
-      "official_url": "https://iisda.government.bg/ras/regulatory/84",
-      "source_date": "2026-07-31",
-      "repo_full_text": false,
-      "route_use": [
-        "административна компетентност",
-        "организация",
-        "услуги"
-      ],
-      "status": "OFFICIAL_SOURCE_CONFIRMED_FULL_FILE_NOT_ARCHIVED"
-    },
-    {
-      "id": "ZDOI",
-      "title": "Закон за достъп до обществена информация",
-      "priority": "P0",
-      "official_url": "https://justice.government.bg/home/index/51d30b6f-ed82-43ae-971d-4cb7adcefda4",
-      "external_amendment_indication": "ДВ бр.55/2026",
-      "repo_full_text": false,
-      "route_use": [
-        "заявление за обществена информация",
-        "екологична информация по ЗООС"
-      ],
-      "status": "OFFICIAL_SOURCE_CONFIRMED_FULL_FILE_NOT_ARCHIVED"
-    },
-    {
-      "id": "NOIISREAU",
-      "title": "Наредба за общите изисквания към информационните системи, регистрите и електронните административни услуги",
-      "priority": "P1",
-      "official_url": "https://www.mtc.government.bg/bg/category/166/naredba-za-obschite-iziskvaniya-km-informacionnite-sistemi-registrite-i-elektronnite-administrativni-uslugi",
-      "external_amendment_indication": "ДВ бр.80/2024 (сверка с публикувания по-стар министерски екземпляр)",
-      "repo_full_text": false,
-      "route_use": [
-        "електронни регистри",
-        "електронни услуги",
-        "вътрешен обмен"
-      ],
-      "status": "OFFICIAL_SITE_CONFIRMED_PUBLICATION_MAY_BE_OLDER"
-    }
-  ],
+  "new_official_act_candidates": [],
   "special_acts": [
     "ЗООС",
     "ЗБР",
@@ -176,9 +164,9 @@
     "word_classic_expert": "LOCKED_NO_CHANGE"
   },
   "next_steps": [
-    "Поискай само липсващите пълни текстове на ZA, ZDOI и NOIISREAU, ако официалното извличане не е възможно.",
-    "Добави официално/лицензионно допустими текстове в постоянно достъпен архив; APIS/Ciela оформлението остава в частния пакет.",
-    "Подготви локален индекс по член/алинея/точка и регресионни тестове, преди да включиш нормативната логика в генераторите."
+    "Nine document supplement is complete in local V3; do not request duplicate uploads.",
+    "Check all date-sensitive amendments before applying a legal article to a case.",
+    "Integrate approved public / license-safe assets and runtime reference lookup in later separately tested checkpoints, keeping Word/GIS/PDF generators locked."
   ],
-  "note": "Налични 6 пълни документа в портативния допълващ пакет. Старият КТ77-R11 остава непроменен; новите PDF не са качени в GitHub."
+  "note": "All nine PDFs complete and hash-checked in local archive V3. The 60 historical records and 56 canonical references in old master remain unchanged; the new package holds nine distinct additions. No automatic PDF2 or author legal citations enabled."
 }
