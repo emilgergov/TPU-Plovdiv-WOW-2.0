@@ -1,0 +1,35 @@
+name: WOW · Б2 · Независими правни хипотези V61.2
+on:
+  push:
+    paths:
+      - 'kt80/integration/kt83-v612-independent-rule-packet.mjs'
+      - 'kt80/integration/kt83-v612-independent-rule-packet.test.mjs'
+      - 'kt80/integration/kt83-v612-legal-hypothesis-preview.mjs'
+      - 'kt80/KT82_21_STAGE_V_V612_INDEPENDENT_HYPOTHESES_TEST.html'
+      - '.github/workflows/kt82-stage-v-v612.yml'
+  pull_request:
+    paths:
+      - 'kt80/integration/kt83-v612-independent-rule-packet.mjs'
+      - 'kt80/integration/kt83-v612-independent-rule-packet.test.mjs'
+      - 'kt80/integration/kt83-v612-legal-hypothesis-preview.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unbiased-legal-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: |
+          node --check kt80/integration/kt83-v612-independent-rule-packet.mjs
+          node --check kt80/integration/kt83-v612-independent-rule-packet.test.mjs
+          node --check kt80/integration/kt83-v612-legal-hypothesis-preview.mjs
+      - name: B2 legal predicates, exceptions and source provenance
+        run: |
+          node --test kt80/integration/kt83-v612-independent-rule-packet.test.mjs
+          node --test kt80/integration/kt83-v611-case-bound-b2.test.mjs
+          node --test kt80/integration/stage4-stage5-smoke.test.mjs
