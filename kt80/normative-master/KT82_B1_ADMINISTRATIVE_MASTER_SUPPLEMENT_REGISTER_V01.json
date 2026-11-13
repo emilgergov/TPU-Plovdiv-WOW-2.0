@@ -1,5 +1,5 @@
 {
-  "schema": "KT82_B1_ADMIN_MASTER_REGISTER_V01",
+  "schema": "KT82_B1_ADMIN_MASTER_REGISTER_V02",
   "checkpoint": "2026-11-13",
   "operational_principle": "Последната приета локална редакция е текущата версия на WOW до следващото контролирано обогатяване. Версия за WOW ≠ независимо удостоверяване на всички по-късни законодателни изменения.",
   "existing_archive": {
@@ -10,10 +10,10 @@
     "physical_archived_unique": 51
   },
   "portable_supplement": {
-    "name": "KT82_B1_Normative_Master_Local_Pack.zip",
-    "sha256": "bc5a5c8b1712c41b6bd2eb334ea322a938a9a0b4b5046258d8f23c5dd081e38e",
-    "contents": "4 user-supplied PDFs + 4 extracted texts + 4 article-page indices + supplement manifest + README",
-    "current_location": "user-conversation artifact; NOT physically uploaded to the public GitHub repository",
+    "name": "KT82_B1_Normative_Master_Local_Pack_V2.zip",
+    "sha256": "dd956a32bfc6f307592b83c405623dfd301066718519515ea6d1eb01aa5370ad",
+    "contents": "6 user-supplied PDFs, 6 extracted texts, 6 article page indexes, manifest and README",
+    "current_location": "user-conversation portable file, not physically published to GitHub",
     "files": [
       {
         "id": "APK",
@@ -86,6 +86,26 @@
           "приложение към чл.8 ал.2"
         ],
         "official_url": "https://www.moew.government.bg/bg/priroda/zakonodatelstvo/nacionalno-zakonodatelstvo/naredbi-pravilnici-instrukcii-tarifi/"
+      },
+      {
+        "id": "ZEU",
+        "title": "Закон за електронното управление",
+        "pages": 43,
+        "sha256": "2534d4efa10a83a61acb636f19da00fc9f4fa8ba2cd4fb62238ae74d7cc84eb6",
+        "latest_amendment_in_copy": "ДВ, бр. 55/2026",
+        "official_url": "https://justice.government.bg/home/normdoc/2135555445",
+        "local_status": "IN_PRIVATE_PORTABLE_SUPPLEMENT_V2",
+        "public_github_physical_archive_status": "NOT_UPLOADED"
+      },
+      {
+        "id": "NAR",
+        "title": "Наредба за Административния регистър",
+        "pages": 13,
+        "sha256": "a9d770845f724382b626e88dd52d4c95c718f0fb05b2218d29499e5f13b7ce1f",
+        "latest_amendment_in_copy": "ДВ, бр. 79/2026",
+        "official_url": "https://iisda.government.bg/regulatory/107",
+        "local_status": "IN_PRIVATE_PORTABLE_SUPPLEMENT_V2",
+        "public_github_physical_archive_status": "NOT_UPLOADED"
       }
     ]
   },
@@ -114,35 +134,6 @@
       "route_use": [
         "заявление за обществена информация",
         "екологична информация по ЗООС"
-      ],
-      "status": "OFFICIAL_SOURCE_CONFIRMED_FULL_FILE_NOT_ARCHIVED"
-    },
-    {
-      "id": "ZEU",
-      "title": "Закон за електронното управление",
-      "priority": "P0",
-      "official_url": "https://justice.government.bg/home/normdoc/2135555445",
-      "external_amendment_indication": "ДВ бр.55/2026",
-      "repo_full_text": false,
-      "route_use": [
-        "електронно подаване",
-        "електронни преписки",
-        "служебен обмен",
-        "електронно връчване"
-      ],
-      "status": "OFFICIAL_FULL_TEXT_ON_GOVERNMENT_SITE_NOT_MIRRORED"
-    },
-    {
-      "id": "NAR",
-      "title": "Наредба за Административния регистър",
-      "priority": "P0",
-      "official_url": "https://iisda.government.bg/regulatory/107",
-      "external_amendment_indication": "ДВ бр.79/2026",
-      "repo_full_text": false,
-      "route_use": [
-        "административни услуги",
-        "регистри на услуги",
-        "реквизити"
       ],
       "status": "OFFICIAL_SOURCE_CONFIRMED_FULL_FILE_NOT_ARCHIVED"
     },
@@ -185,8 +176,9 @@
     "word_classic_expert": "LOCKED_NO_CHANGE"
   },
   "next_steps": [
-    "Осигури разрешено за публикуване локално копие на петте нови акта, след като се сверят редакциите",
-    "Изгради машинен индекс член/алинея/точка, свържи го с конкретния вид преписка (не прави общи заключения)",
-    "Техническо включване след отделен регресионен контрол"
-  ]
+    "Поискай само липсващите пълни текстове на ZA, ZDOI и NOIISREAU, ако официалното извличане не е възможно.",
+    "Добави официално/лицензионно допустими текстове в постоянно достъпен архив; APIS/Ciela оформлението остава в частния пакет.",
+    "Подготви локален индекс по член/алинея/точка и регресионни тестове, преди да включиш нормативната логика в генераторите."
+  ],
+  "note": "Налични 6 пълни документа в портативния допълващ пакет. Старият КТ77-R11 остава непроменен; новите PDF не са качени в GitHub."
 }
