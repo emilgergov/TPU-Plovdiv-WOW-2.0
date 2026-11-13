@@ -1,0 +1,144 @@
+{
+  "schema": "KT82_B1_PRIMARY_SOURCE_PROCEDURAL_ARTICLE_QA_V01",
+  "date": "2026-11-13",
+  "sources": [
+    {
+      "short": "N_OVOS_MOEW",
+      "origin": "Official MOEW webpage print PDF user supplied, in private package V9",
+      "url": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ocenka-na-vuzdejstvieto-vurhu-okolnata-sreda/",
+      "consolidation_header": "ДВ, бр.62/2022; no later actual promulgation established by this record alone"
+    },
+    {
+      "short": "APK_MIN_JUSTICE",
+      "origin": "Ministry of Justice official legal text + APK contained in V9",
+      "url": "https://justice.government.bg/home/normdoc/2135521015"
+    }
+  ],
+  "verified_rules": [
+    {
+      "id": "OVOS_4A",
+      "article": "Наредба за ОВОС чл.4а ал.1–3",
+      "rule": "Referral to Basin Directorate for listed water take/use, wastewater discharges, priority/hazardous substance water contact; director response within 7 days after receipt; when incomplete data Basin Directorate specifies what and at which stage should be supplied.",
+      "route_ids": [
+        3,
+        4,
+        7
+      ],
+      "condition": "Facts of water-related triggers established; no universal basin referral"
+    },
+    {
+      "id": "OVOS_5_4_6",
+      "article": "Наредба за ОВОС чл.5 ал.4–6",
+      "rule": "At first notice stage deficiencies: give investor at least 7 days for correction; missing response can trigger discontinuation under al.5; correction period excluded from 14-day notice period in al.1.",
+      "route_ids": [
+        2,
+        4,
+        9
+      ],
+      "condition": "Do not apply to later assessment-request deficiency without separate art.6 verification"
+    },
+    {
+      "id": "OVOS_6_3_5",
+      "article": "Наредба за ОВОС чл.6 ал.3–5",
+      "rule": "For request for EIA screening missing/inaccurate documentation: investor gets at least 7 days; failure can terminate review of request, time excluded from art.93 al.6 ZOOS decision deadline.",
+      "route_ids": [
+        2,
+        7,
+        9
+      ],
+      "condition": "Distinguish from art.5 initial notification"
+    },
+    {
+      "id": "OVOS_2A",
+      "article": "Наредба за ОВОС чл.2а ал.2, 3, 5, 6",
+      "rule": "Termination when competent authority confirms legal inadmissibility; separate 12-month inactivity criteria followed by reminder letter and up-to-14-day response period.",
+      "route_ids": [
+        9
+      ],
+      "condition": "12 months plus reminder does not cover all termination causes; cannot terminate automatically from mere missing data"
+    },
+    {
+      "id": "APK_31",
+      "article": "АПК чл.31 ал.2–4",
+      "rule": "If administrative individual act belongs to different agency, case-file is forwarded immediately, with notice; submission in deadline to incompetent agency counts as timely.",
+      "route_ids": [
+        20
+      ],
+      "condition": "Only general individual administrative act proceeding; first inspect special statutory rules"
+    },
+    {
+      "id": "APK_112",
+      "article": "АПК чл.112",
+      "rule": "Proposals and signals to wrong authority forwarded no later than 7 days except if issue already sent; originator notified.",
+      "route_ids": [
+        18,
+        20,
+        22
+      ],
+      "condition": "Not general deadline for all incoming case files"
+    },
+    {
+      "id": "APK_118",
+      "article": "АПК чл.118 ал.1–3",
+      "rule": "Proposal resolved within 2 months; communicated within 7 days; exceptional further inquiry higher authority may prolong resolution up to 6 months; decision not appealed.",
+      "route_ids": [
+        22
+      ],
+      "condition": "Proposal qualifies under APK art.107 rather than procedural objection or application"
+    },
+    {
+      "id": "APK_121",
+      "article": "АПК чл.121",
+      "rule": "Signal resolved within 2 months; higher authority may extend by no more than 1 month for especially important reasons and notify author.",
+      "route_ids": [
+        18
+      ],
+      "condition": "Special law may provide other applicable procedure"
+    }
+  ],
+  "review_coverage": {
+    "rules": 8,
+    "affected_route_ids": [
+      2,
+      3,
+      4,
+      7,
+      9,
+      18,
+      20,
+      22
+    ],
+    "other_routes_need_review": true,
+    "all_22_finished": false
+  },
+  "test_cases_to_add": [
+    {
+      "id": "T_OVOS_NOTIF_MISSING",
+      "expected": "art5 >=7 days and deadline suspension; not art6"
+    },
+    {
+      "id": "T_OVOS_SCREEN_MISSING",
+      "expected": "art6 >=7 days and statutory EIA clock suspension; not art5"
+    },
+    {
+      "id": "T_APK_REQUEST_INCOMPETENT",
+      "expected": "art31 immediate forwarding, not 7-day art112"
+    },
+    {
+      "id": "T_APK_SIGNAL_INCOMPETENT",
+      "expected": "art112 7-day forwarding"
+    },
+    {
+      "id": "T_OVOS_TERMINATE",
+      "expected": "conditions art2a case-by-case; no unconditional termination"
+    }
+  ],
+  "gates": {
+    "currentness_of_all_sources_final": false,
+    "automatic_legal_citation": false,
+    "kt80_stages4_5_integration": false,
+    "v27_35_unchanged": true,
+    "classic_AB_only_legacy": true
+  },
+  "status": "PRIMARY_ARTICLE_CONTROL_COMPLETED_FOR_EIGHT_RULES_NOT_GLOBAL_SIGNOFF"
+}
