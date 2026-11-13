@@ -71,5 +71,10 @@
   ],
   "user_dependency": "Ask for ZZT, OS, OVOС and EO PDF ONLY if official sources are insufficient; don't ask to reupload ZOOS, ZBR, TPU, or 9 admin acts.",
   "generator_baselines": "NO_CHANGES",
-  "status": "INVENTORY_IN_PROGRESS_NOT_RELEASE_APPROVAL"
+  "status": "INVENTORY_IN_PROGRESS_NOT_RELEASE_APPROVAL",
+  "supersession_notice": {
+    "recorded_at": "2026-11-13",
+    "policy": "kt80/normative-master/KT82_B1_NORMATIVE_VS_TERRITORIAL_ORDERS_POLICY_2026-11-13.json",
+    "note": "Interpret preintegration zero gaps as general legal instruments relevant to defined routes, NOT all individual territorial orders. Case-by-case authenticated order resolution is a separate feature. Subsequent ZZT, OS 2025 and other documents supersede some outstanding file requests."
+  }
 }
