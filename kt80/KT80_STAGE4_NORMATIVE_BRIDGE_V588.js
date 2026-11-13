@@ -174,7 +174,7 @@ function boot(){
   deficiencies.textContent=p.evidence;
   detailsBody.replaceChildren();
   for(const law of p.laws){const item=node('p');item.append(node('strong',law.id+' · '),document.createTextNode(law.detail+' '+law.verified));detailsBody.append(item)}
-  const sources=node('p','Официални източници: ');for(const [label,url] of p.sourceLinks){const a=node('a',label);a.href=url;a.target='_blank';a.rel='noopener noreferrer';sources.append(a,document.createTextNode(' · '));}detailsBody.append(sources);
+  if(p.sourceLinks.length){const sources=node('p','Официални източници: ');for(const [label,url] of p.sourceLinks){const a=node('a',label);a.href=url;a.target='_blank';a.rel='noopener noreferrer';sources.append(a,document.createTextNode(' · '));}detailsBody.append(sources)}else detailsBody.append(node('p','Приложимите нормативни основания се уточняват по конкретния административен въпрос; на този етап не се посочват непроверени разпоредби.'));
   detailsBody.append(node('p','Конкретното прилагане на правните норми, компетентността и процедурният извод подлежат на експертно потвърждение.'));
   if(!dirty||!notes.value.trim()||notes.value===authored){
    replacing=true;notes.value=p.content;authored=p.content;dirty=false;replacing=false;
