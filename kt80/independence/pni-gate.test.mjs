@@ -81,7 +81,7 @@ test('ПНИ-Д: променена версия или отпечатък на 
  assert.ok(verify(m).errors.some(e=>e.code==='MASTER_HASH'));
 });
 test('ПНИ: няма нищо внесено от текстовете на примерни преписки в нормативния списък',()=>{
- assert.ok(PROTECTED_SOURCES.every(p=>/kt80\/integration\/.+\.mjs$/.test(p)));
+ assert.ok(PROTECTED_SOURCES.every(p=>/^kt80\/(?:integration|independence)\/.+\.mjs$/.test(p)));
  assert.equal(Object.keys(manifest.expected_git_blob_sha1).length,PROTECTED_SOURCES.length);
  assert.ok(PROTECTED_SOURCES.every(p=>gitBlobSha1(sources[p])===manifest.expected_git_blob_sha1[p]));
 });
