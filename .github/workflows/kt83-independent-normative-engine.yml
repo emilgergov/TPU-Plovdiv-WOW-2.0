@@ -44,3 +44,9 @@ jobs:
         run: |
           node --check kt80/integration/kt83-pni-v2-admin-preview.mjs
           node --test kt80/independence/pni-preview-v2.test.mjs
+      - name: PNI V3 free hypothesis research and independent audit
+        run: |
+          node --check kt80/independence/pni-hypothesis-auditor.mjs
+          node --check kt80/integration/kt83-pni-v3-exploration-ui.mjs
+          node --test kt80/independence/pni-exploration.test.mjs
+          node --test kt80/independence/pni-v3-preview.test.mjs
