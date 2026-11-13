@@ -3,13 +3,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {assessStage4,CANONICAL_ARCHIVE,ARCHIVE_SHA256} from './stage4-independent-legal-engine.mjs';
 import {proposeStage5,convertTariffBgnToEur} from './stage5-independent-proposal.mjs';
-const legalRef=(act,article,archivePath)=>({
-  act,article,archivePath,archiveTextAnchor:'Чл. 1.',
-  archive:CANONICAL_ARCHIVE,archiveSha256:ARCHIVE_SHA256,verifiedAgainstV11:true
-});
+import {verifiedReference} from './v11-trusted-source-registry.mjs';
+const legalRef=(id)=>verifiedReference(id);
 const rule={
   id:'hypothesis',title:'Примерна правна хипотеза',
-  legalBasis:legalRef('ЗООС','чл.93','core/ZOOS_2026_51.txt'),
+  legalBasis:legalRef('ZOOS_93'),
   condition:{fact:'applicable'},
   missingFactProposal:'Изясни приложимостта',
   supportedProposal:'Предложи мотивирано процедурно действие'
@@ -22,11 +20,11 @@ const stage4=value=>assessStage4({
 const competence=[{sourceId:'test-doc',factId:'location',archiveOrDossierOrigin:'Преписка'}];
 const fee={
   linkedLegalFindingId:'hypothesis',bgnAmount:'500.00',
-  tariffSource:legalRef('Тарифа МОСВ','чл.1, ал.5, т.1','additions_v11/TARIFA_MOEW_2022.pdf'),
-  euroLawSource:legalRef('Закон за еврото','чл.12–13','additions_v11/EURO_LAW_BNB_2026_DV92.pdf')
+  tariffSource:legalRef('TARIFA_1'),
+  euroLawSource:legalRef('EURO_12')
 };
 test('нормативна опора задължително от V11',()=>{
-  assert.throws(()=>assessStage4({confirmedSubject:'Предмет',scopeConfirmed:true,evidence:evidence('true'),rules:[{...rule,legalBasis:{...rule.legalBasis,verifiedAgainstV11:false}}]}));
+  assert.throws(()=>assessStage4({confirmedSubject:'Предмет',scopeConfirmed:true,evidence:evidence('true'),rules:[{...rule,legalBasis:{...rule.legalBasis,articleSha256:'0000'}}]}));
 });
 test('положителен факт -> подкрепена правна хипотеза',()=>{
   assert.equal(stage4('true').legalFindings[0].state,'supported');
