@@ -1,0 +1,35 @@
+name: WOW · Б2 · Интеграция V61.1
+on:
+  push:
+    paths:
+      - 'kt80/integration/kt83-v611-case-bound-b2-bridge.mjs'
+      - 'kt80/integration/kt83-v611-b2-compact-preview.mjs'
+      - 'kt80/integration/kt83-v611-case-bound-b2.test.mjs'
+      - 'kt80/KT82_20_STAGE_V_V611_B2_INTEGRATION_TEST.html'
+      - '.github/workflows/kt82-stage-v-v611.yml'
+  pull_request:
+    paths:
+      - 'kt80/integration/kt83-v611-case-bound-b2-bridge.mjs'
+      - 'kt80/integration/kt83-v611-b2-compact-preview.mjs'
+      - 'kt80/integration/kt83-v611-case-bound-b2.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-legal-engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax verification
+        run: |
+          node --check kt80/integration/kt83-v611-case-bound-b2-bridge.mjs
+          node --check kt80/integration/kt83-v611-b2-compact-preview.mjs
+          node --check kt80/integration/kt83-v611-case-bound-b2.test.mjs
+      - name: Independent B2 and V11 case-bound engine tests
+        run: |
+          node --test kt80/integration/kt83-v611-case-bound-b2.test.mjs
+          node --test kt80/integration/stage4-stage5-smoke.test.mjs
+          node --test tests/kt82-stage-v-v610.test.cjs
