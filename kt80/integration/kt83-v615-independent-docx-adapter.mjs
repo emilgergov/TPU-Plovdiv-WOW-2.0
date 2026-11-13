@@ -31,8 +31,27 @@ export function inspectBlankDOCX(bytes,zipEngine){
  if(!heads.length||!feet.length||!images.length)error('липсва хедър, футър или вградено лого');
  if(!heads.some(p=>/<w:(?:drawing|pict)\b/.test(read(zip[p]))))
   error('липсва графично лого в хедъра');
- if(!paths.some(p=>/^word\/_rels\/header\d+\.xml\.rels$/.test(p)))
-  error('липсва връзка на логото в хедъра');
+ const documentRels=zip['word/_rels/document.xml.rels'];
+ if(!documentRels)error('липсват Word отношения на разделите');
+ const drels=read(documentRels);
+ if(paths.filter(p=>p.endsWith('.rels')).some(p=>/TargetMode\s*=\s*["']External["']/i.test(read(zip[p]))))
+  error('външни отношения към шаблона не са разрешени');
+ if(!/<w:headerReference\b/.test(xml)||!/<w:footerReference\b/.test(xml))
+  error('хедърът и футърът не са включени във Word раздела');
+ const head=heads.find(p=>drels.includes('Target="'+p.slice(5)+'"'));
+ const foot=feet.find(p=>drels.includes('Target="'+p.slice(5)+'"'));
+ if(!head||!foot)error('хедър/футър не са свързани с основния Word документ');
+ const headRelPath='word/_rels/'+head.slice(5)+'.rels';
+ if(!zip[headRelPath])error('липсва връзка на логото в хедъра');
+ const header=read(zip[head]),hrels=read(zip[headRelPath]);
+ const logoIds=[...header.matchAll(/r:embed=["']([^"']+)["']/g)].map(m=>m[1]);
+ const logoFound=logoIds.some(id=>{
+  const rel=hrels.match(new RegExp('<Relationship\\\\b[^>]*Id=["\\\']'+id+'["\\\'][^>]*>','i'))?.[0]||'';
+  const target=rel.match(/Target=["']([^"']+)["']/)?.[1]||'';
+  return /(?:^|\\/)media\\/[^/]+\\.(png|jpe?g)$/i.test(target) &&
+   images.some(p=>p==='word/'+target.replace(/^\\.\\//,''));
+ });
+ if(!logoFound)error('не е установена действителна вградена връзка към логото');
  const values=[...xml.matchAll(/<w:t(?:\s[^>]*)?>([\s\S]*?)<\/w:t>/g)].map(x=>x[1].trim()).filter(Boolean);
  for(const name of MARKERS){
   const marker='{{'+name+'}}';
