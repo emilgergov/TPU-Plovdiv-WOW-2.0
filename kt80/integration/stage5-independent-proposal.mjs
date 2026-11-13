@@ -4,6 +4,7 @@
  * V11 legal/tariff archive must be supplied via separately verified rules.
  */
 import { CANONICAL_ARCHIVE, ARCHIVE_SHA256 } from './stage4-independent-legal-engine.mjs';
+import { assertVerifiedReference } from './v11-trusted-source-registry.mjs';
 
 export function convertTariffBgnToEur(bgn) {
   if (typeof bgn !== 'string' || !/^\d{1,12}(?:\.\d{1,2})?$/.test(bgn)) {
@@ -20,15 +21,8 @@ export function convertTariffBgnToEur(bgn) {
 }
 
 function requireArchiveRule(o, reference) {
-  if (!o || o.archive !== CANONICAL_ARCHIVE ||
-      o.archiveSha256 !== ARCHIVE_SHA256 ||
-      o.verifiedAgainstV11 !== true ||
-      typeof o.act !== 'string' || !o.act.trim() ||
-      typeof o.article !== 'string' || !o.article.trim() ||
-      typeof o.archivePath !== 'string' || !o.archivePath.trim() ||
-      typeof o.archiveTextAnchor !== 'string' || !o.archiveTextAnchor.trim()) {
-    throw new TypeError('Липсва удостоверено основание от V11: ' + reference);
-  }
+  try { return assertVerifiedReference(o); }
+  catch (e) { throw new TypeError('Липсва удостоверено основание от V11: '+reference+' — '+e.message); }
 }
 
 export function proposeStage5({ stage4, confirmedCompetence, competenceEvidence, fee }) {
@@ -53,8 +47,12 @@ export function proposeStage5({ stage4, confirmedCompetence, competenceEvidence,
     'Предложение: да се провери още една законово обоснована хипотеза от V11.');
   let tariff = null;
   if (fee !== undefined && fee !== null) {
-    requireArchiveRule(fee?.tariffSource, 'тарифа');
-    requireArchiveRule(fee?.euroLawSource, 'закон за еврото');
+    const tariffCitation=requireArchiveRule(fee?.tariffSource, 'тарифа');
+    const euroCitation=requireArchiveRule(fee?.euroLawSource, 'закон за еврото');
+    if (!['TARIFA_1','TARIFA_22'].includes(tariffCitation.id) ||
+        !['EURO_11','EURO_12','EURO_13','EURO_52'].includes(euroCitation.id)) {
+      throw new TypeError('Неправилна комбинация от архивни правни основания за такса');
+    }
     if (!supported.some(x => x.ruleId === fee?.linkedLegalFindingId)) {
       throw new TypeError('Таксата не е свързана с доказано приложимо правно основание');
     }
