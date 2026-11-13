@@ -1,0 +1,160 @@
+{
+  "schema": "KT82_B1_ARCHIVE_GAP_AUDIT_V01",
+  "date": "2026-11-13",
+  "based_on": "kt80/normative-master/KT80_MASTER_UNIFIED_REGISTRY_V01.json",
+  "physical_archive": "v26-test/normative/offline/archive-manifest.json",
+  "counts": {
+    "records": 60,
+    "stored": 55,
+    "missing": 5,
+    "legal_citation_ready": 0,
+    "duplicate_hash_groups": 4
+  },
+  "categories": {
+    "legislation_index": {
+      "entries": 3,
+      "archived": 3,
+      "legal_ready": 0
+    },
+    "law": {
+      "entries": 2,
+      "archived": 2,
+      "legal_ready": 0
+    },
+    "ordinance": {
+      "entries": 4,
+      "archived": 4,
+      "legal_ready": 0
+    },
+    "guidance_or_index": {
+      "entries": 6,
+      "archived": 6,
+      "legal_ready": 0
+    },
+    "zone_portal_entry": {
+      "entries": 33,
+      "archived": 33,
+      "legal_ready": 0
+    },
+    "administrative_registry": {
+      "entries": 5,
+      "archived": 1,
+      "legal_ready": 0
+    },
+    "other_official_reference": {
+      "entries": 3,
+      "archived": 2,
+      "legal_ready": 0
+    },
+    "zone_order_or_form": {
+      "entries": 4,
+      "archived": 4,
+      "legal_ready": 0
+    }
+  },
+  "duplicate_ids": [
+    [
+      "C002",
+      "R-N03"
+    ],
+    [
+      "C003",
+      "R-N05"
+    ],
+    [
+      "C004",
+      "R-N02"
+    ],
+    [
+      "C017",
+      "R-Z04"
+    ]
+  ],
+  "missing": [
+    {
+      "id": "C046",
+      "title": "Регистър на защитените територии — ИАОС",
+      "url": "https://pdbase.eea.government.bg/zpo/bg/index_search.jsp",
+      "status": "MISSING_LOCAL_BYTES"
+    },
+    {
+      "id": "C047",
+      "title": "Природна забележителност „Свети Дух“ — заповед за обявяване",
+      "url": "https://pdbase.eea.government.bg/zpo/bg/area.jsp?NEM_Partition=1&areaID=97&categoryID=3",
+      "status": "MISSING_LOCAL_BYTES"
+    },
+    {
+      "id": "R-R01",
+      "title": "Регистър защитени територии и зони ИАОС",
+      "url": "https://pdbase.eea.government.bg/zpo/bg/index_search.jsp",
+      "status": "MISSING_LOCAL_BYTES"
+    },
+    {
+      "id": "R-T01",
+      "title": "ИАОС — Държавен регистър на защитените територии",
+      "url": "https://pdbase.eea.government.bg/zpo/bg/index_search.jsp",
+      "status": "MISSING_LOCAL_BYTES"
+    },
+    {
+      "id": "R-T02",
+      "title": "Природна забележителност „Свети Дух“ — ИАОС",
+      "url": "https://pdbase.eea.government.bg/zpo/bg/area.jsp?NEM_Partition=1&areaID=97&categoryID=3",
+      "status": "MISSING_LOCAL_BYTES"
+    }
+  ],
+  "priority": [
+    {
+      "level": "P0",
+      "group": "Пълни нормативни текстове",
+      "items": [
+        "ЗООС: C002/R-N03 са информационни страници, не самият закон",
+        "ЗБР: C001 е указател; R-N01 PDF има непотвърдена редакция",
+        "ЗЗТ: C003/R-N05 PDF — сверка на произхода и редакцията",
+        "Наредба ОС: C004/R-N02 — риск от остаряла версия, изискват се изменения/приложения",
+        "Наредби ОВОС и ЕО: C005/C006 — текстове с членове, необходими актуализация и приложения"
+      ]
+    },
+    {
+      "level": "P0",
+      "group": "Универсални административни производства",
+      "items": [
+        "АПК — пълен официален текст и релевантни административни производства за сигнали, предложения, жалби и искания",
+        "ЗДОИ — пълен актуален текст за искания за информация",
+        "ЗЕУ — актуален текст и електронно подаване, връчване и документи",
+        "Приложимите специални разпоредби по ЗООС/ЗБР за екологична информация и сигнали; проверка на компетентност, а не автоматично разширяване"
+      ]
+    },
+    {
+      "level": "P1",
+      "group": "Защитени зони и територии",
+      "items": [
+        "Проверка на официалните заповеди за обявяване и изменения на всички 32 ЗЗ, свързване код→заповед→версия→PDF",
+        "Защитени територии — локални заповеди и изменения, разграничени от ЗЗ",
+        "5 липсващи записа / 2 първични адреса: ИАОС регистър и „Свети Дух“",
+        "Сверка дали записите за зони са описателни портални страници, а не първични заповеди"
+      ]
+    },
+    {
+      "level": "P1",
+      "group": "Приложения, образци и процедури",
+      "items": [
+        "Приложения към Наредба ОС, ОВОС и ЕО — пълнота и версия",
+        "Други подзаконови актове — само след доказана приложимост към 22 маршрута",
+        "Компетентности, срокове и относими формуляри от официалните първоизточници"
+      ]
+    },
+    {
+      "level": "P2",
+      "group": "Версионен и технически индекс",
+      "items": [
+        "Версия и дата на влизане в сила, ДВ/изм., SHA-256, локален оригинал и индексиран текст",
+        "Член/алинея/точка/приложение с позиция в локалния файл и доказателствена връзка",
+        "Дедупликация на 4 групи идентични хешове без изтриване на исторически записи",
+        "Автоматично използване само на legal-ready локални записи; проверка за нови редакции по график и преди издаване"
+      ]
+    }
+  ],
+  "important": "Не заменя физическия архив и не счита URL за локално копие; предходният KT82_B1_OFFICIAL_SOURCE_REGISTER е списък за доставяне, не нов основен MASTER.",
+  "next_stage": "Archive full official primary texts in versioned assets, verify SHA256 and texts, then switch stage 4 to verified local citation index only.",
+  "activated_in_stage4": false
+}
