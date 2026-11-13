@@ -32,8 +32,8 @@ test('Stage 4 uses source-matched receipt rather than string messages',()=>{
   assert.ok(stage4.includes(event),event);
 });
 test('Stage 3 ignores asynchronous completions after changing dossier',()=>{
- assert.match(stage3,/caseId!==(root\.KT80WorkflowState\?\.caseCycleId\|\|null)/);
- assert.match(stage3,/caseGeneration!==(root\.KT80WorkflowState\?\.generation\?\?null)/);
+ assert.ok(stage3.includes("caseId!==(root.KT80WorkflowState?.caseCycleId||null)"));
+ assert.ok(stage3.includes("caseGeneration!==(root.KT80WorkflowState?.generation??null)"));
  assert.match(stage3,/addEventListener\('kt80:case-change'/);
 });
 test('no change to archival ZZ proof and 1% numeric guard',()=>{
