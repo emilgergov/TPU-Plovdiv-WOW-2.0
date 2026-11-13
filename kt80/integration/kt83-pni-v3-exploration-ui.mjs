@@ -29,6 +29,12 @@ function start(){
  outLabel.htmlFor=output.id;
  section.append(lab,area,button,outLabel,output);
  stage.prepend(section);
+ const stage5=document.querySelector('.kt80-stage-panel[data-panel="5"]');
+ if(stage5){
+   const notice=el('p','ПНИ-V3: свободните правни хипотези са само изследователски проекти. Не е определена процедура и не се генерира административен акт. За мотивиран процедурен проект е необходима независима нормативна и експертна приемка.');
+   notice.id='kt83PNIV3Stage5Notice';notice.className='kt83-independent-state';
+   stage5.prepend(notice);
+ }
  let last=null;
  const review=(hypotheses)=>{
   const data=readKT80V598State(window);
