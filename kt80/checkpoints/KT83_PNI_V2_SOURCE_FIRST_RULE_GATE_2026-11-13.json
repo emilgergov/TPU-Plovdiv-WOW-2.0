@@ -1,0 +1,67 @@
+{
+  "schema": "KT83_PNI_V2_SOURCE_FIRST_RULE_GATE",
+  "date": "2026-11-13",
+  "parent": "kt80/checkpoints/KT83_PNI_V1_APPROVED_TECHNICAL_GATE_2026-11-13.json",
+  "goal": "Build and verify a source-first legal-condition framework immune to testing-case contamination",
+  "status": "SOURCE_FIRST_RUNTIME_GATE_AND_ISOLATED_PREVIEW_IMPLEMENTED; AUTOMATED_TESTS_PASSED; LEGAL_COMPLETENESS_NOT_APPROVED",
+  "implemented": {
+    "catalogue": "kt80/independence/pni-normative-conditions.mjs",
+    "approved_normative_domains": 0,
+    "approved_conditions": 0,
+    "deliberately_blocked": true,
+    "entrypoint": "kt80/independence/pni-independent-review.mjs",
+    "tests": "kt80/independence/pni-source-first.test.mjs",
+    "mandatory_gate": "kt80/independence/pni-gate.mjs",
+    "manifest": "kt80/independence/pni-locked-manifest.json",
+    "pilot_javascript": "kt80/integration/kt83-pni-v2-admin-preview.mjs",
+    "pilot_html": "kt80/KT83_03_PNI_V2_SOURCE_FIRST_GATED_TEST.html",
+    "pilot_regression": "kt80/independence/pni-preview-v2.test.mjs"
+  },
+  "ci": {
+    "workflow": ".github/workflows/kt83-independent-normative-engine.yml",
+    "run": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/43504095660",
+    "conclusion": "success",
+    "suites": {
+      "stage4_stage5": 13,
+      "kt83_v13": 7,
+      "kt83_v14": 10,
+      "pni_v1": 12,
+      "pni_v2_source_first": 13,
+      "pni_v2_pilot": 4
+    },
+    "total_checks": 59
+  },
+  "security": {
+    "protection_layers": 7,
+    "rule_injection": "REJECTED",
+    "route_injection": "REJECTED",
+    "competence_or_fee_injection": "REJECTED",
+    "source_first_catalogue": "EMPTY_UNTIL_INDEPENDENT_EXPERT_APPROVAL",
+    "stage5_without_coverage": "BLOCKED",
+    "normative_fingerprint_changes_on_test_fixtures": "NO",
+    "normative_fingerprint_changes_on_normative_code": "YES; BLOCKS CI"
+  },
+  "unchanged": [
+    "B1/V11 normative archive",
+    "B2 expert-accepted result",
+    "V27.35 stable version",
+    "KT80 V59.8 original",
+    "KT83 V1.3 and V1.4 previews"
+  ],
+  "limitations": [
+    "Only seven protected normative modules are cryptographically pinned via committed mjs Git blob hashes.",
+    "Manifest and CI are stored in same repository; a malicious combined change could amend the manifest. GitHub branch protection with independent reviewer required to make this difficult to bypass.",
+    "No verified general provision-to-conditions rules have been approved, so the engine intentionally cannot determine a procedure.",
+    "No guarantee of coverage of all laws, exceptions, or routes; the verified V11 article excerpt index remains partial.",
+    "The independent reviewer is wired only to isolated KT83 PNI-V2 preview, not public production.",
+    "User-provided fact evidence remains to be separately authenticated by full dossier ingestion; not verified merely because submitted."
+  ],
+  "next_steps": [
+    "Develop a source-only legal provision review schema with mandatory V11 article anchors, factual predicates, exceptions and competent authority with independent expert sign-off.",
+    "Complete source-indexed coverage for relevant general and special legislation before activating any automatic procedure.",
+    "Integrate verifiable document provenance from administrative case file reader; no rules or priorities from tests.",
+    "Add blind tests and branch review protection; then full real TEST_2 and unrelated dossier regressions, Word output and visual approval."
+  ],
+  "test_url": "https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/kt80/KT83_03_PNI_V2_SOURCE_FIRST_GATED_TEST.html",
+  "resume_keyword": "WOW-КТ83-ПНИ-V2-ИЗТОЧНИК-ПРЕДПОСТАВКИ-БЕЗ-ЗАМЪРСЯВАНЕ"
+}
