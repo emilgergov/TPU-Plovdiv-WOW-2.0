@@ -207,5 +207,11 @@
     "runtime_modified": false,
     "v27_35_unchanged": true,
     "classic_ab_not_mandatory": true
+  },
+  "supersession": {
+    "status": "SUPERSEDED_NOT_APPROVED_NOT_FOR_KT80_INTEGRATION",
+    "reason": "Predefined catalogue document/result routing is not the starting point or governing logic of the independent KT80 AI author. V27.35 is encapsulated and must never determine KT80 outcomes.",
+    "superseded_by": "kt80/normative-master/KT82_B2_SUBJECT_FIRST_INDEPENDENT_AUTHOR_ARCHITECTURE_2026-11-13.json",
+    "date": "2026-11-13"
   }
 }
