@@ -35,30 +35,51 @@
     // KT80DashboardOpenStage already emits kt80:stage-open exactly once.
   }
   $('kt80ToParcels')?.addEventListener('click',()=>queueMicrotask(onSubject));
-  // Independent GIS results must never be treated as a legal determination.
+  // GIS completeness does not imply that PDF1 has been generated or accepted.
+  // The normative bridge owns the case-bound PDF1 receipt.
   function checkedGIS(){
     if(!route.snapshot().valid||route.snapshot().phase!=='gis_pdf1')return;
-    const s=root.KT80WorkflowState||{},ids=(root.V26ParcelEditor?.normalize?.($('kt80ParcelInput')?.value||'')?.ids)||[];
-    const g=root.KT80FreeGISResults;
-    if(!ids.length){fail('Няма проверен имот. Прилагайте контекстна проверка; не приемайте геометрия по архивен запис.');return;}
-    if(g?.ids?.length!==ids.length||!ids.every((id,i)=>id===g.ids[i])
-      ||!g.results?.every(x=>x.status==='Намерен'&&x.geojson?.features?.length)){
-      render('Изчаква се геометрична проверка за всички имоти. Архивна принадлежност не е геометрично доказателство.');return;
+    const normalized=root.V26ParcelEditor?.normalize?.($('kt80ParcelInput')?.value||'');
+    const ids=normalized?.ids||[], g=root.KT80FreeGISResults;
+    if(!ids.length||normalized.invalid?.length||normalized.uncertain?.length){
+      render('Няма валидирани имотни идентификатори. Необходимо е конкретно уточняване на местоположението.');
+      return;
     }
-    const r=receipt(),passed=route.advance('evidence',{...r,verified:true});
-    render(passed.ok?'Геометрията е налична. Проверете ЗЗ/ЗТ и PDF1; нормативният извод остава независим.':passed.reason);
+    const geometry=Array.isArray(g?.ids)&&g.ids.length===ids.length
+      &&ids.every((id,i)=>id===g.ids[i])
+      &&g.results?.length===ids.length
+      &&g.results.every(x=>x.status==='Намерен'&&x.geojson?.features?.length);
+    if(!geometry){
+      render('Изчаква се проверена геометрия. Архивна принадлежност не доказва пресичане.');
+      return;
+    }
+    const pdf=root.KT83NormativeBridge?.pdfStatus?.();
+    const r=receipt();
+    const pdfCurrent=pdf?.ready===true
+      &&pdf.caseId===r.caseId&&pdf.generation===r.generation
+      &&pdf.evidenceRevision===r.evidenceRevision
+      &&pdf.source===g
+      &&pdf.ids?.length===ids.length&&ids.every((id,i)=>id===pdf.ids[i]);
+    if(!pdfCurrent){
+      render('Геометрията е налична. Изисква се PDF1 за същата преписка и доказателствена ревизия.');
+      return;
+    }
+    const passed=route.advance('evidence',{...r,verified:true});
+    render(passed.ok?'ГИС и PDF1 са удостоверени. Следва независим преглед на доказателствата.':passed.reason);
   }
   document.addEventListener('kt80:parcel-selected',checkedGIS);
-  document.addEventListener('kt82:pdf1-completed',()=>{checkedGIS();render()});
+  document.addEventListener('kt82:pdf1-completed',()=>queueMicrotask(checkedGIS));
   $('kt80ToLaw')?.addEventListener('click',()=>{
     queueMicrotask(()=>{
       if(root.KT80WorkflowState?.step!==4)return;
+      checkedGIS();
       const snap=route.snapshot();
       if(!snap.valid)return render('Няма валиден единен маршрут за текущата преписка.');
-      if(snap.phase==='gis_pdf1')return render('Прегледайте липсващите ГИС доказателства. Архивните пресичания не доказват геометрия.');
+      if(snap.phase==='gis_pdf1')return render('Необходимо е потвърдено PDF1 и геометрия; не приемайте архивен запис за доказателство.');
       if(snap.phase==='evidence'){
+        // The legal review remains independent; passing the stage is NOT a legal finding.
         const progressed=route.advance('normative_v11',{...receipt(),verified:true});
-        render(progressed.ok?'ГИС е разгледан. Следва независима оценка по нормативния архив V11.':progressed.reason);
+        render(progressed.ok?'Пространствените доказателства са предадени. Следва нормативна оценка по V11.':progressed.reason);
       }
     });
   });
