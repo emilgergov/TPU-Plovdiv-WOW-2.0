@@ -170,6 +170,15 @@ function normativeClarity(){
  box.after(warning);
 }
 function reinforceEvidence(){
+ // Prevent silently turning a second file selection into a new case reset.
+ const intakeFile=$('kt80InputFile');
+ intakeFile?.addEventListener('change',e=>{
+  if(!root.KT80WorkflowState?.intake)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  intakeFile.value='';
+  const msg=$('kt80FlowMessage');
+  if(msg)msg.textContent='Текущата преписка е запазена. Изборът на друг файл не изтрива работния цикъл. Допълването на активна преписка ще се разрешава само чрез отделното действие „Добави документи“, след внедряване на защитеното съхранение.';
+ },true);
  $('kt80SubjectConfirmation')?.addEventListener('change',()=>{
   if($('kt80SubjectConfirmation')?.checked)
    root.KT80AdministrativeNotice?.clearError?.('subject');
