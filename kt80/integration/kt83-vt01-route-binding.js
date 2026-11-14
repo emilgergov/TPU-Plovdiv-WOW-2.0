@@ -113,7 +113,10 @@
   function canEnterStageFive(){
     const state=root.KT80WorkflowState||{};
     const verified=currentV11();
-    return route.snapshot().valid&&route.snapshot().phase==='normative_v11'
+    // Reopening stage 5 must not regress a completed, still-current
+    // assessment back to stage 4. Source V11 is verified anew every time.
+    return route.snapshot().valid&&
+      ['normative_v11','motivated_proposal','out_draft'].includes(route.snapshot().phase)
       &&state.lawConfirmed?.expertConfirmed===true&&verified.ok===true;
   }
   root.KT83RouteAccess=Object.freeze({
@@ -135,6 +138,8 @@
       const law=root.KT80WorkflowState?.lawConfirmed;
       if(!law?.expertConfirmed)return fail('Липсва експертно удостоверена нормативна преценка.');
       const snap=route.snapshot();
+      if(['motivated_proposal','out_draft'].includes(snap.phase))
+        return render('Нормативната преценка е актуална. Продължете с проекта на административния документ.');
       if(snap.phase!=='normative_v11')return render('Нормативният маршрут все още не е удостоверен.');
       // Expert-entered legal notes alone are NOT proof of V11 applicability.
       // The independent normative verifier must provide a fresh, case-bound
