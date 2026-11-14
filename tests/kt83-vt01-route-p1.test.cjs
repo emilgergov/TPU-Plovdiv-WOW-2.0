@@ -46,6 +46,9 @@ test('isolated UI binds to original workflow and requires a current PDF1 proof',
  assert.match(binding,/pdf\.source===g/);
  assert.match(binding,/kt82:pdf1-completed/);
  assert.match(binding,/kt82:evidence-invalidated/);
+ assert.match(binding,/KT83V11ValidatedAssessment/);
+ assert.match(binding,/verified\.competenceVerified/);
+ assert.match(binding,/verified\.evidenceRevision!==now\.evidenceRevision/);
  assert.match(html,/integration\/kt83-vt01-automatic-route-p1\.js/);
  assert.match(html,/integration\/kt83-vt01-route-binding\.js/);
  assert.doesNotMatch(html,/<script[^>]*src=["']https:\/\/[^"']*kt83-vt01-route-binding/);
