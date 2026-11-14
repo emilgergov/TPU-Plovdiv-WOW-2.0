@@ -1,6 +1,7 @@
 /* KT80 EG — one working-case credential, RAM only.
  * No localStorage/sessionStorage/cookies, no DOM attributes, no logs.
  * Only exposes request(), hasAccess(), clear(); never exposes the bearer string.
+ * Temporary network failure retains the RAM-only password for this case; 401/403 clears it.
  * Scope: this tab, one case, until route confirmation or reset.
  */
 (function(root){'use strict';
@@ -21,9 +22,14 @@
   else if(hasAccess())key=credential;
   else throw new Error('Необходимо е еднократно въвеждане на паролата за EG автора.');
   const requestEpoch=epoch,caseAtStart=currentCase();
+  // The expert supplied the credential for this single working cycle. Do not
+  // ask again merely because the network failed; never persist outside RAM.
+  if(supplied&&epoch===requestEpoch&&!root.KT80WorkflowState?.routeConfirmed){
+   credential=key;activeCase=caseAtStart;
+  }
   const response=await fetch(endpoint,{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:payload});
   if(response.status===401||response.status===403){clear();return response}
-  // Store only after a successfully authenticated and successful request.
+  // Also accept a successful response when the credential came from RAM.
   if(response.ok&&epoch===requestEpoch&&caseAtStart===currentCase()&&!root.KT80WorkflowState?.routeConfirmed){
    credential=key;activeCase=caseAtStart;
   }
