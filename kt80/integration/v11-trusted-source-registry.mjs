@@ -20,6 +20,15 @@ const records = {
     "articleSha256":"7d230f385ef9c7f1fc25f693b5cbccaa847193648d89f64fac1141d9218a1152",
     "anchor":"Компетентни органи за\nиздаване на административни актове по реда на наредбата"
   },
+  "PRAVILNIK_RIOSV_TERRITORY": {
+    "id":"PRAVILNIK_RIOSV_TERRITORY",
+    "act":"Правилник за устройството и дейността на регионалните инспекции по околната среда и водите",
+    "article":"приложение към чл. 1, ал. 2",
+    "archivePath":"texts/PRAVILNIK_RIOSV_e847f8bd5279401a.txt",
+    "documentSha256":"2dce4d3a9122e8b4fb69f30ba53a079ae24002373945d0e6ec522e91f51aa577",
+    "articleSha256":"70c5f6c6f800e9cd0f31c982a3740c3af34278bb1214901a82f38779c9da5a46",
+    "anchor":"Седалище и териториален обхват на дейност на РИОСВ"
+  },
   "PRAVILNIK_RIOSV_1": {
     "id":"PRAVILNIK_RIOSV_1",
     "act":"Правилник за устройството и дейността на регионалните инспекции по околната среда и водите",
