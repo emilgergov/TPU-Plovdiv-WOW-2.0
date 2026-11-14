@@ -40,8 +40,8 @@
      }
      return;
     }
-    if(++attempts<30&&['GIS_MISMATCH','GEOMETRY_UNVERIFIED','INTERSECTIONS_UNVERIFIED','PI_MASTER_INCOMPLETE','ZONE_BOUNDARIES_INCOMPLETE'].includes(check.code)){
-     root.setTimeout(poll,350);return;
+    if(++attempts<60&&['GIS_MISMATCH','GEOMETRY_UNVERIFIED','INTERSECTIONS_UNVERIFIED','PI_MASTER_INCOMPLETE','ZONE_BOUNDARIES_INCOMPLETE'].includes(check.code)){
+     root.setTimeout(poll,500);return;
     }
     status(check.message+' Предложение: уточнете доказателствата, преди съставяне на PDF1.');
    };
@@ -53,6 +53,15 @@
       e.evidenceRevision!==(root.KT82EvidenceInvalidation?.getRevision?.()??null)||
       e.source!==root.KT80FreeGISResults)return;
    begin();
+  });
+  // Manual PDF1 completion is also authoritative; never auto-download a second copy.
+  document.addEventListener('kt82:pdf1-completed',e=>{
+   const x=current();
+   if(root.KT83P2SpatialGate.pdfReceiptMatches(x,e.detail)){
+    issued=root.KT83P2SpatialGate.check(x).key;
+    serial++;
+    status('PDF1 е изготвен за текущата преписка. Пространствените доказателства са готови за преглед.');
+   }
   });
   document.addEventListener('kt80:stage-open',e=>{if(e.detail?.step===3)begin()});
   const reset=()=>{serial++;issued=null};
