@@ -10,7 +10,8 @@
  const norm=x=>String(x??'').trim();
  const validHash=x=>/^[a-f0-9]{64}$/.test(norm(x));
  const result=(ok,code,message,extra={})=>Object.freeze({ok,code,message,...extra});
- const ids=new Set(Array.from({length:22},(_,i)=>String(i+1).padStart(2,'0')));
+ // Existing 22-item catalogue: 13-16 are internal tools, not outgoing documents.
+ const ids=new Set([...Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0')),...Array.from({length:6},(_,i)=>String(i+17))]);
  function create({digest,verifyApproval}={}){
   const entries=new Map(),snapshots=new Map();
   let epoch=0;
