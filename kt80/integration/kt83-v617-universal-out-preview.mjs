@@ -37,16 +37,29 @@ function boot(){
  const shellLabel=el('label','Оригинална „БЛАНКА РИОСВ ПЛОВДИВ.docx“ — избира се локално, само веднъж за теста');shellLabel.htmlFor=shellSelect.id;
  const docxButton=el('button','Създай Word проект по оригиналната бланка');docxButton.type='button';
  const docxStatus=el('p','Изберете оригиналната бланка само веднъж за тази сесия. Тя остава локално в паметта.');
- // KT83 P4: legacy common-letterhead document generation cannot substitute
- // the individually approved form for each outgoing document.
- docxButton.disabled=true;
- docxButton.title='П4: използвайте утвърдения образец за конкретния OUT.';
- docxButton.textContent='Word проект — изисква образеца на конкретния OUT';
- docxStatus.textContent='П4: общата институционална бланка не замества утвърдения образец на отделния OUT. Директният универсален Word изход е спрян.';
-
+ // P4: every document is composed on the ONE accepted institutional blank.
+ // Classic Word A/B remain encapsulated in V27.35 and are not used here.
+ const titleLabel=el('label','Вид и заглавие на документа — определя се според нормативната преценка');
+ const titleField=el('input');titleField.type='text';titleField.id='kt83P4DocumentTitle';
+ titleField.placeholder='Например: Искане за допълнителна информация';
+ titleField.maxLength=160;titleLabel.htmlFor=titleField.id;
+ const recipientLabel=el('label','Адресат на проекта');
+ const recipientField=el('input');recipientField.type='text';recipientField.id='kt83P4Recipient';
+ recipientField.maxLength=240;recipientLabel.htmlFor=recipientField.id;
+ const addressLabel=el('label','Адрес');
+ const addressField=el('input');addressField.type='text';addressField.id='kt83P4Address';
+ addressField.maxLength=240;addressLabel.htmlFor=addressField.id;
+ const referenceLabel=el('label','Входящ номер на преписката');
+ const referenceField=el('input');referenceField.type='text';referenceField.id='kt83P4Reference';
+ referenceField.maxLength=120;referenceLabel.htmlFor=referenceField.id;
+ const verifiedTitle=()=>{const name=titleField.value.trim();if(!name)
+  throw new Error('Посочете вида на изходящия документ въз основа на нормативната преценка.');
+  return name;};
+ const docFields=()=>({caseTitle:verifiedTitle(),recipient:recipientField.value,
+  address:addressField.value,referenceNumber:referenceField.value});
  const blankClear=el('button','Освободи бланката');blankClear.type='button';
  blankClear.addEventListener('click',()=>{outSession.clear();shellSelect.value='';docxStatus.textContent='Бланката е освободена от паметта на браузъра.';});
- box5.append(run5,status5,draftButton,draftStatus,shellLabel,shellSelect,blankClear,docxButton,docxStatus);
+ box5.append(run5,status5,titleLabel,titleField,recipientLabel,recipientField,addressLabel,addressField,referenceLabel,referenceField,draftButton,draftStatus,shellLabel,shellSelect,blankClear,docxButton,docxStatus);
  p4.append(box4);p5.append(box5);
  function clear(){bridge.invalidate();docxStatus.textContent='Данните по преписката са изменени. Повторете проверката.';draftStatus.textContent='Работната чернова трябва да бъде създадена отново за тази преписка.';status4.textContent='Изменени данни. Необходима е нова преценка.';status5.textContent='Няма актуално предложение за тази преписка.';}
  run4.addEventListener('click',()=>{
@@ -78,7 +91,7 @@ function boot(){
    if(!inspect.ready)throw new Error('Първо потвърдете предмета и обхвата.');
    const proposal=bridge.propose();
    const record=createReviewDocument({caseId:inspect.caseId,generation:inspect.generation,
-    subject:inspect.confirmedSubject,proposal,evidenceRevision:inspect.evidenceRevision});
+    subject:inspect.confirmedSubject,proposal,evidenceRevision:inspect.evidenceRevision,...docFields()});
    const html=renderReviewHTML(record);
    const blob=new Blob([html],{type:'text/html;charset=utf-8'});
    const url=URL.createObjectURL(blob);
@@ -105,7 +118,7 @@ function boot(){
    if(!before.ready)throw new Error('Непотвърден предмет или обхват');
    const proposal=bridge.propose();
    const record=createReviewDocument({caseId:before.caseId,generation:before.generation,
-    subject:before.confirmedSubject,proposal,evidenceRevision:before.evidenceRevision});
+    subject:before.confirmedSubject,proposal,evidenceRevision:before.evidenceRevision,...docFields()});
    const result=await outSession.render(record,{
     currentRecord:()=>{
      const now=bridge.inspect();
@@ -118,12 +131,12 @@ function boot(){
    const url=URL.createObjectURL(blob);
    const link=el('a');link.href=url;link.download='WOW_RABOTEN_PROEKT_ZA_PREGLED.docx';
    document.body.append(link);link.click();link.remove();URL.revokeObjectURL(url);
-   docxStatus.textContent='Създаден е неподписан работен Word документ по общата оригинална бланка. Тя остава локално достъпна за следващите документи в тази сесия.';
+   docxStatus.textContent='Създаден е неподписан Word проект по задължителната бланка на РИОСВ – Пловдив. Видът и съдържанието следват текущата експертна преценка.';
   }catch(e){docxStatus.textContent='Word чернова не е създадена: '+String(e.message||e)}
  });
  for(const event of ['kt80:case-change','kt80:case-reset','kt82:evidence-invalidated'])
   document.addEventListener(event,clear);
- for(const field of [ruleInput,factInput])field.addEventListener('input',clear);
+ for(const field of [ruleInput,factInput,titleField,recipientField,addressField,referenceField])field.addEventListener('input',clear);
  document.addEventListener('kt80:case-reset',()=>{ruleInput.value='';factInput.value='';});
  document.addEventListener('kt80:case-change',()=>{ruleInput.value='';factInput.value='';});
  document.addEventListener('input',event=>{
