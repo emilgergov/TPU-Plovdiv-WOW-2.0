@@ -38,11 +38,20 @@ function boot(){
  checkLabel.append(confirmed,document.createTextNode(' Потвърждавам проверката на относимите основания, доказателствата и компетентността.'));
  const button=make('button','Потвърди проверената нормативна преценка');button.type='button';
  button.id='kt83P5CommitV11';
- const status=make('p','Без експертно потвърждение Етап 5 остава заключен.');
+ const status=make('p','Правната готовност не е удостоверена. Необходимо е изрично експертно потвърждение на нормативните предпоставки и компетентността.');
  status.id='kt83P5ReviewStatus';status.setAttribute('role','status');
  status.setAttribute('aria-live','polite');
  group.append(checkLabel,button,status);parent.append(group);
+ // A delayed competence check belongs to exactly one expert attempt and case revision.
+ // It must not affect the next dossier or a newer expert check.
+ let attempt=0;
+ const signature=()=>{
+  const s=window.KT80WorkflowState||{};
+  return JSON.stringify([s.caseCycleId,s.generation,window.KT82EvidenceInvalidation?.getRevision?.()??null,
+   s.subjectConfirmed?.text,s.subjectConfirmed?.scope,s.step]);
+ };
  const reset=()=>{
+  attempt++;
   const provider=window.KT83V11CaseEvidenceProvider;
   provider?.clear?.();
   const wf=window.KT80WorkflowState;
@@ -58,6 +67,8 @@ function boot(){
    reset();
   });
  button.addEventListener('click',async()=>{
+  const ticket=++attempt,origin=signature();
+  const stillCurrent=()=>ticket===attempt&&origin===signature();
   const provider=window.KT83V11CaseEvidenceProvider;
   const route=window.KT83RouteAccess;
   const workflow=window.KT80WorkflowState||{};
@@ -89,6 +100,7 @@ function boot(){
    if(typeof verifier?.verify!=='function')
     throw new Error('Липсва независим механизъм за проверка на компетентността. Проверете основанието от нормативния MASTER V11 и преписката.');
    const audit=await verifier.verify({context,competence,archived,packet});
+   if(!stillCurrent())return; // Never submit, display or clear a newer case's review.
    if(audit?.verified!==true)throw new Error(audit?.nextAction||'Не е доказана компетентността по текущата преписка.');
    const review=prepareExpertV11Review({
     context,packet,existingStage4:checked,
@@ -101,8 +113,9 @@ function boot(){
    if(!moved.ok){provider.clear();throw new Error(moved.reason||'Отказан преход към Етап 5.')}
    status.textContent='Провереният нормативен резултат е предаден към Етап 5 за тази преписка.';
   }catch(e){
+   if(!stillCurrent())return;
    provider?.clear?.();
-   status.textContent='Предложение: '+String(e?.message||e);
+   status.textContent='Правната готовност не е удостоверена. Предложение: '+String(e?.message||e);
   }
  });
  window.KT83P5ReviewUI=Object.freeze({status:()=>status.textContent});
