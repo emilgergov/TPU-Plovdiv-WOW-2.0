@@ -101,6 +101,9 @@ function openPreview(button){
   copy.querySelectorAll('[for]').forEach(el=>el.removeAttribute('for'));
   copy.querySelectorAll('button,input,select,textarea').forEach(el=>{el.disabled=true;el.setAttribute('aria-disabled','true')});
   copy.querySelectorAll('script').forEach(el=>el.remove());
+  copy.querySelectorAll('a').forEach(el=>{el.removeAttribute('href');el.removeAttribute('target');el.setAttribute('aria-disabled','true')});
+  copy.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
+  copy.querySelectorAll('form').forEach(el=>el.addEventListener('submit',event=>event.preventDefault()));
   fold.append(copy);b.append(fold);
  }
  preview.hidden=false;$('kt83PreviewClose').focus();return true;
