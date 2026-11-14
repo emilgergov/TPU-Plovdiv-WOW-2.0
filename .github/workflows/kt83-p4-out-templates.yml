@@ -1,0 +1,23 @@
+name: KT83 P4 separate approved OUT templates
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - kt80/integration/kt83-p4-out-template-contract.js
+      - kt80/integration/kt83-p4-out-dispatcher.js
+      - tests/kt83-p4-out-template-contract.test.cjs
+      - tests/kt83-p4-out-dispatcher.test.cjs
+      - .github/workflows/kt83-p4-out-templates.yml
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  per-out-templates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check per-OUT selection, original template and case isolation
+        run: node --test tests/kt83-p4-out-template-contract.test.cjs tests/kt83-p4-out-dispatcher.test.cjs
