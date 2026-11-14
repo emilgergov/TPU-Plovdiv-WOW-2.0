@@ -101,6 +101,23 @@
       }
     });
   });
+  // Guard the legacy click BEFORE it advances to stage 5.
+  // Passing a stage and typing legal prose are not independent legal validation.
+  $('kt80ToProposal')?.addEventListener('click',event=>{
+    const law=root.KT80WorkflowState?.lawConfirmed, now=receipt();
+    const verified=root.KT83V11ValidatedAssessment;
+    const eligible=route.snapshot().valid&&route.snapshot().phase==='normative_v11'
+      &&law?.expertConfirmed===true
+      &&verified?.verified===true&&verified.caseId===now.caseId
+      &&verified.generation===now.generation
+      &&verified.evidenceRevision===now.evidenceRevision
+      &&verified.competenceVerified===true
+      &&!!String(verified.reasonedAssessment||'').trim();
+    if(eligible)return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    fail('Етап 5 изисква независима нормативна оценка, проверена компетентност и актуални доказателства по V11. Подгответе конкретните липсващи проверки.');
+  },true);
   $('kt80ToProposal')?.addEventListener('click',()=>{
     queueMicrotask(()=>{
       if(root.KT80WorkflowState?.step!==5)return;
