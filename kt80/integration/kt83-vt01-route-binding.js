@@ -63,25 +63,19 @@
       render('Няма валидирани имотни идентификатори. Необходимо е конкретно уточняване на местоположението.');
       return;
     }
-    const geometry=Array.isArray(g?.ids)&&g.ids.length===ids.length
-      &&ids.every((id,i)=>id===g.ids[i])
-      &&g.results?.length===ids.length
-      &&g.results.every(x=>x.status==='Намерен'&&x.geojson?.features?.length);
-    if(!geometry){
-      render('Изчаква се проверена геометрия. Архивна принадлежност не доказва пресичане.');
+    const proof=root.KT83P2Automatic?.current?.();
+    const checked=root.KT83P2SpatialGate?.check?.(proof);
+    if(!checked?.ok){
+      render((checked?.message||'П2 не е удостоверил ГИС, ПИ MASTER и пространствените пресичания.')+
+       ' Не използвайте архивно пресичане като геометрично доказателство.');
       return;
     }
     const pdf=root.KT83NormativeBridge?.pdfStatus?.();
-    const r=receipt();
-    const pdfCurrent=pdf?.ready===true
-      &&pdf.caseId===r.caseId&&pdf.generation===r.generation
-      &&pdf.evidenceRevision===r.evidenceRevision
-      &&pdf.source===g
-      &&pdf.ids?.length===ids.length&&ids.every((id,i)=>id===pdf.ids[i]);
-    if(!pdfCurrent){
-      render('Геометрията е налична. Изисква се PDF1 за същата преписка и доказателствена ревизия.');
+    if(!root.KT83P2SpatialGate?.pdfReceiptMatches?.(proof,pdf)){
+      render('Пространствените данни са проверени. Необходим е действително генериран PDF1 за текущата преписка и ревизия.');
       return;
     }
+    const r=receipt();
     const passed=route.advance('evidence',{...r,verified:true,pdf1Verified:true,geometryVerified:true});
     render(passed.ok?'ГИС и PDF1 са удостоверени. Следва независим преглед на доказателствата.':passed.reason);
   }
