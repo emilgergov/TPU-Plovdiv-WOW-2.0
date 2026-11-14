@@ -23,7 +23,7 @@ test('P3 refuses missing local sources or independent legal review',()=>{
  const x=fixture();
  assert.equal(create().available,false);
  assert.equal(create({archive:x.archive}).evaluateCase(x.context),null);
- assert.equal(assess(x.context,create({archive:x.archive})).code,'V11_UNVERIFIED');
+ assert.equal(assess(x.context,create({archive:x.archive})).code,'V11_PENDING');
 });
 test('P3 can produce a case-bound V11 receipt with explicitly verified records only',()=>{
  const x=fixture(),verifier=create(x);
