@@ -124,6 +124,10 @@ function boot(){
      const now=bridge.inspect();
      return {caseId:now.caseId,generation:now.generation,
       evidenceRevision:now.evidenceRevision,confirmedSubject:now.confirmedSubject,
+      // The session checks this after DOCX composition too: a changed recipient,
+      // heading, address or reference cannot silently download an outdated file.
+      documentSignature:JSON.stringify([titleField.value,recipientField.value,
+       addressField.value,referenceField.value]),
       assessmentCurrent:!!bridge.getAssessment()};
     }
    });
