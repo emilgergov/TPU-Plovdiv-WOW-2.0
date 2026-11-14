@@ -133,7 +133,10 @@ function compressGIS(){
  const gis=stage.querySelector('.kt80-free-gis');if(!gis)return;
  const source=gis.querySelector('.kt80-gis-source-status');
  if(source){source.setAttribute('aria-live','polite')}
- const toFold=gis.querySelectorAll('.kt80-local-index');
+ // Hide only backup/technical inputs, never the actual case-map/GIS result.
+ const backup=gis.querySelector('.kt80-gis-backup');
+ if(backup){const d=document.createElement('details');d.className='kt83-tech-details';d.append(makeText('summary','Резервно зареждане и технически данни'));backup.before(d);d.append(backup)}
+ const toFold=[...gis.querySelectorAll('.kt80-local-index')].filter(n=>!n.closest('details'));
  if(toFold.length){const d=document.createElement('details');d.className='kt83-tech-details';d.append(makeText('summary','Допълнителни технически справки'));toFold[0].before(d);for(const n of toFold)d.append(n)}
 }
 function init(){inlineHelp();renameStatic();compressGIS();tileStatus();
