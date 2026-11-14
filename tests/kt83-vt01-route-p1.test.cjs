@@ -57,6 +57,9 @@ test('isolated UI binds to original workflow and requires a current PDF1 proof',
  const workflow=fs.readFileSync(require('node:path').join(__dirname,'../kt80/KT83_WORKFLOW_CASE_V591.js'),'utf8');
  assert.match(workflow,/KT83RouteAccess\.canOpenStage\(5\)/);
  assert.match(binding,/root\.KT83RouteAccess=Object\.freeze/);
+ const dashboard=fs.readFileSync(require('node:path').join(__dirname,'../kt80/KT80_E01_DASHBOARD_27_V580.js'),'utf8');
+ assert.match(dashboard,/Number\(step\)===5&&root\.KT83RouteAccess\?\.canOpenStage\?\.\(5\)===false/);
+ assert.match(dashboard,/root\.KT83RouteAccess\?\.denied\?\.\(5\)/);
  assert.match(binding,/\$\('kt80SubjectText'\)\?\.addEventListener\('input',invalidate\)/);
  assert.match(binding,/\$\('kt80ScopeText'\)\?\.addEventListener\('input',invalidate\)/);
  assert.match(binding,/function canEnterStageFive\(\)/);
