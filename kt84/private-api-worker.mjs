@@ -83,17 +83,26 @@ export default {
    if(request.method==='GET'&&path==='/v1/me')
     return json({ok:true,user:{id:actor.subject,role:actor.role,orgId:actor.orgId}});
    if(request.method==='GET'&&path==='/v1/cases'){
-    // Only own cases + explicit unexpired grants, all constrained to same org.
+    // Query candidate records but authorize every result through the exact
+    // same parsed grant policy used by individual GET /v1/cases/:id.
+    // Never use substring matching on the JSON grants list for disclosure.
     const rs=await db.prepare(`SELECT DISTINCT c.case_id AS id,c.subject,c.status,c.version,
-     c.owner_id AS ownerId,c.updated_at AS updatedAt
+     c.owner_id AS ownerId,c.org_id AS orgId,c.updated_at AS updatedAt
      FROM cases c LEFT JOIN case_grants g
      ON g.case_id=c.case_id AND g.org_id=c.org_id AND g.grantee_id=?
      AND g.status='active' AND g.expires_at>?
      WHERE c.org_id=? AND c.status='active' AND
-     (c.owner_id=? OR (g.grant_id IS NOT NULL AND instr(g.actions_json,'"case.read"')>0))
+     (c.owner_id=? OR g.grant_id IS NOT NULL)
      ORDER BY c.updated_at DESC LIMIT 100`)
      .bind(actor.subject,now,actor.orgId,actor.subject).all();
-    return json({ok:true,cases:rs.results||[]});
+    const cases=[];
+    for(const candidate of rs.results||[]){
+      if((await allowed(db,actor,candidate,A.READ,now)).allowed)
+        cases.push({id:candidate.id,subject:candidate.subject,
+         status:candidate.status,version:candidate.version,
+         ownerId:candidate.ownerId,updatedAt:candidate.updatedAt});
+    }
+    return json({ok:true,cases});
    }
    if(request.method==='POST'&&path==='/v1/cases'){
     if(actor.role!=='expert')return fail(403,'EXPERT_ONLY');
