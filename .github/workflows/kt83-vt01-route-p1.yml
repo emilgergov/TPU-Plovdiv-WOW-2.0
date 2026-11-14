@@ -10,6 +10,14 @@ on:
       - kt80/KT83_VT01_P1_AUTOMATIC_ROUTE_TEST.html
       - kt80/KT82_STAGE3_CONSOLIDATED_V600.js
       - .github/workflows/kt83-vt01-route-p1.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - kt80/integration/kt83-vt01-automatic-route-p1.js
+      - kt80/integration/kt83-vt01-route-binding.js
+      - tests/kt83-vt01-route-p1.test.cjs
+      - .github/workflows/kt83-vt01-route-p1.yml
   workflow_dispatch:
 jobs:
   route-test:
