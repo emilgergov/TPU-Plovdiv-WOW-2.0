@@ -25,6 +25,11 @@ css.textContent=`
 .kt83-help-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
 .kt83-ux-purpose{margin:2px 0 10px;color:#e3e9df;font:400 12px/1.4 "Segoe UI",Arial,sans-serif}
 .kt83-ux-status{background:#224536;padding:8px 10px;border-radius:6px;border-left:3px solid #bca467;margin:9px 0;font-size:12px}
+.kt80-v56-stage .kt80-subject-controls{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;margin:7px 0!important}
+.kt80-v56-stage .kt80-subject-controls button{min-width:0!important;max-width:none!important;width:100%!important;margin:0!important;padding:8px 9px!important;font:650 12px/1.35 "Segoe UI",Arial,sans-serif!important;white-space:normal!important}
+.kt80-v56-stage .kt80-v56-fields{gap:10px!important}
+.kt80-v56-stage .kt80-v56-field{min-width:0!important}
+@media(max-width:760px){.kt80-v56-stage .kt80-subject-controls{grid-template-columns:1fr!important}}
 .kt80-stage-panel h2,.kt80-stage-panel h3{font-family:"Segoe UI",Arial,sans-serif!important}
 .kt80-stage-panel{font-family:"Segoe UI",Arial,sans-serif!important;min-width:0}
 .kt80-stage-panel p{margin:5px 0 8px!important;line-height:1.4!important}
@@ -130,8 +135,11 @@ function stagePurpose(step){
 }
 function tileStatus(){
  const s=root.KT80WorkflowState||{},tiles=document.querySelectorAll('#kt80DashboardFive .kt80-dashboard-tile');
+ const gisNotRequired=s.normativeGate?.decision==='NOT_REQUIRED'&&s.normativeGate?.expertConfirmed===true;
+ const spatialReady=gisNotRequired||!!(s.parcelsConfirmed?.spatiallyVerified&&s.parcelsConfirmed?.pdf1Verified);
+ const legalReady=s.lawConfirmed?.expertConfirmed===true&&root.KT83RouteAccess?.currentV11?.()?.ok===true;
  const done=[!!s.intake,!!s.subjectConfirmed?.expertConfirmed&&!!s.subjectConfirmed?.scopeConfirmed,
- !!s.parcelsConfirmed,!!s.lawConfirmed?.expertConfirmed,!!s.routeConfirmed];
+  spatialReady,legalReady,!!s.routeConfirmed];
  let next=done.findIndex(x=>!x);if(next<0)next=4;
  for(let i=0;i<tiles.length;i++){
   const status=done[i]?'done':i===next?'next':'future';
