@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {auditNaturaOsCompetence,COMPETENCE_FACT_IDS} from '../kt80/integration/kt83-p5-competence-audit.mjs';
 import {verifiedReference,assertVerifiedReference,LOCKED_ARCHIVE_SHA256} from '../kt80/integration/v11-trusted-source-registry.mjs';
 const ctx={caseId:'EG-CASE-001',generation:3,evidenceRevision:8,
@@ -63,9 +64,8 @@ test('P5 refuses different jurisdiction, non-OS legal reference or municipality 
  assert.equal(check({packet:{rules:[{id:'incomplete',legalBasis:archived,condition:{fact:'OS_APPLICABLE'}}],evidence:facts()}}).code,'OS_HYPOTHESIS_MISSING');
 });
 test('P5 keeps the trusted verifier on the isolated professional interface with original legal source',()=>{
- const fs=await import('node:fs');
  const url=new URL('../kt80/KT83_VT01_P1_AUTOMATIC_ROUTE_TEST.html',import.meta.url);
- const html=fs.readFileSync(url,'utf8');
+ const html=readFileSync(url,'utf8');
  assert.ok(html.indexOf('kt83-p5-competence-runtime.mjs')>=0);
  assert.ok(html.indexOf('kt83-p5-competence-runtime.mjs')<html.indexOf('kt83-p5-expert-review-ui.mjs'));
 });
