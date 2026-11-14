@@ -13,7 +13,7 @@ const records = {
   // An archival match does NOT certify case-specific applicability or later amendments.
   "N_OS_6A": {
     "id":"N_OS_6A",
-    "act":"Наредба за условията и реда за извършване на оценка за съвместимост",
+    "act":"Наредба за условията и реда за извършване на оценка за съвместимостта на планове, програми, проекти и инвестиционни предложения с предмета и целите на опазване на защитените зони",
     "article":"чл. 6а",
     "archivePath":"additions/N_OS_2025.txt",
     "documentSha256":"2ff40c1a607a0f88cf1b25ff2a587d472dbe0bcda26313922330ad0c25de814d",
