@@ -84,3 +84,32 @@ test('Spatial proof and procedural readiness remain fail-closed for missing GIS/
  const legal=win.KT83P5SingleRoute.next({step:4,caseId:'case',generation:0,evidenceRevision:0,route:{valid:true,phase:'normative_v11'},confirmedSubject:true,confirmedScope:true,verifiedLaw:{ok:false}});
  assert.notEqual(legal.ready,true);
 });
+
+test('GIS hosted source: bounded GET verifies gzip bytes, not a misleading HEAD result',async()=>{
+ const source=load('v26-test/v26-approved-gis-zip.js');
+ const manifest={status:'PASS_COUNT_BY_PREFIX',parcel_geometry:917418,parcel_prefixes:67,overlap_records_expected:181154,shards:258};
+ const base='../v26-test/gis-data',calls=[];
+ const makeProbe=(bytes,status=206)=>({
+  ok:status>=200&&status<300,status,
+  body:{getReader(){let read=false;return {async read(){if(read)return {done:true};read=true;return {done:false,value:Uint8Array.from(bytes)}},async cancel(){}}}}
+ });
+ let mode='valid';
+ const fetch=async(url,opts={})=>{
+  calls.push({url,method:opts.method||'GET',range:opts.headers?.Range||null});
+  if(url.endsWith('/manifest.json'))return {ok:true,json:async()=>manifest};
+  if(mode==='missing')return makeProbe([],404);
+  if(mode==='html')return makeProbe([60,33,68,79,67,84,89,80,69],200);
+  return makeProbe([0x1f,0x8b,0x08,0x00],206);
+ };
+ const win={};
+ vm.runInNewContext(source,{window:win,fetch,console});
+ assert.equal((await win.V26ApprovedGIS.openHosted(base)).shards,258);
+ assert.equal(win.V26ApprovedGIS.isLoaded(),true);
+ assert.equal(calls[1].method,'GET');
+ assert.equal(calls[1].range,'bytes=0-1');
+ assert.ok(!calls.some(c=>c.method==='HEAD'));
+ mode='html';
+ await assert.rejects(()=>win.V26ApprovedGIS.openHosted(base),/gzip/);
+ mode='missing';
+ await assert.rejects(()=>win.V26ApprovedGIS.openHosted(base),/HTTP 404/);
+});
