@@ -36,11 +36,11 @@
   }
   if(step===4){
    if(!route||!legalPhases.has(route.phase))
-    return prompt(4,'LEGAL_NOT_STARTED','Предложение: довършете доказателствения маршрут към нормативния MASTER V11.');
+    return prompt(4,'LEGAL_NOT_STARTED','Предложение: довършете доказателствения маршрут към Нормативния архив.');
    return verifiedLaw?.ok===true&&verifiedLaw.caseId===caseId&&
      verifiedLaw.generation===generation&&verifiedLaw.evidenceRevision===evidenceRevision
      ?prompt(5,'V11_READY','Нормативната преценка е удостоверена; експертът може да потвърди мотивираното предложение.',true)
-     :prompt(4,'V11_PENDING','Предложение: потвърдете приложимите разпоредби, предпоставки и компетентност от единствения MASTER V11.');
+     :prompt(4,'V11_PENDING','Предложение: потвърдете приложимите разпоредби, предпоставки и компетентност от Нормативния архив.');
   }
   if(step===5){
    if(!route?.valid||!legalPhases.has(route.phase)||verifiedLaw?.ok!==true||
@@ -48,7 +48,7 @@
       verifiedLaw.evidenceRevision!==evidenceRevision)
     return prompt(4,'LEGAL_STALE','Предложение: възстановете актуалната независима нормативна преценка.');
    return hasDraft
-    ?prompt(5,'OUT_DRAFT','Неподписаният OUT проект е готов за експертен преглед.')
+    ?prompt(5,'OUT_DRAFT','Неподписаният проект на документ е готов за експертен преглед.')
     :prompt(5,'OUT_PREPARE','Предложение: конструирайте мотивиран OUT върху единната бланка на РИОСВ – Пловдив.');
   }
   return prompt(1,'UNKNOWN_STAGE','Предложение: отворете актуалния етап на преписката.');
