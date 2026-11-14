@@ -51,7 +51,8 @@ function showError(area,message){
  if(!target)return;
  target.textContent=String(message||'');
  target.dataset.kt80Error='true';target.setAttribute('role','alert');
- target.scrollIntoView({block:'nearest',behavior:'smooth'});
+ // Persistent inline feedback remains beside the EG action. Do not pull the
+ // expert away from the current editor with an unsolicited scroll jump.
 }
 function clearError(area){
  const target=document.getElementById(area==='scope'?'kt80ScopeProposalStatus':'kt80SubjectProposalStatus');
