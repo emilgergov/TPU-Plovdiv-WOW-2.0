@@ -1,0 +1,30 @@
+name: KT84-B EG late-response case isolation in Chromium
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - 'tests/kt84-eg-browser-case.test.mjs'
+      - '.github/workflows/kt84-eg-browser.yml'
+      - 'kt80/KT83_AI_SUBJECT_V572.js'
+      - 'kt80/KT83_AI_SCOPE_V572.js'
+      - 'kt80/KT83_CASE_BOUNDARY_V01.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stale-response-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright@1.57.0
+          npx playwright install chromium
+      - run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/kt84-eg-browser-server.log 2>&1 &
+          for n in $(seq 1 30); do curl -sf http://127.0.0.1:8765/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html >/dev/null && break; sleep 1; done
+      - name: Reject delayed EG subject and scope after case switch
+        run: node tests/kt84-eg-browser-case.test.mjs
