@@ -16,8 +16,19 @@ const packet={rules,evidence};
 const stage4=assessStage4({confirmedSubject:context.subject,scopeConfirmed:true,evidence,rules});
 const authority={name:'Удостоверен орган',registryId:'ZOOS_93',
  sourceId:'source-01',sourceLocation:'стр. 2',reason:'Експертно мотивирана материална и териториална компетентност'};
+// Synthetic independent-audit fixture: test metadata only, not a real
+// case, competence finding or normative certification.
+const attestation={verified:true,caseId:context.caseId,
+ generation:context.generation,evidenceRevision:context.evidenceRevision,
+ subject:context.subject,scope:context.scope,authority:authority.name,
+ registryId:authority.registryId,
+ articleSha256:verifiedReference('ZOOS_93').articleSha256,
+ archiveSha256:verifiedReference('ZOOS_93').archiveSha256,
+ sourceId:authority.sourceId,sourceLocation:authority.sourceLocation,
+ reviewerSource:'SYNTHETIC-TEST-REVIEW'};
 const review=overrides=>prepareExpertV11Review({
- context,packet,existingStage4:stage4,authority,expertApproved:true,...overrides});
+ context,packet,existingStage4:stage4,authority,expertApproved:true,
+ independentCompetenceAudit:attestation,...overrides});
 test('P5 reuses independently checked V11 rules and evidence, preserving case identity',()=>{
  const r=review();
  assert.equal(r.caseId,context.caseId);
@@ -29,6 +40,9 @@ test('P5 reuses independently checked V11 rules and evidence, preserving case id
 });
 test('P5 rejects auto-approval, missing authority proof or unlisted V11 reference',()=>{
  assert.throws(()=>review({expertApproved:false}),/потвърждение/);
+ assert.throws(()=>review({independentCompetenceAudit:null}),/независима/);
+ assert.throws(()=>review({independentCompetenceAudit:{...attestation,caseId:'other'}}),/независима/);
+ assert.throws(()=>review({independentCompetenceAudit:{...attestation,articleSha256:'0'.repeat(64)}}),/независима/);
  assert.throws(()=>review({authority:{...authority,reason:''}}),/Компетентността/);
  assert.throws(()=>review({authority:{...authority,registryId:'UNLISTED'}}),/не е проверен/);
 });
@@ -48,6 +62,7 @@ test('P5 review controls exist only inside existing Stage 4 section and never se
  assert.match(ui,/panel\?\.querySelector\('details'\)/);
  assert.match(ui,/createCaseAssessmentPacket/);
  assert.match(ui,/provider\.submit\(review\)/);
+ assert.match(ui,/KT83IndependentCompetenceAudit/);
  assert.match(ui,/route\.commitVerifiedExpertReview\(\)/);
  assert.doesNotMatch(ui,/KT80RouteCatalog|Classic|routeId:/);
  assert.match(html,/kt83-p5-expert-review-ui\.mjs/);
