@@ -10,7 +10,7 @@ const norm=x=>tr(x).normalize('NFKC').toLocaleLowerCase('bg').replace(/[“”"]
 const municipalityNames=[
  'Асеновград','Брезово','Калояново','Карлово','Кричим','Куклен','Марица',
  'Перущица','Пловдив','Първомай','Раковски','Родопи','Садово','Сопот',
- 'Стамболийски','Съединение','Хисаря','Лъки','Ардино'
+ 'Стамболийски','Съединение','Хисаря'
 ];
 const municipalitySet=new Set(municipalityNames.map(norm));
 const expected=Object.freeze({
