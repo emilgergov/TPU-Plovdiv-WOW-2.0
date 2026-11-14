@@ -18,7 +18,14 @@ function invalidate(level){
  setBadge();
 }
 function go(step){
- // Navigation is unrestricted; legal progression and procedural acceptance remain gated by confirmation.
+ // KT83–VT01 P1 (isolated branch only): legal access is controlled centrally.
+ // Expert may inspect earlier stages, but stage 5 cannot be opened without
+ // a case-bound independently verified V11 assessment.
+ if(Number(step)===5&&typeof root.KT83RouteAccess?.canOpenStage==='function'
+    &&root.KT83RouteAccess.canOpenStage(5)!==true){
+   root.KT83RouteAccess?.denied?.(5);
+   return false;
+ }
  state.step=step;state.highest=Math.max(step,state.highest);
  document.querySelectorAll('.kt80-stage-panel[data-panel]').forEach(p=>p.hidden=Number(p.dataset.panel)!==step);
  document.querySelectorAll('.kt80-step').forEach(b=>{const i=Number(b.dataset.step);b.disabled=false;b.setAttribute('aria-current',i===step?'step':'false')});
