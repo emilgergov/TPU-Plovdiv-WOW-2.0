@@ -64,3 +64,41 @@ test('P2 integration uses approved original PDF1 and active case boundary',()=>{
  assert.match(gis,/kt83:gis-intersections-checked/);
  assert.match(bridge,/bytes:receipt\.bytes/);
 });
+
+test('P2 browser integration calls approved PDF1 once per case revision',()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+ const code=fs.readFileSync(path.join(__dirname,'../kt80/integration/kt83-p2-automatic-pdf1.js'),'utf8');
+ const source=fixture(), listeners=new Map();
+ const doc={
+  readyState:'complete',
+  getElementById:id=>id==='kt80ParcelInput'?{value:source.ids.join('; ')}:
+    id==='kt83P1RouteText'?{textContent:''}:null,
+  addEventListener:(name,fn)=>{if(!listeners.has(name))listeners.set(name,[]);listeners.get(name).push(fn);}
+ };
+ const emit=(name,detail)=>{for(const fn of listeners.get(name)||[])fn({detail});};
+ let generated=0;
+ const window={
+  KT83P2SpatialGate:{check,pdfReceiptMatches},
+  KT80WorkflowState:{step:3,caseCycleId:source.caseId,generation:source.generation,
+    normativeGate:{expertConfirmed:true,decision:'REQUIRED'}},
+  KT82EvidenceInvalidation:{getRevision:()=>source.evidenceRevision},
+  V26ParcelEditor:{normalize:()=>({ids:[...source.ids],invalid:[],uncertain:[]})},
+  KT80FreeGISResults:source.live,
+  KT80PIMaster:{getResult:()=>source.pi},
+  KT80FreeGIS:{getMap:()=>({zones:source.zones})},
+  setTimeout:fn=>fn()
+ };
+ window.KT80PDF1Bridge={makePDF:()=>{
+  generated++;
+  emit('kt82:pdf1-completed',{caseId:source.caseId,generation:source.generation,
+    evidenceRevision:source.evidenceRevision,source:source.live,ids:source.ids,bytes:3000});
+ }};
+ vm.runInNewContext(code,{window,document:doc,Promise});
+ emit('kt80:stage-open',{step:3});
+ emit('kt80:stage-open',{step:3});
+ assert.equal(generated,1,'must not make duplicate PDF1 for same proof');
+ emit('kt80:case-reset',{});
+ source.evidenceRevision++;
+ emit('kt80:stage-open',{step:3});
+ assert.equal(generated,2,'new evidence revision permits new PDF1');
+});
