@@ -34,7 +34,7 @@ export function auditNaturaOsCompetence({
     context.subjectConfirmed!==true||context.scopeConfirmed!==true)
   return fail('CASE_UNVERIFIED','потвърдете предмета, обхвата и идентичността на преписката.');
  const basis=verifiedReference('N_OS_6A');
- const territoryBasis=verifiedReference('PRAVILNIK_RIOSV_1');
+ const territoryBasis=verifiedReference('PRAVILNIK_RIOSV_TERRITORY');
  try{assertVerifiedReference(archived)}catch(_){
   return fail('LEGAL_REFERENCE_INVALID','проверете чл. 6а от Наредбата за ОС в MASTER V11.');
  }
@@ -43,10 +43,17 @@ export function auditNaturaOsCompetence({
   return fail('OUT_OF_SCOPE','проверете приложимия специален ред и компетентния орган; този контрол обхваща само чл. 6а НОС.');
  if(!municipalitySet.has(norm(competence?.municipality)))
   return fail('TERRITORY_UNVERIFIED','уточнете общината по приложението към устройствения правилник на РИОСВ.');
- if(!Array.isArray(packet?.rules)||!packet.rules.some(r=>
-   r?.legalBasis?.registryId==='N_OS_6A'&&
-   (()=>{try{assertVerifiedReference(r.legalBasis);return true}catch(_){return false}})()))
-  return fail('OS_HYPOTHESIS_MISSING','изследвайте изключенията и условията по чл. 6а НОС като отделна правна хипотеза.');
+ const walk=x=>x?.fact?[x.fact]:x?.not?walk(x.not):Array.isArray(x?.all)?
+  x.all.flatMap(walk):Array.isArray(x?.any)?x.any.flatMap(walk):[];
+ if(!Array.isArray(packet?.rules)||!packet.rules.some(r=>{
+   try{
+    if(r?.legalBasis?.registryId!=='N_OS_6A')return false;
+    assertVerifiedReference(r.legalBasis);
+    const included=new Set(walk(r.condition));
+    return Object.keys(expected).every(id=>included.has(id));
+   }catch(_){return false}
+ }))
+  return fail('OS_HYPOTHESIS_MISSING','включете всичките седем министерски изключения и териториалните условия в проверената правна хипотеза по чл. 6а НОС.');
  const facts=packet?.evidence;
  if(!Array.isArray(facts))return fail('FACTS_MISSING','добавете проверени доказателства за приложимостта и изключенията.');
  const documents=new Map((Array.isArray(caseDocuments)?caseDocuments:[])
@@ -86,6 +93,7 @@ export function auditNaturaOsCompetence({
   sourceId:competence.sourceId,sourceLocation:competence.sourceLocation,
   reviewerSource:'CASE_FACTS_VERIFIED_BY_SOURCE:'+reviewed.length,
   territorialSource:territoryBasis.archivePath,
+  territorialAppendixSha256:territoryBasis.articleSha256,
   municipality:competence.municipality,
   caveat:'Условна проверка само по чл. 6а НОС, въз основа на текущите удостоверени факти; не установява компетентност по други специални закони.'
  });
