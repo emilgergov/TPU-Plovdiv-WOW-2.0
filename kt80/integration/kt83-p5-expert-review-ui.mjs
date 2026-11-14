@@ -4,6 +4,7 @@
  */
 import {createCaseAssessmentPacket} from './kt83-v612-independent-rule-packet.mjs';
 import {prepareExpertV11Review} from './kt83-p5-expert-v11-review.mjs';
+import {verifiedReference} from './v11-trusted-source-registry.mjs';
 const t=x=>String(x??'').trim();
 const make=(tag,label)=>{const x=document.createElement(tag);if(label)x.textContent=label;return x};
 function boot(){
@@ -54,7 +55,7 @@ function boot(){
    confirmed.checked=false;
    reset();
   });
- button.addEventListener('click',()=>{
+ button.addEventListener('click',async()=>{
   const provider=window.KT83V11CaseEvidenceProvider;
   const route=window.KT83RouteAccess;
   const workflow=window.KT80WorkflowState||{};
@@ -75,11 +76,20 @@ function boot(){
     subjectConfirmed:workflow.subjectConfirmed?.expertConfirmed===true,
     scopeConfirmed:workflow.subjectConfirmed?.scopeConfirmed===true
    };
+   const competence={
+    name:t(authority.value),registryId:t(article.value),
+    sourceId:t(source.value),sourceLocation:t(location.value),reason:t(reason.value)
+   };
+   if(!confirmed.checked)throw new Error('Потвърдете експертния преглед.');
+   const archived=verifiedReference(competence.registryId);
+   const verifier=window.KT83IndependentCompetenceAudit;
+   if(typeof verifier?.verify!=='function')
+    throw new Error('Липсва независим механизъм за проверка на компетентността. Проверете основанието от нормативния MASTER V11 и преписката.');
+   const audit=await verifier.verify({context,competence,archived,packet});
    const review=prepareExpertV11Review({
     context,packet,existingStage4:checked,
-    expertApproved:confirmed.checked,
-    authority:{name:t(authority.value),registryId:t(article.value),
-     sourceId:t(source.value),sourceLocation:t(location.value),reason:t(reason.value)}
+    expertApproved:confirmed.checked,authority:competence,
+    independentCompetenceAudit:audit
    });
    const result=provider.submit(review);
    if(!result.ok)throw new Error(result.reason||'Невалидни доказателства.');
