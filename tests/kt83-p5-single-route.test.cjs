@@ -39,7 +39,7 @@ test('P5 never uses a legal result from another case or revision',()=>{
 test('P5 uses one existing progress box and preserves the standalone V27.35 capsule',()=>{
  const source=fs.readFileSync(path.join(__dirname,'../kt80/integration/kt83-p5-single-route-binding.js'),'utf8');
  const html=fs.readFileSync(path.join(__dirname,'../kt80/KT83_VT01_P1_AUTOMATIC_ROUTE_TEST.html'),'utf8');
- assert.match(source,/getElementById\('kt83P1RouteStatus'\)/);
+ assert.match(source,/existing=\$\('kt83P1RouteStatus'\)/);
  assert.match(source,/note.id='kt83P5NextAction'/);
  assert.doesNotMatch(source,/\.click\(\)|KT80WorkflowGo\(5\)|automaticIssue/);
  assert.match(html,/legacy\/KT80_V27_35_REFERENCE_CAPSULE_V10\.html/);
