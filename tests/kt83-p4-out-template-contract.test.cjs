@@ -50,3 +50,11 @@ test('P4 isolated UI disables legacy single-template universal Word export',()=>
  assert.match(src,/docxButton\.disabled=true/);
  assert.match(src,/общата институционална бланка не замества утвърдения образец/);
 });
+
+test('P4 catalogue tools 13-16 are not outgoing administrative documents',async()=>{
+ const r=make();
+ for(const outId of ['13','14','15','16'])
+  assert.equal(r.select({outId,caseId:'c',generation:1,evidenceRevision:1,
+    expertConfirmed:true,normativeVerified:true}).code,'UNKNOWN_OUT');
+ assert.equal(r.status().remaining,18);
+});
