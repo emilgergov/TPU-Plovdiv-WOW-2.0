@@ -18,6 +18,15 @@ function invalidate(level){
  setBadge();
 }
 function go(step){
+ // KT84-03: only the OPTIONAL private Access-protected shell may authorize
+ // navigation for a bound permanent case. Without that shell the existing
+ // isolated KT83 acceptance workflow is unchanged. This is a UX boundary;
+ // the private Worker remains the actual authorization authority.
+ if(root.KT84ProtectedWorkflow&&
+    root.KT84ProtectedWorkflow.canUseStage(Number(step))!==true){
+   say('Достъпът до този етап трябва да бъде проверен за текущия експерт и преписка.');
+   return false;
+ }
  // KT83–VT01 P1 (isolated branch only): legal access is controlled centrally.
  // Expert may inspect earlier stages, but stage 5 cannot be opened without
  // a case-bound independently verified V11 assessment.
