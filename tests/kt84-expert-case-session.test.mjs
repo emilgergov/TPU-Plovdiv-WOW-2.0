@@ -136,3 +136,29 @@ test('KT84 remains opt-in; public WOW requires a private shell before protection
  const adapter=readFileSync(new URL('../kt84/protected-workflow-adapter.mjs',import.meta.url),'utf8');
  assert.match(adapter,/SERVER_SIDE_EG_CASE_GATE_REQUIRED/);
 });
+
+test('KT84-D: cannot attach a second permanent case ID to the same local cycle',async()=>{
+ const x=setup();
+ await x.client.login();
+ assert.equal((await x.client.attach(CASE)).ok,true);
+ const second='44444444-4444-4444-8444-444444444444';
+ const priorCalls=x.calls.length,priorAbort=x.data.aborts;
+ const refused=await x.client.attach(second);
+ assert.equal(refused.code,'NEW_LOCAL_CYCLE_REQUIRED');
+ assert.equal(x.calls.length,priorCalls,'no private API request for a cross-bound case');
+ assert.equal(x.client.bound().id,CASE,'original case stays bound');
+ assert.equal(x.data.aborts,priorAbort,'rejection does not abort the accepted active case');
+ assert.equal((await x.client.create('Некоректна втора преписка')).code,'NEW_LOCAL_CYCLE_REQUIRED');
+ assert.equal(x.data.created,0,'no orphan server dossier');
+});
+test('KT84-D: reattachment after explicit local cycle change cancels old work',async()=>{
+ const x=setup();
+ await x.client.login();
+ await x.client.attach(CASE);
+ const before=x.data.aborts;
+ x.local.cycleId='55555555-5555-4555-8555-555555555555';
+ const returned=await x.client.attach(CASE);
+ assert.equal(returned.ok,true);
+ assert.equal(returned.case.localCycleId,x.local.cycleId);
+ assert.ok(x.data.aborts>before,'pending work from previous cycle is canceled');
+});
