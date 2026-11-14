@@ -1,0 +1,24 @@
+name: KT84-B EG author and scope continuity guards
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - 'kt80/KT80_EG_ACCESS_SESSION_V01.js'
+      - 'kt80/KT83_VT02_P1_P6_VISUAL_TEST.html'
+      - 'kt80/KT80_E01_SCOPE_UNIFIED_V568.js'
+      - 'tests/kt84-eg-session.test.mjs'
+      - '.github/workflows/kt84-eg-session.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  eg-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify EG session isolation and stale-token rules
+        run: node --test tests/kt84-eg-session.test.mjs
