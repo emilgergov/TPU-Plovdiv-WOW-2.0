@@ -8,6 +8,7 @@ on:
       - kt80/integration/kt83-p2-automatic-pdf1.js
       - kt80/KT82_A_FREE_GIS_V603.js
       - kt80/KT82_STAGE4_V11_SOURCE_GATE_V610.js
+      - kt80/KT82_A_PDF1_V600.js
       - tests/kt83-p2-spatial-gate.test.cjs
       - .github/workflows/kt83-p2-spatial-gate.yml
   pull_request:
