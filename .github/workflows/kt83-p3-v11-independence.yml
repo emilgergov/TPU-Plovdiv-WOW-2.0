@@ -5,11 +5,13 @@ on:
       - kt83-vt01-automatic-route-p1
     paths:
       - kt80/integration/kt83-p3-canonical-v11-master-bridge.mjs
+      - kt80/integration/kt83-p3-case-review-provider.mjs
       - kt80/integration/v11-trusted-source-registry.mjs
       - kt80/integration/stage4-independent-legal-engine.mjs
       - kt80/integration/stage5-independent-proposal.mjs
       - kt80/integration/kt83-vt01-v11-handoff.js
       - tests/kt83-p3-canonical-master-integration.test.mjs
+      - tests/kt83-p3-case-review-provider.test.mjs
       - .github/workflows/kt83-p3-v11-independence.yml
   pull_request:
     branches:
@@ -24,4 +26,4 @@ jobs:
         with:
           node-version: '22'
       - name: Independent legal applicability, source and case isolation checks
-        run: node --test tests/kt83-p3-canonical-master-integration.test.mjs kt80/integration/stage4-stage5-smoke.test.mjs
+        run: node --test tests/kt83-p3-canonical-master-integration.test.mjs tests/kt83-p3-case-review-provider.test.mjs kt80/integration/stage4-stage5-smoke.test.mjs
