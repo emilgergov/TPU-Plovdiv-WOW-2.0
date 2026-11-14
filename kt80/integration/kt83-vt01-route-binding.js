@@ -101,22 +101,30 @@
       }
     });
   });
-  // Shared gate for every stage-5 entry: main step navigation, dashboard,
-  // legacy button and programmatic workflow navigation use the same decision.
+  // One case-specific, provenance-checked evaluation contract. No loose
+  // mutable global approval marker can promote a procedure.
+  function currentV11(){
+    const state=root.KT80WorkflowState||{}, now=receipt();
+    const d=root.KT83NormativeBridge?.getEvidence?.()||{};
+    return root.KT83V11Handoff?.assess({
+      ...now,subject:state.subjectConfirmed?.text,
+      scope:state.subjectConfirmed?.scope,
+      spatialScenario:d.scenario,
+      evidence:d
+    },root.KT83NormativeArchiveV11)||{
+      ok:false,code:'V11_UNAVAILABLE',
+      nextAction:'Предложение: проверете правните основания, приложимостта и компетентността в локалния архив V11.'
+    };
+  }
   function canEnterStageFive(){
-    const law=root.KT80WorkflowState?.lawConfirmed, now=receipt();
-    const verified=root.KT83V11ValidatedAssessment;
+    const state=root.KT80WorkflowState||{};
+    const verified=currentV11();
     return route.snapshot().valid&&route.snapshot().phase==='normative_v11'
-      &&law?.expertConfirmed===true
-      &&verified?.verified===true&&verified.caseId===now.caseId
-      &&verified.generation===now.generation
-      &&verified.evidenceRevision===now.evidenceRevision
-      &&verified.competenceVerified===true
-      &&!!String(verified.reasonedAssessment||'').trim();
+      &&state.lawConfirmed?.expertConfirmed===true&&verified.ok===true;
   }
   root.KT83RouteAccess=Object.freeze({
     canOpenStage:step=>Number(step)!==5||canEnterStageFive(),
-    denied:()=>fail('Етап 5 е блокиран: необходима е независима проверка по V11, включително компетентност и актуални доказателства.')
+    denied:()=>{const v=currentV11();fail((v.reason||'Непотвърдена нормативна приложимост.')+' '+(v.nextAction||''));}
   });
   // Guard the legacy click BEFORE it advances to stage 5.
   // Passing a stage and typing legal prose are not independent legal validation.
@@ -125,7 +133,7 @@
     if(eligible)return;
     event.preventDefault();
     event.stopImmediatePropagation();
-    fail('Етап 5 изисква независима нормативна оценка, проверена компетентност и актуални доказателства по V11. Подгответе конкретните липсващи проверки.');
+    const v=currentV11();fail((v.reason||'Нормативните доказателства са непълни.')+' '+(v.nextAction||''));
   },true);
   $('kt80ToProposal')?.addEventListener('click',()=>{
     queueMicrotask(()=>{
@@ -137,13 +145,10 @@
       // Expert-entered legal notes alone are NOT proof of V11 applicability.
       // The independent normative verifier must provide a fresh, case-bound
       // assessment before P1 can promote a procedural recommendation.
-      const verified=root.KT83V11ValidatedAssessment;
+      const verified=currentV11();
       const now=receipt();
-      if(!verified||verified.verified!==true||verified.caseId!==now.caseId
-          ||verified.generation!==now.generation||verified.evidenceRevision!==now.evidenceRevision
-          ||!verified.reasonedAssessment||!verified.competenceVerified){
-        return fail('Правната бележка е записана, но липсва независимо удостоверена приложимост и компетентност по V11. Не се избира процедура.');
-      }
+      if(!verified.ok)
+        return fail((verified.reason||'Нормативната оценка не е удостоверена.')+' '+(verified.nextAction||''));
       const r=route.advance('motivated_proposal',{...now,verified:true,reasonedAssessment:verified.reasonedAssessment});
       render(r.ok?'Има удостоверена нормативна оценка. Следва конкретно мотивирано предложение за експертен преглед.':r.reason);
     });
