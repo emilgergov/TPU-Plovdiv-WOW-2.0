@@ -9,7 +9,8 @@ const clean=x=>typeof x==='string'?x.trim():'';
 const fail=s=>{throw new TypeError(s)};
 const copy=x=>JSON.parse(JSON.stringify(x));
 export function prepareExpertV11Review({
- context,packet,existingStage4,authority,expertApproved=false
+ context,packet,existingStage4,authority,expertApproved=false,
+ independentCompetenceAudit=null
 }={}){
  if(!clean(context?.caseId)||!Number.isInteger(context.generation)||
     !Number.isInteger(context.evidenceRevision)||!clean(context.subject)||
@@ -28,6 +29,23 @@ export function prepareExpertV11Review({
  let ref;
  try{ref=verifiedReference(authority.registryId)}
  catch(_){fail('Източникът за компетентността не е проверен в MASTER V11.')}
+ // A valid SHA-256 V11 citation does NOT by itself establish jurisdiction.
+ // A separate case-specific, independent competence attestation is mandatory.
+ if(!independentCompetenceAudit||
+    independentCompetenceAudit.verified!==true||
+    independentCompetenceAudit.caseId!==context.caseId||
+    independentCompetenceAudit.generation!==context.generation||
+    independentCompetenceAudit.evidenceRevision!==context.evidenceRevision||
+    clean(independentCompetenceAudit.subject)!==context.subject||
+    clean(independentCompetenceAudit.scope)!==context.scope||
+    clean(independentCompetenceAudit.authority)!==name||
+    independentCompetenceAudit.registryId!==authority.registryId||
+    independentCompetenceAudit.articleSha256!==ref.articleSha256||
+    independentCompetenceAudit.archiveSha256!==ref.archiveSha256||
+    clean(independentCompetenceAudit.sourceId)!==sourceId||
+    clean(independentCompetenceAudit.sourceLocation)!==sourceLocation||
+    !clean(independentCompetenceAudit.reviewerSource))
+  fail('Няма независима, индивидуална проверка на материалната и териториалната компетентност. Предложение: удостоверете основанията от MASTER V11 и конкретната преписка.');
  const stage4=assessStage4({
   confirmedSubject:context.subject,scopeConfirmed:true,
   evidence:packet.evidence,rules:packet.rules
@@ -50,7 +68,7 @@ export function prepareExpertV11Review({
    factId:'EXPERT_COMPETENCE_REVIEW',sourceId,
    archiveOrDossierOrigin:ref.archivePath,
    sourceLocation,legalReference:ref,
-   expertReason:reason
+   expertReason:reason,independentAuditSource:independentCompetenceAudit.reviewerSource
   }]
  });
 }
