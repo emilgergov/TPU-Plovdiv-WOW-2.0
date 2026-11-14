@@ -32,6 +32,7 @@ function go(step){
  // a case-bound independently verified V11 assessment.
  if(Number(step)===5&&typeof root.KT83RouteAccess?.canOpenStage==='function'
     &&root.KT83RouteAccess.canOpenStage(5)!==true){
+   if(root.KT83SafeStageFive?.open?.()===true)return false;
    root.KT83RouteAccess?.denied?.(5);
    return false;
  }
