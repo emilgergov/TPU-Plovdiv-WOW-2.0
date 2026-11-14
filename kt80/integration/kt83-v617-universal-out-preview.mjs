@@ -136,9 +136,14 @@ function boot(){
  });
  for(const event of ['kt80:case-change','kt80:case-reset','kt82:evidence-invalidated'])
   document.addEventListener(event,clear);
- for(const field of [ruleInput,factInput,titleField,recipientField,addressField,referenceField])field.addEventListener('input',clear);
- document.addEventListener('kt80:case-reset',()=>{ruleInput.value='';factInput.value='';});
- document.addEventListener('kt80:case-change',()=>{ruleInput.value='';factInput.value='';});
+ for(const field of [ruleInput,factInput])field.addEventListener('input',clear);
+ for(const field of [titleField,recipientField,addressField,referenceField])field.addEventListener('input',()=>{
+  draftStatus.textContent='Променени са реквизитите на проекта. Създайте нова чернова.';
+  docxStatus.textContent='Променени са реквизитите. Word проектът ще бъде създаден с новите данни.';
+ });
+ const clearDocumentFields=()=>{for(const f of [ruleInput,factInput,titleField,recipientField,addressField,referenceField])f.value='';};
+ document.addEventListener('kt80:case-reset',clearDocumentFields);
+ document.addEventListener('kt80:case-change',clearDocumentFields);
  document.addEventListener('input',event=>{
   if(['kt80SubjectText','kt80ScopeText','kt80ParcelInput'].includes(event.target?.id))clear();
  });
