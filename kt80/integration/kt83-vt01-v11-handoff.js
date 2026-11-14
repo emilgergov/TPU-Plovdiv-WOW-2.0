@@ -37,8 +37,10 @@
       !candidate.provisions.every(p=>clean(p.documentId)&&clean(p.articleRef)&&
         clean(p.archiveSource)&&clean(p.applicabilityReason)))
    return fail('NO_V11_PROOFS','Липсват проверими архивни реквизити, разпоредби или мотиви за тяхната приложимост.');
-  if(typeof verifier?.verifyProvenance!=='function'||
-    verifier.verifyProvenance(candidate,c)!==true)
+  let provenance=false;
+  try{provenance=typeof verifier?.verifyProvenance==='function' &&
+    verifier.verifyProvenance(candidate,c)===true;}catch(_){provenance=false;}
+  if(!provenance)
    return fail('PROVENANCE_UNVERIFIED','Локалният архив V11 не удостоверява произхода и неизменността на правните източници.');
   return Object.freeze({ok:true,code:'VERIFIED',caseId:c.caseId,generation:c.generation,
     evidenceRevision:c.evidenceRevision,verified:true,archiveVersion:'V11',
