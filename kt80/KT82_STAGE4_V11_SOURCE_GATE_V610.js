@@ -197,7 +197,7 @@ function boot(){
    &&idKey(receipt.ids)===idKey(ids)&&live?.results?.every(geometryValid)
    &&receipt.evidenceRevision===(root.KT82EvidenceInvalidation?.getRevision?.()??null);
   if(!valid)return;
-  pdf={ready:true,ids:[...ids],stamp:Date.now(),caseId:receipt.caseId,generation:receipt.generation,source:live,evidenceRevision:receipt.evidenceRevision};
+  pdf={ready:true,ids:[...ids],stamp:Date.now(),caseId:receipt.caseId,generation:receipt.generation,source:live,evidenceRevision:receipt.evidenceRevision,bytes:receipt.bytes};
   lastSignature='';if(!panel.hidden)draw();
  };
  document.addEventListener('kt82:pdf1-completed',pdfReceipt);
