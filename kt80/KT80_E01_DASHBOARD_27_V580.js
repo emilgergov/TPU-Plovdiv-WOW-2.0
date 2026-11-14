@@ -18,6 +18,7 @@ function home(){
 function stage(step){
  // Independent route guard must apply even to direct dashboard navigation.
  if(Number(step)===5&&root.KT83RouteAccess?.canOpenStage?.(5)===false){
+  if(root.KT83SafeStageFive?.open?.()===true)return false;
   root.KT83RouteAccess?.denied?.(5);
   return false;
  }
