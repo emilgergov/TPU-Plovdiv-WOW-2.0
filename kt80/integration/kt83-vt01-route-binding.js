@@ -90,8 +90,18 @@
       if(!law?.expertConfirmed)return fail('Липсва експертно удостоверена нормативна преценка.');
       const snap=route.snapshot();
       if(snap.phase!=='normative_v11')return render('Нормативният маршрут все още не е удостоверен.');
-      const r=route.advance('motivated_proposal',{...receipt(),verified:true,reasonedAssessment:law.legal});
-      render(r.ok?'Има мотивирана експертна правна оценка. Изходният проект остава за преглед, не за подписване.':r.reason);
+      // Expert-entered legal notes alone are NOT proof of V11 applicability.
+      // The independent normative verifier must provide a fresh, case-bound
+      // assessment before P1 can promote a procedural recommendation.
+      const verified=root.KT83V11ValidatedAssessment;
+      const now=receipt();
+      if(!verified||verified.verified!==true||verified.caseId!==now.caseId
+          ||verified.generation!==now.generation||verified.evidenceRevision!==now.evidenceRevision
+          ||!verified.reasonedAssessment||!verified.competenceVerified){
+        return fail('Правната бележка е записана, но липсва независимо удостоверена приложимост и компетентност по V11. Не се избира процедура.');
+      }
+      const r=route.advance('motivated_proposal',{...now,verified:true,reasonedAssessment:verified.reasonedAssessment});
+      render(r.ok?'Има удостоверена нормативна оценка. Следва конкретно мотивирано предложение за експертен преглед.':r.reason);
     });
   });
   const invalidate=()=>{route.reset();render('Данните са променени. Предходните резултати не се пренасят към новата преписка.')};
