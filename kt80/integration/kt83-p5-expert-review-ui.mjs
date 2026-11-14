@@ -26,10 +26,12 @@ function boot(){
   wrap.append(x);group.append(wrap);return x;
  }
  const authority=field('kt83P5CompetentAuthority','Експертно установен компетентен орган');
+ const municipality=field('kt83P5CompetenceMunicipality','Община по приложения териториален обхват на РИОСВ – Пловдив');
  const article=field('kt83P5CompetenceRegistry','Разпоредба от нормативния MASTER V11 — ИД от проверения индекс','Например идентификатор на действително относимата разпоредба');
  const source=field('kt83P5CompetenceDocument','Проверен документ от преписката или нормативния архив');
  const location=field('kt83P5CompetenceLocation','Точно място в документа (страница, член, алинея)');
  const reason=field('kt83P5CompetenceReason','Експертен мотив за материална и териториална компетентност');
+ group.append(make('p','За контрол по чл. 6а НОС проверете отделно приложимостта, териториалния обхват и всички седем изключения за компетентност на министъра. Доказателствените факти в таблицата трябва да съдържат цитат от оригиналния документ (sourceQuote). Непълните данни не се приемат за отрицателен факт.'));
  const checkLabel=make('label');
  checkLabel.style.cssText='display:block;margin:10px 0';
  const confirmed=make('input');confirmed.type='checkbox';confirmed.id='kt83P5CompetenceConfirmed';
@@ -47,11 +49,11 @@ function boot(){
   if(wf?.lawConfirmed?.archiveVersion==='V11')wf.lawConfirmed=null;
   status.textContent='Данните се измениха. Необходима е актуална експертна проверка.';
  };
- for(const input of [rules,facts,authority,article,source,location,reason,confirmed])
+ for(const input of [rules,facts,authority,municipality,article,source,location,reason,confirmed])
   input.addEventListener('input',reset);
  for(const event of ['kt80:case-change','kt80:case-reset','kt82:evidence-invalidated'])
   document.addEventListener(event,()=>{
-   for(const input of [authority,article,source,location,reason])input.value='';
+   for(const input of [authority,municipality,article,source,location,reason])input.value='';
    confirmed.checked=false;
    reset();
   });
@@ -77,15 +79,17 @@ function boot(){
     scopeConfirmed:workflow.subjectConfirmed?.scopeConfirmed===true
    };
    const competence={
-    name:t(authority.value),registryId:t(article.value),
+    name:t(authority.value),municipality:t(municipality.value),registryId:t(article.value),
     sourceId:t(source.value),sourceLocation:t(location.value),reason:t(reason.value)
    };
    if(!confirmed.checked)throw new Error('Потвърдете експертния преглед.');
+   if(!t(municipality.value))throw new Error('Уточнете общината за териториалната компетентност.');
    const archived=verifiedReference(competence.registryId);
    const verifier=window.KT83IndependentCompetenceAudit;
    if(typeof verifier?.verify!=='function')
     throw new Error('Липсва независим механизъм за проверка на компетентността. Проверете основанието от нормативния MASTER V11 и преписката.');
    const audit=await verifier.verify({context,competence,archived,packet});
+   if(audit?.verified!==true)throw new Error(audit?.nextAction||'Не е доказана компетентността по текущата преписка.');
    const review=prepareExpertV11Review({
     context,packet,existingStage4:checked,
     expertApproved:confirmed.checked,authority:competence,
