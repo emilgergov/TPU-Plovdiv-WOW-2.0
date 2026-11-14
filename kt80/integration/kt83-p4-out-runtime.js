@@ -39,8 +39,9 @@
   }
  });
  const renderers=new Proxy({},{
-  get(_,outId){const provider=root.KT83ApprovedOutRenderers;
-   return typeof provider?.getRenderer==='function'?provider.getRenderer(outId):undefined;}
+  get(_,key){const provider=root.KT83ApprovedOutRenderers;
+   const [outId,variant='DEFAULT']=String(key).split('::');
+   return typeof provider?.getRenderer==='function'?provider.getRenderer(outId,variant):undefined;}
  });
  const service=dispatcher.create({templates,currentCase:getCase,
   renderers,legalReceipt:verifiedLaw});
