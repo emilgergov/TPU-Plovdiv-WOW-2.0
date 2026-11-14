@@ -16,7 +16,7 @@ function boot(){
  const group=make('section');
  group.id='kt83P5ExpertVerification';
  group.style.cssText='border-top:1px solid #9cad9e;padding-top:10px;margin-top:13px';
- group.append(make('h4','Експертно удостоверяване на нормативната преценка · MASTER V11'));
+ group.append(make('h4','Експертна проверка на нормативните основания'));
  group.append(make('p','След проверката на хипотезите посочете отделно основанието и доказателствата за компетентността. Потвърждението не издава административен акт.'));
  function field(id,label,placeholder=''){
   const wrap=make('label',label);
