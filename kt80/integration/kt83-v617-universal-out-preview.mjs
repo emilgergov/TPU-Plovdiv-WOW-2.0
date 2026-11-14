@@ -37,6 +37,13 @@ function boot(){
  const shellLabel=el('label','Оригинална „БЛАНКА РИОСВ ПЛОВДИВ.docx“ — избира се локално, само веднъж за теста');shellLabel.htmlFor=shellSelect.id;
  const docxButton=el('button','Създай Word проект по оригиналната бланка');docxButton.type='button';
  const docxStatus=el('p','Изберете оригиналната бланка само веднъж за тази сесия. Тя остава локално в паметта.');
+ // KT83 P4: legacy common-letterhead document generation cannot substitute
+ // the individually approved form for each outgoing document.
+ docxButton.disabled=true;
+ docxButton.title='П4: използвайте утвърдения образец за конкретния OUT.';
+ docxButton.textContent='Word проект — изисква образеца на конкретния OUT';
+ docxStatus.textContent='П4: общата институционална бланка не замества утвърдения образец на отделния OUT. Директният универсален Word изход е спрян.';
+
  const blankClear=el('button','Освободи бланката');blankClear.type='button';
  blankClear.addEventListener('click',()=>{outSession.clear();shellSelect.value='';docxStatus.textContent='Бланката е освободена от паметта на браузъра.';});
  box5.append(run5,status5,draftButton,draftStatus,shellLabel,shellSelect,blankClear,docxButton,docxStatus);
