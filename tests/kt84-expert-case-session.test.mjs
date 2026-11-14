@@ -89,7 +89,7 @@ test('KT84 private transport never sends credentials to an external host',async(
  assert.equal(requests[0].init.credentials,'same-origin');
  assert.equal(requests[0].init.redirect,'error');
  assert.equal(requests[0].init.cache,'no-store');
- assert.throws(()=>transport({path:'https://evil.example/v1/me'}),/Невалиден маршрут/);
+ await assert.rejects(()=>transport({path:'https://evil.example/v1/me'}),/Невалиден маршрут/);
  assert.throws(()=>createProtectedTransport({origin:'http://private.example',fetcher:()=>{}}),/HTTPS/);
 });
 test('KT84 protected workflow prevents direct stage clicks and rechecks the same case',async()=>{
