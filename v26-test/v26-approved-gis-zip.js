@@ -62,7 +62,24 @@ async function openHosted(base){
  if(!response.ok)throw Error('ГИС сегментите още не са публикувани ('+response.status+').');
  const manifest=await response.json();
  if(manifest.status!=='PASS_COUNT_BY_PREFIX'||manifest.parcel_geometry!==917418||manifest.overlap_records_expected!==181154||manifest.shards!==258)throw Error('Непотвърден ГИС манифест.');
- const probe=await fetch(root+'/parcelgeom_36.json.gz',{method:'HEAD',cache:'no-store'});if(!probe.ok)throw Error('Пълният ГИС пакет не е публикуван: липсва parcelgeom_36.json.gz.');hostedRoot=root;hostedManifest=manifest;cache.clear();return manifest;
+ // HEAD is not a reliable availability test on every static host/proxy.
+ // Inspect the first gzip bytes with a bounded GET; never infer a missing file from a HEAD failure.
+ const probeUrl=root+'/parcelgeom_36.json.gz';
+ let probe;
+ try{probe=await fetch(probeUrl,{method:'GET',headers:{Range:'bytes=0-1'},cache:'no-store'});}
+ catch(e){throw Error('Неуспешна връзка с ГИС сегмента parcelgeom_36.json.gz: '+String(e?.message||e));}
+ if(!probe.ok){probe.body?.cancel?.().catch?.(()=>{});throw Error('ГИС сегмент parcelgeom_36.json.gz не е достъпен (HTTP '+probe.status+'). Проверете адреса и публикуването.');}
+ const reader=probe.body?.getReader?.();
+ if(!reader)throw Error('Не може да се провери съдържанието на ГИС сегмента.');
+ let magic=[];
+ try{
+  while(magic.length<2){
+   const part=await reader.read();if(part.done)break;
+   for(let i=0;i<part.value.length&&magic.length<2;i++)magic.push(part.value[i]);
+  }
+ }finally{await reader.cancel().catch(()=>{});}
+ if(magic[0]!==0x1f||magic[1]!==0x8b)throw Error('Публикуваният ГИС сегмент няма валиден gzip заглавен запис.');
+ hostedRoot=root;hostedManifest=manifest;cache.clear();return manifest;
 }
 async function lookup(ids){
  if(!entries&&!hostedRoot)throw Error('ГИС базата не е заредена.');
