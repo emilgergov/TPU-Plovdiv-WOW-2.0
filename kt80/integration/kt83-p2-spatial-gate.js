@@ -22,7 +22,8 @@
    trim(r.input||r.cadnum)===ids[i]&&Array.isArray(r.geojson?.features)&&
    r.geojson.features.some(f=>['Polygon','MultiPolygon'].includes(f?.geometry?.type)&&Array.isArray(f.geometry.coordinates)&&f.geometry.coordinates.length>0));
   if(!good)return {ok:false,code:'GEOMETRY_UNVERIFIED',message:'Липсва потвърдена геометрия за един или повече имоти.'};
-  if(!live.results.every(r=>Array.isArray(r.verified_zone_intersections)&&typeof r.intersection_verified_outside==='boolean'))
+  if(!live.results.every(r=>Array.isArray(r.verified_zone_intersections)&&typeof r.intersection_verified_outside==='boolean'&&
+      (r.verified_zone_intersections.length>0||r.intersection_verified_outside===true)))
    return {ok:false,code:'INTERSECTIONS_UNVERIFIED',message:'Проверката на пресичанията със ЗЗ не е завършена.'};
   if(!Array.isArray(pi.ids)||!Array.isArray(pi.items)||pi.ids.length!==ids.length||pi.items.length!==ids.length||
      !ids.every((id,i)=>pi.ids[i]===id&&pi.items[i]?.status==='FOUND'&&!!pi.items[i]?.profile))
