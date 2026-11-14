@@ -53,6 +53,7 @@ css.textContent=`
 .kt80-dashboard-tile[data-kt83-state="future"]{background:#204a35!important;border-color:#5b8264!important}
 .kt80-dashboard-tile[data-kt83-state="next"]{background:#8c6c34!important;border-color:#f5d68d!important}
 .kt83-preview-disabled{background:#263d34;padding:10px;border:1px solid #9c775d;border-radius:8px;color:#f5d4c4;margin:10px 0}
+.kt84-stage5-outline{padding-left:22px;color:#f3ead6;font:500 14px/1.55 'Segoe UI',Arial,sans-serif}.kt84-stage5-outline li{margin:5px 0}.kt83-preview-dialog{width:min(620px,94vw)!important}
 @media(max-width:900px){.kt80-stage-panel[data-panel="3"] .kt80-gis-layout{grid-template-columns:1fr!important}}
 `;
 document.head.append(css);
@@ -95,20 +96,13 @@ function openPreview(button){
  b.append(makeText('p','Мотивирано експертно предложение за процедура при проверени факти, правни основания и компетентност.'));
  let warning=makeText('div','Определяне на процедура и създаване на проект са недостъпни в този режим. Не попълвайте фиктивни правни основания.');warning.className='kt83-preview-disabled';b.append(warning);
  b.append(makeText('p','Следващо действие: върнете се към непълните проверки в предходните етапи.'));
- const actual=document.querySelector('.kt80-stage-panel[data-panel="5"]');
- if(actual){
-  const fold=document.createElement('details');fold.className='kt83-tech-details';
-  fold.append(makeText('summary','Разгледай действителната структура на Панел 5 (само за преглед)'));
-  const copy=actual.cloneNode(true);copy.hidden=false;copy.removeAttribute('data-panel');copy.classList.remove('kt80-stage-panel');
-  copy.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
-  copy.querySelectorAll('[for]').forEach(el=>el.removeAttribute('for'));
-  copy.querySelectorAll('button,input,select,textarea').forEach(el=>{el.disabled=true;el.setAttribute('aria-disabled','true')});
-  copy.querySelectorAll('script').forEach(el=>el.remove());
-  copy.querySelectorAll('a').forEach(el=>{el.removeAttribute('href');el.removeAttribute('target');el.setAttribute('aria-disabled','true')});
-  copy.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
-  copy.querySelectorAll('form').forEach(el=>el.addEventListener('submit',event=>event.preventDefault()));
-  fold.append(copy);b.append(fold);
- }
+ // Brief structural outline only; never clone the full disabled Stage 5 editor.
+ b.append(makeText('h3','Какво ще се отключи след нормативната проверка'));
+ const items=document.createElement('ul');items.className='kt84-stage5-outline';
+ for(const sentence of ['Мотивирано предложение според доказаните законови условия.','Експертен преглед на избрания документ, адресат и реквизити.','Неподписан работен проект по оригиналната служебна бланка.'])
+  items.append(makeText('li',sentence));
+ b.append(items);
+ b.append(makeText('p','Този преглед не съдържа редактор, избор на процедура или генератор.'));
  preview.hidden=false;$('kt83PreviewClose').focus();return true;
 }
 root.KT83SafeStageFive=Object.freeze({open:openPreview});
