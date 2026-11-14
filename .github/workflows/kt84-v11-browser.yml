@@ -1,0 +1,28 @@
+name: KT84-C independent V11 stale audit browser safeguard
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - 'kt80/integration/kt83-p5-expert-review-ui.mjs'
+      - 'tests/kt84-v11-browser-case.test.mjs'
+      - '.github/workflows/kt84-v11-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  normative-case-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright@1.57.0
+          npx playwright install chromium
+      - run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/kt84-v11.log 2>&1 &
+          for n in $(seq 1 30); do curl -sf http://127.0.0.1:8765/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html >/dev/null && break; sleep 1; done
+      - name: Reject stale asynchronous competence audit in real Stage 4
+        run: node tests/kt84-v11-browser-case.test.mjs
