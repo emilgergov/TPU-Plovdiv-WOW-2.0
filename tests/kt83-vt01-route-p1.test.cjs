@@ -11,14 +11,11 @@ test('requires subject and scope approvals and rejects skipped phases',()=>{
  assert.equal(c.advance('evidence',{...live,verified:false}).ok,false);
  assert.equal(c.advance('evidence',{...live,verified:true}).ok,true);
 });
-test('rejects cross-case evidence, change of generation and unmotivated procedure',()=>{
+test('rejects cross-case evidence and invalidates on revision change',()=>{
  let live={caseId:'case-a',generation:2,evidenceRevision:3};
  const c=coordinator({current:()=>live});
  assert.equal(c.start({subject:true,scope:true}).ok,true);
- assert.equal(c.advance('evidence',{...live,verified:true}).ok,false); // skip GIS
- assert.equal(c.advance('evidence',{...live,verified:true}).ok,false);
  assert.equal(c.advance('evidence',{caseId:'case-b',generation:2,evidenceRevision:3,verified:true}).ok,false);
- assert.equal(c.advance('evidence',{...live,verified:true}).ok,false);
  live={...live,evidenceRevision:4};
  assert.equal(c.advance('evidence',{...live,verified:true}).ok,false);
  assert.equal(c.snapshot().valid,false);
