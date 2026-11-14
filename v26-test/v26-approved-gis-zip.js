@@ -13,7 +13,7 @@ async function openArchive(file){
  const m=new Map(files.map(x=>[x.filename.split('/').pop(),x]));
  // Full deployment contract: never treat a partially extracted/demonstration ZIP
  // as a validated GIS source. Exact shard filenames are checked, not ZIP size.
- const shards=files.filter(x=>/^(?:parcels|parcelgeom|overlays|overlapgeom)_\\d{2}\\.json\\.gz$/i.test(x.filename.split('/').pop()));
+ const shards=files.filter(x=>/^(?:parcels|parcelgeom|overlays|overlapgeom)_\d{2}\.json\.gz$/i.test(x.filename.split('/').pop()));
  let manifest;
  try{
   if(!m.has('manifest.json'))throw Error('Липсва ГИС манифест.');
