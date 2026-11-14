@@ -54,7 +54,11 @@ test('isolated UI binds to original workflow and requires a current PDF1 proof',
  assert.match(binding,/kt82:evidence-invalidated/);
  assert.match(binding,/KT83V11ValidatedAssessment/);
  assert.match(binding,/event\.stopImmediatePropagation\(\)/);
- assert.match(binding,/const eligible=route\.snapshot\(\)\.valid/);
+ const workflow=fs.readFileSync(require('node:path').join(__dirname,'../kt80/KT83_WORKFLOW_CASE_V591.js'),'utf8');
+ assert.match(workflow,/KT83RouteAccess\.canOpenStage\(5\)/);
+ assert.match(binding,/root\.KT83RouteAccess=Object\.freeze/);
+ assert.match(binding,/function canEnterStageFive\(\)/);
+ assert.match(binding,/const eligible=canEnterStageFive\(\)/);
  assert.match(binding,/verified\.competenceVerified/);
  assert.match(binding,/verified\.evidenceRevision!==now\.evidenceRevision/);
  assert.match(html,/integration\/kt83-vt01-automatic-route-p1\.js/);
