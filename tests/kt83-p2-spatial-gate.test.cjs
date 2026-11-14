@@ -57,6 +57,9 @@ test('P2 integration uses approved original PDF1 and active case boundary',()=>{
  const bridge=fs.readFileSync(path.join(base,'KT82_STAGE4_V11_SOURCE_GATE_V610.js'),'utf8');
  assert.match(browser,/KT80PDF1Bridge\.makePDF\(\)/);
  assert.match(browser,/issued===check\.key/);
+ assert.match(browser,/kt82:pdf1-completed/);
+ assert.match(browser,/pdfReceiptMatches\(x,e\.detail\)/);
+ assert.match(browser,/serial\+\+/);
  assert.match(browser,/event\.detail/);
  assert.match(gis,/kt83:gis-intersections-checked/);
  assert.match(bridge,/bytes:receipt\.bytes/);
