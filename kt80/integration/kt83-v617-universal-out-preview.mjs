@@ -92,7 +92,8 @@ function boot(){
  docxButton.addEventListener('click',async()=>{
   if(!outSession.status().hasOriginal){docxStatus.textContent='Изберете оригиналната бланка веднъж за текущата сесия.';return}
   try{
-   if(file.size>12000000||file.size<30)throw new Error('Невалиден размер на DOCX бланката');
+   // The approved template has already been checked by outSession.attach().
+   // No stale file handle is retained after the original is selected.
    const before=bridge.inspect();
    if(!before.ready)throw new Error('Непотвърден предмет или обхват');
    const proposal=bridge.propose();
