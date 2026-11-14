@@ -1,0 +1,27 @@
+name: KT83 P6 integrated case evidence and normative acceptance
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - kt80/integration/kt83-p5-competence-audit.mjs
+      - kt80/integration/kt83-p5-competence-runtime.mjs
+      - kt80/integration/v11-trusted-source-registry.mjs
+      - kt80/integration/kt83-p5-expert-v11-review.mjs
+      - kt80/integration/kt83-p3-canonical-v11-master-bridge.mjs
+      - kt80/integration/kt83-p3-case-review-provider.mjs
+      - kt80/integration/kt83-vt01-v11-handoff.js
+      - tests/kt83-p6-integrated-evidence-to-v11.test.mjs
+      - .github/workflows/kt83-p6-integrated-v11.yml
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  evidence-to-proposal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify full case-bound dossier facts, Art 6a exemptions and original V11 Stage5 outcome
+        run: node --test tests/kt83-p6-integrated-evidence-to-v11.test.mjs tests/kt83-p5-competence-audit.test.mjs tests/kt83-p5-expert-v11-review.test.mjs tests/kt83-p3-canonical-master-integration.test.mjs tests/kt83-p3-case-review-provider.test.mjs
