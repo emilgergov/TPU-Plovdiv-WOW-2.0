@@ -45,9 +45,9 @@ test('isolated UI binds to original workflow and requires a current PDF1 proof',
  assert.match(binding,/gisNotRequired:true/);
  assert.doesNotMatch(binding,/KT80WorkflowGo\?\.\(3\)/);
  assert.match(binding,/KT83NormativeBridge\?\.pdfStatus\?\.\(\)/);
- assert.match(binding,/pdf\.caseId===r\.caseId/);
- assert.match(binding,/pdf\.evidenceRevision===r\.evidenceRevision/);
- assert.match(binding,/pdf\.source===g/);
+ assert.match(binding,/KT83P2SpatialGate\?\.check/);
+ assert.match(binding,/pdfReceiptMatches/);
+ assert.match(binding,/KT83P2Automatic\?\.current/);
  assert.match(binding,/pdf1Verified:true,geometryVerified:true/);
  assert.match(binding,/gisNotRequired:true,expertConfirmed:true,reason:gate\.reason/);
  assert.match(binding,/kt82:pdf1-completed/);
