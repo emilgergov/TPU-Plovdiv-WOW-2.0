@@ -101,7 +101,12 @@ async function process(){
   if(isCurrent())root.KT82UniversalDossier?.apply?.(result);
   if(typeof root.KT80FormMatcher?.compare==='function')await root.KT80FormMatcher.compare(result,{isCurrent,signal:state.abort.signal});
   if(!isCurrent())return;
-  say('Прочитът приключи. Следва проверка на предмета и имотите от експерта.');
+  const all=Array.isArray(result?.files)?result.files:[];
+  const unread=all.filter(f=>/непрочетен|unread|failed|unsupported/i.test(String(f?.status||f?.readingStatus||f?.read_status||''))).length;
+  const uncertain=all.filter(f=>/проверка|review|partial|uncertain/i.test(String(f?.status||f?.readingStatus||f?.read_status||''))).length;
+  say('Автоматичната обработка приключи. Прегледайте статуса на всеки документ;'+
+    (unread||uncertain?' за '+unread+' файла е отчетен проблем с прочита и '+uncertain+' изискват проверка.':' автоматичният резултат не означава експертно прочетена преписка.')+
+    ' Следва проверка на предмета и обхвата от експерта.');
  }catch(e){
   if(!isCurrent())return;
   $('kt80InputStatus').textContent='Обработката не успя: '+String(e?.message||e);
