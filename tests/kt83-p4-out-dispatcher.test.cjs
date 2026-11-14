@@ -75,3 +75,12 @@ test('P4 runtime demands original V11 handoff and loads after route binding',()=
  assert.ok(at('kt83-vt01-route-binding.js')<at('kt83-p4-out-runtime.js'));
  assert.ok(at('kt83-p4-out-template-contract.js')<at('kt83-p4-out-runtime.js'));
 });
+
+test('P4 refuses expert variant mismatch instead of silently selecting a different template',async()=>{
+ const x=fixture();
+ await x.templates.register({outId:'01',variant:'A',templateId:'OUT01-A',
+  sourceDescription:'Одобрен образец A',expectedSha256:h,bytes});
+ const accepted={...x.selection(),variant:'A'};
+ assert.equal((await x.d.prepare({outId:'01',variant:'B',expertChoice:accepted})).code,'OUT_CHOICE_UNCONFIRMED');
+ assert.equal((await x.d.prepare({outId:'01',variant:'A',expertChoice:accepted})).ok,true);
+});
