@@ -61,3 +61,17 @@ test('P4 without renderer never invents structure for a different OUT',async()=>
  expectedSha256:h,bytes});
  assert.equal((await x.d.prepare({outId:'02',expertChoice:{...x.selection(),outId:'02'}})).code,'OUT_RENDERER_MISSING');
 });
+
+test('P4 runtime demands original V11 handoff and loads after route binding',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const runtime=fs.readFileSync(path.join(__dirname,'../kt80/integration/kt83-p4-out-runtime.js'),'utf8');
+ const html=fs.readFileSync(path.join(__dirname,'../kt80/KT83_VT01_P1_AUTOMATIC_ROUTE_TEST.html'),'utf8');
+ assert.match(runtime,/KT83V11Handoff\?\.assess/);
+ assert.match(runtime,/KT83NormativeArchiveV11/);
+ assert.match(runtime,/KT83ApprovedOutTemplates/);
+ assert.match(runtime,/KT83ApprovedOutRenderers/);
+ assert.match(runtime,/allowUniversalBlank:false/);
+ const at=x=>html.indexOf(x);
+ assert.ok(at('kt83-vt01-route-binding.js')<at('kt83-p4-out-runtime.js'));
+ assert.ok(at('kt83-p4-out-template-contract.js')<at('kt83-p4-out-runtime.js'));
+});
