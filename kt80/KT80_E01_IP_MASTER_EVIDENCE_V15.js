@@ -53,6 +53,15 @@ function render(analysis){
  function e(tag,t){const node=document.createElement(tag);node.textContent=t;return node}
  host.append(e('h3','ИП MASTER · доказателствена картина'));
  host.append(e('p','Извлечени теми: '+analysis.unverifiedFieldCount+' · НЯМА ДАННИ: '+analysis.missingFieldCount+'. Нито един откъс не е автоматично доказан.'));
+ if(analysis.subjectSource){
+  const origin=(root.KT80DossierAudit?.records||[]).find(d=>d.file===analysis.subjectSource);
+  const detail=origin?.state==='TEXT_EXTRACTED'?'текстът е извлечен, но съдържанието не е експертно потвърдено':
+   origin?.state==='REVIEW_REQUIRED'?'извлеченият текст изисква проверка по оригинала':
+   origin?.state==='NOT_READ'||origin?.state==='UNSUPPORTED'?'прочитът не е потвърден; проектът не може да се приема без проверка на оригинала':
+   'няма потвърден статус на източника';
+  const trace=e('p','Източник на предложението за предмет: '+analysis.subjectSource+' — '+detail+'.');
+  trace.className='kt80-coverage-detail';host.append(trace);
+ }
  for(const field of analysis.fields){
   const box=document.createElement('details');box.className='kt80-ip-topic';
   const coverage=root.KT80EvidenceCoverage?.summarize(root.KT80DossierAudit,field.evidence.map(x=>x.document))||null;
