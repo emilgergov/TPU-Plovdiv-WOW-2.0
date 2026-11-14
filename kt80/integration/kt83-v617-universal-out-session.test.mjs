@@ -174,6 +174,7 @@ test('unchanged document metadata allows an unsigned review draft on the origina
   });
   const result=await session.render(record(),{currentRecord});
   assert.equal(result.status,'EXPERT_REVIEW_ONLY');
-  assert.equal(result.formalIssuanceAllowed,false);
+  assert.equal(result.signaturesUnsigned,true);
+  assert.equal(result.headerFooterMediaUnmodified,true);
  });
 });
