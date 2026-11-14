@@ -36,7 +36,7 @@
    const choice=templates.select({outId,variant,caseId:caseNow.caseId,generation:caseNow.generation,
     evidenceRevision:caseNow.evidenceRevision,expertConfirmed:true,normativeVerified:true});
    if(!choice.ok)return choice;
-   const renderer=renderers[outId];
+   const renderer=renderers[outId+'::'+variant];
    if(typeof renderer!=='function')
     return error('OUT_RENDERER_MISSING','Няма проверен генератор за съдържанието на този OUT образец.');
    const bytes=templates.getTemplate(choice);
