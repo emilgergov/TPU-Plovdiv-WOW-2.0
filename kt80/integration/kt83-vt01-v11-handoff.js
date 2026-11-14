@@ -7,7 +7,7 @@
  if(root)root.KT83V11Handoff=api;
 })(typeof window!=='undefined'?window:null,function(){'use strict';
  const clean=x=>String(x??'').trim();
- const nextAction='Предложение: проверете в локалния нормативен архив V11 относимите разпоредби, условията за приложимост и компетентността; приложете точните източници и доказателствената връзка към конкретната преписка. Ако липсват данни, подгответе конкретно искане за допълването им.';
+ const nextAction='Предложение: проверете в Нормативния архив относимите разпоредби, условията за приложимост и компетентността; приложете точните източници и доказателствената връзка към конкретната преписка. Ако липсват данни, подгответе конкретно искане за допълването им.';
  const fail=(code,reason)=>Object.freeze({ok:false,code,reason,nextAction});
  function assess(context,verifier){
   const c=context||{};
@@ -16,7 +16,7 @@
   if(!clean(c.subject)||!clean(c.scope))
    return fail('SUBJECT_SCOPE_MISSING','Липсва потвърден предмет или обхват.');
   if(typeof verifier?.evaluateCase!=='function')
-   return fail('V11_UNAVAILABLE','Няма включен независим проверяващ механизъм за локалния нормативен архив V11.');
+   return fail('V11_UNAVAILABLE','Няма включен независим проверяващ механизъм за Нормативния архив.');
   let candidate;
   try{candidate=verifier.evaluateCase(Object.freeze({
     caseId:c.caseId,generation:c.generation,evidenceRevision:c.evidenceRevision,
