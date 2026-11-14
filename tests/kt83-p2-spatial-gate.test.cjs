@@ -55,6 +55,7 @@ test('P2 integration uses approved original PDF1 and active case boundary',()=>{
  const browser=fs.readFileSync(path.join(base,'integration/kt83-p2-automatic-pdf1.js'),'utf8');
  const gis=fs.readFileSync(path.join(base,'KT82_A_FREE_GIS_V603.js'),'utf8');
  const bridge=fs.readFileSync(path.join(base,'KT82_STAGE4_V11_SOURCE_GATE_V610.js'),'utf8');
+ const pdfSource=fs.readFileSync(path.join(base,'KT82_A_PDF1_V600.js'),'utf8');
  assert.match(browser,/KT80PDF1Bridge\.makePDF\(\)/);
  assert.match(browser,/issued===check\.key/);
  assert.match(browser,/kt82:pdf1-completed/);
@@ -63,6 +64,9 @@ test('P2 integration uses approved original PDF1 and active case boundary',()=>{
  assert.match(browser,/event\.detail/);
  assert.match(gis,/kt83:gis-intersections-checked/);
  assert.match(bridge,/bytes:receipt\.bytes/);
+ assert.match(pdfSource,/evidenceRevision===\(root\.KT82EvidenceInvalidation/);
+ assert.match(pdfSource,/source:live,evidenceRevision,bytes:blob\.size/);
+ assert.match(pdfSource,/document\.addEventListener\('kt82:evidence-invalidated',reset\)/);
 });
 
 test('P2 browser integration calls approved PDF1 once per case revision',()=>{
