@@ -33,7 +33,12 @@ function fixture(){
    const trimmed=sql.replace(/\s+/g,' ').trim();
    return {
      async first(){
-       if(trimmed.includes('FROM users'))return users.get(args[0])||null;
+       if(trimmed.includes('FROM users')){
+        const u=users.get(args[0]);
+        return !u?null:trimmed.includes('AS subject')?{
+         subject:u.user_id,orgId:u.org_id,role:u.role,status:u.status
+        }:u;
+       }
        if(trimmed.includes('FROM cases WHERE case_id='))return cases.get(args[0])||null;
        if(trimmed.includes('FROM case_documents WHERE document_id=')){
         const d=docs.get(args[0]);
