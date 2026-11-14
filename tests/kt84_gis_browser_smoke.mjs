@@ -27,7 +27,23 @@ try{
    mapElement:!!document.getElementById('kt80GISMap'),
    caseInput:!!document.getElementById('kt80InputFile')};
  });
+ // Exercise the actual Stage 3 GIS drawing mechanism, not just the lookup adapter.
+ const mapResult=await page.evaluate(async()=>{
+  const input=document.getElementById('kt80ParcelInput');
+  if(!input||!window.KT80FreeGIS?.find)throw Error('Stage 3 actual map UI is not wired');
+  input.value='56784.13.102\\n36676.129.457';
+  await window.KT80FreeGIS.find();
+  const displayed=document.querySelectorAll('#kt80GISParcels path.kt80-map-parcel').length;
+  return {drawnPolygons:displayed,
+    emptyHidden:document.getElementById('kt80GISMapEmpty')?.hidden===true,
+    selected:window.KT80FreeGIS.getMap()?.selected||'',
+    actualCount:window.KT80FreeGIS.getResults()?.length||0,
+    caption:document.getElementById('kt80GISMapCaption')?.textContent||''};
+ });
+ if(mapResult.drawnPolygons<2||!mapResult.emptyHidden||mapResult.actualCount!==2)
+  throw Error('Stage 3 integrated GIS drawing did not render both real parcel polygons: '+JSON.stringify(mapResult));
  await page.screenshot({path:'test-results/kt84/gis-browser.png',fullPage:true});
+ console.log(JSON.stringify({stage:'isolated_chromium_map_render',mapResult},null,2));
  if(!result.gisReady||result.parcels.length!==2||result.parcels.some(x=>x.polygons<1))
   throw Error('No real full GIS polygon returned for known control parcels');
  if(!result.mapElement||!result.caseInput)throw Error('Integrated test page missing GIS or workflow elements');
