@@ -252,10 +252,22 @@ function init(){
  $('kt80LegalNotes').addEventListener('input',()=>invalidate(4));
  $('kt80Authority').addEventListener('change',()=>invalidate(4));
  $('kt80InputFile').addEventListener('change',()=>{
-  // Every file replacement creates a FRESH case cycle using the same full
-  // cleanup path as Clear All, but preserves the newly chosen File object.
-  resetAll({preserveSelectedFile:true});
-  document.dispatchEvent(new Event('kt80:case-change'));
+  const input=$('kt80InputFile'),selected=input?.files?.[0];
+  if(!selected)return;
+  // Selecting the FIRST file must never reset the case or leave Stage 1.
+  // A case reset requires an explicit expert action, never a file-change event.
+  if(!state.intake&&!state.fileName){
+   const name=$('kt80SelectedFileName');
+   if(name){name.textContent=selected.name;name.title=selected.name}
+   $('kt80InputStatus').textContent='Избран файл: '+selected.name+'. Натиснете „Обработи преписката“.';
+   say('Преписката е избрана. Следва обработка на входните документи.');
+   return;
+  }
+  // Do not silently replace an active or partially processed dossier.
+  input.value='';
+  const previous=$('kt80SelectedFileName');
+  if(previous){previous.textContent=state.fileName||'Няма избран файл';previous.title=state.fileName||''}
+  say('Има започната преписка. За нова преписка използвайте изрично „Изчисти работния екран“. Текущите данни не са променени.');
  });
  go(1);root.KT80WorkflowState=state;root.KT80WorkflowGo=go;root.KT80ResetCurrentCase=resetAll;
  root.KT80RebuildKT52=()=>{
