@@ -1,0 +1,24 @@
+name: KT84-03 protected expert and permanent case binding
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - kt84/expert-case-session.mjs
+      - kt84/protected-workflow-adapter.mjs
+      - kt80/KT83_WORKFLOW_CASE_V591.js
+      - kt84/private-api-worker.mjs
+      - tests/kt84-expert-case-session.test.mjs
+      - .github/workflows/kt84-protected-workflow.yml
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  session-bound-workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test expert identity, permanent case, local lifecycle, revoke and five stage gates
+        run: node --test tests/kt84-expert-case-session.test.mjs tests/kt84-access-policy.test.mjs tests/kt84-private-api.test.mjs
