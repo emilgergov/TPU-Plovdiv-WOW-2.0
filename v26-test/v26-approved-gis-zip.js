@@ -23,10 +23,14 @@ async function openArchive(file){
    throw Error('ГИС манифестът не съответства на одобрения пълен набор.');
   if(shards.length!==258||new Set(shards.map(x=>x.filename.split('/').pop())).size!==258)
    throw Error('Непълен ГИС архив: очакват се точно 258 уникални пространствени сегмента.');
-  for(const prefix of ['36','56'])for(const kind of ['parcels','parcelgeom','overlays','overlapgeom']){
-   const key=kind+'_'+prefix+'.json.gz';
-   if(!m.has(key))throw Error('Непълен ГИС архив: липсва '+key);
-  }
+  const prefixes={};
+  for(const kind of ['parcels','parcelgeom','overlays','overlapgeom'])
+   prefixes[kind]=new Set(shards.filter(x=>x.filename.split('/').pop().startsWith(kind+'_')).map(x=>x.filename.split('/').pop().split('_')[1].slice(0,2)));
+  const same=(a,b)=>a.size===b.size&&[...a].every(prefix=>b.has(prefix));
+  if(prefixes.parcels.size!==manifest.parcel_prefixes||!same(prefixes.parcels,prefixes.parcelgeom))
+   throw Error('Непълен ГИС архив: кадастралните и геометричните префикси не съвпадат.');
+  if(!same(prefixes.overlays,prefixes.overlapgeom)||[...prefixes.overlays].some(prefix=>!prefixes.parcels.has(prefix)))
+   throw Error('Непълен ГИС архив: слоевете за пресичания не съответстват на кадастралните префикси.');
  }catch(e){await next.close();throw e}
  if(reader)await reader.close();
  reader=next;entries=m;hostedRoot=null;hostedManifest=manifest;cache.clear();archiveName=file.name;
