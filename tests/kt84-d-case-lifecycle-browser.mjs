@@ -20,7 +20,9 @@ try{
  });
  await page.locator('#kt80InputFile').setInputFiles({name:'synthetic-case.zip',mimeType:'application/zip',buffer:Buffer.from('not-a-real-archive')});
  assert.equal((await page.evaluate(()=>window.KT80WorkflowState.caseCycleId)),original.id,'first file selection must not reset case ID');
- await page.locator('#kt80ProcessFile').click();
+ // This integrated acceptance page keeps the legacy intake button in a hidden
+ // panel; dispatch its existing handler without changing the production UI.
+ await page.locator('#kt80ProcessFile').evaluate(button=>button.click());
  await page.waitForFunction(()=>window.__kt84Incoming.received);
  const processing=await page.evaluate(()=>({id:window.KT80WorkflowState.caseCycleId,generation:window.KT80WorkflowState.generation}));
  assert.equal(processing.id,original.id);
