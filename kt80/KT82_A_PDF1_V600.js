@@ -193,7 +193,7 @@ async function generate(){
   if(gen!==epoch||!sameCase()||root.KT80FreeGISResults!==live)return;
   const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='TPU_Plovdiv_KT80_GIS_analiz_PDF1.pdf';
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
-  const receipt=Object.freeze({caseId:caseCycleId,generation:caseGeneration,ids:Object.freeze([...live.ids]),source:live,evidenceRevision,bytes:blob.size});
+  const receipt=Object.freeze({caseId:caseCycleId,generation:caseGeneration,ids:Object.freeze([...live.ids]),source:live,evidenceRevision:evidenceRevision,bytes:blob.size});
   document.dispatchEvent(new CustomEvent('kt82:pdf1-completed',{detail:receipt}));
   message('Готово! PDF1 е изготвен с карти, административни данни и таблици за ЗЗ и ЗТ. Проверете го като експерт.');
  }catch(e){if(gen===epoch&&sameCase())message('Не успяхме да изготвим PDF1: '+String(e?.message||e))}
