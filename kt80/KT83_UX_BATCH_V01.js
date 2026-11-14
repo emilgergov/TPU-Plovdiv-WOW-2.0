@@ -161,8 +161,8 @@ function compressGIS(){
 function normativeClarity(){
  const box=$('kt83B2CaseBridgeStage4');if(!box)return;
  const existing=$('kt83UXNormativeGap');
- const plain=(box.textContent||'').replace(/\\s+/g,' ');
- const zero=/Проверени условни хипотези[^.]{0,170}?:\\s*0(?:\\s|$)/iu.test(plain);
+ const plain=(box.textContent||'').replace(/\s+/g,' ');
+ const zero=/Проверени условни хипотези[^.]{0,170}?:\s*0(?:\s|$)/iu.test(plain);
  if(!zero){existing?.remove();return}
  if(existing)return;
  const warning=document.createElement('p');warning.id='kt83UXNormativeGap';warning.className='kt83-ux-status';
