@@ -158,6 +158,18 @@ function compressGIS(){
  const toFold=[...gis.querySelectorAll('.kt80-local-index')].filter(n=>!n.closest('details'));
  if(toFold.length){const d=document.createElement('details');d.className='kt83-tech-details';d.append(makeText('summary','Допълнителни технически справки'));toFold[0].before(d);for(const n of toFold)d.append(n)}
 }
+function foldPreliminaryLegal(){
+ const panel=document.querySelector('.kt80-stage-panel[data-panel="4"]');
+ const preliminary=$('kt83NormativePanel');
+ if(!panel||!preliminary||preliminary.closest('.kt83-legal-orientation'))return;
+ const details=document.createElement('details');
+ details.className='kt83-tech-details kt83-legal-orientation';
+ const sum=makeText('summary','Предварителна ориентация — не е правно заключение');
+ details.append(sum);
+ preliminary.before(details);details.append(preliminary);
+ const note=makeText('p','За процедурна преценка използвайте проверените нормативни основания и доказателства. Предварителният текст не удостоверява компетентност.');
+ note.className='kt83-ux-status';details.before(note);
+}
 function normativeClarity(){
  const box=$('kt83B2CaseBridgeStage4');if(!box)return;
  const existing=$('kt83UXNormativeGap');
@@ -190,7 +202,7 @@ function reinforceEvidence(){
   normativeClarity();
  }
 }
-function init(){inlineHelp();renameStatic();compressGIS();reinforceEvidence();tileStatus();
+function init(){inlineHelp();renameStatic();compressGIS();foldPreliminaryLegal();reinforceEvidence();tileStatus();
  document.addEventListener('kt80:stage-open',e=>{if(e.detail?.step>=1&&e.detail.step<=5){activeStep=Number(e.detail.step);stagePurpose(activeStep)}tileStatus()});
  document.addEventListener('kt80:case-change',tileStatus);document.addEventListener('kt80:case-reset',tileStatus);
  for(const id of ['kt80ToSubject','kt80ToParcels','kt80ToLaw','kt80ToProposal','kt80SubjectConfirmation','kt80ScopeConfirmation','kt80LawConfirmed'])$(id)?.addEventListener('click',()=>queueMicrotask(tileStatus));
