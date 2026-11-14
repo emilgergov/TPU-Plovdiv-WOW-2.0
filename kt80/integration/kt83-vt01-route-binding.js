@@ -90,8 +90,14 @@
   style.textContent=`
     .kt83-p1-route{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:13px 16px;margin:9px 0 17px;background:#eef2e8;color:#193727;border:1px solid #98ae9e;border-radius:8px;font:400 14px/1.5 "Segoe UI",Arial,sans-serif}
     .kt83-p1-route strong{font-weight:750;color:#1a4731}
-    .kt80-stage-panel[data-panel="4"] #kt83NormativePanel + details,
-    .kt80-stage-panel[data-panel="5"] #kt80ProcedureSelect {display:none!important}
+    /* One public expert route. Keep research modules installed but invisible
+       unless a later authenticated engineering mode explicitly exposes them. */
+    #kt83PNIV3Exploration,#kt83PNIV3Stage5Notice,
+    .kt80-stage-panel[data-panel="5"] #kt80ProcedureSelect,
+    .kt80-stage-panel[data-panel="5"] #kt80ActivateRoute,
+    .kt80-stage-panel[data-panel="5"] #kt80RoutePanels,
+    .kt80-stage-panel[data-panel="5"] #kt80OpenConditions,
+    .kt80-stage-panel[data-panel="5"] #kt80RouteConfirmation {display:none!important}
     .kt80-stage-panel[data-panel="4"] .kt83-normative-panel details:not([open]){margin-top:5px}
     .kt80-stage-panel[data-panel="4"] .kt83-normative-panel details > summary{font-size:13px}
     .kt80-stage-panel[data-panel="4"] .kt83-normative-panel{font-family:"Segoe UI",Arial,sans-serif}
