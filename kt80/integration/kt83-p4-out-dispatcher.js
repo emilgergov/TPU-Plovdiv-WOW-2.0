@@ -41,13 +41,16 @@
     return error('OUT_RENDERER_MISSING','Няма проверен генератор за съдържанието на този OUT образец.');
    const bytes=templates.getTemplate(choice);
    if(!bytes)return error('TEMPLATE_STALE','Образецът е изменен или не е наличен.');
+   const legalStamp=JSON.stringify(law);
    let rendered;
    try{
     rendered=await renderer({templateBytes:bytes,template:choice.template,
       caseRecord:Object.freeze({...caseNow}),documentData,lawReceipt:law});
    }catch(_){return error('OUT_RENDER_FAILED','Неуспешно генериране по утвърдения образец.');}
+   const latestLaw=legalReceipt();
    if(serial!==generation||!same(currentCase(),caseNow)||
-      legalReceipt()!==law||templates.getTemplate(choice)===null)
+      latestLaw?.verified!==true||JSON.stringify(latestLaw)!==legalStamp||
+      templates.getTemplate(choice)===null)
     return error('OUT_STALE','Преписката, нормативната преценка или образецът се промениха.');
    if(!(rendered?.bytes instanceof Uint8Array)||!rendered.bytes.length||
       rendered.formalIssuanceAllowed!==false||rendered.signed!==false)
