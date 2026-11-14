@@ -10,6 +10,16 @@
   note.setAttribute('aria-live','polite');
   note.style.cssText='display:block;flex-basis:100%;font:400 13px/1.45 "Segoe UI",Arial,sans-serif;color:#284d38';
   existing.append(note);
+  // The earlier heuristic Stage 5 adviser is retained in code for
+  // regression, but hidden from the single professional expert view:
+  // it does not constitute an independently verified V11 decision.
+  if(!$('kt83P5SingleRouteStyle')){
+   const style=root.document.createElement('style');
+   style.id='kt83P5SingleRouteStyle';
+   style.textContent='#kt82RouteAdvicePanel{display:none!important}'+
+     '#kt83P5NextAction{max-width:100%;white-space:normal}';
+   root.document.head.append(style);
+  }
   let last='';
   function refresh(){
    const state=root.KT80WorkflowState||{};
