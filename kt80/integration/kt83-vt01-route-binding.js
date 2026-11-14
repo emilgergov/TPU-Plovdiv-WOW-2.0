@@ -119,8 +119,40 @@
       ['normative_v11','motivated_proposal','out_draft'].includes(route.snapshot().phase)
       &&state.lawConfirmed?.expertConfirmed===true&&verified.ok===true;
   }
+  function commitVerifiedExpertReview(){
+    const before=route.snapshot(),verified=currentV11(),now=receipt();
+    if(!before.valid||!['normative_v11','motivated_proposal','out_draft'].includes(before.phase)||
+       verified.ok!==true||verified.caseId!==now.caseId||
+       verified.generation!==now.generation||verified.evidenceRevision!==now.evidenceRevision){
+      const why=verified.reason||'Правната преценка не е актуално удостоверена от MASTER V11.';
+      render(why+' '+(verified.nextAction||'Предложение: проверете приложимите нормативни основания.'));
+      return {ok:false,reason:why};
+    }
+    const state=root.KT80WorkflowState||{};
+    if(!isConfirmed()||state.step!==4){
+      return {ok:false,reason:'Потвърдете предмета и обхвата и завършете преценката в Етап 4.'};
+    }
+    // One expert action, not a second manual transcription of legal grounds.
+    // In all cases the V11 source is verified again before stage 5 can open.
+    state.lawConfirmed={expertConfirmed:true,archiveVersion:'V11',
+      legal:verified.reasonedAssessment,authority:'VERIFIED_CASE_COMPETENCE',
+      caseId:now.caseId,generation:now.generation,evidenceRevision:now.evidenceRevision};
+    if(before.phase==='normative_v11'){
+      const moved=route.advance('motivated_proposal',{...now,verified:true,
+        reasonedAssessment:verified.reasonedAssessment});
+      if(!moved.ok){state.lawConfirmed=null;render(moved.reason);return moved}
+    }
+    root.KT80WorkflowGo?.(5);
+    if(state.step!==5){
+      state.lawConfirmed=null;
+      return {ok:false,reason:'Етап 5 не беше отворен. Повторете проверката на текущата преписка.'};
+    }
+    render('Нормативният MASTER V11 е удостоверен за текущата преписка. Следва мотивиран OUT проект.');
+    return {ok:true,caseId:now.caseId,evidenceRevision:now.evidenceRevision};
+  }
   root.KT83RouteAccess=Object.freeze({
     canOpenStage:step=>Number(step)!==5||canEnterStageFive(),
+    commitVerifiedExpertReview,
     denied:()=>{const v=currentV11();fail((v.reason||'Непотвърдена нормативна приложимост.')+' '+(v.nextAction||''));}
   });
   // Guard the legacy click BEFORE it advances to stage 5.
