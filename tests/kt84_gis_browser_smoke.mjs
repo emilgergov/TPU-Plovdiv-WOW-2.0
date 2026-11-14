@@ -13,6 +13,16 @@ try{
  const url=origin+'/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html';
  const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:90000});
  if(response?.status()!==200)throw Error('Preview HTML status: '+response?.status());
+ const scopeCheck=await page.evaluate(()=>({
+  diagnostic:window.KT80V568QA?.loaded===true,
+  missing:window.KT80V568QA?.missing||[],
+  evidence:!!document.getElementById('kt80V565Evidence'),
+  proposal:!!document.getElementById('kt80V565OneProposal'),
+  snapshot:typeof window.KT80ScopeEvidence?.snapshot==='function'
+ }));
+ if(!scopeCheck.diagnostic||!scopeCheck.evidence||!scopeCheck.proposal||!scopeCheck.snapshot)
+  throw Error('Stage 2 subject/scope integration is incomplete after DOM initialization: '+JSON.stringify(scopeCheck));
+ console.log('KT84_B_SCOPE_UI',JSON.stringify(scopeCheck));
  const result=await page.evaluate(async()=>{
   const timeout=ms=>new Promise((_,reject)=>setTimeout(()=>reject(Error('GIS browser load timeout')),ms));
   if(!window.KT80FullGISSource?.load||!window.V26BrowserGIS?.lookup)
