@@ -259,3 +259,21 @@ test('KT84-04: audit records successful sharing and revocation without dossier t
  assert.ok(x.audits.some(a=>a.action==='case.share.revoke'&&a.result==='allowed'));
  assert.ok(x.audits.every(a=>!JSON.stringify(a).includes('Лична преписка')));
 });
+
+test('KT84-04: expired grant is ignored on both list and direct dossier access',async()=>{
+ const x=fixture();
+ x.grants.set(UUID.d,{grantId:UUID.d,caseId:UUID.a,
+  orgId:'riosv-plovdiv',granteeId:'expert-b',grantedBy:'expert-a',
+  actions:['case.read'],expiresAt:time()-10,status:'active'});
+ assert.deepEqual((await x.call('expert-b','GET','/v1/cases')).data.cases.map(c=>c.id),[UUID.b]);
+ assert.equal((await x.call('expert-b','GET','/v1/cases/'+UUID.a)).status,404);
+});
+
+test('KT84-04: a grant including a prohibited action does not expose dossier metadata',async()=>{
+ const x=fixture();
+ x.grants.set(UUID.d,{grantId:UUID.d,caseId:UUID.a,
+  orgId:'riosv-plovdiv',granteeId:'expert-b',grantedBy:'expert-a',
+  actions:['case.read','case.share'],expiresAt:time()+3600,status:'active'});
+ assert.deepEqual((await x.call('expert-b','GET','/v1/cases')).data.cases.map(c=>c.id),[UUID.b]);
+ assert.equal((await x.call('expert-b','GET','/v1/cases/'+UUID.a)).status,404);
+});
