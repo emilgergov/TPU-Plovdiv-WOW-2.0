@@ -33,6 +33,10 @@ test('P2 checks all intersections, PI MASTER records and 32 boundaries',()=>{
  x=fixture();x.zones.pop();
  assert.equal(check(x).code,'ZONE_BOUNDARIES_INCOMPLETE');
 });
+test('P2 rejects uncertain identifiers rather than silently dropping them',()=>{
+ const x=fixture();x.uncertainIds=['неуточнен имот'];
+ assert.equal(check(x).code,'IDS_UNCERTAIN');
+});
 test('P2 rejects mismatches and stale PDF1 receipts',()=>{
  const x=fixture(),receipt={caseId:x.caseId,generation:x.generation,
  evidenceRevision:x.evidenceRevision,source:x.live,ids:[...x.ids],bytes:100};
