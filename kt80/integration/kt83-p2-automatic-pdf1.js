@@ -8,7 +8,7 @@
    const w=root.KT80WorkflowState||{},parsed=root.V26ParcelEditor?.normalize?.($('kt80ParcelInput')?.value||'');
    return {caseId:w.caseCycleId||'',generation:w.generation,
     evidenceRevision:root.KT82EvidenceInvalidation?.getRevision?.()??null,
-    gisDecision:w.normativeGate?.decision,ids:parsed?.ids||[],live:root.KT80FreeGISResults,
+    gisDecision:w.normativeGate?.decision,ids:parsed?.ids||[],invalidIds:parsed?.invalid||[],uncertainIds:parsed?.uncertain||[],live:root.KT80FreeGISResults,
     pi:root.KT80PIMaster?.getResult?.(),zones:root.KT80FreeGIS?.getMap?.()?.zones||[]};
   };
   const status=message=>{
