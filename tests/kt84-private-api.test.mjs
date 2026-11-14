@@ -49,3 +49,30 @@ test('KT84 privacy: protected API does not trust JSON userId or open any public 
  assert.match(src,/version=version\+1/);
  assert.doesNotMatch(src,/Access-Control-Allow-Origin|\.workers\.dev|r2\.dev/);
 });
+
+test('KT84 refuses foreign dossier document reads before touching the private bucket',async()=>{
+ let r2Reads=0;
+ const id='11111111-1111-4111-8111-111111111111';
+ const db={prepare(sql){return {bind(){return {
+  async first(){
+   if(sql.includes('FROM users'))return {user_id:'expert-a',org_id:'office-one',role:'expert',status:'active'};
+   if(sql.includes('FROM cases'))return {id,orgId:'office-other',ownerId:'expert-b',status:'active',version:1,subject:'Private'};
+   return null;
+  },
+  async all(){return {results:[]}}
+ }}}}};
+ const env={PRIVATE_DB:db,PRIVATE_FILES:{get:async()=>{r2Reads++;return null}}};
+ const ctx={access:{getIdentity:async()=>({id:'expert-a'})}};
+ const r=await worker.fetch(request('https://private.example/v1/cases/'+id+'/documents'),env,ctx);
+ assert.equal(r.status,404);assert.equal(r2Reads,0);
+});
+test('KT84 rejects forged cross-origin document upload before any private data mutation',async()=>{
+ let writes=0;
+ const env={PRIVATE_DB:{prepare(){writes++;throw Error('should not hit db')}},PRIVATE_FILES:{put(){writes++;}}};
+ const ctx={access:{getIdentity:async()=>({id:'expert-a'})}};
+ const r=await worker.fetch(new Request(
+ 'https://private.example/v1/cases/11111111-1111-4111-8111-111111111111/documents',
+ {method:'POST',headers:{origin:'https://public.example', 'content-type':'application/pdf'},
+  body:'fake'}),env,ctx);
+ assert.equal(r.status,403);assert.equal(writes,0);
+});
