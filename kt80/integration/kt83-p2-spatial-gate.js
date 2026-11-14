@@ -12,6 +12,7 @@
   if(!caseId||!Number.isInteger(x.generation)||!Number.isInteger(x.evidenceRevision))
    return {ok:false,code:'CASE_MISSING',message:'Не е установена идентичността и ревизията на преписката.'};
   if(x.gisDecision!=='REQUIRED')return {ok:false,code:'GIS_NOT_REQUIRED',message:'Не се създава PDF1 при експертно приета неприложимост на ГИС.'};
+  if(x.invalidIds?.length||x.uncertainIds?.length)return {ok:false,code:'IDS_UNCERTAIN',message:'Има невалидни или непотвърдени кадастрални идентификатори.'};
   if(!Array.isArray(ids)||!ids.length||ids.length>100||ids.some(id=>!trim(id))||new Set(ids).size!==ids.length)
    return {ok:false,code:'IDS_INVALID',message:'Не са установени надеждни кадастрални идентификатори.'};
   if(!Array.isArray(live.ids)||!Array.isArray(live.results)||live.ids.length!==ids.length||live.results.length!==ids.length||
