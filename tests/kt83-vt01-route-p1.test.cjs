@@ -9,7 +9,8 @@ test('requires subject and scope approvals and rejects skipped phases',()=>{
  assert.equal(c.start({subject:true,scope:true}).ok,true);
  assert.equal(c.advance('normative_v11',{...live,verified:true}).ok,false);
  assert.equal(c.advance('evidence',{...live,verified:false}).ok,false);
- assert.equal(c.advance('evidence',{...live,verified:true}).ok,true);
+ assert.equal(c.advance('evidence',{...live,verified:true}).ok,false);
+ assert.equal(c.advance('evidence',{...live,verified:true,pdf1Verified:true,geometryVerified:true}).ok,true);
 });
 test('rejects cross-case evidence and invalidates on revision change',()=>{
  let live={caseId:'case-a',generation:2,evidenceRevision:3};
@@ -25,7 +26,7 @@ test('advances sequentially only with matching receipts and motivated V11 evalua
  const c=coordinator({current:()=>live});
  assert.equal(c.start({subject:true,scope:true}).ok,true);
  // subject_scope -> gis_pdf1 happens on start. Next comes evidence.
- assert.equal(c.advance('evidence',{...live,verified:true}).ok,true);
+ assert.equal(c.advance('evidence',{...live,verified:true,pdf1Verified:true,geometryVerified:true}).ok,true);
  assert.equal(c.advance('normative_v11',{...live,verified:true}).ok,true);
  assert.equal(c.advance('motivated_proposal',{...live,verified:true}).ok,false);
  assert.equal(c.advance('motivated_proposal',{...live,verified:true,reasonedAssessment:'Доказателствена оценка'}).ok,true);
@@ -47,6 +48,8 @@ test('isolated UI binds to original workflow and requires a current PDF1 proof',
  assert.match(binding,/pdf\.caseId===r\.caseId/);
  assert.match(binding,/pdf\.evidenceRevision===r\.evidenceRevision/);
  assert.match(binding,/pdf\.source===g/);
+ assert.match(binding,/pdf1Verified:true,geometryVerified:true/);
+ assert.match(binding,/gisNotRequired:true,expertConfirmed:true,reason:gate\.reason/);
  assert.match(binding,/kt82:pdf1-completed/);
  assert.match(binding,/kt82:evidence-invalidated/);
  assert.match(binding,/KT83V11ValidatedAssessment/);
@@ -55,4 +58,15 @@ test('isolated UI binds to original workflow and requires a current PDF1 proof',
  assert.match(html,/integration\/kt83-vt01-automatic-route-p1\.js/);
  assert.match(html,/integration\/kt83-vt01-route-binding\.js/);
  assert.doesNotMatch(html,/<script[^>]*src=["']https:\/\/[^"']*kt83-vt01-route-binding/);
+});
+
+test('GIS exemption requires explicit expert confirmation and reasons',()=>{
+ const live={caseId:'no-gis-case',generation:4,evidenceRevision:3};
+ const c=coordinator({current:()=>live});
+ assert.equal(c.start({subject:true,scope:true}).ok,true);
+ assert.equal(c.advance('evidence',{...live,verified:true,gisNotRequired:true,expertConfirmed:true}).ok,false);
+ assert.equal(c.advance('evidence',{...live,verified:true,gisNotRequired:true,reason:'Неотносимо'}).ok,false);
+ assert.equal(c.advance('evidence',{...live,verified:true,gisNotRequired:true,expertConfirmed:true,reason:'Не се разглежда пространствен въпрос по преписката.'}).ok,true);
+ assert.equal(c.advance('normative_v11',{...live,verified:true}).ok,true);
+ assert.equal(c.advance('motivated_proposal',{...live,verified:true}).ok,false);
 });
