@@ -1,0 +1,26 @@
+name: KT83 P2 proof-bound spatial integration
+on:
+  push:
+    branches:
+      - kt83-vt01-automatic-route-p1
+    paths:
+      - kt80/integration/kt83-p2-spatial-gate.js
+      - kt80/integration/kt83-p2-automatic-pdf1.js
+      - kt80/KT82_A_FREE_GIS_V603.js
+      - kt80/KT82_STAGE4_V11_SOURCE_GATE_V610.js
+      - tests/kt83-p2-spatial-gate.test.cjs
+      - .github/workflows/kt83-p2-spatial-gate.yml
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  p2-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run case-bound spatial evidence regressions
+        run: node --test tests/kt83-p2-spatial-gate.test.cjs
