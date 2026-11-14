@@ -50,7 +50,7 @@ function routes(){
 function intakeResults(data){
  state.intake=data;invalidate(2);
  const docs=data.files||[],subjects=data.subject_candidates||[],ids=data.classification?.leading_candidates||[];
- $('kt80InputStatus').textContent='Прочетени файлове: '+docs.length+'; кандидати за предмет: '+subjects.length+'; кандидати за водещи имоти: '+ids.length+'.\nИзвличането е предварително и изисква преглед.';
+ $('kt80InputStatus').textContent='Инвентаризирани файлове: '+docs.length+'; кандидати за предмет: '+subjects.length+'; кандидати за водещи имоти: '+ids.length+'.\nИзвличането е предварително и изисква преглед.';
  const title=subjects.map(x=>typeof x==='string'?x:x?.title||x?.heading||'').find(x=>typeof x==='string'&&x.trim());
  if(title&&!$('kt80SubjectText').value.trim()){$('kt80SubjectText').value=title;$('kt80SubjectHint').textContent='Кандидат от прочетеното (непотвърден); редактирайте и потвърдете.'}
  if(ids.length&&!$('kt80ParcelInput').value.trim()){$('kt80ParcelInput').value=ids.join('; ');$('kt80ParcelNormalize').click()}
@@ -80,6 +80,14 @@ async function process(){
    const audit=root.KT80DossierCompleteness.audit(result);
    root.KT80DossierCompleteness.render(audit);
    root.KT80DossierAudit=audit;
+   const confirmed=audit.records.filter(r=>r.state==='TEXT_EXTRACTED').length;
+   const review=audit.records.filter(r=>r.state==='REVIEW_REQUIRED').length;
+   const unread=audit.records.filter(r=>r.state==='NOT_READ'||r.state==='UNSUPPORTED').length;
+   $('kt80InputStatus').textContent='Инвентаризирани файлове: '+audit.filesEnumerated+
+    ' · извлечен текст: '+confirmed+' · за проверка: '+review+' · непрочетени: '+unread+
+    '. Кандидати за предмет: '+(result.subject_candidates||[]).length+
+    '; кандидати за водещи имоти: '+(result.classification?.leading_candidates||[]).length+
+    '. Извличането не удостоверява фактическа вярност.';
   }
   root.KT80CH2Evidence?.reset?.();root.KT80ParameterQA?.reset?.();
   if(root.KT80IPMaster){
