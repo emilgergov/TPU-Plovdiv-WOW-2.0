@@ -72,10 +72,15 @@ export function createCaseSession({transport,local,abortPending}={}){
  }
  async function attach(id){
   if(!expert||!uuid.test(id))return fail('SESSION_OR_CASE_INVALID');
+  // A local dossier cycle is bound to ONE permanent case ID. Attaching
+  // another server case without an explicit local reset could mix evidence.
+  if(active()&&caseInfo.id!==id)return fail('NEW_LOCAL_CYCLE_REQUIRED');
   const localAtStart=current();
   if(!validSnapshot(localAtStart))return fail('INVALID_LOCAL_CYCLE');
   const ticket=++serial;
   caseInfo=null;cycle=null;
+  // Any work for a prior binding must be canceled before reattachment.
+  if(typeof abortPending==='function')abortPending();
   const r=await transport({path:'/v1/cases/'+id});
   if(ticket!==serial||!same(localAtStart,current()))return fail('LOCAL_CYCLE_CHANGED');
   const c=r.data?.case;
@@ -89,6 +94,9 @@ export function createCaseSession({transport,local,abortPending}={}){
  }
  async function create(subject){
   if(expert?.role!=='expert'||!clean(subject))return fail('EXPERT_OR_SUBJECT_REQUIRED');
+  // Do not create an orphan server case while a different case is still
+  // assigned to this same local dossier. Start an explicit new cycle first.
+  if(active())return fail('NEW_LOCAL_CYCLE_REQUIRED');
   const start=current();
   if(!validSnapshot(start))return fail('INVALID_LOCAL_CYCLE');
   const ticket=serial;
