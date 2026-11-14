@@ -1,0 +1,21 @@
+name: KT84 protected multi-expert access policy
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - kt84/access-policy.mjs
+      - tests/kt84-access-policy.test.mjs
+      - .github/workflows/kt84-access-policy.yml
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  personal-case-access:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify personal dossiers, delegation, cross-organisation isolation and version conflicts
+        run: node --test tests/kt84-access-policy.test.mjs
