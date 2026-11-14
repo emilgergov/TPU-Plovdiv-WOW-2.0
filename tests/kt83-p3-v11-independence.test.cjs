@@ -10,7 +10,7 @@ function fixture(){
   fingerprint:'source-fingerprint-from-trusted-archive',officialSourceVerified:true,
   currentValidityChecked:true,articles:['чл. 10, ал. 1']};
  const archive={version:'V11',getDocument:()=>doc,verifyDocument:()=>true};
- const review={getCaseReview:()=>({...context,expertConfirmed:true,
+ const review={verifyCaseReview:()=>true,getCaseReview:()=>({...context,expertConfirmed:true,
   applicabilityVerified:true,competenceVerified:true,legalQuestionReviewed:true,
   reasonedAssessment:'Оценка на установените факти и проверените основания',
   proposedAction:'Мотивирано искане за допълнителна информация',
@@ -37,13 +37,13 @@ test('P3 rejects changed case, revision, unreviewed competence or legal question
  const x=fixture(),r=x.review.getCaseReview();
  for(const changed of [{caseId:'OTHER'}, {evidenceRevision:9}, {competenceVerified:false},
   {legalQuestionReviewed:false}, {expertConfirmed:false}]){
-  const review={getCaseReview:()=>({...r,...changed})};
+  const review={verifyCaseReview:()=>true,getCaseReview:()=>({...r,...changed})};
   assert.equal(create({archive:x.archive,review}).evaluateCase(x.context),null);
  }
 });
 test('P3 never infers applicability from GIS or blank archival overlap',()=>{
  const x=fixture();
- const review={getCaseReview:()=>null};
+ const review={verifyCaseReview:()=>true,getCaseReview:()=>null};
  assert.equal(create({archive:x.archive,review}).evaluateCase({...x.context,
   spatialScenario:'B_INTERSECTS',evidence:{archiveOverlap:true}}),null);
 });
@@ -69,7 +69,7 @@ test('P3 rejects incomplete articles, fabricated source references or duplicate 
   [{...r.provisions[0],sourceFingerprint:'fake'}],
   [r.provisions[0],r.provisions[0]],
   []]){
-  assert.equal(create({archive:x.archive,review:{getCaseReview:()=>({...r,provisions})}})
+  assert.equal(create({archive:x.archive,review:{verifyCaseReview:()=>true,getCaseReview:()=>({...r,provisions})}})
    .evaluateCase(x.context),null);
  }
 });
@@ -80,4 +80,25 @@ test('P3 uses no fixed parcel, route, V11 statute or GIS-based procedure heurist
  assert.doesNotMatch(code,/routeId\s*=|procedureId\s*=/);
  assert.match(code,/archive\.verifyDocument\(doc\)/);
  assert.match(code,/review\.getCaseReview\(c\)/);
+});
+
+test('P3 requires independently authenticated case review, not a copied checkbox',()=>{
+ const x=fixture(),r=x.review.getCaseReview();
+ for(const review of [
+  {getCaseReview:()=>r},
+  {getCaseReview:()=>r,verifyCaseReview:()=>false},
+  {getCaseReview:()=>r,verifyCaseReview:()=>{throw Error('no valid expert attestation')}},
+  {getCaseReview:()=>({...r,subject:'Изменен предмет'}),verifyCaseReview:()=>true},
+  {getCaseReview:()=>({...r,scope:'Изменен обхват'}),verifyCaseReview:()=>true},
+ ]){
+   assert.equal(create({archive:x.archive,review}).evaluateCase(x.context),null);
+ }
+});
+test('P3 loses provenance when the expert legal assessment is revised',()=>{
+ const x=fixture(),v=create(x);
+ const candidate=v.evaluateCase(x.context);
+ assert.equal(v.verifyProvenance(candidate,x.context),true);
+ x.review.getCaseReview=()=>({...fixture().review.getCaseReview(),
+   reasonedAssessment:'Променен, непотвърден правен анализ'});
+ assert.equal(v.verifyProvenance(candidate,x.context),false);
 });
