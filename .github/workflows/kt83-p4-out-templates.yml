@@ -5,6 +5,9 @@ on:
     paths:
       - kt80/integration/kt83-p4-out-template-contract.js
       - kt80/integration/kt83-p4-out-dispatcher.js
+      - kt80/integration/kt83-p4-out-runtime.js
+      - kt80/integration/kt83-v617-universal-out-preview.mjs
+      - kt80/KT83_VT01_P1_AUTOMATIC_ROUTE_TEST.html
       - tests/kt83-p4-out-template-contract.test.cjs
       - tests/kt83-p4-out-dispatcher.test.cjs
       - .github/workflows/kt83-p4-out-templates.yml
