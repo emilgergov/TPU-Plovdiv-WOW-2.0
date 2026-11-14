@@ -40,7 +40,7 @@
     if(gate.decision==='NOT_REQUIRED'){
       // These receipts certify an expert relevance decision, NOT a GIS result.
       const spatial=route.advance('evidence',{...receipt(),verified:true,
-        gisNotRequired:true,expertConfirmed:true});
+        gisNotRequired:true,expertConfirmed:true,reason:gate.reason});
       if(!spatial.ok)return render(spatial.reason);
       const handoff=route.advance('normative_v11',{...receipt(),verified:true});
       return render(handoff.ok?
@@ -81,7 +81,7 @@
       render('Геометрията е налична. Изисква се PDF1 за същата преписка и доказателствена ревизия.');
       return;
     }
-    const passed=route.advance('evidence',{...r,verified:true});
+    const passed=route.advance('evidence',{...r,verified:true,pdf1Verified:true,geometryVerified:true});
     render(passed.ok?'ГИС и PDF1 са удостоверени. Следва независим преглед на доказателствата.':passed.reason);
   }
   document.addEventListener('kt80:parcel-selected',checkedGIS);
@@ -128,10 +128,7 @@
     route.reset();
     // Reconcile confirmed subject/scope against the new evidence revision.
     // No legal finding or GIS receipt is carried across revisions.
-    if(isConfirmed()){
-      const restarted=route.start({subject:true,scope:true});
-      render(restarted.ok?'Доказателствата са изменени. Повторете пространствената проверка; правният извод е невалиден.':restarted.reason);
-    } else invalidate();
+    render('Доказателствата са изменени. Предишните проверки са невалидни; следва повторна проверка по актуалния маршрут.');
   });
   // Diagnostics are retained in the DOM, but hidden in normal professional view.
   const style=document.createElement('style');
