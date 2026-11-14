@@ -28,6 +28,8 @@ test('P2 never misstates archive overlap or GIS exemption as geometry',()=>{
 test('P2 checks all intersections, PI MASTER records and 32 boundaries',()=>{
  let x=fixture();delete x.live.results[1].intersection_verified_outside;
  assert.equal(check(x).code,'INTERSECTIONS_UNVERIFIED');
+ x=fixture();x.live.results[1].intersection_verified_outside=false;
+ assert.equal(check(x).code,'INTERSECTIONS_UNVERIFIED');
  x=fixture();x.pi.items[1].status='MISSING';
  assert.equal(check(x).code,'PI_MASTER_INCOMPLETE');
  x=fixture();x.zones.pop();
