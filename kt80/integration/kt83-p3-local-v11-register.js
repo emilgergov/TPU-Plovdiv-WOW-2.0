@@ -37,8 +37,14 @@
    try{approved=await reviewOfficialSource(draft,new Uint8Array(data));}
    catch(_){return {ok:false,code:'OFFICIAL_REVIEW_FAILED'};}
    if(approved!==true)return {ok:false,code:'OFFICIAL_REVIEW_MISSING'};
-   // Pin the approved bytes and metadata in a private in-memory closure.
+   // An attestation is not itself provenance. Require independent recheck
+   // before registering and again each time the source is used.
    const record=Object.freeze({...draft,officialSourceVerified:true,currentValidityChecked:true});
+   let provenance=false;
+   try{provenance=verifyOfficialSource(record,new Uint8Array(data))===true;}
+   catch(_){provenance=false;}
+   if(!provenance)return {ok:false,code:'SOURCE_PROVENANCE_UNVERIFIED'};
+   if(docs.has(record.id))return {ok:false,code:'DUPLICATE_DOCUMENT_ID'};
    docs.set(record.id,{record,bytes:data});
    return Object.freeze({ok:true,code:'IMPORTED',id:record.id,fingerprint});
   }
