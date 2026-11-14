@@ -149,6 +149,9 @@
     });
   });
   const invalidate=()=>{route.reset();render('Данните са променени. Предходните резултати не се пренасят към новата преписка.')};
+  // Changes to the legal question invalidate the route even if no parcel changes.
+  $('kt80SubjectText')?.addEventListener('input',invalidate);
+  $('kt80ScopeText')?.addEventListener('input',invalidate);
   document.addEventListener('kt80:case-reset',invalidate);
   document.addEventListener('kt80:case-change',invalidate);
   document.addEventListener('kt82:evidence-invalidated',()=>{
