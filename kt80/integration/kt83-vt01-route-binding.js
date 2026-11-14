@@ -107,7 +107,7 @@
       evidence:d
     },root.KT83NormativeArchiveV11)||{
       ok:false,code:'V11_UNAVAILABLE',
-      nextAction:'Предложение: проверете правните основания, приложимостта и компетентността в локалния архив V11.'
+      nextAction:'Предложение: проверете правните основания, приложимостта и компетентността в Нормативния архив.'
     };
   }
   function canEnterStageFive(){
@@ -124,7 +124,7 @@
     if(!before.valid||!['normative_v11','motivated_proposal','out_draft'].includes(before.phase)||
        verified.ok!==true||verified.caseId!==now.caseId||
        verified.generation!==now.generation||verified.evidenceRevision!==now.evidenceRevision){
-      const why=verified.reason||'Правната преценка не е актуално удостоверена от MASTER V11.';
+      const why=verified.reason||'Правната преценка не е актуално удостоверена от Нормативния архив.';
       render(why+' '+(verified.nextAction||'Предложение: проверете приложимите нормативни основания.'));
       return {ok:false,reason:why};
     }
@@ -147,7 +147,7 @@
       state.lawConfirmed=null;
       return {ok:false,reason:'Етап 5 не беше отворен. Повторете проверката на текущата преписка.'};
     }
-    render('Нормативният MASTER V11 е удостоверен за текущата преписка. Следва мотивиран OUT проект.');
+    render('Нормативният Нормативния архив е удостоверен за текущата преписка. Следва мотивиран проект на документ.');
     return {ok:true,caseId:now.caseId,evidenceRevision:now.evidenceRevision};
   }
   root.KT83RouteAccess=Object.freeze({
