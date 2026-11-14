@@ -14,7 +14,7 @@ on:
       - kt80/integration/kt83-vt01-route-binding.js
       - kt80/KT83_VT01_P1_AUTOMATIC_ROUTE_TEST.html
       - tests/kt83-p5-single-route.test.cjs
-      - tests/kt83-p5-expert-v11-review.test.mjs tests/kt83-p5-competence-audit.test.mjs
+      - tests/kt83-p5-expert-v11-review.test.mjs
       - tests/kt83-p5-competence-audit.test.mjs
       - .github/workflows/kt83-p5-single-route.yml
   pull_request:
@@ -29,4 +29,4 @@ jobs:
         with:
           node-version: '22'
       - name: Verify case identity, conditional GIS/PDF1, V11 and no stage5 loop
-        run: node --test tests/kt83-p5-single-route.test.cjs tests/kt83-p5-expert-v11-review.test.mjs
+        run: node --test tests/kt83-p5-single-route.test.cjs tests/kt83-p5-expert-v11-review.test.mjs tests/kt83-p5-competence-audit.test.mjs
