@@ -7,6 +7,7 @@ on:
       - kt80/integration/kt83-p3-independent-v11.js
       - kt80/integration/kt83-p3-v11-connector.js
       - kt80/integration/kt83-p3-local-v11-register.js
+      - kt80/integration/kt83-p3-v11-session.js
       - kt80/integration/kt83-vt01-v11-handoff.js
       - tests/kt83-p3-v11-independence.test.cjs
       - tests/kt83-p3-local-v11-register.test.cjs
