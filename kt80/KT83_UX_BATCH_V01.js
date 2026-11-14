@@ -30,6 +30,9 @@ css.textContent=`
 .kt80-v56-stage .kt80-v56-fields{gap:10px!important}
 .kt80-v56-stage .kt80-v56-field{min-width:0!important}
 @media(max-width:760px){.kt80-v56-stage .kt80-subject-controls{grid-template-columns:1fr!important}}
+#kt80ScopeProposalStatus{order:3!important;display:block!important;line-height:1.45!important;font:600 13px/1.45 "Segoe UI",Arial,sans-serif!important;padding:8px 11px!important;border-left:3px solid #bdad7e;background:#284a3b;border-radius:5px;color:#f0eddf;margin:5px 0 9px!important}
+#kt80ScopeProposalStatus[data-kt80-error="true"]{border-left-color:#e6a58a!important;background:#572f2d!important;color:#fff3eb!important}
+#kt80V565OneProposal{order:4!important}
 .kt80-stage-panel h2,.kt80-stage-panel h3{font-family:"Segoe UI",Arial,sans-serif!important}
 .kt80-stage-panel{font-family:"Segoe UI",Arial,sans-serif!important;min-width:0}
 .kt80-stage-panel p{margin:5px 0 8px!important;line-height:1.4!important}
@@ -161,6 +164,15 @@ function compressGIS(){
  const toFold=[...gis.querySelectorAll('.kt80-local-index')].filter(n=>!n.closest('details'));
  if(toFold.length){const d=document.createElement('details');d.className='kt83-tech-details';d.append(makeText('summary','Допълнителни технически справки'));toFold[0].before(d);for(const n of toFold)d.append(n)}
 }
+function placeScopeFeedback(){
+ const controls=$('kt80ImproveScope')?.parentElement,status=$('kt80ScopeProposalStatus');
+ if(!controls||!status)return;
+ // The outcome belongs immediately beside the operation, not after the
+ // long evidence/approval area. We move the existing node, not clone it.
+ controls.insertAdjacentElement('afterend',status);
+ status.setAttribute('role','status');
+ status.setAttribute('aria-live','polite');
+}
 function foldPreliminaryLegal(){
  const panel=document.querySelector('.kt80-stage-panel[data-panel="4"]');
  const preliminary=$('kt83NormativePanel');
@@ -205,7 +217,7 @@ function reinforceEvidence(){
   normativeClarity();
  }
 }
-function init(){inlineHelp();renameStatic();compressGIS();foldPreliminaryLegal();reinforceEvidence();tileStatus();
+function init(){inlineHelp();renameStatic();compressGIS();foldPreliminaryLegal();placeScopeFeedback();reinforceEvidence();tileStatus();
  document.addEventListener('kt80:stage-open',e=>{if(e.detail?.step>=1&&e.detail.step<=5){activeStep=Number(e.detail.step);stagePurpose(activeStep)}tileStatus()});
  document.addEventListener('kt80:case-change',tileStatus);document.addEventListener('kt80:case-reset',tileStatus);
  for(const id of ['kt80ToSubject','kt80ToParcels','kt80ToLaw','kt80ToProposal','kt80SubjectConfirmation','kt80ScopeConfirmation','kt80LawConfirmed'])$(id)?.addEventListener('click',()=>queueMicrotask(tileStatus));
