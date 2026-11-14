@@ -7,6 +7,7 @@ on:
       - kt80/integration/kt83-vt01-automatic-route-p1.js
       - tests/kt83-vt01-route-p1.test.cjs
       - kt80/integration/kt83-vt01-route-binding.js
+      - kt80/integration/kt83-vt01-v11-handoff.js
       - kt80/KT83_VT01_P1_AUTOMATIC_ROUTE_TEST.html
       - kt80/KT82_STAGE3_CONSOLIDATED_V600.js
       - .github/workflows/kt83-vt01-route-p1.yml
