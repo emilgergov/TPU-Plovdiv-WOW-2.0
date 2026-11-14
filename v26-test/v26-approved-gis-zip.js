@@ -9,11 +9,28 @@ async function openArchive(file){
  }
  const next=new global.zip.ZipReader(new global.zip.BlobReader(file));
  let list;try{list=await next.getEntries()}catch(e){await next.close();throw e}
- const m=new Map(list.filter(x=>!x.directory).map(x=>[x.filename.split('/').pop(),x]));
- for(const key of ['parcels_04.json.gz','parcelgeom_04.json.gz','overlays_04.json.gz'])if(!m.has(key)){await next.close();throw Error('Непълен ГИС пакет: '+key)}
+ const files=list.filter(x=>!x.directory);
+ const m=new Map(files.map(x=>[x.filename.split('/').pop(),x]));
+ // Full deployment contract: never treat a partially extracted/demonstration ZIP
+ // as a validated GIS source. Exact shard filenames are checked, not ZIP size.
+ const shards=files.filter(x=>/^(?:parcels|parcelgeom|overlays|overlapgeom)_\\d{2}\\.json\\.gz$/i.test(x.filename.split('/').pop()));
+ let manifest;
+ try{
+  if(!m.has('manifest.json'))throw Error('Липсва ГИС манифест.');
+  const raw=await m.get('manifest.json').getData(new global.zip.TextWriter());
+  manifest=JSON.parse(raw);
+  if(manifest.status!=='PASS_COUNT_BY_PREFIX'||manifest.parcel_geometry!==917418||manifest.overlap_records_expected!==181154||manifest.shards!==258)
+   throw Error('ГИС манифестът не съответства на одобрения пълен набор.');
+  if(shards.length!==258||new Set(shards.map(x=>x.filename.split('/').pop())).size!==258)
+   throw Error('Непълен ГИС архив: очакват се точно 258 уникални пространствени сегмента.');
+  for(const prefix of ['36','56'])for(const kind of ['parcels','parcelgeom','overlays','overlapgeom']){
+   const key=kind+'_'+prefix+'.json.gz';
+   if(!m.has(key))throw Error('Непълен ГИС архив: липсва '+key);
+  }
+ }catch(e){await next.close();throw e}
  if(reader)await reader.close();
- reader=next;entries=m;hostedRoot=null;hostedManifest=null;cache.clear();archiveName=file.name;
- return {name:archiveName,files:m.size};
+ reader=next;entries=m;hostedRoot=null;hostedManifest=manifest;cache.clear();archiveName=file.name;
+ return {name:archiveName,files:m.size,shards:258,parcel_geometry:manifest.parcel_geometry};
 }
 /* Python geometry export may contain non-standard NaN numeric literals. Normalize only tokens outside JSON strings. */
 function normalizeNonFiniteJson(source){
