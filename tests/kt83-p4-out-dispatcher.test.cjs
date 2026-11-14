@@ -14,7 +14,7 @@ function fixture(){
  const templates=templatesFactory({
   digest:async data=>crypto.createHash('sha256').update(data).digest('hex'),
   verifyApproval:async()=>true});
- const renderers={'01':async({templateBytes,template,caseRecord})=>{
+ const renderers={'01::DEFAULT':async({templateBytes,template,caseRecord})=>{
   calls++;assert.ok(template.templateId.startsWith('OUT01'));assert.equal(caseRecord.caseId,'eg-case-01');
   assert.deepEqual(templateBytes,bytes);
   return {bytes:Uint8Array.from([1,2,3]),mediaType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -82,5 +82,5 @@ test('P4 refuses expert variant mismatch instead of silently selecting a differe
   sourceDescription:'Одобрен образец A',expectedSha256:h,bytes});
  const accepted={...x.selection(),variant:'A'};
  assert.equal((await x.d.prepare({outId:'01',variant:'B',expertChoice:accepted})).code,'OUT_CHOICE_UNCONFIRMED');
- assert.equal((await x.d.prepare({outId:'01',variant:'A',expertChoice:accepted})).ok,true);
+ assert.equal((await x.d.prepare({outId:'01',variant:'A',expertChoice:accepted})).code,'OUT_RENDERER_MISSING');
 });
