@@ -101,7 +101,7 @@ function entered(){
  const l=legal();banner.hidden=!!root.KT80WorkflowState?.normativeGate?.expertConfirmed;headline.textContent=l.title;basis.textContent=l.message;
  task.textContent='Пространствена задача: '+(validIds().length?'автоматичен имотен ГИС анализ и проверка по ЗЗ/ЗТ.':'контекстно установяване на местоположението и подготовка на уточняване при съществена липса.');
  const k=l.subject+'|'+l.scope;
- if(lastNotified!==k){lastNotified=k;dialogText.textContent=l.title+'. '+l.message+' Пространствената проверка е констативна и не замества правната преценка.';if(!root.KT80WorkflowState?.normativeGate?.expertConfirmed&&!dialog.open)dialog.showModal()}
+ if(lastNotified!==k){lastNotified=k;dialogText.textContent=l.title+'. '+l.message+' Пространствената проверка е констативна и не замества правната преценка.';/* КТ83 ВТ01 П1: без блокиращ повторен диалог; мотивите остават в информационния панел. */}
  gis.querySelector('h3').textContent='3. Имоти · пространствен анализ по преписката';
  inline.append(gis);inline.hidden=false;fallback.hidden=true;overview.hidden=false;
  const intake=stage.querySelector('.kt80-parcel-intake');if(intake)intake.classList.remove('kt80-v580-fallback-entry');
