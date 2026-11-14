@@ -15,7 +15,8 @@
  function create({archive,review}={}){
   // The archive provider owns provenance. A case draft alone cannot create it.
   const available=archive?.version==='V11'&&typeof archive?.getDocument==='function'&&
-    typeof archive?.verifyDocument==='function'&&typeof review?.getCaseReview==='function';
+    typeof archive?.verifyDocument==='function'&&typeof review?.getCaseReview==='function'&&
+    typeof review?.verifyCaseReview==='function';
   function evaluateCase(context){
    if(!available)return null;
    const c=context||{};
@@ -23,11 +24,15 @@
       !t(c.subject)||!t(c.scope))return null;
    let r;
    try{r=review.getCaseReview(c);}catch(_){return null}
-   if(!r||!exact(r,c)||r.expertConfirmed!==true||r.applicabilityVerified!==true||
+   if(!r||!exact(r,c)||t(r.subject)!==t(c.subject)||t(r.scope)!==t(c.scope)||
+      r.expertConfirmed!==true||r.applicabilityVerified!==true||
       r.competenceVerified!==true||r.legalQuestionReviewed!==true||
       !t(r.reasonedAssessment)||!t(r.proposedAction)||
       !Array.isArray(r.provisions)||!r.provisions.length||
       !distinct(r.provisions.map(p=>t(p.documentId)+'|'+t(p.articleRef))))return null;
+   // The confirmation is a case-bound attestation by the trusted review provider,
+   // not a checkbox or a boolean copied from case input.
+   try{if(review.verifyCaseReview(r,c)!==true)return null}catch(_){return null}
    const resolved=[];
    for(const item of r.provisions){
     if(!t(item?.documentId)||!t(item.articleRef)||!t(item.applicabilityReason)||
@@ -55,6 +60,11 @@
       candidate.archiveVersion!=='V11'||candidate.status!=='VERIFIED'||!Array.isArray(candidate.provisions)||
       !candidate.provisions.length)return false;
    try{
+    const r=review.getCaseReview(context);
+    if(!r||!exact(r,context)||t(r.subject)!==t(context.subject)||
+      t(r.scope)!==t(context.scope)||review.verifyCaseReview(r,context)!==true||
+      t(r.reasonedAssessment)!==t(candidate.reasonedAssessment)||
+      t(r.proposedAction)!==t(candidate.proposedAction))return false;
     return candidate.provisions.every(p=>{
      const d=archive.getDocument(p.documentId);
      return d?.archiveVersion==='V11'&&d.id===p.documentId&&
