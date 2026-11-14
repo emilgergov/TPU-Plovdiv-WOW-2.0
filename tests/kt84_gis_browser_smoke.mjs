@@ -31,7 +31,7 @@ try{
  const mapResult=await page.evaluate(async()=>{
   const input=document.getElementById('kt80ParcelInput');
   if(!input||!window.KT80FreeGIS?.find)throw Error('Stage 3 actual map UI is not wired');
-  input.value='56784.13.102\\n36676.129.457';
+  input.value=['56784.13.102','36676.129.457'].join(String.fromCharCode(10));
   await window.KT80FreeGIS.find();
   const displayed=document.querySelectorAll('#kt80GISParcels path.kt80-map-parcel').length;
   return {drawnPolygons:displayed,
