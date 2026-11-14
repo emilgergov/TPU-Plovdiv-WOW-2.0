@@ -11,14 +11,22 @@
  const validHash=x=>/^[a-f0-9]{64}$/.test(norm(x));
  const result=(ok,code,message,extra={})=>Object.freeze({ok,code,message,...extra});
  const ids=new Set(Array.from({length:22},(_,i)=>String(i+1).padStart(2,'0')));
- function create(){
+ function create({digest,verifyApproval}={}){
   const entries=new Map(),snapshots=new Map();
   let epoch=0;
-  function register({outId,templateId,expectedSha256,sourceDescription,bytes,verified=false}={}){
+  async function register({outId,templateId,expectedSha256,sourceDescription,bytes}={}){
    if(!ids.has(outId)||!norm(templateId)||!validHash(expectedSha256)||
       !norm(sourceDescription)||!(bytes instanceof Uint8Array)||bytes.length<1000)
     return result(false,'MISSING_APPROVED_OUT_TEMPLATE','Предложение: приложете утвърден образец за този конкретен OUT.');
-   if(verified!==true)return result(false,'TEMPLATE_NOT_ATTESTED','Предложение: удостоверете източника и одобрението на образеца.');
+   if(typeof digest!=='function'||typeof verifyApproval!=='function')
+    return result(false,'INDEPENDENT_VERIFIER_REQUIRED','Предложение: свържете проверяващия механизъм на утвърдените OUT образци.');
+   let actual,approved=false;
+   try{
+    actual=await digest(new Uint8Array(bytes));
+    approved=await verifyApproval({outId,templateId,expectedSha256,sourceDescription},new Uint8Array(bytes))===true;
+   }catch(_){return result(false,'TEMPLATE_VERIFICATION_FAILED','Неуспешна проверка на образеца.');}
+   if(actual!==expectedSha256)return result(false,'TEMPLATE_HASH_MISMATCH','Образецът не съвпада с утвърдения файл.');
+   if(!approved)return result(false,'TEMPLATE_NOT_ATTESTED','Предложение: удостоверете източника и одобрението на образеца.');
    if(entries.has(outId))return result(false,'DUPLICATE_OUT_TEMPLATE','За този OUT вече има образец; проверете версията и сменете контролирано.');
    if([...entries.values()].some(v=>v.templateId===templateId))
     return result(false,'TEMPLATE_REUSED_FOR_DIFFERENT_OUT','Един и същ образец не може да подмени отделен OUT.');
