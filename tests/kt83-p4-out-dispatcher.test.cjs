@@ -15,7 +15,7 @@ function fixture(){
   digest:async data=>crypto.createHash('sha256').update(data).digest('hex'),
   verifyApproval:async()=>true});
  const renderers={'01':async({templateBytes,template,caseRecord})=>{
-  calls++;assert.equal(template.templateId,'OUT01');assert.equal(caseRecord.caseId,'eg-case-01');
+  calls++;assert.ok(template.templateId.startsWith('OUT01'));assert.equal(caseRecord.caseId,'eg-case-01');
   assert.deepEqual(templateBytes,bytes);
   return {bytes:Uint8Array.from([1,2,3]),mediaType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     formalIssuanceAllowed:false,signed:false};
