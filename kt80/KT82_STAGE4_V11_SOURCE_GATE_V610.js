@@ -162,7 +162,7 @@ function boot(){
    d.scenario==='FULL_GIS_VERIFIED'?'ПЪЛЕН ГИС АНАЛИЗ · ПРОВЕРЕНИ ЗЗ · PDF1 не е изготвен':
    d.scenario==='GIS_INCOMPLETE'?'ИМОТИ С ГЕОМЕТРИЯ · проверките не са завършени':
    d.scenario==='GIS_NOT_REQUIRED'?'ГИС НЕ Е НЕОБХОДИМ · експертно потвърдено след №2':
-   'КОНТЕКСТЕН АНАЛИЗ · НЯМА УДОСТОВЕРЕНА ИМОТНА ГЕОМЕТРИЯ';
+   (d.ids?.length?'ИДЕНТИФИЦИРАНИ ИМОТИ · НЯМА УДОСТОВЕРЕНА ГЕОМЕТРИЯ':'КОНТЕКСТЕН АНАЛИЗ · НЯМА УДОСТОВЕРЕНА ИМОТНА ГЕОМЕТРИЯ');
   paragraphs.replaceChildren();
   for(const [a,b] of [['Работна процедурна хипотеза',p.hypothesis],['Пространствени доказателства',p.spatial],['Предложение за действие',p.conclusion]]){
    const item=node('div',undefined,'kt83-pair');item.append(node('strong',a),node('p',b));paragraphs.append(item);
