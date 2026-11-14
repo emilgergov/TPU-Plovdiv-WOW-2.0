@@ -25,23 +25,40 @@
   const isConfirmed=()=>!!root.KT80WorkflowState?.subjectConfirmed?.expertConfirmed
      &&!!root.KT80WorkflowState?.subjectConfirmed?.scopeConfirmed;
   const fail=(msg)=>{route.needsReview(msg);render(msg)};
-  function onSubject(){
-    // The original handler confirms the subject and the scope before we can advance.
-    if(!isConfirmed()){render('Необходими са отделно потвърдени предмет и обхват.');return;}
-    const started=route.start({subject:true,scope:true});
-    if(!started.ok){render(started.reason);return;}
-    render('Предметът и обхватът са потвърдени. Отварям ГИС анализа.');
-    root.KT80WorkflowGo?.(3); // Existing stage 3 already starts the GIS engine.
-    // KT80DashboardOpenStage already emits kt80:stage-open exactly once.
+  // Keep the existing expert GIS relevance gate. It may send the case to stage 3
+  // (GIS required) or stage 4 (GIS not relevant). Never force GIS via onSubject.
+  function onGateStage(step){
+    const state=root.KT80WorkflowState||{}, gate=state.normativeGate;
+    if(!isConfirmed()||gate?.expertConfirmed!==true)return;
+    if((step===3&&gate.decision!=='REQUIRED')
+      ||(step===4&&gate.decision!=='NOT_REQUIRED'))return;
+    const current=route.snapshot();
+    if(!current.valid||current.phase==='subject_scope'){
+      const started=route.start({subject:true,scope:true});
+      if(!started.ok)return render(started.reason);
+    }
+    if(gate.decision==='NOT_REQUIRED'){
+      // These receipts certify an expert relevance decision, NOT a GIS result.
+      const spatial=route.advance('evidence',{...receipt(),verified:true,
+        gisNotRequired:true,expertConfirmed:true});
+      if(!spatial.ok)return render(spatial.reason);
+      const handoff=route.advance('normative_v11',{...receipt(),verified:true});
+      return render(handoff.ok?
+        'ГИС е мотивирано неприложим. Етап 4 разглежда документните доказателства и нормативния архив V11.':
+        handoff.reason);
+    }
+    render('ГИС е необходим. Стартира съществуващият пространствен анализ в Етап 3.');
   }
-  $('kt80ToParcels')?.addEventListener('click',()=>queueMicrotask(onSubject));
+  document.addEventListener('kt80:stage-open',e=>{
+    if(e.detail?.step===3||e.detail?.step===4)queueMicrotask(()=>onGateStage(e.detail.step));
+  });
   // GIS completeness does not imply that PDF1 has been generated or accepted.
   // The normative bridge owns the case-bound PDF1 receipt.
   function checkedGIS(){
     if(!route.snapshot().valid||route.snapshot().phase!=='gis_pdf1')return;
     const normalized=root.V26ParcelEditor?.normalize?.($('kt80ParcelInput')?.value||'');
     const ids=normalized?.ids||[], g=root.KT80FreeGISResults;
-    if(!ids.length||normalized.invalid?.length||normalized.uncertain?.length){
+    if(!ids.length||normalized?.invalid?.length||normalized?.uncertain?.length){
       render('Няма валидирани имотни идентификатори. Необходимо е конкретно уточняване на местоположението.');
       return;
     }
