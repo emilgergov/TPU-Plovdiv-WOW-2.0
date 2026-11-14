@@ -37,6 +37,7 @@ export function createCaseReviewStore(current){
   return true;
  }
  function submit(raw){
+  if(!raw||typeof raw!=='object')return {ok:false,reason:'Липсва експертна преценка.'};
   const context=current(),review=deepCopy(raw);
   if(!valid(review,context))return {ok:false,reason:'Липсват експертно удостоверени факти, компетентност или основания от MASTER V11.'};
   approved=freezeDeep(review);signature=canon(approved);
