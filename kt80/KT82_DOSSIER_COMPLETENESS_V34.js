@@ -10,13 +10,15 @@ function audit(intake){
   const readable=/текстът е прочетен|OCR:\s*\d+/i.test(status);
   const concern=/OCR:|експертна проверка|ПРОВЕРКА:|неуспешно|няма извлекаем|отложен|частич|неподдържан|неизвлечен/i.test(status);
   const type=ext(d.filename);
-  const supported=['txt','csv','json','md','pdf','docx','jpg','jpeg','png','webp','bmp','tif','tiff'].includes(type);
-  const state=!supported?'UNSUPPORTED':!readable?'NOT_READ':concern?'REVIEW_REQUIRED':'TEXT_EXTRACTED';
-  const extracted=readable;
   const isLegacyDoc=type==='doc';
+  // The active V35 reader DOES extract legacy DOC text. It always requires
+  // original-document review; extraction is never equivalent to verified content.
+  const supported=['txt','csv','json','md','pdf','doc','docx','jpg','jpeg','png','webp','bmp','tif','tiff'].includes(type);
+  const state=!supported?'UNSUPPORTED':!readable?'NOT_READ':(isLegacyDoc||concern)?'REVIEW_REQUIRED':'TEXT_EXTRACTED';
+  const extracted=readable;
   return {index:i+1,file:String(d.filename||'НЕУСТАНОВЕН ФАЙЛ'),fileType:type,readerStatus:status||'НЯМА ДАННИ',state,extracted,
    note:state==='TEXT_EXTRACTED'?'Текстът е извлечен; точността на фактите не е потвърдена':
-    state==='REVIEW_REQUIRED'?'Проверете текста, OCR и страниците в оригинала':
+    state==='REVIEW_REQUIRED'?(isLegacyDoc?'Текстът от стар Word DOC е извлечен; проверете оригинала, таблиците и оформлението':'Проверете текста, OCR и страниците в оригинала'):
     state==='NOT_READ'?'Изисква се повторен прочит/ръчна проверка':isLegacyDoc?'Старият Word .doc не се обработва: нужен е DOCX или оригинален PDF':'Форматът не е обработен от четеца'};
  });
  const expected=Number.isInteger(intake?.archive_entries)?intake.archive_entries:docs.length;
