@@ -35,7 +35,8 @@ test('P5 rejects auto-approval, missing authority proof or unlisted V11 referenc
 test('P5 rejects stale stage4, unknown legal facts, changed scope or different case',()=>{
  assert.throws(()=>review({existingStage4:null}),/остаряла/);
  assert.throws(()=>review({context:{...context,caseId:''}}),/идентичността/);
- assert.throws(()=>review({context:{...context,scope:'друг обхват'}}),/остаряла/);
+ // The live Stage 4 bridge invalidates its assessment on an edited scope.
+ assert.throws(()=>review({context:{...context,scope:'друг обхват',scopeConfirmed:false}}),/Потвърдете/);
  const inconclusive=[{...evidence[0],value:'unknown'}];
  assert.throws(()=>review({packet:{rules,evidence:inconclusive},
   existingStage4:assessStage4({confirmedSubject:context.subject,scopeConfirmed:true,
