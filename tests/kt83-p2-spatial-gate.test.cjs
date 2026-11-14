@@ -65,7 +65,7 @@ test('P2 integration uses approved original PDF1 and active case boundary',()=>{
  assert.match(gis,/kt83:gis-intersections-checked/);
  assert.match(bridge,/bytes:receipt\.bytes/);
  assert.match(pdfSource,/evidenceRevision===\(root\.KT82EvidenceInvalidation/);
- assert.match(pdfSource,/source:live,evidenceRevision,bytes:blob\.size/);
+ assert.match(pdfSource,/source:live,evidenceRevision:evidenceRevision,bytes:blob\.size/);
  assert.match(pdfSource,/document\.addEventListener\('kt82:evidence-invalidated',reset\)/);
 });
 
