@@ -39,7 +39,10 @@ test('isolated UI binds to original workflow and requires a current PDF1 proof',
  const fs=require('node:fs');
  const binding=fs.readFileSync(require('node:path').join(__dirname,'../kt80/integration/kt83-vt01-route-binding.js'),'utf8');
  const html=fs.readFileSync(require('node:path').join(__dirname,'../kt80/KT83_VT01_P1_AUTOMATIC_ROUTE_TEST.html'),'utf8');
- assert.match(binding,/KT80WorkflowGo\?\.\(3\)/);
+ assert.match(binding,/onGateStage\(step\)/);
+ assert.match(binding,/gate\.decision!=='NOT_REQUIRED'/);
+ assert.match(binding,/gisNotRequired:true/);
+ assert.doesNotMatch(binding,/KT80WorkflowGo\?\.\(3\)/);
  assert.match(binding,/KT83NormativeBridge\?\.pdfStatus\?\.\(\)/);
  assert.match(binding,/pdf\.caseId===r\.caseId/);
  assert.match(binding,/pdf\.evidenceRevision===r\.evidenceRevision/);
