@@ -158,7 +158,30 @@ function compressGIS(){
  const toFold=[...gis.querySelectorAll('.kt80-local-index')].filter(n=>!n.closest('details'));
  if(toFold.length){const d=document.createElement('details');d.className='kt83-tech-details';d.append(makeText('summary','Допълнителни технически справки'));toFold[0].before(d);for(const n of toFold)d.append(n)}
 }
-function init(){inlineHelp();renameStatic();compressGIS();tileStatus();
+function normativeClarity(){
+ const box=$('kt83B2CaseBridgeStage4');if(!box)return;
+ const existing=$('kt83UXNormativeGap');
+ const plain=(box.textContent||'').replace(/\\s+/g,' ');
+ const zero=/Проверени условни хипотези[^.]{0,170}?:\\s*0(?:\\s|$)/iu.test(plain);
+ if(!zero){existing?.remove();return}
+ if(existing)return;
+ const warning=document.createElement('p');warning.id='kt83UXNormativeGap';warning.className='kt83-ux-status';
+ warning.textContent='Няма проверени нормативни хипотези в този резултат. Това НЕ доказва, че не е приложима процедура. Проверете източниците в Нормативния архив и липсващите факти; при необходимост подгответе конкретно искане за информация.';
+ box.after(warning);
+}
+function reinforceEvidence(){
+ $('kt80SubjectConfirmation')?.addEventListener('change',()=>{
+  if($('kt80SubjectConfirmation')?.checked)
+   root.KT80AdministrativeNotice?.clearError?.('subject');
+ });
+ const stage4=document.querySelector('.kt80-stage-panel[data-panel="4"]');
+ if(stage4&&root.MutationObserver){
+  const observer=new MutationObserver(()=>normativeClarity());
+  observer.observe(stage4,{subtree:true,childList:true,characterData:true});
+  normativeClarity();
+ }
+}
+function init(){inlineHelp();renameStatic();compressGIS();reinforceEvidence();tileStatus();
  document.addEventListener('kt80:stage-open',e=>{if(e.detail?.step>=1&&e.detail.step<=5){activeStep=Number(e.detail.step);stagePurpose(activeStep)}tileStatus()});
  document.addEventListener('kt80:case-change',tileStatus);document.addEventListener('kt80:case-reset',tileStatus);
  for(const id of ['kt80ToSubject','kt80ToParcels','kt80ToLaw','kt80ToProposal','kt80SubjectConfirmation','kt80ScopeConfirmation','kt80LawConfirmed'])$(id)?.addEventListener('click',()=>queueMicrotask(tileStatus));
