@@ -17,13 +17,13 @@
     !renderers||typeof legalReceipt!=='function')throw new Error('Липсва защитен вход за П4.');
   let serial=0;
   const invalidate=()=>{serial++};
-  async function prepare({outId,expertChoice,documentData}={}){
+  async function prepare({outId,variant='DEFAULT',expertChoice,documentData}={}){
    const generation=serial,caseNow=currentCase();
    if(!caseNow?.caseId||!Number.isInteger(caseNow?.generation)||
       !Number.isInteger(caseNow?.evidenceRevision)||!str(caseNow.confirmedSubject))
     return error('CASE_UNCONFIRMED','Няма актуален потвърден предмет и преписка.');
    // An OUT choice is made AFTER legal review, never from case type or GIS.
-   if(expertChoice?.outId!==outId||expertChoice?.expertConfirmed!==true||
+   if(expertChoice?.outId!==outId||(expertChoice?.variant||'DEFAULT')!==variant||expertChoice?.expertConfirmed!==true||
       expertChoice.caseId!==caseNow.caseId||
       expertChoice.generation!==caseNow.generation||
       expertChoice.evidenceRevision!==caseNow.evidenceRevision)
@@ -33,7 +33,7 @@
       law.generation!==caseNow.generation||law.evidenceRevision!==caseNow.evidenceRevision||
       !str(law.reasonedAssessment))
     return error('LEGAL_PROOF_MISSING','Не е удостоверена независимата нормативна преценка V11.');
-   const choice=templates.select({outId,caseId:caseNow.caseId,generation:caseNow.generation,
+   const choice=templates.select({outId,variant,caseId:caseNow.caseId,generation:caseNow.generation,
     evidenceRevision:caseNow.evidenceRevision,expertConfirmed:true,normativeVerified:true});
    if(!choice.ok)return choice;
    const renderer=renderers[outId];
@@ -52,7 +52,7 @@
    if(!(rendered?.bytes instanceof Uint8Array)||!rendered.bytes.length||
       rendered.formalIssuanceAllowed!==false||rendered.signed!==false)
     return error('OUT_UNSAFE_RESULT','Резултатът не е удостоверен неподписан работен документ.');
-   return Object.freeze({ok:true,status:'EXPERT_REVIEW_ONLY',outId,
+   return Object.freeze({ok:true,status:'EXPERT_REVIEW_ONLY',outId,variant,
     caseId:caseNow.caseId,generation:caseNow.generation,
     evidenceRevision:caseNow.evidenceRevision,templateId:choice.template.templateId,
     mediaType:rendered.mediaType,bytes:new Uint8Array(rendered.bytes),
