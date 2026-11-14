@@ -43,3 +43,10 @@ test('P4 invalidated session cannot render outdated OUT template',async()=>{
  assert.equal(r.getTemplate(x)[0],65);
  r.clear();assert.equal(r.getTemplate(x),null);
 });
+
+test('P4 isolated UI disables legacy single-template universal Word export',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const src=fs.readFileSync(path.join(__dirname,'../kt80/integration/kt83-v617-universal-out-preview.mjs'),'utf8');
+ assert.match(src,/docxButton\.disabled=true/);
+ assert.match(src,/общата институционална бланка не замества утвърдения образец/);
+});
