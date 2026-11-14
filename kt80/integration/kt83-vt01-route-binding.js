@@ -101,18 +101,27 @@
       }
     });
   });
-  // Guard the legacy click BEFORE it advances to stage 5.
-  // Passing a stage and typing legal prose are not independent legal validation.
-  $('kt80ToProposal')?.addEventListener('click',event=>{
+  // Shared gate for every stage-5 entry: main step navigation, dashboard,
+  // legacy button and programmatic workflow navigation use the same decision.
+  function canEnterStageFive(){
     const law=root.KT80WorkflowState?.lawConfirmed, now=receipt();
     const verified=root.KT83V11ValidatedAssessment;
-    const eligible=route.snapshot().valid&&route.snapshot().phase==='normative_v11'
+    return route.snapshot().valid&&route.snapshot().phase==='normative_v11'
       &&law?.expertConfirmed===true
       &&verified?.verified===true&&verified.caseId===now.caseId
       &&verified.generation===now.generation
       &&verified.evidenceRevision===now.evidenceRevision
       &&verified.competenceVerified===true
       &&!!String(verified.reasonedAssessment||'').trim();
+  }
+  root.KT83RouteAccess=Object.freeze({
+    canOpenStage:step=>Number(step)!==5||canEnterStageFive(),
+    denied:()=>fail('Етап 5 е блокиран: необходима е независима проверка по V11, включително компетентност и актуални доказателства.')
+  });
+  // Guard the legacy click BEFORE it advances to stage 5.
+  // Passing a stage and typing legal prose are not independent legal validation.
+  $('kt80ToProposal')?.addEventListener('click',event=>{
+    const eligible=canEnterStageFive();
     if(eligible)return;
     event.preventDefault();
     event.stopImmediatePropagation();
