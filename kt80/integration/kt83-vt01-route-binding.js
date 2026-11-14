@@ -32,7 +32,7 @@
     if(!started.ok){render(started.reason);return;}
     render('Предметът и обхватът са потвърдени. Отварям ГИС анализа.');
     root.KT80WorkflowGo?.(3); // Existing stage 3 already starts the GIS engine.
-    document.dispatchEvent(new CustomEvent('kt80:stage-open',{detail:{step:3}}));
+    // KT80DashboardOpenStage already emits kt80:stage-open exactly once.
   }
   $('kt80ToParcels')?.addEventListener('click',()=>queueMicrotask(onSubject));
   // Independent GIS results must never be treated as a legal determination.
@@ -76,7 +76,15 @@
   const invalidate=()=>{route.reset();render('Данните са променени. Предходните резултати не се пренасят към новата преписка.')};
   document.addEventListener('kt80:case-reset',invalidate);
   document.addEventListener('kt80:case-change',invalidate);
-  document.addEventListener('kt82:evidence-invalidated',invalidate);
+  document.addEventListener('kt82:evidence-invalidated',()=>{
+    route.reset();
+    // Reconcile confirmed subject/scope against the new evidence revision.
+    // No legal finding or GIS receipt is carried across revisions.
+    if(isConfirmed()){
+      const restarted=route.start({subject:true,scope:true});
+      render(restarted.ok?'Доказателствата са изменени. Повторете пространствената проверка; правният извод е невалиден.':restarted.reason);
+    } else invalidate();
+  });
   // Diagnostics are retained in the DOM, but hidden in normal professional view.
   const style=document.createElement('style');
   style.textContent=`
