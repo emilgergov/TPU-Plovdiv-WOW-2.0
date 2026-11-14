@@ -87,6 +87,17 @@ function openPreview(button){
  b.append(makeText('p','Мотивирано експертно предложение за процедура при проверени факти, правни основания и компетентност.'));
  let warning=makeText('div','Определяне на процедура и създаване на проект са недостъпни в този режим. Не попълвайте фиктивни правни основания.');warning.className='kt83-preview-disabled';b.append(warning);
  b.append(makeText('p','Следващо действие: върнете се към непълните проверки в предходните етапи.'));
+ const actual=document.querySelector('.kt80-stage-panel[data-panel="5"]');
+ if(actual){
+  const fold=document.createElement('details');fold.className='kt83-tech-details';
+  fold.append(makeText('summary','Разгледай действителната структура на Панел 5 (само за преглед)'));
+  const copy=actual.cloneNode(true);copy.hidden=false;copy.removeAttribute('data-panel');copy.classList.remove('kt80-stage-panel');
+  copy.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+  copy.querySelectorAll('[for]').forEach(el=>el.removeAttribute('for'));
+  copy.querySelectorAll('button,input,select,textarea').forEach(el=>{el.disabled=true;el.setAttribute('aria-disabled','true')});
+  copy.querySelectorAll('script').forEach(el=>el.remove());
+  fold.append(copy);b.append(fold);
+ }
  preview.hidden=false;$('kt83PreviewClose').focus();return true;
 }
 root.KT83SafeStageFive=Object.freeze({open:openPreview});
