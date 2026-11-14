@@ -58,3 +58,17 @@ test('P4 catalogue tools 13-16 are not outgoing administrative documents',async(
     expertConfirmed:true,normativeVerified:true}).code,'UNKNOWN_OUT');
  assert.equal(r.status().remaining,18);
 });
+
+test('P4 keeps separately approved A and B variants for the same OUT without cross-use',async()=>{
+ const r=make(),b=new Uint8Array(4096).fill(66);
+ const bh=crypto.createHash('sha256').update(b).digest('hex');
+ assert.equal((await r.register({...props,variant:'A'})).ok,true);
+ assert.equal((await r.register({...props,variant:'B',templateId:'APPROVED_FORM_01_B',expectedSha256:bh,bytes:b})).ok,true);
+ const input={outId:'01',caseId:'case',generation:1,evidenceRevision:2,expertConfirmed:true,normativeVerified:true};
+ const a=r.select({...input,variant:'A'}),other=r.select({...input,variant:'B'});
+ assert.equal(a.ok,true);assert.equal(other.ok,true);
+ assert.notEqual(a.template.templateId,other.template.templateId);
+ assert.deepEqual(r.getTemplate(a),bytes);
+ assert.deepEqual(r.getTemplate(other),b);
+ assert.equal(r.select({...input,variant:'C'}).code,'OUT_TEMPLATE_MISSING');
+});
