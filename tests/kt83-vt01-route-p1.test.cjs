@@ -34,3 +34,19 @@ test('advances sequentially only with matching receipts and motivated V11 evalua
  assert.equal(c.complete({...live,verified:true}).ok,true);
  assert.equal(c.snapshot().status,'ПРОЕКТ ЗА ПРЕГЛЕД');
 });
+
+test('isolated UI binds to original workflow and requires a current PDF1 proof',()=>{
+ const fs=require('node:fs');
+ const binding=fs.readFileSync(require('node:path').join(__dirname,'../kt80/integration/kt83-vt01-route-binding.js'),'utf8');
+ const html=fs.readFileSync(require('node:path').join(__dirname,'../kt80/KT83_VT01_P1_AUTOMATIC_ROUTE_TEST.html'),'utf8');
+ assert.match(binding,/KT80WorkflowGo\?\.\(3\)/);
+ assert.match(binding,/KT83NormativeBridge\?\.pdfStatus\?\.\(\)/);
+ assert.match(binding,/pdf\.caseId===r\.caseId/);
+ assert.match(binding,/pdf\.evidenceRevision===r\.evidenceRevision/);
+ assert.match(binding,/pdf\.source===g/);
+ assert.match(binding,/kt82:pdf1-completed/);
+ assert.match(binding,/kt82:evidence-invalidated/);
+ assert.match(html,/integration\/kt83-vt01-automatic-route-p1\.js/);
+ assert.match(html,/integration\/kt83-vt01-route-binding\.js/);
+ assert.doesNotMatch(html,/<script[^>]*src=["']https:\/\/[^"']*kt83-vt01-route-binding/);
+});
