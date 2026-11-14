@@ -38,6 +38,7 @@
       if(!started.ok)return render(started.reason);
     }
     if(gate.decision==='NOT_REQUIRED'){
+      if(route.snapshot().phase==='normative_v11')return render('ГИС е мотивирано неприложим. Нормативната оценка продължава по V11.');
       // These receipts certify an expert relevance decision, NOT a GIS result.
       const spatial=route.advance('evidence',{...receipt(),verified:true,
         gisNotRequired:true,expertConfirmed:true,reason:gate.reason});
