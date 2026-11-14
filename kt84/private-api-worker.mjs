@@ -62,6 +62,8 @@ const validText=(x,max)=>typeof x==='string'&&x.trim().length>0&&x.length<=max;
 const casePath=/^\/v1\/cases\/([0-9a-f-]{36})$/i;
 const grantsPath=/^\/v1\/cases\/([0-9a-f-]{36})\/grants$/i;
 const revokePath=/^\/v1\/cases\/([0-9a-f-]{36})\/grants\/([0-9a-f-]{36})$/i;
+const documentsPath=/^\/v1\/cases\/([0-9a-f-]{36})\/documents$/i;
+const documentPath=/^\/v1\/cases\/([0-9a-f-]{36})\/documents\/([0-9a-f-]{36})$/i;
 function sameOrigin(request){
  const origin=request.headers.get('origin');
  if(!origin)return true; // machine API calls still require Access.
@@ -108,8 +110,8 @@ export default {
     await audit(db,{actor,caseId:id,action:'case.create',result:'allowed',version:1,requestId});
     return json({ok:true,id,version:1},201);
    }
-   const match=path.match(casePath),grantMatch=path.match(grantsPath),revokeMatch=path.match(revokePath);
-   const caseId=(match||grantMatch||revokeMatch)?.[1];
+   const match=path.match(casePath),grantMatch=path.match(grantsPath),revokeMatch=path.match(revokePath),docList=path.match(documentsPath),docRead=path.match(documentPath);
+   const caseId=(match||grantMatch||revokeMatch||docList||docRead)?.[1];
    if(!caseId)return fail(404,'NOT_FOUND');
    const record=await getCase(db,caseId);
    if(!record||record.orgId!==actor.orgId)return fail(404,'NOT_FOUND');
@@ -139,6 +141,67 @@ export default {
       .bind(caseId,version,actor.subject,now).run();
     await audit(db,{actor,caseId,action:A.EDIT,result:'allowed',version,requestId});
     return json({ok:true,id:caseId,version});
+   }
+   if(docList&&request.method==='GET'){
+    const p=await allowed(db,actor,record,A.READ,now);
+    if(!p.allowed)return fail(404,'NOT_FOUND');
+    const rs=await db.prepare('SELECT document_id AS id,filename,media_type AS mediaType,bytes,created_at AS createdAt FROM case_documents WHERE case_id=? LIMIT 100')
+      .bind(caseId).all();
+    await audit(db,{actor,caseId,action:'case.documents.list',result:'allowed',version:record.version,requestId});
+    return json({ok:true,documents:rs.results||[]});
+   }
+   if(docList&&request.method==='POST'){
+    const expectedVersion=Number(request.headers.get('if-match'));
+    const contentType=request.headers.get('content-type')||'';
+    const filename=request.headers.get('x-document-filename')||'';
+    const length=Number(request.headers.get('content-length')||0);
+    const allowedTypes=new Set(['application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/zip']);
+    if(!allowedTypes.has(contentType)||!validText(filename,180)||
+       !Number.isSafeInteger(expectedVersion)||length<1||length>10485760)
+      return fail(400,'INVALID_DOCUMENT_UPLOAD');
+    const p=await allowed(db,actor,record,A.EDIT,now,expectedVersion);
+    if(!p.allowed)return fail(p.code==='VERSION_CONFLICT'?409:403,p.code);
+    const bytes=new Uint8Array(await request.arrayBuffer());
+    if(bytes.length!==length||bytes.length>10485760)return fail(413,'DOCUMENT_LIMIT');
+    const documentId=uuid(),objectKey=actor.orgId+'/'+caseId+'/'+documentId;
+    await env.PRIVATE_FILES.put(objectKey,bytes,{httpMetadata:{contentType}});
+    // Prevent stale edits or revoked grants from committing document metadata.
+    const updated=await db.prepare(`UPDATE cases SET version=version+1,updated_at=?
+      WHERE case_id=? AND org_id=? AND status='active' AND version=?
+      AND (owner_id=? OR EXISTS(SELECT 1 FROM case_grants g
+        WHERE g.case_id=cases.case_id AND g.org_id=cases.org_id
+        AND g.grantee_id=? AND g.granted_by=cases.owner_id
+        AND g.status='active' AND g.expires_at>? AND instr(g.actions_json,'"case.edit"')>0))`)
+      .bind(now,caseId,actor.orgId,expectedVersion,actor.subject,actor.subject,now).run();
+    if(updated.meta?.changes!==1){
+      await env.PRIVATE_FILES.delete(objectKey);
+      return fail(409,'CONCURRENT_CHANGE_OR_REVOKED_GRANT');
+    }
+    await db.batch([
+     db.prepare(`INSERT INTO case_documents
+      (document_id,case_id,object_key,filename,media_type,bytes,created_by,created_at)
+      VALUES (?,?,?,?,?,?,?,?)`)
+      .bind(documentId,caseId,objectKey,filename,contentType,bytes.length,actor.subject,now),
+     db.prepare('INSERT INTO case_revisions(case_id,version,editor_id,changed_at) VALUES (?,?,?,?)')
+      .bind(caseId,expectedVersion+1,actor.subject,now)
+    ]);
+    await audit(db,{actor,caseId,action:'case.document.upload',result:'allowed',version:expectedVersion+1,requestId});
+    return json({ok:true,id:documentId,version:expectedVersion+1},201);
+   }
+   if(docRead&&request.method==='GET'){
+    const p=await allowed(db,actor,record,A.READ,now);
+    if(!p.allowed)return fail(404,'NOT_FOUND');
+    const d=await db.prepare('SELECT document_id,object_key,media_type,filename FROM case_documents WHERE document_id=? AND case_id=?')
+      .bind(docRead[2],caseId).first();
+    if(!d||!d.object_key.startsWith(actor.orgId+'/'+caseId+'/'))return fail(404,'NOT_FOUND');
+    const object=await env.PRIVATE_FILES.get(d.object_key);
+    if(!object)return fail(404,'NOT_FOUND');
+    await audit(db,{actor,caseId,action:'case.document.read',result:'allowed',version:record.version,requestId});
+    return new Response(object.body,{headers:{
+     'content-type':d.media_type,'content-disposition':'attachment',
+     'cache-control':'private, no-store','x-content-type-options':'nosniff',
+     'content-security-policy':"sandbox; default-src 'none'"
+    }});
    }
    if(grantMatch&&request.method==='POST'){
     const b=await bodyJSON(request);
