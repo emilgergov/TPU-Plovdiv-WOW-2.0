@@ -41,6 +41,10 @@
       if (nextIndex!==currentIndex+1) return {ok:false,reason:'Не е разрешено прескачане или връщане на автоматичния маршрут.'};
       if (!evidence || evidence.caseId!==ticket.caseId || evidence.generation!==ticket.generation || evidence.evidenceRevision!==ticket.evidenceRevision || evidence.verified!==true)
         return {ok:false,reason:'Не са удостоверени необходимите доказателства за тази фаза.'};
+      if(next==='evidence'&&!((evidence.pdf1Verified===true&&evidence.geometryVerified===true)
+         ||(evidence.gisNotRequired===true&&evidence.expertConfirmed===true&&asText(evidence.reason)))){
+        return {ok:false,reason:'Необходимо е PDF1 с валидирана геометрия или мотивирано експертно решение, че ГИС не е приложим.'};
+      }
       // A normative proposition is NOT proof of a legal conclusion.
       if (next==='motivated_proposal' && !asText(evidence.reasonedAssessment))
         return {ok:false,reason:'Липсва мотивирана нормативна оценка по V11.'};
