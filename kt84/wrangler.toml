@@ -1,0 +1,21 @@
+// KT84 isolated configuration template. Do not deploy before binding real
+// private resources and confirming Cloudflare Access on the Worker hostname.
+// No public routes, no assets, no tokens or account identifiers in GitHub.
+name = "kt84-private-case-api-NOT-CONFIGURED"
+main = "private-api-worker.mjs"
+compatibility_date = "2026-11-14"
+workers_dev = false
+
+# Cloudflare dashboard / Wrangler: configure a NEW Access application for
+# this private Worker. Public WOW GitHub Pages remains separate.
+# Example bindings only — intentionally incomplete and not deployable as-is:
+# [[d1_databases]]
+# binding = "PRIVATE_DB"
+# database_name = "kt84-private-cases"
+# database_id = "REPLACE_WITH_REAL_PRIVATE_D1_ID"
+#
+# [[r2_buckets]]
+# binding = "PRIVATE_FILES"
+# bucket_name = "kt84-private-case-documents"
+#
+# Do not set OPENAI_API_KEY here; EG Author uses separate private Worker secret.
