@@ -152,6 +152,7 @@
   }
   root.KT83RouteAccess=Object.freeze({
     canOpenStage:step=>Number(step)!==5||canEnterStageFive(),
+    currentV11,
     commitVerifiedExpertReview,
     denied:()=>{const v=currentV11();fail((v.reason||'Непотвърдена нормативна приложимост.')+' '+(v.nextAction||''));}
   });
