@@ -3,11 +3,13 @@
  */
 (function(root){'use strict';
  function connect(){
+  root.KT83NormativeArchiveV11=null;
   const factory=root.KT83P3NormativeVerifierFactory;
   // The providers are injected by a trusted archival integration. If missing,
   // the P1 fail-closed route and its concrete evidence proposal stay active.
   const archive=root.KT83LocalV11Archive,review=root.KT83LocalV11CaseReview;
-  if(!factory?.create||!archive||!review)return false;
+  if(!factory?.create||!archive||!review||
+     (typeof archive.status==='function'&&!(archive.status()?.count>0)))return false;
   const verifier=factory.create({archive,review});
   if(verifier.available!==true)return false;
   root.KT83NormativeArchiveV11=verifier;
