@@ -69,6 +69,7 @@ test('isolated UI binds to original workflow and requires a current PDF1 proof',
  assert.match(binding,/root\.KT83NormativeArchiveV11/);
  assert.match(html,/integration\/kt83-vt01-automatic-route-p1\.js/);
  assert.match(html,/integration\/kt83-vt01-route-binding\.js/);
+ assert.match(html,/integration\/kt83-vt01-v11-handoff\.js/);
  assert.doesNotMatch(html,/<script[^>]*src=["']https:\/\/[^"']*kt83-vt01-route-binding/);
 });
 
@@ -101,4 +102,17 @@ test('V11 handoff rejects stale cases, missing provisions, unverified provenance
  assert.equal(assess(c,{evaluateCase:()=>({...evidence,provisions:[]}),verifyProvenance:()=>true}).code,'NO_V11_PROOFS');
  assert.equal(assess(c,{evaluateCase:()=>evidence,verifyProvenance:()=>false}).code,'PROVENANCE_UNVERIFIED');
  assert.equal(assess(c,{evaluateCase:()=>evidence,verifyProvenance:()=>true}).ok,true);
+});
+
+test('V11 failures remain concrete and provenance exceptions fail closed',()=>{
+ const {assess}=require('../kt80/integration/kt83-vt01-v11-handoff.js');
+ const c={caseId:'case-x',generation:1,evidenceRevision:4,subject:'Установен предмет',scope:'Потвърден обхват'};
+ const evidence={caseId:c.caseId,generation:c.generation,evidenceRevision:c.evidenceRevision,
+  archiveVersion:'V11',status:'VERIFIED',applicabilityVerified:true,competenceVerified:true,
+  reasonedAssessment:'Мотиви с проверени условия',proposedAction:'Писмо за уточняване',
+  provisions:[{documentId:'v11-ref',articleRef:'чл. X',archiveSource:'локален V11',applicabilityReason:'Проверен факт'}]};
+ const result=assess(c,{evaluateCase:()=>evidence,verifyProvenance:()=>{throw Error('unavailable')}});
+ assert.equal(result.ok,false);
+ assert.equal(result.code,'PROVENANCE_UNVERIFIED');
+ assert.match(result.nextAction,/Предложение/);
 });
