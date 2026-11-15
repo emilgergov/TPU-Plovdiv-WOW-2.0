@@ -316,7 +316,12 @@ async function handleStage4Proposal(request,env){
   if(issues.length)return reply({error:"Stage 4 draft failed administrative quality gate",qualityIssues:issues},422);
   return reply({caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
    requestId:payload.requestId,projectOnly:true,expertReviewRequired:true,
-   archiveEvidenceVerified:false,draft});
+   archiveEvidenceVerified:false,draft,
+   evidenceReceipt:{documentTextsReceived:sourceTexts.length,
+    documentTextsAvailable:context.caseDocuments.sourceTextCount,
+    documentTextTruncated:context.caseDocuments.sourceTextTruncated,
+    caseFactsReceived:evidence.length,gisContextReceived:Boolean(detail.gis),
+    archiveArticleTextsReceived:0,archiveIndexRecordsReceived:sourceHints.length}});
  }catch{return reply({error:"Stage 4 AI request failed or timed out"},504)}
  finally{clearTimeout(timer)}
 }
