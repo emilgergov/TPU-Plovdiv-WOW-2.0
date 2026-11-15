@@ -1,0 +1,38 @@
+name: VT03-R1 scope unblock and single-active-panel browser acceptance
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'vt03/kt80/KT80_E01_SCOPE_UNIFIED_V568.js'
+      - 'vt03/kt80/KT83_AI_SCOPE_V572.js'
+      - 'vt03/kt80/KT84_VT03_RESCUE_V01.js'
+      - 'vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html'
+      - 'tests/kt84-vt03-r1-scope-unlock-browser.mjs'
+      - '.github/workflows/kt84-vt03-r1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify scope syntax
+        run: |
+          node --check vt03/kt80/KT80_E01_SCOPE_UNIFIED_V568.js
+          node --check vt03/kt80/KT83_AI_SCOPE_V572.js
+          node --check vt03/kt80/KT84_VT03_RESCUE_V01.js
+      - name: Install Chromium
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts playwright@1.57.0
+          npx playwright install chromium
+      - name: Serve public test copy
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/vt03-r1.log 2>&1 &
+          for n in $(seq 1 30); do curl -sf http://127.0.0.1:8765/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html >/dev/null && break; sleep 1; done
+      - name: Verify real Chromium scope unlock and gate
+        run: node tests/kt84-vt03-r1-scope-unlock-browser.mjs
