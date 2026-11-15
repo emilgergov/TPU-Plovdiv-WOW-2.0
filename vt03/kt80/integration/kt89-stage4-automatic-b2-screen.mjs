@@ -15,7 +15,7 @@ const DEFINITIONS=[
 ];
 function context(){
  const s=window.KT80WorkflowState||{},p=s.subjectConfirmed||{},e=window.KT83NormativeBridge?.getEvidence?.()||{};
- const rawKind=window.KT82UniversalStage2Result?.type;
+ const rawKind=window.KT82UniversalStage2Result?.type||window.KT82UniversalStage2Result?.kind||s.caseKind;
  const kind=rawKind==='PLAN_PROGRAM'?'plan_program':rawKind==='INVESTMENT'?'investment':'other';
  const rev=window.KT82EvidenceInvalidation?.getRevision?.()??0;
  return {s,p,e,kind,key:[s.caseCycleId||'',s.generation||'',rev,p.text||'',p.scope||'',p.expertConfirmed,p.scopeConfirmed,kind,e.spatialClass||'',e.pdfOK||false].join('~'),
@@ -49,9 +49,12 @@ function start(){
  const more=node('details');more.style.cssText='margin-top:12px';
  more.append(node('summary','Източници, доказателствени ограничения и независим контрол'));box.append(more);
  let snapshot=null,lastKey='';
+ const oldBridge=$('kt83B2CaseBridgeStage4');
+ const oldOptional=$('kt89OptionalNormChoices');
+ const oldSources=$('kt87V11Sources');
  function draw(){
   const c=context();if(lastKey===c.key)return;lastKey=c.key;
-  const defs=DEFINITIONS.filter(d=>d.kind==='all'||d.kind===c.kind||d.kind==='both'&&c.kind!=='other');
+  const defs=DEFINITIONS.filter(d=>c.kind==='other'||d.kind==='all'||d.kind===c.kind||d.kind==='both'&&c.kind!=='other');
   let assessment;
   try{assessment=buildAssessment(c,defs)}catch(error){status.textContent='Нормативният двигател не е достъпен: '+error.message;return}
   const findings=new Map(assessment.legalFindings.map(f=>[f.ruleId,f]));
@@ -81,10 +84,9 @@ function start(){
   summary.append(node('p',msg+' Изискайте конкретно липсващите технически характеристики; отделно потвърдете компетентността. Това е предварително предложение, а не определена процедура.'));
   more.replaceChildren(node('summary','Източници, доказателствени ограничения и независим контрол'));
   more.append(node('p','Проверен архив: '+LOCKED_ARCHIVE+'. Правните цитати са проверени архивни текстове; приложимостта и изключенията се оценяват за конкретната преписка.'));
-  const old=$('kt83B2CaseBridgeStage4');
-  if(old&&!more.contains(old)){const technical=node('details');technical.append(node('summary','Експертен контрол с независимия механизъм V11'));technical.append(old);more.append(technical)}
-  const optional=$('kt89OptionalNormChoices');if(optional&&!more.contains(optional))more.append(optional);
-  const legacySources=$('kt87V11Sources');if(legacySources&&!more.contains(legacySources))more.append(legacySources);
+  if(oldBridge){const technical=node('details');technical.append(node('summary','Експертен контрол с независимия механизъм V11'));technical.append(oldBridge);more.append(technical)}
+  if(oldOptional)more.append(oldOptional);
+  if(oldSources)more.append(oldSources);
   snapshot=Object.freeze({caseKey:c.key,archive:LOCKED_ARCHIVE,legalFindings:assessment.legalFindings,
    proposals:assessment.proposals,screenProposal:msg,expertApproved:false,finalProcedure:false,
    readyForStage5Draft:false,source:'stage4-independent-legal-engine.mjs'});
