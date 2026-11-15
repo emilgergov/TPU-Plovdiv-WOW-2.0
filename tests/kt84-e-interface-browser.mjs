@@ -60,6 +60,23 @@ try{
  assert.match(intake.counts,/За проверка: 1/);
  assert.match(intake.counts,/Без надеждно извлечен текст: 3/);
  assert.match(intake.next,/оригиналите/);
+ const tiles=await page.evaluate(()=>{
+  const state=window.KT80WorkflowState;
+  state.intake={files:[{name:'mock'}]};
+  window.KT83UXBatch.tileStatus();
+  const one=document.querySelector('#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="1"]');
+  const incomplete=one?.dataset.kt83State;
+  window.KT80DossierAudit={records:[{state:'TEXT_EXTRACTED'}]};
+  window.KT83UXBatch.tileStatus();
+  const complete=one?.dataset.kt83State;
+  const label=one?.getAttribute('aria-label');
+  state.intake=null;
+  window.KT83UXBatch.tileStatus();
+  return {incomplete,complete,label};
+ });
+ assert.equal(tiles.incomplete,'next','an inventory with unread documents is not finished');
+ assert.equal(tiles.complete,'done','reviewed extraction allows finished tile');
+ assert.match(tiles.label,/Изработен/);
  const before=await page.evaluate(()=>window.KT80WorkflowState.step);
  const preview=await page.evaluate(()=>{
   const result=window.KT83SafeStageFive.open();
@@ -81,5 +98,5 @@ try{
  assert.equal(preview.fullStageClone,false);
  assert.equal(preview.stage,before);
  assert.equal(errors.length,0,'no uncaught JavaScript exception');
- console.log('KT84_E_BROWSER_VISUAL_QA',JSON.stringify({legal,intake,preview,formatHelp,errors}));
+ console.log('KT84_E_BROWSER_VISUAL_QA',JSON.stringify({legal,intake,preview,formatHelp,tiles,errors}));
 }finally{await browser.close();}
