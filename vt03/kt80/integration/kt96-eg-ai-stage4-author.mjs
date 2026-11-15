@@ -58,7 +58,7 @@ function boot(){
  const cancel=make('button','Отказ');cancel.type='button';cancel.addEventListener('click',()=>{password.value='';dialog.close()});
  form.append(label,send,cancel);dialog.append(form);document.body.append(dialog);
  const target=$('kt93EvidenceTrace')||$('kt91Proposal');
- if(target)host.insertBefore(ui,target);else host.append(ui);
+ if(target?.parentNode===host)host.insertBefore(ui,target);else host.append(ui);
  // CaseCycleId is unique to this local workflow, NOT a guaranteed multi-user persistent case identifier.
  // If the private case service provides a persistent ID, use only an explicit verified binding.
  const caseIdentity=()=>{
