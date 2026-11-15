@@ -18,15 +18,20 @@ try{
   const missing=window.KT80KT53.proposition({...fake,sections:[]});
   window.KT84Feedback.notify('Предметът е потвърден успешно.',{forceTone:'success'});
   const toast=document.querySelector('#kt84FeedbackDock .kt84-feedback');
-  return {scope:withFacts.scope,empty:missing.scope,
+  return {scope:withFacts.scope,empty:missing.scope,evidence:withFacts.evidence,summary:withFacts.scopeSummary,
    hasToast:!!toast,tone:toast?.dataset.tone,
    logs:window.KT84Feedback.historyCount()};
  });
- assert.match(result.scope,/непотвърдени кандидати за дейности/);
- assert.match(result.scope,/Подмяна на съоръжения/);
- assert.match(result.scope,/test-input.pdf/);
- assert.doesNotMatch(result.scope,/^Основна дейност и обект:/);
- assert.match(result.empty,/Не са установени достатъчно надеждни описания/);
+ // KT105 preservation: expert-confirmed subject remains in concise scope;
+ // unverified candidate excerpts belong in the separate evidence map, not in the approved scope.
+ assert.match(result.scope,/Предметно определен обхват/);
+ assert.match(result.scope,/Подмяна на трансформатор/);
+ assert.doesNotMatch(result.scope,/непотвърдени кандидати за дейности|test-input\\.pdf/);
+ assert.equal(result.evidence.replacement[0].file,'test-input.pdf');
+ assert.match(result.evidence.replacement[0].excerpt,/подмяна на съществуващ/);
+ assert.ok(!result.evidence.installation,'candidate without source must not enter evidence');
+ assert.match(result.empty,/Предметно определен обхват/);
+ assert.doesNotMatch(result.empty,/test-input\\.pdf/);
  assert.equal(result.hasToast,true);
  assert.equal(result.tone,'success');
  assert.equal(result.logs,1);
