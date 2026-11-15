@@ -13,6 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Bundle Worker with verified V11 full-text sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes esbuild@0.25.12 cloudflare/ai-author-v27/src/worker.js \
+            --bundle --platform=browser --format=esm --target=es2022 \
+            --outfile=/tmp/tpu-eg-worker-kt105.mjs
+          node --check /tmp/tpu-eg-worker-kt105.mjs
+          test "$(wc -c </tmp/tpu-eg-worker-kt105.mjs)" -gt 100000
       - name: Publish isolated existing Worker via Cloudflare API
         shell: bash
         env:
@@ -29,7 +38,7 @@ jobs:
             -X PUT "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/tpu-plovdiv-ai-author-v27" \
             -H "Authorization: Bearer $CF_TOKEN" \
             -F "metadata=@$metadata;type=application/json" \
-            -F "worker.js=@cloudflare/ai-author-v27/src/worker.js;type=application/javascript+module")"
+            -F "worker.js=@/tmp/tpu-eg-worker-kt105.mjs;type=application/javascript+module")"
           echo "Cloudflare upload HTTP status: $status"
           node - "$response" <<'NODE'
           const fs = require('fs');
