@@ -1,0 +1,34 @@
+name: KT105 Stage 4 evidence-only browser acceptance
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'vt03/kt80/integration/kt96-eg-ai-stage4-author.mjs'
+      - 'vt03/kt80/integration/kt89-stage4-automatic-b2-screen.mjs'
+      - 'vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html'
+      - 'tests/kt105-stage4-human-trigger-browser.mjs'
+      - '.github/workflows/kt105-stage4-browser.yml'
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Stage 4 module syntax
+        run: node --check vt03/kt80/integration/kt96-eg-ai-stage4-author.mjs
+      - name: Install Chromium with compatible runner
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts playwright@1.57.0
+          npx playwright install chromium
+      - name: Serve actual candidate
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/kt105-browser.log 2>&1 &
+          for n in $(seq 1 30); do curl -sf http://127.0.0.1:8765/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html >/dev/null && break; sleep 1; done
+      - name: Stage 4 initial evidence and manual author control
+        run: node tests/kt105-stage4-human-trigger-browser.mjs
