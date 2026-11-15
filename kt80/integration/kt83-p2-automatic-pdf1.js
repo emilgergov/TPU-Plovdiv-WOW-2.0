@@ -42,7 +42,12 @@
       status('PDF1 не е изготвен. Предложение: проверете пространствените данни и повторете генерирането.');
      };
      // The original generator also re-verifies geometry/intersections and PDF content.
-     try{Promise.resolve(root.KT80PDF1Bridge.makePDF()).catch(releaseFailed)}
+     try{Promise.resolve(root.KT80PDF1Bridge.makePDF()).then(()=>{
+      // The approved generator can catch an error and return normally.
+      // Only the kt82:pdf1-completed receipt makes PDF1 actually complete.
+      // If no receipt arrived, unlock the attempt instead of falsely claiming success.
+      releaseFailed();
+     },releaseFailed)}
      catch(_){releaseFailed()}
      return;
     }
