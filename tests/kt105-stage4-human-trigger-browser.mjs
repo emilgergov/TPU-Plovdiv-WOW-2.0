@@ -5,7 +5,7 @@ try{
  const page=await browser.newPage({viewport:{width:1440,height:900}});
  let authorRequests=0;
  const errors=[];
- page.on('pageerror',e=>errors.push(e.message));
+ page.on('pageerror',e=>errors.push(e.stack||e.message));
  await page.route('**/stage4-proposal',route=>{authorRequests++;return route.abort('blockedbyclient')});
  await page.goto('http://127.0.0.1:8765/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html',{waitUntil:'domcontentloaded',timeout:90000});
  await page.waitForSelector('#kt96EGAuthor',{state:'attached',timeout:30000});
