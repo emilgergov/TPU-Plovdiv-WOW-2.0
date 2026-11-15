@@ -30,6 +30,20 @@ try{
  assert.equal(result.hasToast,true);
  assert.equal(result.tone,'success');
  assert.equal(result.logs,1);
+ // A legacy brown action banner must be replaced by one compact notice.
+ await page.evaluate(()=>{
+  document.getElementById('kt80FlowMessage').textContent='Автоматичната обработка приключи. Прегледайте документа.';
+  document.getElementById('kt80InputStatus').textContent='Инвентаризирани файлове: 5 · извлечен текст: 1 · за проверка: 2 · непрочетени: 2.';
+ });
+ await page.waitForTimeout(150);
+ const notices=await page.evaluate(()=>({
+  count:document.querySelectorAll('#kt84FeedbackDock .kt84-feedback').length,
+  oldHidden:document.getElementById('kt80FlowMessage').classList.contains('kt84-feedback-source-hidden'),
+  logs:window.KT84Feedback.historyCount()
+ }));
+ assert.equal(notices.count,1,'never stack action notices');
+ assert.equal(notices.oldHidden,true,'remove permanent brown flow banner');
+ assert.ok(notices.logs>=2,'retain notice history in the log');
  await page.locator('#kt80DashboardFive .kt80-dashboard-tile').nth(1).click();
  await page.waitForFunction(()=>!document.querySelector('.kt80-stage-panel[data-panel="2"]').hidden);
  await page.evaluate(()=>{
