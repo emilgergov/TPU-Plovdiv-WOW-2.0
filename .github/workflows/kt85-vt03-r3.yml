@@ -1,0 +1,35 @@
+name: VT03-R3 stage3 horizontal UI acceptance
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'vt03/kt80/KT85_VT03_STAGE3_HORIZONTAL_V01.js'
+      - 'vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html'
+      - 'tests/kt85-vt03-r3-stage3-layout-browser.mjs'
+      - '.github/workflows/kt85-vt03-r3.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check
+        run: node --check vt03/kt80/KT85_VT03_STAGE3_HORIZONTAL_V01.js
+      - name: Chromium
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts playwright@1.57.0
+          npx playwright install chromium
+      - name: Serve test
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/vt03-r3.log 2>&1 &
+          for n in $(seq 1 30); do curl -sf http://127.0.0.1:8765/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html >/dev/null && break; sleep 1; done
+      - name: Stage3 horizontal and preservation checks
+        run: node tests/kt85-vt03-r3-stage3-layout-browser.mjs
+      - name: Stage2 unchanged confirmation regression
+        run: node tests/kt84-vt03-r1-scope-unlock-browser.mjs
