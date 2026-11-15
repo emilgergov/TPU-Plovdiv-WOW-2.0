@@ -391,6 +391,8 @@ async function handleStage4Proposal(request,env){
   ].join(" ");
   const auditInput={draft,subject:payload.subject,scope:payload.scope,parcelIds,
    establishedFacts:confirmed,uncertainFacts:unresolved,
+   caseDocumentExcerpts:sourceTexts.slice(0,20).map(x=>({source:x.source,text:x.text.slice(0,2500),truncated:x.truncated||x.text.length>2500})),
+   caseDocumentRecords:documentRecords.slice(0,20),gisEvidence:detail.gis||null,
    availableLegalSummaries:context.verifiedOfflineLegalExcerpts,
    verifiedArchiveArticleHashes:context.archiveCheckedArticleHashes,
    fullArticleTextsAvailable:false};
