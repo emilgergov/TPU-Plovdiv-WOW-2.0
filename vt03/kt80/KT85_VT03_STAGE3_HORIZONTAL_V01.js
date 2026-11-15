@@ -121,5 +121,8 @@ function setup(){
  return true;
 }
 function activate(){if(setup())return;let tries=0;const timer=setInterval(()=>{tries++;if(setup()||tries>=20)clearInterval(timer)},180)}
+// The existing stage3 controller attaches the GIS root to the stage only when entered.
+// Listen for stage navigation and preserve that lifecycle.
+document.addEventListener('kt80:stage-open',e=>{if(Number(e.detail?.step)===3)setTimeout(activate,0)});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',activate,{once:true});else activate();
 })(window);
