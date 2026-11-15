@@ -106,3 +106,67 @@ test('P2 browser integration calls approved PDF1 once per case revision',()=>{
  emit('kt80:stage-open',{step:3});
  assert.equal(generated,2,'new evidence revision permits new PDF1');
 });
+
+test('KT84 FINAL: failed PDF1 generation releases its reservation for a genuine retry',async()=>{
+ const fs=require('node:fs'),vm=require('node:vm');
+ const source=fixture(),listeners=new Map(),pending=[];
+ const doc={readyState:'complete',
+  getElementById:id=>id==='kt80ParcelInput'?{value:source.ids.join('; ')}:
+    id==='kt83P1RouteText'?{textContent:''}:null,
+  addEventListener:(name,fn)=>{if(!listeners.has(name))listeners.set(name,[]);listeners.get(name).push(fn)}};
+ const root={
+  KT83P2SpatialGate:{check,pdfReceiptMatches},
+  KT80WorkflowState:{step:3,caseCycleId:source.caseId,generation:source.generation,
+   normativeGate:{expertConfirmed:true,decision:'REQUIRED'}},
+  KT82EvidenceInvalidation:{getRevision:()=>source.evidenceRevision},
+  V26ParcelEditor:{normalize:()=>({ids:source.ids,invalid:[],uncertain:[]})},
+  KT80FreeGISResults:source.live,KT80PIMaster:{getResult:()=>source.pi},
+  KT80FreeGIS:{getMap:()=>({zones:source.zones})},
+  setTimeout:()=>{throw Error('Unexpected spatial polling')}
+ };
+ root.KT80PDF1Bridge={makePDF:()=>new Promise((resolve,reject)=>pending.push({resolve,reject}))};
+ vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../kt80/integration/kt83-p2-automatic-pdf1.js'),'utf8'),
+  {window:root,document:doc,Promise});
+ const begin=()=>root.KT83P2Automatic.begin();
+ begin();begin();
+ assert.equal(pending.length,1,'one in-flight PDF1 per case and revision');
+ pending[0].reject(Error('Temporary renderer outage'));
+ await new Promise(resolve=>setImmediate(resolve));
+ begin();
+ assert.equal(pending.length,2,'failed attempt can be retried in the same case');
+ begin();
+ assert.equal(pending.length,2,'second in-flight generation cannot be duplicated');
+ pending[1].resolve();
+ await new Promise(resolve=>setImmediate(resolve));
+});
+test('KT84 FINAL: delayed failure from prior case does not clear the new case PDF1 receipt',async()=>{
+ const fs=require('node:fs'),vm=require('node:vm');
+ const source=fixture(),listeners=new Map(),pending=[];
+ const doc={readyState:'complete',
+  getElementById:id=>id==='kt80ParcelInput'?{value:source.ids.join('; ')}:
+    id==='kt83P1RouteText'?{textContent:''}:null,
+  addEventListener:(name,fn)=>{if(!listeners.has(name))listeners.set(name,[]);listeners.get(name).push(fn)}};
+ const root={
+  KT83P2SpatialGate:{check,pdfReceiptMatches},
+  KT80WorkflowState:{step:3,caseCycleId:source.caseId,generation:source.generation,
+   normativeGate:{expertConfirmed:true,decision:'REQUIRED'}},
+  KT82EvidenceInvalidation:{getRevision:()=>source.evidenceRevision},
+  V26ParcelEditor:{normalize:()=>({ids:source.ids,invalid:[],uncertain:[]})},
+  KT80FreeGISResults:source.live,KT80PIMaster:{getResult:()=>source.pi},
+  KT80FreeGIS:{getMap:()=>({zones:source.zones})},setTimeout:()=>{}
+ };
+ root.KT80PDF1Bridge={makePDF:()=>new Promise((resolve,reject)=>pending.push({resolve,reject}))};
+ vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../kt80/integration/kt83-p2-automatic-pdf1.js'),'utf8'),
+  {window:root,document:doc,Promise});
+ root.KT83P2Automatic.begin();
+ root.KT80WorkflowState.caseCycleId='case-next';
+ for(const fn of listeners.get('kt80:case-change')||[])fn({});
+ root.KT83P2Automatic.begin();
+ assert.equal(pending.length,2);
+ pending[0].reject(Error('Old dossier failed'));
+ await new Promise(resolve=>setImmediate(resolve));
+ root.KT83P2Automatic.begin();
+ assert.equal(pending.length,2,'late old failure cannot restart or duplicate new-case PDF1');
+ pending[1].resolve();
+ await new Promise(resolve=>setImmediate(resolve));
+});
