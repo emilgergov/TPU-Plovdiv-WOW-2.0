@@ -166,6 +166,11 @@ try{
    generation:1,evidenceRevision:0,requestId:'request-kt97',
    subject:'Монтаж на съоръжение',scope:'Монтаж в съществуващ обект',
    parcelIds:['56784.13.102'],
+   completeCaseEvidence:{archiveName:'p4.zip',sourceTextCount:1,sourceTextTruncated:false,
+    documents:[{file:'notification.pdf',status:'TEXT_EXTRACTED'}],
+    sourceTexts:[{source:'notification.pdf',text:'Потвърдено инвестиционно предложение: складове в ПИ 56784.13.102.',totalChars:83,truncated:false}],
+    documentRecords:[{file:'notification.pdf',readable:true}],
+    gis:{parcelIds:['56784.13.102'],spatial:'no intersection',sourceSummary:[]}},
    evidence:[{factId:'subject_confirmed',value:'true',status:'established',
     sourceId:'KT83',sourceLocation:'Етап 2',description:'Потвърден предмет'},
     {factId:'spatial_intersection',value:'unknown',status:'missing',
@@ -199,6 +204,10 @@ try{
   assert.ok(stage4Data.draft.length>120);
   assert.equal(stage4Context.sourceHints[0].applicabilityVerified,false);
   assert.equal(stage4Context.archiveTextProvided,false);
+  assert.equal(stage4Context.caseDocuments.sourceTexts[0].source,'notification.pdf');
+  assert.match(stage4Context.caseDocuments.sourceTexts[0].text,/56784\\.13\\.102/);
+  assert.equal(stage4Context.caseDocuments.sourceTexts[0].verified,false);
+  assert.equal(stage4Context.gisAnalysis.spatial,'no intersection');
   assert.equal(stage4Context.uncertainFacts[0].status,'missing');
   assert.equal(stage4Calls,1);
   console.log('PASS: KT97 Stage 4 protected route, CORS, evidence contract, case identity and archive honesty.');
