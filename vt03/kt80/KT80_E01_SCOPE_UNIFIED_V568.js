@@ -70,6 +70,33 @@ function init(){
      });
    }
  });
+ // VT03 correction: an explicit, reversible scope-only unlock. Never unfix subject.
+ const unlock=document.createElement('button');
+ unlock.type='button';unlock.id='kt84ScopeUnlock';
+ unlock.textContent='Отмени потвърждението и редактирай обхвата';
+ unlock.className='kt84-scope-unlock';unlock.hidden=true;
+ const approvalLabel=confirmation.closest('label')||confirmation.parentElement;
+ approvalLabel?.insertAdjacentElement('afterend',unlock);
+ const updateUnlock=()=>{unlock.hidden=!confirmation.checked||!$('kt80SubjectConfirmation')?.checked};
+ unlock.addEventListener('click',()=>{
+  if(!$('kt80SubjectConfirmation')?.checked)return;
+  if(dialog.open)dialog.close();
+  confirmation.checked=false;
+  confirmation.dispatchEvent(new Event('change',{bubbles:true}));
+  scope.readOnly=false;
+  const edit=$('kt80EditScope');if(edit)edit.disabled=false;
+  root.KT80ScopeLock?.sync?.();
+  status.textContent='Потвърждението на обхвата е отменено. Предметът остава потвърден. Редактирайте и потвърдете обхвата отново.';
+  updateUnlock();scope.focus();
+ });
+ confirmation.addEventListener('change',updateUnlock);
+ $('kt80SubjectConfirmation')?.addEventListener('change',updateUnlock);
+ document.addEventListener('kt80:case-change',updateUnlock);
+ document.addEventListener('kt80:case-reset',updateUnlock);
+ // Other modules sometimes synchronize checkboxes without dispatching change.
+ const unlockObserver=new MutationObserver(updateUnlock);
+ unlockObserver.observe(approvalLabel||confirmation,{attributes:true,subtree:true,attributeFilter:['class','disabled']});
+ updateUnlock();
  const dialog=document.createElement('dialog');dialog.id='kt80V562Confirm';dialog.className='kt80-v562-dialog';
  const heading=document.createElement('h3');heading.textContent='Потвърждение на окончателния обхват';
  const explanation=document.createElement('p');explanation.textContent='Прочетете текста по-долу. Потвърждаването се отнася точно за него, а не за предложения, останали неприети.';
@@ -83,7 +110,7 @@ function init(){
  row.append(back,yes);dialog.append(heading,explanation,preview,checks,row);document.body.append(dialog);
  let captured='';
  check.addEventListener('change',()=>{yes.disabled=!check.checked});
- back.addEventListener('click',()=>dialog.close());
+ back.addEventListener('click',()=>{dialog.close();check.checked=false;yes.disabled=true;status.textContent='Потвърждението не е променено. За редакция на вече потвърден обхват използвайте „Отмени потвърждението и редактирай обхвата“.';updateUnlock()});
  yes.addEventListener('click',()=>{
   if(!check.checked||!captured||scope.value!==captured||!$('kt80SubjectConfirmation')?.checked){
    dialog.close();status.textContent='Текстът или предметът е променен. Прегледайте отново окончателния обхват.';return;
