@@ -70,8 +70,8 @@ try{
  });
  assert.equal(legalHandoff.before,'FULL_GIS_PDF1',
   'Stage4 must receive verified GIS + real PDF1');
- assert.notEqual(legalHandoff.after,'FULL_GIS_PDF1',
-  'Stage4 must reject PDF1 when PI MASTER no longer proves all parcels');
+ assert.equal(legalHandoff.after,'GIS_INCOMPLETE',
+  'Stage4 must not label GIS fully verified when PI MASTER is incomplete');
  assert.equal(legalHandoff.afterPdf,false);
  assert.equal(legalHandoff.restored,'FULL_GIS_PDF1');
 
