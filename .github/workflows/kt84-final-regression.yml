@@ -4,6 +4,8 @@ on:
     branches: [kt83-vt01-automatic-route-p1]
     paths:
       - 'kt80/KT80_E01_IP_MASTER_SUBJECT_V32.js'
+      - 'kt80/KT83_WORKFLOW_CASE_V591.js'
+      - 'kt80/KT80_E01_KT52_PROJECT_RECONSTRUCTION_V52.js'
       - 'tests/kt84-final-dossier-subject-provenance.test.mjs'
       - '.github/workflows/kt84-final-regression.yml'
   workflow_dispatch:
@@ -21,6 +23,8 @@ jobs:
       - name: Syntax of active dossier and subject modules
         run: |
           node --check kt80/KT80_E01_IP_MASTER_SUBJECT_V32.js
+          node --check kt80/KT83_WORKFLOW_CASE_V591.js
+          node --check kt80/KT80_E01_KT52_PROJECT_RECONSTRUCTION_V52.js
           node --check kt80/KT82_DOSSIER_COMPLETENESS_V34.js
           node --check kt80/KT82_E01_SAFE_ZIP_INTAKE_V35.js
       - name: Unified dossier provenance and normative safety tests
