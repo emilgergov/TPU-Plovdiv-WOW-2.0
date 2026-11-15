@@ -69,7 +69,14 @@ export function createKT83V611Bridge(root){
   if(!Array.isArray(competenceEvidence)||competenceEvidence.some(e=>
    !clean(e?.sourceId)||!clean(e?.factId)||!clean(e?.archiveOrDossierOrigin)))
    throw new TypeError('Компетентността изисква проверим доказателствен източник');
-  const outcome=draftWithCompetenceGate({stage4:evaluated.outcome,authorityClaim:confirmedCompetence,competenceEvidence,fee});
+  // The browser preview consults the same independently reviewed, case-bound
+  // V11 provider. A missing/unavailable provider remains strictly unverified.
+  const context={caseId:now.caseId,generation:now.generation,
+   evidenceRevision:now.evidenceRevision,subject:now.record.confirmedSubject,
+   scope:now.record.scopeTextDraft};
+  const outcome=draftWithCompetenceGate({stage4:evaluated.outcome,
+   authorityClaim:confirmedCompetence,competenceEvidence,fee,
+   caseContext:context,v11Verifier:root.KT83NormativeArchiveV11||null});
   const after=snapshot(root);
   if(after.signature!==evaluated.signature||after.liveRef!==evaluated.liveRef)throw new Error('Преписката се промени по време на изготвяне на предложението');
   return outcome;
