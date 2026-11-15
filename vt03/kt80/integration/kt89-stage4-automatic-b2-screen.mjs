@@ -33,6 +33,26 @@ function reviewedCase(c){
  const r=provider.getCaseReview?.(ctx);
  return r&&provider.verifyCaseReview?.(r,ctx)===true?r:null;
 }
+/* KT93: collect only case-bound, provenance-labelled facts already established
+ * by earlier stages. A confirmed fact is not proof of legal applicability.
+ * Never infer the nature of an activity from the dossier title. */
+function caseEvidence(c){
+ const facts=[],add=(factId,value,sourceId,sourceType,sourceLocation)=>{
+  if(value==='true'||value==='false')facts.push({factId,value,sourceId,sourceType,sourceLocation});
+ };
+ if(c.p.expertConfirmed===true&&c.p.text)
+  add('subject_confirmed','true','KT83:subjectConfirmed','expert-confirmation','Етап 2 · потвърден предмет');
+ if(c.p.scopeConfirmed===true&&c.p.scope)
+  add('scope_confirmed','true','KT83:scopeConfirmed','expert-confirmation','Етап 2 · потвърден обхват');
+ if(c.e.pdfOK===true)
+  add('pdf1_created','true','KT82:PDF1','GIS-document','Етап 3 · PDF1; проверете оригиналния документ');
+ // Only a confirmed spatial classification is factual; absence of
+ // intersection does not disprove an indirect impact or exempt OS.
+ if(c.e.pdfOK===true&&(c.spatial==='OUTSIDE'||c.spatial==='INSIDE'))
+  add('spatial_intersection',c.spatial==='INSIDE'?'true':'false',
+      'KT83:spatialClass','GIS-result','Етап 3 · '+c.ids.join(', '));
+ return facts;
+}
 function buildAssessment(c,defs){
  const review=reviewedCase(c);
  if(review){
@@ -50,7 +70,7 @@ function buildAssessment(c,defs){
  }));
  // Until a case-reviewed packet exists, no legal prerequisites are proved.
  const result=assessStage4({confirmedSubject:c.p.expertConfirmed===true?c.p.text:'',
-   scopeConfirmed:c.p.scopeConfirmed===true,evidence:[],rules});
+   scopeConfirmed:c.p.scopeConfirmed===true,evidence:caseEvidence(c),rules});
  return {result,review:null,mode:'unverified'};
 }
 function start(){
@@ -63,6 +83,9 @@ function start(){
  note.style.cssText='font-size:13px;margin:0 0 12px;line-height:1.45';box.append(note);
  const status=node('div');status.setAttribute('role','status');status.style.cssText='border-left:4px solid #d8b677;background:#254d3a;padding:10px;line-height:1.45;margin-bottom:10px';box.append(status);
  const cards=node('div');cards.style.cssText='display:grid;gap:7px';
+ const trace=node('div');trace.id='kt93EvidenceTrace';
+ trace.style.cssText='padding:12px;border:1px solid #77917d;background:#214635;border-radius:8px;margin:8px 0 12px;line-height:1.5';
+ box.append(trace);
  const summary=node('div');summary.id='kt91Proposal';summary.style.cssText='margin:0 0 12px;padding:14px;border-left:5px solid #dbbb7b;border-radius:8px;background:#254d3a;color:#ffffff;line-height:1.5;font-size:16px';box.append(summary);
  const contrast=node('style');contrast.textContent='#kt91Proposal{background:#254d3a !important;color:#ffffff !important;opacity:1 !important}#kt91Proposal,#kt91Proposal *{color:#ffffff !important;opacity:1 !important;visibility:visible !important;text-shadow:none !important;-webkit-text-fill-color:#ffffff !important}#kt91Proposal strong{font-weight:800 !important}#kt91Proposal p{margin:9px 0 !important;line-height:1.5 !important}#kt91Stage4 details>summary{cursor:pointer}';box.prepend(contrast);
  const hypotheses=node('details');hypotheses.style.cssText='border:1px solid #678873;border-radius:8px;padding:9px';hypotheses.append(node('summary','Конкуриращи правни хипотези · подробна проверка'));hypotheses.append(cards);box.append(hypotheses);
@@ -96,9 +119,28 @@ function start(){
    ' · ПИ: '+(c.ids.join(', ')||'няма въведени')+
    ' · ГИС: '+(c.spatial==='OUTSIDE'?'пространствено непресичане':c.spatial==='INSIDE'?'пространствено пресичане':'недостатъчна квалификация')+
    ' · PDF1: '+(c.e.pdfOK?'отчетен':'неудостоверен')+
-   ' · Правни доказателства с произход: '+(actual?packet.review.legalFacts.length:0)+
+   ' · Потвърдени входни доказателства: '+caseEvidence(c).length+' · Експертно приети правни факти: '+(actual?packet.review.legalFacts.length:0)+
    (actual?' · проверен пакет V11':' · необходим е преглед на първичните източници')+
    '. Входните факти не се редактират в Етап 4.';
+  // Evidence trace is always visible, unlike the advanced expert editors.
+  trace.replaceChildren(node('strong','ДОКАЗАТЕЛСТВА → ПРАВНИ ПРЕДПОСТАВКИ'));
+  const established=caseEvidence(c);
+  const legal=actual?packet.review.legalFacts:[];
+  const evidenceList=node('div');evidenceList.style.cssText='display:grid;gap:5px;margin-top:7px;font-size:13px';
+  for(const f of established){
+   evidenceList.append(node('div','Установен факт: '+f.factId+' = '+f.value+
+    ' · Източник: '+f.sourceId+' · '+f.sourceLocation));
+  }
+  for(const f of legal){
+   evidenceList.append(node('div','Правен доказателствен факт: '+f.factId+' = '+f.value+
+    ' · Източник: '+f.sourceId+' · '+(f.sourceLocation||'място в оригинала не е посочено')));
+  }
+  if(!established.length&&!legal.length)
+   evidenceList.append(node('div','Няма потвърдени входни факти с проследим източник.'));
+  trace.append(evidenceList);
+  trace.append(node('p',actual?
+   'Правните условия са проверени в експертно приетия пакет за текущата преписка.':
+   'Правните предпоставки за ОВОС, ОС, ЕО и компетентност още НЕ са доказани от първични документи. Потвърден предмет или ГИС непресичане не ги замества.'));
   cards.replaceChildren();
   for(const def of (actual?assessment.legalFindings.map(f=>({id:f.ruleId,title:f.title,ref:f.basis?.registryId,question:'Проверка на установените предпоставки и изключения по тази норма.',action:f.proposedAction})):defs)){
    const finding=findings.get(def.id);
@@ -111,6 +153,9 @@ function start(){
    const state=node('div','Автоматична оценка: '+(finding?({'supported':'ПОДКРЕПЕНА','not_supported':'НЕПОДКРЕПЕНА','undetermined':'НЕУСТАНОВЕНА','disputed':'ПРОТИВОРЕЧИВА'}[finding.state]):'НЕУСТАНОВЕНА — липсва удостоверена пълна норма'));
    state.style.cssText='font-weight:700;margin:6px 0';card.append(state);
    card.append(node('div',def.question),node('p','Следващо действие: '+def.action));
+   // Show the factual gap per legal rule, not only when the user opens JSON.
+   if(finding?.missingEvidenceIds?.length)
+    card.append(node('p','Неустановени правни предпоставки: '+finding.missingEvidenceIds.join(', ')+'.'));
    if(actual&&finding){
     const sources=finding.evidenceIds.flatMap(id=>(assessment.evidence[id]?.observations||[]).map(o=>id+': '+o.value+' · '+o.sourceType+' / '+o.sourceId+(o.sourceLocation?' · '+o.sourceLocation:'')));
     card.append(node('p',sources.length?'Доказателствена следа: '+sources.join(' | '):'Липсва доказателствена следа за предпоставките.'));
