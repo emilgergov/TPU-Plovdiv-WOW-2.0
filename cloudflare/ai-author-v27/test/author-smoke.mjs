@@ -149,6 +149,60 @@ try{
   assert.equal(rejectedCalls,2);
   console.log('PASS: A/B legal and Natura 2000 terminology revision, and fail-closed unresolved quality checks.');
 
+
+  // KT97: real client-shaped Stage 4 request, with no secrets and no paid AI call.
+  let stage4Calls=0,stage4Context=null;
+  globalThis.fetch=async (_url,opts)=>{
+    stage4Calls++;
+    const sent=JSON.parse(opts.body);
+    stage4Context=JSON.parse(sent.input[1].content);
+    assert.equal(sent.store,false);
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',
+      text:'Фактическа основа\\nПотвърден е предметът и обхватът на конкретното предложение.\\n\\nНормативни предпоставки и граници на проверката\\nАрхивните указатели не удостоверяват приложимостта на нормите.\\n\\nМотивирано предложение\\nПредлага се проверка на конкретните правни предпоставки по наличните доказателства.\\n\\nДанни за експертна проверка\\nПроверява се наличният нормативен текст и относимостта му към предмета.'}]}]}),{status:200});
+  };
+  const stage4Url='https://example.test/stage4-proposal';
+  const stage4Body={task:'draft_normative_proposal',documentType:'PROJECT_NOT_ACT',
+   caseId:'case-KT97-001',caseIdType:'local-cycle',localCycleId:'case-KT97-001',
+   generation:1,evidenceRevision:0,requestId:'request-kt97',
+   subject:'Монтаж на съоръжение',scope:'Монтаж в съществуващ обект',
+   parcelIds:['56784.13.102'],
+   evidence:[{factId:'subject_confirmed',value:'true',status:'established',
+    sourceId:'KT83',sourceLocation:'Етап 2',description:'Потвърден предмет'},
+    {factId:'spatial_intersection',value:'unknown',status:'missing',
+    sourceId:'KT83',sourceLocation:'Етап 3',description:'ГИС не е потвърден'}],
+   archive:{name:'V11',sha256:'example',archivedTextIncluded:false,
+    verifiedReferences:[{id:'ZOOS_93',act:'ЗООС',article:'чл. 93',textAnchor:'текстов указател',
+     citationVerified:true,applicabilityVerified:false}]},
+   constraints:{expertApprovalRequired:true,neverIssueAct:true,noInventedFacts:true}};
+  const stage4Post=(auth,body,origin='https://emilgergov.github.io')=>
+   new Request(stage4Url,{method:'POST',headers:{Origin:origin,
+    'Content-Type':'application/json',...(auth?{Authorization:'Bearer '+auth}:{})},
+    body:JSON.stringify(body)});
+  const stage4Preflight=await worker.fetch(new Request(stage4Url,{method:'OPTIONS',
+   headers:{Origin:'https://emilgergov.github.io'}}),env);
+  assert.equal(stage4Preflight.status,204);
+  assert.equal(stage4Preflight.headers.get('Access-Control-Allow-Origin'),'https://emilgergov.github.io');
+  const noStage4Auth=await worker.fetch(stage4Post(null,stage4Body),env);
+  assert.equal(noStage4Auth.status,401);assert.equal(stage4Calls,0);
+  const malformedStage4=await worker.fetch(stage4Post('test-access-token',
+   {...stage4Body,caseId:''}),env);
+  assert.equal(malformedStage4.status,400);assert.equal(stage4Calls,0);
+  const stage4Response=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+  assert.equal(stage4Response.status,200);
+  const stage4Data=await stage4Response.json();
+  assert.equal(stage4Data.caseId,stage4Body.caseId);
+  assert.equal(stage4Data.evidenceRevision,stage4Body.evidenceRevision);
+  assert.equal(stage4Data.requestId,stage4Body.requestId);
+  assert.equal(stage4Data.projectOnly,true);
+  assert.equal(stage4Data.expertReviewRequired,true);
+  assert.equal(stage4Data.archiveEvidenceVerified,false);
+  assert.ok(stage4Data.draft.length>120);
+  assert.equal(stage4Context.sourceHints[0].applicabilityVerified,false);
+  assert.equal(stage4Context.archiveTextProvided,false);
+  assert.equal(stage4Context.uncertainFacts[0].status,'missing');
+  assert.equal(stage4Calls,1);
+  console.log('PASS: KT97 Stage 4 protected route, CORS, evidence contract, case identity and archive honesty.');
+
   console.log('PASS: health, unauthorized access, invalid input, classic and expert AI drafting (mock provider).');
   console.log('No real OpenAI API calls made; live generation still requires separate verification.');
 } finally {globalThis.fetch=savedFetch}
