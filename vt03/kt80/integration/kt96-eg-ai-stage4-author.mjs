@@ -12,7 +12,7 @@ const $=id=>document.getElementById(id);
 const make=(tag,txt)=>{const n=document.createElement(tag);if(txt!==undefined)n.textContent=txt;return n;};
 const str=x=>String(x??'').trim();
 function boot(){
- const host=$('kt91Stage4');if(!host||$('kt96EGAuthor'))return false;
+ const host=document.querySelector('.kt80-stage-panel[data-panel="4"]');if(!host||$('kt96EGAuthor'))return false;
  const ui=make('section');ui.id='kt96EGAuthor';ui.style.cssText='padding:14px;margin:12px 0;border:2px solid #c9aa6b;border-radius:9px;background:#143c2b;color:#f7f0db';
  ui.append(make('h3','EG AI Автор · проект за Етап 4'));
  const evidenceBox=make('section');evidenceBox.id='kt105EvidenceOverview';evidenceBox.style.cssText='margin:12px 0;padding:12px;background:#244b36;border-radius:8px;line-height:1.5';
@@ -31,7 +31,7 @@ function boot(){
   ].filter(Boolean).join(' · ')));
   evidenceBox.append(line('Етап 2 · Потвърден предмет',p.expertConfirmed===true?str(p.text):'НЯМА ПОТВЪРДЕН ПРЕДМЕТ'));
   evidenceBox.append(line('Етап 2 · Потвърден обхват',p.scopeConfirmed===true?str(p.scope):'НЯМА ПОТВЪРДЕН ОБХВАТ'));
-  const stable=h.observations.filter(x=>x.status==='established'&&x.factId!=='subject_confirmed'&&x.factId!=='scope_confirmed');
+  const stable=h.observations.filter(x=>x.status==='established'&&x.factId!=='subject_confirmed'&&x.factId!=='scope_confirmed'&&typeof x.value!=='boolean'&&x.factId!=='case_cycle_unique');
   const parcels=h.parcelIds?.length?'Имот(и): '+h.parcelIds.join(', '):'Имот(и): НЯМА ДАННИ';
   evidenceBox.append(line('Етап 3 · Имоти и пространствени данни',parcels+'\n'+stable.slice(0,14).map(x=>str(x.description||x.factId)+': '+str(x.value)).join(' · ')));
  }
@@ -47,7 +47,9 @@ function boot(){
  // KT105: keep the older normative engine running for independent checks,
  // but do not show its automatic proposals before or after the expert calls EG.
  const legacyVisibility=make('style');
- legacyVisibility.textContent='#kt91Stage4 > :not(#kt96EGAuthor){display:none !important}';
+ legacyVisibility.textContent='.kt80-stage-panel[data-panel="4"] > :not(#kt96EGAuthor){display:none !important}'+
+  '.kt80-stage-panel[data-panel="4"]{display:block !important;max-width:none !important}'+
+  '#kt96EGAuthor{width:100%;max-width:1100px;margin:10px auto !important}';
  ui.prepend(legacyVisibility);
  const dialog=make('dialog');dialog.id='kt96EGPassword';dialog.style.cssText='background:#193b2d;color:#fff3db;border:1px solid #d9b874;border-radius:10px;padding:20px;max-width:460px';
  const form=make('form');form.method='dialog';
@@ -57,8 +59,7 @@ function boot(){
  const send=make('button','Изготви проект');send.type='submit';
  const cancel=make('button','Отказ');cancel.type='button';cancel.addEventListener('click',()=>{password.value='';dialog.close()});
  form.append(label,send,cancel);dialog.append(form);document.body.append(dialog);
- const target=$('kt93EvidenceTrace')||$('kt91Proposal');
- if(target?.parentNode===host)host.insertBefore(ui,target);else host.append(ui);
+ host.prepend(ui);
  // CaseCycleId is unique to this local workflow, NOT a guaranteed multi-user persistent case identifier.
  // If the private case service provides a persistent ID, use only an explicit verified binding.
  const caseIdentity=()=>{
@@ -212,13 +213,23 @@ function boot(){
    if(response.status===401||response.status===403){status.textContent='Достъпът до EG Автора е отказан. Паролата за тази сесия е изчистена.';return;}
    if(!response.ok){
     const findings=Array.isArray(data.reviewFindings)?data.reviewFindings.slice(0,5).map(x=>str(x)).filter(Boolean):[];
+    const labels={
+      MISSING_OR_UNORDERED_SECTIONS:'Непълни или разместени задължителни раздели',
+      INCORRECT_COMPATIBILITY_TERMINOLOGY:'Неточна терминология за оценката за съвместимост',
+      CONFUSED_ZOOS_AND_EIA_ANNEX_2:'Смесени приложения към ЗООС и Наредбата за ОВОС',
+      UNJUSTIFIED_BROAD_DOCUMENT_REQUEST:'Необосновано искане за допълнителни документи',
+      MISCHARACTERIZED_OS_ART_2_2_AS_SCREENING:'Неточна правна характеристика на чл. 2, ал. 2 от Наредбата за ОС',
+      INDEPENDENT_REJECTION:'Независимият преглед не приема правните мотиви',
+      REVIEW_REVISION_INVALID:'Поправеният проект не премина нормативния контрол'
+    };
+    const issues=Array.isArray(data.qualityIssues)?data.qualityIssues.map(x=>labels[x]||'Неприет нормативен елемент').slice(0,6):[];
     status.textContent=response.status===413?
-      'Пакетът надхвърля лимита на EG услугата въпреки ограничаването на откъсите.':
+      'Преписката надхвърля допустимия технически обем на заявката.':
       response.status===422?
-      'Независимият нормативен контрол не допусна показване на непроверен проект. '+(data.error||'')+
-      (findings.length?' Причини: '+findings.join('; '):''):
-      'EG услугата не генерира проект (код '+response.status+'). '+(data.error||'')+
-      ' Не показвам програмиран текст като AI резултат.';
+      'Проектът не премина нормативната проверка'+(issues.length?': '+issues.join('; '):'.')+
+      (findings.length?' Констатации: '+findings.join('; '):'')+
+      '. Не се показва непроверен текст.':
+      'EG Авторът не изготви проект (код '+response.status+'). Проверете връзката или възложете повторно.';
     return;
    }
    if(data.caseId!==identity.caseId||data.evidenceRevision!==h.evidenceRevision||data.requestId!==requestId){
@@ -257,7 +268,7 @@ function boot(){
    const reviewInfo=audit.reviewed===true?
     (audit.reviewVerdict==='revise'?'Поправен след вторичен независим нормативен преглед. ':'Преминал вторичен независим преглед за логическа съгласуваност. '):
     'Независим нормативен преглед не е удостоверен. ';
-   status.textContent=reviewInfo+'Пълният нормативен текст V11 все още не е достъпен за сървърния автор; цитатите и приложимостта подлежат на експертна проверка.';
+   status.textContent=reviewInfo+(audit.fullArticlesVerified===true?'Относимите пълни нормативни текстове от MASTER V11 са предоставени. Правната приложимост подлежи на експертно потвърждение.':'Пълните нормативни текстове не са удостоверени като използвани; необходима е експертна проверка.');
    button.textContent='Преработи проект с EG Автора';
   }catch(err){
    if(ticket===serial)status.textContent='Няма потвърден отговор от EG Автора: '+(String(err?.message||err)==='Failed to fetch'?
