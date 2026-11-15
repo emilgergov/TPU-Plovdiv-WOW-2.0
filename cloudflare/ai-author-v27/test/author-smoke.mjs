@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 const source = await readFile(new URL('../src/worker.js', import.meta.url), 'utf8');
-const worker = (await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'))).default;
+const worker = (await import(new URL('../src/worker.js', import.meta.url))).default;
 const savedFetch=globalThis.fetch;
 const sampleDraft=[
  '[[CHARACTERIZATION]]',
