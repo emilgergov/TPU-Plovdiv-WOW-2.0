@@ -48,7 +48,7 @@ function boot(){
  // but do not show its automatic proposals before or after the expert calls EG.
  const legacyVisibility=make('style');
  legacyVisibility.textContent='.kt80-stage-panel[data-panel="4"] > :not(#kt96EGAuthor){display:none !important}'+
-  '.kt80-stage-panel[data-panel="4"]{display:block !important;max-width:none !important}'+
+  '.kt80-stage-panel[data-panel="4"]{max-width:none !important}'+
   '#kt96EGAuthor{width:100%;max-width:1100px;margin:10px auto !important}';
  ui.prepend(legacyVisibility);
  const dialog=make('dialog');dialog.id='kt96EGPassword';dialog.style.cssText='background:#193b2d;color:#fff3db;border:1px solid #d9b874;border-radius:10px;padding:20px;max-width:460px';
