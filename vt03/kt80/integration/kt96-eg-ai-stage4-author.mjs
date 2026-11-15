@@ -99,6 +99,44 @@ function boot(){
    }
   };
  }
+
+ // KT102: measure UTF-8 bytes rather than JS characters. Cyrillic is multi-byte.
+ // Keep all legal/factual identities and the source list; reduce redundant excerpts first.
+ const stageBytes=x=>new TextEncoder().encode(JSON.stringify(x)).length;
+ function fitStage4Request(req){
+  const d=req.completeCaseEvidence;
+  const cap=85000;
+  let bytes=stageBytes(req),passes=0;
+  if(bytes<=cap)return {payload:JSON.stringify(req),bytes,reduced:false};
+  while(bytes>cap&&passes++<24){
+   let changed=false;
+   if(d.pageTexts?.length){d.pageTexts=d.pageTexts.slice(0,Math.floor(d.pageTexts.length/2));changed=true;}
+   else if(d.sourceTexts?.some(x=>x.text.length>500)){
+    const items=[...d.sourceTexts].sort((a,b)=>b.text.length-a.text.length);
+    const largest=items[0];const take=Math.max(500,Math.floor(largest.text.length/2));
+    largest.text=largest.text.slice(0,take);largest.truncated=true;
+    d.sourceTextTruncated=true;changed=true;
+   }else if(d.subjectCandidates?.length>3){
+    d.subjectCandidates=d.subjectCandidates.slice(0,Math.ceil(d.subjectCandidates.length/2));changed=true;
+   }else if(d.dossierEvidence?.length>5){
+    d.dossierEvidence=d.dossierEvidence.slice(0,Math.ceil(d.dossierEvidence.length/2));changed=true;
+   }else if(d.documentRecords?.some(x=>x.facts?.length>2)){
+    for(const rec of d.documentRecords)if(rec.facts?.length>2)rec.facts=rec.facts.slice(0,Math.ceil(rec.facts.length/2));
+    changed=true;
+   }else if(d.semanticReview){
+    d.semanticReview=null;changed=true;
+   }else if(d.gis?.piMaster?.length>300){
+    d.gis.piMaster=d.gis.piMaster.slice(0,Math.floor(d.gis.piMaster.length/2));changed=true;
+   }else if(d.gis?.spatial?.length>300){
+    d.gis.spatial=d.gis.spatial.slice(0,Math.floor(d.gis.spatial.length/2));changed=true;
+   }else if(d.gis?.stage3?.length>300){
+    d.gis.stage3=d.gis.stage3.slice(0,Math.floor(d.gis.stage3.length/2));changed=true;
+   }
+   if(!changed)break;
+   bytes=stageBytes(req);
+  }
+  return {payload:bytes<=cap?JSON.stringify(req):null,bytes,reduced:true};
+ }
  let serial=0,pendingSignature='',finishedSignature='',lastResult=null;
  const clear=()=>{
   serial++;pendingSignature='';finishedSignature='';lastResult=null;password.value='';
@@ -134,11 +172,22 @@ function boot(){
     legalAppplicabilityMustBeVerified:true,neverIssueAct:true}
   };
   try{
-   const response=await window.KT80EGSession.request(ENDPOINT,JSON.stringify(request),firstPassword);
+   const prepared=fitStage4Request(request);
+   if(!prepared.payload){
+    status.textContent='Доказателственият пакет е твърде голям и не може да бъде изпратен безопасно. Размер: '+prepared.bytes+' байта.';
+    return;
+   }
+   const response=await window.KT80EGSession.request(ENDPOINT,prepared.payload,firstPassword);
    const data=await response.json().catch(()=>({}));
    if(ticket!==serial||pendingSignature!==caseIdentity().signature)return;
    if(response.status===401||response.status===403){status.textContent='Достъпът до EG Автора е отказан. Паролата за тази сесия е изчистена.';return;}
-   if(!response.ok){status.textContent='EG услугата не генерира проект (код '+response.status+'). Не показвам програмиран текст като AI резултат.';return;}
+   if(!response.ok){
+    status.textContent=response.status===413?
+      'Пакетът надхвърля лимита на EG услугата въпреки ограничаването на откъсите.':
+      'EG услугата не генерира проект (код '+response.status+'). '+(data.error||'')+
+      ' Не показвам програмиран текст като AI резултат.';
+    return;
+   }
    if(data.caseId!==identity.caseId||data.evidenceRevision!==h.evidenceRevision||data.requestId!==requestId){
     status.textContent='Отхвърлен е AI отговор без потвърдена идентичност на преписката, заявката и редакцията.';return;
    }
