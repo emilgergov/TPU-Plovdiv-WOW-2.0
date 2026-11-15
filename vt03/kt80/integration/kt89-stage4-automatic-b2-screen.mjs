@@ -44,8 +44,9 @@ function start(){
  const note=node('p','Съпоставка на входните факти с всички активни групи хипотези. Неустановеното не е отрицателен факт. Предложение се извежда и при непълни данни.');
  note.style.cssText='font-size:13px;margin:0 0 12px;line-height:1.45';box.append(note);
  const status=node('div');status.setAttribute('role','status');status.style.cssText='border-left:4px solid #d8b677;background:#254d3a;padding:10px;line-height:1.45;margin-bottom:10px';box.append(status);
- const cards=node('div');cards.style.cssText='display:grid;gap:8px';box.append(cards);
- const summary=node('div');summary.style.cssText='margin-top:12px;padding:12px;border:1px solid #87a18b;border-radius:8px;background:#244a38;line-height:1.5';box.append(summary);
+ const cards=node('div');cards.style.cssText='display:grid;gap:7px';
+ const summary=node('div');summary.style.cssText='margin:0 0 12px;padding:12px;border-left:5px solid #dbbb7b;border-radius:8px;background:#eaf0e8;color:#193b2c;line-height:1.5;font-size:16px';box.append(summary);
+ const hypotheses=node('details');hypotheses.style.cssText='border:1px solid #678873;border-radius:8px;padding:9px';hypotheses.append(node('summary','Конкуриращи правни хипотези · подробна проверка'));hypotheses.append(cards);box.append(hypotheses);
  const more=node('details');more.style.cssText='margin-top:12px';
  more.append(node('summary','Източници, доказателствени ограничения и независим контрол'));box.append(more);
  let snapshot=null,lastKey='';
@@ -66,8 +67,8 @@ function start(){
   cards.replaceChildren();
   for(const def of defs){
    const finding=findings.get(def.id);
-   const card=node('div');card.style.cssText='background:#234a38;border:1px solid #668573;border-radius:8px;padding:10px';
-   const title=node('strong',def.title);title.style.cssText='display:block;font-size:15px;color:#efd18f';card.append(title);
+   const card=node('details');card.style.cssText='background:#234a38;border:1px solid #668573;border-radius:8px;padding:8px 10px';
+   const title=node('summary',def.title+' · '+(finding?({'supported':'подкрепена','not_supported':'неподкрепена','undetermined':'неустановена','disputed':'противоречива'}[finding.state]):'неустановена'));title.style.cssText='font-size:14px;font-weight:700;color:#efd18f;cursor:pointer';card.append(title);
    const citation=def.ref&&VERIFIED_ARTICLES[def.ref];
    const source=node('div',citation?'V11: '+citation.act+' · '+citation.article+' · '+citation.archivePath:
      'Необходима е конкретна проверка в пълния V11 — удостоверен цитат за цялата хипотеза липсва в ограничения индекс.');
@@ -76,12 +77,16 @@ function start(){
    state.style.cssText='font-weight:700;margin:6px 0';card.append(state);
    card.append(node('div',def.question),node('p','Следващо действие: '+def.action));cards.append(card);
   }
-  summary.replaceChildren(node('strong','Автоматично мотивирано предложение'));
+  summary.replaceChildren(node('strong','ПРОЦЕДУРНО ПРЕДЛОЖЕНИЕ · за експертен преглед'));
+  hypotheses.querySelector('summary').textContent='Конкуриращи правни хипотези · '+defs.length+' проверки (разгърнете при необходимост)';
   summary.append(node('p',c.confirmed?'Входните предмет и обхват са потвърдени от експерта.':'Потвърдете предмета и обхвата в Етап 2, преди окончателната експертна преценка.'));
-  const msg=c.kind==='investment'?'Проверете конкурентно режимите по приложения № 1 и № 2 към ЗООС и относимия ред за ОС.':
-    c.kind==='plan_program'?'Проверете режимите за екологична оценка и ОС, включително изключенията и възможната координация.':
-    'Установете вида на административния вход; не се избира инвестиционна или планова процедура без доказан предмет.';
-  summary.append(node('p',msg+' Изискайте конкретно липсващите технически характеристики; отделно потвърдете компетентността. Това е предварително предложение, а не определена процедура.'));
+  const msg=c.kind==='investment'?'Предложение: да се прецени приложимостта на процедурите по ОВОС и ОС по установените дейности и техните параметри.':
+    c.kind==='plan_program'?'Предложение: да се прецени приложимостта на режимите за ЕО и ОС и тяхната координация.':
+    'Предложение: определете дали входът е инвестиционно предложение, план, програма или друг административен въпрос и проверете относимите процедури.';
+  summary.append(node('p',msg));
+  summary.append(node('p','Условие за окончателна квалификация: конкретните технически характеристики, пълните правни предпоставки и изключения, както и компетентността трябва да бъдат доказани. До тогава предложението е предварително.'));
+  summary.append(node('p','Компетентен орган: РИОСВ – Пловдив е възможен орган; компетентността не е потвърдена автоматично.'));
+  summary.append(node('p','Следващо действие: експертът проверява непълните доказателства и потвърждава или редактира нормативната връзка, без да променя входните факти.'))
   more.replaceChildren(node('summary','Източници, доказателствени ограничения и независим контрол'));
   more.append(node('p','Проверен архив: '+LOCKED_ARCHIVE+'. Правните цитати са проверени архивни текстове; приложимостта и изключенията се оценяват за конкретната преписка.'));
   if(oldBridge){const technical=node('details');technical.append(node('summary','Експертен контрол с независимия механизъм V11'));technical.append(oldBridge);more.append(technical)}
