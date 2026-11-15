@@ -45,11 +45,19 @@ function start(){
  note.style.cssText='font-size:13px;margin:0 0 12px;line-height:1.45';box.append(note);
  const status=node('div');status.setAttribute('role','status');status.style.cssText='border-left:4px solid #d8b677;background:#254d3a;padding:10px;line-height:1.45;margin-bottom:10px';box.append(status);
  const cards=node('div');cards.style.cssText='display:grid;gap:7px';
- const summary=node('div');summary.style.cssText='margin:0 0 12px;padding:12px;border-left:5px solid #dbbb7b;border-radius:8px;background:#eaf0e8;color:#193b2c;line-height:1.5;font-size:16px';box.append(summary);
+ const summary=node('div');summary.id='kt91Proposal';summary.style.cssText='margin:0 0 12px;padding:14px;border-left:5px solid #dbbb7b;border-radius:8px;background:#eaf0e8;color:#193b2c;line-height:1.5;font-size:16px';box.append(summary);
+ const contrast=node('style');contrast.textContent='#kt91Proposal,#kt91Proposal *{color:#193b2c !important;opacity:1 !important;text-shadow:none !important}#kt91Proposal strong{font-weight:800 !important}#kt91Proposal p{margin:9px 0 !important;line-height:1.5 !important}#kt91Stage4 details>summary{cursor:pointer}';box.prepend(contrast);
  const hypotheses=node('details');hypotheses.style.cssText='border:1px solid #678873;border-radius:8px;padding:9px';hypotheses.append(node('summary','Конкуриращи правни хипотези · подробна проверка'));hypotheses.append(cards);box.append(hypotheses);
  const more=node('details');more.style.cssText='margin-top:12px';
  more.append(node('summary','Източници, доказателствени ограничения и независим контрол'));box.append(more);
  let snapshot=null,lastKey='';
+ // Keep all expert mapping controls and handlers, but collapse their lengthy legacy display.
+ const legacyGroups=[...rhs.querySelectorAll(':scope > .kt86-norm')];
+ if(legacyGroups.length&&!rhs.querySelector('#kt91ExpertMapping')){
+  const fold=node('details');fold.id='kt91ExpertMapping';fold.style.cssText='margin:10px 0;border:1px solid #73947c;border-radius:8px;padding:10px';
+  fold.append(node('summary','Експертна корекция на връзките факт–норма · '+legacyGroups.length+' групи'));
+  legacyGroups[0].before(fold);legacyGroups.forEach(el=>fold.append(el));
+ }
  const oldBridge=$('kt83B2CaseBridgeStage4');
  const oldOptional=$('kt89OptionalNormChoices');
  const oldSources=$('kt87V11Sources');
