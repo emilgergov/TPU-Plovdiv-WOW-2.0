@@ -31,9 +31,20 @@ function boot(){
   ].filter(Boolean).join(' · ')));
   evidenceBox.append(line('Етап 2 · Потвърден предмет',p.expertConfirmed===true?str(p.text):'НЯМА ПОТВЪРДЕН ПРЕДМЕТ'));
   evidenceBox.append(line('Етап 2 · Потвърден обхват',p.scopeConfirmed===true?str(p.scope):'НЯМА ПОТВЪРДЕН ОБХВАТ'));
-  const stable=h.observations.filter(x=>x.status==='established'&&x.factId!=='subject_confirmed'&&x.factId!=='scope_confirmed'&&typeof x.value!=='boolean'&&x.factId!=='case_cycle_unique');
+  // Present only human-readable Stage 3 GIS and parcel facts; boolean transport
+  // markers from the case-hand-off are not administrative findings.
+  const spatial=window.KT83NormativeBridge?.getEvidence?.()||{};
   const parcels=h.parcelIds?.length?'Имот(и): '+h.parcelIds.join(', '):'Имот(и): НЯМА ДАННИ';
-  evidenceBox.append(line('Етап 3 · Имоти и пространствени данни',parcels+'\n'+stable.slice(0,14).map(x=>str(x.description||x.factId)+': '+str(x.value)).join(' · ')));
+  const spatialClass=str(spatial.spatialClass).toUpperCase();
+  const pdfReady=spatial.pdfOK===true;
+  const geographicResult=spatialClass==='OUTSIDE'&&pdfReady?
+    'ГИС: няма установено геометрично пресичане със защитена зона по предадения пространствен анализ.':
+    spatialClass==='INSIDE'&&pdfReady?
+    'ГИС: установено е геометрично пресичане по предадения пространствен анализ.':
+    'ГИС: пространствената квалификация не е удостоверена в предадените данни.';
+  const checked='PDF1: '+(pdfReady?'наличен по данните от Етап 3':'няма потвърдена наличност');
+  evidenceBox.append(line('Етап 3 · Имоти и пространствени данни',
+    [parcels,geographicResult,checked].join(' · ')));
  }
 
  const button=make('button','Изготви проект с EG Автора');button.type='button';button.id='kt96EGGenerate';
