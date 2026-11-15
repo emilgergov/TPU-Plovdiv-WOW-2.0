@@ -273,6 +273,36 @@ try{
   assert.equal(revisionData.normativeAudit.fullArticlesVerified,true);
   console.log('PASS: KT105-C reviewer revision replaces original draft without claiming full-law verification.');
 
+  // KT106: first draft may fail a deterministic quality check. The author receives
+  // the precise defect and the original legal provisions, repairs ONCE, then the
+  // independent reviewer checks the corrected version. No invalid text reaches UI.
+  let kt106Calls=0;
+  const invalidDraft='ВОДЕЩО ПРЕДЛОЖЕНИЕ: Оценка за съвместимост с околната среда.\\nФактическа основа\\nДокументи от преписката.\\nНормативни предпоставки и граници на проверката\\nОтносими норми.\\nМотивирано предложение\\nСъображения по конкретния случай.\\nДанни за експертна проверка\\nОстават експертни проверки.';
+  globalThis.fetch=async (_url,opts)=>{
+    kt106Calls++;
+    const sent=JSON.parse(opts.body),system=sent.input[0].content;
+    if(system.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ')){
+      const audit=JSON.parse(sent.input[1].content);
+      assert.equal(audit.draft,corrected);
+      return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({verdict:'pass',issues:[],revisedDraft:''})}]}]}),{status:200});
+    }
+    if(system.includes('Преработи ПЪЛНИЯ проект')){
+      const repair=JSON.parse(sent.input[1].content);
+      assert(repair.qualityIssues.includes('INCORRECT_COMPATIBILITY_TERMINOLOGY'));
+      assert(repair.legalTextsExact.some(x=>x.reference==='чл. 2'));
+      return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:corrected}]}]}),{status:200});
+    }
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:invalidDraft}]}]}),{status:200});
+  };
+  const repaired=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+  assert.equal(repaired.status,200);
+  const repairedData=await repaired.json();
+  assert.equal(repairedData.draft,corrected);
+  assert.equal(repairedData.normativeAudit.authorRepairs,1);
+  assert.equal(kt106Calls,3);
+  console.log('PASS: KT106 one automatic repair followed by independent normative verification; no invalid draft reaches expert.');
+
+
 
 
   console.log('PASS: KT97 Stage 4 protected route, CORS, evidence contract, case identity and archive honesty.');
