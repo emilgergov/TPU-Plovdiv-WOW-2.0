@@ -252,6 +252,23 @@ try{
   assert.equal(independentReject.status,422);
   assert((await independentReject.json()).qualityIssues.includes('INDEPENDENT_REJECTION'));
   console.log('PASS: KT105-C reviewer rejection blocks unsupported normative claim.');
+  // KT105-C: a review revision must replace the first draft, not append or silently pass.
+  const corrected='ВОДЕЩО ПРЕДЛОЖЕНИЕ: Указване на начина на процедиране по наличните обстоятелства при потвърдена компетентност.\\nФактическа основа\\nИмотът е установен в Етап 3, а предметът е експертно потвърден.\\nНормативни предпоставки и граници на проверката\\nПриложимостта на категорията по ЗООС остава непотвърдена.\\nМотивирано предложение\\nДа се посочат конкретните проверени предпоставки и да се дадат мотивирани указания съобразно закона.\\nДанни за експертна проверка\\nКомпетентността и категорията следва да бъдат потвърдени по първични източници.';
+  globalThis.fetch=async (_url,opts)=>{
+    const sent=JSON.parse(opts.body);
+    const second=sent.input[0].content.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ');
+    const review=JSON.stringify({verdict:'revise',issues:['Нужно е по-точно разграничаване на правните предпоставки'],revisedDraft:corrected});
+    const initial='Фактическа основа\\nДанни по преписката.\\nНормативни предпоставки и граници на проверката\\nПриложимостта не е потвърдена.\\nМотивирано предложение\\nПредлага се проверка на правните предпоставки преди определяне на действие.\\nДанни за експертна проверка\\nИзточниците подлежат на проверка.';
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:second?review:initial}]}]}),{status:200});
+  };
+  const reviewedRevision=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+  assert.equal(reviewedRevision.status,200);
+  const revisionData=await reviewedRevision.json();
+  assert.equal(revisionData.normativeAudit.reviewVerdict,'revise');
+  assert.equal(revisionData.draft,corrected);
+  assert.equal(revisionData.normativeAudit.fullArticlesVerified,false);
+  console.log('PASS: KT105-C reviewer revision replaces original draft without claiming full-law verification.');
+
 
 
   console.log('PASS: KT97 Stage 4 protected route, CORS, evidence contract, case identity and archive honesty.');
