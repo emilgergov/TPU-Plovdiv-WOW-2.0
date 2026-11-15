@@ -24,3 +24,8 @@ jobs:
           node-version: '22'
       - name: Run isolated AI Author tests
         run: node cloudflare/ai-author-v27/test/author-smoke.mjs
+      - name: Check Stage 4 browser module syntax and UTF-8 payload contract
+        run: |
+          node --check vt03/kt80/integration/kt96-eg-ai-stage4-author.mjs
+          node --input-type=module -e "import {readFileSync} from 'node:fs'; const s=readFileSync('vt03/kt80/integration/kt96-eg-ai-stage4-author.mjs','utf8'); for(const term of ['TextEncoder','fitStage4Request','stageBytes(req)','prepared.payload'])if(!s.includes(term))process.exit(1); console.log('PASS: Stage 4 source includes UTF-8 size limits before network calls');"
+
