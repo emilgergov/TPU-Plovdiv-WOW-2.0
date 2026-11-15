@@ -43,7 +43,7 @@ function boot(){
  };
  // Only the locked, audited references are shipped; text anchors are NOT full articles.
  // The server must attach exact V11 text before asserting a grounded normative draft.
- const refs=()=>Object.values(VERIFIED_ARTICLES).filter(r=>['ZOOS_93','N_OS_6A','PRAVILNIK_RIOSV_TERRITORY'].includes(r.id))
+ const refs=()=>Object.values(VERIFIED_ARTICLES)
   .map(r=>({id:r.id,act:r.act,article:r.article,archivePath:r.archivePath,textAnchor:r.anchor,
    citationVerified:true,applicabilityVerified:false}));
 
