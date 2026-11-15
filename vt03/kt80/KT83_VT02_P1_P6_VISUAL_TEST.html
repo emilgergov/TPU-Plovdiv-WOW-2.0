@@ -819,4 +819,124 @@ function validate(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',validate,{once:true});
 else validate();
 })();</script><script src="KT82_STAGE3_CONSOLIDATED_V600.js?v=600-kt83"></script><script src="KT80_STAGE3_CONTEXT_SCREEN_V581.js?v=581-20261113"></script><script src="KT82_LOCATION_ROLES_V593.js?v=593-20261113"></script><script src="KT80_STAGE3_ADMIN_REFINEMENT_V593.js?v=593-20261113"></script><script src="KT82_STAGE4_V11_SOURCE_GATE_V610.js?v=kt83-vt02-20261114"></script><script src="KT82_NORMATIVE_GATE_V585.js?v=585-20261113"></script><script src="KT82_UNIVERSAL_STAGE2_V589.js?v=589-20261113"></script><script src="KT82_ADMIN_STYLE_GUARD_V589.js?v=589-20261113"></script><script src="KT82_SPATIAL_EVIDENCE_V592.js?v=592-20261113"></script><script src="KT82_STAGE5_INDEPENDENT_V610.js?v=610-v11"></script><script src="KT82_A_EVIDENCE_INVALIDATION_V602.js?v=602-20261114"></script><script type="module" src="integration/kt83-pni-v3-exploration-ui.mjs?v=PNI-V3-20261113"></script>
-<script src="https://cdn.jsdelivr.net/npm/fflate@0.8.3/umd/index.js"></script><script type="module" src="integration/kt83-v617-universal-out-preview.mjs?v=617-20261114"></script><script src="integration/kt83-p2-spatial-gate.js?v=p2"></script><script src="integration/kt83-p2-automatic-pdf1.js?v=p2"></script><script src="integration/kt83-vt01-automatic-route-p1.js?v=p1-gis-gate-3"></script><script type="module" src="integration/kt83-p3-canonical-v11-master-bridge.mjs?v=p3-canonical-master"></script><script type="module" src="integration/kt83-p3-case-review-provider.mjs?v=p3-case-review"></script><script src="integration/kt83-vt01-v11-handoff.js?v=kt83-vt02-20261114"></script><script src="integration/kt83-vt01-route-binding.js?v=kt83-vt02-20261114"></script><script src="integration/kt83-p5-single-route.js?v=kt83-vt02-20261114"></script><script src="integration/kt83-p5-single-route-binding.js?v=p5-one-action"></script><script type="module" src="integration/kt83-p5-competence-runtime.mjs?v=p5-competence-archived-v11"></script><script type="module" src="integration/kt88-stage4-existing-engine-ui.mjs?v=kt88-20261115"></script><script type="module" src="integration/kt83-p5-expert-review-ui.mjs?v=kt83-vt02-20261114"></script><script src="KT83_UX_BATCH_V01.js?v=kt83-vt02-20261114"></script><script src="KT84_E_ADMIN_VISUAL_HIERARCHY_V01.js?v=kt84-e-01"></script><script src="KT84_VT03_RESCUE_V01.js?v=20261115-vt03-r1"></script><script src="KT84_VT03_FEEDBACK_V01.js?v=vt03-r2-20261115-clean1"></script><script src="KT85_VT03_STAGE3_HORIZONTAL_V01.js?v=vt03-r3-20261115"></script><script src="KT85_VT03_PREVIOUS_STAGES_COMPACT_V01.js?v=vt03-r3-20261115"></script><script src="KT86_VT03_R4_STAGE345_UI.js?v=vt03-r5-20261115"></script><script type="module" src="integration/kt87-v11-source-visibility.mjs?v=kt87-v11-20261115"></script><script type="module" src="integration/kt89-stage4-automatic-b2-screen.mjs?v=kt89-20261115"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/fflate@0.8.3/umd/index.js"></script><script type="module" src="integration/kt83-v617-universal-out-preview.mjs?v=617-20261114"></script><script src="integration/kt83-p2-spatial-gate.js?v=p2"></script><script src="integration/kt83-p2-automatic-pdf1.js?v=p2"></script><script src="integration/kt83-vt01-automatic-route-p1.js?v=p1-gis-gate-3"></script><script type="module" src="integration/kt83-p3-canonical-v11-master-bridge.mjs?v=p3-canonical-master"></script><script type="module" src="integration/kt83-p3-case-review-provider.mjs?v=p3-case-review"></script><script src="integration/kt83-vt01-v11-handoff.js?v=kt83-vt02-20261114"></script><script src="integration/kt83-vt01-route-binding.js?v=kt83-vt02-20261114"></script><script src="integration/kt83-p5-single-route.js?v=kt83-vt02-20261114"></script><script src="integration/kt83-p5-single-route-binding.js?v=p5-one-action"></script><script type="module" src="integration/kt83-p5-competence-runtime.mjs?v=p5-competence-archived-v11"></script><script type="module" src="integration/kt88-stage4-existing-engine-ui.mjs?v=kt88-20261115"></script><script type="module" src="integration/kt83-p5-expert-review-ui.mjs?v=kt83-vt02-20261114"></script><script src="KT83_UX_BATCH_V01.js?v=kt83-vt02-20261114"></script><script src="KT84_E_ADMIN_VISUAL_HIERARCHY_V01.js?v=kt84-e-01"></script><script src="KT84_VT03_RESCUE_V01.js?v=20261115-vt03-r1"></script><script src="KT84_VT03_FEEDBACK_V01.js?v=vt03-r2-20261115-clean1"></script><script src="KT85_VT03_STAGE3_HORIZONTAL_V01.js?v=vt03-r3-20261115"></script><script src="KT85_VT03_PREVIOUS_STAGES_COMPACT_V01.js?v=vt03-r3-20261115"></script><script src="KT86_VT03_R4_STAGE345_UI.js?v=vt03-r5-20261115"></script><script type="module" src="integration/kt87-v11-source-visibility.mjs?v=kt87-v11-20261115"></script><script type="module" id="kt89-b2-embedded">/* KT89: revive the original B2 tri-state competition graph as an automatic
+   CASE-SCOPED SCREEN, while keeping V11 source and expert approval separate.
+   No V10 provenance can be promoted to V11 legal authority. */
+import {VERIFIED_ARTICLES,LOCKED_ARCHIVE} from './integration/v11-trusted-source-registry.mjs';
+const $=id=>document.getElementById(id), el=(t,s)=>{const x=document.createElement(t);if(s!==undefined)x.textContent=s;return x;};
+const DATA=[
+ {id:'EIA_ANNEX1',label:'ОВОС · приложение №1',key:'annex1',kind:'investment',registry:null,question:'Доказана ли е категорията и точната точка на приложение №1 към ЗООС?',needed:'Съпоставете реалните дейности и параметри с точната категория; посочете оригинален документ и редакция.'},
+ {id:'EIA_SCREEN',label:'ОВОС · преценяване на необходимостта',key:'annex2',kind:'investment',registry:'ZOOS_93',question:'Доказани ли са предпоставките по относимата категория и изключенията?',needed:'Проверете приложение №2, характера на дейността и правния режим за изменения; посочете член, точка и доказателства.'},
+ {id:'OS_RELEVANCE',label:'Оценка за съвместимост',key:'os_relevance',kind:'both',registry:null,question:'Има ли правно релевантна необходимост от проверка за ОС?',needed:'Съпоставете предмета и действителните пътища на въздействие с чл. 31 ЗБР и Наредбата за ОС; ГИС непресичането само по себе си не изключва ОС.'},
+ {id:'BASIN_INPUT',label:'Води · възможна отделна компетентност',key:'water_trigger',kind:'investment',registry:null,question:'Доказана ли е дейност или съоръжение, което активира специален воден режим?',needed:'Проверете от преписката действителните водни дейности и относимите актове, без да предполагате наличието им.'},
+ {id:'EO_ENTRY',label:'Екологична оценка',key:'eo_relevance',kind:'plan_program',registry:null,question:'Документът има ли естество на план или програма и относим режим на ЕО?',needed:'Изяснете вида документ и нормативните предпоставки за ЕО; инвестиционно предложение не става план автоматично.'},
+ {id:'COMPETENCE',label:'Компетентен орган',key:'competence',kind:'all',registry:'N_OS_6A',question:'Доказана ли е материалната, териториалната и специалната компетентност?',needed:'Проверете приложимостта на чл. 6а НОС, всички изключения и териториалния обхват; РИОСВ – Пловдив не се приема служебно.'}
+];
+const norm=s=>String(s??'').trim();
+const scenario=()=>{
+ const wf=window.KT80WorkflowState||{},s=wf.subjectConfirmed||{},ev=window.KT83NormativeBridge?.getEvidence?.()||{};
+ const kind=window.KT82UniversalStage2Result?.type||'INVESTMENT';
+ return {key:[wf.caseCycleId,wf.generation,window.KT82EvidenceInvalidation?.getRevision?.()??0,s.text,s.scope,kind].join('~'),
+ subject:s.text||'',scope:s.scope||'',confirmed:s.expertConfirmed===true&&s.scopeConfirmed===true,
+ kind:kind==='INVESTMENT'?'investment':kind==='PLAN_PROGRAM'?'plan_program':'other',
+ spatial:ev.spatialClass||'UNDETERMINED',pdf:!!ev.pdfOK,parcels:(ev.ids||[]).join(', ')||'не са посочени',gisEvidence:ev};
+};
+const STATUS={true:'ПОДКРЕПЕНА (само за посочения факт)',false:'НЕПОДКРЕПЕНА (само за посочения факт)',unknown:'НЕУСТАНОВЕНА'};
+function boot(graph){
+ const stage=document.querySelector('.kt80-stage-panel[data-panel="4"]');
+ if(!stage||$('kt89B2Automatic'))return;
+ const old=$('kt83B2CaseBridgeStage4');const rhs=$('kt86Matrix')?.querySelector('.kt86-panel:nth-child(2)')||stage;
+ const root=el('section');root.id='kt89B2Automatic';root.style.cssText='border:1px solid #d3b97c;border-radius:10px;padding:12px;background:#163c2d;margin:12px 0;color:#f1efdf';
+ const title=el('h3','Автоматични правни хипотези · Б2');title.style.color='#efcf89';root.append(title);
+ const intro=el('p','Фактите се пренасят от Етапи 1–3. Конкуриращите се хипотези се извеждат без ръчен подбор; неизвестното никога не е отрицателен факт. Архив V11 удостоверява само проверените цитати, а не самата приложимост.');
+ intro.style.cssText='font-size:13px;line-height:1.5';root.append(intro);
+ const status=el('p');status.setAttribute('role','status');status.style.cssText='border-left:4px solid #debd7a;padding:9px;background:#234c38;font-size:13px';
+ const cards=el('div');cards.style.cssText='display:grid;gap:9px';
+ const proposal=el('div');proposal.style.cssText='padding:12px;background:#254a38;border:1px solid #8d9876;border-radius:7px;font-size:14px;line-height:1.5';
+ const refresh=el('button','Обнови хипотезите по входните факти');refresh.type='button';refresh.style.cssText='padding:10px;background:#dabb78;color:#133d2d;font-weight:bold;border-radius:7px;margin:9px 0';
+ let lastKey=null,answers=new Map(),last=null;
+ function resetApproval(){
+   window.KT83V11CaseEvidenceProvider?.clear?.();
+   const w=window.KT80WorkflowState;if(w?.lawConfirmed?.archiveVersion==='V11')w.lawConfirmed=null;
+ }
+ function draw(force=false){
+  const s=scenario();
+  if(!force&&lastKey===s.key)return;
+  if(lastKey!==s.key){answers=new Map();lastKey=s.key;resetApproval();}
+  const kind=s.kind==='plan_program'?'план/програма':s.kind==='investment'?'инвестиционно предложение':'друг административен вход';
+  status.textContent='Предмет и обхват: '+(s.confirmed?'потвърдени':'непотвърдени')+' · вид: '+kind+
+    ' · ПИ: '+s.parcels+' · ГИС: '+s.spatial+' · PDF1: '+(s.pdf?'има отчетен резултат':'не е удостоверен')+
+    '. Няма автоматично удостоверени правни предпоставки.';
+  cards.replaceChildren();
+  const selected=DATA.filter(d=>d.kind==='all'||d.kind==='both'&&s.kind!=='other'||d.kind===s.kind);
+  for(const d of selected){
+   const card=el('div');card.style.cssText='border:1px solid #73917a;border-radius:8px;padding:10px;background:#244937';
+   const h=el('strong',d.label+' · '+d.id);h.style.cssText='display:block;color:#efd18d;margin-bottom:5px';card.append(h);
+   const ref=d.registry&&VERIFIED_ARTICLES[d.registry];const source=el('div',ref?'V11: '+ref.act+' · '+ref.article+' · '+ref.archivePath:'За проверка по пълния V11: в проверения индекс няма достатъчна разпоредба за цялата хипотеза.');
+   source.style.cssText='font-size:12px;color:#dedfcb';card.append(source);
+   const question=el('p',d.question);question.style.cssText='font-size:13px;margin:6px 0';card.append(question);
+   const row=el('div');row.style.cssText='display:grid;grid-template-columns:minmax(150px,1fr) minmax(180px,1fr);gap:7px';
+   const select=el('select');select.style.cssText='background:#faf8ef;color:#163629;padding:7px;min-width:0';for(const [v,t] of [['unknown','Неустановено'],['true','Доказано „да“'],['false','Доказано „не“']])select.append(new Option(t,v));
+   const origin=el('input');origin.type='text';origin.placeholder='Точен документ, страница и мотив';origin.style.cssText='background:#faf8ef;color:#163629;padding:7px;min-width:0;width:100%';
+   const entry=answers.get(d.id);if(entry){select.value=entry.value;origin.value=entry.source}
+   const save=()=>{const candidate=select.value,reference=norm(origin.value);const valid=candidate==='unknown'||reference.length>=12;
+    if(!valid){select.value='unknown';}
+    answers.set(d.id,{value:valid?candidate:'unknown',source:reference});
+    resetApproval();conclude(s,selected);};
+   select.onchange=save;origin.onchange=save;row.append(select,origin);card.append(row);
+   const why=el('details');why.append(el('summary','Проверка, мотиви и липсващи доказателства'),el('p',d.needed));card.append(why);cards.append(card);
+  }
+  conclude(s,selected);
+ }
+ function conclude(s,selected){
+  const supported=[],unknown=[],denied=[];for(const d of selected){const ans=answers.get(d.id);const v=ans?.value||'unknown';
+   (v==='true'?supported:v==='false'?denied:unknown).push(d);
+  }
+  const lines=[];
+  if(!s.confirmed)lines.push('Предложение: потвърдете предмета и обхвата в Етап 2, без да губите вече установените факти.');
+  if(s.kind==='investment')lines.push('Предложение: изследвайте конкуриращите се предпоставки по приложения №1/№2 към ЗООС и ОС, без предварително предпочитан изход.');
+  if(s.kind==='plan_program')lines.push('Предложение: разгледайте ЕО и ОС самостоятелно и възможността за координиране на режимите.');
+  if(s.kind==='other')lines.push('Предложение: определете относимия специален административен ред и компетентния орган.');
+  if(supported.length)lines.push('Представени за последваща проверка като подкрепени от посочени доказателства: '+supported.map(x=>x.id).join(', ')+'. Експертна проверка на изключенията остава задължителна.');
+  if(denied.length)lines.push('Посочени отрицателни факти (само при източник): '+denied.map(x=>x.id).join(', ')+'.');
+  if(unknown.length)lines.push('Неустановени хипотези: '+unknown.map(x=>x.id).join(', ')+'. Предложение: изискайте конкретните липсващи данни и проверете условията и изключенията от оригиналите в V11.');
+  if(s.spatial==='OUTSIDE')lines.push('Доказаното пространствено непресичане не е само по себе си изключение от приложимостта на ОС.');
+  lines.push('Компетентност: РИОСВ – Пловдив е възможен орган, но не е удостоверен без отделна материална и териториална проверка.');
+  proposal.replaceChildren(el('strong','Мотивирано предварително предложение'),el('p',lines.join('\n')));
+  proposal.querySelector('p').style.whiteSpace='pre-line';
+  last=Object.freeze({caseKey:s.key,archive:LOCKED_ARCHIVE,graphVersion:graph.schema,
+   candidateIds:selected.map(x=>x.id),supportedIds:supported.map(x=>x.id),notSupportedIds:denied.map(x=>x.id),
+   undeterminedIds:unknown.map(x=>x.id),proposal:lines.join('\n'),expertApproved:false,finalProcedure:false,
+   sourceCaveat:'B2 graph was V10-based; only V11 allowlisted citations are displayed.'});
+ }
+ root.append(status,refresh,cards,proposal);
+ // Preserve the original independent fact/rule engine for formal expert verification.
+ // Do not let technical JSON forms dominate the expert's default working screen.
+ if(old){const fold=el('details');fold.id='kt89ExpertFormalReview';
+  fold.style.cssText='margin-top:12px;border-top:1px solid #73917a;padding-top:8px';
+  fold.append(el('summary','Разширена проверка на предпоставки и изключения · независим двигател V11'));
+  fold.append(old);root.append(fold);}
+ // The four legacy hand-entry menus are optional alternatives, not the default route.
+ const legacy=Array.from(rhs.querySelectorAll(':scope > .kt86-norm'));
+ if(legacy.length){const fold=el('details');fold.id='kt89OptionalNormChoices';
+  fold.style.cssText='border:1px solid #668879;border-radius:7px;padding:9px;margin:8px 0';
+  fold.append(el('summary','Алтернативни правни връзки · експертна редакция'));
+  legacy[0].before(fold);legacy.forEach(x=>fold.append(x));
+ }
+ const first=rhs.querySelector('#kt89OptionalNormChoices')||rhs.querySelector('#kt87V11Sources')||rhs.querySelector('.kt86-norm');
+ if(first)rhs.insertBefore(root,first);else rhs.append(root);
+ if($('kt87V11Sources')){const oldSource=$('kt87V11Sources');const fold=el('details');fold.append(el('summary','Пълен проверен индекс V11 · архивни препратки'));oldSource.before(fold);fold.append(oldSource)}
+ refresh.onclick=()=>draw(true);
+ ['kt80:stage-open','kt80:case-change','kt80:case-reset','kt82:evidence-invalidated'].forEach(event=>document.addEventListener(event,()=>draw()));
+ window.KT89AutomaticB2=Object.freeze({refresh:()=>draw(true),snapshot:()=>last});
+ draw(true);
+}
+
+const kt89OriginalGraph={"schema":"KT82_B2_INDEPENDENT_LEGAL_COMPETITION_GRAPH_V02","date":"2026-11-13","canonical_documentary_basis":"KT82_B1_Normative_Master_V10_B1_ARCHIVE_FROZEN_2026-11-13.zip","archive_sha256":"605956c29134ebe755d24dacc6bb2a3c062f410043cdc7b39df46e5a34d963cd","verifications":[{"act":"ZOOS","article":"92","path":"core/ZOOS_2026_51.txt","hash_sha256":"4243e6c8d67600d0ec5f3c7a4814f49d27b6ca3f0dbe5e4480a4f604af0a0861","article_text_opening":"Чл. 92 Оценка на въздействието върху околната среда задължително се извършва на: 1. инвестиционните предложения за строителство, дейности и технологии съгласно приложение № 1; 2. (","verified":"ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"},{"act":"ZOOS","article":"93","path":"core/ZOOS_2026_51.txt","hash_sha256":"4243e6c8d67600d0ec5f3c7a4814f49d27b6ca3f0dbe5e4480a4f604af0a0861","article_text_opening":"Чл. 93 (1) (Изм. - ДВ, бр. 77 от 2005 г., изм. - ДВ, бр. 47 от 2009 г., в сила от 23.06.2009 г.) Необходимостта от извършване на ОВОС се преценява за: 1. инвестиционни предложения","verified":"ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"},{"act":"ZBR","article":"31","path":"core/ZBR_2024.txt","hash_sha256":"7a49ef6962da9d9ba08d8ba8452d429b3d6cf7db9975a7a158a79ddc14d7d7a2","article_text_opening":"Чл. 31. (Изм. - ДВ, бр. 88 от 2005 г., в сила от 1.01.2007 г., бр. 30 от 2006 г., бр. 52 от 2007 г.) (1) (Доп. - ДВ, бр. 62 от 2010 г., в сила от 30.09.2010 г.) Планове, програми,","verified":"ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"},{"act":"OS","article":"2","path":"additions/N_OS_2025.txt","hash_sha256":"2ff40c1a607a0f88cf1b25ff2a587d472dbe0bcda26313922330ad0c25de814d","article_text_opening":"Чл. 2. (Изм. - ДВ, бр. 81 от 2010 г., в сила от 15.10.2010 г.) (1) На ОС по реда на глава втора или трета се подлагат: 1. (доп. - ДВ, бр. 94 от 2012 г., в сила от 30.11.2012 г.) пл","verified":"ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"},{"act":"OS","article":"6а","path":"additions/N_OS_2025.txt","hash_sha256":"2ff40c1a607a0f88cf1b25ff2a587d472dbe0bcda26313922330ad0c25de814d","article_text_opening":"чл. 6а указва начина на процедиране, въз основа на попълнен контролен лист и включените в него критерии, съгласно приложение № 1. В 14-дневен срок от подаването на уведомлението по","verified":"ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"},{"act":"OS","article":"12","path":"additions/N_OS_2025.txt","hash_sha256":"2ff40c1a607a0f88cf1b25ff2a587d472dbe0bcda26313922330ad0c25de814d","article_text_opening":"чл. 12 или чл. 13, ал. 3 компетентният орган уведомява възложителя и дава указания за отстраняване на недопустимостта, когато това е приложимо, и определя срок. При неизпълнение на","verified":"ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"},{"act":"OVOS","article":"4а","path":"additions/N_OVOS_2022.txt","hash_sha256":"fd841a55b1ecdbbaadfc197f9e7426dda26526df0a4828d41f3d7658440354d5","article_text_opening":"Чл. 4а. (Нов - ДВ, бр. 3 от 2011 г.) (1) (Изм. ? ДВ, бр. 3 от 2018 г.) Компетентният орган или оправомощено от него длъжностно лице изпраща уведомлението по чл. 4 на директора на с","verified":"ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"},{"act":"OVOS","article":"5","path":"additions/N_OVOS_2022.txt","hash_sha256":"fd841a55b1ecdbbaadfc197f9e7426dda26526df0a4828d41f3d7658440354d5","article_text_opening":"Чл. 5. (1) (Изм. - ДВ, бр. 3 от 2006 г., бр. 80 от 2009 г., доп., бр. 29 от 2010 г., бр. 3 от 2011 г., бр. 31 от 2019 г., в сила от 12.04.2019 г., изм., бр. 67 от 2019 г., в сила о","verified":"ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"},{"act":"EO","article":"4","path":"additions/N_EO_2020.txt","hash_sha256":"2228bfe811949cd68f6c9ebbf6cc222e33ae76ac2306567df52cb7715c306b93","article_text_opening":"чл. 4 и органите по одобряване и/или приемане на съответния план или програма могат да координират провеждането на няколко процедури или да проведат една обща процедура. (","verified":"ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"},{"act":"EO","article":"8","path":"additions/N_EO_2020.txt","hash_sha256":"2228bfe811949cd68f6c9ebbf6cc222e33ae76ac2306567df52cb7715c306b93","article_text_opening":"Чл. 8. (Нов - ДВ, бр. 12 от 2016 г., в сила от 12.02.2016 г.) (1) (Доп. - ДВ, бр. 3 от 2018 г., доп. - ДВ, бр. 31 от 2019 г., в сила от 12.04.2019 г.) За определяне на приложимата","verified":"ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"},{"act":"EO","article":"8а","path":"additions/N_EO_2020.txt","hash_sha256":"2228bfe811949cd68f6c9ebbf6cc222e33ae76ac2306567df52cb7715c306b93","article_text_opening":"Чл. 8а. (Предишен текст на чл. 8 - ДВ, бр. 12 от 2016 г., в сила от 12.02.2016 г.) (1) (Доп. - ДВ, бр. 3 от 2011 г., доп. - ДВ, бр. 12 от 2016 г., в сила от 12.02.2016 г.) За п","verified":"ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"},{"act":"APK","article":"31","path":"texts/APK_f79d7532e8ce81b2.txt","hash_sha256":"9810a21786e0fbffd65ad4dff110d1c73a75b4cc03c07bde15021a8ab742c8fe","article_text_opening":"Чл. 31. (1) Искането се отправя до административния орган, който е компетентен да реши въпроса. (2) Когато органът, започнал производството, установи, че индивидуалният администрат","verified":"ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"},{"act":"APK","article":"112","path":"texts/APK_f79d7532e8ce81b2.txt","hash_sha256":"9810a21786e0fbffd65ad4dff110d1c73a75b4cc03c07bde15021a8ab742c8fe","article_text_opening":"Чл. 112. Предложенията и сигналите, които са подадени до некомпетентен орган, се препращат не по- късно от 7 дни от постъпването им на компетентните органи, освен когато има данни,","verified":"ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"}],"logic":{"facts":"TRUE/FALSE/UNKNOWN only with case provenance","hypothesis_status":["SUPPORTED","NOT_SUPPORTED","UNDETERMINED"],"supported_means":"Preliminary eligibility for drafting a reasoned proposal, NOT a final administrative determination","precedence":"Confirmed expert subject and scope before legal tests; each input has provenance","multiple_applicable":"Retain simultaneous OS/OVOS/EO hypotheses where supported; coordinate rather than force one route","incomplete_facts":"Unknown is not false; always propose concrete next evidence action","competence":"Separately proven; do not assume local inspectorate authority","document":"Selected only after reasoned analysis, never chosen from Classic A/B or fixed catalog"},"case_model":{"confirmed_subject":"required confirmed string","scope_confirmed":"required true","kind":["investment","plan_program","other"],"facts":{"annex1":"true/false/null","annex2":"true/false/null","os_relevance":"true/false/null","eo_relevance":"true/false/null","water_trigger":"true/false/null","competence":"true/false/null"},"parcel":"optional"},"prohibition":["Web evidence","V27.35 templates/outcomes","Preset document-first catalog","Invented territorial orders","Unsupported final decision"],"integration_status":"NOT_INTEGRATED","expert_acceptance":"PENDING","qa_scenarios":14};
+if(kt89OriginalGraph.schema==='KT82_B2_INDEPENDENT_LEGAL_COMPETITION_GRAPH_V02' &&
+  kt89OriginalGraph.logic.incomplete_facts==='Unknown is not false; always propose concrete next evidence action'){
+ const launch=()=>setTimeout(()=>boot(kt89OriginalGraph),900);
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',launch,{once:true});
+ else launch();
+}else console.error('КТ89: контролният граф Б2 не съвпада.');
+</script></body></html>
