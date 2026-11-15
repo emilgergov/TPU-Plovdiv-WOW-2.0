@@ -113,6 +113,8 @@ function showWorkGuides(){
    banner.append(mark,body);
    const legal=document.getElementById('kt84PrimaryLegalFinding');
    if(step===4&&legal?.parentElement===stage)legal.after(banner);
+   else if(step===1&&document.getElementById('kt84IntakeEvidenceResult')?.parentElement===stage)
+    document.getElementById('kt84IntakeEvidenceResult').after(banner);
    else stage.prepend(banner);
   }
   const info=stageGuides[step-1];
