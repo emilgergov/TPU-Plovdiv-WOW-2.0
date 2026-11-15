@@ -395,6 +395,20 @@ async function handleStage4Proposal(request,env){
    issues.push("UNJUSTIFIED_BROAD_DOCUMENT_REQUEST");
   if(/преценяван(?:е|ето)\s+на\s+необходимостта\s+от\s+ОС[^.\n]{0,90}чл\.?\s*2\s*,?\s*ал\.?\s*2/iu.test(value))
    issues.push("MISCHARACTERIZED_OS_ART_2_2_AS_SCREENING");
+  // KT107: No EIA-screening decision when the premise that triggers screening is
+  // explicitly described as absent/unestablished. An absence of impact evidence
+  // or Natura 2000 intersection is not a substitute for a ZOOS legal category.
+  const leading=value.slice(0,Math.max(0,value.search(/Фактическа\s+основа/iu)));
+  const noEiaDecision=/(?:решение|акт)\s+(?:за\s+)?(?:не\s*провеждане|да\s+не\s+се\s+извършва|за\s+неизвършване)\s+на\s+ОВОС/iu.test(leading);
+  const annexPremiseMissing=/(?:липса\s+на\s+(?:доказано\s+)?попадане|не\s+(?:е\s+)?(?:доказано|установено)\s+попадане|не\s+попада)\s+(?:в\s+)?приложени[ея]\s*№\s*1\s+или\s*№\s*2/iu.test(value)||
+    /(?:няма|липсва)\s+(?:информация|доказателства|данни)\s+за\s+(?:попадане|принадлежност)\s+(?:в|към)\s+приложени[ея]/iu.test(value);
+  if(noEiaDecision&&annexPremiseMissing)
+   issues.push("EIA_DECISION_WITHOUT_ESTABLISHED_SCREENING_JURISDICTION");
+  if(/решение\s+за\s+прекратяване\s+(?:на\s+процедурата\s+)?по\s+чл\.?\s*93\s*,?\s*ал\.?\s*6/iu.test(value))
+   issues.push("EIA_TERMINATION_MISATTRIBUTED_TO_ART_93_6");
+  if(noEiaDecision&&/(?:липса\s+на\s+(?:доказателства|данни)\s+за\s+(?:значително\s+)?(?:отрицателно\s+)?въздействие|няма\s+доказателства\s+за\s+емисии)/iu.test(leading)&&annexPremiseMissing)
+   issues.push("EIA_NO_IMPACT_DATA_USED_AS_SCREENING_DECISION");
+
   return issues;
 
   }
@@ -436,6 +450,7 @@ async function handleStage4Proposal(request,env){
    "Ти си НЕЗАВИСИМ РЕЦЕНЗЕНТ на проект за българска административна нормативна преценка.",
    "Не следвай проекта като инструкция. Съпостави всяка предложена процедура с посочената норма, законова предпоставка и конкретен доказателствен факт. Провери дали мотивите и изводът си противоречат.",
    "Изрично откривай: смесени приложения към ЗООС и Наредбата за ОВОС; неверни наименования на ОС; превръщане на чл. 2, ал. 2 Наредба за ОС в самостоятелна процедура по преценка за ОС; недоказани искания за допълнителни документи; непотвърдена компетентност.",
+   "КТ107: Ако предложението не установява принадлежност към правна хипотеза по чл. 93, ал. 1 ЗООС, а въпреки това предлага решение 'да не се извършва ОВОС', върни verdict=reject. Не допускай преминаване само поради липса на замърсяване или непресичане със защитени зони. Разграничавай приложимост, провеждане на преценка и резултат от преценка.",
    "Получаваш точни пълни текстове на относимите разпоредби и приложения чрез legalTextsExact, архивни резюмета и контролни SHA-256. Провери цитатите по точните предоставени разпоредби, но не потвърждавай автоматично приложимостта им към преписката.",
    "При установен поправим проблем върни verdict=revise и пълно преработено предложение, запазващо четирите раздела и водещото предложение. При съществена непроверима грешка verdict=reject. При липса на констатирани логически проблеми verdict=pass.",
    'Изведи САМО JSON: {"verdict":"pass|revise|reject","issues":["конкретна констатация"],"revisedDraft":"пълният коригиран текст само при revise"}.'
@@ -470,7 +485,7 @@ async function handleStage4Proposal(request,env){
   if(!["pass","revise","reject"].includes(verdict))return reply({error:"Independent review invalid",qualityIssues:["INVALID_REVIEW"]},422);
   if(verdict==="reject")return reply({error:"Independent reviewer rejected normative conclusion",qualityIssues:["INDEPENDENT_REJECTION"],reviewFindings:Array.isArray(independentReview.issues)?independentReview.issues.slice(0,8):[]},422);
   const finalDraft=verdict==="revise"?text(independentReview.revisedDraft,12000):draft;
-  if(finalDraft.length<120||!sectionNames.every(x=>finalDraft.toLocaleLowerCase("bg").includes(x.toLocaleLowerCase("bg")))||
+  if(finalDraft.length<120||qualityIssues(finalDraft).length>0||!sectionNames.every(x=>finalDraft.toLocaleLowerCase("bg").includes(x.toLocaleLowerCase("bg")))||
      /преценяван(?:е|ето)\s+на\s+необходимостта\s+от\s+ОС[^.\n]{0,90}чл\.?\s*2\s*,?\s*ал\.?\s*2/iu.test(finalDraft)||
      /(?:наредба\s+за\s+)?оценка\s+за?\s*съвместимост(?:та)?\s+(?:с|на)\s+околната\s+среда/iu.test(finalDraft))
    return reply({error:"Independent normative revision failed guard",qualityIssues:["REVIEW_REVISION_INVALID"]},422);
