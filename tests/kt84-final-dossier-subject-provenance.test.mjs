@@ -86,3 +86,37 @@ test('ВА-009: PDF with OCR warning is not promoted to unconditional read',()=>
   document_texts:[sourceText('Скан.pdf')]};
  assert.equal(engine.propose(intake).sourceReadStatus,'REVIEW_REQUIRED');
 });
+
+function loadReconstructor(){
+ const {engine}=load();
+ const root={KT80SubjectMaster:engine};
+ vm.runInNewContext(readFileSync(new URL('../kt80/KT80_E01_KT52_PROJECT_RECONSTRUCTION_V52.js',import.meta.url),'utf8'),
+  {window:root,document:{getElementById:()=>null,createElement:()=>({})}});
+ return root.KT80KT52;
+}
+test('ВА-009 end-to-end builder: unread title cannot reach KT52 and KT53 as a proposed subject',()=>{
+ const reconstruction=loadReconstructor();
+ const intake={subject_candidates:[candidate('Уведомление.doc','Ново строителство на складова база')],
+  files:[file('Уведомление.doc','НЕПРОЧЕТЕН: четецът не върна текст')],
+  document_texts:[]};
+ const output=reconstruction.build(intake,{proposedSubject:'Ново строителство на складова база'},null,null,{audit:{records:[{file:'Уведомление.doc',state:'NOT_READ'}]}});
+ assert.equal(output.subjectCandidate,'НЯМА ДАННИ');
+ assert.ok(output.unresolved.some(x=>/няма удостоверен|не е обвързан|достоверно извлечен/.test(x)));
+ assert.equal(output.subjectCandidateVerified,false);
+});
+test('ВА-009 end-to-end builder: readable and review-required DOC remains a provisional reconstruction',()=>{
+ const reconstruction=loadReconstructor();
+ const intake={subject_candidates:[candidate('Уведомление.doc','Реконструкция на съществуващ обект')],
+  files:[file('Уведомление.doc','текстът е прочетен; ПРОВЕРКА: DOC')],
+  document_texts:[sourceText('Уведомление.doc')]};
+ const output=reconstruction.build(intake,{proposedSubject:'Реконструкция на съществуващ обект'},null,null,{audit:{records:[{file:'Уведомление.doc',state:'REVIEW_REQUIRED'}]}});
+ assert.match(output.subjectCandidate,/Реконструкция на съществуващ обект/);
+ assert.equal(output.subjectCandidateVerified,false);
+ assert.ok(output.unresolved.some(x=>/OCR\/частичен прочит/.test(x)));
+});
+test('ВА-009 old workflow no longer prefills subject candidates before source gate',()=>{
+ const active=readFileSync(new URL('../kt80/KT83_WORKFLOW_CASE_V591.js',import.meta.url),'utf8');
+ const section=active.slice(active.indexOf('function intakeResults('),active.indexOf('async function process()'));
+ assert.match(section,/KT80SubjectMaster/);
+ assert.doesNotMatch(section,/\$\('kt80SubjectText'\)\.value\s*=\s*title/);
+});
