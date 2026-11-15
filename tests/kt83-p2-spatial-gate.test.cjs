@@ -170,3 +170,31 @@ test('KT84 FINAL: delayed failure from prior case does not clear the new case PD
  pending[1].resolve();
  await new Promise(resolve=>setImmediate(resolve));
 });
+
+test('KT84 FINAL: silent PDF1 generator failure without receipt must not count as completed',async()=>{
+ const fs=require('node:fs'),vm=require('node:vm');
+ const source=fixture(),listeners=new Map();
+ const doc={readyState:'complete',
+  getElementById:id=>id==='kt80ParcelInput'?{value:source.ids.join('; ')}:
+    id==='kt83P1RouteText'?{textContent:''}:null,
+  addEventListener:(name,fn)=>{if(!listeners.has(name))listeners.set(name,[]);listeners.get(name).push(fn)}};
+ let runs=0;
+ const root={
+  KT83P2SpatialGate:{check,pdfReceiptMatches},
+  KT80WorkflowState:{step:3,caseCycleId:source.caseId,generation:source.generation,
+   normativeGate:{expertConfirmed:true,decision:'REQUIRED'}},
+  KT82EvidenceInvalidation:{getRevision:()=>source.evidenceRevision},
+  V26ParcelEditor:{normalize:()=>({ids:source.ids,invalid:[],uncertain:[]})},
+  KT80FreeGISResults:source.live,KT80PIMaster:{getResult:()=>source.pi},
+  KT80FreeGIS:{getMap:()=>({zones:source.zones})},setTimeout:()=>{}
+ };
+ root.KT80PDF1Bridge={makePDF:async()=>{runs++; return undefined; /* approved generator catches failures */}};
+ vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../kt80/integration/kt83-p2-automatic-pdf1.js'),'utf8'),
+  {window:root,document:doc,Promise});
+ root.KT83P2Automatic.begin();
+ assert.equal(runs,1);
+ await new Promise(resolve=>setImmediate(resolve));
+ root.KT83P2Automatic.begin();
+ assert.equal(runs,2,'missing PDF1 receipt cannot freeze subsequent attempts');
+ await new Promise(resolve=>setImmediate(resolve));
+});
