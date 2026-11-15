@@ -34,6 +34,13 @@
  .kt84-format-details summary{cursor:pointer;color:#eed5a0;font-weight:700}
  .kt84-format-details #kt80AcceptedFormatsNote{background:transparent!important;
  border:0!important;margin:8px 0 2px!important;padding:3px!important;font-size:13px!important}
+ .kt84-work-step{display:flex;gap:10px;align-items:flex-start;padding:9px 13px;
+ border:1px solid #8ca993;border-radius:8px;background:#18382c;color:#f4eee0;
+ margin:4px 0 12px;font:500 14px/1.42 "Segoe UI",Arial,sans-serif}
+ .kt84-work-step strong{font-weight:750;color:#f9eac5}
+ .kt84-work-step .kt84-work-fields{display:grid;gap:3px;flex:1}
+ .kt84-work-step .kt84-work-marker{font-weight:800;color:#f4d69a;white-space:nowrap}
+ @media(max-width:620px){.kt84-work-step{display:block}.kt84-work-step .kt84-work-marker{display:block;margin-bottom:5px}}
  .kt84-result-group{position:relative}
  .kt84-result-group h3{font-family:"Segoe UI",Arial,sans-serif!important}
  @media(max-width:650px){.kt84-primary-finding{padding:11px 13px}
@@ -76,6 +83,46 @@
    const node=$(id);if(node&&node.textContent!==txt)node.textContent=txt;
   }
  }
+const stageGuides=[
+ {work:'Прегледайте прочита на документите и отбележете липсите.',
+  finish:'Наличен е действителен документен отчет; спорните извлечени данни остават за експертна проверка.'},
+ {work:'Проверете предмета, обхвата и произхода на извлечените сведения.',
+  finish:'Предметът и обхватът са потвърдени поотделно от експерта.'},
+ {work:'Проверете имотите, реалната геометрия и пространствения резултат.',
+  finish:'Налице е обоснован пространствен резултат или мотивирана неприложимост на ГИС.'},
+ {work:'Съпоставете фактите с нормативните основания и компетентността.',
+  finish:'Независимата правна преценка е удостоверена за текущата преписка.'},
+ {work:'Прегледайте мотивираното предложение и вида на документа.',
+  finish:'Документът е неподписан работен проект и отразява удостовереното правно основание.'}
+];
+function showWorkGuides(){
+ for(let step=1;step<=5;step++){
+  const stage=document.querySelector('.kt80-stage-panel[data-panel="'+step+'"]');
+  if(!stage)continue;
+  let banner=document.getElementById('kt84WorkGuide'+step);
+  if(!banner){
+   banner=document.createElement('section');banner.id='kt84WorkGuide'+step;
+   banner.className='kt84-work-step';banner.setAttribute('aria-label','Експертна задача за етап '+step);
+   const mark=document.createElement('span');mark.className='kt84-work-marker';mark.textContent='Етап '+step;
+   const body=document.createElement('div');body.className='kt84-work-fields';
+   for(const [id,head] of [['kt84GuideWork'+step,'Текуща задача: '],['kt84GuideFinish'+step,'Критерий за завършване: ']]){
+    const item=document.createElement('div');item.id=id;
+    const strong=document.createElement('strong');strong.textContent=head;
+    item.append(strong,document.createTextNode(''));body.append(item);
+   }
+   banner.append(mark,body);
+   const legal=document.getElementById('kt84PrimaryLegalFinding');
+   if(step===4&&legal?.parentElement===stage)legal.after(banner);
+   else stage.prepend(banner);
+  }
+  const info=stageGuides[step-1];
+  for(const [id,value] of [['kt84GuideWork'+step,info.work],['kt84GuideFinish'+step,info.finish]]){
+   const el=document.getElementById(id);
+   if(el&&el.lastChild?.nodeType===3)el.lastChild.textContent=value;
+   else if(el)el.append(document.createTextNode(value));
+  }
+ }
+}
 function foldIntakeFormats(){
  const note=$('kt80AcceptedFormatsNote');
  if(!note||note.closest('details'))return;
@@ -126,7 +173,7 @@ function showIntakeEvidence(){
  }
 }
  function init(){
-  foldIntakeFormats();show();showIntakeEvidence();
+  foldIntakeFormats();show();showWorkGuides();showIntakeEvidence();
   for(const event of ['kt80:case-change','kt80:case-reset','kt80:stage-open',
     'kt82:evidence-invalidated','kt80:procedure-confirmed']){
    document.addEventListener(event,()=>queueMicrotask(show));
@@ -146,7 +193,7 @@ function showIntakeEvidence(){
    new MutationObserver(()=>queueMicrotask(showIntakeEvidence))
     .observe(intakeStatus,{childList:true,characterData:true,subtree:true});
   }
-  root.KT84EVisual=Object.freeze({refresh:()=>{show();showIntakeEvidence()}});
+  root.KT84EVisual=Object.freeze({refresh:()=>{show();showWorkGuides();showIntakeEvidence()}});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
  else init();
