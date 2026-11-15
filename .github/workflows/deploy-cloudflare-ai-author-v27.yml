@@ -105,3 +105,28 @@ jobs:
           if(!d.error || d.draft){console.error('Unexpected response from protected endpoint');process.exit(1)}
           console.log('Protected AI endpoint rejects unauthenticated requests');
           NODE
+      - name: Verify deployed Stage 4 route without paid AI requests
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev"
+          response="$(mktemp)"
+          trap 'rm -f "$response"' EXIT
+          status="$(curl -sS --retry 4 --retry-delay 2 --max-time 20 -o "$response" -w '%{http_code}' \
+            -X POST "$base/stage4-proposal" -H 'Content-Type: application/json' \
+            --data '{"task":"draft_normative_proposal"}')"
+          echo "Protected Stage 4 HTTP status: $status"
+          [[ "$status" == "401" || "$status" == "503" ]] || { echo "::error::Stage 4 route not protected or not installed"; exit 1; }
+          node - "$response" <<'NODE'
+          const fs=require('fs'); const r=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          if(!r.error)process.exit(1);
+          if(r.error==="Not found")process.exit(1);
+          console.log('Deployed Stage 4 route exists and rejects requests without credentials');
+          NODE
+          status="$(curl -sS --max-time 20 -o /dev/null -w '%{http_code}' \
+            -X OPTIONS "$base/stage4-proposal" \
+            -H 'Origin: https://emilgergov.github.io' \
+            -H 'Access-Control-Request-Method: POST' \
+            -H 'Access-Control-Request-Headers: authorization,content-type')"
+          echo "Stage 4 browser preflight HTTP status: $status"
+          [[ "$status" == "204" ]] || { echo "::error::Stage 4 browser preflight failed"; exit 1; }
