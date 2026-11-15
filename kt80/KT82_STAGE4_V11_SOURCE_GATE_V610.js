@@ -62,7 +62,12 @@ function boot(){
   
   const gate=workflow.normativeGate||null;
   const gisNotRequired=gate?.expertConfirmed===true&&gate.decision==='NOT_REQUIRED'&&workflow.parcelsConfirmed?.mode==='GIS_NOT_REQUIRED';
-  const scenario=gisNotRequired?'GIS_NOT_REQUIRED':valid?(pdfOK?'FULL_GIS_PDF1':intersections?'FULL_GIS_VERIFIED':'GIS_INCOMPLETE'):'CONTEXT';
+  // Full-GIS verification requires every PI MASTER profile and all 32 zone
+  // boundaries; polygon availability plus intersections alone is insufficient.
+  const fullSpatial=valid&&intersections&&piOK&&
+   root.KT80FreeGIS?.getMap?.()?.zones?.length===32;
+  const scenario=gisNotRequired?'GIS_NOT_REQUIRED':
+   valid?(pdfOK?'FULL_GIS_PDF1':fullSpatial?'FULL_GIS_VERIFIED':'GIS_INCOMPLETE'):'CONTEXT';
   const spatialEvidence=root.KT82SpatialEvidence?.get?.()||null;
   return {ids,live,pi,place,context,stage3,workflow,gate,gisNotRequired,valid,intersections,spatialClass,zoneStatuses,piOK,pdfOK,scenario,spatialEvidence};
  }
