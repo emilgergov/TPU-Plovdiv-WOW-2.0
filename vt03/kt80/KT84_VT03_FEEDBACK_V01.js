@@ -28,21 +28,25 @@ let seq=0,seen=new Map(),timers=new Map();
 function currentCase(){return root.KT80WorkflowState?.caseId||root.KT80WorkflowState?.intake?.archive_name||id('kt80CaseBadge')?.textContent||'Нова преписка'}
 let activeCase=currentCase();
 function classify(message){
- if(/(?:грешка|неуспя|не може|не могат|липсва|недостатъчно|непъл|непрочетен|блокир|отказа достъп|потвърдете и обхвата|задължително)/iu.test(message))return 'critical';
+ // Counts in the intake inventory are warnings, not blocking failures.
+ if(/(?:Инвентаризирани файлове|За проверка: Има непрочетени материали|Автоматичната обработка приключи)/iu.test(message))return 'warning';
+ if(/(?:грешка|неуспя|не може|не могат|липсва|недостатъчно|непъл|блокир|отказа достъп|потвърдете и обхвата|задължително)/iu.test(message))return 'critical';
  if(/(?:за проверка|предложени|непотвърден|прегледайте|проверете|предстои|не е удостовер|изисква)/iu.test(message))return 'warning';
  return 'success';
 }
 function hideNoncriticalOrigin(origin,tone){
  // Critical proof and field validation must always remain visible near the input.
  if(!origin)return;
- origin.classList.toggle('kt84-feedback-source-hidden',tone!=='critical');
+ // A transient action report has a permanent source of truth elsewhere (inventory, field status).
+ // Keep inline validation and evidence, hide only the legacy action banner.
+ origin.classList.toggle('kt84-feedback-source-hidden',origin.id==='kt80FlowMessage'||tone!=='critical');
 }
 function emit(message,{origin=null,forceTone=null}={}){
  const text=String(message||'').replace(/\s+/gu,' ').trim();
  if(text.length<12||/^(?:КТ\d+(?:\.\d+)?\s*[·:])?\s*(?:Проект за проверка|Текстът подлежи на експертна проверка)/iu.test(text))return;
  const tone=forceTone||classify(text);
  const key=origin?.id||text.slice(0,30);
- if(seen.get(key)===text)return;
+ if(seen.get(key)===text){if(origin?.id==='kt80FlowMessage')hideNoncriticalOrigin(origin,tone);return;}
  seen.set(key,text);hideNoncriticalOrigin(origin,tone);
  if(tone==='critical')history.open=false;
  const item=document.createElement('div');item.className='kt84-feedback';item.dataset.tone=tone;
@@ -52,7 +56,8 @@ function emit(message,{origin=null,forceTone=null}={}){
  const remove=()=>{clearTimeout(timers.get(item));timers.delete(item);item.remove()};
  close.addEventListener('click',remove);header.append(title,close);
  const body=document.createElement('p');body.textContent=text.length>360?text.slice(0,357)+'…':text;item.append(header,body);
- for(const old of [...dock.children])if(old.dataset.tone!=='critical')old.remove();
+ // Never stack messages on top of the controls. The full sequence stays in the log.
+ for(const old of [...dock.children]){clearTimeout(timers.get(old));timers.delete(old);old.remove()}
  dock.append(item);
  const li=document.createElement('li');li.textContent=new Date().toLocaleTimeString('bg-BG')+' · '+text;
  list.prepend(li);while(list.children.length>60)list.lastElementChild.remove();
@@ -60,7 +65,7 @@ function emit(message,{origin=null,forceTone=null}={}){
  if(tone!=='critical'){const t=setTimeout(remove,tone==='success'?4500:8500);timers.set(item,t)}
 }
 function init(){
- const ids=['kt80InputStatus','kt80ScopeProposalStatus','kt80KT53Status','kt80RelevanceDecisionStatus','kt80DashboardNotice','kt80SubjectHint','kt80KT53Warnings'];
+ const ids=['kt80InputStatus','kt80ScopeProposalStatus','kt80KT53Status','kt80RelevanceDecisionStatus','kt80DashboardNotice','kt80SubjectHint','kt80KT53Warnings','kt80FlowMessage'];
  for(const nodeId of ids){
   const node=id(nodeId);if(!node)continue;
   const observer=new MutationObserver(()=>{
