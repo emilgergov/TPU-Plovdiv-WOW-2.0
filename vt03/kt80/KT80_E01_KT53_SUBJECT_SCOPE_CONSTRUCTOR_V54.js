@@ -34,7 +34,6 @@ function listSources(reconstruction){
  * Other activity classifications are review cues, NEVER claimed planned works.
  */
 function conciseScopeDraft(subject,reconstruction){
- const t=tidy(subject).replace(/[.\s]+$/u,'');
  const approved=(reconstruction?.confirmedParameters||[]).filter(x=>x&&x.original&&!x.evidenceExcluded&&x.role!=='ambiguous'&&!x.compoundDesignation);
  const known=[],seen=new Set();
  for(const x of approved){
@@ -43,16 +42,24 @@ function conciseScopeDraft(subject,reconstruction){
   known.push((x.type||'Технически параметър')+': '+tidy(x.original));
   if(known.length===8)break;
  }
- const relevance=root.KT80Relevance?.assess?.(reconstruction,t)||null;
- const candidates=(relevance?.review||[]).map(x=>x.name);
- // V56.2: one factual candidate; unconfirmed topics belong to the evidence area.
- // An unknown technical detail must never appear as a committed project activity.
- const paragraphs=[];
- if(t)paragraphs.push('Основна дейност и обект: '+t+'.');
- else paragraphs.push('Основната дейност и обектът се уточняват по наличните първични документи.');
- if(known.length)paragraphs.push('Експертно потвърдени технически характеристики: '+known.join('; ')+'.');
- const text=paragraphs.join('\n\n');
- return {text,pending:candidates.length,approved:known.length,relevance};
+ const relevance=root.KT80Relevance?.assess?.(reconstruction,tidy(subject))||null;
+ const candidates=(relevance?.review||[]).filter(x=>x.positives>0&&x.sources?.some(s=>s.file&&s.excerpt));
+ const activities=[];
+ for(const item of candidates.slice(0,6)){
+  const source=item.sources.find(s=>s.file&&s.excerpt);
+  if(!source)continue;
+  activities.push('• '+item.name+' — кандидат за проверка по '+source.file+(source.page?' (стр. '+source.page+')':'')+'.');
+ }
+ const blocks=[];
+ blocks.push('Дейности и технически обхват на инвестиционното предложение:');
+ if(activities.length)blocks.push('От прочетените документи са установени следните непотвърдени кандидати за дейности:\n'+activities.join('\n'));
+ else blocks.push('Не са установени достатъчно надеждни описания на конкретни предвидени дейности и строително-монтажни работи. Необходима е проверка на първичните документи.');
+ if(known.length)blocks.push('Експертно потвърдени технически характеристики:\n'+known.map(s=>'• '+s).join('\n'));
+ const gaps=(relevance?.crucial||[]).slice(0,4).map(x=>'• '+x.label);
+ if(gaps.length)blocks.push('Неизяснени съществени сведения за проверка:\n'+gaps.join('\n'));
+ blocks.push('Местоположението и кадастралните данни се определят по потвърдения предмет и пространствения анализ; те не заместват описанието на предвидените дейности.');
+ return {text:blocks.join('\n\n'),pending:candidates.length,approved:known.length,relevance,
+  scopeSufficient:known.length>0||activities.length>0};
 }
 function proposition(reconstruction){
  const reasons=[...(reconstruction?.unresolved||[])];
@@ -101,7 +108,7 @@ function proposition(reconstruction){
  if(unsupported)reasons.push('Няма проверими извлечени факти с оригинален документ.');
  return Object.freeze({schema:'KT80-KT53-SUBJECT-SCOPE-V53',
   subject:usableSubject?subject:'',subjectStatus,
-  scope:scope,scopeSummary:{approvedParameters:concise.approved,pendingTopics:concise.pending},relevance:concise.relevance,
+  scope:scope,scopeSummary:{approvedParameters:concise.approved,pendingTopics:concise.pending,scopeSufficient:concise.scopeSufficient},relevance:concise.relevance,
   evidence:evidenceMap,sourceCount:facts.length,
   unresolved:[...new Set(reasons)],expertConfirmed:false,aiGenerated:false,
   evidenceReliability:'НЕПОТВЪРДЕНИ КАНДИДАТ-ДОКАЗАТЕЛСТВА',
