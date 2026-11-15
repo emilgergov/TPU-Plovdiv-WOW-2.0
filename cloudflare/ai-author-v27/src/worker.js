@@ -397,7 +397,13 @@ async function handleStage4Proposal(request,env){
   const auditProvider=await fetch("https://api.openai.com/v1/responses",{
    method:"POST",signal:controller.signal,
    headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
-   body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:3400,
+   body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:6500,
+    text:{format:{type:"json_schema",name:"kt105_normative_audit",strict:true,
+     schema:{type:"object",additionalProperties:false,properties:{
+      verdict:{type:"string",enum:["pass","revise","reject"]},
+      issues:{type:"array",items:{type:"string"}},
+      revisedDraft:{type:"string"}
+     },required:["verdict","issues","revisedDraft"]}}},
     input:[{role:"system",content:reviewSystem},{role:"user",content:JSON.stringify(auditInput)}]})
   });
   if(!auditProvider.ok)return reply({error:"Independent normative review not available",qualityIssues:["REVIEW_UNAVAILABLE"]},422);
