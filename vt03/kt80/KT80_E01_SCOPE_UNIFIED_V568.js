@@ -97,6 +97,11 @@ function init(){
  const unlockObserver=new MutationObserver(updateUnlock);
  unlockObserver.observe(approvalLabel||confirmation,{attributes:true,subtree:true,attributeFilter:['class','disabled']});
  updateUnlock();
+ const insufficientScope=text=>{
+  const v=String(text||'').trim();
+  return v.length<125&&/(?:район|община|област|местност|гр\\.|град|село)/iu.test(v)&&
+   !/(?:дейност|строител|реконструк|оборудван|склад|обект|производств|монтаж|експлоатац|сграда|съоръжен|инфраструктур)/iu.test(v);
+ };
  const dialog=document.createElement('dialog');dialog.id='kt80V562Confirm';dialog.className='kt80-v562-dialog';
  const heading=document.createElement('h3');heading.textContent='Потвърждение на окончателния обхват';
  const explanation=document.createElement('p');explanation.textContent='Прочетете текста по-долу. Потвърждаването се отнася точно за него, а не за предложения, останали неприети.';
@@ -124,6 +129,10 @@ function init(){
   event.preventDefault();event.stopImmediatePropagation();
   if(!$('kt80SubjectConfirmation')?.checked){status.textContent='Първо потвърдете предмета.';return}
   captured=scope.value.trim();
+  if(insufficientScope(captured)){
+   status.textContent='Обхватът съдържа само местоположение. Добавете конкретната дейност, обекта и доказаните технически характеристики, преди потвърждение.';
+   return;
+  }
   if(!captured){status.textContent='Няма проект за потвърждение. Конструирайте или редактирайте обхвата.';return}
   preview.textContent=captured;check.checked=false;yes.disabled=true;
   dialog.showModal();
