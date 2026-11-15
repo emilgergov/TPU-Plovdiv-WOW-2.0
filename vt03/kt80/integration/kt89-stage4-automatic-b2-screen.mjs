@@ -102,7 +102,7 @@ function boot(graph){
   fold.append(el('summary','Алтернативни правни връзки · експертна редакция'));
   legacy[0].before(fold);legacy.forEach(x=>fold.append(x));
  }
- const first=rhs.querySelector('.kt87V11Sources')||rhs.querySelector('#kt87V11Sources')||rhs.querySelector('.kt86-norm')||rhs.querySelector('#kt89OptionalNormChoices');
+ const first=rhs.querySelector('#kt89OptionalNormChoices')||rhs.querySelector('#kt87V11Sources')||rhs.querySelector('.kt86-norm');
  if(first)rhs.insertBefore(root,first);else rhs.append(root);
  if($('kt87V11Sources')){const oldSource=$('kt87V11Sources');const fold=el('details');fold.append(el('summary','Пълен проверен индекс V11 · архивни препратки'));oldSource.before(fold);fold.append(oldSource)}
  refresh.onclick=()=>draw(true);
