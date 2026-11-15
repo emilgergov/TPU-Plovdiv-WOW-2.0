@@ -75,6 +75,27 @@ try{
  assert.equal(legalHandoff.afterPdf,false);
  assert.equal(legalHandoff.restored,'FULL_GIS_PDF1');
 
+ // A previous case's PDF1 must never be accepted by the next case,
+ // even if the imot IDs and the visible geometry have not changed.
+ const isolation=await page.evaluate(()=>{
+  const state=window.KT80WorkflowState,bridge=window.KT83NormativeBridge;
+  const originalCaseId=state.caseCycleId;
+  const before=bridge.getEvidence();
+  try{
+   state.caseCycleId='EG-OTHER-CASE-ISOLATION-TEST';
+   const foreign=bridge.getEvidence();
+   return {before:before.scenario,foreign:foreign.scenario,
+    beforePdf:before.pdfOK,foreignPdf:foreign.pdfOK};
+  }finally{state.caseCycleId=originalCaseId}
+ });
+ assert.equal(isolation.beforePdf,true);
+ assert.equal(isolation.foreignPdf,false,
+  'a PDF1 receipt from another case must not prove this case');
+ assert.notEqual(isolation.foreign,'FULL_GIS_PDF1',
+  'Stage4 cannot inherit a PDF1 from the previous dossier');
+ assert.equal((await page.evaluate(()=>window.KT83NormativeBridge.getEvidence())).scenario,
+  'FULL_GIS_PDF1','restoring the original case must restore its own evidence');
+
  assert.equal(errors.length,0,'no uncaught JS exceptions');
- console.log('KT84_FINAL_REAL_THREE_SCENARIO_GIS_PDF1',JSON.stringify({proof,receipt,legalHandoff,bytes:bytes.byteLength,errors}));
+ console.log('KT84_FINAL_REAL_THREE_SCENARIO_GIS_PDF1',JSON.stringify({proof,receipt,legalHandoff,isolation,bytes:bytes.byteLength,errors}));
 }finally{await browser.close();}
