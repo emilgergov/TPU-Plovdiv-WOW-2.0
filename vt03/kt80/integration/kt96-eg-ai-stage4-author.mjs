@@ -157,6 +157,7 @@ function boot(){
      ' документа с извлечен текст; '+(Number(receipt.caseFactsReceived)||0)+
      ' доказателствени позиции; ГИС: '+(receipt.gisContextReceived?'предаден':'липсва')+
      '; нормативни препратки: '+(Number(receipt.archiveIndexRecordsReceived)||0)+
+     '; проверени извлечения V11: '+(Number(receipt.archiveVerifiedExcerptsReceived)||0)+
      '; пълни текстове на разпоредби: '+(Number(receipt.archiveArticleTextsReceived)||0)+'.'+
      (receipt.documentTextTruncated?' Част от документалния текст е съкратена по технически лимит.':'');
    output.textContent=sourceInfo+String.fromCharCode(10,10)+data.draft;output.style.display='block';
