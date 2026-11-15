@@ -158,7 +158,9 @@ try{
     assert.equal(sent.store,false);
     if(sent.input[0].content.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ')){
       const audit=JSON.parse(sent.input[1].content);
-      assert.equal(audit.fullArticleTextsAvailable,false);
+      assert.equal(audit.fullArticleTextsAvailable,true);
+      assert(audit.exactApplicableLawTexts.some(x=>x.reference==='чл. 93'));
+      assert(audit.exactApplicableLawTexts.some(x=>x.reference==='Приложение № 2 към ЗООС'));
       assert(audit.draft.includes('Фактическа основа'));
       return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({verdict:'pass',issues:[],revisedDraft:''})}]}]}),{status:200});
     }
@@ -206,10 +208,12 @@ try{
   assert.equal(stage4Data.requestId,stage4Body.requestId);
   assert.equal(stage4Data.projectOnly,true);
   assert.equal(stage4Data.expertReviewRequired,true);
-  assert.equal(stage4Data.archiveEvidenceVerified,false);
+  assert.equal(stage4Data.archiveEvidenceVerified,true);
+  assert(stage4Data.evidenceReceipt.archiveArticleTextsReceived>=8);
+  assert.equal(stage4Data.evidenceReceipt.archiveCorpusDocumentsAvailable,22);
   assert.ok(stage4Data.draft.length>120);
   assert.equal(stage4Context.sourceHints[0].applicabilityVerified,false);
-  assert.equal(stage4Context.archiveTextProvided,false);
+  assert.equal(stage4Context.archiveTextProvided,true);
   assert.equal(stage4Context.archiveExcerptProvenanceConfirmed,true);
   assert.equal(stage4Context.verifiedOfflineLegalExcerpts.length,8);
   assert.equal(stage4Context.verifiedOfflineLegalExcerpts[1].ref,'чл. 2, ал. 2');
@@ -222,7 +226,7 @@ try{
   assert.equal(stage4Calls,2);
   assert.equal(stage4Data.normativeAudit.reviewed,true);
   assert.equal(stage4Data.normativeAudit.reviewVerdict,'pass');
-  assert.equal(stage4Data.normativeAudit.fullArticlesVerified,false);
+  assert.equal(stage4Data.normativeAudit.fullArticlesVerified,true);
 
   // KT104: do not allow a fabricated annex classification or wrong Natura 2000 title
   // to be silently presented as an accepted project.
@@ -266,7 +270,7 @@ try{
   const revisionData=await reviewedRevision.json();
   assert.equal(revisionData.normativeAudit.reviewVerdict,'revise');
   assert.equal(revisionData.draft,corrected);
-  assert.equal(revisionData.normativeAudit.fullArticlesVerified,false);
+  assert.equal(revisionData.normativeAudit.fullArticlesVerified,true);
   console.log('PASS: KT105-C reviewer revision replaces original draft without claiming full-law verification.');
 
 
