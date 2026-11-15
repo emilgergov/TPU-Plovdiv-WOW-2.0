@@ -46,6 +46,59 @@ function boot(){
  const refs=()=>Object.values(VERIFIED_ARTICLES).filter(r=>['ZOOS_93','N_OS_6A','PRAVILNIK_RIOSV_TERRITORY'].includes(r.id))
   .map(r=>({id:r.id,act:r.act,article:r.article,archivePath:r.archivePath,textAnchor:r.anchor,
    citationVerified:true,applicabilityVerified:false}));
+
+ // KT99: transport extracted case material, not a mere document count.
+ // Source text is untrusted dossier evidence; NEVER promote it to an approved finding.
+ // Payload is bounded for the protected Worker; preserve source identity and mark truncation.
+ const compact=(x,max=1300)=>str(x).slice(0,max);
+ const serializable=(x,max=5000)=>{try{return JSON.stringify(x).slice(0,max)}catch(_){return ''}};
+ function stageEvidenceDetail(w,h){
+  const intake=w.intake||{},documents=Array.isArray(intake.document_texts)?intake.document_texts:[];
+  const dossier=Array.isArray(intake.dossier_documents)?intake.dossier_documents:[];
+  const pages=Array.isArray(intake.page_text_index)?intake.page_text_index:[];
+  const files=Array.isArray(intake.files)?intake.files:[];
+  const budgets={documents:49000,pageText:15000};
+  let remaining=budgets.documents;
+  const sourceTexts=documents.slice(0,60).map(d=>{
+   const source=compact(d?.source,200);
+   const raw=str(d?.text),length=Math.min(remaining,16000,raw.length);
+   const excerpt=raw.slice(0,length);
+   remaining-=length;
+   return {source,text:excerpt,totalChars:raw.length,truncated:length<raw.length,
+    status:'SOURCE_TEXT_NOT_EXPERT_VERIFIED'};
+  }).filter(d=>d.source&&d.text);
+  return {
+   archiveName:compact(intake.archive_name,180),
+   documents:files.slice(0,80).map(d=>({file:compact(d?.name||d?.file||d?.source,180),
+    status:compact(d?.status||d?.state||d?.readStatus,150)})),
+   documentRecords:dossier.slice(0,35).map(d=>({file:compact(d.file,180),
+    type:compact(d.type,50),readable:d.readable===true,
+    facts:Array.isArray(d.facts)?d.facts.slice(0,12).map(f=>({
+     key:compact(f.key,80),value:compact(f.value,500),source:compact(f.source,180),
+     verified:false})):[],
+    references:Array.isArray(d.references)?d.references.slice(0,12):[]})),
+   sourceTexts,
+   pageTexts:pages.slice(0,50).map(p=>({file:compact(p.file,180),page:p.page,
+    text:compact(p.text,300),verified:false})),
+   sourceTextCount:documents.length,
+   sourceTextTruncated:sourceTexts.some(d=>d.truncated)||documents.length>sourceTexts.length,
+   dossierEvidence:Array.isArray(intake.evidence)?intake.evidence.slice(0,50):[],
+   subjectCandidates:Array.isArray(intake.subject_candidates)?intake.subject_candidates.slice(0,12).map(s=>({
+    source:compact(s.source,180),title:compact(s.title,500),
+    sections:Array.isArray(s.sections)?s.sections.slice(0,15).map(t=>({
+     key:compact(t.key,50),text:compact(t.text,1200),source:compact(t.source,180),
+     reviewRequired:true})):[]})):[],
+   semanticReview:intake.semantic_review||null,
+   gis:{
+    parcelIds:[...h.parcelIds],
+    sourceSummary:h.observations.filter(x=>/parcel|spatial|pdf/i.test(x.factId)),
+    piMaster:serializable(window.KT80PIMaster?.getResult?.(),4500),
+    spatial:serializable(window.KT83NormativeBridge?.getEvidence?.(),5500),
+    stage3:serializable(window.KT80Stage3?.getResult?.(),4500),
+    areaContext:serializable(window.KT81ContextScreen?.getResult?.(),2600)
+   }
+  };
+ }
  let serial=0,pendingSignature='',finishedSignature='',lastResult=null;
  const clear=()=>{
   serial++;pendingSignature='';finishedSignature='';lastResult=null;password.value='';
@@ -74,6 +127,7 @@ function boot(){
    evidence:h.observations.map(x=>({factId:x.factId,value:x.value,status:x.status,
     sourceId:x.sourceId,sourceLocation:x.sourceLocation,description:x.description})),
    parcelIds:h.parcelIds,
+   completeCaseEvidence:stageEvidenceDetail(w,h),
    archive:{name:LOCKED_ARCHIVE,sha256:LOCKED_ARCHIVE_SHA256,verifiedReferences:refs(),
     archivedTextIncluded:false},
    constraints:{noInventedFacts:true,noInventedCitations:true,expertApprovalRequired:true,
