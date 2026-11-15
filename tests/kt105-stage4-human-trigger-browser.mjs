@@ -10,6 +10,8 @@ try{
  await page.goto('http://127.0.0.1:8765/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html',{waitUntil:'domcontentloaded',timeout:90000});
  await page.waitForSelector('#kt96EGAuthor',{state:'attached',timeout:30000});
  const initial=await page.evaluate(()=>{
+  const stage4=document.querySelector('.kt80-stage-panel[data-panel="4"]');
+  stage4.hidden=false; // simulate actual transition before checking rendered pixels
   document.dispatchEvent(new CustomEvent('kt80:stage-open',{detail:{step:4}}));
   return {
    heading:document.querySelector('#kt96EGAuthor h3')?.textContent,
