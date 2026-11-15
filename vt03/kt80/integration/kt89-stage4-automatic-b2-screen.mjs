@@ -4,7 +4,8 @@
 import {LOCKED_ARCHIVE, VERIFIED_ARTICLES, verifiedReference} from './v11-trusted-source-registry.mjs';
 import {assessStage4} from './stage4-independent-legal-engine.mjs';
 import {collectStageEvidence,verifyStageEvidence} from './kt95-stage-evidence-handoff.mjs';
-const BUILD='KT95-20261115-stage-handoff-01';
+import {createCaseProposal} from './kt96-stage4-case-proposal.mjs';
+const BUILD='KT96-20261115-concrete-proposal-01';
 const $=id=>document.getElementById(id);
 const node=(tag,content)=>{const x=document.createElement(tag);if(content!==undefined)x.textContent=content;return x;};
 const DEFINITIONS=[
@@ -119,6 +120,7 @@ function start(){
   try{packet=buildAssessment(c,defs);assessment=packet.result}catch(error){status.textContent='Нормативният двигател не е достъпен: '+error.message;return}
   const findings=new Map(assessment.legalFindings.map(f=>[f.ruleId,f]));
   const actual=packet.mode==='verified';
+  const specific=createCaseProposal(handoff,c,actual?packet.review:null);
   status.textContent='Модул '+BUILD+' · Предмет и обхват: '+(c.confirmed?'потвърдени':'непотвърдени')+
    ' · ПИ: '+(c.ids.join(', ')||'няма въведени')+
    ' · ГИС: '+(c.spatial==='OUTSIDE'?'пространствено непресичане':c.spatial==='INSIDE'?'пространствено пресичане':'недостатъчна квалификация')+
@@ -180,10 +182,18 @@ function start(){
   summary.append(node('p',c.confirmed?'Входните предмет и обхват са потвърдени от експерта.':'Потвърдете предмета и обхвата в Етап 2, преди окончателната експертна преценка.'));
   const candidates=assessment.legalFindings.filter(f=>f.state==='supported');
   const unresolved=assessment.legalFindings.filter(f=>f.state==='undetermined'||f.state==='disputed');
-  const msg=actual
-    ?(candidates.length?'Предложение за процедура според подкрепените хипотези: '+candidates.map(f=>f.title+' ('+f.basis.act+', '+f.basis.article+')').join('; ')+'.':'Не е удостоверена приложима процедура. Предложение: изискайте конкретните липсващи факти и проверете конкуриращите се режими.')
-    :'Работно предложение: проверете режимите по ОВОС и ОС (а при план или програма — ЕО), според действителните дейности и пълните нормативни предпоставки. Не е направена доказана правна квалификация.';
+  const msg=actual&&candidates.length?
+   'Работно предложение по подкрепени предпоставки: '+candidates.map(f=>f.title+' ('+f.basis.act+', '+f.basis.article+')').join('; ')+'.':
+   specific.action;
+  summary.append(node('p',specific.assessment));
   summary.append(node('p',msg));
+  for(const b of specific.basis)summary.append(node('p',b));
+  summary.append(node('p','НОРМАТИВНО ОСНОВАНИЕ: '+specific.motive));
+  if(specific.candidateSource)summary.append(node('p','Проверен архивен цитат: '+specific.candidateSource.act+' · '+specific.candidateSource.article+' · '+specific.candidateSource.archivePath+' (кандидат, не установена приложимост).'));
+  if(specific.missing.length){
+   summary.append(node('strong','РЕШАВАЩИ НЕДОСТИГАЩИ СВЕДЕНИЯ / ПРЕДПОСТАВКИ'));
+   for(const miss of specific.missing)summary.append(node('p',miss.label+' · източник: '+miss.origin));
+  }
   if(actual){
    summary.append(node('p','Правни хипотези: подкрепени '+candidates.length+' · неустановени/противоречиви '+unresolved.length+'. Източниците и правните основания са от експертно удостоверения пакет за тази преписка.'));
    for(const p of assessment.proposals)summary.append(node('p',p));
@@ -199,7 +209,7 @@ function start(){
   if(oldOptional)more.append(oldOptional);
   if(oldSources)more.append(oldSources);
   snapshot=Object.freeze({caseKey:c.key,handoffKey:handoff.key,archive:LOCKED_ARCHIVE,legalFindings:assessment.legalFindings,
-   proposals:assessment.proposals,screenProposal:msg,expertApproved:actual,finalProcedure:false,
+   proposals:assessment.proposals,screenProposal:msg,specificProposal:specific,expertApproved:actual,finalProcedure:false,
    readyForStage5Draft:actual&&assessment.readyForStage5Draft,source:'stage4-independent-legal-engine.mjs'});
  }
  const first=rhs.querySelector('#kt89B2Automatic')||rhs.querySelector('#kt89OptionalNormChoices')||rhs.querySelector('#kt87V11Sources');
