@@ -95,6 +95,13 @@ jobs:
           curl --fail --silent --show-error --retry 5 --retry-delay 3 --max-time 15 \
             "https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/health" \
             | node -e 'let s="";process.stdin.on("data",x=>s+=x);process.stdin.on("end",()=>{let d=JSON.parse(s);console.log("Service:",d.service,"Status:",d.status,"AI enabled:",d.aiGenerationEnabled);if(d.status!=="online"||d.service!=="TPU Plovdiv AI Author V27")process.exit(1)})'
+      - name: Verify live full-text V11 legal corpus without AI usage
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 4 --retry-delay 2 --max-time 30 \
+            "https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/legal-archive-health" \
+            | node -e 'let s="";process.stdin.on("data",b=>s+=b);process.stdin.on("end",()=>{const d=JSON.parse(s);console.log("V11 archive status:",d.status,"sources:",d.sourceDocuments,"verified provisions:",d.exactProvisionsReady);if(d.status!=="ready"||d.sourceDocuments!==22||d.requiredProvisionsVerified!==7||d.exactProvisionsReady<10)process.exit(1)})'
       - name: Verify unauthenticated AI requests cannot incur charges
         shell: bash
         run: |
