@@ -17,7 +17,7 @@ export function createCaseProposal(handoff,context,review=null){
   missing.push({id:'annex_threshold',label:'Количествени характеристики, мощности, капацитет и прагове, когато са относими',origin:'Преписка / технически документи'});
   missing.push({id:'annex_exceptions',label:'Проверка на относимите изменения и изключения по конкретната категория',origin:'MASTER V11 + факти'});
  }
- if(!yes(facts,'parcel_identifiers_confirmed')&&!s.parcelsConfirmed?.notApplicable){
+ if(!ids.length&&!s.parcelsConfirmed?.notApplicable){
   missing.push({id:'parcel_evidence',label:'Удостоверено местоположение и териториален обхват',origin:'Етап 3'});
  }
  if(!review)missing.push({id:'legal_source_application',label:'Документално установена приложимост на всички съществени правни предпоставки и изключения',origin:'MASTER V11 + Етап 4'});
