@@ -302,6 +302,28 @@ try{
   assert.equal(kt106Calls,3);
   console.log('PASS: KT106 one automatic repair followed by independent normative verification; no invalid draft reaches expert.');
 
+  // KT107: contradictory "no category established" + "decision not to conduct EIA"
+  // must not be accepted, even if a model repeats it after one corrective request.
+  const k107Bad='ВОДЕЩО ПРЕДЛОЖЕНИЕ: Да се издаде решение за непровеждане на ОВОС поради липса на доказано попадане в приложения № 1 или № 2 към ЗООС.\\nФактическа основа\\nСкладови помещения по индивидуална преписка.\\nНормативни предпоставки и граници на проверката\\nНе е установено попадане в приложения № 1 или № 2.\\nМотивирано предложение\\nДа се издаде решение за непровеждане на ОВОС.\\nДанни за експертна проверка\\nПравните предпоставки не са удостоверени.';
+  let k107Calls=0;
+  globalThis.fetch=async (_url,opts)=>{
+    k107Calls++;
+    const sent=JSON.parse(opts.body),sys=sent.input[0].content;
+    if(sys.includes('Преработи ПЪЛНИЯ проект')){
+      const req=JSON.parse(sent.input[1].content);
+      assert(req.qualityIssues.includes('EIA_DECISION_WITHOUT_ESTABLISHED_SCREENING_JURISDICTION'));
+    }
+    if(sys.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ'))throw Error('Reviewer must not be called on unresolved contradiction');
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:k107Bad}]}]}),{status:200});
+  };
+  const blocked=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+  assert.equal(blocked.status,422);
+  const blockedBody=await blocked.json();
+  assert(blockedBody.qualityIssues.includes('EIA_DECISION_WITHOUT_ESTABLISHED_SCREENING_JURISDICTION'));
+  assert.equal(k107Calls,2);
+  console.log('PASS: KT107 unsupported non-EIA decision rejected even after correction attempt.');
+
+
 
 
 
