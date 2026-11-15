@@ -42,7 +42,7 @@ function start(){
    const r=VERIFIED_ARTICLES[id];
    entries.push({id:'H_'+id,title:r.act+' · '+r.article,registryId:id,
     requirements:['F_'+id],exceptions:[],
-    exceptionAudit:{status:'no_known_exceptions',sourceId:'ЗА ПРОВЕРКА',sourceLocation:r.archivePath,reason:'Необходим е действителен експертен преглед на изключенията; този проект НЕ е проверен'},
+    exceptionAudit:{status:'requires_review',sourceId:'',sourceLocation:r.archivePath,reason:'Експертът трябва да провери изключенията по пълния архивен текст'},
     missingFactProposal:'Предложение: проверете предпоставките и изключенията по '+r.article+' от '+r.act+' и приложете доказателствата.',
     supportedProposal:'Предложение: проверете и мотивирайте приложимата процедура по '+r.article+'.',
     notSupportedProposal:'Предложение: изследвайте алтернативните приложими правни основания.'});
@@ -54,6 +54,7 @@ function start(){
   rules.dispatchEvent(new Event('input',{bubbles:true}));
  });
  let last=null;
+ for(const input of [rules,facts])input.addEventListener('input',()=>{last=null});
  assess.addEventListener('click',()=>{
   try{
    const packet=createCaseAssessmentPacket({hypotheses:JSON.parse(rules.value||'[]'),facts:JSON.parse(facts.value||'[]')});
