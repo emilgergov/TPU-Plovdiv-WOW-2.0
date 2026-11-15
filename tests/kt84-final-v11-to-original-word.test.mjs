@@ -108,8 +108,13 @@ function recordFromVerified(chain){
   throw new TypeError('Няма актуално, независимо удостоверена оценка V11.');
  // A positive individual V11 review does not authorize a formal outgoing act.
  const proposal=draftWithCompetenceGate({
-  stage4:chain.stage4,authorityClaim:authority.name
+  stage4:chain.stage4,authorityClaim:authority.name,
+  caseContext:chain.current,v11Verifier:chain.bridge
  });
+ assert.equal(proposal.limitedV11ReviewVerified,true);
+ assert.equal(proposal.authorityVerification,'VERIFIED_FOR_OS_6A_REVIEW_ONLY');
+ assert.equal(proposal.readyForFormalDraft,false);
+ assert.equal(proposal.administrativeActIssued,false);
  return createReviewDocument({caseId:chain.current.caseId,
   generation:chain.current.generation,evidenceRevision:chain.current.evidenceRevision,
   subject:chain.current.subject,proposal,caseTitle:'Работно писмо за експертен преглед',
@@ -147,6 +152,12 @@ test('FINAL: independent V11 -> motivated unsigned Word on accepted original str
    provisions:chain.verified.provisions.length,
    size:result.bytes.length,originalPartsPreserved:true,formalIssuance:false}));
  });
+});
+test('FINAL: a free-form authority claim alone cannot certify competence',()=>{
+ const chain=reviewChain();
+ const draft=draftWithCompetenceGate({stage4:chain.stage4,authorityClaim:authority.name});
+ assert.equal(draft.limitedV11ReviewVerified,false);
+ assert.equal(draft.readyForFormalDraft,false);
 });
 test('FINAL: updated evidence revision invalidates V11 and denies Word creation',()=>{
  const chain=reviewChain();
