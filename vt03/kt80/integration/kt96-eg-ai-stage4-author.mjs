@@ -150,7 +150,16 @@ function boot(){
     requestId,draft:data.draft,projectOnly:true,expertApproved:false,
     providerArchiveEvidenceVerified:data.archiveEvidenceVerified===true
    });
-   output.textContent=data.draft;output.style.display='block';
+   const receipt=data.evidenceReceipt||{};
+   const dossierCount=Number(receipt.documentTextsReceived)||0;
+   const availableCount=Number(receipt.documentTextsAvailable)||0;
+   const sourceInfo='Входни данни: '+dossierCount+' от '+availableCount+
+     ' документа с извлечен текст; '+(Number(receipt.caseFactsReceived)||0)+
+     ' доказателствени позиции; ГИС: '+(receipt.gisContextReceived?'предаден':'липсва')+
+     '; нормативни препратки: '+(Number(receipt.archiveIndexRecordsReceived)||0)+
+     '; пълни текстове на разпоредби: '+(Number(receipt.archiveArticleTextsReceived)||0)+'.'+
+     (receipt.documentTextTruncated?' Част от документалния текст е съкратена по технически лимит.':'');
+   output.textContent=sourceInfo+'\\n\\n'+data.draft;output.style.display='block';
    status.textContent=data.archiveEvidenceVerified===true?
      'Получен е проект от EG Автора. Предстои независима правна и експертна проверка.':
      'Получен е проект от EG Автора. Пълният нормативен текст V11 не е удостоверен като използван; цитатите трябва да бъдат проверени.';
