@@ -55,7 +55,7 @@ function start(){
  };
  const target=$('kt86Matrix')?.querySelector('.kt86-panel:nth-child(2)')||panel;
  const first=target.querySelector('.kt86-norm');
- if(first)target.insertBefore(source,first);else target.append(source);
+ if(first?.parentNode===target)target.insertBefore(source,first);else target.append(source);
  update();diagnostics();
  ['kt80:case-change','kt80:case-reset','kt82:evidence-invalidated','kt80:stage-open'].forEach(evt=>document.addEventListener(evt,diagnostics));
  window.KT87V11SourceStatus=Object.freeze({diagnostics,archive:LOCKED_ARCHIVE,indexCount:records.length});
