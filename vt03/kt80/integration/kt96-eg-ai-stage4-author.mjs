@@ -159,7 +159,7 @@ function boot(){
      '; нормативни препратки: '+(Number(receipt.archiveIndexRecordsReceived)||0)+
      '; пълни текстове на разпоредби: '+(Number(receipt.archiveArticleTextsReceived)||0)+'.'+
      (receipt.documentTextTruncated?' Част от документалния текст е съкратена по технически лимит.':'');
-   output.textContent=sourceInfo+'\\n\\n'+data.draft;output.style.display='block';
+   output.textContent=sourceInfo+String.fromCharCode(10,10)+data.draft;output.style.display='block';
    status.textContent=data.archiveEvidenceVerified===true?
      'Получен е проект от EG Автора. Предстои независима правна и експертна проверка.':
      'Получен е проект от EG Автора. Пълният нормативен текст V11 не е удостоверен като използван; цитатите трябва да бъдат проверени.';
