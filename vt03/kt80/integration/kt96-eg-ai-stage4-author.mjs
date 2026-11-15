@@ -15,13 +15,33 @@ function boot(){
  const host=$('kt91Stage4');if(!host||$('kt96EGAuthor'))return false;
  const ui=make('section');ui.id='kt96EGAuthor';ui.style.cssText='padding:14px;margin:12px 0;border:2px solid #c9aa6b;border-radius:9px;background:#143c2b;color:#f7f0db';
  ui.append(make('h3','EG AI Автор · проект за Етап 4'));
- ui.append(make('p','При влизане в Етап 4 EG Авторът предлага проект по фактите от Етапи 1–3 и наличните нормативни източници. Проектът НЕ е административен акт и не удостоверява правна приложимост.'));
+ const evidenceBox=make('section');evidenceBox.id='kt105EvidenceOverview';evidenceBox.style.cssText='margin:12px 0;padding:12px;background:#244b36;border-radius:8px;line-height:1.5';
+ ui.append(evidenceBox);
+ const line=(name,value)=>{const block=make('div');block.style.cssText='margin-bottom:9px';const heading=make('strong',name);heading.style.cssText='display:block;color:#f1d18f';block.append(heading,make('div',value||'НЯМА ДАННИ'));return block;};
+ function showEstablishedEvidence(){
+  const w=window.KT80WorkflowState||{},p=w.subjectConfirmed||{},h=collectStageEvidence(window),intake=w.intake||{};
+  evidenceBox.replaceChildren(make('h4','Установени данни от Етапи 1–3'));
+  const docs=Array.isArray(intake.document_texts)?intake.document_texts:[];
+  const files=Array.isArray(intake.files)?intake.files:[];
+  const names=files.map(x=>str(x?.name||x?.file||x?.source)).filter(Boolean);
+  evidenceBox.append(line('Етап 1 · Преписка',[
+    intake.archive_name?'Архив: '+str(intake.archive_name):'',
+    'Документи с извлечен текст: '+docs.length,
+    names.length?'Файлове: '+names.slice(0,12).join('; '):''
+  ].filter(Boolean).join(' · ')));
+  evidenceBox.append(line('Етап 2 · Потвърден предмет',p.expertConfirmed===true?str(p.text):'НЯМА ПОТВЪРДЕН ПРЕДМЕТ'));
+  evidenceBox.append(line('Етап 2 · Потвърден обхват',p.scopeConfirmed===true?str(p.scope):'НЯМА ПОТВЪРДЕН ОБХВАТ'));
+  const stable=h.observations.filter(x=>x.status==='established'&&x.factId!=='subject_confirmed'&&x.factId!=='scope_confirmed');
+  const parcels=h.parcelIds?.length?'Имот(и): '+h.parcelIds.join(', '):'Имот(и): НЯМА ДАННИ';
+  evidenceBox.append(line('Етап 3 · Имоти и пространствени данни',parcels+'\n'+stable.slice(0,14).map(x=>str(x.description||x.factId)+': '+str(x.value)).join(' · ')));
+ }
+
  const button=make('button','Изготви проект с EG Автора');button.type='button';button.id='kt96EGGenerate';
  button.style.cssText='background:#d9b874;color:#173a28;padding:10px 14px;font-weight:800;border:0;border-radius:7px;cursor:pointer';
- const status=make('p','EG Авторът още не е изготвил проект.');status.id='kt96EGStatus';status.setAttribute('role','status');
+ const status=make('p','');status.style.display='none';status.id='kt96EGStatus';status.setAttribute('role','status');
  const output=make('div');output.id='kt96EGDraft';output.style.cssText='white-space:pre-wrap;line-height:1.6;border-left:4px solid #d4ba80;padding:12px;background:#244a37;color:#fff;display:none';
  const lead=make('div');lead.id='kt104EGLead';lead.style.cssText='display:none;margin:12px 0;padding:14px;border-left:6px solid #e1be72;border-radius:7px;background:#244b36;font-size:17px;font-weight:700;line-height:1.55;white-space:pre-wrap';
- const expanded=make('details');expanded.id='kt104EGDetails';expanded.style.cssText='margin:12px 0;border:1px solid #9d9e72;border-radius:7px;padding:10px';
+ const expanded=make('details');expanded.id='kt104EGDetails';expanded.style.cssText='display:none;margin:12px 0;border:1px solid #9d9e72;border-radius:7px;padding:10px';
  expanded.append(make('summary','Подробна фактическа и нормативна аргументация'),output);
  ui.append(button,status,lead,expanded);
  const dialog=make('dialog');dialog.id='kt96EGPassword';dialog.style.cssText='background:#193b2d;color:#fff3db;border:1px solid #d9b874;border-radius:10px;padding:20px;max-width:460px';
@@ -144,9 +164,10 @@ function boot(){
  const clear=()=>{
   serial++;pendingSignature='';finishedSignature='';lastResult=null;password.value='';
   if(dialog.open)dialog.close();button.disabled=false;output.textContent='';output.style.display='none';
-  status.textContent='EG Авторът още не е изготвил проект.';lead.textContent='';lead.style.display='none';expanded.open=false;
+  status.textContent='';status.style.display='none';lead.textContent='';lead.style.display='none';expanded.style.display='none';expanded.open=false;showEstablishedEvidence();
  };
  async function generate(firstPassword=null){
+  status.style.display='block';
   const identity=caseIdentity(),{w,h}=identity,p=w.subjectConfirmed||{};
   if(!(p.expertConfirmed===true&&p.scopeConfirmed===true)){
    status.textContent='Необходимо е потвърждение на предмета и обхвата в Етап 2.';return;
@@ -221,7 +242,7 @@ function boot(){
     'ВОДЕЩО ПРЕДЛОЖЕНИЕ — ПРОЕКТ ЗА ЕКСПЕРТНА ПРОВЕРКА'+String.fromCharCode(10)+leadingDraft:
     'Не е отделено самостоятелно водещо предложение. Вижте пълния текст по-долу.';
    lead.style.display='block';
-   expanded.open=!leadingDraft;
+   expanded.open=!leadingDraft;expanded.style.display='block';
    output.textContent=sourceInfo+String.fromCharCode(10,10)+body;output.style.display='block';
    status.textContent=data.archiveEvidenceVerified===true?
      'Получен е проект от EG Автора. Предстои независима правна и експертна проверка.':
@@ -235,12 +256,12 @@ function boot(){
  }
  button.addEventListener('click',()=>generate());
  form.addEventListener('submit',e=>{e.preventDefault();const p=password.value;password.value='';dialog.close();generate(p)});
- document.addEventListener('kt80:stage-open',e=>{if(e.detail?.step===4&&!pendingSignature&&!finishedSignature&&window.KT80EGSession?.hasAccess())generate()});
+ document.addEventListener('kt80:stage-open',e=>{if(e.detail?.step===4)showEstablishedEvidence()});
  ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'].forEach(e=>document.addEventListener(e,clear));
  window.KT96EGStage4=Object.freeze({refresh:()=>generate(),snapshot:()=>finishedSignature===caseIdentity().signature?lastResult:null,
   getStatus:()=>status.textContent});
- // The Stage 4 panel can already be active when this module finishes loading.
- if(window.KT80WorkflowState?.step===4&&window.KT80EGSession?.hasAccess())generate();
+ // KT105: on entry only present established evidence and one explicit author button.
+ showEstablishedEvidence();
  return true;
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,1500),{once:true});
