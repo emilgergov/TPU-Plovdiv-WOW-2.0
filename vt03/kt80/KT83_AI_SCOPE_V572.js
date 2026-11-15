@@ -45,6 +45,16 @@ function safeScopeProposal(raw,baseline){
   return !novel.some(w=>newTechnical.test(w)) && novel.length<=1;
  });
  const result=allowed.join(' ').replace(/\s+/gu,' ').trim();
+ // Preserve substantive coverage. A geographic fragment is NOT an improved
+ // description of an investment activity, even when its words occur in source.
+ const significant=t=>String(t||'').toLocaleLowerCase('bg').match(/[\\p{L}\\p{N}]{4,}/gu)||[];
+ const sourceTerms=significant(source),resultTerms=significant(result);
+ const geographicOnly=result.length<115&&/(?:район|община|област|местност|град|гр\\.|село)/iu.test(result)&&
+  !/(?:дейност|строител|реконструк|оборудван|склад|обект|производств|монтаж|експлоатац|сграда|съоръжен|инфраструктур)/iu.test(result);
+ if(geographicOnly||(sourceTerms.length>=10&&resultTerms.length<Math.ceil(sourceTerms.length*.55))){
+  return {text:source,note:'Предложението съкращава съществения обхват или го заменя с местоположение. Запазен е първоначалният проект; редактирайте ръчно или реконструирайте от преписката.'};
+ }
+
  const baseNorm=source.toLocaleLowerCase('bg').replace(/[.,;:!?\s–—-]+/gu,' ').trim();
  const resultNorm=result.toLocaleLowerCase('bg').replace(/[.,;:!?\s–—-]+/gu,' ').trim();
  if(!result||resultNorm===baseNorm){
