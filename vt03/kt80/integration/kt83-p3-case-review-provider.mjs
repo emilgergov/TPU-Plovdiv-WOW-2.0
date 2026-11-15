@@ -41,6 +41,7 @@ export function createCaseReviewStore(current){
   const context=current(),review=deepCopy(raw);
   if(!valid(review,context))return {ok:false,reason:'Липсват експертно удостоверени факти, компетентност или основания от MASTER V11.'};
   approved=freezeDeep(review);signature=canon(approved);
+  if(typeof document!=='undefined')document.dispatchEvent(new Event('kt83:review-submitted'));
   return {ok:true,caseId:approved.caseId,evidenceRevision:approved.evidenceRevision};
  }
  function getCaseReview(context){
