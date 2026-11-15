@@ -1,0 +1,40 @@
+name: VT03-R2 scope and action-panel acceptance
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'vt03/kt80/KT80_E01_KT53_SUBJECT_SCOPE_CONSTRUCTOR_V54.js'
+      - 'vt03/kt80/KT80_E01_SCOPE_UNIFIED_V568.js'
+      - 'vt03/kt80/KT84_VT03_FEEDBACK_V01.js'
+      - 'vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html'
+      - 'tests/kt84-vt03-r2-scope-feedback-browser.mjs'
+      - '.github/workflows/kt84-vt03-r2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JS syntax and scope gates
+        run: |
+          node --check vt03/kt80/KT80_E01_KT53_SUBJECT_SCOPE_CONSTRUCTOR_V54.js
+          node --check vt03/kt80/KT80_E01_SCOPE_UNIFIED_V568.js
+          node --check vt03/kt80/KT84_VT03_FEEDBACK_V01.js
+      - name: Install Chromium
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts playwright@1.57.0
+          npx playwright install chromium
+      - name: Serve candidate
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/vt03-r2.log 2>&1 &
+          for n in $(seq 1 30); do curl -sf http://127.0.0.1:8765/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html >/dev/null && break; sleep 1; done
+      - name: Existing scope unlock and visual acceptance
+        run: node tests/kt84-vt03-r1-scope-unlock-browser.mjs
+      - name: New evidence-bound scope and temporary action panels
+        run: node tests/kt84-vt03-r2-scope-feedback-browser.mjs
