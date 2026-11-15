@@ -316,9 +316,9 @@ try{
     if(sys.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ'))throw Error('Reviewer must not be called on unresolved contradiction');
     return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:k107Bad}]}]}),{status:200});
   };
-  const blocked=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
-  assert.equal(blocked.status,422);
-  const blockedBody=await blocked.json();
+  const kt107Blocked=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+  assert.equal(kt107Blocked.status,422);
+  const blockedBody=await kt107Blocked.json();
   assert(blockedBody.qualityIssues.includes('EIA_DECISION_WITHOUT_ESTABLISHED_SCREENING_JURISDICTION'));
   assert.equal(k107Calls,2);
   console.log('PASS: KT107 unsupported non-EIA decision rejected even after correction attempt.');
