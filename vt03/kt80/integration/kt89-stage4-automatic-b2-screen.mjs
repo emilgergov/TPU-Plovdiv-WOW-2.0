@@ -3,6 +3,7 @@
  * Automatic hypotheses + concrete proposals; no user-authored JSON in main UI. */
 import {LOCKED_ARCHIVE, VERIFIED_ARTICLES, verifiedReference} from './v11-trusted-source-registry.mjs';
 import {assessStage4} from './stage4-independent-legal-engine.mjs';
+const BUILD='KT94-20261115-evidence-contract-01';
 const $=id=>document.getElementById(id);
 const node=(tag,content)=>{const x=document.createElement(tag);if(content!==undefined)x.textContent=content;return x;};
 const DEFINITIONS=[
@@ -78,7 +79,9 @@ function start(){
  if(!stage||$('kt91Stage4'))return;
  const rhs=$('kt86Matrix')?.querySelector('.kt86-panel:nth-child(2)')||stage;
  const box=node('section');box.id='kt91Stage4';box.style.cssText='padding:14px;border:1px solid #d6b979;border-radius:10px;background:#173d2e;color:#f5edda;margin:12px 0';
- const h=node('h3','Автоматична независима нормативна преценка · Етап 4');h.style.cssText='font-size:20px;color:#f0d18f;margin:0 0 6px';box.append(h);
+ const h=node('h3','Автоматична независима нормативна преценка · Етап 4');
+ h.title='Версия на изпълнявания модул: '+BUILD;
+ box.dataset.build=BUILD;h.style.cssText='font-size:20px;color:#f0d18f;margin:0 0 6px';box.append(h);
  const note=node('p','Съпоставка на входните факти с всички активни групи хипотези. Неустановеното не е отрицателен факт. Предложение се извежда и при непълни данни.');
  note.style.cssText='font-size:13px;margin:0 0 12px;line-height:1.45';box.append(note);
  const status=node('div');status.setAttribute('role','status');status.style.cssText='border-left:4px solid #d8b677;background:#254d3a;padding:10px;line-height:1.45;margin-bottom:10px';box.append(status);
@@ -115,7 +118,7 @@ function start(){
   try{packet=buildAssessment(c,defs);assessment=packet.result}catch(error){status.textContent='Нормативният двигател не е достъпен: '+error.message;return}
   const findings=new Map(assessment.legalFindings.map(f=>[f.ruleId,f]));
   const actual=packet.mode==='verified';
-  status.textContent='Предмет и обхват: '+(c.confirmed?'потвърдени':'непотвърдени')+
+  status.textContent='Модул '+BUILD+' · Предмет и обхват: '+(c.confirmed?'потвърдени':'непотвърдени')+
    ' · ПИ: '+(c.ids.join(', ')||'няма въведени')+
    ' · ГИС: '+(c.spatial==='OUTSIDE'?'пространствено непресичане':c.spatial==='INSIDE'?'пространствено пресичане':'недостатъчна квалификация')+
    ' · PDF1: '+(c.e.pdfOK?'отчетен':'неудостоверен')+
@@ -123,9 +126,13 @@ function start(){
    (actual?' · проверен пакет V11':' · необходим е преглед на първичните източници')+
    '. Входните факти не се редактират в Етап 4.';
   // Evidence trace is always visible, unlike the advanced expert editors.
-  trace.replaceChildren(node('strong','ДОКАЗАТЕЛСТВА → ПРАВНИ ПРЕДПОСТАВКИ'));
+  trace.replaceChildren(node('strong','ДОКАЗАТЕЛСТВА → ПРАВНИ ПРЕДПОСТАВКИ · '+BUILD));
   const established=caseEvidence(c);
   const legal=actual?packet.review.legalFacts:[];
+  const contract=node('p',actual?
+   'Пакет за конкретната преписка: удостоверен и валиден за текущата ревизия.':
+   'ПРЕКЪСНАТА ВРЪЗКА: няма експертно удостоверен пакет от първични доказателства за настоящата преписка във входа на независимия двигател V11. Архивът е достъпен, но наличието на нормативни текстове не замества доказването на правните предпоставки.');
+  contract.style.cssText='font-weight:700;margin:9px 0;color:#fff1cf';trace.append(contract);
   const evidenceList=node('div');evidenceList.style.cssText='display:grid;gap:5px;margin-top:7px;font-size:13px';
   for(const f of established){
    evidenceList.append(node('div','Установен факт: '+f.factId+' = '+f.value+
@@ -140,7 +147,7 @@ function start(){
   trace.append(evidenceList);
   trace.append(node('p',actual?
    'Правните условия са проверени в експертно приетия пакет за текущата преписка.':
-   'Правните предпоставки за ОВОС, ОС, ЕО и компетентност още НЕ са доказани от първични документи. Потвърден предмет или ГИС непресичане не ги замества.'));
+   'Налични са само установените по-горе факти. Липсват автоматично извлечени и удостоверени за конкретната преписка правни предпоставки, изключения и основания за компетентност. Използвайте експертната доказателствена проверка, без да въвеждате предположения.'));
   cards.replaceChildren();
   for(const def of (actual?assessment.legalFindings.map(f=>({id:f.ruleId,title:f.title,ref:f.basis?.registryId,question:'Проверка на установените предпоставки и изключения по тази норма.',action:f.proposedAction})):defs)){
    const finding=findings.get(def.id);
