@@ -49,7 +49,7 @@ css.textContent=`
 .kt83-tech-details summary{color:#e3c985;cursor:pointer;font-weight:650;font-size:13px}
 .kt80-version-proof{display:none!important}
 .kt80-dashboard-tile[data-kt83-state="done"]{background:#335e58!important;border-color:#8ba9a3!important}
-.kt80-dashboard-tile[data-kt83-state="done"] .kt80-dashboard-tile-number:after{content:" ✓";color:#ddeddf}
+.kt80-dashboard-tile[data-kt83-state="done"] .kt80-dashboard-tile-number:after{content:" · ✓ Изработен";color:#ddeddf;font-weight:750}
 .kt80-dashboard-tile[data-kt83-state="future"]{background:#204a35!important;border-color:#5b8264!important}
 .kt80-dashboard-tile[data-kt83-state="next"]{background:#8c6c34!important;border-color:#f5d68d!important}
 .kt83-preview-disabled{background:#263d34;padding:10px;border:1px solid #9c775d;border-radius:8px;color:#f5d4c4;margin:10px 0}
@@ -138,13 +138,19 @@ function tileStatus(){
  const gisNotRequired=s.normativeGate?.decision==='NOT_REQUIRED'&&s.normativeGate?.expertConfirmed===true;
  const spatialReady=gisNotRequired||!!(s.parcelsConfirmed?.spatiallyVerified&&s.parcelsConfirmed?.pdf1Verified);
  const legalReady=s.lawConfirmed?.expertConfirmed===true&&root.KT83RouteAccess?.currentV11?.()?.ok===true;
- const done=[!!s.intake,!!s.subjectConfirmed?.expertConfirmed&&!!s.subjectConfirmed?.scopeConfirmed,
-  spatialReady,legalReady,!!s.routeConfirmed];
+ // Inventory is not evidence of successful text extraction or expert verification.
+ const audit=root.KT80DossierAudit?.records;
+ const intakeReady=!!s.intake&&Array.isArray(audit)&&audit.length>0&&
+  audit.every(r=>r?.state==='TEXT_EXTRACTED');
+ // A chosen legacy catalog route is never a verified procedural determination.
+ const formalReady=legalReady&&s.routeConfirmed?.legalReadiness===true;
+ const done=[intakeReady,!!s.subjectConfirmed?.expertConfirmed&&!!s.subjectConfirmed?.scopeConfirmed,
+  spatialReady,legalReady,formalReady];
  let next=done.findIndex(x=>!x);if(next<0)next=4;
  for(let i=0;i<tiles.length;i++){
   const status=done[i]?'done':i===next?'next':'future';
   tiles[i].dataset.kt83State=status;
-  tiles[i].setAttribute('aria-label',(status==='done'?'Завършен · ':status==='next'?'Следва · ':'Предстоящ · ')+tiles[i].textContent.replace(/➜/g,'').trim());
+  tiles[i].setAttribute('aria-label',(status==='done'?'Изработен · ':status==='next'?'Следва · ':'Предстоящ · ')+tiles[i].textContent.replace(/➜/g,'').trim());
  }
 }
 function compressGIS(){
