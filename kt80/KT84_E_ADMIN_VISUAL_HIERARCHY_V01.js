@@ -29,6 +29,11 @@
  .kt84-intake-evidence h3{color:#fff0ce!important;font:750 18px/1.3 "Segoe UI",Arial,sans-serif!important;margin:0 0 7px!important}
  .kt84-intake-evidence p{color:#f0ecdb!important;font:500 14px/1.45 "Segoe UI",Arial,sans-serif!important;margin:5px 0!important}
  .kt84-intake-evidence[data-incomplete="true"]{border-color:#d9ad84;border-left-color:#f1ab75}
+ .kt84-format-details{margin:7px 0 11px;background:#1b3d30;border:1px solid #769177;
+ border-radius:8px;padding:8px 11px;font:500 13px/1.45 "Segoe UI",Arial,sans-serif}
+ .kt84-format-details summary{cursor:pointer;color:#eed5a0;font-weight:700}
+ .kt84-format-details #kt80AcceptedFormatsNote{background:transparent!important;
+ border:0!important;margin:8px 0 2px!important;padding:3px!important;font-size:13px!important}
  .kt84-result-group{position:relative}
  .kt84-result-group h3{font-family:"Segoe UI",Arial,sans-serif!important}
  @media(max-width:650px){.kt84-primary-finding{padding:11px 13px}
@@ -71,6 +76,16 @@
    const node=$(id);if(node&&node.textContent!==txt)node.textContent=txt;
   }
  }
+function foldIntakeFormats(){
+ const note=$('kt80AcceptedFormatsNote');
+ if(!note||note.closest('details'))return;
+ const disclosure=document.createElement('details');
+ disclosure.className='kt84-format-details';
+ const title=document.createElement('summary');
+ title.textContent='Допустими файлове и ограничения';
+ note.before(disclosure);disclosure.append(title,note);
+ // Document types and size constraints remain unchanged and accessible.
+}
 function showIntakeEvidence(){
  const stage=document.querySelector('.kt80-stage-panel[data-panel="1"]');if(!stage)return;
  let node=$('kt84IntakeEvidenceResult');
@@ -111,7 +126,7 @@ function showIntakeEvidence(){
  }
 }
  function init(){
-  show();showIntakeEvidence();
+  foldIntakeFormats();show();showIntakeEvidence();
   for(const event of ['kt80:case-change','kt80:case-reset','kt80:stage-open',
     'kt82:evidence-invalidated','kt80:procedure-confirmed']){
    document.addEventListener(event,()=>queueMicrotask(show));
