@@ -1,0 +1,30 @@
+name: KT84 FINAL common functional evidence regressions
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - 'kt80/KT80_E01_IP_MASTER_SUBJECT_V32.js'
+      - 'tests/kt84-final-dossier-subject-provenance.test.mjs'
+      - '.github/workflows/kt84-final-regression.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  provenance-and-independent-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax of active dossier and subject modules
+        run: |
+          node --check kt80/KT80_E01_IP_MASTER_SUBJECT_V32.js
+          node --check kt80/KT82_DOSSIER_COMPLETENESS_V34.js
+          node --check kt80/KT82_E01_SAFE_ZIP_INTAKE_V35.js
+      - name: Unified dossier provenance and normative safety tests
+        run: |
+          node --test tests/kt84-final-dossier-subject-provenance.test.mjs
+          node --test tests/kt84-c-legal-independence.test.mjs
+          node --test tests/kt83-p3-case-review-provider.test.mjs
