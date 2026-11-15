@@ -214,6 +214,22 @@ try{
   assert.equal(stage4Context.gisAnalysis.spatial,'no intersection');
   assert.equal(stage4Context.uncertainFacts[0].status,'missing');
   assert.equal(stage4Calls,1);
+
+  // KT104: do not allow a fabricated annex classification or wrong Natura 2000 title
+  // to be silently presented as an accepted project.
+  const forbiddenDrafts=[
+    'Фактическа основа\\nДанни по преписката.\\nНормативни предпоставки и граници на проверката\\nНаредба за оценка за съвместимост с околната среда.\\nМотивирано предложение\\nДа се провери приложение № 2.\\nДанни за експертна проверка\\nИзточници.',
+    'Фактическа основа\\nДанни по преписката.\\nНормативни предпоставки и граници на проверката\\nПриложение № 2 към Наредбата за ОВОС съдържа списък с категории дейности.\\nМотивирано предложение\\nДа се провери приложимостта.\\nДанни за експертна проверка\\nИзточници.'
+  ];
+  for(const forbidden of forbiddenDrafts){
+    globalThis.fetch=async ()=>new Response(JSON.stringify({output:[{content:[{type:'output_text',text:forbidden}]}]}),{status:200});
+    const guarded=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+    assert.equal(guarded.status,422,'invalid legal characterization must not reach an expert as accepted draft');
+    const reason=await guarded.json();
+    assert(reason.qualityIssues.some(x=>x==='INCORRECT_COMPATIBILITY_TERMINOLOGY'||x==='CONFUSED_ZOOS_AND_EIA_ANNEX_2'));
+  }
+  console.log('PASS: KT104 misleading OS terminology and confused EIA annex rejected.');
+
   console.log('PASS: KT97 Stage 4 protected route, CORS, evidence contract, case identity and archive honesty.');
 
   console.log('PASS: health, unauthorized access, invalid input, classic and expert AI drafting (mock provider).');
