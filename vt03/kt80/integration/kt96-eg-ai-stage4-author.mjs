@@ -213,9 +213,9 @@ function boot(){
      '; пълни текстове на разпоредби: '+(Number(receipt.archiveArticleTextsReceived)||0)+'.'+
      (receipt.documentTextTruncated?' Част от документалния текст е съкратена по технически лимит.':'');
    const body=str(data.draft);
-   const heading=/ВОДЕЩО\\s+ПРЕДЛОЖЕНИЕ\\s*[:：-]?/iu.exec(body);
+   const heading=/ВОДЕЩО\s+ПРЕДЛОЖЕНИЕ\s*[:：-]?/iu.exec(body);
    const afterLead=heading?body.slice(heading.index+heading[0].length):'';
-   const nextSection=afterLead.search(/Фактическа\\s+основа/iu);
+   const nextSection=afterLead.search(/Фактическа\s+основа/iu);
    const leadingDraft=nextSection>=0?afterLead.slice(0,nextSection).trim():afterLead.slice(0,1100).trim();
    lead.textContent=leadingDraft?
     'ВОДЕЩО ПРЕДЛОЖЕНИЕ — ПРОЕКТ ЗА ЕКСПЕРТНА ПРОВЕРКА'+String.fromCharCode(10)+leadingDraft:
