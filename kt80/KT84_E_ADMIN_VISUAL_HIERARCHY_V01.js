@@ -22,6 +22,13 @@
  .kt80-stage-panel[data-panel="4"] .kt83-independent-panel button,
  .kt80-stage-panel[data-panel="4"] #kt83P5CommitV11{
    font-size:13px!important;font-weight:650!important}
+
+ .kt84-intake-evidence{background:#18382c;color:#f4eee0;border:2px solid #a8bf9c;
+  border-left:7px solid #dab875;border-radius:10px;padding:12px 16px;margin:5px 0 12px;
+  font:500 14px/1.45 "Segoe UI",Arial,sans-serif}
+ .kt84-intake-evidence h3{color:#fff0ce!important;font:750 18px/1.3 "Segoe UI",Arial,sans-serif!important;margin:0 0 7px!important}
+ .kt84-intake-evidence p{color:#f0ecdb!important;font:500 14px/1.45 "Segoe UI",Arial,sans-serif!important;margin:5px 0!important}
+ .kt84-intake-evidence[data-incomplete="true"]{border-color:#d9ad84;border-left-color:#f1ab75}
  .kt84-result-group{position:relative}
  .kt84-result-group h3{font-family:"Segoe UI",Arial,sans-serif!important}
  @media(max-width:650px){.kt84-primary-finding{padding:11px 13px}
@@ -64,8 +71,47 @@
    const node=$(id);if(node&&node.textContent!==txt)node.textContent=txt;
   }
  }
+function showIntakeEvidence(){
+ const stage=document.querySelector('.kt80-stage-panel[data-panel="1"]');if(!stage)return;
+ let node=$('kt84IntakeEvidenceResult');
+ if(!node){
+  node=document.createElement('section');node.id='kt84IntakeEvidenceResult';
+  node.className='kt84-intake-evidence';node.setAttribute('role','status');
+  node.setAttribute('aria-live','polite');
+  for(const [tag,id] of [['h3','kt84IntakeResultTitle'],['p','kt84IntakeResultCounts'],['p','kt84IntakeResultNext']]){
+   const el=document.createElement(tag);el.id=id;node.append(el);
+  }
+  stage.prepend(node);
+ }
+ const state=root.KT80WorkflowState||{},audit=root.KT80DossierAudit;
+ const records=Array.isArray(audit?.records)?audit.records:null;
+ let title='Прочитът на преписката не е удостоверен';
+ let counts='Няма завършен доказателствен отчет за входните файлове.';
+ let next='Следващо действие: изберете преписка и проверете извличането на текст за всеки документ.';
+ let incomplete=true;
+ if(records){
+  const read=records.filter(r=>r.state==='TEXT_EXTRACTED').length;
+  const review=records.filter(r=>r.state==='REVIEW_REQUIRED').length;
+  const unread=records.filter(r=>r.state==='NOT_READ'||r.state==='UNSUPPORTED').length;
+  const other=Math.max(0,records.length-read-review-unread);
+  title='Автоматичната обработка е отчетена — експертната проверка остава необходима';
+  counts='Инвентаризирани: '+records.length+' · Извлечен текст: '+read+
+    ' · За проверка: '+review+' · Без надеждно извлечен текст: '+(unread+other);
+  next=review||unread||other
+    ?'Следващо действие: отворете оригиналите на проблемните документи и отбележете ограниченията преди правни изводи.'
+    :'Следващо действие: прегледайте извлеченото съдържание; извличането не удостоверява фактическа вярност.';
+  incomplete=!!(review||unread||other);
+ }else if(state.intake){
+  title='Има предварителен прочит, но липсва пълен доказателствен отчет';
+  next='Следващо действие: проверете инвентара и оригиналите на всички приложени документи.';
+ }
+ node.dataset.incomplete=String(incomplete);
+ for(const [id,txt] of [['kt84IntakeResultTitle',title],['kt84IntakeResultCounts',counts],['kt84IntakeResultNext',next]]){
+  if($(id).textContent!==txt)$(id).textContent=txt;
+ }
+}
  function init(){
-  show();
+  show();showIntakeEvidence();
   for(const event of ['kt80:case-change','kt80:case-reset','kt80:stage-open',
     'kt82:evidence-invalidated','kt80:procedure-confirmed']){
    document.addEventListener(event,()=>queueMicrotask(show));
@@ -78,7 +124,14 @@
   if(legalResult&&root.MutationObserver)
    new MutationObserver(()=>queueMicrotask(show))
     .observe(legalResult,{childList:true,characterData:true,subtree:true});
-  root.KT84EVisual=Object.freeze({refresh:show});
+  for(const event of ['kt80:stage-open','kt80:case-reset','kt80:case-change'])
+   document.addEventListener(event,()=>queueMicrotask(showIntakeEvidence));
+  const intakeStatus=$('kt80InputStatus');
+  if(intakeStatus&&root.MutationObserver){
+   new MutationObserver(()=>queueMicrotask(showIntakeEvidence))
+    .observe(intakeStatus,{childList:true,characterData:true,subtree:true});
+  }
+  root.KT84EVisual=Object.freeze({refresh:()=>{show();showIntakeEvidence()}});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
  else init();
