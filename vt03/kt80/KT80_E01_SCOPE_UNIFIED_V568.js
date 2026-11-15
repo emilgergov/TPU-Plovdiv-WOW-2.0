@@ -108,7 +108,7 @@ function init(){
  const preview=document.createElement('pre');preview.id='kt80V562FinalText';
  const checks=document.createElement('label');checks.className='kt80-v562-approval';
  const check=document.createElement('input');check.type='checkbox';
- checks.append(check,document.createTextNode(' Прегледах този окончателен текст и доказателствените сведения.'));
+ checks.append(check,document.createTextNode(' Потвърждавам само действително установените сведения в този обхват. Липсващите технически дейности и доказателства остават за проверка.'));
  const row=document.createElement('div');row.className='kt80-v562-dialog-actions';
  const back=document.createElement('button');back.type='button';back.textContent='Върни към редакцията';
  const yes=document.createElement('button');yes.type='button';yes.textContent='Потвърди показания обхват';yes.disabled=true;
@@ -129,7 +129,7 @@ function init(){
   event.preventDefault();event.stopImmediatePropagation();
   if(!$('kt80SubjectConfirmation')?.checked){status.textContent='Първо потвърдете предмета.';return}
   captured=scope.value.trim();
-  if(/Не са установени достатъчно надеждни описания на конкретни предвидени дейности/iu.test(captured)){
+  if(/Не са установени достатъчно надеждни описания на конкретни предвидени дейности/iu.test(captured)||/^Работен обхват: конкретният предмет и характерът/iu.test(captured)){
    status.textContent='Не може да потвърдите обхват, съдържащ изрична липса на надеждно установени дейности. Проверете оригиналите и редактирайте конкретните дейности.';
    return;
   }
@@ -139,6 +139,12 @@ function init(){
    return;
   }
   if(!captured){status.textContent='Няма проект за потвърждение. Конструирайте или редактирайте обхвата.';return}
+  // An object/subject-only description can be acknowledged for routing, but not as a
+  // claim that unspecified construction or technical activities were verified.
+  const evidenceState=root.KT80KT53?.getCurrent?.()?.scopeSummary;
+  explanation.textContent=evidenceState?.approvedParameters===0
+   ? 'Потвърждавате само известния предметно определен обхват от преписката. Няма потвърдени технически характеристики; тези липси остават в „Мотиви и доказателства“ и не се превръщат в установени дейности или правна готовност.'
+   : 'Прочетете текста по-долу и сравнете с оригиналите. Потвърждението се отнася само за действително установеното; липсите остават за проверка.';
   preview.textContent=captured;check.checked=false;yes.disabled=true;
   dialog.showModal();
  },true);
