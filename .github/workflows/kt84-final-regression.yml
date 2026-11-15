@@ -6,6 +6,10 @@ on:
       - 'kt80/KT80_E01_IP_MASTER_SUBJECT_V32.js'
       - 'kt80/KT83_WORKFLOW_CASE_V591.js'
       - 'kt80/KT80_E01_KT52_PROJECT_RECONSTRUCTION_V52.js'
+      - 'kt80/integration/kt83-p2-automatic-pdf1.js'
+      - 'tests/kt83-p2-spatial-gate.test.cjs'
+      - 'tests/kt83-p6-integrated-evidence-to-v11.test.mjs'
+      - 'kt80/integration/kt83-v617-universal-out-session.mjs'
       - 'tests/kt84-final-dossier-subject-provenance.test.mjs'
       - '.github/workflows/kt84-final-regression.yml'
   workflow_dispatch:
@@ -20,6 +24,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install approved test-only dependencies for original OUT blank
+        run: npm install --no-save --no-package-lock --ignore-scripts fflate@0.8.3 @xmldom/xmldom@0.9.8
       - name: Syntax of active dossier and subject modules
         run: |
           node --check kt80/KT80_E01_IP_MASTER_SUBJECT_V32.js
@@ -32,3 +38,7 @@ jobs:
           node --test tests/kt84-final-dossier-subject-provenance.test.mjs
           node --test tests/kt84-c-legal-independence.test.mjs
           node --test tests/kt83-p3-case-review-provider.test.mjs
+          node --test tests/kt83-p2-spatial-gate.test.cjs
+          node --test tests/kt83-vt01-route-p1.test.cjs
+          node --test tests/kt83-p6-integrated-evidence-to-v11.test.mjs
+          node --test kt80/integration/kt83-v617-universal-out-session.test.mjs
