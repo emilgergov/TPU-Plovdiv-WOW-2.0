@@ -22,18 +22,36 @@ function context(){
   confirmed:p.expertConfirmed===true&&p.scopeConfirmed===true,
   ids:Array.isArray(e.ids)?e.ids:[],spatial:e.spatialClass||'UNDETERMINED'};
 }
+/* KT92: use the existing, case-bound V11 review provider before any fallback.
+ * Never turn the dossier title, GIS overlay or selected organ into legal proof. */
+function reviewedCase(c){
+ const provider=window.KT83V11CaseEvidenceProvider;
+ const ctx={caseId:c.s.caseCycleId,generation:c.s.generation,
+   evidenceRevision:window.KT82EvidenceInvalidation?.getRevision?.()??0,
+   subject:c.p.text,scope:c.p.scope};
+ if(!provider||!c.confirmed)return null;
+ const r=provider.getCaseReview?.(ctx);
+ return r&&provider.verifyCaseReview?.(r,ctx)===true?r:null;
+}
 function buildAssessment(c,defs){
+ const review=reviewedCase(c);
+ if(review){
+  // The original independent engine validates each exact V11 legal reference.
+  const result=assessStage4({confirmedSubject:c.p.text,scopeConfirmed:true,
+    evidence:review.legalFacts,rules:review.rules});
+  return {result,review,mode:'verified'};
+ }
  const rules=defs.filter(d=>d.ref&&VERIFIED_ARTICLES[d.ref]).map(d=>({
   id:d.id,title:d.title,legalBasis:verifiedReference(d.ref),
   condition:{all:[{fact:d.fact},{not:{fact:d.exception}}]},
   missingFactProposal:'Предложение: '+d.action,
-  supportedProposal:'Предложение: проверете изцяло приложимостта и компетентността, след което мотивирайте '+d.title+'.',
-  notSupportedProposal:'Предложение: изследвайте останалите конкуриращи се основания и изключения.'
+  supportedProposal:'Предложение: проверете приложимостта и компетентността за '+d.title+'.',
+  notSupportedProposal:'Предложение: проверете други конкуриращи се основания.'
  }));
- // An empty ledger is deliberate: subject/GIS alone does NOT establish annex
- // classifications, exception absence or statutory competence.
- return assessStage4({confirmedSubject:c.p.expertConfirmed===true?c.p.text:'',
+ // Until a case-reviewed packet exists, no legal prerequisites are proved.
+ const result=assessStage4({confirmedSubject:c.p.expertConfirmed===true?c.p.text:'',
    scopeConfirmed:c.p.scopeConfirmed===true,evidence:[],rules});
+ return {result,review:null,mode:'unverified'};
 }
 function start(){
  const stage=document.querySelector('.kt80-stage-panel[data-panel="4"]');
@@ -70,16 +88,19 @@ function start(){
   foldExpertEditor();
   const c=context();if(lastKey===c.key)return;lastKey=c.key;
   const defs=DEFINITIONS.filter(d=>c.kind==='other'||d.kind==='all'||d.kind===c.kind||d.kind==='both'&&c.kind!=='other');
-  let assessment;
-  try{assessment=buildAssessment(c,defs)}catch(error){status.textContent='Нормативният двигател не е достъпен: '+error.message;return}
+  let packet,assessment;
+  try{packet=buildAssessment(c,defs);assessment=packet.result}catch(error){status.textContent='Нормативният двигател не е достъпен: '+error.message;return}
   const findings=new Map(assessment.legalFindings.map(f=>[f.ruleId,f]));
+  const actual=packet.mode==='verified';
   status.textContent='Предмет и обхват: '+(c.confirmed?'потвърдени':'непотвърдени')+
    ' · ПИ: '+(c.ids.join(', ')||'няма въведени')+
    ' · ГИС: '+(c.spatial==='OUTSIDE'?'пространствено непресичане':c.spatial==='INSIDE'?'пространствено пресичане':'недостатъчна квалификация')+
    ' · PDF1: '+(c.e.pdfOK?'отчетен':'неудостоверен')+
+   ' · Правни доказателства с произход: '+(actual?packet.review.legalFacts.length:0)+
+   (actual?' · проверен пакет V11':' · необходим е преглед на първичните източници')+
    '. Входните факти не се редактират в Етап 4.';
   cards.replaceChildren();
-  for(const def of defs){
+  for(const def of (actual?assessment.legalFindings.map(f=>({id:f.ruleId,title:f.title,ref:f.basis?.registryId,question:'Проверка на установените предпоставки и изключения по тази норма.',action:f.proposedAction})):defs)){
    const finding=findings.get(def.id);
    const card=node('details');card.style.cssText='background:#234a38;border:1px solid #668573;border-radius:8px;padding:8px 10px';
    const title=node('summary',def.title+' · '+(finding?({'supported':'подкрепена','not_supported':'неподкрепена','undetermined':'неустановена','disputed':'противоречива'}[finding.state]):'неустановена'));title.style.cssText='font-size:14px;font-weight:700;color:#efd18f;cursor:pointer';card.append(title);
@@ -89,31 +110,44 @@ function start(){
    source.style.cssText='font-size:12px;color:#caddce;margin:5px 0';card.append(source);
    const state=node('div','Автоматична оценка: '+(finding?({'supported':'ПОДКРЕПЕНА','not_supported':'НЕПОДКРЕПЕНА','undetermined':'НЕУСТАНОВЕНА','disputed':'ПРОТИВОРЕЧИВА'}[finding.state]):'НЕУСТАНОВЕНА — липсва удостоверена пълна норма'));
    state.style.cssText='font-weight:700;margin:6px 0';card.append(state);
-   card.append(node('div',def.question),node('p','Следващо действие: '+def.action));cards.append(card);
+   card.append(node('div',def.question),node('p','Следващо действие: '+def.action));
+   if(actual&&finding){
+    const sources=finding.evidenceIds.flatMap(id=>(assessment.evidence[id]?.observations||[]).map(o=>id+': '+o.value+' · '+o.sourceType+' / '+o.sourceId+(o.sourceLocation?' · '+o.sourceLocation:'')));
+    card.append(node('p',sources.length?'Доказателствена следа: '+sources.join(' | '):'Липсва доказателствена следа за предпоставките.'));
+   }
+   cards.append(card);
   }
   summary.replaceChildren(node('strong','ПРОЦЕДУРНО ПРЕДЛОЖЕНИЕ · за експертен преглед'));
-  hypotheses.querySelector('summary').textContent='Конкуриращи правни хипотези · '+defs.length+' проверки (разгърнете при необходимост)';
+  hypotheses.querySelector('summary').textContent='Конкуриращи правни хипотези · '+assessment.legalFindings.length+' проверени правила (разгърнете при необходимост)';
   summary.append(node('p',c.confirmed?'Входните предмет и обхват са потвърдени от експерта.':'Потвърдете предмета и обхвата в Етап 2, преди окончателната експертна преценка.'));
-  const msg=c.kind==='investment'?'Предложение: да се прецени приложимостта на процедурите по ОВОС и ОС по установените дейности и техните параметри.':
-    c.kind==='plan_program'?'Предложение: да се прецени приложимостта на режимите за ЕО и ОС и тяхната координация.':
-    'Предложение: определете дали входът е инвестиционно предложение, план, програма или друг административен въпрос и проверете относимите процедури.';
+  const candidates=assessment.legalFindings.filter(f=>f.state==='supported');
+  const unresolved=assessment.legalFindings.filter(f=>f.state==='undetermined'||f.state==='disputed');
+  const msg=actual
+    ?(candidates.length?'Предложение за процедура според подкрепените хипотези: '+candidates.map(f=>f.title+' ('+f.basis.act+', '+f.basis.article+')').join('; ')+'.':'Не е удостоверена приложима процедура. Предложение: изискайте конкретните липсващи факти и проверете конкуриращите се режими.')
+    :'Работно предложение: проверете режимите по ОВОС и ОС (а при план или програма — ЕО), според действителните дейности и пълните нормативни предпоставки. Не е направена доказана правна квалификация.';
   summary.append(node('p',msg));
-  summary.append(node('p','Условие за окончателна квалификация: конкретните технически характеристики, пълните правни предпоставки и изключения, както и компетентността трябва да бъдат доказани. До тогава предложението е предварително.'));
-  summary.append(node('p','Компетентен орган: РИОСВ – Пловдив е възможен орган; компетентността не е потвърдена автоматично.'));
-  summary.append(node('p','Следващо действие: експертът проверява непълните доказателства и потвърждава или редактира нормативната връзка, без да променя входните факти.'))
+  if(actual){
+   summary.append(node('p','Правни хипотези: подкрепени '+candidates.length+' · неустановени/противоречиви '+unresolved.length+'. Източниците и правните основания са от експертно удостоверения пакет за тази преписка.'));
+   for(const p of assessment.proposals)summary.append(node('p',p));
+  }else{
+   summary.append(node('p','Няма приет пакет с доказателства за тази преписка от V11. Предложение: извършете експертна проверка по източници, факти, условия и изключения; не използвайте празен резултат като отрицателно заключение.'));
+  }
+  const authority=actual?packet.review.confirmedCompetence:null;
+  summary.append(node('p','КОМПЕТЕНТЕН ОРГАН: '+(authority||'неустановен; РИОСВ – Пловдив е само кандидат за проверка')+'.'));
+  summary.append(node('p','СЛЕДВАЩО ДЕЙСТВИЕ: '+(actual&&assessment.readyForStage5Draft?'експертът преглежда мотивите и компетентността и преминава към Етап 5 за проект, без автоматично издаване на акт.':'проверете посочените първични доказателства и правни изключения; след това възстановете експертната приемка.')));
   more.replaceChildren(node('summary','Източници, доказателствени ограничения и независим контрол'));
   more.append(node('p','Проверен архив: '+LOCKED_ARCHIVE+'. Правните цитати са проверени архивни текстове; приложимостта и изключенията се оценяват за конкретната преписка.'));
   if(oldBridge){const technical=node('details');technical.append(node('summary','Експертен контрол с независимия механизъм V11'));technical.append(oldBridge);more.append(technical)}
   if(oldOptional)more.append(oldOptional);
   if(oldSources)more.append(oldSources);
   snapshot=Object.freeze({caseKey:c.key,archive:LOCKED_ARCHIVE,legalFindings:assessment.legalFindings,
-   proposals:assessment.proposals,screenProposal:msg,expertApproved:false,finalProcedure:false,
-   readyForStage5Draft:false,source:'stage4-independent-legal-engine.mjs'});
+   proposals:assessment.proposals,screenProposal:msg,expertApproved:actual,finalProcedure:false,
+   readyForStage5Draft:actual&&assessment.readyForStage5Draft,source:'stage4-independent-legal-engine.mjs'});
  }
  const first=rhs.querySelector('#kt89B2Automatic')||rhs.querySelector('#kt89OptionalNormChoices')||rhs.querySelector('#kt87V11Sources');
  if(first)first.before(box);else rhs.prepend(box);
  const duplicate=$('kt89B2Automatic');if(duplicate)duplicate.remove();
- ['kt80:stage-open','kt80:case-change','kt80:case-reset','kt82:evidence-invalidated'].forEach(event=>document.addEventListener(event,()=>{lastKey='';draw()}));
+ ['kt80:stage-open','kt80:case-change','kt80:case-reset','kt82:evidence-invalidated','kt83:review-submitted','kt83:v11-review-updated'].forEach(event=>document.addEventListener(event,()=>{lastKey='';draw()}));
  window.KT89AutomaticB2=Object.freeze({refresh:()=>{lastKey='';draw()},snapshot:()=>snapshot});
  draw();
 }
