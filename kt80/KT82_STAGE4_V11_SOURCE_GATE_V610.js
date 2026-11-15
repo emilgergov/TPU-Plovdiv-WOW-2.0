@@ -53,7 +53,12 @@ function boot(){
   const intersections=!!valid&&zoneStatuses.every(x=>x!=='UNVERIFIED');
   const spatialClass=!intersections?'UNDETERMINED':zoneStatuses.every(x=>x==='OUTSIDE')?'OUTSIDE':zoneStatuses.every(x=>x==='INTERSECTS')?'INTERSECTS':'MIXED';
   const piOK=valid&&!!pi&&idKey(pi.ids||[])===idKey(ids)&&pi.items?.length===ids.length&&pi.items.every(x=>x?.status==='FOUND'&&x.profile);
-  const pdfOK=!!valid&&pdf.ready&&idKey(pdf.ids)===idKey(ids)&&pdf.caseId===workflow.caseCycleId&&pdf.generation===workflow.generation&&pdf.source===live&&pdf.evidenceRevision===(root.KT82EvidenceInvalidation?.getRevision?.()??null);
+  // PDF1 status requires the full original P2 proof, not a loose event.
+  const proof=root.KT83P2Automatic?.current?.()||null;
+  const pdfOK=!!valid&&!!proof&&!!root.KT83P2SpatialGate?.pdfReceiptMatches?.(proof,pdf)
+   &&pdf.ready===true&&idKey(pdf.ids)===idKey(ids)&&pdf.caseId===workflow.caseCycleId
+   &&pdf.generation===workflow.generation&&pdf.source===live
+   &&pdf.evidenceRevision===(root.KT82EvidenceInvalidation?.getRevision?.()??null);
   
   const gate=workflow.normativeGate||null;
   const gisNotRequired=gate?.expertConfirmed===true&&gate.decision==='NOT_REQUIRED'&&workflow.parcelsConfirmed?.mode==='GIS_NOT_REQUIRED';
@@ -196,7 +201,8 @@ function boot(){
    &&receipt.source===live&&Array.isArray(receipt.ids)&&ids.length>0
    &&idKey(receipt.ids)===idKey(ids)&&live?.results?.every(geometryValid)
    &&receipt.evidenceRevision===(root.KT82EvidenceInvalidation?.getRevision?.()??null);
-  if(!valid)return;
+  const proof=root.KT83P2Automatic?.current?.();
+  if(!valid||!proof||!root.KT83P2SpatialGate?.pdfReceiptMatches?.(proof,receipt))return;
   pdf={ready:true,ids:[...ids],stamp:Date.now(),caseId:receipt.caseId,generation:receipt.generation,source:live,evidenceRevision:receipt.evidenceRevision,bytes:receipt.bytes};
   lastSignature='';if(!panel.hidden)draw();
  };
