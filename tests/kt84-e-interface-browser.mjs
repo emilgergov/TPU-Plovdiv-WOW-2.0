@@ -27,6 +27,17 @@ try{
  assert.ok(legal.reason.length>10);
  assert.match(legal.next,/Предложение:/);
  assert.equal(legal.aria,'status');
+ const formatHelp=await page.evaluate(()=>{
+  const note=document.getElementById('kt80AcceptedFormatsNote');
+  const folded=note?.closest('details');
+  return {present:!!note,folded:!!folded,open:folded?.open,
+   label:folded?.querySelector('summary')?.textContent,
+   text:note?.textContent?.slice(0,70)};
+ });
+ assert.equal(formatHelp.present,true);
+ assert.equal(formatHelp.folded,true);
+ assert.equal(formatHelp.open,false);
+ assert.match(formatHelp.label,/Допустими файлове и ограничения/);
  const intake=await page.evaluate(()=>{
   const audit=document.getElementById('kt84IntakeEvidenceResult');
   assertPresent(audit,'missing intake summary');
@@ -70,5 +81,5 @@ try{
  assert.equal(preview.fullStageClone,false);
  assert.equal(preview.stage,before);
  assert.equal(errors.length,0,'no uncaught JavaScript exception');
- console.log('KT84_E_BROWSER_VISUAL_QA',JSON.stringify({legal,intake,preview,errors}));
+ console.log('KT84_E_BROWSER_VISUAL_QA',JSON.stringify({legal,intake,preview,formatHelp,errors}));
 }finally{await browser.close();}
