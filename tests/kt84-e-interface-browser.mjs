@@ -9,6 +9,13 @@ try{
   {waitUntil:'domcontentloaded',timeout:90000});
  await page.waitForFunction(()=>window.KT84EVisual?.refresh&&window.KT83SafeStageFive?.open,
   null,{timeout:30000});
+ const guides=await page.evaluate(()=>[1,2,3,4,5].map(n=>({
+  stage:n,present:!!document.getElementById('kt84WorkGuide'+n),
+  current:document.getElementById('kt84GuideWork'+n)?.textContent,
+  criterion:document.getElementById('kt84GuideFinish'+n)?.textContent,
+  count:document.querySelectorAll('#kt84WorkGuide'+n).length})));
+ assert.equal(guides.length,5);
+ assert.ok(guides.every(x=>x.present&&x.count===1&&x.current?.includes('Текуща задача')&&x.criterion?.includes('Критерий')));
  const legal=await page.evaluate(()=>{
   const stage=document.querySelector('.kt80-stage-panel[data-panel="4"]');
   const finding=document.getElementById('kt84PrimaryLegalFinding');
@@ -98,5 +105,5 @@ try{
  assert.equal(preview.fullStageClone,false);
  assert.equal(preview.stage,before);
  assert.equal(errors.length,0,'no uncaught JavaScript exception');
- console.log('KT84_E_BROWSER_VISUAL_QA',JSON.stringify({legal,intake,preview,formatHelp,tiles,errors}));
+ console.log('KT84_E_BROWSER_VISUAL_QA',JSON.stringify({guides,legal,intake,preview,formatHelp,tiles,errors}));
 }finally{await browser.close();}
