@@ -10,6 +10,8 @@ on:
       - 'tests/kt83-p2-spatial-gate.test.cjs'
       - 'tests/kt83-p6-integrated-evidence-to-v11.test.mjs'
       - 'tests/kt84-final-v11-to-original-word.test.mjs'
+      - 'kt80/integration/kt83-v613-competence-gate.mjs'
+      - 'kt80/integration/kt83-v613-case-bound-b2-bridge.mjs'
       - 'kt80/integration/kt83-v617-universal-out-session.mjs'
       - 'tests/kt84-final-dossier-subject-provenance.test.mjs'
       - '.github/workflows/kt84-final-regression.yml'
