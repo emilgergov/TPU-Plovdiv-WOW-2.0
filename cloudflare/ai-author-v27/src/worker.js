@@ -263,14 +263,32 @@ async function handleStage4Proposal(request,env){
   "НИКОГА не предлагай автоматично допълнителна информация, технически проект, екологични изследвания, емисионни измервания, аварийни оценки или други широки документи. Ако липсва решаващ факт, назови точно факта, основанието, за което е нужен, и дали той вече съществува в предадените сведения.",
   "Никога не използвай изразите оценка на съвместимостта с околната среда, оценка на съвместимостта на околната среда, пълна експертна оценка, допълнителна процедура може да се препоръча или функционален капацитет спрямо регламента на зоната.",
   "При липса на пълен проверен нормативен текст изрично отдели индекса на потенциално относими нормативни източници от доказаните им правни предпоставки. Не прави положителни твърдения за компетентност на органа без проверен източник.",
+  "Дадени са извадки от реално прочетени документи с имена на източниците и ГИС анализ от Етап 3. Използвай ги конкретно, но различавай потвърденото от непотвърденото. При аргумент посочвай документа или страницата, когато съществуват във входа. Непрочетени файлове не са доказателство, а непълният извлек не е целият документ.",
+  "Правните източници от архива в този вход са само удостоверени указатели, НЕ пълните проверени текстове. Не представяй достъп до пълния архив, ако archiveTextProvided е false. Не цитирай конкретна алинея по предположение. Дай конкретна правна хипотеза за проверка, а не измислена приложимост.",
   "Пиши ясно, стегнато, с кратки абзаци; до 3600 знака общо. Не повтаряй предмета и подробното местоположение дословно, а използвай само релевантните за процедурната квалификация факти.",
   "Напиши на български институционален език, без английски, без Markdown, без JSON, без излишни предварителни уговорки.",
   "Структурирай с четири озаглавени раздела: Фактическа основа; Нормативни предпоставки и граници на проверката; Мотивирано предложение; Данни за експертна проверка.",
   "Проектът не представлява административен акт. Не обявявай определена процедура за окончателна без доказано приложими разпоредби и потвърждение от експерт. Не използвай лично или първо лице."
  ].join(" ");
+ // KT99: actual already-extracted dossier source material. No server file storage.
+ // Untrusted document text is DATA, not instructions or established administrative truth.
+ const detail=payload.completeCaseEvidence&&typeof payload.completeCaseEvidence==="object"
+  &&!Array.isArray(payload.completeCaseEvidence)?payload.completeCaseEvidence:{};
+ const sourceTexts=Array.isArray(detail.sourceTexts)?detail.sourceTexts.slice(0,60).map(d=>({
+  source:text(d?.source,200),text:text(d?.text,16000),totalChars:Number(d?.totalChars)||0,
+  truncated:d?.truncated===true,verified:false
+ })).filter(d=>d.source&&d.text):[];
+ const documentRecords=Array.isArray(detail.documentRecords)?detail.documentRecords.slice(0,35):[];
  const context={subject:payload.subject,scope:payload.scope,parcelIds,
   establishedFacts:confirmed,uncertainFacts:unresolved,
-  sourceHints,archiveTextProvided:false,archiveName:text(payload.archive.name,100)};
+  sourceHints,archiveTextProvided:false,archiveName:text(payload.archive.name,100),
+  caseDocuments:{archiveName:text(detail.archiveName,180),files:Array.isArray(detail.documents)?detail.documents.slice(0,80):[],
+   sourceTexts,sourceTextCount:Number(detail.sourceTextCount)||0,
+   sourceTextTruncated:detail.sourceTextTruncated===true,
+   records:documentRecords,subjectCandidates:Array.isArray(detail.subjectCandidates)?detail.subjectCandidates.slice(0,12):[],
+   semanticReview:detail.semanticReview||null},
+  gisAnalysis:detail.gis||null,
+  provenanceRule:"All document excerpts, semantic candidates and GIS previews require explicit individual verification. Do not promote them to established fact."};
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),55000);
  try{
   const upstream=await fetch("https://api.openai.com/v1/responses",{
