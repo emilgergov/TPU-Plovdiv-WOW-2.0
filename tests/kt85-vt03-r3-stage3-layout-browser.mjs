@@ -5,8 +5,8 @@ try{
  const page=await browser.newPage({viewport:{width:1600,height:900}});
  const faults=[];page.on('pageerror',e=>faults.push(e.message));
  await page.goto('http://127.0.0.1:8765/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html',{waitUntil:'domcontentloaded',timeout:90000});
- await page.waitForFunction(()=>window.KT85Stage3UX?.ready===true,null,{timeout:20000});
  await page.locator('#kt80DashboardFive .kt80-dashboard-tile').nth(2).click();
+ await page.waitForFunction(()=>window.KT85Stage3UX?.ready===true,null,{timeout:20000});
  await page.waitForFunction(()=>!document.querySelector('.kt80-stage-panel[data-panel="3"]').hidden,null,{timeout:12000});
  await page.waitForTimeout(700);
  const layout=await page.evaluate(()=>{
