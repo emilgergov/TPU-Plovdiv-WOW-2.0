@@ -18,7 +18,9 @@
   const active=()=>root.KT80WorkflowState?.step===3&&root.KT80WorkflowState?.normativeGate?.expertConfirmed===true&&
     root.KT80WorkflowState.normativeGate.decision==='REQUIRED';
   function begin(){
-   const ticket=++serial;
+   // Merely re-entering Stage 3 must not invalidate a pending PDF1 operation.
+   // Only actual evidence/case resets or a confirmed PDF1 completion increment serial.
+   const ticket=serial;
    if(!active())return;
    let attempts=0;
    const poll=()=>{
