@@ -205,7 +205,7 @@ try{
   assert.equal(stage4Context.sourceHints[0].applicabilityVerified,false);
   assert.equal(stage4Context.archiveTextProvided,false);
   assert.equal(stage4Context.caseDocuments.sourceTexts[0].source,'notification.pdf');
-  assert.match(stage4Context.caseDocuments.sourceTexts[0].text,/56784\\.13\\.102/);
+  assert.ok(stage4Context.caseDocuments.sourceTexts[0].text.includes('56784.13.102'));
   assert.equal(stage4Context.caseDocuments.sourceTexts[0].verified,false);
   assert.equal(stage4Context.gisAnalysis.spatial,'no intersection');
   assert.equal(stage4Context.uncertainFacts[0].status,'missing');
