@@ -208,6 +208,48 @@ async function handleScopeImprove(request,env){
  * Every response must match the caller's case, evidence revision and request.
  * Archive anchors are not full legal text and must NOT be represented as verified law.
  */
+/* KT100 — editorial extracts transcribed from the SHA-256 verified, locked V11
+ * offline normative archive. These are narrowly scoped provision extracts,
+ * NOT the entire 82-entry ZIP or a certification of case applicability.
+ * They are attached SERVER-SIDE, never trusted from dossier or browser input.
+ * Archive checksum: 8d3851affd72fb44b4d663920196e00ec317c8e45d36fc16c6ad6b0ce965226c.
+ */
+const KT100_ARCHIVE_SHA="8d3851affd72fb44b4d663920196e00ec317c8e45d36fc16c6ad6b0ce965226c";
+const KT100_VERIFIED_PROVISIONS=Object.freeze([
+ {id:"OS_ART_2_1",act:"Наредба за оценка за съвместимост",ref:"чл. 2, ал. 1",
+  path:"additions/N_OS_2025.txt",
+  condition:"Обхваща ИП по глава шеста ЗООС; предложения извън глава шеста, попадащи изцяло или отчасти в защитена зона и свързани с промяна на предназначението и/или начина на трайно ползване; както и случаи с изрично условие за ОС в акт по план от по-висока степен.",
+  applicable:null,sourceKind:"verified_offline_archival_provision_extract"},
+ {id:"OS_ART_2_2",act:"Наредба за оценка за съвместимост",ref:"чл. 2, ал. 2",
+  path:"additions/N_OS_2025.txt",
+  condition:"За ИП извън ал. 1 компетентният орган по чл. 6а указва начина на процедиране според характера и местоположението, след проверка за допустимост когато е приложимо, въз основа на контролен лист и приложение № 1; писмено уведомяване в 14-дневен срок от подаване на уведомлението, при необходимост с указания.",
+  applicable:null,sourceKind:"verified_offline_archival_provision_extract"},
+ {id:"OS_ART_2_4",act:"Наредба за оценка за съвместимост",ref:"чл. 2, ал. 4",
+  path:"additions/N_OS_2025.txt",
+  condition:"При установени непълноти, пропуски или неточности в уведомлението компетентният орган изисква допълнителна информация и определя срок; не изисквай такава само защото някой факт не е предаден към AI, ако той е наличен в преписката.",
+  applicable:null,sourceKind:"verified_offline_archival_provision_extract"},
+ {id:"OS_ART_6A",act:"Наредба за оценка за съвместимост",ref:"чл. 6а",
+  path:"additions/N_OS_2025.txt",
+  condition:"Компетентността е разпределена според категорията и местоположението, със специални случаи на компетентност на министъра; за останалите случаи е предвидена компетентност на директора на съответната РИОСВ. Конкретната компетентност следва да бъде проверена по всички изключения.",
+  applicable:null,sourceKind:"verified_offline_archival_provision_extract"},
+ {id:"ZOOS_ART_93_1",act:"Закон за опазване на околната среда",ref:"чл. 93, ал. 1",
+  path:"core/ZOOS_2026_51.txt",
+  condition:"Преценяване необходимостта от ОВОС е предвидено за инвестиционни предложения по приложение № 2 и конкретно изброени разширения/изменения и специални хипотези. Точното съответствие с категорията и праговете на приложения № 1 и № 2 трябва да се установи по дейността, не от наименованието на имота или устройствения му статут.",
+  applicable:null,sourceKind:"verified_offline_archival_provision_extract"},
+ {id:"ZOOS_ART_93_2_3",act:"Закон за опазване на околната среда",ref:"чл. 93, ал. 2 и 3",
+  path:"core/ZOOS_2026_51.txt",
+  condition:"Ал. 2 урежда случаи на министъра (включително трансгранични и изрично определени териториални/национални хипотези); ал. 3 урежда преценката от директора на съответната РИОСВ за случаите по ал. 1, т. 1–3 и 5, освен специално приложимите изключения.",
+  applicable:null,sourceKind:"verified_offline_archival_provision_extract"},
+ {id:"ZBR_ART_31",act:"Закон за биологичното разнообразие",ref:"чл. 31, ал. 1, 4 и 5",
+  path:"core/ZBR_2024.txt",
+  condition:"Ал. 1 свързва ОС с възможност за значително отрицателно въздействие върху защитени зони, самостоятелно или в съчетание; ал. 4 урежда съвместяване с глава шеста ЗООС, а ал. 5 самостоятелния ред по наредбата в останалите случаи. Непресичането не решава само по себе си дали има значително въздействие.",
+  applicable:null,sourceKind:"verified_offline_archival_provision_extract"},
+ {id:"N_OVOS_APPLICABILITY",act:"Наредба за ОВОС",ref:"приложение № 2 към чл. 6",
+  path:"official_sources/N_OVOS_ANNEX_2_FULL.txt",
+  condition:"Информационните изисквания за преценяване необходимостта от ОВОС се прилагат при установено попадане в относимата процедура. Списъкът не е основание автоматично да се изисква целият технически проект по всяко уведомление.",
+  applicable:null,sourceKind:"verified_offline_archival_provision_extract"}
+]);
+
 async function handleStage4Proposal(request,env){
  if(request.method!=="POST")return reply({error:"Method not allowed"},405);
  const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN]
@@ -264,7 +306,8 @@ async function handleStage4Proposal(request,env){
   "Никога не използвай изразите оценка на съвместимостта с околната среда, оценка на съвместимостта на околната среда, пълна експертна оценка, допълнителна процедура може да се препоръча или функционален капацитет спрямо регламента на зоната.",
   "При липса на пълен проверен нормативен текст изрично отдели индекса на потенциално относими нормативни източници от доказаните им правни предпоставки. Не прави положителни твърдения за компетентност на органа без проверен източник.",
   "Дадени са извадки от реално прочетени документи с имена на източниците и ГИС анализ от Етап 3. Използвай ги конкретно, но различавай потвърденото от непотвърденото. При аргумент посочвай документа или страницата, когато съществуват във входа. Непрочетени файлове не са доказателство, а непълният извлек не е целият документ.",
-  "Правните източници от архива в този вход са само удостоверени указатели, НЕ пълните проверени текстове. Не представяй достъп до пълния архив, ако archiveTextProvided е false. Не цитирай конкретна алинея по предположение. Дай конкретна правна хипотеза за проверка, а не измислена приложимост.",
+  "Контролираните verifiedOfflineLegalExcerpts са архивно проверени ИЗВЛЕЧЕНИЯ от първични текстове в MASTER V11 (SHA удостоверен), но не пълни членове. Разсъждавай конкретно по тези предпоставки, посочвай член/алинея, като ясно различаваш доказан архивен текст от НЕдоказана приложимост към преписката. Не твърди, че пълният 82-документен архив е качен на сървъра.",
+  "Разграничи три последователни въпроса: 1) дейността попада ли в приложение № 1/2 на ЗООС; 2) попада ли в хипотезите по чл. 2, ал. 1 на Наредбата за ОС; 3) при непопадане там приложима ли е преценката по чл. 2, ал. 2. Давай ясно конкретно ПРЕДЛОЖЕНИЕ за действие въз основа на тези условия, маркирайки недоказаните предпоставки. Не измисляй категория от приложенията.",
   "Пиши ясно, стегнато, с кратки абзаци; до 3600 знака общо. Не повтаряй предмета и подробното местоположение дословно, а използвай само релевантните за процедурната квалификация факти.",
   "Напиши на български институционален език, без английски, без Markdown, без JSON, без излишни предварителни уговорки.",
   "Структурирай с четири озаглавени раздела: Фактическа основа; Нормативни предпоставки и граници на проверката; Мотивирано предложение; Данни за експертна проверка.",
@@ -282,6 +325,9 @@ async function handleStage4Proposal(request,env){
  const context={subject:payload.subject,scope:payload.scope,parcelIds,
   establishedFacts:confirmed,uncertainFacts:unresolved,
   sourceHints,archiveTextProvided:false,archiveName:text(payload.archive.name,100),
+  verifiedOfflineLegalExcerpts:payload.archive.sha256===KT100_ARCHIVE_SHA?
+   KT100_VERIFIED_PROVISIONS:[],
+  archiveExcerptProvenanceConfirmed:payload.archive.sha256===KT100_ARCHIVE_SHA,
   caseDocuments:{archiveName:text(detail.archiveName,180),files:Array.isArray(detail.documents)?detail.documents.slice(0,80):[],
    sourceTexts,sourceTextCount:Number(detail.sourceTextCount)||0,
    sourceTextTruncated:detail.sourceTextTruncated===true,
@@ -321,7 +367,7 @@ async function handleStage4Proposal(request,env){
     documentTextsAvailable:context.caseDocuments.sourceTextCount,
     documentTextTruncated:context.caseDocuments.sourceTextTruncated,
     caseFactsReceived:evidence.length,gisContextReceived:Boolean(detail.gis),
-    archiveArticleTextsReceived:0,archiveIndexRecordsReceived:sourceHints.length}});
+    archiveArticleTextsReceived:0,archiveVerifiedExcerptsReceived:context.verifiedOfflineLegalExcerpts.length,archiveIndexRecordsReceived:sourceHints.length}});
  }catch{return reply({error:"Stage 4 AI request failed or timed out"},504)}
  finally{clearTimeout(timer)}
 }
