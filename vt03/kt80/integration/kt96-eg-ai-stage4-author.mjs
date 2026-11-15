@@ -211,8 +211,12 @@ function boot(){
    if(ticket!==serial||pendingSignature!==caseIdentity().signature)return;
    if(response.status===401||response.status===403){status.textContent='Достъпът до EG Автора е отказан. Паролата за тази сесия е изчистена.';return;}
    if(!response.ok){
+    const findings=Array.isArray(data.reviewFindings)?data.reviewFindings.slice(0,5).map(x=>str(x)).filter(Boolean):[];
     status.textContent=response.status===413?
       'Пакетът надхвърля лимита на EG услугата въпреки ограничаването на откъсите.':
+      response.status===422?
+      'Независимият нормативен контрол не допусна показване на непроверен проект. '+(data.error||'')+
+      (findings.length?' Причини: '+findings.join('; '):''):
       'EG услугата не генерира проект (код '+response.status+'). '+(data.error||'')+
       ' Не показвам програмиран текст като AI резултат.';
     return;
@@ -249,9 +253,12 @@ function boot(){
    lead.style.display='block';
    expanded.open=!leadingDraft;expanded.style.display='block';
    output.textContent=sourceInfo+String.fromCharCode(10,10)+body;output.style.display='block';
-   status.textContent=data.archiveEvidenceVerified===true?
-     'Получен е проект от EG Автора. Предстои независима правна и експертна проверка.':
-     'Получен е проект от EG Автора. Пълният нормативен текст V11 не е удостоверен като използван; цитатите трябва да бъдат проверени.';
+   const audit=data.normativeAudit||{};
+   const reviewInfo=audit.reviewed===true?
+    (audit.reviewVerdict==='revise'?'Поправен след вторичен независим нормативен преглед. ':'Преминал вторичен независим преглед за логическа съгласуваност. '):
+    'Независим нормативен преглед не е удостоверен. ';
+   status.textContent=reviewInfo+'Пълният нормативен текст V11 все още не е достъпен за сървърния автор; цитатите и приложимостта подлежат на експертна проверка.';
+   button.textContent='Преработи проект с EG Автора';
   }catch(err){
    if(ticket===serial)status.textContent='Няма потвърден отговор от EG Автора: '+(String(err?.message||err)==='Failed to fetch'?
     'мрежова грешка или липсващ достъпен сървърен маршрут.':'връзката с услугата не е установена.')+' Не е заместен с алгоритмичен текст.';
