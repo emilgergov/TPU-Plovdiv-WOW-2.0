@@ -1,0 +1,154 @@
+{
+  "schema": "KT82_B2_INDEPENDENT_LEGAL_COMPETITION_GRAPH_V02",
+  "date": "2026-11-13",
+  "canonical_documentary_basis": "KT82_B1_Normative_Master_V10_B1_ARCHIVE_FROZEN_2026-11-13.zip",
+  "archive_sha256": "605956c29134ebe755d24dacc6bb2a3c062f410043cdc7b39df46e5a34d963cd",
+  "verifications": [
+    {
+      "act": "ZOOS",
+      "article": "92",
+      "path": "core/ZOOS_2026_51.txt",
+      "hash_sha256": "4243e6c8d67600d0ec5f3c7a4814f49d27b6ca3f0dbe5e4480a4f604af0a0861",
+      "article_text_opening": "Чл. 92 Оценка на въздействието върху околната среда задължително се извършва на: 1. инвестиционните предложения за строителство, дейности и технологии съгласно приложение № 1; 2. (",
+      "verified": "ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"
+    },
+    {
+      "act": "ZOOS",
+      "article": "93",
+      "path": "core/ZOOS_2026_51.txt",
+      "hash_sha256": "4243e6c8d67600d0ec5f3c7a4814f49d27b6ca3f0dbe5e4480a4f604af0a0861",
+      "article_text_opening": "Чл. 93 (1) (Изм. - ДВ, бр. 77 от 2005 г., изм. - ДВ, бр. 47 от 2009 г., в сила от 23.06.2009 г.) Необходимостта от извършване на ОВОС се преценява за: 1. инвестиционни предложения",
+      "verified": "ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"
+    },
+    {
+      "act": "ZBR",
+      "article": "31",
+      "path": "core/ZBR_2024.txt",
+      "hash_sha256": "7a49ef6962da9d9ba08d8ba8452d429b3d6cf7db9975a7a158a79ddc14d7d7a2",
+      "article_text_opening": "Чл. 31. (Изм. - ДВ, бр. 88 от 2005 г., в сила от 1.01.2007 г., бр. 30 от 2006 г., бр. 52 от 2007 г.) (1) (Доп. - ДВ, бр. 62 от 2010 г., в сила от 30.09.2010 г.) Планове, програми,",
+      "verified": "ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"
+    },
+    {
+      "act": "OS",
+      "article": "2",
+      "path": "additions/N_OS_2025.txt",
+      "hash_sha256": "2ff40c1a607a0f88cf1b25ff2a587d472dbe0bcda26313922330ad0c25de814d",
+      "article_text_opening": "Чл. 2. (Изм. - ДВ, бр. 81 от 2010 г., в сила от 15.10.2010 г.) (1) На ОС по реда на глава втора или трета се подлагат: 1. (доп. - ДВ, бр. 94 от 2012 г., в сила от 30.11.2012 г.) пл",
+      "verified": "ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"
+    },
+    {
+      "act": "OS",
+      "article": "6а",
+      "path": "additions/N_OS_2025.txt",
+      "hash_sha256": "2ff40c1a607a0f88cf1b25ff2a587d472dbe0bcda26313922330ad0c25de814d",
+      "article_text_opening": "чл. 6а указва начина на процедиране, въз основа на попълнен контролен лист и включените в него критерии, съгласно приложение № 1. В 14-дневен срок от подаването на уведомлението по",
+      "verified": "ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"
+    },
+    {
+      "act": "OS",
+      "article": "12",
+      "path": "additions/N_OS_2025.txt",
+      "hash_sha256": "2ff40c1a607a0f88cf1b25ff2a587d472dbe0bcda26313922330ad0c25de814d",
+      "article_text_opening": "чл. 12 или чл. 13, ал. 3 компетентният орган уведомява възложителя и дава указания за отстраняване на недопустимостта, когато това е приложимо, и определя срок. При неизпълнение на",
+      "verified": "ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"
+    },
+    {
+      "act": "OVOS",
+      "article": "4а",
+      "path": "additions/N_OVOS_2022.txt",
+      "hash_sha256": "fd841a55b1ecdbbaadfc197f9e7426dda26526df0a4828d41f3d7658440354d5",
+      "article_text_opening": "Чл. 4а. (Нов - ДВ, бр. 3 от 2011 г.) (1) (Изм. ? ДВ, бр. 3 от 2018 г.) Компетентният орган или оправомощено от него длъжностно лице изпраща уведомлението по чл. 4 на директора на с",
+      "verified": "ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"
+    },
+    {
+      "act": "OVOS",
+      "article": "5",
+      "path": "additions/N_OVOS_2022.txt",
+      "hash_sha256": "fd841a55b1ecdbbaadfc197f9e7426dda26526df0a4828d41f3d7658440354d5",
+      "article_text_opening": "Чл. 5. (1) (Изм. - ДВ, бр. 3 от 2006 г., бр. 80 от 2009 г., доп., бр. 29 от 2010 г., бр. 3 от 2011 г., бр. 31 от 2019 г., в сила от 12.04.2019 г., изм., бр. 67 от 2019 г., в сила о",
+      "verified": "ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"
+    },
+    {
+      "act": "EO",
+      "article": "4",
+      "path": "additions/N_EO_2020.txt",
+      "hash_sha256": "2228bfe811949cd68f6c9ebbf6cc222e33ae76ac2306567df52cb7715c306b93",
+      "article_text_opening": "чл. 4 и органите по одобряване и/или приемане на съответния план или програма могат да координират провеждането на няколко процедури или да проведат една обща процедура. (",
+      "verified": "ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"
+    },
+    {
+      "act": "EO",
+      "article": "8",
+      "path": "additions/N_EO_2020.txt",
+      "hash_sha256": "2228bfe811949cd68f6c9ebbf6cc222e33ae76ac2306567df52cb7715c306b93",
+      "article_text_opening": "Чл. 8. (Нов - ДВ, бр. 12 от 2016 г., в сила от 12.02.2016 г.) (1) (Доп. - ДВ, бр. 3 от 2018 г., доп. - ДВ, бр. 31 от 2019 г., в сила от 12.04.2019 г.) За определяне на приложимата",
+      "verified": "ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"
+    },
+    {
+      "act": "EO",
+      "article": "8а",
+      "path": "additions/N_EO_2020.txt",
+      "hash_sha256": "2228bfe811949cd68f6c9ebbf6cc222e33ae76ac2306567df52cb7715c306b93",
+      "article_text_opening": "Чл. 8а. (Предишен текст на чл. 8 - ДВ, бр. 12 от 2016 г., в сила от 12.02.2016 г.) (1) (Доп. - ДВ, бр. 3 от 2011 г., доп. - ДВ, бр. 12 от 2016 г., в сила от 12.02.2016 г.) За п",
+      "verified": "ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"
+    },
+    {
+      "act": "APK",
+      "article": "31",
+      "path": "texts/APK_f79d7532e8ce81b2.txt",
+      "hash_sha256": "9810a21786e0fbffd65ad4dff110d1c73a75b4cc03c07bde15021a8ab742c8fe",
+      "article_text_opening": "Чл. 31. (1) Искането се отправя до административния орган, който е компетентен да реши въпроса. (2) Когато органът, започнал производството, установи, че индивидуалният администрат",
+      "verified": "ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"
+    },
+    {
+      "act": "APK",
+      "article": "112",
+      "path": "texts/APK_f79d7532e8ce81b2.txt",
+      "hash_sha256": "9810a21786e0fbffd65ad4dff110d1c73a75b4cc03c07bde15021a8ab742c8fe",
+      "article_text_opening": "Чл. 112. Предложенията и сигналите, които са подадени до некомпетентен орган, се препращат не по- късно от 7 дни от постъпването им на компетентните органи, освен когато има данни,",
+      "verified": "ARTICLE_OCCURRENCE_NOT_FULL_LEGAL_APPROVAL"
+    }
+  ],
+  "logic": {
+    "facts": "TRUE/FALSE/UNKNOWN only with case provenance",
+    "hypothesis_status": [
+      "SUPPORTED",
+      "NOT_SUPPORTED",
+      "UNDETERMINED"
+    ],
+    "supported_means": "Preliminary eligibility for drafting a reasoned proposal, NOT a final administrative determination",
+    "precedence": "Confirmed expert subject and scope before legal tests; each input has provenance",
+    "multiple_applicable": "Retain simultaneous OS/OVOS/EO hypotheses where supported; coordinate rather than force one route",
+    "incomplete_facts": "Unknown is not false; always propose concrete next evidence action",
+    "competence": "Separately proven; do not assume local inspectorate authority",
+    "document": "Selected only after reasoned analysis, never chosen from Classic A/B or fixed catalog"
+  },
+  "case_model": {
+    "confirmed_subject": "required confirmed string",
+    "scope_confirmed": "required true",
+    "kind": [
+      "investment",
+      "plan_program",
+      "other"
+    ],
+    "facts": {
+      "annex1": "true/false/null",
+      "annex2": "true/false/null",
+      "os_relevance": "true/false/null",
+      "eo_relevance": "true/false/null",
+      "water_trigger": "true/false/null",
+      "competence": "true/false/null"
+    },
+    "parcel": "optional"
+  },
+  "prohibition": [
+    "Web evidence",
+    "V27.35 templates/outcomes",
+    "Preset document-first catalog",
+    "Invented territorial orders",
+    "Unsupported final decision"
+  ],
+  "integration_status": "NOT_INTEGRATED",
+  "expert_acceptance": "PENDING",
+  "qa_scenarios": 14
+}
