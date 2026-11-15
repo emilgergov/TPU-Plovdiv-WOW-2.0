@@ -125,7 +125,7 @@ function init(){
   status.textContent='Потвърден е точно показаният окончателен обхват. За промяна отменете потвърждението.';
  });
  confirmation.addEventListener('click',event=>{
-  if(confirmation.checked)return; // Permit explicit unconfirmation.
+  if(!confirmation.checked)return; // Native uncheck is allowed; opening a new approval requires a preview.
   event.preventDefault();event.stopImmediatePropagation();
   if(!$('kt80SubjectConfirmation')?.checked){status.textContent='Първо потвърдете предмета.';return}
   captured=scope.value.trim();
