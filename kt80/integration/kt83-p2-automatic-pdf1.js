@@ -32,12 +32,16 @@
      }
      issued=check.key;
      status('ГИС, ПИ MASTER и пресичанията са проверени. Подготвям PDF1 за текущата преписка.');
+     // A STARTED operation is not a completed PDF1. On failure, release only
+     // this attempt's key; a newer case/revision must never be overwritten.
+     const releaseFailed=()=>{
+      if(ticket!==serial||issued!==check.key)return;
+      issued=null;
+      status('PDF1 не е изготвен. Предложение: проверете пространствените данни и повторете генерирането.');
+     };
      // The original generator also re-verifies geometry/intersections and PDF content.
-     try{Promise.resolve(root.KT80PDF1Bridge.makePDF()).catch(()=>{
-      if(ticket===serial)status('PDF1 не е изготвен. Предложение: проверете пространствените данни и повторете.');
-     })}catch(_){
-      if(ticket===serial)status('PDF1 не е изготвен. Предложение: проверете наличността на генератора.');
-     }
+     try{Promise.resolve(root.KT80PDF1Bridge.makePDF()).catch(releaseFailed)}
+     catch(_){releaseFailed()}
      return;
     }
     if(++attempts<60&&['GIS_MISMATCH','GEOMETRY_UNVERIFIED','INTERSECTIONS_UNVERIFIED','PI_MASTER_INCOMPLETE','ZONE_BOUNDARIES_INCOMPLETE'].includes(check.code)){
