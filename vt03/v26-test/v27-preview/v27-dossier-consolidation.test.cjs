@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const ctx=vm.createContext({});for(const p of ['v27-dossier-batches.js','v27-dossier-consolidation.js'])vm.runInContext(fs.readFileSync(__dirname+'/'+p,'utf8'),ctx);
+const files=[{path:'same.txt',text:'A'.repeat(6200)},{path:'same.txt',text:'B'.repeat(2100)},{path:'scan.pdf',error:'unreadable'}];
+const prepared=ctx.V27DossierBatches.prepare({files},{chunkChars:2000}),requests=ctx.V27DossierBatches.toRequests(prepared,{maxRequestChars:6500}).requests;
+const result=ctx.V27DossierConsolidation.consolidate(prepared,requests);
+assert.equal(result.documents[0].text,files[0].text);assert.equal(result.documents[1].text,files[1].text);assert.equal(result.documents[2].status,'unreadable');assert.equal(result.complete,false);
+assert.throws(()=>ctx.V27DossierConsolidation.consolidate(prepared,requests.slice(1)),/Missing dossier chunks/);
+const altered=requests.map(g=>g.map(x=>({...x})));altered[0][0].text='wrong';assert.throws(()=>ctx.V27DossierConsolidation.consolidate(prepared,altered),/chunk mismatch/);
+assert.throws(()=>ctx.V27DossierConsolidation.consolidate(prepared,[...requests,requests[0]]),/Duplicate dossier chunk/);
+const full=ctx.V27DossierBatches.prepare({files:files.slice(0,2)},{chunkChars:2000});assert.equal(ctx.V27DossierConsolidation.consolidate(full,ctx.V27DossierBatches.toRequests(full,{maxRequestChars:6500}).requests).complete,true);
+console.log('V27.1 dossier consolidation: complete, lossless, provenance, corruption guards PASS');

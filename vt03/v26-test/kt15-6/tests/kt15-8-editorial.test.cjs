@@ -1,0 +1,34 @@
+const assert=require('node:assert/strict');
+const {prepare}=require('../v26-editorial-analysis.js');
+const sample=[{title:'Складове за промишлени стоки и офиси',source:'Уведомление.docx',activities:['Предвижда се изграждане на складове за промишлени стоки и офиси.'],infrastructure:[{topic:'electricity',text:'Предвижда се присъединяване към електроразпределителната мрежа.',source:'Уведомление.docx'},{topic:'electricity',text:'Предвижда се присъединяване към електроразпределителната мрежа.',source:'Техническо описание.pdf'}]}];
+const result=prepare(sample);
+assert.equal(result.readyForWord,false);
+assert.equal(result.subject,'Складове за промишлени стоки и офиси');
+assert.equal(result.editorialPlan.find(x=>x.topic==='electricity').facts.length,1);
+assert.equal(result.editorialPlan.find(x=>x.topic==='electricity').facts[0].sources.length,2);
+assert.equal(result.editorialPlan.find(x=>x.topic==='wastewater').facts.length,0);
+assert(result.review.some(x=>x.topic==='wastewater'&&x.reason==='НЯМА ДАННИ'));
+assert(result.findings.every(x=>x.reviewRequired));
+console.log('KT15.8 editorial evidence: PASS (no unverified Word text)');
+
+const {brief}=require('../v26-editorial-analysis.js');
+const editorial=brief(sample);
+assert.equal(editorial.readyForWord,false);
+assert.equal(editorial.classical.paragraphs,null);
+assert.equal(editorial.expert.sections.find(x=>x.topic==='electricity').reported.length,1);
+assert.equal(editorial.expert.sections.find(x=>x.topic==='electricity').reported[0].sources.length,2);
+assert.equal(editorial.expert.sections.find(x=>x.topic==='water_supply').approvedText,null);
+assert(editorial.checks.some(x=>x.issue==='Непотвърден извлечен откъс'));
+console.log('KT15.8 editorial brief: PASS (source-traceable, no fabricated prose)');
+
+const {composeApproved}=require('../v26-editorial-analysis.js');
+const valid=['construction','electricity','water_supply','wastewater'].map(topic=>({topic,approvedText:'Потвърдено описание на дейността и условията по преписката',source:'Уведомление.docx',verified:true,approved:true}));
+const ready=composeApproved({facts:valid});
+assert.equal(ready.readyForWord,true);
+assert.equal(ready.expertSections.length,4);
+assert.equal(ready.classical.waterSupply.includes('Потвърдено'),true);
+const unsafe=composeApproved({facts:[...valid,{topic:'access',approvedText:'Неизяснен достъп',source:'Уведомление.docx',verified:false,approved:true}]});
+assert.equal(unsafe.readyForWord,false);
+assert.equal(unsafe.blocked.length,1);
+assert.equal(composeApproved({facts:valid.slice(0,2)}).readyForWord,false);
+console.log('KT15.8 approved prose: PASS (four required paragraphs, strict approval gate)');

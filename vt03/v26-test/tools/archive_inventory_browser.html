@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>V26 — преглед на ZIP архив без Python</title>
+<style>body{font:16px system-ui,Arial;max-width:900px;margin:35px auto;padding:0 16px;color:#193d30}input,button{font:inherit;padding:12px}button{background:#176b50;color:#fff;border:0;border-radius:8px}table{width:100%;border-collapse:collapse}td,th{padding:8px;border-bottom:1px solid #ddd;text-align:left;word-break:break-all}p{line-height:1.5}.muted{color:#61776d}</style></head><body>
+<h1>V26 — проверка на ZIP архив</h1>
+<p>Работи локално в браузъра, без Python и без качване на файловете в интернет. Чете ZIP директорията, без да извлича файловете. За 7z е необходим отделен декодер.</p>
+<label>Избери ZIP архив: <input id="file" type="file" accept=".zip,application/zip"></label>
+<p id="status" role="status"></p><button id="save" disabled>Запази списъка като JSON</button>
+<p class="muted">Това е инструмент за инвентаризация, не ГИС анализ. Оригиналният архив остава непроменен.</p><table><thead><tr><th>Файл в архива</th><th>Размер (байта)</th><th>ГИС?</th></tr></thead><tbody id="rows"></tbody></table>
+<script>
+const $=id=>document.getElementById(id);let report=null;
+function u16(v,p){return v.getUint16(p,true)}function u32(v,p){return v.getUint32(p,true)}
+function decode(b,utf){return new TextDecoder(utf?'utf-8':'windows-1251',{fatal:false}).decode(b)}
+$('file').addEventListener('change',async e=>{
+ $('rows').replaceChildren();$('save').disabled=true;report=null;
+ const f=e.target.files[0];if(!f)return;
+ if(!f.name.toLowerCase().endsWith('.zip')){$('status').textContent='Поддържа се само ZIP. За 7z е нужен отделен инструмент.';return}
+ try{
+ const tailSize=Math.min(f.size,65557);const tail=new DataView(await f.slice(f.size-tailSize).arrayBuffer());let eocd=-1;
+ for(let i=tail.byteLength-22;i>=0;i--){if(u32(tail,i)===0x06054b50&&i+22+u16(tail,i+20)===tail.byteLength){eocd=i;break}}
+ if(eocd<0)throw Error('Не е открит ZIP каталог (EOCD).');
+ const count=u16(tail,eocd+10),length=u32(tail,eocd+12),offset=u32(tail,eocd+16);
+ if(count===65535||length===0xffffffff||offset===0xffffffff)throw Error('ZIP64: този архив изисква разширен четец.');
+ if(offset+length>f.size)throw Error('Невалиден ZIP каталог.');
+ const data=new DataView(await f.slice(offset,offset+length).arrayBuffer());let pos=0;const items=[];
+ while(pos+46<=data.byteLength&&u32(data,pos)===0x02014b50){
+ const flags=u16(data,pos+8),compressed=u32(data,pos+20),size=u32(data,pos+24),n=u16(data,pos+28),ex=u16(data,pos+30),co=u16(data,pos+32);
+ if(pos+46+n+ex+co>data.byteLength)throw Error('Непълен ZIP запис.');
+ const bytes=new Uint8Array(data.buffer,data.byteOffset+pos+46,n);
+ const name=decode(bytes,Boolean(flags&2048));const gis=/parcel_lookup|\.gdb[/\\]|\.gpkg$|\.geojson$|\.shp$|kadnum|kais_parcels|intersect/i.test(name);
+ if(!name.endsWith('/'))items.push({path:name,size_bytes:size,compressed_bytes:compressed,gis_candidate:gis});
+ pos+=46+n+ex+co;
+ }
+ if(!items.length)throw Error('Няма разчетени файлове.');
+ report={archive:f.name,archive_bytes:f.size,entries:items.length,central_directory_count:count,items};
+ const matches=items.filter(x=>x.gis_candidate);$('status').textContent=`Прочетени ${items.length} файла; ${matches.length} възможни ГИС записа. Файлът не е качван никъде.`;
+ for(const item of (matches.length?matches:items.slice(0,100))){const tr=document.createElement('tr');for(const value of [item.path,item.size_bytes,item.gis_candidate?'Да':'—']){const td=document.createElement('td');td.textContent=String(value);tr.append(td)}$('rows').append(tr)}
+ $('save').disabled=false;
+ }catch(err){$('status').textContent='Грешка: '+err.message}
+});
+$('save').addEventListener('click',()=>{if(!report)return;const b=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});const url=URL.createObjectURL(b);const a=document.createElement('a');a.href=url;a.download='v26_zip_inventory.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)});
+</script></body></html>

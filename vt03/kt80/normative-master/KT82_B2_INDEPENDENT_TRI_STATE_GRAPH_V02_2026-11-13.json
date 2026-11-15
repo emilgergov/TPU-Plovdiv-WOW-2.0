@@ -1,0 +1,86 @@
+{
+  "schema": "KT82_B2_INDEPENDENT_TRI_STATE_DECISION_GRAPH_V02",
+  "date": "2026-11-13",
+  "source_policy": "B1 V10 EXCLUSIVE; NO WEB",
+  "source_archive": "KT82_B1_Normative_Master_V10_B1_ARCHIVE_FROZEN_2026-11-13.zip",
+  "status": "B2_SCIENTIFIC_LOGIC_PROTOTYPE_TESTED_NOT_INTEGRATED",
+  "source_control": {
+    "article_anchor_occurrences": 13,
+    "acts": [
+      "ЗООС",
+      "ЗБР",
+      "Наредба ОС",
+      "Наредба ОВОС",
+      "Наредба ЕО",
+      "АПК"
+    ],
+    "validated_local_only": true
+  },
+  "logic": {
+    "input_order": [
+      "Преписка и доказани факти",
+      "Потвърден предмет и обхват",
+      "Имоти/ГИС само при приложимост",
+      "Паралелни правни хипотези",
+      "Мотивирано предложение за процедура и документ"
+    ],
+    "fact_truth": [
+      "TRUE",
+      "FALSE",
+      "UNKNOWN"
+    ],
+    "legal_assessment": [
+      "SUPPORTED",
+      "NOT_SUPPORTED",
+      "UNDETERMINED"
+    ],
+    "hypotheses": [
+      "ЗООС чл.92 и приложение №1",
+      "ЗООС чл.93 и приложение №2 или друга хипотеза",
+      "ЗБР чл.31 и Наредба ОС чл.2",
+      "Наредба ОВОС чл.4а при доказани водни основания",
+      "Наредба ЕО чл.8 и отделно чл.8а",
+      "Компетентност по ЗООС, Наредба ОС чл.6а, Наредба ЕО чл.4 и АПК"
+    ],
+    "material_rules": [
+      "UNKNOWN не означава FALSE",
+      "Положителните едновременно приложими ОС+ОВОС или ОС+ЕО не се заличават за удобство на интерфейса",
+      "При едновременно наличие на хипотези по приложения №1 и №2 ЗООС се изисква правна квалификация; не се генерират две автоматични окончателни решения",
+      "Преди окончателен документ се удостоверява компетентният орган",
+      "Без доказани условия няма категорично отрицателен или положителен процедурен извод",
+      "НИКОГА без мотивирано предложение; при липси посочи точно необходимите факти",
+      "Никаква зависимост от Classic A/Б или капсулирана V27.35"
+    ]
+  },
+  "test_suite": {
+    "mode": "Deterministic offline local decision model",
+    "count": 14,
+    "pass": 14,
+    "fail": 0,
+    "scenarios": [
+      "no_subject",
+      "no_parcel",
+      "unknown_classification",
+      "proved_no_annex1",
+      "proved_annex1",
+      "both_annexes",
+      "eia_and_os_parallel",
+      "no_water",
+      "water",
+      "plan_eo",
+      "eo_and_os_parallel",
+      "unknown_competence",
+      "proved_competence",
+      "unknown_kind"
+    ],
+    "runtime_kt80_tests_executed": false
+  },
+  "acceptance": {
+    "subject_first_graph_drafted": true,
+    "automatic_legal_citation": false,
+    "expert_approval": false,
+    "stage4_5_integration": false,
+    "v27_35_untouched": true
+  },
+  "next": "Extend to individual evidence-provenance, dispute reconciliation, time-sensitive legal applicability and detailed competent-authority gates with V10 only. Keep tests separate from live app."
+}

@@ -1,0 +1,15 @@
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const src=fs.readFileSync(__dirname+'/v26-draft-package.js','utf8');
+const section=src.slice(src.indexOf('function normativePdf('),src.indexOf('async function make('));
+assert.match(section,/codes:\[\.\.\.new Set\(verified\)\]/,'PDF2 may use verified intersections only');
+assert.match(section,/archivedCodes:\[\.\.\.new Set\(archived\)\]/,'archival overlays retained separately for traceability');
+assert.doesNotMatch(section,/codes:\[\.\.\.new Set\(\[\.\.\.verified,\.\.\.archived\]\)\]/);
+assert.match(section,/const gisZoneCodes=\[\.\.\.new Set\(gisEvidence\.flatMap\(x=>x\.codes\)\)\]/);
+const make=src.slice(src.indexOf('async function make('),src.indexOf('async function standalonePDF('));
+assert.match(make,/const determination=scenarioFromGIS\(results,normalized\)/);
+assert.match(make,/register=\{\.\.\.register,spatialDetermination:determination\}/);
+assert.match(make,/const expertDraft=window\.V26ExpertDraft\?\.build\(\{results,roles:normalized,determination/);
+assert.match(make,/caseMetadata\.parcelIds=\[\.\.\.new Set\(confirmedIds\)\]\.join\(', '\)/);
+assert.match(make,/gisPdf\(results,register\)/);
+assert.match(make,/normativePdf\(results,register\)/);
+console.log('V27.1 P8 PDF2 uses verified GIS intersections; common case context across four documents PASS');

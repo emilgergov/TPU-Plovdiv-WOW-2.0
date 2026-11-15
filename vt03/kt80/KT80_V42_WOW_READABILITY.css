@@ -1,0 +1,238 @@
+/* KT80 V42 — shared readability baseline. No changes to frozen V31 core CSS.
+   Applied to KT80 work screens; minimum comfortable sizes for important facts. */
+:root{--kt80-body-readable:16px;--kt80-meta-readable:14px;--kt80-heading-readable:20px}
+.kt80-workflow,.kt80-stages,.kt80-tiny-status{font-size:var(--kt80-body-readable);line-height:1.55}
+.kt80-workflow .kt80-stage-panel{font-size:var(--kt80-body-readable);line-height:1.6}
+.kt80-workflow .kt80-stage-panel h2{font-size:22px;line-height:1.35}
+.kt80-workflow .kt80-stage-panel p,
+.kt80-workflow .kt80-stage-panel li,
+.kt80-workflow .kt80-stage-panel label,
+.kt80-workflow .kt80-stage-panel summary{font-size:16px;line-height:1.6}
+.kt80-workflow .kt80-stage-panel label:not(.kt80-check){font-size:16px;font-weight:700}
+.kt80-workflow .kt80-stage-panel button,
+.kt80-workflow .kt80-stage-panel input,
+.kt80-workflow .kt80-stage-panel select,
+.kt80-workflow .kt80-stage-panel textarea{font-size:16px;line-height:1.45}
+.kt80-workflow .kt80-stage-panel button{font-weight:750}
+.kt80-workflow .kt80-stage-panel .kt80-template-help,
+.kt80-workflow .kt80-stage-panel .kt80-guide{padding:15px;border-color:#c0a566}
+.kt80-workflow .kt80-template-help summary,
+.kt80-workflow .kt80-guide summary{font-size:18px;font-weight:800;color:#ffe19a;padding:6px 2px}
+.kt80-workflow .kt80-template-help p,
+.kt80-workflow .kt80-template-help div,
+.kt80-workflow .kt80-template-help span,
+.kt80-workflow .kt80-guide p,
+.kt80-workflow .kt80-guide div{font-size:16px;line-height:1.65;color:#f4eddd}
+.kt80-workflow #kt80FormMatches,
+.kt80-workflow #kt80InputStatus,
+.kt80-workflow #kt80ReviewSummary,
+.kt80-workflow #kt80SubjectProposalStatus,
+.kt80-workflow .kt80-hint,
+.kt80-workflow .kt80-flow-message{font-size:16px;line-height:1.65;color:#f7f1df;padding:15px}
+.kt80-workflow #kt80FormMatches > *,
+.kt80-workflow #kt80FormMatches p,
+.kt80-workflow #kt80FormMatches li,
+.kt80-workflow #kt80FormMatches small{font-size:15px;line-height:1.65}
+.kt80-workflow #kt80FormMatches a{color:#ffe29c;text-decoration:underline;text-underline-offset:3px}
+.kt80-workflow .kt80-workflow-audit{font-size:16px;line-height:1.6}
+.kt80-workflow .kt80-workflow-audit h3{font-size:20px}
+.kt80-workflow .kt80-workflow-audit summary{font-size:17px;color:#ffe6a4}
+.kt80-workflow .kt80-workflow-audit p,
+.kt80-workflow .kt80-workflow-audit small{font-size:15px;line-height:1.6}
+.kt80-workflow .kt80-file-status{font-size:14px}
+.kt80-workflow .kt80-file-name{font-size:17px;line-height:1.5}
+.kt80-workflow .kt80-file-reason{font-size:15px;line-height:1.55;color:#ecebdd}
+.kt80-workflow .kt80-file-status-summary{font-size:17px;font-weight:800}
+.kt80-workflow .kt80-input-formats-note{font-size:15px;line-height:1.65;color:#f3e8cf}
+.kt80-workflow .kt80-input-formats-note strong{color:#ffe4a5}
+.kt80-workflow .kt80-custom-file-name{font-size:16px}
+.kt80-workflow .kt80-original-open{font-size:15px}
+.kt80-tiny-status,.kt80-tiny-status span,.kt80-tiny-status strong{font-size:15px;line-height:1.5}
+.kt80-stages .kt80-step{font-size:15px;line-height:1.4}
+.kt80-original-panel,.kt80-original-panel p,
+.kt80-original-panel .kt80-original-head{font-size:16px;line-height:1.6}
+.kt80-original-panel small{font-size:14px}
+@media(max-width:700px){
+.kt80-workflow .kt80-file-status-row{gap:8px}
+.kt80-workflow .kt80-file-name{font-size:16px}
+.kt80-workflow .kt80-file-reason{font-size:14px}
+.kt80-workflow .kt80-stage-panel h2{font-size:20px}
+}
+
+/* KT80 V43 — visible, safe workflow-back navigation, consistent with WOW. */
+.kt80-workflow .kt80-back-navigation{display:flex;justify-content:flex-start;align-items:center;margin:0 0 13px;padding:0 0 10px;border-bottom:1px solid rgba(220,188,111,.32)}
+.kt80-workflow .kt80-step-back{background:#204a34;color:#ffe0a0;border:1px solid #d5b66e;border-radius:8px;padding:10px 16px;cursor:pointer;font-size:16px;font-weight:800;line-height:1.3}
+.kt80-workflow .kt80-step-back:hover,.kt80-workflow .kt80-step-back:focus-visible{background:#326749;color:#fff1c7;outline:2px solid #ffe1a1;outline-offset:2px}
+
+/* KT80 CH2 V44 — evidence passport follows approved expert-readability standard. */
+.kt80-ch2-passport{padding:17px;background:#153b2b;border:1px solid #b9a06e;border-radius:10px;margin:15px 0;color:#f5edd9}
+.kt80-ch2-passport h3{font:700 21px Georgia,serif;color:#ffe0a0;margin:0 0 13px}
+.kt80-ch2-passport .kt80-ch2-summary{font-size:16px;font-weight:750;color:#ffebc0}
+.kt80-ch2-passport .kt80-ch2-warning{border-left:4px solid #d6ba75;background:#25432c;padding:10px 13px;font-size:15px;line-height:1.55}
+.kt80-ch2-passport .kt80-ch2-critical{border-left:4px solid #df8b65;background:#50311f;padding:10px 13px;color:#ffe5c8;font-size:16px;font-weight:700}
+.kt80-ch2-passport .kt80-ch2-topic,.kt80-ch2-passport .kt80-ch2-alert{margin:10px 0;border:1px solid #7f875b;border-radius:8px;padding:11px;background:#1b4531}
+.kt80-ch2-passport details summary{font-size:17px;color:#ffe2a6;font-weight:800;cursor:pointer;line-height:1.55}
+.kt80-ch2-passport .kt80-ch2-evidence{padding:10px 13px;margin:10px 0;border:1px solid #698466;border-radius:7px;background:#234d38}
+.kt80-ch2-passport .kt80-ch2-evidence p{font-size:16px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.kt80-ch2-passport .kt80-ch2-source{font-size:15px;font-weight:800;color:#ffdf99;overflow-wrap:anywhere}
+.kt80-ch2-passport .kt80-ch2-open{background:#d5b569;color:#193a2a;border:1px solid #f5d890;border-radius:7px;padding:9px 12px;cursor:pointer;font-size:15px;font-weight:800}
+.kt80-ch2-passport .kt80-ch2-open:hover,.kt80-ch2-passport .kt80-ch2-open:focus-visible{filter:brightness(1.1);outline:2px solid #fff2c5}
+.kt80-ch2-passport .kt80-ch2-footnote{font-size:15px;color:#f3e4c0;line-height:1.5}
+
+/* KT80 CH2 V46: row-level evidence access + explicit expert-ignored trace. */
+.kt80-ch2-passport .kt80-ch2-topic-wrap{margin:10px 0;border:1px solid #84936a;border-radius:9px;padding:9px;background:#1c4330}
+.kt80-ch2-passport .kt80-ch2-topic-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.kt80-ch2-passport .kt80-ch2-topic{flex:1;min-width:min(100%,320px);margin:0;background:transparent;border:0;padding:4px}
+.kt80-ch2-passport .kt80-ch2-missing-files{padding:12px;border-top:1px solid #84936a;margin-top:8px}
+.kt80-ch2-passport .kt80-ch2-missing-files[hidden],.kt80-ch2-passport .kt80-ch2-correction-editor[hidden]{display:none}
+.kt80-ch2-passport .kt80-ch2-missing-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid #597459;padding:10px 2px;font-size:15px}
+.kt80-ch2-passport .kt80-ch2-correction-editor{padding:13px;background:#103325;border:1px solid #d5b76b;border-radius:8px;margin-top:9px}
+.kt80-ch2-passport .kt80-ch2-correction-editor textarea{display:block;width:100%;min-height:72px;padding:11px;border:1px solid #d2bc7e;border-radius:7px;background:#f9f7ed;color:#173628;font-size:16px;line-height:1.5;margin:9px 0}
+.kt80-ch2-passport .kt80-ch2-ignore{background:#6d3d24;color:#fff0d3;border-color:#e0a872}
+.kt80-ch2-passport .kt80-ch2-flag{margin:7px 9px 7px 0}
+.kt80-ch2-passport .kt80-ch2-correction{font-size:15px;color:#f5e0aa}
+
+/* KT80 V47: PDF.js in-WOW original view, independent of Edge iframe restrictions. */
+.kt80-pdf-nav{display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap;margin:2px 0 14px;padding:11px;background:#1e4934;border:1px solid #bfa362;border-radius:9px}
+.kt80-pdf-nav button{font-size:16px;font-weight:800;padding:10px 15px;border-radius:7px;background:#dfbe70;color:#153528;border:1px solid #f6dda2;cursor:pointer}
+.kt80-pdf-nav button:disabled{opacity:.38;cursor:not-allowed}
+.kt80-pdf-nav strong{font-size:16px;color:#ffe3a8}
+.kt80-pdf-canvas{display:block;margin:0 auto 12px;max-width:100%;height:auto;background:#fff;box-shadow:0 4px 20px #0006;border-radius:3px}
+
+/* KT80 V48 — evidence/source file status everywhere, consistent with WOW. */
+.kt80-coverage-detail{font-size:15px!important;line-height:1.6!important;color:#ffebbd!important;padding:9px 11px;border-left:3px solid #d2b96e;background:#224333;border-radius:4px;margin:9px 0!important}
+.kt80-coverage-marker{display:inline-block;font-size:14px;font-weight:800;padding:4px 8px;margin:5px 0;color:#ffe8ab;border:1px solid #ae9362;border-radius:6px;background:#214c33}
+.kt80-ip-evidence-entry{padding:12px;border:1px solid #728765;border-radius:7px;background:#204532;margin:9px 0;font-size:16px;line-height:1.5}
+.kt80-ip-evidence-entry p{font-size:16px!important;line-height:1.6!important;overflow-wrap:anywhere}
+.kt80-ip-evidence-entry button{font-size:15px!important;padding:9px 13px;margin:4px 0}
+.kt80-ip-topic summary{font-size:17px!important;line-height:1.5;font-weight:800;color:#ffe2a6}
+.kt80-ip-topic{border:1px solid #78906f;border-radius:7px;padding:11px;margin:8px 0;background:#204935}
+
+/* KT80 CH2.1 V50 — specialist technical evidence, matching approved V49 typography. */
+.kt80-ch21-reader{padding:18px;margin:15px 0;border:1px solid #b9a06e;border-radius:10px;background:#173d2c;color:#f4ecd8}
+.kt80-ch21-reader h3{font:700 21px Georgia,serif;color:#ffe0a0;margin:0 0 12px}
+.kt80-ch21-reader .kt80-ch21-summary{font-size:16px;line-height:1.7;font-weight:750}
+.kt80-ch21-reader .kt80-ch21-notice{font-size:15px;line-height:1.65;background:#284637;border-left:4px solid #d5b66e;padding:12px}
+.kt80-ch21-reader details{border:1px solid #819068;border-radius:8px;padding:12px;margin:10px 0;background:#1c4734}
+.kt80-ch21-reader summary{font-size:17px;font-weight:800;color:#ffe1a3;cursor:pointer}
+.kt80-ch21-reader .kt80-ch21-row{padding:12px 6px;border-bottom:1px solid #708568;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.kt80-ch21-reader .kt80-ch21-row p{font-size:16px;line-height:1.6;margin:3px 0;flex-basis:100%}
+.kt80-ch21-reader .kt80-ch21-source{font-size:15px;color:#f9e6b5;overflow-wrap:anywhere}
+.kt80-ch21-reader .kt80-ch21-row button{flex-shrink:0}
+
+/* KT51 V51 — parameter-by-parameter, expert-controlled technical QA. */
+.kt80-param-review{margin:16px 0;padding:18px;background:#163d2d;border:1px solid #b8a16c;border-radius:10px;color:#f5eddc}
+.kt80-param-review h3{font:700 21px Georgia,serif;color:#ffe4a0;margin:0 0 12px}
+.kt80-param-review .kt80-ch21-summary{font-size:16px;font-weight:750;line-height:1.7}
+.kt80-param-review .kt80-ch21-notice{font-size:15px;line-height:1.65;padding:12px;border-left:4px solid #dbc079;background:#2a4935}
+.kt80-param-review .kt80-ch21-details{padding:13px;border:1px solid #8f9b6a;border-radius:8px;background:#204632}
+.kt80-param-review summary{font-size:17px;font-weight:800;color:#ffe2a3;cursor:pointer}
+.kt80-param-review .kt80-param-review-row{margin:12px 0;padding:12px;border:1px solid #79906a;border-radius:8px;background:#244b38}
+.kt80-param-review .kt80-param-review-title{font-size:17px;display:block;line-height:1.5;color:#fff0bc;overflow-wrap:anywhere}
+.kt80-param-review .kt80-param-review-row p{font-size:16px;line-height:1.6;overflow-wrap:anywhere}
+.kt80-param-review .kt80-param-warning{padding:8px;border-left:3px solid #d6ae5e;background:#513e24;color:#ffe5a4}
+.kt80-param-review .kt80-param-expert{margin:10px 0;border-top:1px solid #7b906d;padding:12px 0}
+.kt80-param-review .kt80-param-reason{display:block;width:100%;min-height:74px;box-sizing:border-box;background:#faf7ee;color:#153524;border-radius:7px;border:1px solid #bfa46b;padding:12px;font-size:16px;margin:10px 0}
+.kt80-param-review button{margin:7px 12px 5px 0;font-size:15px}
+
+/* KT80 KT52 — reconstruct project activity and scope, original WOW readability. */
+.kt80-kt52-reconstruction{margin:16px 0;padding:18px;background:#163e2e;border:1px solid #b8a16c;border-radius:10px;color:#f5eddb}
+.kt80-kt52-reconstruction h3{font:700 21px Georgia,serif;color:#ffe3a0;margin:0 0 12px}
+.kt80-kt52-reconstruction .kt80-ch21-summary{font-size:16px;line-height:1.7;font-weight:750}
+.kt80-kt52-reconstruction .kt80-kt52-candidate{font-size:17px;font-weight:750;line-height:1.6;background:#295038;padding:12px;color:#ffe4b2}
+.kt80-kt52-reconstruction .kt80-kt52-section,.kt80-kt52-reconstruction .kt80-kt52-uncertainty{border:1px solid #8d956a;background:#204b36;padding:12px;border-radius:8px;margin:12px 0}
+.kt80-kt52-reconstruction summary{font-size:17px;font-weight:800;color:#ffe4a6;cursor:pointer;line-height:1.5}
+.kt80-kt52-reconstruction .kt80-kt52-topic{padding:9px;border:1px solid #6d8668;border-radius:7px;margin:9px 0}
+.kt80-kt52-reconstruction .kt80-kt52-fact{padding:12px;margin:9px 0;background:#204432;border-left:3px solid #c9a968;border-radius:5px}
+.kt80-kt52-reconstruction p{font-size:16px;line-height:1.65;overflow-wrap:anywhere}
+
+/* KT53: subject and scope in the accepted WOW type scale and gold-on-green scheme. */
+.kt80-kt53-composer{background:#153d2d;color:#f8efd8;border:1px solid #c9aa6c;border-radius:10px;padding:18px;margin:16px 0;display:grid;gap:11px}
+.kt80-kt53-composer h3{font:700 21px Georgia,serif;color:#ffe0a0;margin:0}
+.kt80-kt53-composer label{font-size:17px;font-weight:800;color:#ffe5b3}
+.kt80-kt53-composer textarea{display:block;box-sizing:border-box;width:100%;min-height:190px;background:#fcf9ef;color:#173527;border:1px solid #d5b56a;border-radius:8px;padding:14px;font-size:17px;line-height:1.6}
+.kt80-kt53-composer .kt80-kt53-status{font-size:16px;font-weight:750;line-height:1.6;background:#234b37;padding:11px;border-left:4px solid #e2ba70}
+.kt80-kt53-composer .kt80-kt53-warnings{font-size:15px;line-height:1.65;color:#f8ddad}
+.kt80-kt53-composer details{border:1px solid #80966f;border-radius:8px;padding:10px;background:#1e4534}
+.kt80-kt53-composer details summary{font-size:16px;font-weight:800;cursor:pointer;color:#ffdf9d}
+.kt80-kt53-composer .kt80-kt53-evidence-line{border-bottom:1px solid #708665;padding:10px 4px}
+.kt80-kt53-composer .kt80-kt53-evidence-line p{font-size:15px;line-height:1.6}
+.kt80-kt53-composer .kt80-kt53-disclaimer{font-size:15px;line-height:1.6;color:#f4dfb6}
+.kt80-kt53-composer .kt80-check{display:flex;align-items:center;gap:12px;cursor:pointer}
+.kt80-kt53-composer input[type=checkbox]{width:20px;height:20px;accent-color:#d4ad5d}
+
+/* KT80 V54 — balanced desktop type scale and a compact evidence work screen.
+   Reduce oversized gold/bold rows while keeping accessible body text and controls. */
+.kt80-ip-topic summary,.kt80-ch2-passport .kt80-ch2-topic,
+.kt80-ch21-reader summary,.kt80-param-review summary,
+.kt80-kt52-reconstruction summary{font-size:16px!important;font-weight:650!important;line-height:1.48!important;letter-spacing:0!important}
+.kt80-ch2-passport .kt80-ch2-topic-header{gap:9px!important}
+.kt80-ch2-passport .kt80-ch2-topic-wrap{padding:7px!important;margin:7px 0!important}
+.kt80-ip-topic{padding:8px!important;margin:6px 0!important}
+.kt80-ch2-passport h3,.kt80-ch21-reader h3,.kt80-param-review h3,.kt80-kt52-reconstruction h3,.kt80-kt53-composer h3{font-size:20px!important;font-weight:700!important;line-height:1.4!important}
+.kt80-ch21-reader,.kt80-param-review,.kt80-kt52-reconstruction,.kt80-kt53-composer{padding:14px!important;margin:10px 0!important}
+.kt80-kt53-composer textarea{font-size:16px!important;line-height:1.5!important;min-height:144px!important}
+.kt80-compact-heading{font-weight:700;font-size:18px;color:#f2d28c;margin:12px 0 4px}
+.kt80-compact-nav{border:1px solid #a68e62;background:#163f2f;padding:11px;border-radius:9px;display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.kt80-compact-nav-title{flex-basis:100%;font-weight:750;font-size:17px;color:#f3d18b;margin-bottom:3px}
+.kt80-compact-shortcut,.kt80-compact-controls button{font-size:14px!important;font-weight:650!important;padding:9px 12px!important;border-radius:7px!important}
+.kt80-compact-controls{display:flex;gap:7px;flex-wrap:wrap}
+.kt80-compact-details{margin:7px 0;border:1px solid #7e9270;border-radius:9px;background:#1c4332;overflow:clip}
+.kt80-compact-details>summary{list-style:revert;font-size:16px;font-weight:700;color:#f2d18e;cursor:pointer;padding:12px 14px;line-height:1.5}
+.kt80-compact-details[open]>summary{border-bottom:1px solid #79916e}
+.kt80-compact-details>section,.kt80-compact-details>div{margin:9px!important}
+.kt80-compact-diagnostic{font-size:14px!important;font-weight:650!important;margin:10px 0!important;padding:9px 12px!important}
+@media(max-width:1100px){
+ .kt80-compact-nav{gap:6px;padding:9px}
+ .kt80-compact-shortcut{flex:1 1 170px;white-space:normal}
+ .kt80-compact-details>summary{font-size:15.5px}
+ .kt80-ch2-passport .kt80-ch2-topic-wrap{flex-wrap:wrap}
+ .kt80-kt53-composer textarea{min-height:130px!important}
+}
+@media(max-width:660px){
+ .kt80-compact-shortcut{flex-basis:calc(50% - 8px);font-size:13.5px!important}
+ .kt80-compact-details>summary{font-size:15px}
+ .kt80-compact-nav-title{font-size:16px}
+}
+
+/* KT80 V55 — sober administrative layout. Stage 2 prioritizes the expert decision.
+   Evidence is collapsed in native HTML, independent of scripts and screen size. */
+.kt80-workflow .kt80-stage-panel.kt80-administrative-panel{
+ font-family:Arial,system-ui,sans-serif!important;line-height:1.48!important;
+ max-width:100%;padding:16px!important;
+}
+.kt80-administrative-panel .kt80-admin-head h2{font-family:Georgia,serif!important;font-size:21px!important;font-weight:700!important;margin:0 0 6px!important}
+.kt80-administrative-panel .kt80-admin-head p{font-size:15px!important;font-weight:400!important;line-height:1.5!important;margin:0 0 12px!important;color:#e3e7df!important}
+.kt80-administrative-panel .kt80-subject-controls{display:flex;gap:8px;flex-wrap:wrap;margin:7px 0 10px!important}
+.kt80-administrative-panel .kt80-subject-controls button,.kt80-administrative-panel #kt80ToParcels{font-size:14px!important;font-weight:650!important;padding:10px 14px!important;min-height:40px;box-shadow:none!important}
+.kt80-administrative-panel #kt80SubjectProposalStatus{font-size:14px!important;line-height:1.45!important;padding:8px 10px!important;margin:5px 0 10px!important;background:transparent!important;color:#d9e4dc!important}
+.kt80-administrative-panel>label:not(.kt80-check){font-size:15px!important;font-weight:650!important;margin:7px 0!important;display:block}
+.kt80-administrative-panel #kt80SubjectText{min-height:88px!important;height:94px;resize:vertical;font-family:Arial,system-ui,sans-serif!important;font-size:16px!important;line-height:1.5!important;padding:11px!important}
+.kt80-administrative-panel #kt80SubjectHint{font-size:13px!important;font-weight:400!important;padding:7px 10px!important;margin:6px 0 12px!important;line-height:1.45!important}
+.kt80-administrative-panel .kt80-kt53-composer{display:block!important;background:transparent!important;padding:0!important;border:0!important;margin:8px 0!important}
+.kt80-administrative-panel .kt80-kt53-composer h3{font-family:Arial,system-ui,sans-serif!important;font-size:16px!important;font-weight:700!important;line-height:1.4!important;color:#f0d59b!important;margin:2px 0 6px!important}
+.kt80-administrative-panel #kt80KT53Status{font-size:13px!important;font-weight:500!important;background:transparent!important;border-left:2px solid #b4a57d!important;padding:6px 9px!important;margin:5px 0!important}
+.kt80-administrative-panel .kt80-kt53-composer label{font-size:15px!important;font-weight:650!important;display:block;margin:8px 0!important}
+.kt80-administrative-panel #kt80ScopeText{font-family:Arial,system-ui,sans-serif!important;font-size:15px!important;min-height:128px!important;height:146px!important;line-height:1.5!important;padding:11px!important}
+.kt80-administrative-panel #kt80KT53Warnings{font-size:13px!important;line-height:1.45!important;font-weight:400!important;margin:7px 0!important;color:#e4cfab!important;max-height:65px;overflow:auto}
+.kt80-administrative-panel .kt80-kt53-evidence{margin:8px 0!important;padding:8px 10px!important;border-color:#637962!important}
+.kt80-administrative-panel .kt80-kt53-evidence>summary{font-size:14px!important;font-weight:600!important;line-height:1.45!important}
+.kt80-administrative-panel .kt80-kt53-disclaimer{font-size:12.5px!important;line-height:1.4!important;font-weight:400!important;margin:6px 0!important}
+.kt80-administrative-panel .kt80-kt53-composer .kt80-check{font-size:14px!important;font-weight:500!important}
+.kt80-administrative-panel .kt80-admin-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:10px 0 6px;border-top:1px solid #4d6a58;margin:9px 0}
+.kt80-administrative-panel .kt80-admin-actions label{font-size:14px!important;font-weight:550!important}
+.kt80-administrative-panel .kt80-admin-evidence{margin:10px 0 4px;border:1px solid #708576;border-radius:7px;background:#163d2e}
+.kt80-administrative-panel .kt80-admin-evidence>summary{padding:12px 14px;cursor:pointer;font-family:Arial,system-ui,sans-serif!important;font-size:15px!important;font-weight:700!important;line-height:1.45!important;color:#f0d69f!important}
+.kt80-administrative-panel .kt80-admin-sublabel{font-size:12px;font-weight:400;color:#cfdbce;margin-left:7px;white-space:normal}
+.kt80-administrative-panel .kt80-admin-evidence-body{padding:8px 12px 14px;border-top:1px solid #4c6b56}
+.kt80-administrative-panel .kt80-admin-evidence-help{font-size:13px!important;line-height:1.45!important;color:#d3dfd6!important;margin:4px 0 8px!important}
+.kt80-administrative-panel .kt80-admin-subsection{margin:7px 0;border:1px solid #708473;border-radius:6px;background:#1b4332}
+.kt80-administrative-panel .kt80-admin-subsection>summary{font-family:Arial,system-ui,sans-serif!important;cursor:pointer;font-size:14px!important;font-weight:650!important;line-height:1.5!important;color:#e9d6a8!important;padding:10px 12px!important}
+.kt80-administrative-panel .kt80-admin-subsection[open]>summary{border-bottom:1px solid #59735c}
+.kt80-administrative-panel .kt80-admin-subsection>section,.kt80-administrative-panel .kt80-admin-subsection>div{margin:9px!important}
+@media(max-width:900px){
+ .kt80-workflow .kt80-stage-panel.kt80-administrative-panel{padding:12px!important}
+ .kt80-administrative-panel .kt80-admin-actions{align-items:stretch;flex-direction:column}
+ .kt80-administrative-panel #kt80ToParcels{align-self:flex-start}
+ .kt80-administrative-panel .kt80-admin-sublabel{display:block;margin:3px 0 0}
+}

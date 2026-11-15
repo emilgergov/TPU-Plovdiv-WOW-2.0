@@ -1,0 +1,53 @@
+{
+  "schema": "KT82_B1_ZOOS_2026_CONSOLIDATED_DOCUMENT_QA_V01",
+  "date": "2026-11-13",
+  "input": {
+    "filename": "Закон за опазване на околната среда.pdf",
+    "origin": "User supplied, magistrat.bg consolidated text as of 2026-11-13",
+    "pages": 147,
+    "sha256": "d20cf9fe70994d3f2650c99e58f0ab90560bcb43e0f525a3fc4fe3a64897fa0b",
+    "legal_status": "LATEST_LOCAL_WORKING_SECONDARY_CONSOLIDATION"
+  },
+  "checks": {
+    "article_94_paragraph_3": "Reflects ДВ 51/2026 effective 2026-06-05, referencing Закон за противодействие на корупцията сред лица, заемащи публични длъжности",
+    "annex_pages": {
+      "1": 133,
+      "2": 135,
+      "3": 137,
+      "4": 142,
+      "5": 146,
+      "6": 147,
+      "7": 147,
+      "8": 147
+    },
+    "annex_6_7": "Present as repealed descriptors; do not treat as operative mandatory annexes",
+    "articles_indexed": 252,
+    "verified_through_text_search": true
+  },
+  "working_package": {
+    "filename": "KT82_B1_Normative_Master_Local_Pack_V6_REVIEW.zip",
+    "sha256": "edd562883f6d8b7dc1afc821ad1ff7a6ff7aecbcc35e8bf3c98e63c198abf715",
+    "bytes": 20569669,
+    "zip_integrity": "PASS",
+    "new_additions": [
+      "ZOOS_2026_51 full PDF + extracted text + index",
+      "ZOOS_2026_16 prior official MOEW PDF retained historic",
+      "ZBR_2024 full MOEW PDF + text + index",
+      "ZBR_DV88_2023 four-page official amendment + text + index"
+    ],
+    "previous_v5_preserved": true,
+    "private_legal_originals_uploaded_to_public_git": false
+  },
+  "next_checks": [
+    "Primary source DV 51/2026 alignment for ZOOS current edition",
+    "ZBR 2024 annex completeness and legal-effectivity review",
+    "Cross-reference statutory applicability in 22 routes",
+    "Read-only QA only before any runtime integration"
+  ],
+  "gates": {
+    "automatic_legal_citation": false,
+    "kt80_integration": false,
+    "legacy_v27_35_classic_models_mandatory": false,
+    "live_code_untouched": true
+  }
+}

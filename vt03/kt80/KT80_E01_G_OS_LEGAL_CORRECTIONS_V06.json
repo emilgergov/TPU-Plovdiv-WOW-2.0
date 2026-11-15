@@ -1,0 +1,101 @@
+{
+  "schema": "kt80-e01-g-v06-os-corrections",
+  "date": "2026-11-11",
+  "source": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Naredbi/NAREDBA_za_usl_reda_za_izvarshvane_na_ocenka_za_savmestimostta_na_PPPIP_2025.pdf",
+  "source_status": "PRIMARY_OFFICIAL_PUBLISHED_TEXT_INSPECTED",
+  "not_all_procedures_approved": true,
+  "entries": [
+    {
+      "id": 1,
+      "label": "Писмо по чл. 2, ал. 2 от Наредбата за ОС",
+      "procedural_start": "Уведомление по чл. 2, ал. 3 с данни съгласно Приложение №2, част А за планове/програми/проекти или част Б за инвестиционни предложения",
+      "applicant_document": "Уведомление с информация по Приложение №2 (чл. 2, ал. 3)",
+      "authority_document": "Контролен лист по Приложение №1 (чл. 2, ал. 2) — попълва се за преценката на компетентния орган, НЕ е образец за заявителя",
+      "procedure": "чл. 2, ал. 2 — предварително отграничаване от случаите по ал. 1, проверка за допустимост по чл. 12 при приложимост, контролен лист, писмено уведомяване",
+      "time_notation": "Текстът на официално публикувания PDF предвижда 14 дни за писмено уведомяване от подаване на уведомлението и оповестяване на писмото на сайта в 7 дни; срокове се проверяват за конкретния факт и редакция",
+      "blockers": [
+        "Непотвърден предмет, капацитет или технология",
+        "Неясни енергийни, транспортни и водни връзки",
+        "Неизяснен начин на отвеждане/заустване на отпадъчните води",
+        "Неизследвани преки, косвени или съвкупни въздействия",
+        "Непроверена компетентност по чл. 6а"
+      ],
+      "legal_status": "TEXT_AND_PROCEDURE_CONFIRMED_IN_OFFICIAL_2025_PDF; LATER_UPDATES_NOT_EXCLUDED",
+      "source_url": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Naredbi/NAREDBA_za_usl_reda_za_izvarshvane_na_ocenka_za_savmestimostta_na_PPPIP_2025.pdf",
+      "source_edition": "Наредба ОС, публикуван текст на МОСВ, изм. ДВ бр. 96/2025; не е самостоятелна проверка за всички изменения до 11.11.2026",
+      "final_legal_acceptance": false
+    },
+    {
+      "id": 2,
+      "label": "Искане за допълнителна информация",
+      "procedural_start": "Вече подадено уведомление по чл. 2, ал. 3 с непълноти, пропуски или неточности",
+      "applicant_document": "Родителското уведомление, чиито факти са непълни",
+      "authority_document": "Писмено искане за допълнителна информация и определен срок",
+      "procedure": "чл. 2, ал. 4 — приложимо само за клон по чл. 2, ал. 2–3; другите производства имат самостоятелни основания",
+      "time_notation": "Срокът за допълване се определя от органа според закона и конкретната непълнота",
+      "blockers": [
+        "Липсата не е конкретизирана",
+        "Не е доказана нуждата от допълнителната информация",
+        "Неправилно приложен специален ред"
+      ],
+      "legal_status": "TEXT_CONFIRMED_IN_OFFICIAL_2025_PDF; BRANCH_SPECIFIC",
+      "source_url": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Naredbi/NAREDBA_za_usl_reda_za_izvarshvane_na_ocenka_za_savmestimostta_na_PPPIP_2025.pdf",
+      "source_edition": "Наредба ОС, публикуван текст на МОСВ, изм. ДВ бр. 96/2025; не е самостоятелна проверка за всички изменения до 11.11.2026",
+      "final_legal_acceptance": false
+    },
+    {
+      "id": 5,
+      "label": "Указания по процедурата за ОС",
+      "procedural_start": "Първо се избира правилният клон: самостоятелна ОС по глава втора или съвместена ОС през ОВОС/ЕО",
+      "applicant_document": "За конкретния самостоятелен ред — уведомление съгласно чл. 10; за чл. 2, ал. 2 — уведомление по ал. 3 с Приложение №2",
+      "authority_document": "Указания по конкретния ред, не фиксирано предварително отрицателно писмо",
+      "procedure": "чл. 4–5 Наредба ОС уреждат разликата между съвместена и самостоятелна процедура",
+      "time_notation": "Според приложимия самостоятелен/съвместен ред",
+      "blockers": [
+        "Грешен избор на глава от наредбата",
+        "Грешно определен орган по чл. 6а",
+        "Неизяснени въздействия и допустимост"
+      ],
+      "legal_status": "BASIS_CONFIRMED_IN_OFFICIAL_2025_PDF; ART10_FORM_DETAIL_PENDING",
+      "source_url": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Naredbi/NAREDBA_za_usl_reda_za_izvarshvane_na_ocenka_za_savmestimostta_na_PPPIP_2025.pdf",
+      "source_edition": "Наредба ОС, публикуван текст на МОСВ, изм. ДВ бр. 96/2025; не е самостоятелна проверка за всички изменения до 11.11.2026",
+      "final_legal_acceptance": false
+    },
+    {
+      "id": 6,
+      "label": "Решение за преценяване вероятната степен на отрицателно въздействие",
+      "procedural_start": "Самостоятелен ред по глава втора, започнал с надлежно уведомление и достатъчна документация",
+      "applicant_document": "Уведомление и изискуема информация по специалния ред",
+      "authority_document": "Мотивирано решение след проверка по съответните норми (чл.18, когато е приложим)",
+      "procedure": "чл. 7 — последователност: уведомление, допустимост, преценка на вероятна степен, следващи етапи според необходимостта",
+      "time_notation": "Сроковете и специфичните реквизити изискват отделна проверка на чл. 18 към приложимата дата",
+      "blockers": [
+        "Само пространствено пресичане без оценка на въздействията",
+        "Липсва проверка за допустимост",
+        "Неправилна компетентност"
+      ],
+      "legal_status": "SEQUENCE_CONFIRMED_IN_OFFICIAL_2025_PDF; ACT18_DETAIL_PENDING",
+      "source_url": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Naredbi/NAREDBA_za_usl_reda_za_izvarshvane_na_ocenka_za_savmestimostta_na_PPPIP_2025.pdf",
+      "source_edition": "Наредба ОС, публикуван текст на МОСВ, изм. ДВ бр. 96/2025; не е самостоятелна проверка за всички изменения до 11.11.2026",
+      "final_legal_acceptance": false
+    },
+    {
+      "id": 9,
+      "label": "Прекратяване на процедура",
+      "procedural_start": "Образувана конкретна преписка и настъпило законово основание",
+      "applicant_document": "Родителско уведомление/искане и доказателства за действията по него",
+      "authority_document": "Надлежен документ за прекратяване, видът зависи от нормативния клон",
+      "procedure": "чл. 2, ал. 5 от Наредбата за ОС предвижда конкретни основания за прекратяване; не се прилага автоматично към ОВОС/ЕО",
+      "time_notation": "Съобразно специалния ред и доказано уведомяване",
+      "blockers": [
+        "Недоказано неизпълнение на указания",
+        "Необосновано основание или срок",
+        "Неправилно прилагане спрямо друг вид процедура"
+      ],
+      "legal_status": "SPECIFIC_OS_BRANCH_CONFIRMED_IN_OFFICIAL_2025_PDF; OTHER_BRANCHES_PENDING",
+      "source_url": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Naredbi/NAREDBA_za_usl_reda_za_izvarshvane_na_ocenka_za_savmestimostta_na_PPPIP_2025.pdf",
+      "source_edition": "Наредба ОС, публикуван текст на МОСВ, изм. ДВ бр. 96/2025; не е самостоятелна проверка за всички изменения до 11.11.2026",
+      "final_legal_acceptance": false
+    }
+  ]
+}

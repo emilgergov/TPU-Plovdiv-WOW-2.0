@@ -1,0 +1,17 @@
+const assert=require('node:assert/strict');const fs=require('node:fs');const vm=require('node:vm');const ctx={};
+vm.runInNewContext(fs.readFileSync(__dirname+'/v27-verified-context.js','utf8'),ctx);
+const g=ctx.V27VerifiedContext.gis,l=ctx.V27VerifiedContext.legal;
+const polygon={features:[{geometry:{type:'Polygon',coordinates:[]}}]};
+const a={input:'56784.13.102',status:'Намерен',geojson:polygon,intersection_verified_outside:true};
+const b={input:'56784.13.105',status:'Намерен',geojson:polygon,verified_zone_intersections:['BG0002057']};
+const roles={'56784.13.102':'leading','56784.13.105':'ancillary'};
+assert.equal(g([a],roles).scenario,'A');
+assert.equal(g([a,b],roles).scenario,'B');
+assert.equal(g([a,{...b,geojson:null}],roles).scenario,'REVIEW');
+assert.equal(g([a,{...b,verified_zone_intersections:[],intersection_verified_outside:false}],roles).scenario,'REVIEW');
+assert.throws(()=>g([a],{}),/Непотвърден/);
+const sources=l({records:[{id:'1',title:'Закон',source:'https://example.org'},{id:'2',title:'Наредба',source:'https://example.org/2',officialVerified:true,version:'2026-10-01',articleText:'Член 1'}]});
+assert.equal(sources.sources[0].verification,'catalog_only');
+assert.equal(sources.sources[0].provisionText,null);
+assert.equal(sources.sources[1].verification,'article_verified');
+console.log('V27.1 P5/P6 GIS and legal evidence: PASS');

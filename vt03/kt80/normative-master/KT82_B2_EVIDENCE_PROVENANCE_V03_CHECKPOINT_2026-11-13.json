@@ -1,0 +1,93 @@
+{
+  "schema": "KT82_B2_EVIDENCE_PROVENANCE_V03_GITHUB_CHECKPOINT",
+  "date": "2026-11-13",
+  "policy": "EXCLUSIVE_V10_ARCHIVE_ONLY",
+  "basis": "KT82_B1_Normative_Master_V10_B1_ARCHIVE_FROZEN_2026-11-13.zip",
+  "locally_generated_artifacts": [
+    {
+      "filename": "KT82_B2_EVIDENCE_PROVENANCE_V03.json",
+      "sha256": "59cdfb1f8e9841efb2bceb134df15669d3f8224b1c70691ced67d68c148844dc",
+      "bytes": 9901
+    },
+    {
+      "filename": "KT82_B2_EVIDENCE_PROVENANCE_QA_V03.json",
+      "sha256": "b7c7be159d8eaef91768fbb920c1cc052410dd1201a1acd8e56857a2cbdfd8c2",
+      "bytes": 12600
+    }
+  ],
+  "legal_article_heading_assertions": {
+    "tested": 13,
+    "found_with_real_headings": 13,
+    "not_found": 0,
+    "extraction_correction": "Allow ZOOS text: 'Чл. 92\\n' and 'Чл. 93\\n' besides standard 'Чл. N.'; forbid keyword-only match as legal article verification.",
+    "acts": [
+      "ЗООС",
+      "ЗБР",
+      "Наредба ОС",
+      "Наредба ОВОС",
+      "Наредба ЕО",
+      "АПК"
+    ]
+  },
+  "decision_engine": {
+    "flow": [
+      "Expert-confirmed subject and scope",
+      "Dossier facts with source ID/source type/date",
+      "Tri-state facts plus CONFLICT",
+      "Parallel legal hypotheses from V10",
+      "Competence considered separately",
+      "Reasoned next-action proposal, not preset document"
+    ],
+    "fact_states": [
+      "TRUE",
+      "FALSE",
+      "UNKNOWN",
+      "CONFLICT"
+    ],
+    "hypothesis_states": [
+      "SUPPORTED",
+      "NOT_SUPPORTED",
+      "UNDETERMINED",
+      "DISPUTED"
+    ],
+    "required_fact_provenance": [
+      "source_id",
+      "source_type",
+      "observed_at",
+      "boolean value"
+    ],
+    "conflict_handling": "Contrary supported evidence => disputed, never silently overwrite by last document or infer negative; propose expert reconciliation.",
+    "unknown_handling": "Incomplete evidence => unknown, never false.",
+    "date_handling": "An evidence timestamp is recorded for conflict review, not proof of legal effect or fact validity at any different time.",
+    "competence": "Must be determined from material and territorial facts; Boolean mock is NOT competence verification.",
+    "no_parcel": "Does not block procedure when parcel inapplicable.",
+    "candidate_documents": "Only after free analysis; 22 catalog not legal decision engine."
+  },
+  "local_mock_qa": {
+    "scenarios": 22,
+    "passed": 22,
+    "failed": 0,
+    "covers": [
+      "No expert subject / unconfirmed scope",
+      "No parcel",
+      "Annex 1 and Annex 2 factual predicates",
+      "OS + OVOS and EO + OS parallels",
+      "Fact dispute from multiple documents",
+      "Unproven source, absent source date, wrong assertion type",
+      "Water trigger true/false/unknown",
+      "Unknown or disputed competence",
+      "No forced negative outcomes from lack of affirmative facts",
+      "Different-date disagreement"
+    ],
+    "type": "Deterministic local model, NOT KT80 application test or regulatory acceptance"
+  },
+  "gates": {
+    "V10_frozen": true,
+    "Classic_AB_V27_35_capsulated": true,
+    "route_first_forbidden": true,
+    "automatic_citation_not_enabled": true,
+    "KT80_runtime_not_modified": true,
+    "B2_expert_acceptance_pending": true
+  },
+  "next": "Replace boolean proof-of-concept fields with source-linked dossier observations and detailed jurisdiction/clock gates; stage 4-5 remains uninvolved."
+}

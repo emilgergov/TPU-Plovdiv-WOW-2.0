@@ -1,0 +1,34 @@
+{
+  "schema": "KT83_CASE_ISOLATION_HARD_STOP",
+  "date": "2026-11-13",
+  "decision": "User explicitly rejects any contamination of AI author legal hypotheses by example TEST_2 or any dossier-specific result.",
+  "root_cause": "V1.4 hard-coded ZOOS_93 as single universal discovered candidate and used text keyword patterns derived from the TEST_2 context.",
+  "resolved_code": [
+    {
+      "path": "kt80/integration/kt83-v1-4-hypothesis-discovery.mjs",
+      "change": "Removed TEST_2-shaped thematic detectors and hard-coded ZOOS_93 candidate. Closed automatic discovery while source-grounded universal normative mapping has not been implemented."
+    },
+    {
+      "path": "kt80/integration/kt83-v1-4-auto-discovery.test.mjs",
+      "change": "Replaced biased scenario assertions with 10 unbiased-case regression tests, including no fixed article for dossier matching TEST_2."
+    }
+  ],
+  "scope": "Prevent production of preferential hypotheses from case-specific tests; may still read V11 article catalog as normative references but existence of article is not a predicate for applicability.",
+  "case_separation": {
+    "normative_V11": "Only authority for available legal provisions. Must be indexed independently from the test cases.",
+    "case_documents": "Facts and case-specific evidence ONLY. No rule/prior/weight/baseline.",
+    "approved_TEST_2": "Stored exclusively as regression fixture / expert acceptance reference, never a seed to select default legal article.",
+    "classic_AB": "No inheritance for independent author.",
+    "live_auto_hypotheses": "DISABLED / FAIL CLOSED until unbiased source-to-conditions graph is complete."
+  },
+  "engineering_rules": [
+    "No hard-coded default legal provision as consequence of dossier kind (e.g. investment) or keyword alone.",
+    "Every automatically proposed hypothesis must originate from audited law-to-conditions registry independent of individual files.",
+    "Use adversarial regression across cases from multiple administrative regimes and out-of-distribution cases.",
+    "Absence of verified mapping results in evidence-aware next action, not arbitrarily preferred statute.",
+    "Expert controls legal determination; no automatic administrative act issue."
+  ],
+  "ci": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/43500447232",
+  "previous_stable_status": "B1/V11 and B2 remain locked; V27.35 and base KT80 V59.8 unchanged.",
+  "next_work": "Build unbiased normative MASTER provision-to-conditions graph, prove coverage and source hashes, then re-enable auto-discovery per verified statute. Do not use TEST_2 in rule construction."
+}

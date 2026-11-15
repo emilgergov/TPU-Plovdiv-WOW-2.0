@@ -1,0 +1,161 @@
+{
+  "schema": "KT82_B1_COMPETENCE_DECISION_GATES_V01",
+  "date": "2026-11-13",
+  "status": "VERIFIED_SELECTED_COMPETENCE_GATES_NOT_FINAL_ROUTE_SIGNOFF",
+  "source_audit": [
+    {
+      "act": "Наредба за ЕО",
+      "source": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ekologichna-ocenka-na-planove-i-programi/",
+      "verified_editions_in_source": "last amendment cited ДВ70/2020",
+      "articles": [
+        "чл.4",
+        "чл.5",
+        "чл.8",
+        "чл.8а",
+        "чл.14",
+        "чл.23",
+        "чл.25"
+      ],
+      "source_level": "official_MOEW_consolidation"
+    },
+    {
+      "act": "Наредба за ОВОС",
+      "source": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ocenka-na-vuzdejstvieto-vurhu-okolnata-sreda/",
+      "verified_editions_in_source": "last amendment cited ДВ62/2022",
+      "articles": [
+        "чл.4а",
+        "чл.5",
+        "чл.6",
+        "чл.7",
+        "чл.8",
+        "чл.18",
+        "чл.20"
+      ],
+      "source_level": "official_MOEW_consolidation"
+    },
+    {
+      "act": "АПК",
+      "source": "https://publicbg.justice.government.bg/home/normdoc/2135521015",
+      "articles": [
+        "чл.31",
+        "чл.112",
+        "чл.113"
+      ],
+      "source_level": "official_Ministry_of_Justice"
+    }
+  ],
+  "route_gates": [
+    {
+      "id": 7,
+      "branch": "ОВОС преценка",
+      "prereqs": [
+        "ЗООС приложение №1/2 categorization",
+        "чл.93 ЗООС jurisdiction and request type",
+        "Наредба ОВОС чл.6–8 screening evidence and consultation",
+        "special statutory exceptions and spatial remit"
+      ],
+      "output": "Only propose draft of screening decision after all competence/evidence gates are fulfilled"
+    },
+    {
+      "id": 8,
+      "branch": "Пълна ОВОС",
+      "prereqs": [
+        "ЗООС чл.94 competent authority; verify cross-regional or ministerial branch",
+        "Наредба ОВОС чл.18 full report, consultations, public hearing and EEC decision",
+        "Наредба ОВОС чл.20 statutory decision window"
+      ],
+      "output": "No premature final decision from notification alone"
+    },
+    {
+      "id": 10,
+      "branch": "ЕО първоначална квалификация",
+      "prereqs": [
+        "Plan/program approval authority and territorial scope",
+        "Наредба ЕО чл.4: MOEW for plans/programs approved by central executive bodies or National Assembly; RIOSV or MOEW per art10(2) ZOOS/special law for territorial executive body/municipal council",
+        "Наредба ЕО чл.8 notification under annex 3"
+      ],
+      "output": "Instruction about appropriate EO procedure, not screening decision"
+    },
+    {
+      "id": 11,
+      "branch": "ЕО преценяване",
+      "prereqs": [
+        "Наредба ЕО чл.4 competence",
+        "Наредба ЕО чл.8а screening request under annex 4",
+        "Наредба ЕО чл.14 criteria and health consultations; Art85 ZOOS deadlines"
+      ],
+      "output": "Decision requires actual screening dossier"
+    },
+    {
+      "id": 12,
+      "branch": "ЕО становище",
+      "prereqs": [
+        "Наредба ЕО чл.4 competence",
+        "Наредба ЕО чл.23 standard dossier or documented special al2 branch",
+        "Наредба ЕО чл.25 and expert environmental council mechanism"
+      ],
+      "output": "Final opinion not derived from early art8 notification"
+    },
+    {
+      "id": 20,
+      "branch": "Препращане",
+      "prereqs": [
+        "Classify input as general individual administrative act request versus proposal/signal",
+        "АПК чл.31 immediate forwarding vs чл.112 seven-day forwarding",
+        "Check special process and submitter notice"
+      ],
+      "output": "Correct competent recipient and time requirement"
+    }
+  ],
+  "matrix_consistency": {
+    "catalog_total": 22,
+    "internal_tools_not_acts": [
+      13,
+      14,
+      15,
+      16
+    ],
+    "no_template_binding_to_classic_ab": true,
+    "site_specific_orders_outside_general_normative_master": true
+  },
+  "regression_cases": [
+    {
+      "test": "COMP_EO_CENTRAL",
+      "input": "Plan approved by central authority",
+      "expect": "Jurisdiction MOEW by EO ordinance art4(1)"
+    },
+    {
+      "test": "COMP_EO_MUNICIPAL_MULTIREGIONAL",
+      "input": "Plan approved municipal council but spanning multiple RIOSV districts",
+      "expect": "Check ZOOS art10(2) branch; no automatic RIOSV Plovdiv"
+    },
+    {
+      "test": "COMP_EO_SCREENING_VS_OPINION",
+      "input": "EO notification only, absent report",
+      "expect": "No screening decision or final EO opinion"
+    },
+    {
+      "test": "COMP_OVOS_MISSING_EEC",
+      "input": "OVOS full decision requested, evidence of expert ecological council absent",
+      "expect": "Evidence needed, not unsupported final act"
+    },
+    {
+      "test": "COMP_APK_REFERRAL",
+      "input": "Unspecified incoming referral request",
+      "expect": "Require input legal type classification before date calculation"
+    }
+  ],
+  "unresolved": [
+    "Full legal effectiveness / superseding act check for all used provisions against Gazette",
+    "Exact source-level competence for each remaining route beyond this targeted subset",
+    "Evidence/completeness and procedural exception logic on remaining catalog entries",
+    "User expert acceptance after B1 technical source validation"
+  ],
+  "gates": {
+    "runtime_changed": false,
+    "v27_35_changed": false,
+    "auto_legal_citation": false,
+    "kt80_stages4_5_integration": false,
+    "full_b1_accepted": false
+  }
+}

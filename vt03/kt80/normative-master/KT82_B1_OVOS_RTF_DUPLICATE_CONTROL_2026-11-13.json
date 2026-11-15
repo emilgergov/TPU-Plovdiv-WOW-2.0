@@ -1,0 +1,22 @@
+{
+  "schema": "KT82_B1_OVOS_RTF_DUPLICATE_CONTROL_V01",
+  "checked_at": "2026-11-13",
+  "new_upload": "NAREDBA_za_usloviqta_i_reda_za_izvyrsvane_na_ocenka_na_vyzdejstvieto_vyrhu_okolnata_sreda_Zagl_izm_D156833650a06e5075376b66c8a25638e (1).rtf",
+  "sha256": "8cad4ec22a216e5a36866d10c989f376b5f82635327ad331b07a4a17ce1bf760",
+  "same_as_previous_upload": true,
+  "size_bytes": 832947,
+  "remaining_missing_annex_bodies": [
+    "2",
+    "2а",
+    "7",
+    "9"
+  ],
+  "official_public_full_text": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ocenka-na-vuzdejstvieto-vurhu-okolnata-sreda/",
+  "disposition": "NO_DUPLICATE_ADDITION_TO_CANONICAL_ARCHIVE",
+  "next": "Acquire Print-to-PDF of full official page or authenticated full annex text, compare four annex bodies before declaring B1 complete",
+  "technical_status": {
+    "integration": false,
+    "automatic_citations": false,
+    "classic_ab_mandatory": false
+  }
+}
