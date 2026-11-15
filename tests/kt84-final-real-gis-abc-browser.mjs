@@ -53,6 +53,28 @@ try{
    caseId:r?.caseId||null,status:document.getElementById('kt80PDF1Status')?.textContent||''};
  });
  assert.equal(receipt.ok,true,'the generated PDF1 receipt belongs to the same case and evidence revision');
+ const legalHandoff=await page.evaluate(()=>{
+  const bridge=window.KT83NormativeBridge;
+  if(!bridge?.getEvidence)throw Error('Stage4 spatial evidence bridge unavailable');
+  const before=bridge.getEvidence();
+  // Deliberately remove a PI MASTER proof AFTER valid PDF1 completion. The
+  // normative bridge must not retain a falsely ready FULL_GIS_PDF1 state.
+  const pi=window.KT80PIMaster.getResult();
+  const old=pi.items[0].status;
+  pi.items[0].status='MISSING';
+  const after=bridge.getEvidence();
+  pi.items[0].status=old;
+  const restored=bridge.getEvidence();
+  return {before:before.scenario,after:after.scenario,restored:restored.scenario,
+   beforePdf:before.pdfOK,afterPdf:after.pdfOK,restoredPdf:restored.pdfOK};
+ });
+ assert.equal(legalHandoff.before,'FULL_GIS_PDF1',
+  'Stage4 must receive verified GIS + real PDF1');
+ assert.notEqual(legalHandoff.after,'FULL_GIS_PDF1',
+  'Stage4 must reject PDF1 when PI MASTER no longer proves all parcels');
+ assert.equal(legalHandoff.afterPdf,false);
+ assert.equal(legalHandoff.restored,'FULL_GIS_PDF1');
+
  assert.equal(errors.length,0,'no uncaught JS exceptions');
- console.log('KT84_FINAL_REAL_THREE_SCENARIO_GIS_PDF1',JSON.stringify({proof,receipt,bytes:bytes.byteLength,errors}));
+ console.log('KT84_FINAL_REAL_THREE_SCENARIO_GIS_PDF1',JSON.stringify({proof,receipt,legalHandoff,bytes:bytes.byteLength,errors}));
 }finally{await browser.close();}
