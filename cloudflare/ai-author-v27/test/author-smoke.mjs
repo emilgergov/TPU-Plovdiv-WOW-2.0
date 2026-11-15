@@ -239,6 +239,21 @@ try{
   }
   console.log('PASS: KT104 misleading OS terminology and confused EIA annex rejected.');
 
+  // KT105-C: separately test the independent review's fail-closed path.
+  globalThis.fetch=async (_url,opts)=>{
+    const sent=JSON.parse(opts.body);
+    const second=sent.input[0].content.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ');
+    const review=JSON.stringify({verdict:'reject',
+      issues:['Не е доказана конкретна категория по приложение № 2 към ЗООС'],revisedDraft:''});
+    const ordinary='ВОДЕЩО ПРЕДЛОЖЕНИЕ: Указване на начина на процедиране при проверка на законовите предпоставки.\\nФактическа основа\\nИзвлечени са данни от преписката и ГИС.\\nНормативни предпоставки и граници на проверката\\nОтношението към съответната категория по ЗООС следва да се установи от първичен нормативен текст.\\nМотивирано предложение\\nПредлага се конкретно мотивирано писмо за указване на начина на процедиране.\\nДанни за експертна проверка\\nПриложимостта на категорията остава непотвърдена.';
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:second?review:ordinary}]}]}),{status:200});
+  };
+  const independentReject=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+  assert.equal(independentReject.status,422);
+  assert((await independentReject.json()).qualityIssues.includes('INDEPENDENT_REJECTION'));
+  console.log('PASS: KT105-C reviewer rejection blocks unsupported normative claim.');
+
+
   console.log('PASS: KT97 Stage 4 protected route, CORS, evidence contract, case identity and archive honesty.');
 
   console.log('PASS: health, unauthorized access, invalid input, classic and expert AI drafting (mock provider).');
