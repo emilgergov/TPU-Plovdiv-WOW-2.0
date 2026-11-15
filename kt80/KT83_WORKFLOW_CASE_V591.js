@@ -51,8 +51,11 @@ function intakeResults(data){
  state.intake=data;invalidate(2);
  const docs=data.files||[],subjects=data.subject_candidates||[],ids=data.classification?.leading_candidates||[];
  $('kt80InputStatus').textContent='Инвентаризирани файлове: '+docs.length+'; кандидати за предмет: '+subjects.length+'; кандидати за водещи имоти: '+ids.length+'.\nИзвличането е предварително и изисква преглед.';
- const title=subjects.map(x=>typeof x==='string'?x:x?.title||x?.heading||'').find(x=>typeof x==='string'&&x.trim());
- if(title&&!$('kt80SubjectText').value.trim()){$('kt80SubjectText').value=title;$('kt80SubjectHint').textContent='Кандидат от прочетеното (непотвърден); редактирайте и потвърдете.'}
+ // Candidate titles cannot be promoted by the workflow before the independent
+ // reader/source audit. KT80SubjectMaster is the sole provenance-checked entry.
+ // A failed/unchecked DOC reader must never prefill the subject as reliable.
+ if(!$('kt80SubjectText').value.trim())
+  $('kt80SubjectHint').textContent='Кандидатите за предмет се проверяват по действително извлечен текст и оригинален документ. Допустима е експертна редакция.';
  if(ids.length&&!$('kt80ParcelInput').value.trim()){$('kt80ParcelInput').value=ids.join('; ');$('kt80ParcelNormalize').click()}
  const possible=[];for(const d of docs){
  const nm=String(d.filename||d.file||d.name||'').toLocaleLowerCase('bg');
