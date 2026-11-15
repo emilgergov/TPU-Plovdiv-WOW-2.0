@@ -33,6 +33,10 @@ function listSources(reconstruction){
  * Only explicit expert-approved parameters become positive technical assertions.
  * Other activity classifications are review cues, NEVER claimed planned works.
  */
+/* VT03-R5. The short scope contains anchored object/activity information only.
+ * Unverified candidate activities and missing technical details stay in the
+ * evidence disclosure. Scope acceptance is NOT evidence of legal readiness.
+ */
 function conciseScopeDraft(subject,reconstruction){
  const approved=(reconstruction?.confirmedParameters||[]).filter(x=>x&&x.original&&!x.evidenceExcluded&&x.role!=='ambiguous'&&!x.compoundDesignation);
  const known=[],seen=new Set();
@@ -44,22 +48,21 @@ function conciseScopeDraft(subject,reconstruction){
  }
  const relevance=root.KT80Relevance?.assess?.(reconstruction,tidy(subject))||null;
  const candidates=(relevance?.review||[]).filter(x=>x.positives>0&&x.sources?.some(s=>s.file&&s.excerpt));
- const activities=[];
- for(const item of candidates.slice(0,6)){
-  const source=item.sources.find(s=>s.file&&s.excerpt);
-  if(!source)continue;
-  activities.push('• '+item.name+' — кандидат за проверка по '+source.file+(source.page?' (стр. '+source.page+')':'')+'.');
- }
+ const reliableSubject=tidy(subject);
  const blocks=[];
- blocks.push('Дейности и технически обхват на инвестиционното предложение:');
- if(activities.length)blocks.push('От прочетените документи са установени следните непотвърдени кандидати за дейности:\n'+activities.join('\n'));
- else blocks.push('Не са установени достатъчно надеждни описания на конкретни предвидени дейности и строително-монтажни работи. Необходима е проверка на първичните документи.');
+ if(reliableSubject){
+  // Describe the submitted subject, not hypothetical construction works.
+  blocks.push('Предметно определен обхват на инвестиционното предложение: '+reliableSubject.replace(/[.!?]+$/u,'')+'.');
+ }else{
+  blocks.push('Работен обхват: конкретният предмет и характерът на предвидените дейности се уточняват по първичните документи.');
+ }
  if(known.length)blocks.push('Експертно потвърдени технически характеристики:\n'+known.map(s=>'• '+s).join('\n'));
- const gaps=(relevance?.crucial||[]).slice(0,4).map(x=>'• '+x.label);
- if(gaps.length)blocks.push('Неизяснени съществени сведения за проверка:\n'+gaps.join('\n'));
- blocks.push('Местоположението и кадастралните данни се определят по потвърдения предмет и пространствения анализ; те не заместват описанието на предвидените дейности.');
+ // Do NOT copy candidate activities or documentary gaps into the scope.
+ // Both remain visible under "Мотиви и доказателства" via relevance.
  return {text:blocks.join('\n\n'),pending:candidates.length,approved:known.length,relevance,
-  scopeSufficient:known.length>0||activities.length>0};
+  scopeSufficient:known.length>0||candidates.length>0,
+  activityEvidenceVerified:known.length>0,
+  unresolvedEvidence:!known.length||Boolean(relevance?.crucial?.length)};
 }
 function proposition(reconstruction){
  const reasons=[...(reconstruction?.unresolved||[])];
