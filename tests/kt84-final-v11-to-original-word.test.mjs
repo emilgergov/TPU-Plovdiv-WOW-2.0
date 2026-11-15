@@ -13,7 +13,8 @@ import {prepareExpertV11Review} from '../kt80/integration/kt83-p5-expert-v11-rev
 import {createCaseReviewStore} from '../kt80/integration/kt83-p3-case-review-provider.mjs';
 import {createMasterV11Bridge} from '../kt80/integration/kt83-p3-canonical-v11-master-bridge.mjs';
 import {verifiedReference} from '../kt80/integration/v11-trusted-source-registry.mjs';
-import {assess as v11Handoff} from '../kt80/integration/kt83-vt01-v11-handoff.js';
+import V11Handoff from '../kt80/integration/kt83-vt01-v11-handoff.js';
+const v11Handoff=V11Handoff.assess;
 import {draftWithCompetenceGate} from '../kt80/integration/kt83-v613-competence-gate.mjs';
 import {createReviewDocument} from '../kt80/integration/kt83-v614-review-document.mjs';
 import {createUniversalOutSession} from '../kt80/integration/kt83-v617-universal-out-session.mjs';
