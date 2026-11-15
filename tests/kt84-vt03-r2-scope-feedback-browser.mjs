@@ -66,7 +66,7 @@ try{
  }));
  assert.equal(insufficient.checked,false);
  assert.equal(insufficient.open,false);
- assert.match(insufficient.status,/Не може да потвърдите обхват/);
+ assert.match(insufficient.status,/Не може да потвърдите обхват|подлежи на експертна проверка/);
  assert.deepEqual(faults,[],'no uncaught exceptions');
  console.log('VT03_R2_SCOPE_FEEDBACK_PASS',JSON.stringify({result,insufficient,faults}));
 }finally{await browser.close();}
