@@ -175,7 +175,7 @@ try{
     sourceId:'KT83',sourceLocation:'Етап 2',description:'Потвърден предмет'},
     {factId:'spatial_intersection',value:'unknown',status:'missing',
     sourceId:'KT83',sourceLocation:'Етап 3',description:'ГИС не е потвърден'}],
-   archive:{name:'V11',sha256:'example',archivedTextIncluded:false,
+   archive:{name:'V11',sha256:'8d3851affd72fb44b4d663920196e00ec317c8e45d36fc16c6ad6b0ce965226c',archivedTextIncluded:false,
     verifiedReferences:[{id:'ZOOS_93',act:'ЗООС',article:'чл. 93',textAnchor:'текстов указател',
      citationVerified:true,applicabilityVerified:false}]},
    constraints:{expertApprovalRequired:true,neverIssueAct:true,noInventedFacts:true}};
@@ -204,6 +204,10 @@ try{
   assert.ok(stage4Data.draft.length>120);
   assert.equal(stage4Context.sourceHints[0].applicabilityVerified,false);
   assert.equal(stage4Context.archiveTextProvided,false);
+  assert.equal(stage4Context.archiveExcerptProvenanceConfirmed,true);
+  assert.equal(stage4Context.verifiedOfflineLegalExcerpts.length,8);
+  assert.equal(stage4Context.verifiedOfflineLegalExcerpts[1].ref,'чл. 2, ал. 2');
+  assert.equal(stage4Context.verifiedOfflineLegalExcerpts[1].applicable,null);
   assert.equal(stage4Context.caseDocuments.sourceTexts[0].source,'notification.pdf');
   assert.ok(stage4Context.caseDocuments.sourceTexts[0].text.includes('56784.13.102'));
   assert.equal(stage4Context.caseDocuments.sourceTexts[0].verified,false);
