@@ -3,7 +3,8 @@
  * Automatic hypotheses + concrete proposals; no user-authored JSON in main UI. */
 import {LOCKED_ARCHIVE, VERIFIED_ARTICLES, verifiedReference} from './v11-trusted-source-registry.mjs';
 import {assessStage4} from './stage4-independent-legal-engine.mjs';
-const BUILD='KT94-20261115-evidence-contract-01';
+import {collectStageEvidence,verifyStageEvidence} from './kt95-stage-evidence-handoff.mjs';
+const BUILD='KT95-20261115-stage-handoff-01';
 const $=id=>document.getElementById(id);
 const node=(tag,content)=>{const x=document.createElement(tag);if(content!==undefined)x.textContent=content;return x;};
 const DEFINITIONS=[
@@ -38,8 +39,8 @@ function reviewedCase(c){
  * by earlier stages. A confirmed fact is not proof of legal applicability.
  * Never infer the nature of an activity from the dossier title. */
 function caseEvidence(c){
- const facts=[],add=(factId,value,sourceId,sourceType,sourceLocation)=>{
-  if(value==='true'||value==='false')facts.push({factId,value,sourceId,sourceType,sourceLocation});
+ const facts=collectStageEvidence(window).legalInputs.map(x=>({...x})),add=(factId,value,sourceId,sourceType,sourceLocation)=>{
+  if((value==='true'||value==='false')&&!facts.some(f=>f.factId===factId))facts.push({factId,value,sourceId,sourceType,sourceLocation});
  };
  if(c.p.expertConfirmed===true&&c.p.text)
   add('subject_confirmed','true','KT83:subjectConfirmed','expert-confirmation','Етап 2 · потвърден предмет');
@@ -112,7 +113,7 @@ function start(){
  const oldSources=$('kt87V11Sources');
  function draw(){
   foldExpertEditor();
-  const c=context();if(lastKey===c.key)return;lastKey=c.key;
+  const c=context(),handoff=collectStageEvidence(window);if(lastKey===c.key+'|'+handoff.key)return;lastKey=c.key+'|'+handoff.key;
   const defs=DEFINITIONS.filter(d=>c.kind==='other'||d.kind==='all'||d.kind===c.kind||d.kind==='both'&&c.kind!=='other');
   let packet,assessment;
   try{packet=buildAssessment(c,defs);assessment=packet.result}catch(error){status.textContent='Нормативният двигател не е достъпен: '+error.message;return}
@@ -128,6 +129,11 @@ function start(){
   // Evidence trace is always visible, unlike the advanced expert editors.
   trace.replaceChildren(node('strong','ДОКАЗАТЕЛСТВА → ПРАВНИ ПРЕДПОСТАВКИ · '+BUILD));
   const established=caseEvidence(c);
+   const receipt=node('p','Доказателствено предаване · Етапи 1–3: '+handoff.observations.filter(f=>f.status==='established').length+' установени, '+handoff.observations.filter(f=>f.status==='partial').length+' непълни, '+handoff.observations.filter(f=>f.status==='missing').length+' липсващи. Пакетът '+(verifyStageEvidence(handoff,window)?'съответства':'НЕ съответства')+' на текущия ИД и ревизия.');
+   receipt.style.cssText='font-weight:700;margin:8px 0;color:#fff1cf';trace.append(receipt);
+   const handoffDetail=node('details');handoffDetail.append(node('summary','Всички предадени факти, произход и доказателствен статус'));
+   handoff.observations.forEach(f=>handoffDetail.append(node('p',f.description+' · '+({'established':'УСТАНОВЕН','partial':'НЕПЪЛЕН','missing':'ЛИПСВАЩ'}[f.status]||f.status)+' · '+f.sourceLocation+' · '+f.sourceId)));
+   trace.append(handoffDetail);
   const legal=actual?packet.review.legalFacts:[];
   const contract=node('p',actual?
    'Пакет за конкретната преписка: удостоверен и валиден за текущата ревизия.':
@@ -192,7 +198,7 @@ function start(){
   if(oldBridge){const technical=node('details');technical.append(node('summary','Експертен контрол с независимия механизъм V11'));technical.append(oldBridge);more.append(technical)}
   if(oldOptional)more.append(oldOptional);
   if(oldSources)more.append(oldSources);
-  snapshot=Object.freeze({caseKey:c.key,archive:LOCKED_ARCHIVE,legalFindings:assessment.legalFindings,
+  snapshot=Object.freeze({caseKey:c.key,handoffKey:handoff.key,archive:LOCKED_ARCHIVE,legalFindings:assessment.legalFindings,
    proposals:assessment.proposals,screenProposal:msg,expertApproved:actual,finalProcedure:false,
    readyForStage5Draft:actual&&assessment.readyForStage5Draft,source:'stage4-independent-legal-engine.mjs'});
  }
