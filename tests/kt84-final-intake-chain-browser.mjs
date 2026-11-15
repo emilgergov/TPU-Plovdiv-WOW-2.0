@@ -35,6 +35,6 @@ try{
  assert.match(result.intakeStatus,/Инвентаризирани файлове: 2/);
  assert.ok(result.field.length>5,'real reader must provide an editable candidate');
  assert.ok(result.caseId.length>20);
- assert.equal(faults.length,0,'no uncaught UI exceptions');
+ assert.equal(faults.length,0,'no uncaught UI exceptions: '+faults.join(' | '));
  console.log('KT84_FINAL_REAL_ZIP_BROWSER_CHAIN',JSON.stringify({result,faults}));
 }finally{await browser.close();}
