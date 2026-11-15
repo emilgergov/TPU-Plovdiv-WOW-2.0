@@ -20,7 +20,10 @@ function boot(){
  button.style.cssText='background:#d9b874;color:#173a28;padding:10px 14px;font-weight:800;border:0;border-radius:7px;cursor:pointer';
  const status=make('p','EG Авторът още не е изготвил проект.');status.id='kt96EGStatus';status.setAttribute('role','status');
  const output=make('div');output.id='kt96EGDraft';output.style.cssText='white-space:pre-wrap;line-height:1.6;border-left:4px solid #d4ba80;padding:12px;background:#244a37;color:#fff;display:none';
- ui.append(button,status,output);
+ const lead=make('div');lead.id='kt104EGLead';lead.style.cssText='display:none;margin:12px 0;padding:14px;border-left:6px solid #e1be72;border-radius:7px;background:#244b36;font-size:17px;font-weight:700;line-height:1.55;white-space:pre-wrap';
+ const expanded=make('details');expanded.id='kt104EGDetails';expanded.style.cssText='margin:12px 0;border:1px solid #9d9e72;border-radius:7px;padding:10px';
+ expanded.append(make('summary','Подробна фактическа и нормативна аргументация'),output);
+ ui.append(button,status,lead,expanded);
  const dialog=make('dialog');dialog.id='kt96EGPassword';dialog.style.cssText='background:#193b2d;color:#fff3db;border:1px solid #d9b874;border-radius:10px;padding:20px;max-width:460px';
  const form=make('form');form.method='dialog';
  const label=make('label','Парола за EG Автора — един път в работния цикъл');
@@ -141,7 +144,7 @@ function boot(){
  const clear=()=>{
   serial++;pendingSignature='';finishedSignature='';lastResult=null;password.value='';
   if(dialog.open)dialog.close();button.disabled=false;output.textContent='';output.style.display='none';
-  status.textContent='EG Авторът още не е изготвил проект.';
+  status.textContent='EG Авторът още не е изготвил проект.';lead.textContent='';lead.style.display='none';expanded.open=false;
  };
  async function generate(firstPassword=null){
   const identity=caseIdentity(),{w,h}=identity,p=w.subjectConfirmed||{};
@@ -209,7 +212,17 @@ function boot(){
      '; проверени извлечения V11: '+(Number(receipt.archiveVerifiedExcerptsReceived)||0)+
      '; пълни текстове на разпоредби: '+(Number(receipt.archiveArticleTextsReceived)||0)+'.'+
      (receipt.documentTextTruncated?' Част от документалния текст е съкратена по технически лимит.':'');
-   output.textContent=sourceInfo+String.fromCharCode(10,10)+data.draft;output.style.display='block';
+   const body=str(data.draft);
+   const heading=/ВОДЕЩО\\s+ПРЕДЛОЖЕНИЕ\\s*[:：-]?/iu.exec(body);
+   const afterLead=heading?body.slice(heading.index+heading[0].length):'';
+   const nextSection=afterLead.search(/Фактическа\\s+основа/iu);
+   const leadingDraft=nextSection>=0?afterLead.slice(0,nextSection).trim():afterLead.slice(0,1100).trim();
+   lead.textContent=leadingDraft?
+    'ВОДЕЩО ПРЕДЛОЖЕНИЕ — ПРОЕКТ ЗА ЕКСПЕРТНА ПРОВЕРКА'+String.fromCharCode(10)+leadingDraft:
+    'Не е отделено самостоятелно водещо предложение. Вижте пълния текст по-долу.';
+   lead.style.display='block';
+   expanded.open=!leadingDraft;
+   output.textContent=sourceInfo+String.fromCharCode(10,10)+body;output.style.display='block';
    status.textContent=data.archiveEvidenceVerified===true?
      'Получен е проект от EG Автора. Предстои независима правна и експертна проверка.':
      'Получен е проект от EG Автора. Пълният нормативен текст V11 не е удостоверен като използван; цитатите трябва да бъдат проверени.';
