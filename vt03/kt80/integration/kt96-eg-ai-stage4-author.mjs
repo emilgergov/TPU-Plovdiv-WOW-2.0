@@ -44,6 +44,11 @@ function boot(){
  const expanded=make('details');expanded.id='kt104EGDetails';expanded.style.cssText='display:none;margin:12px 0;border:1px solid #9d9e72;border-radius:7px;padding:10px';
  expanded.append(make('summary','Подробна фактическа и нормативна аргументация'),output);
  ui.append(button,status,lead,expanded);
+ // KT105: keep the older normative engine running for independent checks,
+ // but do not show its automatic proposals before or after the expert calls EG.
+ const legacyVisibility=make('style');
+ legacyVisibility.textContent='#kt91Stage4 > :not(#kt96EGAuthor){display:none !important}';
+ ui.prepend(legacyVisibility);
  const dialog=make('dialog');dialog.id='kt96EGPassword';dialog.style.cssText='background:#193b2d;color:#fff3db;border:1px solid #d9b874;border-radius:10px;padding:20px;max-width:460px';
  const form=make('form');form.method='dialog';
  const label=make('label','Парола за EG Автора — един път в работния цикъл');
