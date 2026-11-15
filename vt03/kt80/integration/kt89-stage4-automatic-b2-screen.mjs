@@ -95,7 +95,14 @@ function boot(graph){
   fold.style.cssText='margin-top:12px;border-top:1px solid #73917a;padding-top:8px';
   fold.append(el('summary','Разширена проверка на предпоставки и изключения · независим двигател V11'));
   fold.append(old);root.append(fold);}
- const first=rhs.querySelector('.kt87V11Sources')||rhs.querySelector('#kt87V11Sources')||rhs.querySelector('.kt86-norm');
+ // The four legacy hand-entry menus are optional alternatives, not the default route.
+ const legacy=Array.from(rhs.querySelectorAll(':scope > .kt86-norm'));
+ if(legacy.length){const fold=el('details');fold.id='kt89OptionalNormChoices';
+  fold.style.cssText='border:1px solid #668879;border-radius:7px;padding:9px;margin:8px 0';
+  fold.append(el('summary','Алтернативни правни връзки · експертна редакция'));
+  legacy[0].before(fold);legacy.forEach(x=>fold.append(x));
+ }
+ const first=rhs.querySelector('.kt87V11Sources')||rhs.querySelector('#kt87V11Sources')||rhs.querySelector('.kt86-norm')||rhs.querySelector('#kt89OptionalNormChoices');
  if(first)rhs.insertBefore(root,first);else rhs.append(root);
  if($('kt87V11Sources')){const oldSource=$('kt87V11Sources');const fold=el('details');fold.append(el('summary','Пълен проверен индекс V11 · архивни препратки'));oldSource.before(fold);fold.append(oldSource)}
  refresh.onclick=()=>draw(true);
