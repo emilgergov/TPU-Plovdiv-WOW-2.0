@@ -155,8 +155,14 @@ try{
   globalThis.fetch=async (_url,opts)=>{
     stage4Calls++;
     const sent=JSON.parse(opts.body);
-    stage4Context=JSON.parse(sent.input[1].content);
     assert.equal(sent.store,false);
+    if(sent.input[0].content.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ')){
+      const audit=JSON.parse(sent.input[1].content);
+      assert.equal(audit.fullArticleTextsAvailable,false);
+      assert(audit.draft.includes('Фактическа основа'));
+      return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({verdict:'pass',issues:[],revisedDraft:''})}]}]}),{status:200});
+    }
+    stage4Context=JSON.parse(sent.input[1].content);
     return new Response(JSON.stringify({output:[{content:[{type:'output_text',
       text:'Фактическа основа\\nПотвърден е предметът и обхватът на конкретното предложение.\\n\\nНормативни предпоставки и граници на проверката\\nАрхивните указатели не удостоверяват приложимостта на нормите.\\n\\nМотивирано предложение\\nПредлага се проверка на конкретните правни предпоставки по наличните доказателства.\\n\\nДанни за експертна проверка\\nПроверява се наличният нормативен текст и относимостта му към предмета.'}]}]}),{status:200});
   };
@@ -213,7 +219,10 @@ try{
   assert.equal(stage4Context.caseDocuments.sourceTexts[0].verified,false);
   assert.equal(stage4Context.gisAnalysis.spatial,'no intersection');
   assert.equal(stage4Context.uncertainFacts[0].status,'missing');
-  assert.equal(stage4Calls,1);
+  assert.equal(stage4Calls,2);
+  assert.equal(stage4Data.normativeAudit.reviewed,true);
+  assert.equal(stage4Data.normativeAudit.reviewVerdict,'pass');
+  assert.equal(stage4Data.normativeAudit.fullArticlesVerified,false);
 
   // KT104: do not allow a fabricated annex classification or wrong Natura 2000 title
   // to be silently presented as an accepted project.
