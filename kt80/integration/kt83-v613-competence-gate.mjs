@@ -5,7 +5,9 @@
  * Consequently the only lawful state here is "needs validation".
  */
 import {proposeStage5} from './stage5-independent-proposal.mjs';
-import V11Handoff from './kt83-vt01-v11-handoff.js';
+import * as V11HandoffModule from './kt83-vt01-v11-handoff.js';
+// The accepted V11 handoff is UMD: CommonJS exports in Node, window API in Chromium.
+const v11Handoff=V11HandoffModule.default?.assess || globalThis.KT83V11Handoff?.assess;
 const t=x=>typeof x==='string'?x.trim():'';
 export const COMPETENCE_GATE_VERSION='V61.3';
 export function draftWithCompetenceGate({stage4,authorityClaim=null,competenceEvidence=[],fee=null,
@@ -19,8 +21,8 @@ export function draftWithCompetenceGate({stage4,authorityClaim=null,competenceEv
  const claimPresent=!!claim||competenceEvidence.length>0;
  // Recompute against the CURRENT case and the trusted V11 provider. A supplied
  // boolean, a stale review, or an archive citation alone cannot certify competence.
- const verified=caseContext&&v11Verifier?
-  V11Handoff.assess(caseContext,v11Verifier):null;
+ const verified=caseContext&&v11Verifier&&typeof v11Handoff==='function'?
+  v11Handoff(caseContext,v11Verifier):null;
  const caseVerified=verified?.ok===true&&verified.competenceVerified===true&&
   verified.provisions?.length>0&&
   stage4.confirmedSubject===caseContext.subject&&stage4.readyForStage5Draft===true;
