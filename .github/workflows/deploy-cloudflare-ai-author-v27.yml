@@ -38,7 +38,7 @@ jobs:
             -X PUT "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/tpu-plovdiv-ai-author-v27" \
             -H "Authorization: Bearer $CF_TOKEN" \
             -F "metadata=@$metadata;type=application/json" \
-            -F "worker.js=@/tmp/tpu-eg-worker-kt105.mjs;type=application/javascript+module")"
+            -F "worker.js=@/tmp/tpu-eg-worker-kt105.mjs;filename=worker.js;type=application/javascript+module")"
           echo "Cloudflare upload HTTP status: $status"
           node - "$response" <<'NODE'
           const fs = require('fs');
