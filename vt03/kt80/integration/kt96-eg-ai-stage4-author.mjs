@@ -113,6 +113,8 @@ function boot(){
  ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'].forEach(e=>document.addEventListener(e,clear));
  window.KT96EGStage4=Object.freeze({refresh:()=>generate(),snapshot:()=>finishedSignature===caseIdentity().signature?lastResult:null,
   getStatus:()=>status.textContent});
+ // The Stage 4 panel can already be active when this module finishes loading.
+ if(window.KT80WorkflowState?.step===4&&window.KT80EGSession?.hasAccess())generate();
  return true;
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,1500),{once:true});
