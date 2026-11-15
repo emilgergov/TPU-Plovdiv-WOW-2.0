@@ -129,6 +129,11 @@ function init(){
   event.preventDefault();event.stopImmediatePropagation();
   if(!$('kt80SubjectConfirmation')?.checked){status.textContent='Първо потвърдете предмета.';return}
   captured=scope.value.trim();
+  if(/Не са установени достатъчно надеждни описания на конкретни предвидени дейности/iu.test(captured)){
+   status.textContent='Не може да потвърдите обхват, съдържащ изрична липса на надеждно установени дейности. Проверете оригиналите и редактирайте конкретните дейности.';
+   return;
+  }
+
   if(insufficientScope(captured)){
    status.textContent='Обхватът съдържа само местоположение. Добавете конкретната дейност, обекта и доказаните технически характеристики, преди потвърждение.';
    return;
