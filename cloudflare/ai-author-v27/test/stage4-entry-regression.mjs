@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const client=readFileSync('vt03/kt80/integration/kt96-eg-ai-stage4-author.mjs','utf8');
+const html=readFileSync('vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html','utf8');
+assert(client.includes('function showEstablishedEvidence()'),'the Stage 1–3 overview must exist');
+for(const part of ['Етап 1 · Преписка','Етап 2 · Потвърден предмет','Етап 2 · Потвърден обхват','Етап 3 · Имоти и пространствени данни'])assert(client.includes(part));
+assert(client.includes("const button=make('button','Изготви проект с EG Автора')"),'single launch control');
+assert(client.includes('showEstablishedEvidence();'),'initial evidence snapshot');
+assert(client.includes('status.style.display=\'none\''),'status hidden until request');
+assert(client.includes('expanded.style.cssText=\'display:none'),'long text hidden until result');
+assert(client.includes('#kt91Stage4 > :not(#kt96EGAuthor){display:none !important}'),'legacy visual proposal hidden');
+assert(!/stage-open[^\n]*generate\(/.test(client),'never call AI on stage entry');
+assert(!/if\(window\.KT80WorkflowState\?\.step===4[^\n]*generate\(/.test(client),'never generate on boot');
+assert(client.includes("button.addEventListener('click',()=>generate())"),'explicit human launch required');
+assert(html.includes('kt96-eg-ai-stage4-author.mjs?v=kt105-human-trigger-20261116'),'fresh module release');
+console.log('PASS: KT105 only established intake evidence and one manual author button at Stage 4 entry.');
