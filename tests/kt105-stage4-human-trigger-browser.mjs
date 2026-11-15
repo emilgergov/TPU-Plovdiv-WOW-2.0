@@ -18,7 +18,9 @@ try{
    statusVisible:getComputedStyle(document.querySelector('#kt96EGStatus')).display!=='none',
    leadVisible:getComputedStyle(document.querySelector('#kt104EGLead')).display!=='none',
    detailsVisible:getComputedStyle(document.querySelector('#kt104EGDetails')).display!=='none',
-   legacyHidden:getComputedStyle(document.querySelector('#kt91Proposal')).display==='none'
+   legacyHidden:document.querySelector('#kt91Proposal')?.getClientRects().length===0,
+   authorInStage4:document.querySelector('#kt96EGAuthor')?.parentElement===document.querySelector('.kt80-stage-panel[data-panel="4"]'),
+   visibleDirectChildren:[...document.querySelectorAll('.kt80-stage-panel[data-panel="4"] > *')].filter(x=>x.getClientRects().length>0).map(x=>x.id||x.tagName)
   };
  });
  await page.waitForTimeout(650);
@@ -30,6 +32,8 @@ try{
  assert.equal(initial.leadVisible,false);
  assert.equal(initial.detailsVisible,false);
  assert.equal(initial.legacyHidden,true,'legacy automatic proposal must stay hidden before expert action');
+ assert.equal(initial.authorInStage4,true,'author is the only child presented by the Stage 4 panel');
+ assert.deepEqual(initial.visibleDirectChildren,['kt96EGAuthor'],'Stage 4 may not show additional legacy panels or controls');
  assert.deepEqual(errors,[]);
  console.log('PASS: KT105 real Chromium Stage 4 initial overview, single author button, no automatic request, no visible legacy proposals');
 }finally{await browser.close()}
