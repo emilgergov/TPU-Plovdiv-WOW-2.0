@@ -15,6 +15,8 @@ try {
  });
  assert.equal(home.fold,true);assert.equal(home.collapsed,true);
  assert.equal(home.tiles,5);assert.equal(home.golds,1,'exactly one next task should be gold');
+ await page.locator('#kt80DashboardFive .kt80-dashboard-tile').nth(1).click();
+ await page.waitForFunction(()=>!document.querySelector('.kt80-stage-panel[data-panel="2"]').hidden);
  const seed=await page.evaluate(()=>{
   const subject=document.getElementById('kt80SubjectText');
   const approval=document.getElementById('kt80SubjectConfirmation');
