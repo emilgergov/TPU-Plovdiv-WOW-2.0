@@ -374,26 +374,62 @@ async function handleStage4Proposal(request,env){
   });
   if(!upstream.ok)return reply({error:"AI provider request failed",providerStatus:upstream.status},502);
   const data=await upstream.json();
-  const draft=(data.output||[]).flatMap(x=>x.content||[])
+  let draft=(data.output||[]).flatMap(x=>x.content||[])
    .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
   if(!draft||draft.length<120||draft.length>12000)
    return reply({error:"Stage 4 draft is empty or too verbose",qualityIssues:["EMPTY_OR_EXCESSIVE_DRAFT"]},422);
   const sectionNames=["Фактическа основа","Нормативни предпоставки и граници на проверката",
    "Мотивирано предложение","Данни за експертна проверка"];
-  const normalized=draft.toLocaleLowerCase("bg");
+  // KT106: check-first, one bounded author repair, then recheck. Never show a known-invalid proposal.
+  function qualityIssues(value){
+  const normalized=value.toLocaleLowerCase("bg");
   const heads=sectionNames.map(s=>normalized.indexOf(s.toLocaleLowerCase("bg")));
   const issues=[];
   if(heads.some(x=>x<0)||heads.some((x,i)=>i>0&&x<=heads[i-1]))issues.push("MISSING_OR_UNORDERED_SECTIONS");
-  if(/(?:наредба\s+за\s+)?оценка\s+за?\s*съвместимост(?:та)?\s+(?:с|на)\s+околната\s+среда|пълна\s+експертна\s+оценка/iu.test(draft))
+  if(/(?:наредба\s+за\s+)?оценка\s+за?\s*съвместимост(?:та)?\s+(?:с|на)\s+околната\s+среда|пълна\s+експертна\s+оценка/iu.test(value))
    issues.push("INCORRECT_COMPATIBILITY_TERMINOLOGY");
-  if(/приложение\s*№\s*2\s*(?:към\s*(?:чл\.?\s*6\s*)?наредбата\s+за\s+ОВОС)[^.!?\n]{0,135}(?:списък|категори[ия]|видове\s+дейности)/iu.test(draft)||
-     /наредбата\s+за\s+ОВОС[^.!?\n]{0,60}приложение\s*№\s*2[^.!?\n]{0,90}(?:списък|категори[ия]|видове\s+дейности)/iu.test(draft))
+  if(/приложение\s*№\s*2\s*(?:към\s*(?:чл\.?\s*6\s*)?наредбата\s+за\s+ОВОС)[^.!?\n]{0,135}(?:списък|категори[ия]|видове\s+дейности)/iu.test(value)||
+     /наредбата\s+за\s+ОВОС[^.!?\n]{0,60}приложение\s*№\s*2[^.!?\n]{0,90}(?:списък|категори[ия]|видове\s+дейности)/iu.test(value))
    issues.push("CONFUSED_ZOOS_AND_EIA_ANNEX_2");
-  if(/(?:следва|необходимо|изисква\s+се|необходими)\s+(?:(?:да\s+се\s+)?(?:представи|изготви|предостави|извърши)\s+)?(?:пълен\s+)?(?:технически\s+проект|екологични\s+изследвания|измервания\s+на\s+емисиите)/iu.test(draft))
+  if(/(?:следва|необходимо|изисква\s+се|необходими)\s+(?:(?:да\s+се\s+)?(?:представи|изготви|предостави|извърши)\s+)?(?:пълен\s+)?(?:технически\s+проект|екологични\s+изследвания|измервания\s+на\s+емисиите)/iu.test(value))
    issues.push("UNJUSTIFIED_BROAD_DOCUMENT_REQUEST");
-  if(/преценяван(?:е|ето)\s+на\s+необходимостта\s+от\s+ОС[^.\n]{0,90}чл\.?\s*2\s*,?\s*ал\.?\s*2/iu.test(draft))
+  if(/преценяван(?:е|ето)\s+на\s+необходимостта\s+от\s+ОС[^.\n]{0,90}чл\.?\s*2\s*,?\s*ал\.?\s*2/iu.test(value))
    issues.push("MISCHARACTERIZED_OS_ART_2_2_AS_SCREENING");
-  if(issues.length)return reply({error:"Stage 4 draft failed administrative quality gate",qualityIssues:issues},422);
+  return issues;
+
+  }
+  let issues=qualityIssues(draft);
+  let authorRepairs=0;
+  if(issues.length){
+   const repairInstructions=[
+    "Ти си същият EG Автор. Преработи ПЪЛНИЯ проект според констатираните точни дефекти, като съхраниш верните факти и нормативните източници.",
+    "Задължително: ВОДЕЩО ПРЕДЛОЖЕНИЕ, Фактическа основа, Нормативни предпоставки и граници на проверката, Мотивирано предложение, Данни за експертна проверка.",
+    "Забранено е да се заменя конкретно правно предложение с общо искане за допълнителна информация или измислена процедура.",
+    "Наредба за ОС, чл. 2, ал. 2 не е самостоятелна универсална процедура по преценка за ОС. Приложение № 2 към Наредбата за ОВОС не е списък с категории.",
+    "Текстът се показва само при преминаване на автоматичния и независимия нормативен контрол. Пиши само преработения проект на български."
+   ].join(" ");
+   const revision=await fetch("https://api.openai.com/v1/responses",{
+    method:"POST",signal:controller.signal,
+    headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:4600,
+     input:[{role:"system",content:repairInstructions},
+      {role:"user",content:JSON.stringify({draft,qualityIssues:issues,
+       establishedFacts:confirmed,sourceTexts:sourceTexts.slice(0,10).map(x=>({source:x.source,text:x.text.slice(0,1800)})),
+       legalTextsExact:verifiedLegalCorpus.legalProvisions,subject:payload.subject,scope:payload.scope})}]})
+   });
+   authorRepairs=1;
+   if(!revision.ok)return reply({error:"Нормативната преработка не е достъпна.",qualityIssues:issues,qualityStage:"author_repair"},422);
+   const revisionData=await revision.json();
+   const candidate=(revisionData.output||[]).flatMap(x=>x.content||[])
+    .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
+   if(candidate.length>=120&&candidate.length<=12000){
+    const remaining=qualityIssues(candidate);
+    if(remaining.length===0){draft=candidate;issues=[]}
+    else issues=remaining;
+   }
+  }
+  if(issues.length)return reply({error:"Проектът съдържа нормативни или структурни несъответствия, които не са отстранени при автоматичната преработка.",
+    qualityIssues:issues,qualityStage:"author_repair",authorRepairs},422);
   // KT105-C: independent second model run with a distinct reviewer role.
   // It does not confer statutory validity; full normative source text remains unavailable.
   const reviewSystem=[
@@ -441,7 +477,7 @@ async function handleStage4Proposal(request,env){
   return reply({caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
    requestId:payload.requestId,projectOnly:true,expertReviewRequired:true,
    archiveEvidenceVerified:true,draft:finalDraft,
-   normativeAudit:{reviewed:true,reviewVerdict:verdict,fullArticlesVerified:true,allArchiveSourcesExamined:false,verifiedLegalProvisionCount:verifiedLegalCorpus.legalProvisions.length,findings:Array.isArray(independentReview.issues)?independentReview.issues.slice(0,8):[]},
+   normativeAudit:{reviewed:true,reviewVerdict:verdict,authorRepairs,fullArticlesVerified:true,allArchiveSourcesExamined:false,verifiedLegalProvisionCount:verifiedLegalCorpus.legalProvisions.length,findings:Array.isArray(independentReview.issues)?independentReview.issues.slice(0,8):[]},
    evidenceReceipt:{documentTextsReceived:sourceTexts.length,
     documentTextsAvailable:context.caseDocuments.sourceTextCount,
     documentTextTruncated:context.caseDocuments.sourceTextTruncated,
