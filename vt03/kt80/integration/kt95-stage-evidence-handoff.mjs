@@ -49,7 +49,7 @@ export function collectStageEvidence(root=window){
   factId:f.factId,value:f.value,sourceId:f.sourceId,sourceType:f.sourceType,sourceLocation:f.sourceLocation
  }));
  return freeze({caseId,generation,evidenceRevision:revision,key,
-  observations:freeze(observations),legalInputs:freeze(legalInputs),
+  observations:freeze(observations),legalInputs:freeze(legalInputs),parcelIds:freeze(ids),
   completeForLegalReview:false,verifiedLegalPremises:0,
   missingLegalLink:'Изискват се конкретни правни предпоставки с първичен източник, точно място и експертна проверка.'});
 }
