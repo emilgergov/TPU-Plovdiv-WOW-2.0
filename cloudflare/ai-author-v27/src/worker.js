@@ -466,6 +466,23 @@ export default {
    return new Response(response.body,{status:response.status,headers:h});
   }
 
+  if(request.method==="GET" && url.pathname==="/legal-archive-health"){
+   try{
+    const legal=await getLegalContext({
+      archiveSHA256:"8d3851affd72fb44b4d663920196e00ec317c8e45d36fc16c6ad6b0ce965226c",
+      subject:"Контролна проверка на достъпа до законодателството"
+    });
+    const required=["чл. 2","чл. 6а","чл. 93","чл. 31",
+      "Приложение № 1 към ЗООС","Приложение № 2 към ЗООС",
+      "Приложение № 2 към чл. 6 от Наредбата за ОВОС"];
+    const present=required.filter(ref=>legal.legalProvisions.some(x=>x.reference===ref));
+    if(present.length!==required.length)return reply({status:"incomplete",verifiedProvisions:present.length,required:required.length},503);
+    return reply({service:"TPU Plovdiv V11 legal corpus",status:"ready",
+      archiveSHA256:legal.archiveSHA256,sourceDocuments:legal.indexedDocuments,
+      exactProvisionsReady:legal.legalProvisions.length,
+      requiredProvisionsVerified:present.length});
+   }catch{return reply({service:"TPU Plovdiv V11 legal corpus",status:"unavailable"},503)}
+  }
   if(request.method==="GET" && (url.pathname==="/" || url.pathname==="/health")) {
    return reply({service:"TPU Plovdiv AI Author V27",status:"online",apiKeyConfigured:Boolean(env.OPENAI_API_KEY),aiGenerationEnabled:Boolean(env.OPENAI_API_KEY && (env.AI_AUTHOR_PASSWORD_V27 || env.AI_AUTHOR_ACCESS_TOKEN))});
   }
