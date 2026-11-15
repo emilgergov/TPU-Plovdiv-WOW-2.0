@@ -8,9 +8,9 @@ assert(client.includes("const button=make('button','Изготви проект 
 assert(client.includes('showEstablishedEvidence();'),'initial evidence snapshot');
 assert(client.includes('status.style.display=\'none\''),'status hidden until request');
 assert(client.includes('expanded.style.cssText=\'display:none'),'long text hidden until result');
-assert(client.includes('#kt91Stage4 > :not(#kt96EGAuthor){display:none !important}'),'legacy visual proposal hidden');
+assert(client.includes('.kt80-stage-panel[data-panel=\"4\"] > :not(#kt96EGAuthor){display:none !important}'),'legacy visual proposal hidden');
 assert(!/stage-open[^\n]*generate\(/.test(client),'never call AI on stage entry');
 assert(!/if\(window\.KT80WorkflowState\?\.step===4[^\n]*generate\(/.test(client),'never generate on boot');
 assert(client.includes("button.addEventListener('click',()=>generate())"),'explicit human launch required');
-assert(html.includes('kt96-eg-ai-stage4-author.mjs?v=kt105-normative-full-20261116-v2'),'fresh module release');
+assert(html.includes('kt96-eg-ai-stage4-author.mjs?v=kt106-stage4-clean-gate-20261116'),'fresh module release');
 console.log('PASS: KT105 only established intake evidence and one manual author button at Stage 4 entry.');
