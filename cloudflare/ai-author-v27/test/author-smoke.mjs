@@ -294,9 +294,9 @@ try{
     }
     return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:invalidDraft}]}]}),{status:200});
   };
-  const repaired=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
-  assert.equal(repaired.status,200);
-  const repairedData=await repaired.json();
+  const kt106Repaired=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+  assert.equal(kt106Repaired.status,200);
+  const repairedData=await kt106Repaired.json();
   assert.equal(repairedData.draft,corrected);
   assert.equal(repairedData.normativeAudit.authorRepairs,1);
   assert.equal(kt106Calls,3);
