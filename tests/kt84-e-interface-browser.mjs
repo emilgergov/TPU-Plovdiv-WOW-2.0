@@ -27,6 +27,28 @@ try{
  assert.ok(legal.reason.length>10);
  assert.match(legal.next,/Предложение:/);
  assert.equal(legal.aria,'status');
+ const intake=await page.evaluate(()=>{
+  const audit=document.getElementById('kt84IntakeEvidenceResult');
+  assertPresent(audit,'missing intake summary');
+  window.KT80DossierAudit={records:[
+   {state:'TEXT_EXTRACTED'},{state:'REVIEW_REQUIRED'},
+   {state:'NOT_READ'},{state:'UNSUPPORTED'},{state:'NOT_READ'}
+  ]};
+  window.KT84EVisual.refresh();
+  return {title:document.getElementById('kt84IntakeResultTitle').textContent,
+   counts:document.getElementById('kt84IntakeResultCounts').textContent,
+   next:document.getElementById('kt84IntakeResultNext').textContent,
+   incomplete:audit.dataset.incomplete,
+   position:[...audit.parentElement.children].indexOf(audit)};
+  function assertPresent(node,message){if(!node)throw Error(message)}
+ });
+ assert.equal(intake.position,0);
+ assert.equal(intake.incomplete,'true');
+ assert.match(intake.counts,/Инвентаризирани: 5/);
+ assert.match(intake.counts,/Извлечен текст: 1/);
+ assert.match(intake.counts,/За проверка: 1/);
+ assert.match(intake.counts,/Без надеждно извлечен текст: 3/);
+ assert.match(intake.next,/оригиналите/);
  const before=await page.evaluate(()=>window.KT80WorkflowState.step);
  const preview=await page.evaluate(()=>{
   const result=window.KT83SafeStageFive.open();
@@ -48,5 +70,5 @@ try{
  assert.equal(preview.fullStageClone,false);
  assert.equal(preview.stage,before);
  assert.equal(errors.length,0,'no uncaught JavaScript exception');
- console.log('KT84_E_BROWSER_VISUAL_QA',JSON.stringify({legal,preview,errors}));
+ console.log('KT84_E_BROWSER_VISUAL_QA',JSON.stringify({legal,intake,preview,errors}));
 }finally{await browser.close();}
