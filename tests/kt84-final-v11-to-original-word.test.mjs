@@ -159,6 +159,15 @@ test('FINAL: a free-form authority claim alone cannot certify competence',()=>{
  assert.equal(draft.limitedV11ReviewVerified,false);
  assert.equal(draft.readyForFormalDraft,false);
 });
+test('FINAL: stale V11 review cannot certify competence in Stage5',()=>{
+ const chain=reviewChain();
+ chain.current.evidenceRevision++;
+ const draft=draftWithCompetenceGate({stage4:chain.stage4,
+  authorityClaim:authority.name,caseContext:chain.current,v11Verifier:chain.bridge});
+ assert.equal(draft.limitedV11ReviewVerified,false);
+ assert.equal(draft.authorityVerification,'NOT_ESTABLISHED_BY_CASE_AND_V11');
+ assert.equal(draft.readyForFormalDraft,false);
+});
 test('FINAL: updated evidence revision invalidates V11 and denies Word creation',()=>{
  const chain=reviewChain();
  chain.current.evidenceRevision++;
