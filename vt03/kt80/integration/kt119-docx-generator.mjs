@@ -32,9 +32,11 @@ function install(){
    if(isSubject&&line.startsWith('Относно:')){
      addText(p,'Относно:',true,true);
      const rest=line.slice('Относно:'.length);
-     // Universal: bold only the investment title immediately following the (ИП) marker.
-     // Never bold a quoted locality or import the reference dossier's specific title.
-     const titleMatch=rest.match(/Уведомление\s+за\s+инвестиционно\s+предложение\s*\(ИП\)\s*(„[^“\n]+“)/iu);
+     // Universal formatting, independent of whether the dossier is a plan,
+     // programme, project or investment proposal. Only the *title* that is
+     // explicitly quoted as the document subject is bold; location quotes
+     // (e.g. the locality) are left italic.
+     const titleMatch=rest.match(/(?:^|[\s:])((?:„[^“\n]{2,180}“))(?=\s|[,.;]|$)/u);
      const approvedTitle=titleMatch?.[1]||'';
      const titleAt=approvedTitle?rest.indexOf(approvedTitle):-1;
      if(titleAt>=0){
