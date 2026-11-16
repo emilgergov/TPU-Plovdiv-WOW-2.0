@@ -202,3 +202,15 @@ body[data-kt80-view="home"] .kt80-dashboard-tile[data-kt80-kind="step"][data-kt1
 /* Pending does not mean inaccessible. Keep text legible and buttons keyboard reachable. */
 body[data-kt80-view="home"] .kt80-dashboard-tile[data-kt80-kind="step"][data-kt122-state="pending"]{opacity:1!important;color:#e8e9d9!important;border-color:#728d7e!important}
 body[data-kt80-view="home"] .kt80-dashboard-tile[data-kt80-kind="step"][data-kt122-state="pending"] :is(.kt80-dashboard-tile-text,.kt80-dashboard-tile-number){color:inherit!important}
+
+/* KT123-B2: ensure high contrast of all stage labels, including internally disabled-looking tiles. */
+body[data-kt80-view="home"] #kt80DashboardFive .kt80-dashboard-tile[data-kt122-state="pending"],
+body[data-kt80-view="home"] #kt80DashboardFive .kt80-dashboard-tile[data-kt122-state="pending"]:disabled{
+ opacity:1!important;filter:none!important;background:#214634!important;color:#f1ecd8!important;
+}
+body[data-kt80-view="home"] #kt80DashboardFive .kt80-dashboard-tile[data-kt122-state="pending"] :is(.kt80-dashboard-tile-text,.kt80-dashboard-tile-number,.kt80-dashboard-tile-arrow),
+body[data-kt80-view="home"] #kt80DashboardFive .kt80-dashboard-tile[data-kt122-state="pending"]:disabled :is(.kt80-dashboard-tile-text,.kt80-dashboard-tile-number,.kt80-dashboard-tile-arrow){
+ opacity:1!important;filter:none!important;color:#f1ecd8!important;-webkit-text-fill-color:#f1ecd8!important;
+}
+body[data-kt80-view="home"] #kt80DashboardFive .kt80-dashboard-tile[data-kt122-state="pending"] .kt80-dashboard-tile-number{color:#f4d18d!important;-webkit-text-fill-color:#f4d18d!important}
+#kt80DashboardRoutes .kt123-panel-mark{align-self:flex-start;margin:0 0 3px;white-space:normal;overflow-wrap:anywhere}
