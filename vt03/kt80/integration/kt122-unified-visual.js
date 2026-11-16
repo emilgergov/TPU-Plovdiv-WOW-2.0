@@ -59,8 +59,8 @@ function three(){
 function compactBack(){
  document.querySelectorAll('.kt80-stage-panel button').forEach(b=>{
   if(b.id==='kt80DashboardBack'||b.classList.contains('kt122-back'))return;
-  const txt=(b.textContent||'').replace(/\\s+/g,' ').trim();
-  if(/^(?:←\\s*)?Назад$/iu.test(txt))b.classList.add('kt122-back');
+  const txt=(b.textContent||'').replace(/\s+/g,' ').trim();
+  if(/^(?:←\s*)?Назад$/iu.test(txt))b.classList.add('kt122-back');
  });
 }
 function four(){
