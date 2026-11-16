@@ -136,7 +136,7 @@ function mount(){
  one();two();three();four();gate();compactBack();dashboard();
  document.addEventListener('kt80:stage-open',()=>setTimeout(()=>{one();two();three();compactBack();dashboard()},220));
  document.addEventListener('kt115:stage4-draft',()=>{bindProgress();kt123Progress.stage4Draft=true;dashboard()});
- document.addEventListener('kt116:stage4-confirmed',()=>{bindProgress();kt123Progress.stage4Confirmed=true;const h=w.KT116ExpertHandoff?.snapshot?.();kt123Progress.selectedPanel=Number(h?.text?.match(/ИЗБРАН\\s+ПАНЕЛ\\s*:\\s*0?(\\d{1,2})\\b/iu)?.[1]||0);dashboard()});
+ document.addEventListener('kt116:stage4-confirmed',()=>{bindProgress();kt123Progress.stage4Confirmed=true;const h=w.KT116ExpertHandoff?.snapshot?.();kt123Progress.selectedPanel=Number(h?.text?.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0);dashboard()});
  document.addEventListener('kt123:stage5-draft',()=>{bindProgress();kt123Progress.stage5Draft=true;dashboard()});
  document.addEventListener('kt123:stage5-confirmed',()=>{bindProgress();kt123Progress.stage5Confirmed=true;dashboard()});
  ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'].forEach(e=>document.addEventListener(e,()=>{resetProgress();setTimeout(()=>{two();dashboard()},160)}));
