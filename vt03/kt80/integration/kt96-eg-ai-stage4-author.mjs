@@ -228,6 +228,7 @@ function boot(){
    constraints:{noInventedFacts:true,noInventedCitations:true,expertApprovalRequired:true,
     legalAppplicabilityMustBeVerified:true,legalApplicabilityMustBeVerified:true,neverIssueAct:true}
   };
+  const activityTicket=window.KT80Busy?.start?.('EG Автор · Изготвя нормативен проект за Етап 4…');
   try{
    const prepared=fitStage4Request(request);
    if(!prepared.payload){
@@ -370,6 +371,7 @@ function boot(){
    if(ticket===serial)status.textContent='Няма потвърден отговор от EG Автора: '+(String(err?.message||err)==='Failed to fetch'?
     'мрежова грешка или липсващ достъпен сървърен маршрут.':'връзката с услугата не е установена.')+' Не е заместен с алгоритмичен текст.';
   }finally{
+   if(activityTicket!==undefined)window.KT80Busy?.finish?.(activityTicket);
    if(ticket===serial){button.disabled=false;pendingSignature='';}
   }
  }
