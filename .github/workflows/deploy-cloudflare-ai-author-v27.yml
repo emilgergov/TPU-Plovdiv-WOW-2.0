@@ -94,7 +94,7 @@ jobs:
           set -euo pipefail
           curl --fail --silent --show-error --retry 5 --retry-delay 3 --max-time 15 \
             "https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/health" \
-            | node -e 'let s="";process.stdin.on("data",x=>s+=x);process.stdin.on("end",()=>{let d=JSON.parse(s);console.log("Service:",d.service,"Status:",d.status,"AI enabled:",d.aiGenerationEnabled);if(d.status!=="online"||d.service!=="TPU Plovdiv AI Author V27"||d.stage4Contract!=="KT115_EXPERT_PREVIEW_V1"){console.error("::error::Live Stage 4 Worker is not KT115 expert-preview contract");process.exit(1)}})'
+            | node -e 'let s="";process.stdin.on("data",x=>s+=x);process.stdin.on("end",()=>{let d=JSON.parse(s);console.log("Service:",d.service,"Status:",d.status,"AI enabled:",d.aiGenerationEnabled);if(d.status!=="online"||d.service!=="TPU Plovdiv AI Author V27"||d.stage4Contract!=="KT115_EXPERT_PREVIEW_V1"||d.stage5Contract!=="KT117_DOCUMENT_DRAFT_V1"){console.error("::error::Live Worker does not confirm KT115 and KT117 contracts");process.exit(1)}})'
       - name: Verify live full-text V11 legal corpus without AI usage
         shell: bash
         run: |
