@@ -651,7 +651,7 @@ async function handleStage5Document(request,env){
  // Delimit a title only when a clear spatial qualifier follows it.
  const quoteCaseTitle=(subject)=>{
    const raw=String(subject??"").trim().replace(/[.\s]+$/u,"");
-   const re=/\s+(?:в(?:ъв)?\s+(?:позем[еe]н(?:ия)?\s+имот|ПИ\b|УПИ\b|имот\s+с\s+идентификатор|гр\.\s|град\s|с\.\s|землището\s)|,\s*(?:местност|находящ|разположен))/iu;
+   const re=/\s+(?:в(?:ъв)?\s+(?:поземлен(?:ия)?\s+имот|ПИ(?=\s|[.,]|$)|УПИ(?=\s|[.,]|$)|имот\s+с\s+идентификатор|гр\.\s|град\s|с\.\s|землището\s|община\s|област\s)|,\s*(?:местност|находящ|разположен))/iu;
    const m=re.exec(raw);
    if(!m)return raw;
    const title=raw.slice(0,m.index).trim();
