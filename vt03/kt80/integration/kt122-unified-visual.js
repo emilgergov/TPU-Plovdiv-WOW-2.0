@@ -27,7 +27,14 @@ function one(){
 }
 function two(){
  const p=stage(2),fields=p?.querySelector('.kt80-v56-fields'),check=$('kt80SubjectConfirmation'),scope=p?.querySelector('.kt80-v56-scope-container');
- if(!p||!fields||!check||!scope||p.querySelector('.kt122-stage2-tabs'))return;
+ if(!p||!fields||!check||!scope)return;
+ const existing=p.querySelector('.kt122-stage2-tabs');
+ if(existing){
+  const scopeTab=existing.querySelectorAll('button')[1];
+  if(scopeTab)scopeTab.disabled=!check.checked;
+  if(!check.checked){p.classList.remove('kt122-show-scope');p.classList.add('kt122-show-subject');existing.querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-selected',String(i===0)));}
+  return;
+ }
  const tabs=make('div','kt122-stage2-tabs'),a=make('button',null,'Предмет'),b=make('button',null,'Обхват');
  a.type='button';b.type='button';tabs.append(a,b);fields.before(tabs);
  const select=which=>{
@@ -78,6 +85,7 @@ function mount(){
  one();two();three();four();gate();compactBack();dashboard();
  document.addEventListener('kt80:stage-open',()=>setTimeout(()=>{one();two();three();compactBack();dashboard()},220));
  document.addEventListener('kt116:stage4-confirmed',dashboard);
+ ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'].forEach(e=>document.addEventListener(e,()=>setTimeout(()=>{two();dashboard()},160)));
  const step2=$('kt80ScopeConfirmation');step2?.addEventListener('change',dashboard);
  const item=$('kt80SubjectConfirmation');item?.addEventListener('change',dashboard);
 }
