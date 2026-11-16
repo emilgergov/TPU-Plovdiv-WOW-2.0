@@ -2,14 +2,52 @@
 (function(w){'use strict';
 const $=id=>document.getElementById(id),stage=n=>document.querySelector('.kt80-stage-panel[data-panel="'+n+'"]');
 const make=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e};
+const kt123Progress={caseCycleId:null,stage4Draft:false,stage4Confirmed:false,stage5Draft:false,stage5Confirmed:false,selectedPanel:null};
+function resetProgress(){Object.assign(kt123Progress,{caseCycleId:null,stage4Draft:false,stage4Confirmed:false,stage5Draft:false,stage5Confirmed:false,selectedPanel:null});}
+function bindProgress(){
+ const id=w.KT80WorkflowState?.caseCycleId||null;
+ if(kt123Progress.caseCycleId!==id){resetProgress();kt123Progress.caseCycleId=id;}
+}
 function dashboard(){
- const tiles=[...document.querySelectorAll('.kt80-dashboard-tile[data-kt80-kind="step"]')];if(!tiles.length)return;
- const s=w.KT80WorkflowState||{};let active=1;
- if(s.subjectConfirmed?.expertConfirmed){active=2;if(s.subjectConfirmed?.scopeConfirmed)active=3}
- if(s.normativeGate?.expertConfirmed&&s.normativeGate?.decision==='NOT_REQUIRED')active=4;
- if(s.step===4&&s.normativeGate?.expertConfirmed)active=4;
- if(w.KT116ExpertHandoff?.snapshot?.())active=5;
- tiles.forEach(t=>{const n=Number(t.dataset.kt80Index);t.dataset.kt122State=n===active?'current':n<active?'done':'pending'});
+ const tiles=[...document.querySelectorAll('#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"]')];if(!tiles.length)return;
+ bindProgress();
+ const s=w.KT80WorkflowState||{};
+ const handoff=w.KT116ExpertHandoff?.snapshot?.();
+ const final=w.KT117Document?.snapshot?.();
+ const hasCase=!!(s.fileName||s.intake||s.subjectConfirmed);
+ const stage2=!!(s.subjectConfirmed?.expertConfirmed&&s.subjectConfirmed?.scopeConfirmed);
+ const stage3=!!(s.parcelsConfirmed?.expertConfirmed||kt123Progress.stage4Draft||kt123Progress.stage4Confirmed||handoff);
+ const stage4=!!(handoff||kt123Progress.stage4Confirmed);
+ const stage5=!!final;
+ const status=[
+  hasCase?'done':'current',
+  stage2?'done':hasCase?'current':'pending',
+  stage3?'done':stage2?'current':'pending',
+  stage4?'done':kt123Progress.stage4Draft?'review':stage3?'current':'pending',
+  stage5?'done':kt123Progress.stage5Draft?'review':stage4?'current':'pending'
+ ];
+ // A new case has exactly one current stage. Navigation never marks anything as complete.
+ if(stage5)status[4]='done';
+ else if(kt123Progress.stage5Draft)status[4]='review';
+ else if(stage4)status[4]='current';
+ tiles.forEach(t=>{
+  const n=Number(t.dataset.kt80Index),state=status[n-1]||'pending';
+  t.dataset.kt122State=state;
+  const num=t.querySelector('.kt80-dashboard-tile-number');
+  if(num){const suffix=state==='done'?' · ✓ Завършен':state==='review'?' · За преглед':'';
+   if(num.textContent!=='ЕТАП '+n+suffix)num.textContent='ЕТАП '+n+suffix;
+  }
+  t.title=state==='review'?'Изготвен резултат — необходим е експертен преглед':state==='done'?'Потвърден етап':state==='current'?'Текущ работен етап':'Достъпен за преглед и работа според правата';
+ });
+ // Highlight the selected administrative direction without claiming final legal approval.
+ const chosen=Number(kt123Progress.selectedPanel||handoff?.text?.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0);
+ document.querySelectorAll('#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-kind="route"]').forEach(t=>{
+  const id=Number(t.dataset.kt80Index),isSelected=chosen>0&&id===chosen;
+  t.dataset.kt123Selected=String(isSelected);
+  const badge=t.querySelector('.kt123-selected-direction');
+  if(isSelected&&!badge){const mark=make('span','kt123-selected-direction','ИЗБРАНО НАПРАВЛЕНИЕ');t.querySelector('.kt80-dashboard-tile-number')?.after(mark);}
+  if(!isSelected)badge?.remove();
+ });
 }
 function one(){
  const p=stage(1),file=p?.querySelector('.kt80-custom-file-field'),run=$('kt80ProcessFile'),audit=$('kt80DossierAudit');
@@ -97,8 +135,11 @@ function gate(){
 function mount(){
  one();two();three();four();gate();compactBack();dashboard();
  document.addEventListener('kt80:stage-open',()=>setTimeout(()=>{one();two();three();compactBack();dashboard()},220));
- document.addEventListener('kt116:stage4-confirmed',dashboard);
- ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'].forEach(e=>document.addEventListener(e,()=>setTimeout(()=>{two();dashboard()},160)));
+ document.addEventListener('kt115:stage4-draft',()=>{bindProgress();kt123Progress.stage4Draft=true;dashboard()});
+ document.addEventListener('kt116:stage4-confirmed',()=>{bindProgress();kt123Progress.stage4Confirmed=true;const h=w.KT116ExpertHandoff?.snapshot?.();kt123Progress.selectedPanel=Number(h?.text?.match(/ИЗБРАН\\s+ПАНЕЛ\\s*:\\s*0?(\\d{1,2})\\b/iu)?.[1]||0);dashboard()});
+ document.addEventListener('kt123:stage5-draft',()=>{bindProgress();kt123Progress.stage5Draft=true;dashboard()});
+ document.addEventListener('kt123:stage5-confirmed',()=>{bindProgress();kt123Progress.stage5Confirmed=true;dashboard()});
+ ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'].forEach(e=>document.addEventListener(e,()=>{resetProgress();setTimeout(()=>{two();dashboard()},160)}));
  const step2=$('kt80ScopeConfirmation');step2?.addEventListener('change',dashboard);
  const item=$('kt80SubjectConfirmation');item?.addEventListener('change',dashboard);
 }
