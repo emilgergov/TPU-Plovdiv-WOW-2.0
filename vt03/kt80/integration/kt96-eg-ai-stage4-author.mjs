@@ -266,12 +266,12 @@ function boot(){
      (receipt.documentTextTruncated?' Част от документалния текст е съкратена по технически лимит.':'');
    const body=str(data.draft);
    // KT110: remove only presentation artifacts; preserve substantive legal text.
-   const legalDisplay=body.replace(/\\bspatial_intersection\\s*=\\s*(?:false|true)\\b/giu,
+   const legalDisplay=body.replace(/\bspatial_intersection\s*=\s*(?:false|true)\b/giu,
       m=>/false/iu.test(m)?'няма доказано геометрично пресичане':'данни за геометрично пресичане')
-    .replace(/^\\s*---+\\s*$/gmu,'').replace(/\\n{3,}/g,'\\n\\n').trim();
-   const heading=/ВОДЕЩО\\s+ПРЕДЛОЖЕНИЕ\\s*[:：-]?/iu.exec(legalDisplay);
+    .replace(/^\s*---+\s*$/gmu,'').replace(/\n{3,}/g,'\n\n').trim();
+   const heading=/ВОДЕЩО\s+ПРЕДЛОЖЕНИЕ\s*[:：-]?/iu.exec(legalDisplay);
    const afterLead=heading?legalDisplay.slice(heading.index+heading[0].length):'';
-   const nextSection=afterLead.search(/Фактическа\\s+основа/iu);
+   const nextSection=afterLead.search(/Фактическа\s+основа/iu);
    const leadingDraft=nextSection>=0?afterLead.slice(0,nextSection).trim():afterLead.slice(0,1100).trim();
    const detailedText=nextSection>=0?afterLead.slice(nextSection).trim():legalDisplay;
    lead.textContent=leadingDraft?
