@@ -91,7 +91,8 @@ function initialize(){
    if(!live()||live()?.text!==source.text||live()?.version!==source.version){note.textContent='Данните на преписката са променени. Отговорът не е използван.';return;}
    if(!res.ok){note.textContent='Текстът не е получен. Проверете достъпа и услугата (код '+res.status+').';return;}
    if(data.caseId!==source.caseId||data.requestId!==requestId||data.evidenceRevision!==source.evidenceRevision||
-     data.stage4Version!==source.version||data.selectedPanelLine!==line||data.projectOnly!==true||
+     data.stage4Version!==source.version||data.selectedPanelLine!==line||
+     data.documentTitle!==documentLabel(line)||data.incomingReference!==incomingReference()||data.projectOnly!==true||
      data.expertReviewRequired!==true||clean(data.draft).length<120){
      note.textContent='Отговорът не съответства на потвърдената преписка.';return;
    }
