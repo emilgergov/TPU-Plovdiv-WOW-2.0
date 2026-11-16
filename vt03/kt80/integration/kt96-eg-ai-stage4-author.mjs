@@ -209,6 +209,20 @@ function boot(){
    completeCaseEvidence:stageEvidenceDetail(w,h),
    archive:{name:LOCKED_ARCHIVE,sha256:LOCKED_ARCHIVE_SHA256,verifiedReferences:refs(),
     archivedTextIncluded:false},
+   // KT114: author requirements are not prefilled legal conclusions.
+   normativeReviewRequirements:{
+    compareBeforePanelSelection:true,
+    comparisonCount:4,
+    fourHypotheses:'Apply four hypotheses as defined in verified server-side law; never invent legal classifications.',
+    perHypothesis:['verified legal prerequisites','case evidence and sources','decisive missing facts','reasoned conclusion'],
+    noNegativeConclusionFromMissingCategoryDocument:true,
+    noConclusionFromSpatialNonIntersectionAlone:true,
+    selectedPanelMustMatchAuthoritative22PanelCatalog:true,
+    panel02MustHaveExactlyApprovedLabel:true,
+    doNotShiftLegalClassificationToApplicant:true,
+    noInventedLegalBasis:true,
+    draftRequiresIndependentReview:true
+   },
    constraints:{noInventedFacts:true,noInventedCitations:true,expertApprovalRequired:true,
     legalAppplicabilityMustBeVerified:true,neverIssueAct:true}
   };
@@ -257,12 +271,16 @@ function boot(){
     };
     const issues=Array.isArray(data.qualityIssues)?data.qualityIssues.map(x=>(labels[x]||'Непозната нормативна проверка')+' ['+str(x)+']').slice(0,6):[];
     const checkPhase=data.qualityStage==='author_repair'?' (след автоматичната преработка)':data.qualityStage==='independent_review'?' (независим нормативен преглед)':'';
+    // A server-side legal rejection cannot be solved by a visual refresh.
+    const needsWorkerRepair=Array.isArray(data.qualityIssues)&&data.qualityIssues.some(x=>
+     x==='MISSING_REASONED_LEGAL_COMPARISON'||x==='ADMIN_PANEL_02_LABEL_MISMATCH');
+    const repairNote=needsWorkerRepair?' Нужно е поправяне на нормативния генератор или каталога на панелите в защитения EG Worker. Не повтаряйте същия тест преди корекцията.':'';
     status.textContent=response.status===413?
       'Преписката надхвърля допустимия технически обем на заявката.':
       response.status===422?
       'Проектът не премина нормативната проверка'+checkPhase+(issues.length?': '+issues.join('; '):'.')+
       (findings.length?' Констатации: '+findings.join('; '):'')+
-      '. Не се показва непроверен текст.':
+      '. Не се показва непроверен текст.'+repairNote:
       'EG Авторът не изготви проект (код '+response.status+'). Проверете връзката или възложете повторно.';
     return;
    }
