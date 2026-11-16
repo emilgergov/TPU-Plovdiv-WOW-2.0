@@ -410,7 +410,7 @@ async function handleStage4Proposal(request,env){
   if(declared&&/писмо\s+за\s+допълнителна\s+информация/iu.test(leadText)&&declared.id!==2)
     issues.push("ADMIN_PANEL_02_LABEL_MISMATCH");
   if(declared&&declared.id===2){
-    const hasGap=/(\bлипсва(?:щ[аио])?\b|не\s+е\s+представен|противоречив[аио]?|разминаван)/iu.test(value);
+    const hasGap=/(?:липсва(?:щ[аио])?|не\s+е\s+представен|противоречив[аио]?|разминаван)/iu.test(value);
     const hasSource=/(?:уведомление|документ|преписка|техническо\s+описание|стр\.?\s*\d|файл)/iu.test(value);
     if(!hasGap||!hasSource)issues.push("PANEL_02_MISSING_EVIDENCED_FACT_GAP");
     if(/(?:възложителят\s+да\s+(?:определи|посочи)|да\s+се\s+предостави)\s+(?:точн(?:ата|ия)\s+)?(?:правн(?:ата|ия)\s+)?категори(?:ята|я)\s+по\s+приложение/iu.test(value))
