@@ -1,22 +1,39 @@
 import {collectStageEvidence} from './kt95-stage-evidence-handoff.mjs';
 const make=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;return x};
 const clean=x=>String(x??'').trim();
+
+const incomingReference=()=>{
+ const w=window.KT80WorkflowState||{},i=w.intake||{};
+ // Only explicitly identified incoming-file registry fields; don't mine arbitrary
+ // correspondence or attachments for a number belonging to another document.
+ const candidates=[i.incoming_number,i.incomingNumber,i.registry_number,i.registryNumber,
+  i.entry_number,i.entryNumber,i.vh_number,i.vhNumber,
+  i.incoming?.number,i.registration?.incoming_number];
+ const explicit=candidates.map(clean).find(x=>/^((вх\.?\s*№\s*)?ОВОС[-– ]?\d+[-–]\d+\s*\/\s*\d{1,2}\.\d{1,2}\.\d{4}(\s*г\.?)?)$/iu.test(x));
+ return explicit?explicit.replace(/^вх\.?\s*№\s*/iu,'').trim():'ОВОС-ХХХХ/ХХ.ХХ.ХХХХ г.';
+};
+const documentLabel=line=>{
+ const name=clean(line).replace(/^ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\s*[—–-]?\s*/iu,'');
+ return name||'Административен документ';
+};
+
 function initialize(){
  const panel=document.getElementById('kt116Stage5');
  if(!panel)return;
  let source=null,versions=[],confirmed=null,busy=false;
  const endpoint='https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/stage5-document';
  const stylesheet=make('style');
- stylesheet.textContent='#kt117Stage5{color:#f7f0df;font:14px/1.6 Verdana,Arial}#kt117Stage5 .kt117-context{padding:14px;background:#264e3b;border:1px solid #8a9b79;border-radius:8px;margin:12px 0}#kt117Stage5 .kt117-heading{font-weight:700;color:#f6d18a;margin:0 0 9px}#kt117Stage5 .kt117-main{font-size:18px;font-weight:700;color:#ffdfa2;margin:8px 0}#kt117Stage5 .kt117-paper{padding:16px;background:#284d3c;border-left:4px solid #d9bb7a;white-space:pre-wrap;line-height:1.7;margin:12px 0}#kt117Stage5 .kt117-actions{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}#kt117Stage5 .kt117-actions button{font:700 13px Verdana,Arial;background:#dab972;color:#163a29;border:none;border-radius:6px;padding:11px 14px;cursor:pointer}#kt117Stage5 .kt117-actions button[disabled]{opacity:.5;cursor:default}#kt117Stage5 [hidden]{display:none!important}#kt117Stage5 textarea[hidden]{display:none!important}#kt117Stage5 .kt117-actions button[hidden]{display:none!important}#kt117Stage5 textarea{width:100%;min-height:360px;box-sizing:border-box;font:13px/1.6 Verdana,Arial;background:#fffdf5;color:#142e22;padding:12px;border-radius:6px}#kt117Stage5 .kt117-note{font-size:12px;color:#f2d398;white-space:pre-wrap}#kt117Stage5 details{padding:10px;border:1px solid #68896e;border-radius:7px;margin:10px 0}#kt117Stage5 summary{color:#f5d18b;cursor:pointer}';
+ stylesheet.textContent='#kt117Stage5{color:#f7f0df;font:14px/1.6 Verdana,Arial}#kt117Stage5 .kt117-context{padding:14px;background:#264e3b;border:1px solid #8a9b79;border-radius:8px;margin:12px 0}#kt117Stage5 .kt117-heading{font-weight:700;color:#f6d18a;margin:0 0 9px}#kt117Stage5 .kt117-main{font-size:18px;font-weight:700;color:#ffdfa2;margin:8px 0}#kt117Stage5 .kt117-reference{font-weight:700;color:#f6d18a;margin:6px 0 12px}#kt117Stage5 .kt117-paper{padding:16px;background:#284d3c;border-left:4px solid #d9bb7a;white-space:pre-wrap;line-height:1.7;margin:12px 0}#kt117Stage5 .kt117-actions{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}#kt117Stage5 .kt117-actions button{font:700 13px Verdana,Arial;background:#dab972;color:#163a29;border:none;border-radius:6px;padding:11px 14px;cursor:pointer}#kt117Stage5 .kt117-actions button[disabled]{opacity:.5;cursor:default}#kt117Stage5 [hidden]{display:none!important}#kt117Stage5 textarea[hidden]{display:none!important}#kt117Stage5 .kt117-actions button[hidden]{display:none!important}#kt117Stage5 textarea{width:100%;min-height:360px;box-sizing:border-box;font:13px/1.6 Verdana,Arial;background:#fffdf5;color:#142e22;padding:12px;border-radius:6px}#kt117Stage5 .kt117-note{font-size:12px;color:#f2d398;white-space:pre-wrap}#kt117Stage5 details{padding:10px;border:1px solid #68896e;border-radius:7px;margin:10px 0}#kt117Stage5 summary{color:#f5d18b;cursor:pointer}';
  document.head.append(stylesheet);
  const ui=make('section');ui.id='kt117Stage5';
  const heading=make('h3','5. Изготвяне на административния документ');
  const context=make('div');context.className='kt117-context';
  const contextTitle=make('div','Потвърдено предложение от Етап 4');contextTitle.className='kt117-heading';
  const direction=make('div');direction.className='kt117-main';
+ const reference=make('div');reference.className='kt117-reference';
  const details=make('div'), warnings=make('details'),warningText=make('div');
  warnings.append(make('summary','Бележки от нормативния преглед'),warningText);
- context.append(contextTitle,direction,details,warnings);
+ context.append(contextTitle,direction,reference,details,warnings);
  const action=make('div');action.className='kt117-actions';
  const generate=make('button','Изготви текст с EG Автора');
  const edit=make('button','Редактирай текста'),save=make('button','Запази редакцията'),cancel=make('button','Откажи редакцията'),confirm=make('button','Потвърди текста');
@@ -41,7 +58,8 @@ function initialize(){
   source=a;versions=[];confirmed=null;context.hidden=false;action.hidden=false;reviewActions.hidden=false;footer.hidden=true;
   original.hidden=false;original.querySelector('pre').textContent=a.text;
   let panelLine=a.text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\b[^\n]*/iu)?.[0]||'Административно направление, потвърдено от експерта';
-  direction.textContent=panelLine.replace(/^ИЗБРАН\s+ПАНЕЛ\s*:\s*/iu,'');
+  direction.textContent=documentLabel(panelLine);
+  reference.textContent='Представена документация · вх. № '+incomingReference();
   const p=window.KT80WorkflowState?.subjectConfirmed||{};
   const parcels=collectStageEvidence(window).parcelIds;
   details.textContent='Предмет: '+clean(p.text)+'\nИмот(и): '+parcels.join(', ')+'\nЕксперт: '+a.expert+' · Версия: '+a.version;
@@ -64,7 +82,8 @@ function initialize(){
   const requestId=crypto.randomUUID();const payload={task:'draft_stage5_document',projectOnly:true,expertConfirmed:true,
    caseId:source.caseId,evidenceRevision:source.evidenceRevision,stage4Version:source.version,requestId,
    confirmedStage4Text:source.text,selectedPanelLine:line,subject:clean(p.text),scope:clean(p.scope),
-   parcelIds:[...ev.parcelIds],warnings:source.warnings||[]};
+   parcelIds:[...ev.parcelIds],warnings:source.warnings||[],
+   documentTitle:documentLabel(line),incomingReference:incomingReference()};
   busy=true;generate.disabled=true;note.textContent='EG Авторът изготвя проект на административния текст.';
   try{
    const res=await window.KT80EGSession.request(endpoint,JSON.stringify(payload));
