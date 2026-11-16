@@ -526,7 +526,7 @@ async function handleStage4Proposal(request,env){
   return reply({caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
    requestId:payload.requestId,projectOnly:true,expertReviewRequired:true,
    archiveEvidenceVerified:true,draft:finalDraft,
-   normativeAudit:{reviewed:true,reviewVerdict:verdict,authorRepairs,selectedPanelId:Number(finalDraft.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1])||0)||null,fullArticlesVerified:true,allArchiveSourcesExamined:false,verifiedLegalProvisionCount:verifiedLegalCorpus.legalProvisions.length,findings:Array.isArray(independentReview.issues)?independentReview.issues.slice(0,8):[]},
+   normativeAudit:{reviewed:true,reviewVerdict:verdict,authorRepairs,selectedPanelId:Number(finalDraft.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0)||null,fullArticlesVerified:true,allArchiveSourcesExamined:false,verifiedLegalProvisionCount:verifiedLegalCorpus.legalProvisions.length,findings:Array.isArray(independentReview.issues)?independentReview.issues.slice(0,8):[]},
    evidenceReceipt:{documentTextsReceived:sourceTexts.length,
     documentTextsAvailable:context.caseDocuments.sourceTextCount,
     documentTextTruncated:context.caseDocuments.sourceTextTruncated,
