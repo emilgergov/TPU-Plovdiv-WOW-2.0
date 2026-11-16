@@ -112,7 +112,7 @@ function initialize(){
    const data=await res.json().catch(()=>({}));
    if(!live()||live()?.text!==source.text||live()?.version!==source.version){note.textContent='Данните на преписката са променени. Отговорът не е използван.';return;}
    if(!res.ok){
-    const legalIssue=res.status===422&&['STAGE5_DIRECTION_CONFLICT','UNSUPPORTED_CATEGORICAL_CONCLUSION','STAGE4_LEGAL_MATRIX_CONFLICT'].includes(data.error);
+    const legalIssue=res.status===422&&['STAGE5_DIRECTION_CONFLICT','UNSUPPORTED_CATEGORICAL_CONCLUSION','STAGE4_LEGAL_MATRIX_CONFLICT','STAGE4_DECISION_MODEL_CONFLICT'].includes(data.error);
     const diagnostic=(Array.isArray(data.findings)?data.findings:[]).slice(0,4).map(f=>
      String(f.test||'Предпоставка')+': '+String(f.actual||'неустановена')+
      (f.requiredForDirection?' · необходимо за избраното направление: '+f.requiredForDirection:'')+
