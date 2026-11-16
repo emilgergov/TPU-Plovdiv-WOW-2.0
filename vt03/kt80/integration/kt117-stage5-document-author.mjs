@@ -1,3 +1,4 @@
+import {kt120ReferenceDraft} from './kt120-approved-reference-draft.mjs';
 import {collectStageEvidence} from './kt95-stage-evidence-handoff.mjs';
 const make=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;return x};
 const clean=x=>String(x??'').trim();
@@ -36,9 +37,10 @@ function initialize(){
  context.append(contextTitle,direction,reference,details,warnings);
  const action=make('div');action.className='kt117-actions';
  const generate=make('button','Изготви текст с EG Автора');
+ const approvedReference=make('button','Приложи одобрените абзаци КТ120');approvedReference.hidden=true;
  const edit=make('button','Редактирай текста'),save=make('button','Запази редакцията'),cancel=make('button','Откажи редакцията'),confirm=make('button','Потвърди текста');
  edit.hidden=true;save.hidden=true;cancel.hidden=true;confirm.hidden=true;
- action.append(generate); const reviewActions=make('div'); reviewActions.className='kt117-actions'; reviewActions.append(edit,save,cancel,confirm);
+ action.append(generate,approvedReference); const reviewActions=make('div'); reviewActions.className='kt117-actions'; reviewActions.append(edit,save,cancel,confirm);
  const note=make('p');note.className='kt117-note';
  const editorial=make('details');editorial.hidden=true;
  const editorialTitle=make('summary','Бележки за редакция');editorial.append(editorialTitle);
@@ -62,6 +64,10 @@ function initialize(){
   original.hidden=false;original.querySelector('pre').textContent=a.text;
   let panelLine=a.text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\b[^\n]*/iu)?.[0]||'Административно направление, потвърдено от експерта';
   direction.textContent=documentLabel(panelLine);
+  const subj=clean(window.KT80WorkflowState?.subjectConfirmed?.text);
+  const parcelsForReference=collectStageEvidence(window).parcelIds;
+  approvedReference.hidden=!(panelLine.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?1\b/iu)&&subj.includes('Складове за промишлени стоки и офиси')&&parcelsForReference.includes('56784.13.102'));
+  approvedReference.title='Контролен образец само за тестовата преписка; изисква ново експертно потвърждение.';
   reference.textContent='Представена документация · вх. № '+incomingReference();
   const p=window.KT80WorkflowState?.subjectConfirmed||{};
   const parcels=collectStageEvidence(window).parcelIds;
@@ -75,6 +81,15 @@ function initialize(){
   preview.textContent=v.text;preview.hidden=false;textarea.hidden=true;textarea.style.display='none';edit.hidden=false;save.hidden=true;cancel.hidden=true;
   confirm.hidden=!!confirmed;confirmedText.textContent=confirmed?'Потвърден текст · версия '+confirmed.version+'. Експертните редакции остават окончателни за документа.':'';
   footer.hidden=!confirmed;word.disabled=!(confirmed&&window.KT119TemplateReady?.());
+ };
+ approvedReference.onclick=()=>{
+  sync();
+  if(!source||approvedReference.hidden)return;
+  const draft=kt120ReferenceDraft(incomingReference());
+  versions.push({version:versions.length+1,text:draft,kind:'заключени абзаци КТ120 — контролен образец'});
+  confirmed=null;editorialIssues=[];
+  editorial.hidden=true;render();
+  note.textContent='Заредени са точно одобрените абзаци № 1–7. № 8 и № 9 отпадат. Прегледайте текста и потвърдете изрично преди Word. Само за тази контролна преписка.';
  };
  generate.onclick=async()=>{
   sync();if(!source||busy)return;
