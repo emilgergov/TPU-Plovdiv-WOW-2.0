@@ -23,6 +23,13 @@ if(host&&five){
  const password=mk('input');password.type='password';password.placeholder='Парола за копието (12+ знака)';password.autocomplete='new-password';password.hidden=true;
  ui.append(header,alerts,paper,textarea,actorLabel,actions,note,next,save,password);
  host.append(ui);
+ const restoreBar=mk('div');restoreBar.id='kt116Restore';restoreBar.style.cssText='padding:12px;margin:8px 0;color:#efd4a0;font:13px Verdana;background:#173b2b;border:1px solid #7b8e6f;border-radius:7px';
+ const restoreLabel=mk('label','Повторно отваряне на защитено копие');
+ const restoreFile=mk('input');restoreFile.type='file';restoreFile.accept='.json,application/json';
+ const restoreKey=mk('input');restoreKey.type='password';restoreKey.placeholder='Парола за копието';restoreKey.autocomplete='off';
+ const restoreBtn=mk('button','Отвори копието');restoreBtn.type='button';restoreBtn.style.cssText='background:#d9b874;color:#153a27;padding:9px 13px;border:0;border-radius:6px;font-weight:bold';
+ const restoreStatus=mk('p','Копието се зарежда само след проверка на предмета, обхвата и имотите; след възстановяване е необходимо ново потвърждение.');
+ restoreBar.append(restoreLabel,restoreFile,restoreKey,restoreBtn,restoreStatus);host.append(restoreBar);
  const stage5=mk('section');stage5.id='kt116Stage5';five.prepend(stage5);
  const evidence=()=>collectStageEvidence(window);
  const current=()=>proposal&&proposal.localId===evidence().caseId&&proposal.revision===evidence().evidenceRevision&&proposal.generation===evidence().generation&&proposal.key===evidence().key;
@@ -89,7 +96,9 @@ if(host&&five){
    const enc=new TextEncoder(),salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
    const key0=await crypto.subtle.importKey('raw',enc.encode(password.value),'PBKDF2',false,['deriveKey']);
    const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:210000,hash:'SHA-256'},key0,{name:'AES-GCM',length:256},false,['encrypt']);
-   const payload={approved,history,caseBinding:{caseId:proposal.caseId,evidenceRevision:proposal.revision}};
+   const w=window.KT80WorkflowState||{},h=evidence();
+   const payload={approved,history,caseBinding:{caseId:proposal.caseId,evidenceRevision:proposal.revision,
+    subject:val(w.subjectConfirmed?.text),scope:val(w.subjectConfirmed?.scope),parcelIds:[...h.parcelIds]}};
    const bytes=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(JSON.stringify(payload))));
    const b64=a=>btoa(Array.from(a,x=>String.fromCharCode(x)).join(''));
    const obj={format:'WOW-KT116-ENCRYPTED-V1',salt:b64(salt),iv:b64(iv),ciphertext:b64(bytes)};
@@ -98,6 +107,42 @@ if(host&&five){
    password.value='';note.textContent='Шифрованото копие е изтеглено. Няма централен архив; пазете файла и паролата отделно.';
   }catch{note.textContent='Неуспешен защитен запис.';}
  };
+ async function decrypt(data,secret){
+  if(data?.format!=='WOW-KT116-ENCRYPTED-V1')throw Error('Неподдържан формат');
+  const bytes=x=>Uint8Array.from(atob(x),v=>v.charCodeAt(0));
+  const enc=new TextEncoder(),raw=await crypto.subtle.importKey('raw',enc.encode(secret),'PBKDF2',false,['deriveKey']);
+  const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:bytes(data.salt),iterations:210000,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['decrypt']);
+  const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:bytes(data.iv)},key,bytes(data.ciphertext));
+  return JSON.parse(new TextDecoder().decode(plain));
+ }
+ restoreBtn.onclick=async()=>{
+  const file=restoreFile.files?.[0],h=evidence(),w=window.KT80WorkflowState||{};
+  if(!file||!restoreKey.value){restoreStatus.textContent='Изберете защитения файл и въведете паролата.';return;}
+  if(!w.subjectConfirmed?.expertConfirmed||!w.subjectConfirmed?.scopeConfirmed){restoreStatus.textContent='Първо потвърдете предмета и обхвата в Етап 2.';return;}
+  try{
+   const data=await decrypt(JSON.parse(await file.text()),restoreKey.value);
+   const binding=data?.caseBinding||{},sameSubject=val(binding.subject)===val(w.subjectConfirmed.text),
+    sameScope=val(binding.scope)===val(w.subjectConfirmed.scope),
+    sameParcels=JSON.stringify(binding.parcelIds||[])===JSON.stringify([...h.parcelIds]);
+   if(!sameSubject||!sameScope||!sameParcels||!Array.isArray(data.history)||!data.history.length||
+      !val(data.approved?.original)||!val(data.approved?.text)){
+    restoreStatus.textContent='Копието не съответства на потвърдените предмет, обхват и имоти. Няма възстановени данни.';return;
+   }
+   proposal={caseId:h.caseId,localId:h.caseId,revision:h.evidenceRevision,generation:h.generation,
+    key:h.key,requestId:'restored-expert-copy',original:data.approved.original,
+    warnings:Array.isArray(data.approved.warnings)?data.approved.warnings:[]};
+   history=data.history.filter(x=>x&&typeof x.text==='string').map((x,i)=>({version:i+1,text:x.text,
+    kind:x.kind,createdAt:x.createdAt})).slice(0,30);
+   if(!history.length)throw Error('Няма съдържание');
+   approved=null;restoreKey.value='';restoreFile.value='';
+   ui.hidden=false;document.getElementById('kt104EGLead').style.display='none';
+   document.getElementById('kt104EGDetails').style.display='none';
+   note.textContent='Възстановен работен текст. Изисква се ново експертно потвърждение за текущата преписка.';
+   restoreStatus.textContent='Копието е отворено за редакция и ново потвърждение.';
+   display();render5();
+  }catch{restoreStatus.textContent='Неуспешно отваряне. Проверете паролата и файла.';}
+ };
+
  function clear(){proposal=null;history=[];approved=null;ui.hidden=true;render5();}
  ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'].forEach(n=>document.addEventListener(n,clear));
  window.KT116ExpertHandoff=Object.freeze({snapshot:()=>approved&&current()?approved:null,history:()=>current()?history.map(x=>({version:x.version,kind:x.kind,createdAt:x.createdAt})):[]});
