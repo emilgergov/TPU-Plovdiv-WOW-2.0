@@ -2,7 +2,7 @@
  * The file is processed locally. Never upload the dossier or template.
  * Only the confirmed expert text is inserted, byte-for-byte per paragraph.
  */
-const TEMPLATE_SHA256='17637d5122d8f72e29df7aecb71d068745e26d31844fe70421ec6551ebb2004e';
+const TEMPLATE_SHA256='0ac5895527e5350bfa074710fef9b801c37f30d4262e4404e98756f917a0994f';
 const W='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const el=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;return x};
 const q=x=>String(x??'').trim();
@@ -14,7 +14,7 @@ function install(){
  const help=root.querySelector('.kt117-note')?.parentElement||root;
  const select=el('div');select.style.cssText='padding:13px;margin:12px 0;border:1px solid #998b5d;background:#183b2c;border-radius:8px;color:#f5e9c9;font:13px/1.5 Verdana,Arial';
  const title=el('strong','Бланка на РИОСВ – Пловдив');title.style.cssText='display:block;color:#f2d190;margin-bottom:7px';
- const description=el('div','Изберете коригираната бланка КТ119 (единият електронен подпис е над адресата), само веднъж за текущата сесия. Файлът остава в браузъра; не се изпраща към сървър.');
+ const description=el('div','Изберете последната бланка КТ119 (горен подпис вляво, удебелени нормативни основания), само веднъж за текущата сесия. Файлът остава в браузъра; не се изпраща към сървър.');
  const file=el('input');file.type='file';file.accept='.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document';file.setAttribute('aria-label','Изберете одобрената DOCX бланка');file.style.cssText='display:block;margin:11px 0;color:#f8edd7;max-width:100%';
  const status=el('p','Не е избрана бланка.');status.style.cssText='color:#e8ce99;font-size:12px;margin:5px 0';
  select.append(title,description,file,status);
@@ -42,10 +42,10 @@ function install(){
    if(!line.length)addText(p,'');
  };
  const textIn=p=>Array.from(p.getElementsByTagNameNS(W,'t')).map(n=>n.textContent).join('');
- const replacePara=(para,line,subject=false)=>{
+ const replacePara=(para,line,subject=false,title=false)=>{
    const props=Array.from(para.childNodes).find(n=>n.localName==='pPr'&&n.namespaceURI===W);
    para.replaceChildren();if(props)para.append(props);
-   segmented(para,line,subject);
+   if(title)addText(para,line,true);else segmented(para,line,subject);
    if(textIn(para)!==line)throw Error('Text mismatch while formatting paragraph');
  };
  const newPara=(line)=>{
@@ -93,7 +93,7 @@ function install(){
      const locate=token=>paragraphs.find(p=>textIn(p).includes(token));
      const subj=locate('{{SUBJECT}}'),title=locate('{{DOCUMENT_TITLE}}'),anchor=locate('{{BODY_ANCHOR}}');
      if(!subj||!title||!anchor)throw Error('Липсва динамичен раздел в бланката.');
-     replacePara(subj,subject,true);replacePara(title,docTitle);
+     replacePara(subj,subject,true);replacePara(title,docTitle,false,true);
      const nodes=bodyLines.map(x=>newPara(x));
      for(const p of nodes)body.insertBefore(p,anchor);
      body.removeChild(anchor);
