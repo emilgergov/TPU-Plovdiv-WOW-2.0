@@ -29,14 +29,14 @@ function install(){
      addText(p,line,true);return;
    }
    if(isSubject&&line.startsWith('Относно:')){
-     addText(p,'Относно:',true);
+     addText(p,'Относно:',true,true);
      const rest=line.slice('Относно:'.length);
      // Only the exact approved investment-title span is bold, not quoted localities.
      const approvedTitle='„Складове за промишлени стоки и офиси“';
      const titleAt=rest.indexOf(approvedTitle);
      if(titleAt>=0){
        if(titleAt>0)addText(p,rest.slice(0,titleAt),false,true);
-       addText(p,approvedTitle,true);
+       addText(p,approvedTitle,true,true);
        if(titleAt+approvedTitle.length<rest.length)addText(p,rest.slice(titleAt+approvedTitle.length),false,true);
      }else addText(p,rest,false,true);
      return;
@@ -113,6 +113,12 @@ function install(){
      const subj=locate('{{SUBJECT}}'),title=locate('{{DOCUMENT_TITLE}}'),anchor=locate('{{BODY_ANCHOR}}');
      if(!subj||!title||!anchor)throw Error('Липсва динамичен раздел в бланката.');
      replacePara(subj,subject,true);replacePara(title,docTitle,false,true);
+     // KT120: Subject is justified, with the same 1.5 cm first-line indent as the body.
+     let subjectProps=Array.from(subj.childNodes).find(n=>n.namespaceURI===W&&n.localName==='pPr');
+     if(!subjectProps){subjectProps=WN('pPr');subj.insertBefore(subjectProps,subj.firstChild)}
+     for(const node of Array.from(subjectProps.childNodes).filter(n=>n.namespaceURI===W&&(n.localName==='jc'||n.localName==='ind')))subjectProps.removeChild(node);
+     const subjectAlign=WN('jc');subjectAlign.setAttributeNS(W,'w:val','both');subjectProps.append(subjectAlign);
+     const subjectIndent=WN('ind');subjectIndent.setAttributeNS(W,'w:firstLine','850');subjectProps.append(subjectIndent);
      const nodes=bodyLines.map(x=>newPara(x));
      for(const p of nodes)body.insertBefore(p,anchor);
      body.removeChild(anchor);
