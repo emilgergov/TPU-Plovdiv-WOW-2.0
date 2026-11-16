@@ -11,7 +11,7 @@ const charset='application/vnd.openxmlformats-officedocument.wordprocessingml.';
 const body=()=>p('Ниво на конфиденциалност 0','right')+p('[TLP-WHITE]','right')+p('')+
  p('Електронен подпис: __________________________','left')+p('ДО')+
  p('Възложител: ХХХХХХХХХХХХХ')+p('Адрес: ХХХХХХХХХХХХХ')+
- p('')+p('{{SUBJECT}}')+p('')+p('{{DOCUMENT_TITLE}}','center')+
+ p('')+p('{{SUBJECT}}')+p('{{DOCUMENT_TITLE}}','center',240)+
  p('{{BODY_ANCHOR}}')+p('С уважение,','left',360)+
  p('Електронен подпис: __________________________','left');
 const doc=xml('<w:document '+ns+'><w:body>'+body()+
@@ -22,9 +22,9 @@ const doc=xml('<w:document '+ns+'><w:body>'+body()+
 const pic=(id,name,cx,cy)=>
  '<w:r><w:drawing><wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" distT="0" distB="0" distL="0" distR="0"><wp:extent cx="'+cx+'" cy="'+cy+'"/><wp:docPr id="1" name="'+name+'"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="1" name="'+name+'"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="'+id+'"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="'+cx+'" cy="'+cy+'"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
 const header=xml('<w:hdr '+ns+'><w:tbl><w:tblPr><w:tblW w:type="dxa" w:w="9638"/></w:tblPr>'+
- '<w:tblGrid><w:gridCol w:w="850"/><w:gridCol w:w="8788"/></w:tblGrid><w:tr>'+
- '<w:tc><w:tcPr><w:tcW w:w="850" w:type="dxa"/></w:tcPr>'+'<w:p>'+pic('rIdCrest','Герб',480000,610000)+'</w:p>'+'</w:tc>'+
- '<w:tc><w:tcPr><w:tcW w:w="8788" w:type="dxa"/></w:tcPr>'+
+ '<w:tblGrid><w:gridCol w:w="1180"/><w:gridCol w:w="8458"/></w:tblGrid><w:tr>'+
+ '<w:tc><w:tcPr><w:tcW w:w="1180" w:type="dxa"/><w:tcMar><w:top w:w="90" w:type="dxa"/><w:right w:w="130" w:type="dxa"/></w:tcMar></w:tcPr>'+'<w:p>'+pic('rIdCrest','Герб',615000,815000)+'</w:p>'+'</w:tc>'+
+ '<w:tc><w:tcPr><w:tcW w:w="8458" w:type="dxa"/></w:tcPr>'+
  p('Р Е П У Б Л И К А  Б Ъ Л Г А Р И Я')+
  p('Министерство на околната среда и водите')+
  p('Регионална инспекция по околната среда и водите – Пловдив')+
