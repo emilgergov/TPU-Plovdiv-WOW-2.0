@@ -188,3 +188,6 @@ body[data-kt80-view="home"] .kt80-dashboard-tile[data-kt80-kind="step"][data-kt1
 #kt117Stage5 #kt119WordCreate{max-width:360px!important}
 #kt117Stage5 .kt117-actions:has(#kt119WordCreate){margin:8px 0!important}
 @media(max-width:850px){.kt80-stage-panel[data-panel="2"] .kt122-scope-action-row{grid-template-columns:1fr!important}#kt117Stage5 .kt122-author-action-row{grid-template-columns:1fr!important}}
+
+/* KT122 VB-21: duplicate GIS evidence card is display-only; all GIS calculations and Stage4 handoff remain intact. */
+.kt80-stage-panel[data-panel="3"] #kt82SpatialEvidence592{display:none!important}
