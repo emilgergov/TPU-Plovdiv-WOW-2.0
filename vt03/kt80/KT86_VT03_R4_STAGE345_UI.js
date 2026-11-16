@@ -106,7 +106,7 @@ approve.disabled=!valid;menu.value='';chosen.textContent='№ на кандид�
 restore.onclick=()=>{draft.value=initial};
 approve.onclick=()=>{message.textContent='За окончателно потвърждение използвайте оригиналните нормативни контроли в Етап 5.'};
 document.body.append(overlay);w.KT86Stage5Preview={open(){render();overlay.hidden=false;document.body.style.overflow='hidden'}};
-document.addEventListener('click',e=>{const t=e.target.closest?.('.kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="5"]');if(!t||w.KT83RouteAccess?.canOpenStage?.(5)===true)return;e.preventDefault();e.stopImmediatePropagation();w.KT86Stage5Preview.open()},true);
+document.addEventListener('click',e=>{const t=e.target.closest?.('.kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="5"]');if(!t||w.KT83RouteAccess?.canOpenStage?.(5)===true)return;e.preventDefault();e.stopImmediatePropagation();if(typeof w.KT122Stage5Direct==='function')w.KT122Stage5Direct();else w.KT86Stage5Preview.open()},true);
 }
 function init(){stage4();stage5();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,1100),{once:true});else setTimeout(init,1100);
