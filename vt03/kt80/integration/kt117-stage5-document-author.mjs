@@ -2,6 +2,27 @@ import {collectStageEvidence} from './kt95-stage-evidence-handoff.mjs';
 const make=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;return x};
 const clean=x=>String(x??'').trim();
 
+function formatDraftSubject(draft){
+ const raw=String(draft??'').replace(/\r\n/g,'\n');
+ const lines=raw.split('\n'),index=lines.findIndex(x=>/^\s*Относно\s*:/iu.test(x));
+ if(index<0)return {text:raw,warning:'Липсва ред „Относно:“. Редактирайте проекта преди потвърждение.'};
+ const value=lines[index].replace(/^\s*Относно\s*:\s*/iu,'').trim();
+ const prefix='Уведомление за инвестиционно предложение (ИП)';
+ if(value.startsWith(prefix))return {text:raw,warning:null};
+ let title='',tail='';
+ const direct=value.match(/^(„[^“]+“)([\s\S]*)$/u);
+ if(direct){title=direct[1];tail=direct[2]}
+ else {
+   const boundary=value.match(/^(.+?)(,\s*(?:разположен[аои]?|находящ[аои]?|в\s+(?:поземлен|ПИ|имот|землището)|попадащ[аои]?|с\s+местоположение|местност)[\s\S]*)$/iu);
+   if(boundary){title=boundary[1].trim();tail=boundary[2]}
+ }
+ if(!title)return {text:raw,warning:'Не е разграничено еднозначно наименованието на ИП в „Относно:“. Моля, въведете „Относно: Уведомление за инвестиционно предложение (ИП) „Наименование“ …“.'};
+ const quoted=title.startsWith('„')?title:'„'+title.replace(/^["„]|["“]$/g,'')+'“';
+ lines[index]='Относно: '+prefix+' '+quoted+tail;
+ return {text:lines.join('\n'),warning:null};
+}
+
+
 const incomingReference=()=>{
  const w=window.KT80WorkflowState||{},i=w.intake||{};
  // Only explicitly identified incoming-file registry fields; don't mine arbitrary
@@ -102,7 +123,9 @@ function initialize(){
    editorialIssues=Array.isArray(data.editorialFlags)?data.editorialFlags.filter(x=>typeof x==='string').slice(0,8):[];
    editorialContent.replaceChildren(...editorialIssues.map(x=>make('p',x)));
    editorial.hidden=!editorialIssues.length;
-   versions.push({version:versions.length+1,text:data.draft,kind:'предложение на EG Автора'});
+   const normalized=formatDraftSubject(data.draft);
+   if(normalized.warning){editorialIssues.push(normalized.warning);editorialContent.append(make('p',normalized.warning));editorial.hidden=false;}
+   versions.push({version:versions.length+1,text:normalized.text,kind:'предложение на EG Автора — универсална структура на „Относно:“'});
    confirmed=null;render();note.textContent=editorialIssues.length?'Проектът е готов. Проверете бележките за редакция преди потвърждение.':'Проектът е готов за експертна редакция или потвърждение.';
   }catch{note.textContent='Възникна грешка при изготвянето на текста.';}
   finally{busy=false;generate.disabled=false}
