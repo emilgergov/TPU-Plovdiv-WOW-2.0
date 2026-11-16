@@ -59,7 +59,7 @@ function four(){
  const p=stage(4),intro=p?.querySelector(':scope > p');if(intro)intro.style.cssText='font:12px/1.5 Verdana,Arial;margin:4px 0 9px;max-width:100%';
 }
 function directFive(){
- const five=stage(5);if(!five||!$('kt116Stage5'))return false;
+ const five=stage(5);if(!five)return false;
  // UI-only display of the KT121 accepted Stage5. The author/Word remain locked
  // unless the case-bound KT116 expert handoff exists.
  document.body.dataset.kt80View='stage';
