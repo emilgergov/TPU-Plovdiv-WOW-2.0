@@ -64,3 +64,12 @@ body[data-kt80-view="home"] .kt80-dashboard-tile[data-kt80-kind="step"] :is(.kt8
 #kt82NormativeGateDialog .kt82-gate-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
 #kt82NormativeGateDialog .kt82-gate-actions button{min-height:45px!important;width:100%!important;font:700 13px Verdana,Arial!important}
 @media(max-width:600px){#kt82NormativeGateDialog .kt82-gate-actions{grid-template-columns:1fr!important}}
+
+/* VB-03: compact initial explanatory banners while retaining factual warnings. */
+body[data-kt80-view="stage"] .kt84-primary-finding{padding:9px 12px!important;margin:3px 0 8px!important;font:500 13px/1.5 Verdana,Arial,sans-serif!important;border-left-width:4px!important}
+body[data-kt80-view="stage"] .kt84-primary-finding h2{font:700 16px/1.35 Verdana,Arial!important;margin:0 0 4px!important}
+.kt80-stage-panel[data-panel="1"] .kt84-work-step{padding:7px 10px!important;margin:4px 0 7px!important;font:12px/1.45 Verdana,Arial!important}
+.kt80-stage-panel[data-panel="3"] #kt85Stage3Actions #kt80ToLaw{min-height:48px!important;font-weight:800!important}
+/* VB-05: equal visual sizes for peer actions in expert authoring screens. */
+#kt116Editor .actions button{min-height:44px!important;min-width:160px!important;font-family:Verdana,Arial,sans-serif!important}
+#kt117Stage5 .kt117-actions button{min-height:44px!important;flex:1 1 155px}
