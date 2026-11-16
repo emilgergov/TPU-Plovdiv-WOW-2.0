@@ -70,6 +70,17 @@ try{
   assert.equal(result.expertReviewRequired,true);
   assert.equal(result.evidenceReceipt.archiveCorpusDocumentsAvailable,22);
   const gen=contextLog[2*idx].context,review=contextLog[2*idx+1].context;
+  // KT112: compare what the actual two model calls receive, not merely
+  // what the V11 loader can return in isolation.
+  const exact=(items,ref)=>items.find(x=>x.reference===ref)?.fullLegalText||'';
+  for(const modelInput of [gen.legalTextsExact,review.exactApplicableLawTexts]){
+   assert.match(exact(modelInput,'чл. 2'),/чл\.\s*6а указва начина на процедиране/iu);
+   assert.match(exact(modelInput,'чл. 2'),/процедурата се прекратява/iu);
+   const os6a=modelInput.find(x=>x.act==='Наредба за ОС'&&x.reference==='чл. 6а');
+   assert.match(os6a?.fullLegalText||'',/^Чл\.\s*6а\./u);
+   assert.match(exact(modelInput,'Приложение № 1 към ЗООС'),/^Приложение № 1\s+към чл\.\s*92/u);
+   assert.match(exact(modelInput,'Приложение № 2 към ЗООС'),/^Приложение № 2\s+към чл\.\s*93/u);
+  }
   assert.equal(gen.parcelIds[0],s.parcel);
   assert.equal(gen.gisAnalysis.spatial,s.gis);
   assert.equal(gen.caseDocuments.sourceTexts[0].source,s.source);
