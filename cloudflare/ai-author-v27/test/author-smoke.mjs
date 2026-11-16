@@ -486,15 +486,12 @@ try{
     'Фактите по уведомлението трябва да се сравнят с относимите законови категории.',
     'Настоящият проект е структуриран и преработен съгласно приложените материали и в пълно съответствие с приложимата нормативна уредба.'
    );
-  let observedCalls=0;
+  let observedCalls=0,observedQuality=[];
   globalThis.fetch=async(_url,opts)=>{
    observedCalls++;
    const sent=JSON.parse(opts.body),system=sent.input[0].content;
    if(system.includes('Преработи ПЪЛНИЯ проект')){
-    const got=JSON.parse(sent.input[1].content).qualityIssues;
-    assert(got.includes('UNDETERMINED_BASED_ON_LEGAL_CLASSIFICATION_GAP'));
-    assert(got.includes('UNSPECIFIED_AREA_TYPE_IN_EVIDENCE_GAP'));
-    assert(got.includes('DRAFT_SELF_CERTIFICATION_NOT_EVIDENCE'));
+    observedQuality=JSON.parse(sent.input[1].content).qualityIssues;
     return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:kt110Valid}]}]}),{status:200});
    }
    if(system.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ'))
@@ -502,9 +499,12 @@ try{
    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:observedBad}]}]}),{status:200});
   };
   const observedFixed=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
-  assert.equal(observedFixed.status,200);
+  assert.equal(observedFixed.status,200,JSON.stringify(await observedFixed.clone().json()));
   assert.equal((await observedFixed.json()).draft,kt110Valid);
   assert.equal(observedCalls,3);
+  assert(observedQuality.includes('UNDETERMINED_BASED_ON_LEGAL_CLASSIFICATION_GAP'),JSON.stringify(observedQuality));
+  assert(observedQuality.includes('UNSPECIFIED_AREA_TYPE_IN_EVIDENCE_GAP'),JSON.stringify(observedQuality));
+  assert(observedQuality.includes('DRAFT_SELF_CERTIFICATION_NOT_EVIDENCE'),JSON.stringify(observedQuality));
   console.log('PASS: KT123 legal-only uncertainty and unspecified building/property area trigger one bounded expert-safe repair.');
 
   // KT113 regression: panel 01 must NEVER be passed when a necessary
