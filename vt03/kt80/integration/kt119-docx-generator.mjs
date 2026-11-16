@@ -18,6 +18,7 @@ function install(){
    const r=WN('r'),prop=WN('rPr'),fonts=WN('rFonts'),size=WN('sz');
    fonts.setAttributeNS(W,'w:ascii','Verdana');fonts.setAttributeNS(W,'w:hAnsi','Verdana');fonts.setAttributeNS(W,'w:cs','Verdana');
    size.setAttributeNS(W,'w:val','20');prop.append(fonts);
+   const lang=WN('lang');lang.setAttributeNS(W,'w:val','bg-BG');prop.append(lang);
    if(weight)prop.append(WN('b'));if(italic)prop.append(WN('i'));
    prop.append(size);
    const t=WN('t',text);t.setAttribute('xml:space','preserve');
@@ -31,9 +32,11 @@ function install(){
    if(isSubject&&line.startsWith('Относно:')){
      addText(p,'Относно:',true,true);
      const rest=line.slice('Относно:'.length);
-     // Only the exact approved investment-title span is bold, not quoted localities.
-     const approvedTitle='„Складове за промишлени стоки и офиси“';
-     const titleAt=rest.indexOf(approvedTitle);
+     // Universal: bold only the investment title immediately following the (ИП) marker.
+     // Never bold a quoted locality or import the reference dossier's specific title.
+     const titleMatch=rest.match(/Уведомление\s+за\s+инвестиционно\s+предложение\s*\(ИП\)\s*(„[^“\n]+“)/iu);
+     const approvedTitle=titleMatch?.[1]||'';
+     const titleAt=approvedTitle?rest.indexOf(approvedTitle):-1;
      if(titleAt>=0){
        if(titleAt>0)addText(p,rest.slice(0,titleAt),false,true);
        addText(p,approvedTitle,true,true);
