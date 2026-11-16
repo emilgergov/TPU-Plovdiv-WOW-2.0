@@ -45,8 +45,21 @@ function two(){
   b.setAttribute('aria-selected',String(which==='scope'));
  };
  const refresh=()=>{b.disabled=!check.checked;if(!check.checked&&p.classList.contains('kt122-show-scope'))select('subject')};
- a.addEventListener('click',()=>select('subject'));b.addEventListener('click',()=>{if(check.checked)select('scope')});
- check.addEventListener('change',()=>{refresh();if(check.checked)select('scope')});select(check.checked?'scope':'subject');refresh();
+ const openScope=()=>{
+   if(!check.checked)return;
+   select('scope');refresh();
+   // Keep the new active section in view after the existing expert confirmation handlers finish.
+   requestAnimationFrame(()=>requestAnimationFrame(()=>{
+     if(!check.checked)return;
+     select('scope');b.scrollIntoView({behavior:'smooth',block:'start'});
+   }));
+ };
+ a.addEventListener('click',()=>select('subject'));
+ b.addEventListener('click',()=>{if(check.checked){select('scope');b.scrollIntoView({behavior:'smooth',block:'start'})}});
+ check.addEventListener('change',()=>{refresh();if(check.checked)openScope()});
+ // Other pre-existing modules may update the expert-confirmation checkbox programmatically.
+ // Observe ONLY its checked-state attribute and don't re-run the original confirmation logic.
+ select(check.checked?'scope':'subject');refresh();
 }
 function three(){
  const p=stage(3),actions=$('kt85Stage3Actions'),check=$('kt80ParcelsConfirmation')?.closest('label'),next=$('kt80ToLaw'),find=$('kt80FindParcels'),pdf=$('kt80PDF1');
