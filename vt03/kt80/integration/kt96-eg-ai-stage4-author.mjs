@@ -16,11 +16,13 @@ function boot(){
  const ui=make('section');ui.id='kt96EGAuthor';ui.style.cssText='padding:14px;margin:12px 0;border:2px solid #c9aa6b;border-radius:9px;background:#143c2b;color:#f7f0db';
  ui.append(make('h3','EG AI Автор · проект за Етап 4'));
  const evidenceBox=make('section');evidenceBox.id='kt105EvidenceOverview';evidenceBox.style.cssText='margin:12px 0;padding:12px;background:#244b36;border-radius:8px;line-height:1.5';
- ui.append(evidenceBox);
- const line=(name,value)=>{const block=make('div');block.style.cssText='margin-bottom:9px';const heading=make('strong',name);heading.style.cssText='display:block;color:#f1d18f';block.append(heading,make('div',value||'НЯМА ДАННИ'));return block;};
+ const style=make('style');
+ style.textContent='#kt105EvidenceOverview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;background:#102e23!important;border:1px solid #c1a665;padding:13px!important}#kt105EvidenceOverview h4{grid-column:1/-1;color:#f3d28c;font:bold 17px Verdana;margin:0 0 3px}#kt105EvidenceOverview .kt117-evidence-item{background:#294b38;border-left:3px solid #cbae72;border-radius:5px;padding:10px;min-width:0;font:13px/1.45 Verdana;color:#f5efe2}#kt105EvidenceOverview .kt117-evidence-item strong{display:block;color:#f1d28c;font:700 13px Verdana;margin:0 0 5px}#kt105EvidenceOverview .kt117-evidence-item>div{overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}#kt105EvidenceOverview .kt117-evidence-item:hover>div{-webkit-line-clamp:unset}#kt96EGAuthor{font-family:Verdana,Arial,sans-serif!important}#kt96EGAuthor h3{font:700 19px Verdana;color:#f5d18b}@media(max-width:760px){#kt105EvidenceOverview{grid-template-columns:1fr}}';
+ ui.append(style,evidenceBox);
+ const line=(name,value)=>{const block=make('div');block.className='kt117-evidence-item';block.title=value||'Няма данни';const heading=make('strong',name);block.append(heading,make('div',value||'НЯМА ДАННИ'));return block;};
  function showEstablishedEvidence(){
   const w=window.KT80WorkflowState||{},p=w.subjectConfirmed||{},h=collectStageEvidence(window),intake=w.intake||{};
-  evidenceBox.replaceChildren(make('h4','Установени данни от Етапи 1–3'));
+  evidenceBox.replaceChildren(make('h4','Установени данни'));
   const docs=Array.isArray(intake.document_texts)?intake.document_texts:[];
   const files=Array.isArray(intake.files)?intake.files:[];
   const names=files.map(x=>str(x?.name||x?.file||x?.source)).filter(Boolean);
