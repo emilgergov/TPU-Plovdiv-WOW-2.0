@@ -710,10 +710,28 @@ async function handleStage5Document(request,env){
  draft=subjectLine+"\n\n"+refLine+"\n\n"+draft;
 
  const editorialFlags=[];
- const evidence=input.confirmedStage4Text;
- const uncertainCategories=/ПРИЛОЖЕНИЕ\s*№\s*2[\s\S]{0,450}НЕОПРЕДЕЛЕНА|липс(?:ва|ват)\s+(?:пълн[а-я]*|конкретн[а-я]*|техническ[а-я]*|параметр[а-я]*)\s+(?:информация|данни|параметри)|не\s+позволяват?\s+(?:категоричн[а-я]*|еднозначн[а-я]*)\s+(?:квалификация|категоризация)|непълнот[а-я]*\s+на\s+(?:техническ[а-я]*|информация)/iu.test(evidence);
+ const evidence=input.confirmedStage4Text.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
+ // KT123: The source of legal certainty is the exact four-row expert-confirmed
+ // matrix, never a loose search across unrelated hypotheses and alternatives.
+ const testedRows=[
+  ["A1",/^\s*ПРИЛОЖЕНИЕ\s*№\s*1\s*КЪМ\s*ЗООС\s*:\s*(ПОЛОЖИТЕЛНА|ОТРИЦАТЕЛНА|НЕОПРЕДЕЛЕНА)\s*[—–-]\s*(.+)$/imu],
+  ["A2",/^\s*ПРИЛОЖЕНИЕ\s*№\s*2\s*КЪМ\s*ЗООС\s*:\s*(ПОЛОЖИТЕЛНА|ОТРИЦАТЕЛНА|НЕОПРЕДЕЛЕНА)\s*[—–-]\s*(.+)$/imu],
+  ["OS1",/^\s*ЧЛ\.\s*2\s*,?\s*АЛ\.\s*1\s*НАРЕДБА\s*ЗА\s*ОС\s*:\s*(ПОЛОЖИТЕЛНА|ОТРИЦАТЕЛНА|НЕОПРЕДЕЛЕНА)\s*[—–-]\s*(.+)$/imu],
+  ["OS2",/^\s*ЧЛ\.\s*2\s*,?\s*АЛ\.\s*2\s*НАРЕДБА\s*ЗА\s*ОС\s*:\s*(ПОЛОЖИТЕЛНА|ОТРИЦАТЕЛНА|НЕОПРЕДЕЛЕНА)\s*[—–-]\s*(.+)$/imu]
+ ];
+ const legalMatrix=Object.fromEntries(testedRows.map(([key,pattern])=>{
+  const row=evidence.match(pattern);return [key,row?{status:row[1].toUpperCase(),reason:row[2].trim()}:null];
+ }));
+ const expectedPanel1={A1:"ОТРИЦАТЕЛНА",A2:"ОТРИЦАТЕЛНА",OS1:"ОТРИЦАТЕЛНА",OS2:"ПОЛОЖИТЕЛНА"};
+ const inconsistentPanel1=confirmedPanelId===1?Object.entries(expectedPanel1).filter(([key,expected])=>legalMatrix[key]?.status!==expected):[];
+ if(inconsistentPanel1.length)return reply({
+  error:"STAGE4_LEGAL_MATRIX_CONFLICT",expertReviewRequired:true,projectOnly:true,
+  message:"Избраното направление №01 не съответства на конкретните нормативни изводи в Етап 4. Проверете доказателствата за посочените редове; системата не сменя процедурата.",
+  findings:inconsistentPanel1.map(([key,expected])=>({test:key,actual:legalMatrix[key]?.status||"НЕУСТАНОВЕНА",requiredForDirection:expected}))
+ },422);
+ const uncertainCategories=Object.values(legalMatrix).some(row=>row?.status==="НЕОПРЕДЕЛЕНА");
  const categoricalOutside=/(?:не\s+попада|извън\s+обхвата)\s+(?:в|на)\s+(?:приложени[ея]|приложения)\s*№\s*[12]|не\s+попада\s+в\s+нито\s+една\s+от\s+категориите|не\s+се\s+отнася\s+към\s+(?:никоя|категориите)/iu.test(draft);
- if(uncertainCategories&&categoricalOutside)return reply({error:"UNSUPPORTED_CATEGORICAL_CONCLUSION",message:"Не може да се твърди доказана неприложимост при неопределена нормативна категория. Върнете проекта за експертна проверка на Етап 4.",expertReviewRequired:true,projectOnly:true},422);
+ if(uncertainCategories&&categoricalOutside)return reply({error:"UNSUPPORTED_CATEGORICAL_CONCLUSION",message:"Проектът твърди неприложимост, но конкретна нормативна предпоставка в Етап 4 е неопределена. Проверете посочените редове и доказателствата; изборът на панел не се променя автоматично.",findings:Object.entries(legalMatrix).filter(([,row])=>row?.status==="НЕОПРЕДЕЛЕНА").map(([test,row])=>({test,actual:row.status,reason:row.reason})),expertReviewRequired:true,projectOnly:true},422);
  if(/(?:няма\s+липсващи\s+данни|не\s+са\s+установени\s+(?:липсващи|съществени\s+липси))[\s\S]{0,900}(?:липсват\s+(?:технически\s+)?данни|непълн(?:а|и)\s+(?:информация|данни))/iu.test(draft)||
  /(?:липсват\s+(?:технически\s+)?данни|непълн(?:а|и)\s+(?:информация|данни))[\s\S]{0,900}(?:няма\s+липсващи\s+данни|не\s+са\s+установени\s+(?:липсващи|съществени\s+липси))/iu.test(draft))
    editorialFlags.push("Вътрешно противоречие относно пълнотата на данните — необходима е експертна редакция.");
