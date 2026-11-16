@@ -1,0 +1,53 @@
+
+body[data-kt80-view="home"] #kt80ClearAll{display:none!important}
+body[data-kt80-view="home"] .kt80-dashboard-tile[data-kt80-kind="step"]{background:#193b2d!important;color:#e4e9e0!important;border:2px solid #688275!important;box-shadow:none!important}
+body[data-kt80-view="home"] .kt80-dashboard-tile[data-kt80-kind="step"][data-kt122-state="current"]{background:#ddbc76!important;color:#163b2d!important;border-color:#f6dd9b!important}
+body[data-kt80-view="home"] .kt80-dashboard-tile[data-kt80-kind="step"][data-kt122-state="done"]{background:#32745a!important;color:#fff8e1!important;border-color:#9fc9a8!important}
+body[data-kt80-view="home"] .kt80-dashboard-tile[data-kt80-kind="step"][data-kt122-state="pending"]{opacity:.65!important}
+body[data-kt80-view="home"] .kt80-dashboard-tile[data-kt80-kind="step"] :is(.kt80-dashboard-tile-text,.kt80-dashboard-tile-number){color:inherit!important}
+.kt80-dashboard-subnav{gap:9px!important;margin:7px auto!important}
+#kt80DashboardBack{padding:7px 12px!important;font:700 13px Verdana,Arial!important}
+.kt80-stage-panel{font-family:Verdana,Arial,sans-serif!important}
+.kt80-stage-panel .kt80-version-proof{display:none!important}
+.kt122-intake-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 10px}
+.kt122-intake-row .kt80-custom-file-field{flex:1 1 280px;margin:0!important}
+.kt122-intake-row #kt80ProcessFile{flex:0 0 auto;margin:0!important}
+.kt122-intake-row :is(#kt80ProcessFile,.kt80-custom-file-button){min-height:46px!important;display:inline-flex;align-items:center;justify-content:center;padding:10px 14px!important;font:700 13px Verdana,Arial!important}
+.kt80-stage-panel[data-panel="1"] #kt80AcceptedFormatsNote{font:12px/1.55 Verdana,Arial!important;max-height:64px;overflow:auto;opacity:.85}
+.kt80-stage-panel[data-panel="1"] #kt80InputStatus{font:12px/1.45 Verdana,Arial!important;padding:5px 0!important;margin:4px 0!important}
+.kt122-audit-fold{border:1px solid #6b8d75;border-radius:9px;margin:10px 0;padding:10px;background:#173b2c}
+.kt122-audit-fold>summary{cursor:pointer;color:#f0d28d;font:700 14px Verdana,Arial}
+.kt122-audit-fold #kt80DossierAudit{max-height:52vh;overflow:auto;margin-top:10px}
+.kt122-audit-fold #kt80DossierAudit>*{font-size:12px!important;line-height:1.45!important}
+.kt122-audit-fold #kt80DossierAudit button{padding:7px 10px!important;min-height:32px!important}
+.kt80-stage-panel[data-panel="1"] .kt80-template-help>p{font-size:12px!important;margin:5px 0!important}
+.kt122-stage2-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 12px}
+.kt122-stage2-tabs button{min-height:46px;font:700 14px Verdana;background:#214e3a;color:#eaddbd;border:1px solid #bb9d5c;border-radius:8px;cursor:pointer}
+.kt122-stage2-tabs button[aria-selected=true]{background:#dbba73!important;color:#17392c!important}
+.kt122-stage2-tabs button:disabled{opacity:.5;cursor:not-allowed}
+.kt80-stage-panel[data-panel="2"].kt122-tabs-on .kt80-v56-fields{display:block!important;grid-template-columns:1fr!important}
+.kt80-stage-panel[data-panel="2"].kt122-show-subject .kt80-v56-scope-container{display:none!important}
+.kt80-stage-panel[data-panel="2"].kt122-show-scope .kt80-v56-fields>.kt80-v56-field[aria-label="Проект на предмет"]{display:none!important}
+.kt80-stage-panel[data-panel="2"] .kt80-v56-fields>*{max-width:100%!important;width:100%!important}
+.kt80-stage-panel[data-panel="2"] .kt80-v56-title-row{margin:0!important;padding:0!important}
+.kt80-stage-panel[data-panel="2"] .kt80-v56-title-row p{font:12px/1.45 Verdana,Arial!important;margin:3px 0 8px!important}
+.kt80-stage-panel .kt80-subject-controls{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.kt80-stage-panel .kt80-subject-controls button{width:100%!important;min-height:47px!important;padding:8px!important;font-family:Verdana,Arial!important}
+.kt80-stage-panel[data-panel="3"] .kt85-stage3-header{padding:7px 12px!important}
+.kt80-stage-panel[data-panel="3"] .kt85-stage3-header .kt85-note{font-size:12px!important}
+.kt80-stage-panel[data-panel="3"] .kt85-gis-main{grid-template-columns:minmax(0,1.85fr) minmax(290px,1fr)!important}
+.kt80-stage-panel[data-panel="3"] #kt85Stage3Actions{display:flex!important;flex-direction:column!important;gap:8px!important}
+.kt80-stage-panel[data-panel="3"] #kt85Stage3Actions>*{width:100%!important;min-height:44px!important;grid-column:auto!important;box-sizing:border-box!important}
+.kt80-stage-panel[data-panel="3"] #kt85Stage3Actions #kt80FindParcels{background:#315c45!important;color:#f4e7cd!important}
+.kt80-stage-panel[data-panel="3"] #kt85Stage3Actions #kt80ToLaw{background:#dfbd76!important;color:#17382b!important;border:1px solid #f7dfa5!important;order:99!important}
+.kt80-stage-panel[data-panel="3"] .kt80-check:has(#kt80ParcelsConfirmation){font:700 13px/1.4 Verdana,Arial!important;padding:11px!important;min-height:48px!important}
+.kt80-stage-panel[data-panel="3"] .kt85-gis-sidebar{gap:7px!important}
+.kt80-stage-panel[data-panel="3"] .kt85-side-card{padding:10px 12px!important}
+.kt80-stage-panel[data-panel="3"] .kt85-compact-gis-status{max-height:94px;overflow:auto}
+.kt80-stage-panel[data-panel="3"] .kt85-side-card h3{font-size:14px!important}
+.kt80-stage-panel[data-panel="3"] .kt80-gis-detail{max-height:185px!important}
+.kt80-stage-panel[data-panel="4"] #kt96EGAuthor{max-width:100%!important}
+.kt80-stage-panel[data-panel="4"] #kt105EvidenceOverview{margin:8px 0!important}
+#kt116Stage5,#kt117Stage5{font-family:Verdana,Arial,sans-serif!important}
+#kt117Stage5 .kt117-actions button{min-width:154px;min-height:43px}
+@media(max-width:850px){.kt80-stage-panel[data-panel="3"] .kt85-gis-main{grid-template-columns:1fr!important}.kt80-stage-panel .kt80-subject-controls{grid-template-columns:1fr!important}}
