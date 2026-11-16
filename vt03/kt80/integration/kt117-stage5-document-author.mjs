@@ -46,8 +46,8 @@ function initialize(){
  const preview=make('div');preview.className='kt117-paper';preview.hidden=true;
  const textarea=make('textarea');textarea.hidden=true;textarea.style.display='none';textarea.setAttribute('aria-label','Редакция на административния документ');
  const confirmedText=make('div');confirmedText.className='kt117-note';
- const word=make('button','Създай Word по бланката');word.disabled=true;
- const wordInfo=make('p','Word генераторът ще се активира след свързване и проверка на утвърдената бланка на РИОСВ – Пловдив. Няма да се създава документ по приблизителен образец.');
+ const word=make('button','Създай Word по бланката');word.id='kt119WordCreate';word.disabled=true;
+ const wordInfo=make('p','За първия тест изберете проверената бланка на РИОСВ – Пловдив. След потвърждение текстът се пренася в DOCX без пренаписване.');
  wordInfo.className='kt117-note';
  const original=make('details');original.append(make('summary','Пълен експертно потвърден анализ от Етап 4'),make('pre'));
  const footer=make('div');footer.className='kt117-actions';footer.append(word);
@@ -74,7 +74,7 @@ function initialize(){
   const v=versions.at(-1);if(!v)return;
   preview.textContent=v.text;preview.hidden=false;textarea.hidden=true;textarea.style.display='none';edit.hidden=false;save.hidden=true;cancel.hidden=true;
   confirm.hidden=!!confirmed;confirmedText.textContent=confirmed?'Потвърден текст · версия '+confirmed.version+'. Експертните редакции остават окончателни за документа.':'';
-  footer.hidden=!confirmed;word.disabled=true;
+  footer.hidden=!confirmed;word.disabled=!(confirmed&&window.KT119TemplateReady?.());
  };
  generate.onclick=async()=>{
   sync();if(!source||busy)return;
@@ -122,8 +122,10 @@ function initialize(){
   const v=versions.at(-1);
   confirmed=Object.freeze({...v,caseId:source.caseId,stage4Version:source.version,
     expert:source.expert,confirmedAt:new Date().toISOString()});
-  render();note.textContent='Текстът е потвърден от експерта. Остава свързването с утвърдената Word бланка.';
+  render();note.textContent='Текстът е потвърден от експерта. Можете да създадете DOCX по проверената бланка.';
  };
+ word.addEventListener('click',()=>window.KT119Download?.());
+ document.addEventListener('kt119:template-ready',()=>{word.disabled=!(confirmed&&window.KT119TemplateReady?.());});
  document.addEventListener('kt116:stage4-confirmed',()=>{source=null;sync()});
  document.addEventListener('kt116:stage5-open',()=>sync());
  ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'].forEach(x=>document.addEventListener(x,()=>{source=null;sync()}));
