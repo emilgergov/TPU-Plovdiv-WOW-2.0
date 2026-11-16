@@ -73,3 +73,64 @@ body[data-kt80-view="stage"] .kt84-primary-finding h2{font:700 16px/1.35 Verdana
 /* VB-05: equal visual sizes for peer actions in expert authoring screens. */
 #kt116Editor .actions button{min-height:44px!important;min-width:160px!important;font-family:Verdana,Arial,sans-serif!important}
 #kt117Stage5 .kt117-actions button{min-height:44px!important;flex:1 1 155px}
+
+/* KT122 acceptance: central visual contract and equal-size controls */
+#kt80DashboardSubnav{display:flex!important;align-items:center!important;gap:10px!important;flex-wrap:wrap!important}
+#kt80DashboardSubnav .kt122-global-back{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:37px!important;width:auto!important;margin:0!important;padding:6px 13px!important;font:700 13px Verdana,Arial!important;order:2}
+#kt80DashboardSubnav .kt122-global-back[hidden]{display:none!important}
+#kt80ScreenTitle{order:3;min-width:200px}
+.kt80-stage-panel .kt122-back{float:none!important}
+.kt80-stage-panel[data-panel="1"] .kt80-template-help[hidden]{display:none!important}
+.kt80-stage-panel[data-panel="1"] .kt122-intake-row{display:grid!important;grid-template-columns:minmax(0,1fr) 235px!important;align-items:stretch!important;gap:12px!important}
+.kt80-stage-panel[data-panel="1"] .kt80-custom-file-field{display:grid!important;grid-template-columns:235px minmax(0,1fr)!important;gap:10px!important;min-width:0}
+.kt80-stage-panel[data-panel="1"] .kt80-custom-file-button,
+.kt80-stage-panel[data-panel="1"] #kt80ProcessFile{width:235px!important;min-width:235px!important;max-width:235px!important;min-height:52px!important;margin:0!important;font:700 14px Verdana,Arial!important}
+.kt80-stage-panel[data-panel="1"] .kt122-intake-row #kt80ProcessFile{align-self:stretch!important}
+.kt80-stage-panel[data-panel="1"] #kt80DossierAudit{max-height:55vh!important;overflow-y:auto!important}
+.kt80-stage-panel[data-panel="1"] .kt80-file-status-row{grid-template-columns:145px minmax(0,1fr) 115px!important;gap:4px 9px!important;padding:6px 3px!important;align-items:center!important}
+.kt80-stage-panel[data-panel="1"] .kt80-file-status{font:700 11px/1.15 Verdana,Arial!important;padding:5px 6px!important;max-width:145px!important}
+.kt80-stage-panel[data-panel="1"] .kt80-file-name{font:700 12px/1.35 Verdana,Arial!important;min-width:0!important}
+.kt80-stage-panel[data-panel="1"] .kt80-file-status-row button{min-height:28px!important;max-width:115px!important;padding:5px 8px!important;font:700 11px Verdana,Arial!important;justify-self:end!important}
+.kt80-stage-panel[data-panel="1"] .kt80-file-reason{font:11px/1.35 Verdana,Arial!important;grid-column:2/-1!important;margin:0!important;padding:0!important;display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:1!important;overflow:hidden!important;cursor:pointer!important}
+.kt80-stage-panel[data-panel="1"] .kt80-file-reason.kt122-unclamp{-webkit-line-clamp:unset!important;display:block!important;white-space:normal!important}
+.kt80-stage-panel[data-panel="1"] .kt80-file-status-summary{font:700 12px/1.5 Verdana,Arial!important}
+.kt80-stage-panel[data-panel="1"] .kt80-workflow-audit h3{font:700 14px Verdana,Arial!important}
+.kt80-stage-panel[data-panel="2"] .kt122-stage2-tabs button{min-height:46px!important}
+.kt80-stage-panel[data-panel="2"] button:has(+ #kt80ScopeConfirmation){max-width:100%!important}
+.kt80-stage-panel[data-panel="2"] button{font-family:Verdana,Arial!important}
+.kt80-stage-panel[data-panel="2"] .kt80-v56-field textarea{min-height:155px!important}
+.kt80-stage-panel[data-panel="2"] .kt80-check{font:700 13px Verdana,Arial!important;padding:10px 12px!important}
+.kt80-stage-panel[data-panel="2"] .kt80-v56-fields{margin:4px 0 8px!important}
+.kt122-gis-radios{display:grid;gap:9px;margin:7px 0 12px}
+.kt122-gis-label{font:700 13px Verdana,Arial;color:#f7d18e}
+.kt122-radio-option{display:flex;align-items:center;gap:9px;padding:12px 14px;border:1px solid #8ea789;background:#254d3b;border-radius:8px;font:700 13px Verdana,Arial;cursor:pointer;color:#f7edcf}
+.kt122-radio-option:has(input:checked){background:#dbba75;color:#183a2b;border:2px solid #fff1be}
+.kt122-radio-option input{width:18px;height:18px;accent-color:#1f583d}
+.kt82-normative-gate .kt122-original-gis-select{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
+.kt82-normative-gate .kt82-gate-content{max-width:660px!important;padding:18px 23px!important;overflow:visible!important}
+.kt82-normative-gate .kt82-gate-pair{margin:7px 0!important;padding:7px 10px!important}
+.kt82-normative-gate .kt82-gate-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
+.kt82-normative-gate .kt82-gate-actions button{min-height:45px!important;width:100%!important}
+.kt80-stage-panel[data-panel="3"] .kt122-gis-detail-fold{border:1px solid #638777;padding:7px 10px;border-radius:8px;margin:6px 0}
+.kt80-stage-panel[data-panel="3"] .kt122-gis-detail-fold summary{font:700 12px Verdana,Arial;color:#d7b770;cursor:pointer}
+.kt80-stage-panel[data-panel="3"] .kt122-pdf-status{font:12px/1.45 Verdana,Arial!important;background:#234d3a;padding:8px!important;border-left:3px solid #d6b76f;margin:5px 0!important}
+.kt80-stage-panel[data-panel="3"] .kt122-main-gis-summary{font:700 13px Verdana,Arial;color:#efd18e;padding:7px 10px}
+.kt80-stage-panel[data-panel="3"] .kt85-side-card{padding:8px 11px!important}
+#kt116Editor .kt122-decision-summary{display:grid;gap:6px;background:#26513b;border-left:5px solid #dabc73;padding:15px;margin:12px 0;font:700 15px/1.45 Verdana,Arial}
+#kt116Editor .kt122-decision-summary strong{font:700 18px/1.4 Verdana,Arial;color:#f1d38c}
+#kt116Editor .kt122-decision-summary span{font:13px/1.45 Verdana,Arial;color:#f6eed8}
+#kt116Editor .kt122-normative-fold{margin:9px 0 12px;padding:10px;border:1px solid #6c8e76;border-radius:8px}
+#kt116Editor .kt122-normative-fold>summary{font:700 14px Verdana,Arial;color:#f5d18b;cursor:pointer}
+#kt116Editor .kt122-normative-fold .paper{font:13px/1.55 Verdana,Arial;white-space:pre-wrap;padding:12px!important}
+#kt116Editor .kt122-expert-row{display:grid!important;grid-template-columns:minmax(160px,1fr) minmax(250px,1.6fr) minmax(160px,1fr)!important;gap:10px!important;align-items:end!important;margin:10px 0!important}
+#kt116Editor .kt122-expert-row>button{width:100%!important;min-height:49px!important;margin:0!important}
+#kt116Editor .kt122-expert-id label{font:700 12px Verdana,Arial!important;display:block!important;margin:0!important}
+#kt116Editor .kt122-expert-id input{display:block;width:100%;min-height:43px;box-sizing:border-box}
+#kt117Stage5 .kt122-stage5-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,1fr);gap:12px}
+#kt117Stage5 .kt122-stage5-left,#kt117Stage5 .kt122-stage5-right{min-width:0;display:flex;flex-direction:column;gap:3px}
+#kt117Stage5 .kt122-stage5-grid .kt117-reference{margin:0 0 5px}
+#kt117Stage5 .kt122-stage5-grid .kt117-main{font:700 18px/1.4 Verdana,Arial;margin:0}
+#kt117Stage5 .kt122-stage5-right>div{white-space:pre-wrap;font:12px/1.5 Verdana,Arial;overflow-wrap:anywhere}
+#kt117Stage5 .kt122-duplicate-note{display:none!important}
+#kt117Stage5 .kt117-note{margin:6px 0!important}
+@media(max-width:870px){.kt80-stage-panel[data-panel="1"] .kt122-intake-row{grid-template-columns:1fr!important}.kt80-stage-panel[data-panel="1"] .kt80-custom-file-field{grid-template-columns:1fr!important}#kt116Editor .kt122-expert-row{grid-template-columns:1fr!important}#kt117Stage5 .kt122-stage5-grid{grid-template-columns:1fr!important}}
