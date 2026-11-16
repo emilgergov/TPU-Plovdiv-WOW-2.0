@@ -24,10 +24,9 @@ function install(){
    r.append(prop,t);p.append(r);
  };
  const segmented=(p,line,isSubject=false)=>{
-   // Institutional recipient block: labels are bold; values remain regular.
-   if(line==='ДО'){addText(p,line,true);return;}
-   for(const label of ['Възложител:','Адрес:']){
-     if(line.startsWith(label)){addText(p,label,true);if(line.length>label.length)addText(p,line.slice(label.length));return;}
+   // Expert-approved recipient block: each complete line is bold.
+   if(line==='ДО'||line.startsWith('Възложител:')||line.startsWith('Адрес:')){
+     addText(p,line,true);return;
    }
    if(isSubject&&line.startsWith('Относно:')){
      addText(p,'Относно:',true);
