@@ -29,7 +29,7 @@ const header=xml('<w:hdr '+ns+'><w:tbl><w:tblPr><w:tblW w:type="dxa" w:w="9638"/
  p('Министерство на околната среда и водите')+
  p('Регионална инспекция по околната среда и водите – Пловдив')+
  '</w:tc></w:tr></w:tbl></w:hdr>');
-const footer=xml('<w:ftr '+ns+'><w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="6"/></w:pBdr></w:pPr></w:p>'+
+const footer=xml('<w:ftr '+ns+'><w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="6"/></w:pBdr></w:pPr></w:p>'+ '<w:p>'+pic('rIdEco','Знак за околната среда',270000,220000)+'</w:p>'+
  p('4000, гр. Пловдив, бул. „Марица“ № 122, тел./факс 032 628994','center')+
  p('Зелен телефон 032 643245; e-mail: riosv@plovdiv.riew.gov.bg; https://plovdiv.riew.gov.bg','center')+'</w:ftr>');
 const parts={
