@@ -1,3 +1,4 @@
+import {ROUTE_PRECONDITIONS,LEGAL_TESTS} from "./kt123-normative-scope.mjs";
 /**
  * KT123 bounded, deterministic, case-neutral decision compatibility engine.
  * It NEVER establishes legal applicability by itself. It checks mutually
@@ -56,6 +57,8 @@ export function evaluateDecision(input){
    typeof physicalGap.factId==="string"&&physicalGap.factId.length>0&&
    typeof physicalGap.sourceId==="string"&&physicalGap.sourceId.length>0&&
    typeof physicalGap.legalCriterion==="string"&&physicalGap.legalCriterion.length>0;
+ const mandatoryTests=ROUTE_PRECONDITIONS[selectedPanel]?.legalTests||[];
+ if(mandatoryTests.length&&!legalSourceVerified)warnings.push({code:"ROUTE_LEGAL_SOURCE_NOT_CONFIRMED",tests:mandatoryTests});
  const validPanel=Number.isInteger(selectedPanel)&&selectedPanel>=1&&selectedPanel<=22;
  if(!validPanel)errors.push({code:"UNKNOWN_OR_UNSELECTED_ROUTE",test:"PANEL"});
  if(selectedPanel===1&&!panel1Compatible)
@@ -77,6 +80,8 @@ export function evaluateDecision(input){
   modelScope:"ZOOS_A1_A2_OS_ART2_AND_22_ROUTE_SAFETY",
   decisiveEvidenceVerified:Boolean(authoritativeEvidence&&legalSourceVerified),
   canIssueAdministrativeAct:false,
+  requiredLegalTests:mandatoryTests,
+  availableLegalTestCount:LEGAL_TESTS.length,
   expertApprovalRequired:true
  });
 }
