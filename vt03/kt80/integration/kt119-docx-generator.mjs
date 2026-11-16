@@ -90,6 +90,18 @@ function install(){
      const body=dom.getElementsByTagNameNS(W,'body')[0];
      if(!body)throw Error('Липсва тяло на документа.');
      const paragraphs=Array.from(body.childNodes).filter(n=>n.namespaceURI===W&&n.localName==='p');
+     // Enforce the signed-off KT119 layout independently of Word's inherited paragraph styles.
+     const allPar=Array.from(body.getElementsByTagNameNS(W,'p'));
+     const signatureParas=allPar.filter(p=>textIn(p).trim().startsWith('Електронен подпис:'));
+     if(signatureParas.length!==2)throw Error('Бланката трябва да съдържа точно два блока за електронен подпис.');
+     const firstSignature=signatureParas[0];
+     let signProps=Array.from(firstSignature.childNodes).find(n=>n.namespaceURI===W&&n.localName==='pPr');
+     if(!signProps){signProps=WN('pPr');firstSignature.insertBefore(signProps,firstSignature.firstChild)}
+     for(const jc of Array.from(signProps.getElementsByTagNameNS(W,'jc')))jc.parentNode.removeChild(jc);
+     const align=WN('jc');align.setAttributeNS(W,'w:val','left');signProps.append(align);
+     const closing=allPar.find(p=>textIn(p).trim()==='С уважение,');
+     if(!closing)throw Error('Липсва заключителният реквизит „С уважение,“.');
+     replacePara(closing,'С уважение,',false,true);
      const locate=token=>paragraphs.find(p=>textIn(p).includes(token));
      const subj=locate('{{SUBJECT}}'),title=locate('{{DOCUMENT_TITLE}}'),anchor=locate('{{BODY_ANCHOR}}');
      if(!subj||!title||!anchor)throw Error('Липсва динамичен раздел в бланката.');
