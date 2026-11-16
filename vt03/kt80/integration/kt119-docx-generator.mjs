@@ -25,9 +25,14 @@ function install(){
  };
  const segmented=(p,line,isSubject=false)=>{
    if(isSubject&&line.startsWith('Относно:')){
-     addText(p,'Относно:',true);addText(p,line.slice(8),false,true);return;
+     addText(p,'Относно:',true);
+     const rest=line.slice('Относно:'.length),quoted=/„[^“]+“/gu;
+     let start=0,m;
+     while((m=quoted.exec(rest))){if(m.index>start)addText(p,rest.slice(start,m.index),false,true);addText(p,m[0],true);start=m.index+m[0].length}
+     if(start<rest.length)addText(p,rest.slice(start),false,true);
+     return;
    }
-   const regex=/(?:чл\.\s*\d+[а-я]?|ал\.\s*\d+|т\.\s*\d+|приложени(?:е|ето)\s*№\s*\d+)/giu;
+   const regex=/(?:чл\.\s*\d+[а-я]?|ал\.\s*\d+|т\.\s*\d+|§\s*\d+|приложени(?:е|ето|я)\s*№\s*\d+)/giu;
    let start=0,m;while((m=regex.exec(line))){
      if(m.index>start)addText(p,line.slice(start,m.index));
      addText(p,m[0],true);start=m.index+m[0].length;
