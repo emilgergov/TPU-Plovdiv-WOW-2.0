@@ -30,6 +30,18 @@ function mark(){
   card.classList.add('kt123-panel-card');
   const b=document.createElement('span');b.className='kt123-panel-mark';b.dataset.kind=profile(id);b.textContent=visibleType(id);kind.after(b);
  });
+ // The primary dashboard uses BUTTON tiles, not the legacy #groups article.card catalog.
+ document.querySelectorAll('#kt80DashboardRoutes .kt80-dashboard-tile').forEach(tile=>{
+  const number=(tile.querySelector('.kt80-dashboard-tile-number')?.textContent||tile.textContent||'').match(/№\\s*0?(\\d{1,2})/u);
+  const id=Number(tile.dataset.kt80Index||number?.[1]||0);
+  if(id<1||id>22)return;
+  if(tile.querySelector('.kt123-panel-mark'))return;
+  const markNode=document.createElement('span');markNode.className='kt123-panel-mark';
+  markNode.dataset.kind=profile(id);
+  markNode.textContent=visibleType(id);
+  const label=tile.querySelector('.kt80-dashboard-tile-number');
+  if(label)label.after(markNode);else tile.prepend(markNode);
+ });
  const title=document.getElementById('dialogTitle'),meta=document.getElementById('dialogMeta');
  const m=(title?.textContent||'').match(/№\s*0?(\d{1,2})/u);
  if(m&&meta){
@@ -38,9 +50,10 @@ function mark(){
   if(!meta.textContent.includes(suffix))meta.textContent+=suffix;
  }
 }
-const root=document.getElementById('groups'),title=document.getElementById('dialogTitle');
+const root=document.getElementById('groups'),title=document.getElementById('dialogTitle'),dash=document.getElementById('kt80DashboardRoutes');
+if(dash)new MutationObserver(mark).observe(dash,{childList:true,subtree:true});
 if(root)new MutationObserver(mark).observe(root,{childList:true,subtree:true});
 if(title)new MutationObserver(mark).observe(title,{childList:true,characterData:true,subtree:true});
 mark();
-window.KT123PanelArchitecture=Object.freeze({version:'KT123-B1',profile,isIndependent:id=>profile(Number(id))==='independent'});
+window.KT123PanelArchitecture=Object.freeze({version:'KT123-B2',profile,isIndependent:id=>profile(Number(id))==='independent'});
 })();
