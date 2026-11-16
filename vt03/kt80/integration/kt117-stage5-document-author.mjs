@@ -143,6 +143,10 @@ function initialize(){
  confirm.onclick=()=>{
   if(!source||!live()||live()?.version!==source.version||!versions.length)return;
   const v=versions.at(-1);
+  if(!/^Относно:\s*Уведомление за инвестиционно предложение \(ИП\)\s+„[^“]+“/u.test(v.text.trim())){
+    note.textContent='Редът „Относно:“ трябва да съдържа „Уведомление за инвестиционно предложение (ИП)“, следвано от наименованието на ИП в кавички. Редактирайте текста преди потвърждение.';
+    return;
+  }
   confirmed=Object.freeze({...v,caseId:source.caseId,stage4Version:source.version,
     expert:source.expert,confirmedAt:new Date().toISOString()});
   render();note.textContent='Текстът е потвърден от експерта. Можете да създадете DOCX по проверената бланка.';
