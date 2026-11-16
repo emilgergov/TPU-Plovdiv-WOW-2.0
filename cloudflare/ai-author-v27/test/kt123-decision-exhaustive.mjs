@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
+import {LEGAL_TESTS,ROUTE_PRECONDITIONS,MODEL_BOUNDARY} from "../src/kt123-normative-scope.mjs";
 import {evaluateDecision,evaluateDraft,STATUSES,TEST_KEYS} from "../src/kt123-decision-model.mjs";
+assert.equal(LEGAL_TESTS.length,10);
+assert.equal(Object.keys(ROUTE_PRECONDITIONS).length,22);
+assert.equal(ROUTE_PRECONDITIONS[15].automaticFinalAct,false);
+assert(ROUTE_PRECONDITIONS[1].legalTests.includes("OS_ART2_2"));
+assert.equal(MODEL_BOUNDARY.documentationOnly,true);
 const positive="ПОЛОЖИТЕЛНА",negative="ОТРИЦАТЕЛНА",unknown="НЕОПРЕДЕЛЕНА";
 let runs=0,positiveBoth=0,unknownFirst=0,panelOneBlocked=0;
 const description="Проверено по независими доказателства и относим нормативен текст; подлежи на експертно установяване преди произнасяне.";
@@ -11,6 +17,7 @@ for(const A1 of STATUSES)for(const A2 of STATUSES)for(const OS1 of STATUSES)for(
   assert.equal(out.canIssueAdministrativeAct,false);
   assert.equal(out.expertApprovalRequired,true);
   assert.equal(out.selectedPanel,panel);
+  assert.deepEqual(out.requiredLegalTests,ROUTE_PRECONDITIONS[panel].legalTests);
   if(OS1===positive&&OS2===positive){positiveBoth++;assert(out.errors.some(x=>x.code==="OS_ART2_MUTUALLY_EXCLUSIVE"))}
   if(OS1===unknown&&OS2===positive){unknownFirst++;assert(out.errors.some(x=>x.code==="OS_ART2_PREMATURE_EXCLUSION"))}
   if(panel===1){
