@@ -21,7 +21,10 @@ if(host&&five){
  const next=mk('button','Продължи към Етап 5');next.hidden=true;
  const save=mk('button','Запази защитено копие');save.hidden=true;
  const password=mk('input');password.type='password';password.placeholder='Парола за копието (12+ знака)';password.autocomplete='new-password';password.hidden=true;
- ui.append(header,alerts,paper,textarea,actorLabel,actions,note,next,save,password);
+ const archiveMenu=mk('details');archiveMenu.style.cssText='margin:14px 0;border:1px solid #749170;border-radius:7px;padding:10px';
+ archiveMenu.append(mk('summary','Запазване на защитено копие'),password,save);
+ ui.append(header,alerts,paper,textarea,actorLabel,actions,note,next,archiveMenu);
+ archiveMenu.hidden=true;
  host.append(ui);
  const restoreBar=mk('details');restoreBar.id='kt116Restore';restoreBar.style.cssText='padding:12px;margin:8px 0;color:#efd4a0;font:13px Verdana;background:#173b2b;border:1px solid #7b8e6f;border-radius:7px';
  const restoreLabel=mk('label','Повторно отваряне на защитено копие');
@@ -31,6 +34,23 @@ if(host&&five){
  const restoreStatus=mk('p','Копието се зарежда само след проверка на предмета, обхвата и имотите; след възстановяване е необходимо ново потвърждение.');
  restoreBar.append(mk('summary','Отвори запазено предложение'),restoreLabel,restoreFile,restoreKey,restoreBtn,restoreStatus);host.append(restoreBar);
  const stage5=mk('section');stage5.id='kt116Stage5';five.prepend(stage5);
+ const confirmDialog=mk('dialog');confirmDialog.id='kt117ConfirmDialog';
+ confirmDialog.style.cssText='background:#153b2d;color:#f4e9ce;border:2px solid #d0b06c;border-radius:10px;padding:20px;max-width:420px;font:14px/1.6 Verdana';
+ const dlgMessage=mk('p'),dlgActions=mk('div');dlgActions.style.cssText='display:flex;gap:12px;justify-content:flex-end;margin-top:18px';
+ const dlgYes=mk('button','Потвърди'),dlgNo=mk('button','Отказ');
+ [dlgYes,dlgNo].forEach(b=>{b.style.cssText='border:0;border-radius:6px;background:#d7b673;color:#153a29;font:bold 13px Verdana;padding:10px 15px;cursor:pointer'});
+ dlgActions.append(dlgNo,dlgYes);confirmDialog.append(dlgMessage,dlgActions);document.body.append(confirmDialog);
+ function confirmStyled(message){
+  dlgMessage.textContent=message;
+  return new Promise(resolve=>{
+   let finished=false;
+   const close=ok=>{if(finished)return;finished=true;confirmDialog.close();resolve(ok)};
+   dlgYes.onclick=()=>close(true);dlgNo.onclick=()=>close(false);
+   confirmDialog.oncancel=e=>{e.preventDefault();close(false)};
+   confirmDialog.showModal();
+  });
+ }
+
  const evidence=()=>collectStageEvidence(window);
  const current=()=>proposal&&proposal.localId===evidence().caseId&&proposal.revision===evidence().evidenceRevision&&proposal.generation===evidence().generation&&proposal.key===evidence().key;
  const titlePattern=/^(ПРИЛОЖЕНИЕ № [12] КЪМ ЗООС|ЧЛ\. 2, АЛ\. [12] НАРЕДБА ЗА ОС|ВОДЕЩО ПРЕДЛОЖЕНИЕ|ИЗБРАН ПАНЕЛ|ЗАЩО ТОЗИ ПАНЕЛ|ЗАЩО НЕ АЛТЕРНАТИВИТЕ|Фактическа основа|Нормативни предпоставки и граници на проверката|Мотивирано предложение|Данни за експертна проверка)\s*[:：]/iu;
@@ -48,9 +68,10 @@ if(host&&five){
   ui.hidden=false;paper.hidden=false;textarea.hidden=true;change.hidden=false;confirm.hidden=false;storeEdit.hidden=true;cancel.hidden=true;
   render(paper,history.at(-1).text);alertContent.replaceChildren();
   proposal.warnings.forEach(w=>alertContent.append(mk('p',w)));alerts.hidden=!proposal.warnings.length;
-  next.hidden=!approved;save.hidden=!approved;password.hidden=!approved;
+  next.hidden=!approved;archiveMenu.hidden=!approved;save.hidden=!approved;password.hidden=!approved;
  }
  function render5(){
+  if(window.KT117Document)return;
   stage5.replaceChildren(mk('h3','5. Определяне на процедурата по ИП'));
   if(!approved||!current()){stage5.append(mk('p','Няма потвърдено предложение за текущата преписка.'));return;}
   stage5.append(mk('h4','Потвърдена версия '+approved.version));
@@ -78,11 +99,11 @@ if(host&&five){
   approved=null;note.textContent='Редакцията е запазена за тази работна сесия.';display();render5();
  };
  cancel.onclick=display;
- confirm.onclick=()=>{
+ confirm.onclick=async()=>{
   if(!current()){note.textContent='Данните по преписката са променени.';return;}
   const expert=val(actor.value);if(expert.length<2){note.textContent='Посочете експерта.';actor.focus();return;}
   const v=history.at(-1);
-  if(!window.confirm('Потвърждавате версия '+v.version+' за предаване към Етап 5?'))return;
+  if(!await confirmStyled('Потвърждавате версия '+v.version+' за предаване към Етап 5?'))return;
   approved=Object.freeze({caseId:proposal.caseId,requestId:proposal.requestId,evidenceRevision:proposal.revision,
    version:v.version,text:v.text,original:proposal.original,warnings:[...proposal.warnings],
    expert,approvedAt:new Date().toLocaleString('bg-BG'),expertApproved:true});
