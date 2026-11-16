@@ -32,7 +32,7 @@ function mark(){
  });
  // The primary dashboard uses BUTTON tiles, not the legacy #groups article.card catalog.
  document.querySelectorAll('#kt80DashboardRoutes .kt80-dashboard-tile').forEach(tile=>{
-  const number=(tile.querySelector('.kt80-dashboard-tile-number')?.textContent||tile.textContent||'').match(/№\\s*0?(\\d{1,2})/u);
+  const number=(tile.querySelector('.kt80-dashboard-tile-number')?.textContent||tile.textContent||'').match(/№\s*0?(\d{1,2})/u);
   const id=Number(tile.dataset.kt80Index||number?.[1]||0);
   if(id<1||id>22)return;
   if(tile.querySelector('.kt123-panel-mark'))return;
