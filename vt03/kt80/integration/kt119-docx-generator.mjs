@@ -36,8 +36,13 @@ function install(){
      // programme, project or investment proposal. Only the *title* that is
      // explicitly quoted as the document subject is bold; location quotes
      // (e.g. the locality) are left italic.
-     const titleMatch=rest.match(/(?:^|[\s:])((?:„[^“\n]{2,180}“))(?=\s|[,.;]|$)/u);
-     const approvedTitle=titleMatch?.[1]||'';
+     const quoted=[...rest.matchAll(/„[^“\n]{2,180}“/gu)];
+     // A quoted locality, street, district or zone is *not* the title of the document.
+     const candidate=quoted.find(m=>{
+       const before=rest.slice(0,m.index).trimEnd();
+       return !/(?:местност|ул\.|улица|квартал|район|село|гр\.|град|землище|община|област|защитена\s+зона|зона)\s*$/iu.test(before);
+     });
+     const approvedTitle=candidate?.[0]||'';
      const titleAt=approvedTitle?rest.indexOf(approvedTitle):-1;
      if(titleAt>=0){
        if(titleAt>0)addText(p,rest.slice(0,titleAt),false,true);
