@@ -20,7 +20,7 @@ const documentLabel=line=>{
 function initialize(){
  const panel=document.getElementById('kt116Stage5');
  if(!panel)return;
- let source=null,versions=[],confirmed=null,busy=false;
+ let source=null,versions=[],confirmed=null,busy=false,editorialIssues=[];
  const endpoint='https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/stage5-document';
  const stylesheet=make('style');
  stylesheet.textContent='#kt117Stage5{color:#f7f0df;font:14px/1.6 Verdana,Arial}#kt117Stage5 .kt117-context{padding:14px;background:#264e3b;border:1px solid #8a9b79;border-radius:8px;margin:12px 0}#kt117Stage5 .kt117-heading{font-weight:700;color:#f6d18a;margin:0 0 9px}#kt117Stage5 .kt117-main{font-size:18px;font-weight:700;color:#ffdfa2;margin:8px 0}#kt117Stage5 .kt117-reference{font-weight:700;color:#f6d18a;margin:6px 0 12px}#kt117Stage5 .kt117-paper{padding:16px;background:#284d3c;border-left:4px solid #d9bb7a;white-space:pre-wrap;line-height:1.7;margin:12px 0}#kt117Stage5 .kt117-actions{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}#kt117Stage5 .kt117-actions button{font:700 13px Verdana,Arial;background:#dab972;color:#163a29;border:none;border-radius:6px;padding:11px 14px;cursor:pointer}#kt117Stage5 .kt117-actions button[disabled]{opacity:.5;cursor:default}#kt117Stage5 [hidden]{display:none!important}#kt117Stage5 textarea[hidden]{display:none!important}#kt117Stage5 .kt117-actions button[hidden]{display:none!important}#kt117Stage5 textarea{width:100%;min-height:360px;box-sizing:border-box;font:13px/1.6 Verdana,Arial;background:#fffdf5;color:#142e22;padding:12px;border-radius:6px}#kt117Stage5 .kt117-note{font-size:12px;color:#f2d398;white-space:pre-wrap}#kt117Stage5 details{padding:10px;border:1px solid #68896e;border-radius:7px;margin:10px 0}#kt117Stage5 summary{color:#f5d18b;cursor:pointer}';
@@ -40,6 +40,9 @@ function initialize(){
  edit.hidden=true;save.hidden=true;cancel.hidden=true;confirm.hidden=true;
  action.append(generate); const reviewActions=make('div'); reviewActions.className='kt117-actions'; reviewActions.append(edit,save,cancel,confirm);
  const note=make('p');note.className='kt117-note';
+ const editorial=make('details');editorial.hidden=true;
+ const editorialTitle=make('summary','Бележки за редакция');editorial.append(editorialTitle);
+ const editorialContent=make('div');editorial.append(editorialContent);
  const preview=make('div');preview.className='kt117-paper';preview.hidden=true;
  const textarea=make('textarea');textarea.hidden=true;textarea.style.display='none';textarea.setAttribute('aria-label','Редакция на административния документ');
  const confirmedText=make('div');confirmedText.className='kt117-note';
@@ -48,14 +51,14 @@ function initialize(){
  wordInfo.className='kt117-note';
  const original=make('details');original.append(make('summary','Пълен експертно потвърден анализ от Етап 4'),make('pre'));
  const footer=make('div');footer.className='kt117-actions';footer.append(word);
- ui.append(heading,context,action,note,preview,textarea,reviewActions,confirmedText,footer,wordInfo,original);
+ ui.append(heading,context,action,note,editorial,preview,textarea,reviewActions,confirmedText,footer,wordInfo,original);
  panel.replaceChildren(ui);
  const live=()=>window.KT116ExpertHandoff?.snapshot?.()||null;
  function sync(){
   const a=live();
-  if(!a){source=null;versions=[];confirmed=null;context.hidden=true;action.hidden=true;preview.hidden=true;textarea.hidden=true;textarea.style.display='none';reviewActions.hidden=true;footer.hidden=true;original.hidden=true;note.textContent='Няма потвърдено предложение по текущата преписка.';return;}
+  if(!a){source=null;versions=[];confirmed=null;editorialIssues=[];editorial.hidden=true;context.hidden=true;action.hidden=true;preview.hidden=true;textarea.hidden=true;textarea.style.display='none';reviewActions.hidden=true;footer.hidden=true;original.hidden=true;note.textContent='Няма потвърдено предложение по текущата преписка.';return;}
   if(source&&source.caseId===a.caseId&&source.version===a.version&&source.text===a.text)return;
-  source=a;versions=[];confirmed=null;context.hidden=false;action.hidden=false;reviewActions.hidden=false;footer.hidden=true;
+  source=a;versions=[];confirmed=null;editorialIssues=[];editorial.hidden=true;context.hidden=false;action.hidden=false;reviewActions.hidden=false;footer.hidden=true;
   original.hidden=false;original.querySelector('pre').textContent=a.text;
   let panelLine=a.text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\b[^\n]*/iu)?.[0]||'Административно направление, потвърдено от експерта';
   direction.textContent=documentLabel(panelLine);
@@ -96,8 +99,11 @@ function initialize(){
      data.expertReviewRequired!==true||clean(data.draft).length<120){
      note.textContent='Отговорът не съответства на потвърдената преписка.';return;
    }
+   editorialIssues=Array.isArray(data.editorialFlags)?data.editorialFlags.filter(x=>typeof x==='string').slice(0,8):[];
+   editorialContent.replaceChildren(...editorialIssues.map(x=>make('p',x)));
+   editorial.hidden=!editorialIssues.length;
    versions.push({version:versions.length+1,text:data.draft,kind:'предложение на EG Автора'});
-   confirmed=null;render();note.textContent='Проектът е готов за експертна редакция или потвърждение.';
+   confirmed=null;render();note.textContent=editorialIssues.length?'Проектът е готов. Проверете бележките за редакция преди потвърждение.':'Проектът е готов за експертна редакция или потвърждение.';
   }catch{note.textContent='Възникна грешка при изготвянето на текста.';}
   finally{busy=false;generate.disabled=false}
  };
