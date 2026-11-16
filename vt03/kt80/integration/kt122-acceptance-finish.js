@@ -23,7 +23,11 @@ function one(){
  // Keep the exact format restrictions available in their disclosure.
  const lead=[...p.querySelectorAll('p')].find(x=>x.textContent.includes('Първичните файлове не се променят'));
  if(lead)lead.hidden=true;
- const status=$('kt80InputStatus');if(status&&status.textContent.startsWith('Няма заредена преписка'))status.hidden=true;
+ const status=$('kt80InputStatus');
+ if(status&&once(status,'kt122Status')){
+  const refresh=()=>{status.hidden=/^Няма заредена преписка/u.test(status.textContent.trim())};
+  new MutationObserver(refresh).observe(status,{subtree:true,childList:true,characterData:true});refresh();
+ }
  const audit=$('kt80DossierAudit');if(audit&&once(audit,'kt122Rows')){
   const mark=()=>{
    audit.querySelectorAll('.kt80-file-reason').forEach(r=>{
