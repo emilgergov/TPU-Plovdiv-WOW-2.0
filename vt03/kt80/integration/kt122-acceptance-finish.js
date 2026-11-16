@@ -131,11 +131,16 @@ function five(){
  }
  const notes=p.querySelectorAll('.kt117-note');
  // Keep live dynamic status and error messages intact; hide only the fixed Word-template explanation.
- notes.forEach(n=>{if(n.textContent.startsWith('Документът се създава автоматично по одобрения институционален модел'))n.classList.add('kt122-duplicate-note')});
+ notes.forEach(n=>{if(n.textContent.startsWith('Документът се създава автоматично по одобрения институционален модел')&&!n.classList.contains('kt122-duplicate-note'))n.classList.add('kt122-duplicate-note')});
 }
 function apply(){back();one();two();gate();three();four();five()}
 function boot(){
  apply();
+ // Author/editor components mount asynchronously. Re-apply only when those specific
+ // hosts acquire content; do not observe the whole document or modify case state.
+ const host=$('kt96EGAuthor'),fivePanel=panel(5);
+ if(host)new MutationObserver(()=>four()).observe(host,{childList:true});
+ if(fivePanel)new MutationObserver(()=>five()).observe(fivePanel,{childList:true,subtree:true});
  d.addEventListener('kt80:stage-open',()=>w.setTimeout(apply,120));
  d.addEventListener('kt116:stage4-confirmed',()=>w.setTimeout(apply,100));
  d.addEventListener('kt116:stage5-open',()=>w.setTimeout(apply,120));
