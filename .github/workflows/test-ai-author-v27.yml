@@ -34,6 +34,6 @@ jobs:
           node --check vt03/kt80/integration/kt96-eg-ai-stage4-author.mjs
           node cloudflare/ai-author-v27/test/stage4-size-regression.mjs
           node cloudflare/ai-author-v27/test/stage4-entry-regression.mjs
-          node --input-type=module -e "import {readFileSync} from 'node:fs';const h=readFileSync('vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html','utf8');if(!h.includes('kt96-eg-ai-stage4-author.mjs?v=kt112-full-legal-boundaries-20261116-v1'))process.exit(1);console.log('PASS: fresh Stage 4 asset cache version');"
+          node --input-type=module -e "import {readFileSync} from 'node:fs';const h=readFileSync('vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html','utf8');if(!h.includes('kt96-eg-ai-stage4-author.mjs?v=kt113-final-legal-comparison-20261116-v1'))process.exit(1);console.log('PASS: fresh Stage 4 asset cache version');"
           node --input-type=module -e "import {readFileSync} from 'node:fs'; const s=readFileSync('vt03/kt80/integration/kt96-eg-ai-stage4-author.mjs','utf8'); for(const term of ['TextEncoder','fitStage4Request','stageBytes(req)','prepared.payload'])if(!s.includes(term))process.exit(1); console.log('PASS: Stage 4 source includes UTF-8 size limits before network calls');"
 
