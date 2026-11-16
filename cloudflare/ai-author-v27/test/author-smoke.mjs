@@ -323,6 +323,26 @@ try{
   assert.equal(k107Calls,2);
   console.log('PASS: KT107 unsupported non-EIA decision rejected even after correction attempt.');
 
+  // KT108: no proposed screening decision when classification is explicitly unresolved.
+  const k108Bad='ВОДЕЩО ПРЕДЛОЖЕНИЕ: Директорът на РИОСВ да вземе решение за преценяване необходимостта от извършване на ОВОС за складовете, като попадането в приложение № 1 или № 2 към ЗООС не е установено.\\nФактическа основа\\nИзграждане на склад и офиси.\\nНормативни предпоставки и граници на проверката\\nКатегорията не е установена; съответствието с приложение № 2 е неясно.\\nМотивирано предложение\\nПредлага се провеждане на преценка за необходимостта от ОВОС без установена категория.\\nДанни за експертна проверка\\nНеобходими са доказателства за категория.';
+  let k108Calls=0;
+  globalThis.fetch=async (_url,opts)=>{
+    k108Calls++;
+    const sent=JSON.parse(opts.body),sys=sent.input[0].content;
+    if(sys.includes('Преработи ПЪЛНИЯ проект')){
+      const req=JSON.parse(sent.input[1].content);
+      assert(req.qualityIssues.includes('EIA_SCREENING_PROPOSED_BEFORE_LEGAL_CLASSIFICATION'));
+    }
+    if(sys.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ'))throw Error('Review must not accept the contradictory screening proposal');
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:k108Bad}]}]}),{status:200});
+  };
+  const kt108Blocked=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+  assert.equal(kt108Blocked.status,422);
+  assert((await kt108Blocked.json()).qualityIssues.includes('EIA_SCREENING_PROPOSED_BEFORE_LEGAL_CLASSIFICATION'));
+  assert.equal(k108Calls,2);
+  console.log('PASS: KT108 screening applicability must be established before recommendation.');
+
+
 
 
 
