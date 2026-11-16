@@ -56,11 +56,31 @@ function install(){
    if(title)addText(para,line,true);else segmented(para,line,subject);
    if(textIn(para)!==line)throw Error('Text mismatch while formatting paragraph');
  };
+ const formatTitle=para=>{
+   let props=Array.from(para.childNodes).find(n=>n.namespaceURI===W&&n.localName==='pPr');
+   if(!props){props=WN('pPr');para.insertBefore(props,para.firstChild)}
+   for(const n of Array.from(props.childNodes).filter(n=>n.namespaceURI===W&&['spacing','jc','ind'].includes(n.localName)))props.removeChild(n);
+   const spacing=WN('spacing');
+   spacing.setAttributeNS(W,'w:before','240');spacing.setAttributeNS(W,'w:after','240');
+   spacing.setAttributeNS(W,'w:line','240');spacing.setAttributeNS(W,'w:lineRule','auto');
+   props.append(spacing);
+   const jc=WN('jc');jc.setAttributeNS(W,'w:val','center');props.append(jc);
+   props.append(WN('keepNext'),WN('keepLines'),WN('widowControl'));
+ };
+ const formatClosing=para=>{
+   let props=Array.from(para.childNodes).find(n=>n.namespaceURI===W&&n.localName==='pPr');
+   if(!props){props=WN('pPr');para.insertBefore(props,para.firstChild)}
+   for(const n of Array.from(props.childNodes).filter(n=>n.namespaceURI===W&&n.localName==='spacing'))props.removeChild(n);
+   const sp=WN('spacing');sp.setAttributeNS(W,'w:before','360');sp.setAttributeNS(W,'w:after','0');
+   sp.setAttributeNS(W,'w:line','240');sp.setAttributeNS(W,'w:lineRule','auto');props.append(sp);
+   props.append(WN('keepNext'));
+ };
  const newPara=(line)=>{
    const p=WN('p'),pp=WN('pPr'),spacing=WN('spacing'),lineEl=WN('spacing');
    spacing.setAttributeNS(W,'w:after','0');spacing.setAttributeNS(W,'w:line','240');
    spacing.setAttributeNS(W,'w:before','0');spacing.setAttributeNS(W,'w:lineRule','auto');pp.append(spacing);
    const indent=WN('ind');indent.setAttributeNS(W,'w:firstLine','850');pp.append(indent); // 1.5 cm first-line indent
+   pp.append(WN('widowControl'));
    const align=WN('jc');align.setAttributeNS(W,'w:val','both');pp.append(align);p.append(pp);
    segmented(p,line);if(textIn(p)!==line)throw Error('Text mismatch in new paragraph');
    return p;
@@ -103,6 +123,7 @@ function install(){
      const closing=allPar.find(p=>textIn(p).trim()==='С уважение,');
      if(!closing)throw Error('Липсва заключителният реквизит „С уважение,“.');
      replacePara(closing,'С уважение,',false,true);
+     formatClosing(closing);
      const locate=token=>paragraphs.find(p=>textIn(p).includes(token));
      // Re-apply bold recipient labels even when the built-in template changes.
      const recipient=allPar.find(p=>textIn(p).trim()==='ДО');
@@ -112,13 +133,16 @@ function install(){
      for(const para of [recipient,recipientParty,recipientAddress])replacePara(para,textIn(para));
      const subj=locate('{{SUBJECT}}'),title=locate('{{DOCUMENT_TITLE}}'),anchor=locate('{{BODY_ANCHOR}}');
      if(!subj||!title||!anchor)throw Error('Липсва динамичен раздел в бланката.');
-     replacePara(subj,subject,true);replacePara(title,docTitle,false,true);
+     replacePara(subj,subject,true);replacePara(title,docTitle.toLocaleUpperCase('bg-BG'),false,true);
+     formatTitle(title);
      // KT120: Subject is justified, with the same 1.5 cm first-line indent as the body.
      let subjectProps=Array.from(subj.childNodes).find(n=>n.namespaceURI===W&&n.localName==='pPr');
      if(!subjectProps){subjectProps=WN('pPr');subj.insertBefore(subjectProps,subj.firstChild)}
      for(const node of Array.from(subjectProps.childNodes).filter(n=>n.namespaceURI===W&&(n.localName==='jc'||n.localName==='ind')))subjectProps.removeChild(node);
      const subjectAlign=WN('jc');subjectAlign.setAttributeNS(W,'w:val','both');subjectProps.append(subjectAlign);
      const subjectIndent=WN('ind');subjectIndent.setAttributeNS(W,'w:firstLine','850');subjectProps.append(subjectIndent);
+     subjectProps.append(WN('widowControl'));
+     // Retain original confirmed subject content; formatting is independent from proposal text.
      const nodes=bodyLines.map(x=>newPara(x));
      for(const p of nodes)body.insertBefore(p,anchor);
      body.removeChild(anchor);
