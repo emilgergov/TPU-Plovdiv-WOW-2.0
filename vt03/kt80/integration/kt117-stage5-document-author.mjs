@@ -108,11 +108,16 @@ function initialize(){
    const data=await res.json().catch(()=>({}));
    if(!live()||live()?.text!==source.text||live()?.version!==source.version){note.textContent='Данните на преписката са променени. Отговорът не е използван.';return;}
    if(!res.ok){
-    const legalIssue=res.status===422&&(data.error==='STAGE5_DIRECTION_CONFLICT'||data.error==='UNSUPPORTED_CATEGORICAL_CONCLUSION');
+    const legalIssue=res.status===422&&['STAGE5_DIRECTION_CONFLICT','UNSUPPORTED_CATEGORICAL_CONCLUSION','STAGE4_LEGAL_MATRIX_CONFLICT'].includes(data.error);
+    const diagnostic=(Array.isArray(data.findings)?data.findings:[]).slice(0,4).map(f=>
+     String(f.test||'Предпоставка')+': '+String(f.actual||'неустановена')+
+     (f.requiredForDirection?' · необходимо за избраното направление: '+f.requiredForDirection:'')+
+     (f.reason?' · '+f.reason:''));
     note.textContent=legalIssue?
-     'Нормативният контрол спря проекта: '+String(data.message||'Административното направление и съдържанието не съответстват.')+' Етап 4 остава за експертен преглед.':
+     'Не е изготвен непроверен документ. '+String(data.message||'Необходимо е съгласуване с анализа от Етап 4.')+
+     '\\nПредложение: сверете конкретните предпоставки с доказателствата в Етап 4, редактирайте извода и потвърдете отново. Избраното направление не се сменя автоматично.':
      'Текстът не е получен. Проверете достъпа и услугата (код '+res.status+').';
-    if(legalIssue){editorialIssues=[note.textContent];editorialContent.replaceChildren(make('p',note.textContent));editorial.hidden=false;}
+    if(legalIssue){editorialIssues=[note.textContent,...diagnostic];editorialContent.replaceChildren(...editorialIssues.map(x=>make('p',x)));editorial.hidden=false;}
     return;
    }
    if(data.caseId!==source.caseId||data.requestId!==requestId||data.evidenceRevision!==source.evidenceRevision||
