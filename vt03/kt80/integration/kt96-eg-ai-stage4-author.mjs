@@ -264,6 +264,13 @@ function boot(){
       LEGAL_COMPARISON_AFTER_PANEL_SELECTION:'Нормативната съпоставка е поставена след избора на панел',
       PANEL_01_NOT_SUPPORTED_BY_NEGATIVE_CLASSIFICATION:'Панел 01 не е обоснован с доказано отрицателни хипотези и приложимост на чл. 2, ал. 2',
       UNDETERMINED_WITHOUT_DECISIVE_FACT:'Неопределен резултат без посочен конкретен липсващ решаващ факт',
+
+       UNDETERMINED_BASED_ON_LEGAL_CLASSIFICATION_GAP:'Правна квалификация е представена неправилно като липсващ физически факт',
+       UNSPECIFIED_AREA_TYPE_IN_EVIDENCE_GAP:'Не е разграничена площта на имота от площта на сградата или застрояването',
+       DRAFT_SELF_CERTIFICATION_NOT_EVIDENCE:'Заключението съдържа самооценка вместо доказателствени мотиви',
+       INTERNAL_TEST_REFERENCES_IN_EXPERT_DRAFT:'В нормативния проект са останали вътрешни технически препратки',
+       UNSUPPORTED_AUTHOR_SELF_ASSESSMENT:'Авторска самооценка не доказва законосъобразност',
+       SELF_CERTIFICATION_CONTRADICTS_UNDETERMINED_MATRIX:'Самооценка противоречи на неопределен нормативен резултат',
       NEGATIVE_CONCLUSION_FROM_MISSING_CLASSIFICATION:'Отрицателният извод е изведен единствено от липса на правна категория',
       EMPTY_OR_EXCESSIVE_DRAFT:'Проектът е празен или надхвърля допустимия обем',
       MISSING_OR_UNORDERED_SECTIONS:'Липсващ или разместен задължителен раздел',
