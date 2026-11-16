@@ -458,7 +458,7 @@ try{
     'ПРИЛОЖЕНИЕ № 2 КЪМ ЗООС: ОТРИЦАТЕЛНА — Съпоставката на конкретните параметри на складовата дейност с относимите нормативни категории потвърждава неприложимост на описаните позиции.',
     'ПРИЛОЖЕНИЕ № 2 КЪМ ЗООС: ПОЛОЖИТЕЛНА — Съпоставката на действително документирани параметри на обекта с конкретната категория потвърждава приложимостта.'
   );
-  for(const [name,invalid] of [['undetermined',undecided],['positive',positive],['missing',kt110Valid.replace(/^ПРИЛОЖЕНИЕ № 1 КЪМ ЗООС:[^\\n]*\\n/u,'')]]){
+  for(const [name,invalid] of [['undetermined',undecided],['positive',positive],['missing',kt110Valid.replace(/^ПРИЛОЖЕНИЕ № 1 КЪМ ЗООС:[^\n]*\n/u,'')]]){
     let callsKT113=0;
     globalThis.fetch=async (_url,opts)=>{
       callsKT113++;
