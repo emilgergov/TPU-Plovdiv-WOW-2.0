@@ -543,7 +543,7 @@ async function handleStage4Proposal(request,env){
        legalTextsExact:verifiedLegalCorpus.legalProvisions,routeCatalog:KT109_ROUTE_CATALOG,subject:payload.subject,scope:payload.scope})}]})
    });
    authorRepairs=1;
-   if(!revision.ok)return reply({error:"Нормативната преработка не е достъпна.",qualityIssues:issues,qualityStage:"author_repair"},422);
+   if(!revision.ok)return expertPreview("Автоматичната нормативна преработка не е достъпна.",issues,"author_repair",draft,{authorRepairs});
    const revisionData=await revision.json();
    const candidate=(revisionData.output||[]).flatMap(x=>x.content||[])
     .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
@@ -594,14 +594,14 @@ async function handleStage4Proposal(request,env){
      },required:["verdict","issues","revisedDraft"]}}},
     input:[{role:"system",content:reviewSystem},{role:"user",content:JSON.stringify(auditInput)}]})
   });
-  if(!auditProvider.ok)return reply({error:"Independent normative review not available",qualityIssues:["REVIEW_UNAVAILABLE"]},422);
+  if(!auditProvider.ok)return expertPreview("Независимият нормативен преглед не е достъпен.",["REVIEW_UNAVAILABLE"],"independent_review",draft);
   const auditData=await auditProvider.json();
   const auditText=(auditData.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
   let independentReview;
   try{independentReview=JSON.parse(auditText.replace(/^\x60\x60\x60(?:json)?\s*|\s*\x60\x60\x60$/giu,""))}
-  catch{return reply({error:"Independent normative review unreadable",qualityIssues:["REVIEW_UNREADABLE"]},422)}
+  catch{return expertPreview("Независимият нормативен преглед не върна четим резултат.",["REVIEW_UNREADABLE"],"independent_review",draft)}
   const verdict=independentReview?.verdict;
-  if(!["pass","revise","reject"].includes(verdict))return reply({error:"Independent review invalid",qualityIssues:["INVALID_REVIEW"]},422);
+  if(!["pass","revise","reject"].includes(verdict))return expertPreview("Независимият преглед е невалиден.",["INVALID_REVIEW"],"independent_review",draft);
   if(verdict==="reject")return expertPreview("Независимият преглед не одобрява проекта.",["INDEPENDENT_REJECTION"],"independent_review",draft,{reviewFindings:Array.isArray(independentReview.issues)?independentReview.issues.slice(0,8):[]});
   const finalDraft=verdict==="revise"?text(independentReview.revisedDraft,12000):draft;
   if(finalDraft.length<120||qualityIssues(finalDraft).length>0||!sectionNames.every(x=>finalDraft.toLocaleLowerCase("bg").includes(x.toLocaleLowerCase("bg")))||
