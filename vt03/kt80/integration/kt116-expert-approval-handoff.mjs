@@ -88,7 +88,22 @@ if(host&&five){
    expert,approvedAt:new Date().toLocaleString('bg-BG'),expertApproved:true});
   note.textContent='Потвърдено. Предложението е готово за Етап 5.';display();render5();
  };
- next.onclick=()=>{if(!approved||!current())return;render5();const nav=document.querySelector('.kt80-step[data-step="5"]');if(nav)nav.click();else {five.hidden=false;five.scrollIntoView();}};
+ // KT116-R2: the legacy stage navigation opens a read-only gate dialog.
+ // This case-bound confirmation instead opens ONLY the new Stage 5 preview.
+ // No procedure activation, external document, or normative approval occurs.
+ next.onclick=()=>{
+  if(!approved||!current())return;
+  render5();
+  document.querySelectorAll('.kt80-stage-panel').forEach(panel=>{
+   panel.hidden=panel!==five;
+  });
+  document.querySelectorAll('.kt80-step').forEach(nav=>{
+   if(nav.dataset.step==='5')nav.setAttribute('aria-current','step');
+   else nav.removeAttribute('aria-current');
+  });
+  five.hidden=false;
+  five.scrollIntoView({behavior:'smooth',block:'start'});
+ };
  save.onclick=async()=>{
   if(!approved||!current())return;
   if(password.value.length<12){note.textContent='Въведете парола от поне 12 знака.';return;}
