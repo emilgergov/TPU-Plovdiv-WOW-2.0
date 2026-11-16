@@ -38,7 +38,7 @@ function two(){
  };
  const refresh=()=>{b.disabled=!check.checked;if(!check.checked&&p.classList.contains('kt122-show-scope'))select('subject')};
  a.addEventListener('click',()=>select('subject'));b.addEventListener('click',()=>{if(check.checked)select('scope')});
- check.addEventListener('change',refresh);select(check.checked?'scope':'subject');refresh();
+ check.addEventListener('change',()=>{refresh();if(check.checked)select('scope')});select(check.checked?'scope':'subject');refresh();
 }
 function three(){
  const p=stage(3),actions=$('kt85Stage3Actions'),check=$('kt80ParcelsConfirmation')?.closest('label'),next=$('kt80ToLaw'),find=$('kt80FindParcels'),pdf=$('kt80PDF1');
@@ -47,6 +47,13 @@ function three(){
  if(check&&!check.dataset.kt122Label){check.dataset.kt122Label='1';const old=check.textContent.trim();check.title=old;const tn=[...check.childNodes].find(n=>n.nodeType===3&&n.textContent.trim().length>20);if(tn)tn.textContent=' Потвърждавам проверката';}
  if(find&&!find.dataset.kt122Label){find.dataset.kt122Label='1';find.title='Повторна ГИС справка. При преход от Етап 2 имотите се зареждат автоматично.';find.textContent='Обнови ГИС справката'}
  if(pdf&&!pdf.dataset.kt122Label){pdf.dataset.kt122Label='1';pdf.title='PDF1 се изготвя и автоматично при успешно приключване на пространствената проверка. Ръчно изготвяне или повторение.';pdf.textContent='Изготви / повтори PDF1'}
+}
+function compactBack(){
+ document.querySelectorAll('.kt80-stage-panel button').forEach(b=>{
+  if(b.id==='kt80DashboardBack'||b.classList.contains('kt122-back'))return;
+  const txt=(b.textContent||'').replace(/\\s+/g,' ').trim();
+  if(/^(?:←\\s*)?Назад$/iu.test(txt))b.classList.add('kt122-back');
+ });
 }
 function four(){
  const p=stage(4),intro=p?.querySelector(':scope > p');if(intro)intro.style.cssText='font:12px/1.5 Verdana,Arial;margin:4px 0 9px;max-width:100%';
@@ -64,8 +71,8 @@ function directFive(){
 }
 w.KT122Stage5Direct=directFive;
 function mount(){
- one();two();three();four();dashboard();
- document.addEventListener('kt80:stage-open',()=>setTimeout(()=>{one();two();three();dashboard()},220));
+ one();two();three();four();compactBack();dashboard();
+ document.addEventListener('kt80:stage-open',()=>setTimeout(()=>{one();two();three();compactBack();dashboard()},220));
  document.addEventListener('kt116:stage4-confirmed',dashboard);
  const step2=$('kt80ScopeConfirmation');step2?.addEventListener('change',dashboard);
  const item=$('kt80SubjectConfirmation');item?.addEventListener('change',dashboard);
