@@ -45,6 +45,15 @@ function two(){
  const p=panel(2),sc=$('kt80ScopeConfirmation');if(!p||!sc)return;
  const controls=[...p.querySelectorAll('button')],cancel=controls.find(x=>/Отмени потвърждението и редактирай обхвата/u.test(x.textContent));
  if(cancel)cancel.textContent='Отмени потвърждението';
+ const scopeBox=p.querySelector('.kt80-v56-scope-container'),next=$('kt80ToParcels');
+ if(scopeBox&&next&&sc.closest('label')){
+  let row=scopeBox.querySelector('.kt122-scope-action-row');
+  if(!row){row=mk('div','kt122-scope-action-row');scopeBox.append(row)}
+  const confirmLabel=sc.closest('label');
+  if(cancel&&cancel.parentElement!==row)row.prepend(cancel);
+  if(confirmLabel.parentElement!==row)row.append(confirmLabel);
+  if(next.parentElement!==row)row.append(next);
+ }
  // Preserve the input and event handlers; styling applies to the existing controls.
  const tabs=p.querySelector('.kt122-stage2-tabs'),sub=$('kt80SubjectConfirmation');
  if(tabs&&sub){
@@ -81,9 +90,15 @@ function three(){
   fold.append(mk('summary',null,'Подробни пространствени данни'));detail.before(fold);fold.append(detail);
  }
  const sidebar=p.querySelector('.kt85-gis-sidebar');
+ // Suppress only the duplicate visual result card; all source spatial data remain intact.
+ for(const h of p.querySelectorAll('h2,h3,h4,strong')){
+   if(h.textContent.trim()!=='Пространствен доказателствен резултат')continue;
+   const card=h.closest('section,article,.kt85-evidence-card,.kt80-spatial-result')||h.parentElement;
+   if(card&&card!==p&&!card.contains($('kt85Stage3Actions'))&&!card.contains($('kt80Map')))card.hidden=true;
+ }
  if(sidebar&&!sidebar.querySelector('.kt122-main-gis-summary')){
-  const summary=mk('div','kt122-main-gis-summary','Избран имот · пространствен статус');
-  sidebar.prepend(summary);
+  // The existing sidebar heading already names the selected property.
+  // Do not add a second headline over the same evidence.
  }
 }
 function four(){
@@ -108,8 +123,22 @@ function four(){
   fold.before(live);
   const update=()=>{
    const src=proposal.textContent||'';
-   const route=src.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*[^\n]+/iu)?.[0]||'Изготвя се предложение';
-   const why=src.match(/(?:ЗАЩО ТОЗИ ПАНЕЛ|ВОДЕЩО ПРЕДЛОЖЕНИЕ)\s*[\n:]+([^\n]+)/iu)?.[1]||'Подробните мотиви са налични в анализа';
+   // KT116 renders heading and paragraph as separate DOM nodes, so textContent
+   // contains no newline between "ИЗБРАН ПАНЕЛ" and its value.
+   const heading=[...proposal.querySelectorAll('h4')].find(x=>/^ИЗБРАН\s+ПАНЕЛ/iu.test(x.textContent.trim()));
+   const route=heading?.nextElementSibling?.textContent?.trim()||
+     src.match(/ИЗБРАН\s+ПАНЕЛ\s*[:：]?\s*(\d{1,2}\s*[—–-][^\n]{3,190})/iu)?.[1]||
+     'Няма готово предложение за панел';
+   const reasonHead=[...proposal.querySelectorAll('h4')].find(x=>/ЗАЩО\s+ТОЗИ\s+ПАНЕЛ|ВОДЕЩО\s+ПРЕДЛОЖЕНИЕ/iu.test(x.textContent.trim()));
+   const why=reasonHead?.nextElementSibling?.textContent?.trim()||'Подробните мотиви са налични в анализа';
+   // Only visual clean-up: the approved version and editable text are unchanged.
+   for(const line of proposal.querySelectorAll('p')){
+     const val=line.textContent.trim();
+     if(val==='---'||val==='— — —'){line.hidden=true;continue}
+     if(/^\*[^*]+\*$/u.test(val)&&!line.dataset.kt122DisplayClean){
+       line.dataset.kt122DisplayClean='1';line.textContent=val.slice(1,-1);
+     }
+   }
    live.replaceChildren(mk('strong',null,route),mk('span',null,why.slice(0,340)));
   };
   new MutationObserver(update).observe(proposal,{subtree:true,childList:true,characterData:true});update();
@@ -128,6 +157,11 @@ function five(){
    // Do not delete the original dynamic details or source text; move only their DOM positions.
    if(details&&details!==direction&&details!==reference&&details!==warnings)right.append(details);
   }
+ }
+ const generation=p.querySelector('.kt117-actions'),note=p.querySelector('.kt117-note');
+ if(generation&&generation.querySelector('button')?.textContent.includes('Изготви текст')&&note&&!generation.closest('.kt122-author-action-row')){
+  const row=mk('div','kt122-author-action-row');
+  generation.before(row);row.append(generation,note);note.classList.add('kt122-author-status');
  }
  const notes=p.querySelectorAll('.kt117-note');
  // Keep live dynamic status and error messages intact; hide only the fixed Word-template explanation.
