@@ -6,6 +6,7 @@ function formatDraftSubject(draft){
  const raw=String(draft??'').replace(/\r\n/g,'\n');
  const lines=raw.split('\n'),index=lines.findIndex(x=>/^\s*Относно\s*:/iu.test(x));
  if(index<0)return {text:raw,warning:'Липсва ред „Относно:“. Въведете ред по действителния предмет на преписката.'};
+ if(index!==0)return {text:raw,warning:'Редът „Относно:“ трябва да е първият ред на документа, както изисква одобрената бланка.'};
  const value=lines[index].replace(/^\s*Относно\s*:\s*/iu,'').trim();
  if(!value)return {text:raw,warning:'Редът „Относно:“ е празен.'};
  // Preserve case-specific designation: investment proposal, plan, programme, project, or another lawful type.
