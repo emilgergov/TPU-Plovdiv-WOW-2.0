@@ -231,13 +231,31 @@ function boot(){
       UNJUSTIFIED_BROAD_DOCUMENT_REQUEST:'Необосновано искане за допълнителни документи',
       MISCHARACTERIZED_OS_ART_2_2_AS_SCREENING:'Неточна правна характеристика на чл. 2, ал. 2 от Наредбата за ОС',
       INDEPENDENT_REJECTION:'Независимият преглед не приема правните мотиви',
-      REVIEW_REVISION_INVALID:'Поправеният проект не премина нормативния контрол'
+      REVIEW_REVISION_INVALID:'Поправеният проект не премина нормативния контрол',
+      EIA_DECISION_WITHOUT_ESTABLISHED_SCREENING_JURISDICTION:'Необосновано решение по ОВОС без установена приложимост',
+      EIA_SCREENING_PROPOSED_BEFORE_LEGAL_CLASSIFICATION:'Предложена е преценка по ОВОС преди установяване на приложима категория',
+      LEGAL_CLASSIFICATION_SHIFTED_TO_APPLICANT:'Правната квалификация е прехвърлена към възложителя',
+      EIA_TERMINATION_MISATTRIBUTED_TO_ART_93_6:'Неправилно позоваване на чл. 93, ал. 6 ЗООС',
+      EIA_NO_IMPACT_DATA_USED_AS_SCREENING_DECISION:'Недоказано отсъствие на въздействие е използвано като основание за решение',
+      UNKNOWN_ADMINISTRATIVE_PANEL:'Избран е номер извън утвърдените 22 административни панела',
+      ADMIN_PANEL_02_LABEL_MISMATCH:'Несъответствие между номера и наименованието на панела',
+      PANEL_02_MISSING_EVIDENCED_FACT_GAP:'Не е обоснована конкретна липсваща фактическа информация за панел 02',
+      PANEL_02_SHIFTS_LEGAL_CLASSIFICATION:'Панел 02 неправомерно възлага правната квалификация на възложителя',
+      INTERNAL_GIS_TRANSPORT_TOKEN_IN_DRAFT:'Останало е вътрешно техническо обозначение от ГИС',
+      MISSING_LEGAL_CATEGORY_DOCUMENT_TREATED_AS_FACT:'Липсата на документ за правна категория е третирана като липсващ факт',
+      EMPTY_OR_EXCESSIVE_DRAFT:'Проектът е празен или надхвърля допустимия обем',
+      MISSING_OR_UNORDERED_SECTIONS:'Липсващ или разместен задължителен раздел',
+      REVIEW_UNAVAILABLE:'Независимият нормативен преглед не е достъпен',
+      REVIEW_UNREADABLE:'Независимият преглед не върна валиден резултат',
+      INVALID_REVIEW:'Невалиден резултат от независимия преглед',
+      ARCHIVE_FULL_TEXT_UNAVAILABLE:'Пълните нормативни текстове не са налични'
     };
-    const issues=Array.isArray(data.qualityIssues)?data.qualityIssues.map(x=>labels[x]||'Неприет нормативен елемент').slice(0,6):[];
+    const issues=Array.isArray(data.qualityIssues)?data.qualityIssues.map(x=>(labels[x]||'Непозната нормативна проверка')+' ['+str(x)+']').slice(0,6):[];
+    const checkPhase=data.qualityStage==='author_repair'?' (след автоматичната преработка)':data.qualityStage==='independent_review'?' (независим нормативен преглед)':'';
     status.textContent=response.status===413?
       'Преписката надхвърля допустимия технически обем на заявката.':
       response.status===422?
-      'Проектът не премина нормативната проверка'+(issues.length?': '+issues.join('; '):'.')+
+      'Проектът не премина нормативната проверка'+checkPhase+(issues.length?': '+issues.join('; '):'.')+
       (findings.length?' Констатации: '+findings.join('; '):'')+
       '. Не се показва непроверен текст.':
       'EG Авторът не изготви проект (код '+response.status+'). Проверете връзката или възложете повторно.';
