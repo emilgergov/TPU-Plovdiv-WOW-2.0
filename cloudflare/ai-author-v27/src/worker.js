@@ -403,7 +403,10 @@ async function handleStage4Proposal(request,env){
    issues.push("UNJUSTIFIED_BROAD_DOCUMENT_REQUEST");
   if(/\bspatial_intersection\b|(?:^|[\s(])(?:true|false)(?:[\s,.)]|$)/imu.test(value))
    issues.push("INTERNAL_GIS_TRANSPORT_TOKEN_IN_DRAFT");
-  if(/(?:липс(?:ва|ват)|не\s+е\s+представен)[^.!?\n]{0,100}(?:документ|доказателств[ао])[^.!?\n]{0,120}(?:категори[яи]|попадане)[^.!?\n]{0,60}приложени[ея]\s*№/iu.test(value))
+  // KT111: only block the demonstrably invalid causal shortcut, not an
+  // ordinary factual observation that the applicant did not state a category.
+  // A missing legal categorization document is not a missing physical fact.
+  if(/(?:липс(?:ва|ват)|не\s+е\s+представен)[^.!?\n]{0,110}(?:документ|доказателств[ао])[^.!?\n]{0,120}(?:категори[яи]|попадане)[^.!?\n]{0,60}приложени[ея]\s*№[^.!?\n]{0,110}(?:следователно|поради\s+това|налага\s+се)[^.!?\n]{0,110}(?:допълнителна\s+информация|писмо|процедура)/iu.test(value))
    issues.push("MISSING_LEGAL_CATEGORY_DOCUMENT_TREATED_AS_FACT");
   if(/преценяван(?:е|ето)\s+на\s+необходимостта\s+от\s+ОС[^.\n]{0,90}чл\.?\s*2\s*,?\s*ал\.?\s*2/iu.test(value))
    issues.push("MISCHARACTERIZED_OS_ART_2_2_AS_SCREENING");
