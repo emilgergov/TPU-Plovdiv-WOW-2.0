@@ -621,17 +621,58 @@ async function handleStage4Proposal(request,env){
  finally{clearTimeout(timer)}
 }
 
+
+async function handleStage5Document(request,env){
+ if(request.method!=="POST")return reply({error:"Method not allowed"},405);
+ const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN].filter(x=>typeof x==="string"&&x.length);
+ if(!env.OPENAI_API_KEY||!tokens.length)return reply({error:"Service unavailable"},503);
+ if(!tokens.some(t=>request.headers.get("Authorization")==="Bearer "+t))return reply({error:"Unauthorized"},401);
+ let input;
+ try{const raw=await request.text();if(new TextEncoder().encode(raw).length>42000)return reply({error:"Payload too large"},413);input=JSON.parse(raw)}
+ catch{return reply({error:"Invalid request"},400)}
+ const ok=x=>typeof x==="string"&&x.length>0;
+ if(input?.task!=="draft_stage5_document"||!ok(input.caseId)||input.caseId.length>200||
+ !ok(input.requestId)||input.requestId.length>100||!Number.isInteger(input.stage4Version)||input.stage4Version<1||
+ !ok(input.confirmedStage4Text)||input.confirmedStage4Text.length>18000||input.expertConfirmed!==true||
+ input.projectOnly!==true||!ok(input.subject)||!ok(input.scope)||
+ !(typeof input.evidenceRevision==="string"||typeof input.evidenceRevision==="number"))
+ return reply({error:"Invalid expert-confirmed handoff"},400);
+ const match=input.confirmedStage4Text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b[^\n]*/iu);
+ if(!match||input.selectedPanelLine?.trim()!==match[0].trim())
+ return reply({error:"Confirmed direction mismatch"},409);
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),55000);
+ try{
+ const instructions="Състави само ПРОЕКТ на административен документ на български език, от името на компетентния административен орган РИОСВ – Пловдив. Изказът е ясен, официален, точен и сдържан, без разказвателни обяснения, самореклама или вътрешни означения (AI, EG, панел, тест, сценарий). Изпълнявай единствено потвърденото от експерта административно направление, не го заменяй, не предрешавай нова процедура. Не представяй недоказани факти като установени; не измисляй нормативни реквизити. При неизвестен административен реквизит използвай XXXXXXXX. Започни с Относно:, последвано от стегнати административни абзаци. Без лого, футър, подписи и технически коментари. Текстът подлежи на последващо експертно потвърждение; след това експертните редакции имат абсолютен приоритет.";
+ const facts=JSON.stringify({selectedDirection:match[0],subject:input.subject,scope:input.scope,
+ expertConfirmedProposal:input.confirmedStage4Text,
+ parcelIds:Array.isArray(input.parcelIds)?input.parcelIds.slice(0,80):[],
+ warnings:Array.isArray(input.warnings)?input.warnings.slice(0,12):[]});
+ const response=await fetch("https://api.openai.com/v1/responses",{method:"POST",signal:controller.signal,
+ headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
+ body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:3700,
+ input:[{role:"system",content:instructions},{role:"user",content:facts}]})});
+ if(!response.ok)return reply({error:"Author provider unavailable",providerStatus:response.status},502);
+ const data=await response.json();
+ const draft=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
+ if(draft.length<120||draft.length>18000)return reply({error:"Draft incomplete"},422);
+ return reply({caseId:input.caseId,evidenceRevision:input.evidenceRevision,
+ stage4Version:input.stage4Version,requestId:input.requestId,selectedPanelLine:match[0],
+ draft,projectOnly:true,expertReviewRequired:true,documentIssued:false,wordTemplateApplied:false});
+ }catch{return reply({error:"Document drafting failed"},504)}
+ finally{clearTimeout(timer)}
+}
+
 export default {
  async fetch(request,env) {
   const url=new URL(request.url);
   const origin=request.headers.get("Origin")||"";
-  if(request.method==="OPTIONS" && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||url.pathname==="/stage4-proposal")) {
+  if(request.method==="OPTIONS" && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||(url.pathname==="/stage4-proposal"||url.pathname==="/stage5-document"))) {
    if(origin!==ALLOWED_ORIGIN) return new Response(null,{status:403});
    return new Response(null,{status:204,headers:{"Access-Control-Allow-Origin":ALLOWED_ORIGIN,"Access-Control-Allow-Methods":"POST","Access-Control-Allow-Headers":"Authorization, Content-Type","Access-Control-Max-Age":"600","Vary":"Origin"}});
   }
-  if(origin===ALLOWED_ORIGIN && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||url.pathname==="/stage4-proposal") && request.method==="POST") {
+  if(origin===ALLOWED_ORIGIN && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||(url.pathname==="/stage4-proposal"||url.pathname==="/stage5-document")) && request.method==="POST") {
    // Return the same authenticated response with exact-origin CORS, never wildcard.
-   const response=url.pathname==="/stage4-proposal"?await handleStage4Proposal(request,env):url.pathname==="/scope-improve"?await handleScopeImprove(request,env):url.pathname==="/subject-improve"?await handleSubjectImprove(request,env):await handleAuthor(request,env);
+   const response=url.pathname==="/stage5-document"?await handleStage5Document(request,env):(url.pathname==="/stage4-proposal")?await handleStage4Proposal(request,env):url.pathname==="/scope-improve"?await handleScopeImprove(request,env):url.pathname==="/subject-improve"?await handleSubjectImprove(request,env):await handleAuthor(request,env);
    const h=new Headers(response.headers);h.set("Access-Control-Allow-Origin",ALLOWED_ORIGIN);h.set("Vary","Origin");
    return new Response(response.body,{status:response.status,headers:h});
   }
@@ -656,6 +697,6 @@ export default {
   if(request.method==="GET" && (url.pathname==="/" || url.pathname==="/health")) {
    return reply({service:"TPU Plovdiv AI Author V27",status:"online",stage4Contract:"KT115_EXPERT_PREVIEW_V1",apiKeyConfigured:Boolean(env.OPENAI_API_KEY),aiGenerationEnabled:Boolean(env.OPENAI_API_KEY && (env.AI_AUTHOR_PASSWORD_V27 || env.AI_AUTHOR_ACCESS_TOKEN))});
   }
-  return url.pathname==="/stage4-proposal"?handleStage4Proposal(request,env):url.pathname==="/scope-improve"?handleScopeImprove(request,env):url.pathname==="/subject-improve"?handleSubjectImprove(request,env):handleAuthor(request,env);
+  return url.pathname==="/stage5-document"?handleStage5Document(request,env):url.pathname==="/stage4-proposal"?handleStage4Proposal(request,env):url.pathname==="/scope-improve"?handleScopeImprove(request,env):url.pathname==="/subject-improve"?handleSubjectImprove(request,env):handleAuthor(request,env);
  }
 };
