@@ -66,14 +66,19 @@ function initialize(){
   direction.textContent=documentLabel(panelLine);
   const subj=clean(window.KT80WorkflowState?.subjectConfirmed?.text);
   const parcelsForReference=collectStageEvidence(window).parcelIds;
-  approvedReference.hidden=!(panelLine.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?1\b/iu)&&subj.includes('Складове за промишлени стоки и офиси')&&parcelsForReference.includes('56784.13.102'));
-  approvedReference.title='Контролен образец само за тестовата преписка; изисква ново експертно потвърждение.';
+  const referenceCase=subj.includes('Складове за промишлени стоки и офиси')&&parcelsForReference.includes('56784.13.102');
+  const approvedRoute=/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?1\b/iu.test(panelLine);
+  approvedReference.hidden=!referenceCase;
+  approvedReference.disabled=!approvedRoute;
+  approvedReference.title=approvedRoute?'Приложи седемте заключени абзаца; необходимо е ново експертно потвърждение.':'КТ120 е приета за панел 01. Върнете се към Етап 4 и потвърдете правилното направление.';
   reference.textContent='Представена документация · вх. № '+incomingReference();
   const p=window.KT80WorkflowState?.subjectConfirmed||{};
   const parcels=collectStageEvidence(window).parcelIds;
   details.textContent='Предмет: '+clean(p.text)+'\nИмот(и): '+parcels.join(', ')+'\nЕксперт: '+a.expert+' · Версия: '+a.version;
   warnings.hidden=!a.warnings?.length;warningText.textContent=(a.warnings||[]).join('\n');
-  note.textContent='Изготвянето на документа използва точно това потвърдено направление. Не извършва нова процедурна квалификация.';
+  note.textContent=referenceCase&&!approvedRoute?
+   'Несъответствие с КТ120: заключените абзаци са за „Писмо по чл. 2, ал. 2 от Наредбата за ОС“ (панел 01), но Етап 4 е потвърдил друго направление. Върнете се към Етап 4; не подменяме експертното решение автоматично.':
+   'Изготвянето на документа използва точно това потвърдено направление. Не извършва нова процедурна квалификация.';
   preview.hidden=true;textarea.hidden=true;textarea.style.display='none';edit.hidden=true;save.hidden=true;cancel.hidden=true;confirm.hidden=true;generate.hidden=false;
  }
  const render=()=>{
