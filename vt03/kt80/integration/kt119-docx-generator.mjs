@@ -24,6 +24,11 @@ function install(){
    r.append(prop,t);p.append(r);
  };
  const segmented=(p,line,isSubject=false)=>{
+   // Institutional recipient block: labels are bold; values remain regular.
+   if(line==='ДО'){addText(p,line,true);return;}
+   for(const label of ['Възложител:','Адрес:']){
+     if(line.startsWith(label)){addText(p,label,true);if(line.length>label.length)addText(p,line.slice(label.length));return;}
+   }
    if(isSubject&&line.startsWith('Относно:')){
      addText(p,'Относно:',true);
      const rest=line.slice('Относно:'.length);
@@ -55,7 +60,9 @@ function install(){
  const newPara=(line)=>{
    const p=WN('p'),pp=WN('pPr'),spacing=WN('spacing'),lineEl=WN('spacing');
    spacing.setAttributeNS(W,'w:after','0');spacing.setAttributeNS(W,'w:line','240');
-   spacing.setAttributeNS(W,'w:before','0');spacing.setAttributeNS(W,'w:lineRule','auto');pp.append(spacing);const align=WN('jc');align.setAttributeNS(W,'w:val','both');pp.append(align);p.append(pp);
+   spacing.setAttributeNS(W,'w:before','0');spacing.setAttributeNS(W,'w:lineRule','auto');pp.append(spacing);
+   const indent=WN('ind');indent.setAttributeNS(W,'w:firstLine','850');pp.append(indent); // 1.5 cm first-line indent
+   const align=WN('jc');align.setAttributeNS(W,'w:val','both');pp.append(align);p.append(pp);
    segmented(p,line);if(textIn(p)!==line)throw Error('Text mismatch in new paragraph');
    return p;
  };
@@ -98,6 +105,12 @@ function install(){
      if(!closing)throw Error('Липсва заключителният реквизит „С уважение,“.');
      replacePara(closing,'С уважение,',false,true);
      const locate=token=>paragraphs.find(p=>textIn(p).includes(token));
+     // Re-apply bold recipient labels even when the built-in template changes.
+     const recipient=allPar.find(p=>textIn(p).trim()==='ДО');
+     const recipientParty=allPar.find(p=>textIn(p).startsWith('Възложител:'));
+     const recipientAddress=allPar.find(p=>textIn(p).startsWith('Адрес:'));
+     if(!recipient||!recipientParty||!recipientAddress)throw Error('Липсват реквизити за адресата.');
+     for(const para of [recipient,recipientParty,recipientAddress])replacePara(para,textIn(para));
      const subj=locate('{{SUBJECT}}'),title=locate('{{DOCUMENT_TITLE}}'),anchor=locate('{{BODY_ANCHOR}}');
      if(!subj||!title||!anchor)throw Error('Липсва динамичен раздел в бланката.');
      replacePara(subj,subject,true);replacePara(title,docTitle,false,true);
