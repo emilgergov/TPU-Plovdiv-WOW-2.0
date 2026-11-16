@@ -424,14 +424,14 @@ async function handleStage4Proposal(request,env){
    if(/(?:(?:^|[^\p{L}\p{N}])КТ[-–]?\s*\d{2,4}(?=$|[^\p{L}\p{N}])|(?:контролна\s+точка|тестова\s+версия)\s*№?\s*\d+|(?:според|съгласно|по)\s+(?:наш(?:ия|ите)\s+)?(?:тест|валидатор|алгоритъм|работен\s+цикъл))/iu.test(value))
     issues.push("INTERNAL_TEST_REFERENCES_IN_EXPERT_DRAFT");
    const overclaim=/(?:изцяло|напълно|безусловно)\s+(?:съответства|отговаря)[^.!?\n]{0,90}(?:всички|нормативн(?:и|ите))|(?:всички|пълн(?:о|а))\s+(?:нормативни\s+)?(?:изисквания|условия|предпоставки)[^.!?\n]{0,60}(?:изпълнен[иао]|спазен[иао])|(?:не\s+са\s+установени|липсват)\s+(?:никакви\s+)?(?:съществени\s+)?(?:липси|противоречия)/iu.test(value);
-   const matrixUnknown=/^\s*(?:ПРИЛОЖЕНИЕ\s*№\s*[12]\s*КЪМ\s*ЗООС|ЧЛ\.\s*2\s*,?\s*АЛ\.\s*[12]\s*НАРЕДБА\s+ЗА\s*ОС)\s*:\s*НЕОПРЕДЕЛЕНА\b/imu.test(value.replace(/\*\*/gu,""));
+   const matrixUnknown=/^\s*(?:ПРИЛОЖЕНИЕ\s*№\s*[12]\s*КЪМ\s*ЗООС|ЧЛ\.\s*2\s*,?\s*АЛ\.\s*[12]\s*НАРЕДБА\s+ЗА\s*ОС)\s*:\s*НЕОПРЕДЕЛЕНА(?=\s|[—–-]|$)/imu.test(value.replace(/\*\*/gu,""));
    if(overclaim&&matrixUnknown)issues.push("SELF_CERTIFICATION_CONTRADICTS_UNDETERMINED_MATRIX");
    if(/(?:този\s+проект|предложени(?:ето|ят)\s+текст)\s+(?:изцяло|напълно)\s+(?:съответства|отговаря)\s+на\s+(?:всички|нормативн(?:и|ите))/iu.test(value))
     issues.push("UNSUPPORTED_AUTHOR_SELF_ASSESSMENT");
    
 // KT123 final: legal qualification is not a missing physical fact.
    const undecidedLines=value.replace(/\*\*/gu,"").split(/\r?\n/u).filter(line=>
-    /^\s*(?:ПРИЛОЖЕНИЕ\s*№\s*[12]\s*КЪМ\s*ЗООС|ЧЛ\.\s*2\s*,?\s*АЛ\.\s*[12]\s*НАРЕДБА\s+ЗА\s*ОС)\s*:\s*НЕОПРЕДЕЛЕНА\b/iu.test(line));
+    /^\s*(?:ПРИЛОЖЕНИЕ\s*№\s*[12]\s*КЪМ\s*ЗООС|ЧЛ\.\s*2\s*,?\s*АЛ\.\s*[12]\s*НАРЕДБА\s+ЗА\s*ОС)\s*:\s*НЕОПРЕДЕЛЕНА(?=\s|[—–-]|$)/iu.test(line));
    const legalOnlyGap=/(?:липс(?:ва|ата)[^.!?\n]{0,65}(?:правн[а-я]*\s+)?(?:квалификаци|категоризаци)|непълн[а-я]*\s+(?:правн[а-я]*\s+)?(?:квалификаци|категоризаци)|неясн[а-я]*\s+(?:правн[а-я]*\s+)?(?:квалификаци|категори)|не\s+(?:е\s+)?(?:извършена|направена)\s+(?:пълна\s+)?правна\s+съпоставка)/iu;
    if(undecidedLines.some(row=>legalOnlyGap.test(row)))
     issues.push("UNDETERMINED_BASED_ON_LEGAL_CLASSIFICATION_GAP");
