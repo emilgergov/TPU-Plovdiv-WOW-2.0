@@ -27,7 +27,7 @@ try{
  });
  await page.waitForTimeout(650);
  assert.equal(authorRequests,0,'Stage 4 must not initiate AI automatically');
- assert(initial.heading?.includes('EG AI Автор'));
+ assert(initial.heading?.includes('EG Автор'));
  for(const stage of ['Етап 1','Етап 2','Етап 3'])assert(initial.evidence?.includes(stage),'missing established stage overview: '+stage);
  assert.deepEqual(initial.actions,['Изготви проект с EG Автора']);
  assert.equal(initial.statusVisible,false);
