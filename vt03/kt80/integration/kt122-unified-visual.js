@@ -7,6 +7,7 @@ function dashboard(){
  const s=w.KT80WorkflowState||{};let active=1;
  if(s.subjectConfirmed?.expertConfirmed){active=2;if(s.subjectConfirmed?.scopeConfirmed)active=3}
  if(s.normativeGate?.expertConfirmed&&s.normativeGate?.decision==='NOT_REQUIRED')active=4;
+ if(s.step===4&&s.normativeGate?.expertConfirmed)active=4;
  if(w.KT116ExpertHandoff?.snapshot?.())active=5;
  tiles.forEach(t=>{const n=Number(t.dataset.kt80Index);t.dataset.kt122State=n===active?'current':n<active?'done':'pending'});
 }
@@ -70,8 +71,11 @@ function directFive(){
  w.KT117Document?.refresh?.();five.hidden=false;w.scrollTo?.({top:0,behavior:'smooth'});return true;
 }
 w.KT122Stage5Direct=directFive;
+function gate(){
+ const cancel=$('kt82GateCancel');if(cancel)cancel.textContent='Назад към Етап 2';
+}
 function mount(){
- one();two();three();four();compactBack();dashboard();
+ one();two();three();four();gate();compactBack();dashboard();
  document.addEventListener('kt80:stage-open',()=>setTimeout(()=>{one();two();three();compactBack();dashboard()},220));
  document.addEventListener('kt116:stage4-confirmed',dashboard);
  const step2=$('kt80ScopeConfirmation');step2?.addEventListener('change',dashboard);
