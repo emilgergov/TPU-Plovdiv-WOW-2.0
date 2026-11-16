@@ -2,7 +2,7 @@
  * The file is processed locally. Never upload the dossier or template.
  * Only the confirmed expert text is inserted, byte-for-byte per paragraph.
  */
-const TEMPLATE_SHA256='d7372e0eeb8808e220b9bf8d88281822687dde8e13b35b2a02188f612605e951';
+const TEMPLATE_SHA256='c616f1cb88b9ef69c9f188bbbd9acfedf662ef779d3b3dca20818a04e95d4978';
 const W='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const el=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;return x};
 const q=x=>String(x??'').trim();
