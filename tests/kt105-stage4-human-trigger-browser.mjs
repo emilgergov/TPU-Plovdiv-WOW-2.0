@@ -22,7 +22,7 @@ try{
    detailsVisible:getComputedStyle(document.querySelector('#kt104EGDetails')).display!=='none',
    legacyHidden:document.querySelector('#kt91Proposal')?.getClientRects().length===0,
    authorInStage4:document.querySelector('#kt96EGAuthor')?.parentElement===document.querySelector('.kt80-stage-panel[data-panel="4"]'),
-   visibleDirectChildren:[...document.querySelectorAll('.kt80-stage-panel[data-panel="4"] > *')].filter(x=>x.getClientRects().length>0).map(x=>x.id||x.tagName)
+   visibleDirectChildren:[...document.querySelectorAll('.kt80-stage-panel[data-panel="4"] > *')].filter(x=>getComputedStyle(x).display!=='none').map(x=>x.id||x.tagName)
   };
  });
  await page.waitForTimeout(650);
