@@ -271,6 +271,28 @@ function boot(){
     };
     const issues=Array.isArray(data.qualityIssues)?data.qualityIssues.map(x=>(labels[x]||'Непозната нормативна проверка')+' ['+str(x)+']').slice(0,6):[];
     const checkPhase=data.qualityStage==='author_repair'?' (след автоматичната преработка)':data.qualityStage==='independent_review'?' (независим нормативен преглед)':'';
+    // KT115: show an unverified AI draft ONLY as expert-readable material.
+    // The case-bound response is not cached, approved or exposed to Stage 5.
+    if(response.status===422 && data.expertPreviewOnly===true &&
+       data.qualityPassed===false && data.handoffAllowed===false &&
+       data.projectOnly===true && data.expertReviewRequired===true &&
+       data.caseId===identity.caseId && data.requestId===requestId &&
+       data.evidenceRevision===h.evidenceRevision &&
+       str(data.unverifiedDraft).length>=120){
+      finishedSignature='';lastResult=null;
+      const warnings=issues.length?issues.join('; '):'Нормативната проверка не е премината.';
+      lead.textContent='ПРОЕКТ ЗА ЕКСПЕРТЕН ПРЕГЛЕД — НЕПРОВЕРЕН\nНе представлява административно решение. Няма автоматично предаване към Етап 5.';
+      lead.style.display='block';
+      expanded.style.display='block';expanded.open=true;
+      output.textContent='КОНСТАТИРАНИ ПРОБЛЕМИ:\n'+warnings+
+       (findings.length?'\nСтановище на рецензента: '+findings.join('; '):'')+
+       '\n\nПЪЛЕН РАБОТЕН ТЕКСТ НА EG АВТОРА (ЗА ЕКСПЕРТНА РЕДАКЦИЯ):\n\n'+str(data.unverifiedDraft);
+      output.style.display='block';
+      status.textContent='EG Авторът представи работен проект с отбелязани нормативни проблеми. Експертът може да го прочете и редактира; проектът не е одобрен и не се подава към Етап 5.';
+      button.textContent='Преработи проект с EG Автора';
+      return;
+    }
+
     // A server-side legal rejection cannot be solved by a visual refresh.
     const needsWorkerRepair=Array.isArray(data.qualityIssues)&&data.qualityIssues.some(x=>
      x==='MISSING_REASONED_LEGAL_COMPARISON'||x==='ADMIN_PANEL_02_LABEL_MISMATCH');
