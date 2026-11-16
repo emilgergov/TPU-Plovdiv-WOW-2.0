@@ -448,6 +448,34 @@ try{
   assert.equal(kt110Calls,3);
   console.log('PASS: KT110 strips internal GIS transport identifiers through bounded repair before independent review.');
 
+  // KT123 bounded content cleanup: internal KT notes and self-certification.
+  const kt123Invalid=kt110Valid.replace(
+    'Фактите по уведомлението трябва да се сравнят с относимите законови категории.',
+    'Съгласно КТ114 този проект изцяло съответства на всички нормативни изисквания и не са установени съществени липси или противоречия.'
+  );
+  let kt123Calls=0;
+  globalThis.fetch=async(_url,opts)=>{
+    kt123Calls++;
+    const sent=JSON.parse(opts.body),sys=sent.input[0].content;
+    if(sys.includes('Преработи ПЪЛНИЯ проект')){
+      const req=JSON.parse(sent.input[1].content);
+      assert(req.qualityIssues.includes('INTERNAL_TEST_REFERENCES_IN_EXPERT_DRAFT'));
+      assert(req.qualityIssues.includes('UNSUPPORTED_AUTHOR_SELF_ASSESSMENT'));
+      return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:kt110Valid}]}]}),{status:200});
+    }
+    if(sys.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ')){
+      assert.equal(JSON.parse(sent.input[1].content).draft,kt110Valid);
+      return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({verdict:'pass',issues:[],revisedDraft:''})}]}]}),{status:200});
+    }
+    assert(sys.includes('ИЗХОДНА СЪДЪРЖАТЕЛНА ДИСЦИПЛИНА'));
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:kt123Invalid}]}]}),{status:200});
+  };
+  const kt123Fixed=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+  assert.equal(kt123Fixed.status,200);
+  assert.equal((await kt123Fixed.json()).draft,kt110Valid);
+  assert.equal(kt123Calls,3);
+  console.log('PASS: KT123 internal references and unsupported self-rating are repaired before expert confirmation.');
+
   // KT113 regression: panel 01 must NEVER be passed when a necessary
   // applicability test is positive or indeterminate instead of negative.
   const undecided=kt110Valid.replace(
