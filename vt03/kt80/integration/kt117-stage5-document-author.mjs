@@ -52,6 +52,10 @@ function initialize(){
  edit.hidden=true;save.hidden=true;cancel.hidden=true;confirm.hidden=true;
  action.append(generate); const reviewActions=make('div'); reviewActions.className='kt117-actions'; reviewActions.append(edit,save,cancel,confirm);
  const note=make('p');note.className='kt117-note';
+  const authorProgress=make('div');authorProgress.className='kt123-author-progress';authorProgress.hidden=true;authorProgress.setAttribute('role','status');authorProgress.setAttribute('aria-live','polite');
+  const progressLabel=make('span','EG Авторът изготвя проекта на административния документ…');
+  const progressTrack=make('div');progressTrack.className='kt123-author-track';progressTrack.setAttribute('role','progressbar');progressTrack.setAttribute('aria-label','Работа на EG Автора');progressTrack.removeAttribute('aria-valuenow');
+  progressTrack.append(make('div'));authorProgress.append(progressLabel,progressTrack);
  const editorial=make('details');editorial.hidden=true;
  const editorialTitle=make('summary','Бележки за редакция');editorial.append(editorialTitle);
  const editorialContent=make('div');editorial.append(editorialContent);
@@ -65,12 +69,12 @@ function initialize(){
  wordInfo.className='kt117-note';
  const original=make('details');original.append(make('summary','Пълен експертно потвърден анализ от Етап 4'),make('pre'));
  const footer=make('div');footer.className='kt117-actions';footer.append(word);
- ui.append(heading,context,action,note,editorial,preview,textarea,reviewActions,decisionStatus,confirmedText,footer,wordInfo,original);
+ ui.append(heading,context,action,note,authorProgress,editorial,preview,textarea,reviewActions,decisionStatus,confirmedText,footer,wordInfo,original);
  panel.replaceChildren(ui);
  const live=()=>window.KT116ExpertHandoff?.snapshot?.()||null;
  function sync(){
   const a=live();
-  if(!a){source=null;versions=[];confirmed=null;editorialIssues=[];editorial.hidden=true;context.hidden=true;action.hidden=true;preview.hidden=true;textarea.hidden=true;textarea.style.display='none';reviewActions.hidden=true;footer.hidden=true;original.hidden=true;note.textContent='Няма потвърдено предложение по текущата преписка.';return;}
+  if(!a){authorProgress.hidden=true;source=null;versions=[];confirmed=null;editorialIssues=[];editorial.hidden=true;context.hidden=true;action.hidden=true;preview.hidden=true;textarea.hidden=true;textarea.style.display='none';reviewActions.hidden=true;footer.hidden=true;original.hidden=true;note.textContent='Няма потвърдено предложение по текущата преписка.';return;}
   if(source&&source.caseId===a.caseId&&source.version===a.version&&source.text===a.text)return;
   source=a;versions=[];confirmed=null;editorialIssues=[];editorial.hidden=true;context.hidden=false;action.hidden=false;reviewActions.hidden=false;footer.hidden=true;
   original.hidden=false;original.querySelector('pre').textContent=a.text;
@@ -101,7 +105,7 @@ function initialize(){
    confirmedStage4Text:source.text,selectedPanelLine:line,subject:clean(p.text),scope:clean(p.scope),
    parcelIds:[...ev.parcelIds],warnings:source.warnings||[],
    documentTitle:documentLabel(line),incomingReference:incomingReference()};
-  busy=true;generate.disabled=true;note.textContent='EG Авторът изготвя проект на административния текст.';
+  busy=true;generate.disabled=true;authorProgress.hidden=false;note.textContent='EG Авторът изготвя проект на административния текст.';
   try{
    const res=await window.KT80EGSession.request(endpoint,JSON.stringify(payload));
    const data=await res.json().catch(()=>({}));
@@ -121,7 +125,7 @@ function initialize(){
    versions.push({version:versions.length+1,text:normalized.text,kind:'предложение на EG Автора — индивидуален предмет'});
    confirmed=null;decisionStatus.hidden=true;render();note.textContent=editorialIssues.length?'Проектът е готов. Проверете бележките за редакция преди потвърждение.':'Проектът е готов за експертна редакция или потвърждение.';
   }catch{note.textContent='Възникна грешка при изготвянето на текста.';}
-  finally{busy=false;generate.disabled=false}
+  finally{busy=false;generate.disabled=false;authorProgress.hidden=true}
  };
  edit.onclick=()=>{
   if(!versions.length)return;textarea.value=versions.at(-1).text;textarea.hidden=false;textarea.style.display='block';preview.hidden=true;
