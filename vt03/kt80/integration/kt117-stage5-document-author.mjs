@@ -5,23 +5,13 @@ const clean=x=>String(x??'').trim();
 function formatDraftSubject(draft){
  const raw=String(draft??'').replace(/\r\n/g,'\n');
  const lines=raw.split('\n'),index=lines.findIndex(x=>/^\s*Относно\s*:/iu.test(x));
- if(index<0)return {text:raw,warning:'Липсва ред „Относно:“. Редактирайте проекта преди потвърждение.'};
+ if(index<0)return {text:raw,warning:'Липсва ред „Относно:“. Въведете ред по действителния предмет на преписката.'};
  const value=lines[index].replace(/^\s*Относно\s*:\s*/iu,'').trim();
- const prefix='Уведомление за инвестиционно предложение (ИП)';
- if(value.startsWith(prefix))return {text:raw,warning:null};
- let title='',tail='';
- const direct=value.match(/^(„[^“]+“)([\s\S]*)$/u);
- if(direct){title=direct[1];tail=direct[2]}
- else {
-   const boundary=value.match(/^(.+?)(,?\s+(?:(?:разположен[аои]?|находящ[аои]?|попадащ[аои]?)\s+|в\s+(?:поземлен\s+имот|ПИ|имот|землището)|с\s+местоположение|местност\b)[\s\S]*)$/iu);
-   if(boundary){title=boundary[1].trim();tail=boundary[2]}
- }
- if(!title)return {text:raw,warning:'Не е разграничено еднозначно наименованието на ИП в „Относно:“. Моля, въведете „Относно: Уведомление за инвестиционно предложение (ИП) „Наименование“ …“.'};
- const quoted=title.startsWith('„')?title:'„'+title.replace(/^["„]|["“]$/g,'')+'“';
- lines[index]='Относно: '+prefix+' '+quoted+tail;
- return {text:lines.join('\n'),warning:null};
+ if(!value)return {text:raw,warning:'Редът „Относно:“ е празен.'};
+ // Preserve case-specific designation: investment proposal, plan, programme, project, or another lawful type.
+ // Never inject or require a fixed document type; editing the confirmed content belongs to the expert.
+ return {text:raw,warning:null};
 }
-
 
 const incomingReference=()=>{
  const w=window.KT80WorkflowState||{},i=w.intake||{};
@@ -127,7 +117,7 @@ function initialize(){
    editorial.hidden=!editorialIssues.length;
    const normalized=formatDraftSubject(data.draft);
    if(normalized.warning){editorialIssues.push(normalized.warning);editorialContent.append(make('p',normalized.warning));editorial.hidden=false;}
-   versions.push({version:versions.length+1,text:normalized.text,kind:'предложение на EG Автора — универсална структура на „Относно:“'});
+   versions.push({version:versions.length+1,text:normalized.text,kind:'предложение на EG Автора — индивидуален предмет'});
    confirmed=null;decisionStatus.hidden=true;render();note.textContent=editorialIssues.length?'Проектът е готов. Проверете бележките за редакция преди потвърждение.':'Проектът е готов за експертна редакция или потвърждение.';
   }catch{note.textContent='Възникна грешка при изготвянето на текста.';}
   finally{busy=false;generate.disabled=false}
@@ -144,29 +134,18 @@ function initialize(){
  cancel.onclick=render;
  confirm.onclick=()=>{
   if(!source||!live()||live()?.version!==source.version||!versions.length){
-    showDecisionStatus('Не може да се потвърди: данните или версията на преписката не съответстват на потвърдения Етап 4.',true);
-    return;
+    showDecisionStatus('Не може да се потвърди: данните на преписката или експертната версия са променени.',true);return;
   }
-  const v=versions.at(-1),normalized=formatDraftSubject(v.text);
-  if(normalized.warning){
-    note.textContent=normalized.warning;
-    showDecisionStatus(normalized.warning+' Изберете „Редактирай текста“ и поправете заглавието.',true);
-    return;
+  const v=versions.at(-1),checked=formatDraftSubject(v.text);
+  if(checked.warning){
+    showDecisionStatus(checked.warning+' Изберете „Редактирай текста“.',true);return;
   }
-  // Accepted universal "Относно:" formatting only; no rewriting of the letter body.
-  if(normalized.text!==v.text){
-    versions.push({...v,version:versions.length+1,text:normalized.text,kind:'техническо оформление на „Относно:“'});
-  }
-  const ready=versions.at(-1);
-  if(!/^Относно:\s*Уведомление за инвестиционно предложение \(ИП\)\s+„[^“]+“/u.test(ready.text.trim())){
-    showDecisionStatus('Редът „Относно:“ изисква „Уведомление за инвестиционно предложение (ИП)“ и наименование на ИП в кавички.',true);
-    return;
-  }
-  confirmed=Object.freeze({...ready,caseId:source.caseId,stage4Version:source.version,
+  // Expert confirms exactly the displayed draft; no last-minute rewriting.
+  confirmed=Object.freeze({...v,caseId:source.caseId,stage4Version:source.version,
     expert:source.expert,confirmedAt:new Date().toISOString()});
   render();
   note.textContent='Текстът е потвърден от експерта. Можете да създадете DOCX по проверената бланка.';
-  showDecisionStatus('Текстът е потвърден · версия '+confirmed.version+'. Бутонът „Създай Word по бланката“ е достъпен по-долу.');
+  showDecisionStatus('Текстът е потвърден · версия '+confirmed.version+'. Създаването на Word е достъпно по-долу.');
  };
  word.addEventListener('click',()=>window.KT119Download?.());
  document.addEventListener('kt119:template-ready',()=>{word.disabled=!(confirmed&&window.KT119TemplateReady?.());});
