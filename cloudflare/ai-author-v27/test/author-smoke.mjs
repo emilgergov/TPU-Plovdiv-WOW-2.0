@@ -403,6 +403,44 @@ try{
   assert.equal(panel02AcceptedCalls,2);
   console.log('PASS: KT109 panel 02 remains possible when a specific sourced factual gap is stated and independently reviewed.');
 
+  // KT110: an author draft containing hidden transport tokens must be corrected
+  // before the second model is allowed to mark it reviewed.
+  const kt110Valid=[
+    'ВОДЕЩО ПРЕДЛОЖЕНИЕ: Проект за мотивирано писмо за начина на процедиране според прегледа на доказателствата.',
+    'ИЗБРАН ПАНЕЛ: 01 — Писмо по чл. 2, ал. 2 от Наредбата за ОС',
+    'ЗАЩО ТОЗИ ПАНЕЛ: Проверяват се отделно ал. 1 и ал. 2 от чл. 2 по наличните факти и архивния нормативен текст.',
+    'ЗАЩО НЕ АЛТЕРНАТИВИТЕ: Други резултати предполагат допълнителни установени правни предпоставки.',
+    'Фактическа основа','Складове за промишлени стоки и офиси с установен имот.',
+    'Нормативни предпоставки и граници на проверката','Юридическата квалификация на дейността се извършва от компетентния орган.',
+    'Мотивирано предложение','Мотивирано писмо за начина на процедиране като проект за експертна проверка.',
+    'Данни за експертна проверка','Фактите по уведомлението трябва да се сравнят с относимите законови категории.'
+  ].join('\\n');
+  const kt110Invalid=kt110Valid.replace('Складове за промишлени стоки и офиси с установен имот.','Складове за промишлени стоки и офиси, spatial_intersection = false.');
+  let kt110Calls=0;
+  globalThis.fetch=async (_url,opts)=>{
+    kt110Calls++;
+    const sent=JSON.parse(opts.body),sys=sent.input[0].content;
+    const req=JSON.parse(sent.input[1].content);
+    if(sys.includes('Преработи ПЪЛНИЯ проект')){
+      assert(req.qualityIssues.includes('INTERNAL_GIS_TRANSPORT_TOKEN_IN_DRAFT'));
+      return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:kt110Valid}]}]}),{status:200});
+    }
+    if(sys.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ')){
+      assert.equal(req.draft,kt110Valid);
+      return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({verdict:'pass',issues:[],revisedDraft:''})}]}]}),{status:200});
+    }
+    assert(sys.includes('КТ110'));
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:kt110Invalid}]}]}),{status:200});
+  };
+  const kt110Run=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+  assert.equal(kt110Run.status,200);
+  const kt110Json=await kt110Run.json();
+  assert.equal(kt110Json.draft,kt110Valid);
+  assert.equal(kt110Json.normativeAudit.authorRepairs,1);
+  assert.equal(kt110Calls,3);
+  console.log('PASS: KT110 strips internal GIS transport identifiers through bounded repair before independent review.');
+
+
 
 
 
