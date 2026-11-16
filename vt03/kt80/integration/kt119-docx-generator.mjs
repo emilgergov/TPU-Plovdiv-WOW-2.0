@@ -30,7 +30,7 @@ function install(){
  const quotedSubject=(line)=>{
    if(!line.startsWith('Относно:'))return line;
    const rest=line.slice('Относно:'.length);
-   const loc=/\s+(?:в(?:ъв)?\s+(?:позем[еe]н(?:ия)?\s+имот|ПИ\b|УПИ\b|имот\s+с\s+идентификатор|гр\.\s|град\s|с\.\s|землището\s)|,\s*(?:местност|находящ|разположен))/iu;
+   const loc=/\s+(?:в(?:ъв)?\s+(?:поземлен(?:ия)?\s+имот|ПИ(?=\s|[.,]|$)|УПИ(?=\s|[.,]|$)|имот\s+с\s+идентификатор|гр\.\s|град\s|с\.\s|землището\s|община\s|област\s)|,\s*(?:местност|находящ|разположен))/iu;
    const boundary=loc.exec(rest);
    if(!boundary)return line;
    const title=rest.slice(0,boundary.index).trim();
