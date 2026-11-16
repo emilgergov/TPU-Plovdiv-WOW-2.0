@@ -38,8 +38,8 @@ try{
  const blocked=await worker.fetch(request(conflict),env);
  assert.equal(blocked.status,422);
  const diag=await blocked.json();
- assert.equal(diag.error,'STAGE4_LEGAL_MATRIX_CONFLICT');
- assert(diag.findings.some(x=>x.test==='A2'&&x.actual==='НЕОПРЕДЕЛЕНА'));
+ assert.equal(diag.error,'STAGE4_DECISION_MODEL_CONFLICT');
+ assert(diag.findings.some(x=>x.test==='PANEL'&&x.actual==='PANEL_01_CONTRADICTS_LEGAL_FACTS'));
  assert.equal(providerCalls,2,'contradictory Stage4 must not incur a paid AI request');
  // If panel 01 is confirmed, a request for extra information is not an admissible substitute.
  produced='Необходимо е да представите допълнителна информация, включваща точна технология, капацитет и техническа документация, за да се прецени приложимостта на нормативната категория за настоящата преписка.';
