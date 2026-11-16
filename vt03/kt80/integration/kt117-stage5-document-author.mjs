@@ -47,7 +47,7 @@ function initialize(){
  const textarea=make('textarea');textarea.hidden=true;textarea.style.display='none';textarea.setAttribute('aria-label','Редакция на административния документ');
  const confirmedText=make('div');confirmedText.className='kt117-note';
  const word=make('button','Създай Word по бланката');word.id='kt119WordCreate';word.disabled=true;
- const wordInfo=make('p','За първия тест изберете проверената бланка на РИОСВ – Пловдив. След потвърждение текстът се пренася в DOCX без пренаписване.');
+ const wordInfo=make('p','Документът се създава автоматично по одобрения институционален модел на РИОСВ – Пловдив. Използва се само експертно потвърденият текст, без пренаписване.');
  wordInfo.className='kt117-note';
  const original=make('details');original.append(make('summary','Пълен експертно потвърден анализ от Етап 4'),make('pre'));
  const footer=make('div');footer.className='kt117-actions';footer.append(word);
