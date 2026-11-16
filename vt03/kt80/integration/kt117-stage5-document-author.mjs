@@ -107,7 +107,14 @@ function initialize(){
    const res=await window.KT80EGSession.request(endpoint,JSON.stringify(payload));
    const data=await res.json().catch(()=>({}));
    if(!live()||live()?.text!==source.text||live()?.version!==source.version){note.textContent='Данните на преписката са променени. Отговорът не е използван.';return;}
-   if(!res.ok){note.textContent='Текстът не е получен. Проверете достъпа и услугата (код '+res.status+').';return;}
+   if(!res.ok){
+    const legalIssue=res.status===422&&(data.error==='STAGE5_DIRECTION_CONFLICT'||data.error==='UNSUPPORTED_CATEGORICAL_CONCLUSION');
+    note.textContent=legalIssue?
+     'Нормативният контрол спря проекта: '+String(data.message||'Административното направление и съдържанието не съответстват.')+' Етап 4 остава за експертен преглед.':
+     'Текстът не е получен. Проверете достъпа и услугата (код '+res.status+').';
+    if(legalIssue){editorialIssues=[note.textContent];editorialContent.replaceChildren(make('p',note.textContent));editorial.hidden=false;}
+    return;
+   }
    if(data.caseId!==source.caseId||data.requestId!==requestId||data.evidenceRevision!==source.evidenceRevision||
      data.stage4Version!==source.version||data.selectedPanelLine!==line||
      data.documentTitle!==documentLabel(line)||data.incomingReference!==incomingReference()||data.projectOnly!==true||
