@@ -265,16 +265,21 @@ function boot(){
      '; пълни текстове на разпоредби: '+(Number(receipt.archiveArticleTextsReceived)||0)+'.'+
      (receipt.documentTextTruncated?' Част от документалния текст е съкратена по технически лимит.':'');
    const body=str(data.draft);
-   const heading=/ВОДЕЩО\s+ПРЕДЛОЖЕНИЕ\s*[:：-]?/iu.exec(body);
-   const afterLead=heading?body.slice(heading.index+heading[0].length):'';
-   const nextSection=afterLead.search(/Фактическа\s+основа/iu);
+   // KT110: remove only presentation artifacts; preserve substantive legal text.
+   const legalDisplay=body.replace(/\\bspatial_intersection\\s*=\\s*(?:false|true)\\b/giu,
+      m=>/false/iu.test(m)?'няма доказано геометрично пресичане':'данни за геометрично пресичане')
+    .replace(/^\\s*---+\\s*$/gmu,'').replace(/\\n{3,}/g,'\\n\\n').trim();
+   const heading=/ВОДЕЩО\\s+ПРЕДЛОЖЕНИЕ\\s*[:：-]?/iu.exec(legalDisplay);
+   const afterLead=heading?legalDisplay.slice(heading.index+heading[0].length):'';
+   const nextSection=afterLead.search(/Фактическа\\s+основа/iu);
    const leadingDraft=nextSection>=0?afterLead.slice(0,nextSection).trim():afterLead.slice(0,1100).trim();
+   const detailedText=nextSection>=0?afterLead.slice(nextSection).trim():legalDisplay;
    lead.textContent=leadingDraft?
     'ВОДЕЩО ПРЕДЛОЖЕНИЕ — ПРОЕКТ ЗА ЕКСПЕРТНА ПРОВЕРКА'+String.fromCharCode(10)+leadingDraft:
     'Не е отделено самостоятелно водещо предложение. Вижте пълния текст по-долу.';
    lead.style.display='block';
    expanded.open=!leadingDraft;expanded.style.display='block';
-   output.textContent=sourceInfo+String.fromCharCode(10,10)+body;output.style.display='block';
+   output.textContent=sourceInfo+String.fromCharCode(10,10)+detailedText;output.style.display='block';
    const audit=data.normativeAudit||{};
    const reviewInfo=audit.reviewed===true?
     (audit.reviewVerdict==='revise'?'Поправен след вторичен независим нормативен преглед. ':'Преминал вторичен независим преглед за логическа съгласуваност. '):
