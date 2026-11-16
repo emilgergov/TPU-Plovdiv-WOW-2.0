@@ -243,6 +243,11 @@ function boot(){
       PANEL_02_SHIFTS_LEGAL_CLASSIFICATION:'Панел 02 неправомерно възлага правната квалификация на възложителя',
       INTERNAL_GIS_TRANSPORT_TOKEN_IN_DRAFT:'Останало е вътрешно техническо обозначение от ГИС',
       MISSING_LEGAL_CATEGORY_DOCUMENT_TREATED_AS_FACT:'Липсата на документ за правна категория е третирана като липсващ факт',
+      MISSING_REASONED_LEGAL_COMPARISON:'Липсва пълната обоснована съпоставка на четирите нормативни хипотези',
+      LEGAL_COMPARISON_AFTER_PANEL_SELECTION:'Нормативната съпоставка е поставена след избора на панел',
+      PANEL_01_NOT_SUPPORTED_BY_NEGATIVE_CLASSIFICATION:'Панел 01 не е обоснован с доказано отрицателни хипотези и приложимост на чл. 2, ал. 2',
+      UNDETERMINED_WITHOUT_DECISIVE_FACT:'Неопределен резултат без посочен конкретен липсващ решаващ факт',
+      NEGATIVE_CONCLUSION_FROM_MISSING_CLASSIFICATION:'Отрицателният извод е изведен единствено от липса на правна категория',
       EMPTY_OR_EXCESSIVE_DRAFT:'Проектът е празен или надхвърля допустимия обем',
       MISSING_OR_UNORDERED_SECTIONS:'Липсващ или разместен задължителен раздел',
       REVIEW_UNAVAILABLE:'Независимият нормативен преглед не е достъпен',
@@ -288,6 +293,7 @@ function boot(){
       m=>/false/iu.test(m)?'няма доказано геометрично пресичане':'данни за геометрично пресичане')
     .replace(/^\s*---+\s*$/gmu,'').replace(/\n{3,}/g,'\n\n').trim();
    const heading=/ВОДЕЩО\s+ПРЕДЛОЖЕНИЕ\s*[:：-]?/iu.exec(legalDisplay);
+   const comparisonText=heading?legalDisplay.slice(0,heading.index).trim():'';
    const afterLead=heading?legalDisplay.slice(heading.index+heading[0].length):'';
    const nextSection=afterLead.search(/Фактическа\s+основа/iu);
    const leadingDraft=nextSection>=0?afterLead.slice(0,nextSection).trim():afterLead.slice(0,1100).trim();
@@ -297,7 +303,9 @@ function boot(){
     'Не е отделено самостоятелно водещо предложение. Вижте пълния текст по-долу.';
    lead.style.display='block';
    expanded.open=!leadingDraft;expanded.style.display='block';
-   output.textContent=sourceInfo+String.fromCharCode(10,10)+detailedText;output.style.display='block';
+   output.textContent=sourceInfo+String.fromCharCode(10,10)+
+    (comparisonText?'НОРМАТИВНА СЪПОСТАВКА ПРЕДИ ИЗБОРА НА ПАНЕЛ'+String.fromCharCode(10)+comparisonText+String.fromCharCode(10,10):'')+
+    detailedText;output.style.display='block';
    const audit=data.normativeAudit||{};
    const reviewInfo=audit.reviewed===true?
     (audit.reviewVerdict==='revise'?'Поправен след вторичен независим нормативен преглед. ':'Преминал вторичен независим преглед за логическа съгласуваност. '):
