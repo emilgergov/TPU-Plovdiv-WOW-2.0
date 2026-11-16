@@ -30,6 +30,7 @@ jobs:
           node cloudflare/ai-author-v27/test/kt105-abc-integration.mjs
           node cloudflare/ai-author-v27/test/author-smoke.mjs
           node cloudflare/ai-author-v27/test/kt123-stage4-stage5-coherence.mjs
+          node cloudflare/ai-author-v27/test/kt123-decision-exhaustive.mjs
       - name: Check Stage 4 browser module syntax and UTF-8 payload contract
         run: |
           node --check vt03/kt80/integration/kt96-eg-ai-stage4-author.mjs
