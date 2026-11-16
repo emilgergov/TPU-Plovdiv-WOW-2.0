@@ -119,7 +119,17 @@ function initialize(){
    editorial.hidden=!editorialIssues.length;
    const normalized=formatDraftSubject(data.draft);
    if(normalized.warning){editorialIssues.push(normalized.warning);editorialContent.append(make('p',normalized.warning));editorial.hidden=false;}
+   // Client-side safety guard is required even while an older Worker may be live.
+   const selectedPanelId=Number(line.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0);
+   const requestInsteadOfNotice=selectedPanelId===1 &&
+    /(?:необходимо\s+е\s+да\s+представите|изисквам\s+да\s+представите|указвам\s+(?:ви\s+)?да\s+(?:представите|допълните)|да\s+допълните\s+представената\s+документация|представете\s+допълнителн[а-я]*\s+(?:документ|информац)|допълнителна\s+информация[,\s]+включваща)/iu.test(normalized.text);
+   if(requestInsteadOfNotice){
+    editorialIssues.push('Избрано е писмо по чл. 2, ал. 2, но проектът изисква допълнителна информация. Не се допуска потвърждаване или Word. Проверете нормативната основа в Етап 4.');
+    editorialContent.replaceChildren(...editorialIssues.map(x=>make('p',x)));editorial.hidden=false;
+    note.textContent='Отхвърлен е проект с различно административно действие. Резултатът не е запазен за потвърждаване.';return;
+   }
    versions.push({version:versions.length+1,text:normalized.text,kind:'предложение на EG Автора — индивидуален предмет'});
+   document.dispatchEvent(new CustomEvent('kt123:stage5-draft',{detail:{caseId:source.caseId,stage4Version:source.version}}));
    confirmed=null;decisionStatus.hidden=true;render();note.textContent=editorialIssues.length?'Проектът е готов. Проверете бележките за редакция преди потвърждение.':'Проектът е готов за експертна редакция или потвърждение.';
   }catch{note.textContent='Възникна грешка при изготвянето на текста.';}
   finally{if(activityTicket!==undefined)window.KT80Busy?.finish?.(activityTicket);busy=false;generate.disabled=false}
@@ -145,6 +155,7 @@ function initialize(){
   // Expert confirms exactly the displayed draft; no last-minute rewriting.
   confirmed=Object.freeze({...v,caseId:source.caseId,stage4Version:source.version,
     expert:source.expert,confirmedAt:new Date().toISOString()});
+  document.dispatchEvent(new CustomEvent('kt123:stage5-confirmed',{detail:{caseId:source.caseId,stage4Version:source.version}}));
   render();
   note.textContent='Текстът е потвърден от експерта. Можете да създадете DOCX по проверената бланка.';
   showDecisionStatus('Текстът е потвърден · версия '+confirmed.version+'. Създаването на Word е достъпно по-долу.');
