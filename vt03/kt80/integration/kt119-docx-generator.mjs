@@ -23,8 +23,9 @@ function install(){
  const addText=(p,text,weight=false,italic=false)=>{
    const r=WN('r'),prop=WN('rPr'),fonts=WN('rFonts'),size=WN('sz');
    fonts.setAttributeNS(W,'w:ascii','Verdana');fonts.setAttributeNS(W,'w:hAnsi','Verdana');fonts.setAttributeNS(W,'w:cs','Verdana');
-   size.setAttributeNS(W,'w:val','20');prop.append(fonts,size);
+   size.setAttributeNS(W,'w:val','20');prop.append(fonts);
    if(weight)prop.append(WN('b'));if(italic)prop.append(WN('i'));
+   prop.append(size);
    const t=WN('t',text);t.setAttribute('xml:space','preserve');
    r.append(prop,t);p.append(r);
  };
