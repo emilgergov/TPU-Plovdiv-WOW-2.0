@@ -448,6 +448,37 @@ try{
   assert.equal(kt110Calls,3);
   console.log('PASS: KT110 strips internal GIS transport identifiers through bounded repair before independent review.');
 
+  // KT113 regression: panel 01 must NEVER be passed when a necessary
+  // applicability test is positive or indeterminate instead of negative.
+  const undecided=kt110Valid.replace(
+    'ПРИЛОЖЕНИЕ № 2 КЪМ ЗООС: ОТРИЦАТЕЛНА — Съпоставката на конкретните параметри на складовата дейност с относимите нормативни категории потвърждава неприложимост на описаните позиции.',
+    'ПРИЛОЖЕНИЕ № 2 КЪМ ЗООС: НЕОПРЕДЕЛЕНА — Не е представен решаващ технически параметър за капацитета и вида на обекта в приложеното уведомление.'
+  );
+  const positive=kt110Valid.replace(
+    'ПРИЛОЖЕНИЕ № 2 КЪМ ЗООС: ОТРИЦАТЕЛНА — Съпоставката на конкретните параметри на складовата дейност с относимите нормативни категории потвърждава неприложимост на описаните позиции.',
+    'ПРИЛОЖЕНИЕ № 2 КЪМ ЗООС: ПОЛОЖИТЕЛНА — Съпоставката на действително документирани параметри на обекта с конкретната категория потвърждава приложимостта.'
+  );
+  for(const [name,invalid] of [['undetermined',undecided],['positive',positive],['missing',kt110Valid.replace(/^ПРИЛОЖЕНИЕ № 1 КЪМ ЗООС:[^\\n]*\\n/u,'')]]){
+    let callsKT113=0;
+    globalThis.fetch=async (_url,opts)=>{
+      callsKT113++;
+      const sent=JSON.parse(opts.body),system=sent.input[0].content;
+      if(system.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ'))throw Error('KT113 invalid comparison reached independent acceptance');
+      if(system.includes('Преработи ПЪЛНИЯ проект')){
+        const submitted=JSON.parse(sent.input[1].content);
+        assert(submitted.qualityIssues.some(x=>x==='PANEL_01_NOT_SUPPORTED_BY_NEGATIVE_CLASSIFICATION'||x==='MISSING_REASONED_LEGAL_COMPARISON'),name);
+      }
+      return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:invalid}]}]}),{status:200});
+    };
+    const blocked=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+    assert.equal(blocked.status,422,name);
+    const details=await blocked.json();
+    assert(details.qualityIssues.some(x=>x==='PANEL_01_NOT_SUPPORTED_BY_NEGATIVE_CLASSIFICATION'||x==='MISSING_REASONED_LEGAL_COMPARISON'),name);
+    assert.equal(callsKT113,2,name);
+  }
+  console.log('PASS: KT113 panel 01 rejected on positive, indeterminate or missing legal matrix before independent review.');
+
+
 
 
 
