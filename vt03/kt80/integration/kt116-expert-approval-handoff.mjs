@@ -53,6 +53,26 @@ if(host&&five){
 
  const evidence=()=>collectStageEvidence(window);
  const current=()=>proposal&&proposal.localId===evidence().caseId&&proposal.revision===evidence().evidenceRevision&&proposal.generation===evidence().generation&&proposal.key===evidence().key;
+ // KT123 — the same explicit legal matrix as the Worker; the expert may edit
+ // the reasoning, but the selected administrative direction cannot contradict it.
+ const validateStage4Direction=text=>{
+  const normalized=val(text).replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
+  const chosen=Number(normalized.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0);
+  if(!chosen)return 'Посочете еднозначно избрания панел и мотивите за него преди потвърждение.';
+  if(chosen!==1)return '';
+  const defs=[
+   ['Приложение № 1 към ЗООС',/^\s*ПРИЛОЖЕНИЕ\s*№\s*1\s*КЪМ\s*ЗООС\s*:\s*(ПОЛОЖИТЕЛНА|ОТРИЦАТЕЛНА|НЕОПРЕДЕЛЕНА)\s*[—–-]\s*(.+)$/imu,'ОТРИЦАТЕЛНА'],
+   ['Приложение № 2 към ЗООС',/^\s*ПРИЛОЖЕНИЕ\s*№\s*2\s*КЪМ\s*ЗООС\s*:\s*(ПОЛОЖИТЕЛНА|ОТРИЦАТЕЛНА|НЕОПРЕДЕЛЕНА)\s*[—–-]\s*(.+)$/imu,'ОТРИЦАТЕЛНА'],
+   ['Чл. 2, ал. 1 от Наредбата за ОС',/^\s*ЧЛ\.\s*2\s*,?\s*АЛ\.\s*1\s*НАРЕДБА\s*ЗА\s*ОС\s*:\s*(ПОЛОЖИТЕЛНА|ОТРИЦАТЕЛНА|НЕОПРЕДЕЛЕНА)\s*[—–-]\s*(.+)$/imu,'ОТРИЦАТЕЛНА'],
+   ['Чл. 2, ал. 2 от Наредбата за ОС',/^\s*ЧЛ\.\s*2\s*,?\s*АЛ\.\s*2\s*НАРЕДБА\s*ЗА\s*ОС\s*:\s*(ПОЛОЖИТЕЛНА|ОТРИЦАТЕЛНА|НЕОПРЕДЕЛЕНА)\s*[—–-]\s*(.+)$/imu,'ПОЛОЖИТЕЛНА']
+  ];
+  const conflicts=defs.flatMap(([label,re,expected])=>{
+   const row=normalized.match(re);
+   return !row||row[1].toUpperCase()!==expected||row[2].trim().length<45?
+    [label+': '+(row?.[1]||'липсва установен извод')+' — необходимо е изясняване на предпоставките и доказателствата']:[];});
+  return conflicts.length?'Избраният панел №01 не е съгласуван с четирите нормативни проверки:\n'+conflicts.join('\n')+
+   '\nEG Авторът предлага корекция в Етап 4; експертът проверява доказателствата и потвърждава изводите. Не се извършва автоматична смяна на процедура.':'';
+ };
  const titlePattern=/^(ПРИЛОЖЕНИЕ № [12] КЪМ ЗООС|ЧЛ\. 2, АЛ\. [12] НАРЕДБА ЗА ОС|ВОДЕЩО ПРЕДЛОЖЕНИЕ|ИЗБРАН ПАНЕЛ|ЗАЩО ТОЗИ ПАНЕЛ|ЗАЩО НЕ АЛТЕРНАТИВИТЕ|Фактическа основа|Нормативни предпоставки и граници на проверката|Мотивирано предложение|Данни за експертна проверка)\s*[:：]/iu;
  function render(container,content){
   container.replaceChildren();
@@ -103,6 +123,8 @@ if(host&&five){
   if(!current()){note.textContent='Данните по преписката са променени.';return;}
   const expert=val(actor.value);if(expert.length<2){note.textContent='Посочете експерта.';actor.focus();return;}
   const v=history.at(-1);
+  const normativeMismatch=validateStage4Direction(v.text);
+  if(normativeMismatch){note.textContent=normativeMismatch;note.setAttribute('role','alert');alerts.hidden=false;alertContent.replaceChildren(mk('p',normativeMismatch));return;}
   if(!await confirmStyled('Потвърждавате версия '+v.version+' за предаване към Етап 5?'))return;
   approved=Object.freeze({caseId:proposal.caseId,requestId:proposal.requestId,evidenceRevision:proposal.revision,
    version:v.version,text:v.text,original:proposal.original,warnings:[...proposal.warnings],
