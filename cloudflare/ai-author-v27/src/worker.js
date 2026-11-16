@@ -420,7 +420,7 @@ async function handleStage4Proposal(request,env){
   // KT114: remove only display Markdown markers for quality checks. In KT113
   // "**ИЗБРАН ПАНЕЛ:** 2" bypassed the route-specific matrix gate.
   // KT123: engineering references and contradictory self-rating are not legal evidence.
-   if(/(?:\bКТ[-–]?\s*\d{2,4}\b|(?:контролна\s+точка|тестова\s+версия)\s*№?\s*\d+|(?:според|съгласно|по)\s+(?:наш(?:ия|ите)\s+)?(?:тест|валидатор|алгоритъм|работен\s+цикъл))/iu.test(value))
+   if(/(?:(?:^|[^\p{L}\p{N}])КТ[-–]?\s*\d{2,4}(?=$|[^\p{L}\p{N}])|(?:контролна\s+точка|тестова\s+версия)\s*№?\s*\d+|(?:според|съгласно|по)\s+(?:наш(?:ия|ите)\s+)?(?:тест|валидатор|алгоритъм|работен\s+цикъл))/iu.test(value))
     issues.push("INTERNAL_TEST_REFERENCES_IN_EXPERT_DRAFT");
    const overclaim=/(?:изцяло|напълно|безусловно)\s+(?:съответства|отговаря)[^.!?\n]{0,90}(?:всички|нормативн(?:и|ите))|(?:всички|пълн(?:о|а))\s+(?:нормативни\s+)?(?:изисквания|условия|предпоставки)[^.!?\n]{0,60}(?:изпълнен[иао]|спазен[иао])|(?:не\s+са\s+установени|липсват)\s+(?:никакви\s+)?(?:съществени\s+)?(?:липси|противоречия)/iu.test(value);
    const matrixUnknown=/^\s*(?:ПРИЛОЖЕНИЕ\s*№\s*[12]\s*КЪМ\s*ЗООС|ЧЛ\.\s*2\s*,?\s*АЛ\.\s*[12]\s*НАРЕДБА\s+ЗА\s*ОС)\s*:\s*НЕОПРЕДЕЛЕНА\b/imu.test(value.replace(/\*\*/gu,""));
