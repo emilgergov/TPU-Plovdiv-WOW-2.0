@@ -1,5 +1,6 @@
 import {getLegalContext} from "./legal-v11-loader.mjs";
 import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
+import {evaluateDraft} from "./kt123-decision-model.mjs";
 // TPU Plovdiv AI Author V27 — isolated test-only authoring gateway.
 // Never send an OpenAI key to the browser. Authorization is fail-closed.
 const headers = { "Content-Type":"application/json; charset=utf-8", "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff", "Access-Control-Allow-Origin":"null" };
@@ -486,7 +487,15 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
         issues.push("NEGATIVE_CONCLUSION_FROM_MISSING_CLASSIFICATION");
     }
   }
-  // KT109: verify an explicit catalog reference when present. For existing
+  // KT123: independent finite-state compatibility control, not AI narrative.
+   if(/ИЗБРАН\s+ПАНЕЛ\s*:/iu.test(value)){
+     const decision=evaluateDraft(value);
+     const blocking=new Set(["OS_ART2_MUTUALLY_EXCLUSIVE","OS_ART2_PREMATURE_EXCLUSION",
+      "PANEL_01_CONTRADICTS_LEGAL_FACTS","UNKNOWN_OR_UNSELECTED_ROUTE",
+      "MISSING_LEGAL_PREDICATE","UNSUPPORTED_NORMATIVE_REASON","DUPLICATED_LEGAL_PREDICATE"]);
+     for(const finding of decision.decision.errors)if(blocking.has(finding.code))issues.push(finding.code);
+   }
+   // KT109: verify an explicit catalog reference when present. For existing
   // client/test drafts without an explicit panel marker, do not fabricate a route.
   const panelMatch=gateText.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu);
   if(panelMatch&&!KT109_ROUTE_BY_ID.has(Number(panelMatch[1])))
@@ -692,6 +701,15 @@ async function handleStage5Document(request,env){
  const legalMatrix=Object.fromEntries(testedRows.map(([key,pattern])=>{
   const row=evidence.match(pattern);return [key,row?{status:row[1].toUpperCase(),reason:row[2].trim()}:null];
  }));
+ // The Stage 5 server recomputes the same model before authoring any document.
+ const stage5Decision=evaluateDraft(input.confirmedStage4Text);
+ const stage5HardCodes=new Set(["OS_ART2_MUTUALLY_EXCLUSIVE","OS_ART2_PREMATURE_EXCLUSION",
+   "PANEL_01_CONTRADICTS_LEGAL_FACTS","MISSING_LEGAL_PREDICATE",
+   "UNSUPPORTED_NORMATIVE_REASON","DUPLICATED_LEGAL_PREDICATE"]);
+ const stage5Hard=stage5Decision.decision.errors.filter(x=>stage5HardCodes.has(x.code));
+ if(stage5Hard.length)return reply({error:"STAGE4_DECISION_MODEL_CONFLICT",expertReviewRequired:true,projectOnly:true,
+   message:"Потвърдената преценка противоречи на нормативните зависимости. Проверете конкретните основания в Етап 4; направлението не се сменя автоматично.",
+   findings:stage5Hard.map(x=>({test:x.test,actual:x.code,reason:x.detail||""}))},422);
  const expectedPanel1={A1:"ОТРИЦАТЕЛНА",A2:"ОТРИЦАТЕЛНА",OS1:"ОТРИЦАТЕЛНА",OS2:"ПОЛОЖИТЕЛНА"};
  const inconsistentPanel1=confirmedPanelId===1?Object.entries(expectedPanel1).filter(([key,expected])=>legalMatrix[key]?.status!==expected):[];
  if(inconsistentPanel1.length)return reply({
