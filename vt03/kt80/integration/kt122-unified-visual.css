@@ -191,3 +191,14 @@ body[data-kt80-view="home"] .kt80-dashboard-tile[data-kt80-kind="step"][data-kt1
 
 /* KT122 VB-21: duplicate GIS evidence card is display-only; all GIS calculations and Stage4 handoff remain intact. */
 .kt80-stage-panel[data-panel="3"] #kt82SpatialEvidence592{display:none!important}
+
+/* KT123-A — actual Stage5 request lifecycle; no fabricated completion percentage. */
+#kt117Stage5 .kt123-author-progress{background:#214a36;border:1px solid #b89657;border-left:4px solid #dbb96e;border-radius:8px;padding:10px 13px;margin:5px 0 12px;color:#ffe2a2;font:700 13px/1.5 Verdana,Arial,sans-serif}
+#kt117Stage5 .kt123-author-progress[hidden]{display:none!important}
+#kt117Stage5 .kt123-author-track{height:10px;border:1px solid #85744b;border-radius:99px;background:#102d21;overflow:hidden;margin-top:8px}
+#kt117Stage5 .kt123-author-track>div{width:33%;height:100%;border-radius:99px;background:linear-gradient(90deg,#b08c46,#f4d38b,#b08c46);animation:kt123AuthorMove 1.6s ease-in-out infinite alternate}
+@keyframes kt123AuthorMove{from{transform:translateX(0)}to{transform:translateX(203%)}}
+@media(prefers-reduced-motion:reduce){#kt117Stage5 .kt123-author-track>div{animation:none;width:100%;opacity:.65}}
+/* Pending does not mean inaccessible. Keep text legible and buttons keyboard reachable. */
+body[data-kt80-view="home"] .kt80-dashboard-tile[data-kt80-kind="step"][data-kt122-state="pending"]{opacity:1!important;color:#e8e9d9!important;border-color:#728d7e!important}
+body[data-kt80-view="home"] .kt80-dashboard-tile[data-kt80-kind="step"][data-kt122-state="pending"] :is(.kt80-dashboard-tile-text,.kt80-dashboard-tile-number){color:inherit!important}
