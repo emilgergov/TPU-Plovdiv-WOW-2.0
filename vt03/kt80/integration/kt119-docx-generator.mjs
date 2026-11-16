@@ -1,24 +1,18 @@
+import {makeAutomaticTemplate} from './kt120-embedded-word-template.mjs';
 /* КТ119 — DOCX from the approved RIOSV-Plovdiv source document.
  * The file is processed locally. Never upload the dossier or template.
  * Only the confirmed expert text is inserted, byte-for-byte per paragraph.
  */
-const TEMPLATE_SHA256='0ac5895527e5350bfa074710fef9b801c37f30d4262e4404e98756f917a0994f';
 const W='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const el=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;return x};
 const q=x=>String(x??'').trim();
 let templateBytes=null;
-const digest=async b=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b))).map(n=>n.toString(16).padStart(2,'0')).join('');
 function install(){
  const root=document.getElementById('kt117Stage5'),button=document.getElementById('kt119WordCreate');
  if(!root||!button)return false;
- const help=root.querySelector('.kt117-note')?.parentElement||root;
- const select=el('div');select.style.cssText='padding:13px;margin:12px 0;border:1px solid #998b5d;background:#183b2c;border-radius:8px;color:#f5e9c9;font:13px/1.5 Verdana,Arial';
- const title=el('strong','Бланка на РИОСВ – Пловдив');title.style.cssText='display:block;color:#f2d190;margin-bottom:7px';
- const description=el('div','Изберете последната бланка КТ119 (горен подпис вляво, удебелени нормативни основания), само веднъж за текущата сесия. Файлът остава в браузъра; не се изпраща към сървър.');
- const file=el('input');file.type='file';file.accept='.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document';file.setAttribute('aria-label','Изберете одобрената DOCX бланка');file.style.cssText='display:block;margin:11px 0;color:#f8edd7;max-width:100%';
- const status=el('p','Не е избрана бланка.');status.style.cssText='color:#e8ce99;font-size:12px;margin:5px 0';
- select.append(title,description,file,status);
- const info=button.parentElement;info?.parentElement?.insertBefore(select,info);
+ const status=el('p','Използва се вградената одобрена бланка на РИОСВ – Пловдив.');
+ status.style.cssText='color:#e8ce99;font:12px/1.5 Verdana,Arial;margin:8px 0';
+ button.parentElement?.insertAdjacentElement('afterend',status);
  const WN=(tag,text)=>{const n=document.createElementNS(W,'w:'+tag);if(text!==undefined)n.textContent=text;return n};
  const addText=(p,text,weight=false,italic=false)=>{
    const r=WN('r'),prop=WN('rPr'),fonts=WN('rFonts'),size=WN('sz');
@@ -50,27 +44,18 @@ function install(){
  };
  const newPara=(line)=>{
    const p=WN('p'),pp=WN('pPr'),spacing=WN('spacing'),lineEl=WN('spacing');
-   spacing.setAttributeNS(W,'w:after','120');spacing.setAttributeNS(W,'w:line','240');
-   spacing.setAttributeNS(W,'w:lineRule','auto');pp.append(spacing);p.append(pp);
+   spacing.setAttributeNS(W,'w:after','0');spacing.setAttributeNS(W,'w:line','240');
+   spacing.setAttributeNS(W,'w:before','0');spacing.setAttributeNS(W,'w:lineRule','auto');pp.append(spacing);const align=WN('jc');align.setAttributeNS(W,'w:val','both');pp.append(align);p.append(pp);
    segmented(p,line);if(textIn(p)!==line)throw Error('Text mismatch in new paragraph');
    return p;
  };
- file.addEventListener('change',async()=>{
-   templateBytes=null;document.dispatchEvent(new Event('kt119:template-ready'));
-   try{
-     const chosen=file.files?.[0];if(!chosen)throw Error('Не е избран файл.');
-     if(chosen.size>250000||chosen.size<25000)throw Error('Неочакван размер на бланката.');
-     const data=await chosen.arrayBuffer(),sha=await digest(data);
-     if(sha!==TEMPLATE_SHA256)throw Error('Това не е проверената бланка КТ119. Изберете файла от тестовия пакет.');
-     if(!window.fflate?.unzipSync||!window.fflate?.zipSync)throw Error('Библиотеката за DOCX не е заредена.');
-     const zip=window.fflate.unzipSync(new Uint8Array(data));
-     const xml=new TextDecoder().decode(zip['word/document.xml']||new Uint8Array());
-     if(!xml.includes('{{SUBJECT}}')||!xml.includes('{{BODY_ANCHOR}}')||!xml.includes('{{DOCUMENT_TITLE}}'))throw Error('Липсват контролни полета в бланката.');
-     templateBytes=new Uint8Array(data);
-     status.textContent='Бланката е проверена. След потвърждение на текста можете да създадете DOCX.';
-   }catch(e){status.textContent=String(e.message||e);file.value='';}
-   document.dispatchEvent(new Event('kt119:template-ready'));
- });
+ try{
+   templateBytes=makeAutomaticTemplate();
+   const zip=window.fflate.unzipSync(templateBytes);
+   const text=new TextDecoder().decode(zip['word/document.xml']);
+   if(!text.includes('{{SUBJECT}}')||!text.includes('{{DOCUMENT_TITLE}}')||!text.includes('{{BODY_ANCHOR}}'))throw Error('Невалидни контролни полета');
+   status.textContent='Бланката се прилага автоматично; експертът не избира файл.';
+ }catch(e){templateBytes=null;status.textContent='Бланката не е готова: '+String(e.message||e)}
  window.KT119TemplateReady=()=>!!templateBytes;
  window.KT119Download=async()=>{
    const approved=window.KT117Document?.snapshot?.(),stage4=window.KT116ExpertHandoff?.snapshot?.();
@@ -80,7 +65,7 @@ function install(){
      const raw=approved.text.replace(/\r\n/g,'\n');
      const lines=raw.split('\n'),subject=lines[0];
      if(!subject?.startsWith('Относно:'))throw Error('Липсва потвърден ред „Относно:“.');
-     const bodyLines=lines.slice(1);
+     const bodyLines=lines.slice(1).filter(x=>x.trim().length>0);
      const chosen=stage4.text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\s*[—–-]\s*([^\n]+)/iu);
      if(!chosen)throw Error('Липсва потвърдено наименование на административния документ.');
      const docTitle=chosen[1].trim();
@@ -110,7 +95,7 @@ function install(){
      for(const p of nodes)body.insertBefore(p,anchor);
      body.removeChild(anchor);
      const actual=[textIn(subj),...nodes.map(textIn)].join('\n');
-     if(actual!==raw)throw Error('DOCX не съвпада с експертно потвърденото съдържание.');
+     if(actual.replace(/\n+/g,'\n')!==raw.replace(/\n+/g,'\n').replace(/^\n|\n$/g,''))throw Error('DOCX не съвпада с експертно потвърденото съдържание.');
      // Never rewrite a confirmed run. Formatting changes only the appearance.
      contents['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(dom));
      const bytes=window.fflate.zipSync(contents,{level:6});
