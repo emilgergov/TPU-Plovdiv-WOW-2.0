@@ -289,6 +289,11 @@ function boot(){
        '\n\nПЪЛЕН РАБОТЕН ТЕКСТ НА EG АВТОРА (ЗА ЕКСПЕРТНА РЕДАКЦИЯ):\n\n'+str(data.unverifiedDraft);
       output.style.display='block';
       status.textContent='EG Авторът представи работен проект с отбелязани нормативни проблеми. Експертът може да го прочете и редактира; проектът не е одобрен и не се подава към Етап 5.';
+      document.dispatchEvent(new CustomEvent('kt115:stage4-draft',{detail:{
+       caseId:identity.caseId,evidenceRevision:h.evidenceRevision,requestId,
+       sourceDraft:str(data.unverifiedDraft),warnings:issues,qualityPassed:false,
+       originalCaseSignature:identity.signature,caseIdType:identity.caseIdType
+      }}));
       button.textContent='Преработи проект с EG Автора';
       return;
     }
@@ -353,6 +358,11 @@ function boot(){
     (audit.reviewVerdict==='revise'?'Поправен след вторичен независим нормативен преглед. ':'Преминал вторичен независим преглед за логическа съгласуваност. '):
     'Независим нормативен преглед не е удостоверен. ';
    status.textContent=reviewInfo+(audit.fullArticlesVerified===true?'Относимите пълни нормативни текстове от MASTER V11 са предоставени. Правната приложимост подлежи на експертно потвърждение.':'Пълните нормативни текстове не са удостоверени като използвани; необходима е експертна проверка.');
+   document.dispatchEvent(new CustomEvent('kt115:stage4-draft',{detail:{
+    caseId:identity.caseId,evidenceRevision:h.evidenceRevision,requestId,
+    sourceDraft:str(data.draft),warnings:[],qualityPassed:true,
+    originalCaseSignature:identity.signature,caseIdType:identity.caseIdType
+   }}));
    button.textContent='Преработи проект с EG Автора';
   }catch(err){
    if(ticket===serial)status.textContent='Няма потвърден отговор от EG Автора: '+(String(err?.message||err)==='Failed to fetch'?
