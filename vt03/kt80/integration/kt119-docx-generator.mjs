@@ -147,6 +147,14 @@ function install(){
      subjectProps.append(WN('widowControl'));
      // Retain original confirmed subject content; formatting is independent from proposal text.
      const nodes=bodyLines.map(x=>newPara(x));
+     // Keep the closing signature block together with the preceding substantive
+     // paragraph. Without this, Word can strand "С уважение" on a new page.
+     // This does not change a single character of the expert-confirmed text.
+     const lastBody=nodes.at(-1);
+     if(lastBody){
+       const props=Array.from(lastBody.childNodes).find(n=>n.namespaceURI===W&&n.localName==='pPr');
+       if(props&&!Array.from(props.childNodes).some(n=>n.namespaceURI===W&&n.localName==='keepNext'))props.append(WN('keepNext'));
+     }
      for(const p of nodes)body.insertBefore(p,anchor);
      body.removeChild(anchor);
      const actual=[textIn(subj),...nodes.map(textIn)].join('\n');
