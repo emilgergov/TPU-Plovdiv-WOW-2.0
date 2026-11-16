@@ -436,7 +436,7 @@ async function handleStage4Proposal(request,env){
    if(undecidedLines.some(row=>legalOnlyGap.test(row)))
     issues.push("UNDETERMINED_BASED_ON_LEGAL_CLASSIFICATION_GAP");
    if(undecidedLines.some(row=>/(?:липс(?:ва|ата)|непълн[а-я]*\s+информаци)[^.!?\n]{0,115}площ/iu.test(row)&&
-     !/(?:застроен[а-я]*\s+площ|разгънат[а-я]*\s+застроен[а-я]*\s+площ|РЗП|площ\s+на\s+(?:сград[а-я]*|имот[а-я]*|обект[а-я]*|терен[а-я]*))/iu.test(row)))
+     !/(?:застроен[а-я]*\s+площ|разгънат[а-я]*\s+застроен[а-я]*\s+площ|РЗП|площ\s+на\s+(?:сград[а-я]*|имот[а-я]*|терен[а-я]*))/iu.test(row)))
     issues.push("UNSPECIFIED_AREA_TYPE_IN_EVIDENCE_GAP");
    if(/(?:настоящият|този)\s+проект[^.!?\n]{0,140}(?:в\s+пълно\s+съответствие|напълно\s+съответства|структуриран\s+и\s+преработен)|(?:този|настоящият)\s+(?:проект|анализ)[^.!?\n]{0,100}(?:най[-\s]+подходящата|безспорн[а-я]*\s+правн[а-я]*)/iu.test(value))
     issues.push("DRAFT_SELF_CERTIFICATION_NOT_EVIDENCE");
