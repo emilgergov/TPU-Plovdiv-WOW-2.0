@@ -39,6 +39,13 @@ function mark(){
  // Ensure a legible state without changing whether an individual stage is complete.
  document.querySelectorAll('#kt80DashboardFive .kt80-dashboard-tile').forEach(tile=>{
   const state=tile.dataset.kt122State;
+  if(state==='current'){
+   tile.style.removeProperty('opacity');tile.style.removeProperty('color');
+   [tile.querySelector('.kt80-dashboard-tile-number'),tile.querySelector('.kt80-dashboard-tile-text'),tile.querySelector('.kt80-dashboard-tile-arrow')].filter(Boolean).forEach(node=>{
+    node.style.removeProperty('opacity');node.style.removeProperty('color');node.style.removeProperty('-webkit-text-fill-color');
+   });
+   return;
+  }
   if(state!=='pending'&&state!=='done'&&state!=='review')return;
   const ink=state==='review'?'#fff0bf':'#f4eddb';
   tile.style.setProperty('opacity','1','important');
@@ -76,5 +83,5 @@ if(dash)new MutationObserver(mark).observe(dash,{childList:true,subtree:true});
 if(root)new MutationObserver(mark).observe(root,{childList:true,subtree:true});
 if(title)new MutationObserver(mark).observe(title,{childList:true,characterData:true,subtree:true});
 mark();
-window.KT123PanelArchitecture=Object.freeze({version:'KT123-E2',profile,isIndependent:id=>profile(Number(id))==='independent'});
+window.KT123PanelArchitecture=Object.freeze({version:'KT123-E3',profile,isIndependent:id=>profile(Number(id))==='independent'});
 })();
