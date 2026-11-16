@@ -688,9 +688,12 @@ async function handleStage5Document(request,env){
    ", "+legalBasis+"Ви уведомявам следното:";
  // Exclude provider-generated letterhead/recipient metadata; these are controlled by
  // the approved DOCX form. Strip only leading blocks, not facts in body paragraphs.
- draft=draft.replace(/^\s*(?:(?:РЕГИОНАЛНА\s+ИНСПЕКЦИЯ[^\n]*|РИОСВ\s*[–-]\s*Пловдив\s*$|(?:Вх\.?\s*№|Изх\.?\s*№|Адресат\s*:|ДО\s*$|Възложител\s*:|Адрес\s*:)[^\n]*|(?:ПИСМО\s+ПО\s+ЧЛ\.[^\n]*))\s*\n)+/iu,"").trim();
+ const trimSubject=()=>draft=draft.replace(/^\s*Относно\s*:[^\n]*(?:\n|$)/iu,"").trim();
+ const trimLetterhead=()=>draft=draft.replace(/^\s*(?:(?:РЕГИОНАЛНА\s+ИНСПЕКЦИЯ[^\n]*|РИОСВ\s*[–-]\s*Пловдив\s*$|(?:Вх\.?\s*№|Изх\.?\s*№|Адресат\s*:|ДО\s*$|Възложител\s*:|Адрес\s*:)[^\n]*|(?:ПИСМО\s+ПО\s+ЧЛ\.[^\n]*))\s*\n)+/iu,"").trim();
+ // Either the generated header or subject line can come first. Remove both
+ // only while at the beginning of the *unconfirmed* draft.
+ trimSubject();trimLetterhead();trimSubject();trimLetterhead();
  draft=draft.replace(/\bВъзложителят\s+следва\s+да\s+бъде\s+уведомена\b/giu,"Възложителят следва да бъде уведомен");
- draft=draft.replace(/^\s*Относно\s*:[^\n]*(?:\n|$)/iu,"").trim();
  // Remove only the duplicated model-generated introduction, not its substantive legal reasoning.
  // Anchored to the start of the draft so expert-authored later paragraphs are untouched.
  draft=draft.replace(/^\s*(?:Във\s+връзка\s+с\s+(?:инвестиционното\s+предложение|представената\s+документация)|По\s+повод\s+(?:инвестиционното\s+предложение|постъпилото\s+уведомление))[^\n]{0,1100}?(?:Ви\s+уведомявам\s+следното|се\s+уведомява\s+следното)\s*:\s*/iu,"").trim();
