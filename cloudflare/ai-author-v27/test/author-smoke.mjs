@@ -476,6 +476,37 @@ try{
   assert.equal(kt123Calls,3);
   console.log('PASS: KT123 internal references and unsupported self-rating are repaired before expert confirmation.');
 
+  // KT123 final: reproduce the observed ambiguous urban-development reasoning.
+  // A legal classification problem is not evidence of a missing physical area.
+  const observedBad=kt110Valid
+   .replace(
+    'ПРИЛОЖЕНИЕ № 2 КЪМ ЗООС: ОТРИЦАТЕЛНА — Съпоставката на конкретните параметри на складовата дейност с относимите нормативни категории потвърждава неприложимост на описаните позиции.',
+    'ПРИЛОЖЕНИЕ № 2 КЪМ ЗООС: НЕОПРЕДЕЛЕНА — Липсва обаче ясна правна квалификация с точна категория и праг, поради непълна информация относно конкретната площ на обекта от наличния доклад по приложение № 2 ЗООС.'
+   ).replace(
+    'Фактите по уведомлението трябва да се сравнят с относимите законови категории.',
+    'Настоящият проект е структуриран и преработен съгласно приложените материали и в пълно съответствие с приложимата нормативна уредба.'
+   );
+  let observedCalls=0;
+  globalThis.fetch=async(_url,opts)=>{
+   observedCalls++;
+   const sent=JSON.parse(opts.body),system=sent.input[0].content;
+   if(system.includes('Преработи ПЪЛНИЯ проект')){
+    const got=JSON.parse(sent.input[1].content).qualityIssues;
+    assert(got.includes('UNDETERMINED_BASED_ON_LEGAL_CLASSIFICATION_GAP'));
+    assert(got.includes('UNSPECIFIED_AREA_TYPE_IN_EVIDENCE_GAP'));
+    assert(got.includes('DRAFT_SELF_CERTIFICATION_NOT_EVIDENCE'));
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:kt110Valid}]}]}),{status:200});
+   }
+   if(system.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ'))
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({verdict:'pass',issues:[],revisedDraft:''})}]}]}),{status:200});
+   return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:observedBad}]}]}),{status:200});
+  };
+  const observedFixed=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+  assert.equal(observedFixed.status,200);
+  assert.equal((await observedFixed.json()).draft,kt110Valid);
+  assert.equal(observedCalls,3);
+  console.log('PASS: KT123 legal-only uncertainty and unspecified building/property area trigger one bounded expert-safe repair.');
+
   // KT113 regression: panel 01 must NEVER be passed when a necessary
   // applicability test is positive or indeterminate instead of negative.
   const undecided=kt110Valid.replace(
