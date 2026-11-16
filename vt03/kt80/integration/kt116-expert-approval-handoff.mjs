@@ -1,6 +1,7 @@
 import {collectStageEvidence} from './kt95-stage-evidence-handoff.mjs';
 const mk=(tag,value)=>{const e=document.createElement(tag);if(value!==undefined)e.textContent=value;return e};
 const val=v=>String(v??'').trim();
+function installKT116(){
 const host=document.getElementById('kt96EGAuthor'),five=document.querySelector('.kt80-stage-panel[data-panel="5"]');
 if(host&&five){
  let proposal=null,history=[],approved=null;
@@ -102,3 +103,5 @@ if(host&&five){
  window.KT116ExpertHandoff=Object.freeze({snapshot:()=>approved&&current()?approved:null,history:()=>current()?history.map(x=>({version:x.version,kind:x.kind,createdAt:x.createdAt})):[]});
  render5();
 }
+}
+setTimeout(installKT116,2400);
