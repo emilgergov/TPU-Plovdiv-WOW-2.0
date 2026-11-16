@@ -640,10 +640,16 @@ async function handleStage5Document(request,env){
  const match=input.confirmedStage4Text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b[^\n]*/iu);
  if(!match||input.selectedPanelLine?.trim()!==match[0].trim())
  return reply({error:"Confirmed direction mismatch"},409);
+ const title=typeof input.documentTitle==="string"?input.documentTitle.trim():"";
+ const incoming=typeof input.incomingReference==="string"?input.incomingReference.trim():"";
+ const expectedTitle=match[0].replace(/^ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\s*[—–-]?\s*/iu,"").trim();
+ const placeholder="ОВОС-ХХХХ/ХХ.ХХ.ХХХХ г.";
+ const safeReference=/^ОВОС[-– ]?\d+[-–]\d+\s*\/\s*\d{1,2}\.\d{1,2}\.\d{4}(\s*г\.?)?$/iu.test(incoming)?incoming:placeholder;
+ if(title!==expectedTitle)return reply({error:"Document title does not match the expert-confirmed direction"},409);
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),55000);
  try{
- const instructions="Състави само ПРОЕКТ на административен документ на български език, от името на компетентния административен орган РИОСВ – Пловдив. Изказът е ясен, официален, точен и сдържан, без разказвателни обяснения, самореклама или вътрешни означения (AI, EG, панел, тест, сценарий). Изпълнявай единствено потвърденото от експерта административно направление, не го заменяй, не предрешавай нова процедура. Не представяй недоказани факти като установени; не измисляй нормативни реквизити. При неизвестен административен реквизит използвай XXXXXXXX. Започни с Относно:, последвано от стегнати административни абзаци. Без лого, футър, подписи и технически коментари. Не пишѝ, че писмото или актът вече е издаден, че органът вече се е произнесъл или че процедурата се прекратява, ако това не следва от потвърденото направление и доказаните факти. Не включвай самостоятелна заключителна самооценка на анализа, твърдения за задължителни срокове, правни последици или прекратяване без установено основание. Не извеждай липса на въздействия единствено от липса на пространствено пресичане. Не възлагай правната квалификация на възложителя; когато се искат допълнителни данни, посочи само конкретни фактически характеристики. При противоречие между предложението и нормативна предпоставка запази направлението, но отбележи проблема за експертна проверка извън текста на писмото, без да измисляш решение. Текстът подлежи на последващо експертно потвърждение; след това експертните редакции имат абсолютен приоритет.";
- const facts=JSON.stringify({selectedDirection:match[0],subject:input.subject,scope:input.scope,
+ const instructions="Състави само ПРОЕКТ на административен документ на български език, от името на компетентния административен орган РИОСВ – Пловдив. Изказът е ясен, официален, точен и сдържан, без разказвателни обяснения, самореклама или вътрешни означения (AI, EG, панел, тест, сценарий). Изпълнявай единствено потвърденото от експерта административно направление, не го заменяй, не предрешавай нова процедура. Не представяй недоказани факти като установени; не измисляй нормативни реквизити. При неизвестен административен реквизит използвай XXXXXXXX. Подготви текст точно за посочения документ, а не обща правна справка. Първият ред трябва да бъде Относно: и конкретният предмет на представеното инвестиционно предложение, включително установените имот, местоположение и характер на дейностите. След него посочи: Във връзка с представената документация с вх. № [точният предоставен номер или утвърденият Х заместител], относно [предмета]...; изясни точно какво е предметът на това писмо и какво конкретно се съобщава или изисква от възложителя. Номерът и датата не се измислят. Не искай общи неопределени документи. Без лого, футър, подписи и технически коментари. Не пишѝ, че писмото или актът вече е издаден, че органът вече се е произнесъл или че процедурата се прекратява, ако това не следва от потвърденото направление и доказаните факти. Не включвай самостоятелна заключителна самооценка на анализа, твърдения за задължителни срокове, правни последици или прекратяване без установено основание. Не извеждай липса на въздействия единствено от липса на пространствено пресичане. Не възлагай правната квалификация на възложителя; когато се искат допълнителни данни, посочи само конкретни фактически характеристики. При противоречие между предложението и нормативна предпоставка запази направлението, но отбележи проблема за експертна проверка извън текста на писмото, без да измисляш решение. Текстът подлежи на последващо експертно потвърждение; след това експертните редакции имат абсолютен приоритет.";
+ const facts=JSON.stringify({selectedDirection:match[0],documentTitle:title,incomingReference:safeReference,subject:input.subject,scope:input.scope,
  expertConfirmedProposal:input.confirmedStage4Text,
  parcelIds:Array.isArray(input.parcelIds)?input.parcelIds.slice(0,80):[],
  warnings:Array.isArray(input.warnings)?input.warnings.slice(0,12):[]});
@@ -653,10 +659,18 @@ async function handleStage5Document(request,env){
  input:[{role:"system",content:instructions},{role:"user",content:facts}]})});
  if(!response.ok)return reply({error:"Author provider unavailable",providerStatus:response.status},502);
  const data=await response.json();
- const draft=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
+ let draft=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
+ // Document-identifying metadata is controlled by the case, not invented by the model.
+ // This is draft assembly before any expert revision; confirmed expert text is never rewritten.
+ const subjectLine="Относно: "+input.subject.trim().replace(/[.\s]+$/u,"")+".";
+ const refLine="Във връзка с представената документация с вх. № "+safeReference+
+   " относно "+input.subject.trim().replace(/[.\s]+$/u,"")+", Ви уведомяваме следното:";
+ draft=draft.replace(/^\s*Относно\s*:[^\n]*(?:\n|$)/iu,"").trim();
+ draft=subjectLine+"\n\n"+refLine+"\n\n"+draft;
+
  if(draft.length<120||draft.length>18000)return reply({error:"Draft incomplete"},422);
  return reply({caseId:input.caseId,evidenceRevision:input.evidenceRevision,
- stage4Version:input.stage4Version,requestId:input.requestId,selectedPanelLine:match[0],
+ stage4Version:input.stage4Version,requestId:input.requestId,selectedPanelLine:match[0],documentTitle:title,incomingReference:safeReference,
  draft,projectOnly:true,expertReviewRequired:true,documentIssued:false,wordTemplateApplied:false});
  }catch{return reply({error:"Document drafting failed"},504)}
  finally{clearTimeout(timer)}
