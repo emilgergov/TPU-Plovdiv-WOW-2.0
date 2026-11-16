@@ -104,7 +104,7 @@ if(host&&five){
  }
  document.addEventListener('kt115:stage4-draft',e=>{
   const d=e.detail||{},h=evidence();if(!d.sourceDraft||d.evidenceRevision!==h.evidenceRevision||d.caseId!==h.caseId&&d.caseIdType!=='shared-verified')return;
-  proposal={caseId:d.caseId,localId:h.caseId,revision:h.evidenceRevision,generation:h.generation,key:h.key,requestId:d.requestId,original:d.sourceDraft,warnings:d.warnings||[]};
+  proposal={caseId:d.caseId,localId:h.caseId,revision:h.evidenceRevision,generation:h.generation,key:h.key,requestId:d.requestId,original:d.sourceDraft,warnings:d.warnings||[],serverQualityPassed:d.qualityPassed===true};
   history=[{version:1,text:d.sourceDraft,kind:'автор',createdAt:new Date().toISOString()}];approved=null;
   document.getElementById('kt104EGLead').style.display='none';document.getElementById('kt104EGDetails').style.display='none';
   note.textContent='Работен проект. Експертът може да го редактира или потвърди.';display();render5();
@@ -123,6 +123,7 @@ if(host&&five){
   if(!current()){note.textContent='Данните по преписката са променени.';return;}
   const expert=val(actor.value);if(expert.length<2){note.textContent='Посочете експерта.';actor.focus();return;}
   const v=history.at(-1);
+  if(proposal.serverQualityPassed!==true){note.textContent='Този проект е обозначен от сървъра като НЕПРОВЕРЕН. Можете да го редактирате, но не и да го предадете към Етап 5 без нова успешна нормативна проверка от EG Автора.';note.setAttribute('role','alert');return;}
   const normativeMismatch=validateStage4Direction(v.text);
   if(normativeMismatch){note.textContent=normativeMismatch;note.setAttribute('role','alert');alerts.hidden=false;alertContent.replaceChildren(mk('p',normativeMismatch));return;}
   if(!await confirmStyled('Потвърждавате версия '+v.version+' за предаване към Етап 5?'))return;
@@ -195,7 +196,7 @@ if(host&&five){
     restoreStatus.textContent='Копието не съответства на потвърдените предмет, обхват и имоти. Няма възстановени данни.';return;
    }
    proposal={caseId:h.caseId,localId:h.caseId,revision:h.evidenceRevision,generation:h.generation,
-    key:h.key,requestId:'restored-expert-copy',original:data.approved.original,
+    key:h.key,requestId:'restored-expert-copy',serverQualityPassed:false,original:data.approved.original,
     warnings:Array.isArray(data.approved.warnings)?data.approved.warnings:[]};
    history=data.history.filter(x=>x&&typeof x.text==='string').map((x,i)=>({version:i+1,text:x.text,
     kind:x.kind,createdAt:x.createdAt})).slice(0,30);
