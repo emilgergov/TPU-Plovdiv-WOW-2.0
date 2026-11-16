@@ -506,6 +506,14 @@ async function handleStage4Proposal(request,env){
   return issues;
 
   }
+  // KT115: expose a flagged draft to the current expert without accepting it.
+  const expertPreview=(reason,codes,stage,proposal=draft,extra={})=>reply({
+   error:reason,caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
+   requestId:payload.requestId,projectOnly:true,expertReviewRequired:true,
+   expertPreviewOnly:true,qualityPassed:false,handoffAllowed:false,
+   unverifiedDraft:typeof proposal==="string"?proposal.slice(0,12000):"",
+   qualityIssues:codes,qualityStage:stage,...extra
+  },422);
   let issues=qualityIssues(draft);
   let authorRepairs=0;
   if(issues.length){
@@ -541,12 +549,11 @@ async function handleStage4Proposal(request,env){
     .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
    if(candidate.length>=120&&candidate.length<=12000){
     const remaining=qualityIssues(candidate);
-    if(remaining.length===0){draft=candidate;issues=[]}
-    else issues=remaining;
+    // Preserve the revised reasoning for inspection even if it is not approved.
+    draft=candidate;issues=remaining;
    }
   }
-  if(issues.length)return reply({error:"Проектът съдържа нормативни или структурни несъответствия, които не са отстранени при автоматичната преработка.",
-    qualityIssues:issues,qualityStage:"author_repair",authorRepairs},422);
+  if(issues.length)return expertPreview("Проектът изисква експертен преглед на нормативните несъответствия.",issues,"author_repair",draft,{authorRepairs});
   // KT105-C: independent second model run with a distinct reviewer role.
   // It does not confer statutory validity; full normative source text remains unavailable.
   const reviewSystem=[
@@ -595,12 +602,12 @@ async function handleStage4Proposal(request,env){
   catch{return reply({error:"Independent normative review unreadable",qualityIssues:["REVIEW_UNREADABLE"]},422)}
   const verdict=independentReview?.verdict;
   if(!["pass","revise","reject"].includes(verdict))return reply({error:"Independent review invalid",qualityIssues:["INVALID_REVIEW"]},422);
-  if(verdict==="reject")return reply({error:"Independent reviewer rejected normative conclusion",qualityIssues:["INDEPENDENT_REJECTION"],reviewFindings:Array.isArray(independentReview.issues)?independentReview.issues.slice(0,8):[]},422);
+  if(verdict==="reject")return expertPreview("Независимият преглед не одобрява проекта.",["INDEPENDENT_REJECTION"],"independent_review",draft,{reviewFindings:Array.isArray(independentReview.issues)?independentReview.issues.slice(0,8):[]});
   const finalDraft=verdict==="revise"?text(independentReview.revisedDraft,12000):draft;
   if(finalDraft.length<120||qualityIssues(finalDraft).length>0||!sectionNames.every(x=>finalDraft.toLocaleLowerCase("bg").includes(x.toLocaleLowerCase("bg")))||
      /преценяван(?:е|ето)\s+на\s+необходимостта\s+от\s+ОС[^.\n]{0,90}чл\.?\s*2\s*,?\s*ал\.?\s*2/iu.test(finalDraft)||
      /(?:наредба\s+за\s+)?оценка\s+за?\s*съвместимост(?:та)?\s+(?:с|на)\s+околната\s+среда/iu.test(finalDraft))
-   return reply({error:"Independent normative revision failed guard",qualityIssues:["REVIEW_REVISION_INVALID"]},422);
+   return expertPreview("Преработеният проект не премина нормативната проверка.",["REVIEW_REVISION_INVALID",...qualityIssues(finalDraft)],"independent_review",finalDraft);
   return reply({caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
    requestId:payload.requestId,projectOnly:true,expertReviewRequired:true,
    archiveEvidenceVerified:true,draft:finalDraft,
