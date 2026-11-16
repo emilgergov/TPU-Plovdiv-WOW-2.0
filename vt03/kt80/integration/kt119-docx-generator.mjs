@@ -26,10 +26,15 @@ function install(){
  const segmented=(p,line,isSubject=false)=>{
    if(isSubject&&line.startsWith('Относно:')){
      addText(p,'Относно:',true);
-     const rest=line.slice('Относно:'.length),quoted=/„[^“]+“/gu;
-     let start=0,m;
-     while((m=quoted.exec(rest))){if(m.index>start)addText(p,rest.slice(start,m.index),false,true);addText(p,m[0],true);start=m.index+m[0].length}
-     if(start<rest.length)addText(p,rest.slice(start),false,true);
+     const rest=line.slice('Относно:'.length);
+     // Only the exact approved investment-title span is bold, not quoted localities.
+     const approvedTitle='„Складове за промишлени стоки и офиси“';
+     const titleAt=rest.indexOf(approvedTitle);
+     if(titleAt>=0){
+       if(titleAt>0)addText(p,rest.slice(0,titleAt),false,true);
+       addText(p,approvedTitle,true);
+       if(titleAt+approvedTitle.length<rest.length)addText(p,rest.slice(titleAt+approvedTitle.length),false,true);
+     }else addText(p,rest,false,true);
      return;
    }
    const regex=/(?:чл\.\s*\d+[а-я]?|ал\.\s*\d+|т\.\s*\d+|§\s*\d+|приложени(?:е|ето|я)\s*№\s*\d+)/giu;
