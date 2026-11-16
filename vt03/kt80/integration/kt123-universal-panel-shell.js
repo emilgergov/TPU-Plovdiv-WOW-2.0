@@ -30,6 +30,17 @@ function mark(){
   card.classList.add('kt123-panel-card');
   const b=document.createElement('span');b.className='kt123-panel-mark';b.dataset.kind=profile(id);b.textContent=visibleType(id);kind.after(b);
  });
+ // Ensure a legible state without changing whether an individual stage is complete.
+ document.querySelectorAll('#kt80DashboardFive .kt80-dashboard-tile').forEach(tile=>{
+  if(tile.dataset.kt122State!=='pending')return;
+  tile.style.setProperty('opacity','1','important');
+  tile.style.setProperty('color','#f4eddb','important');
+  [tile.querySelector('.kt80-dashboard-tile-number'),tile.querySelector('.kt80-dashboard-tile-text'),tile.querySelector('.kt80-dashboard-tile-arrow')].filter(Boolean).forEach(node=>{
+   node.style.setProperty('opacity','1','important');
+   node.style.setProperty('color','#f4eddb','important');
+   node.style.setProperty('-webkit-text-fill-color','#f4eddb','important');
+  });
+ });
  // The primary dashboard uses BUTTON tiles, not the legacy #groups article.card catalog.
  document.querySelectorAll('#kt80DashboardRoutes .kt80-dashboard-tile').forEach(tile=>{
   const number=(tile.querySelector('.kt80-dashboard-tile-number')?.textContent||tile.textContent||'').match(/№\s*0?(\d{1,2})/u);
@@ -50,10 +61,11 @@ function mark(){
   if(!meta.textContent.includes(suffix))meta.textContent+=suffix;
  }
 }
-const root=document.getElementById('groups'),title=document.getElementById('dialogTitle'),dash=document.getElementById('kt80DashboardRoutes');
+const root=document.getElementById('groups'),title=document.getElementById('dialogTitle'),dash=document.getElementById('kt80DashboardRoutes'),five=document.getElementById('kt80DashboardFive');
+if(five)new MutationObserver(mark).observe(five,{childList:true,subtree:true,attributes:true,attributeFilter:['data-kt122-state']});
 if(dash)new MutationObserver(mark).observe(dash,{childList:true,subtree:true});
 if(root)new MutationObserver(mark).observe(root,{childList:true,subtree:true});
 if(title)new MutationObserver(mark).observe(title,{childList:true,characterData:true,subtree:true});
 mark();
-window.KT123PanelArchitecture=Object.freeze({version:'KT123-B2',profile,isIndependent:id=>profile(Number(id))==='independent'});
+window.KT123PanelArchitecture=Object.freeze({version:'KT123-B4',profile,isIndependent:id=>profile(Number(id))==='independent'});
 })();
