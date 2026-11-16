@@ -1,7 +1,9 @@
 import {makeAutomaticTemplate} from './kt120-embedded-word-template.mjs';
 /* КТ119 — DOCX from the approved RIOSV-Plovdiv source document.
  * The file is processed locally. Never upload the dossier or template.
- * Only the confirmed expert text is inserted, byte-for-byte per paragraph.
+ * Confirmed body paragraphs remain unchanged. Only the expressly approved
+ * typographic quotation marks around a clearly identified title in "Относно:"
+ * may be inserted for the institutional DOCX presentation.
  */
 const W='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const el=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;return x};
@@ -181,7 +183,7 @@ function install(){
      const actual=[textIn(subj),...nodes.map(textIn)].join('\n');
      const presentationText=[renderedSubject,...bodyLines].join('\n');
      if(actual!==presentationText)throw Error('DOCX не съвпада с потвърденото съдържание и единственото разрешено оформление на предмета.');
-     // Never rewrite a confirmed run. Formatting changes only the appearance.
+     // Preserve confirmed body text exactly. The subject may gain only approved title quotation marks.
      contents['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(dom));
      const bytes=window.fflate.zipSync(contents,{level:6});
      const blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
