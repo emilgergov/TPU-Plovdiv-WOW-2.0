@@ -684,8 +684,8 @@ async function handleStage5Document(request,env){
  const confirmedOSArticle=confirmedOS && /^ИЗБРАН\s+ПАНЕЛ\s*:\s*0?1\b/iu.test(match[0]);
  const legalBasis=confirmedOSArticle?"на основание чл. 2, ал. 2 от "+osFirstCitation+", ":
    confirmedOS?"съобразно "+osFirstCitation+", ":"";
- const refLine="Във връзка с представената документация с вх. № "+safeReference+
-   " за горепосочения предмет на преписката, "+legalBasis+"Ви уведомявам следното:";
+ const refLine="Във връзка с постъпилата документация с вх. № "+safeReference+
+   ", "+legalBasis+"Ви уведомявам следното:";
  // Exclude provider-generated letterhead/recipient metadata; these are controlled by
  // the approved DOCX form. Strip only leading blocks, not facts in body paragraphs.
  draft=draft.replace(/^\s*(?:(?:РЕГИОНАЛНА\s+ИНСПЕКЦИЯ[^\n]*|РИОСВ\s*[–-]\s*Пловдив\s*$|(?:Вх\.?\s*№|Изх\.?\s*№|Адресат\s*:|ДО\s*$|Възложител\s*:|Адрес\s*:)[^\n]*|(?:ПИСМО\s+ПО\s+ЧЛ\.[^\n]*))\s*\n)+/iu,"").trim();
@@ -698,8 +698,8 @@ async function handleStage5Document(request,env){
 
  const editorialFlags=[];
  const evidence=input.confirmedStage4Text;
- const uncertainCategories=/ПРИЛОЖЕНИЕ\s*№\s*2[^\n]*НЕОПРЕДЕЛЕНА|липс(?:ва|ват)\s+(?:пълн[а-я]*|конкретн[а-я]*|техническ[а-я]*|параметр[а-я]*)\s+(?:информация|данни|параметри)|не\s+позволяват?\s+(?:категоричн[а-я]*|еднозначн[а-я]*)\s+(?:квалификация|категоризация)/iu.test(evidence);
- const categoricalOutside=/(?:не\s+попада|извън\s+обхвата)\s+(?:в|на)\s+(?:приложени[ея]|приложения)\s*№\s*[12]/iu.test(draft);
+ const uncertainCategories=/ПРИЛОЖЕНИЕ\s*№\s*2[\s\S]{0,450}НЕОПРЕДЕЛЕНА|липс(?:ва|ват)\s+(?:пълн[а-я]*|конкретн[а-я]*|техническ[а-я]*|параметр[а-я]*)\s+(?:информация|данни|параметри)|не\s+позволяват?\s+(?:категоричн[а-я]*|еднозначн[а-я]*)\s+(?:квалификация|категоризация)|непълнот[а-я]*\s+на\s+(?:техническ[а-я]*|информация)/iu.test(evidence);
+ const categoricalOutside=/(?:не\s+попада|извън\s+обхвата)\s+(?:в|на)\s+(?:приложени[ея]|приложения)\s*№\s*[12]|не\s+попада\s+в\s+нито\s+една\s+от\s+категориите|не\s+се\s+отнася\s+към\s+(?:никоя|категориите)/iu.test(draft);
  if(uncertainCategories&&categoricalOutside)editorialFlags.push("Проверка за нормативна съгласуваност: проектът твърди непопадане в приложение № 1 или № 2, докато в анализа са отбелязани липсващи данни за категоризиране.");
  if(/(?:няма\s+липсващи\s+данни|не\s+са\s+установени\s+(?:липсващи|съществени\s+липси))[\s\S]{0,900}(?:липсват\s+(?:технически\s+)?данни|непълн(?:а|и)\s+(?:информация|данни))/iu.test(draft)||
  /(?:липсват\s+(?:технически\s+)?данни|непълн(?:а|и)\s+(?:информация|данни))[\s\S]{0,900}(?:няма\s+липсващи\s+данни|не\s+са\s+установени\s+(?:липсващи|съществени\s+липси))/iu.test(draft))
