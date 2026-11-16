@@ -342,6 +342,68 @@ try{
   assert.equal(k108Calls,2);
   console.log('PASS: KT108 screening applicability must be established before recommendation.');
 
+  // KT109: 22-route catalog must reach both AI passes. A panel 02 without
+  // a verified missing fact and source cannot pass; panel 02 is not a fallback
+  // for uncertainty in legal qualification.
+  const route02Bad=[
+    'ВОДЕЩО ПРЕДЛОЖЕНИЕ: Писмо за допълнителна информация.',
+    'ИЗБРАН ПАНЕЛ: 02 — Писмо за допълнителна информация',
+    'ЗАЩО ТОЗИ ПАНЕЛ: Неясно е коя процедура се прилага.',
+    'ЗАЩО НЕ АЛТЕРНАТИВИТЕ: Няма сигурност за панел 01 и панел 04.',
+    'Фактическа основа','Складова сграда и офиси.',
+    'Нормативни предпоставки и граници на проверката','Трябва да се определи законовата категория.',
+    'Мотивирано предложение','Предлага се писмо за допълнителна информация.',
+    'Данни за експертна проверка','Правната квалификация трябва да бъде извършена от органа.'
+  ].join('\\n');
+  let route02Calls=0;
+  globalThis.fetch=async (_url,opts)=>{
+    route02Calls++;
+    const sent=JSON.parse(opts.body),sys=sent.input[0].content;
+    if(sys.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ'))throw Error('Unsubstantiated panel 02 must not reach the reviewer');
+    const req=JSON.parse(sent.input[1].content);
+    assert.equal(req.routeCatalog.length,22);
+    assert(req.routeCatalog.some(x=>x.id===2));
+    assert(req.routeCatalog.some(x=>x.id===20));
+    if(sys.includes('Преработи ПЪЛНИЯ проект'))
+      assert(req.qualityIssues.includes('PANEL_02_MISSING_EVIDENCED_FACT_GAP'));
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:route02Bad}]}]}),{status:200});
+  };
+  const panel02Rejected=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+  assert.equal(panel02Rejected.status,422);
+  assert((await panel02Rejected.json()).qualityIssues.includes('PANEL_02_MISSING_EVIDENCED_FACT_GAP'));
+  assert.equal(route02Calls,2);
+  console.log('PASS: KT109 panel 02 rejected when no specific missing fact is traced to a dossier source.');
+
+  const route02Qualified=[
+    'ВОДЕЩО ПРЕДЛОЖЕНИЕ: Изготвяне на писмо за допълнителна информация за техническа характеристика на водоплътната яма.',
+    'ИЗБРАН ПАНЕЛ: 02 — Писмо за допълнителна информация',
+    'ЗАЩО ТОЗИ ПАНЕЛ: В представеното уведомление липсва конкретна информация за отпадъчните води; за проверка по относимата разпоредба е нужна характеристиката на съоръжението, която не е установена в наличния документ.',
+    'ЗАЩО НЕ АЛТЕРНАТИВИТЕ: Панел 01 изисква вече достатъчно потвърдени факти, а панел 04 предполага обоснован режим по ОВОС.',
+    'Фактическа основа','Представена е преписка с предмет изграждане на складова сграда.',
+    'Нормативни предпоставки и граници на проверката','Компетентният орган трябва да удостовери конкретната приложима норма и пропуснатото фактическо обстоятелство.',
+    'Мотивирано предложение','Предлага се конкретно писмо по доказаната фактическа липса, а не искане възложителят да определя правната категория.',
+    'Данни за експертна проверка','Преди одобрение се сверява оригиналното уведомление и липсата на сведения.'
+  ].join('\\n');
+  let panel02AcceptedCalls=0;
+  globalThis.fetch=async (_url,opts)=>{
+    panel02AcceptedCalls++;
+    const sent=JSON.parse(opts.body),sys=sent.input[0].content;
+    const req=JSON.parse(sent.input[1].content);
+    assert.equal(req.routeCatalog.length,22);
+    if(sys.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ')){
+      assert(req.draft.includes('ИЗБРАН ПАНЕЛ: 02'));
+      return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({verdict:'pass',issues:[],revisedDraft:''})}]}]}),{status:200});
+    }
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:route02Qualified}]}]}),{status:200});
+  };
+  const qualifiedRoute=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+  assert.equal(qualifiedRoute.status,200);
+  const qualifiedBody=await qualifiedRoute.json();
+  assert.equal(qualifiedBody.normativeAudit.selectedPanelId,2);
+  assert.equal(panel02AcceptedCalls,2);
+  console.log('PASS: KT109 panel 02 remains possible when a specific sourced factual gap is stated and independently reviewed.');
+
+
 
 
 
