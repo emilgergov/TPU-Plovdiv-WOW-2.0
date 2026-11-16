@@ -224,7 +224,7 @@ function boot(){
     draftRequiresIndependentReview:true
    },
    constraints:{noInventedFacts:true,noInventedCitations:true,expertApprovalRequired:true,
-    legalAppplicabilityMustBeVerified:true,neverIssueAct:true}
+    legalAppplicabilityMustBeVerified:true,legalApplicabilityMustBeVerified:true,neverIssueAct:true}
   };
   try{
    const prepared=fitStage4Request(request);
