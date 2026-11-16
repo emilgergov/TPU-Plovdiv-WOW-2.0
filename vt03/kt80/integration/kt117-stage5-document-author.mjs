@@ -24,6 +24,10 @@ const incomingReference=()=>{
  const explicit=candidates.map(clean).find(x=>/^((вх\.?\s*№\s*)?ОВОС[-– ]?\d+[-–]\d+\s*\/\s*\d{1,2}\.\d{1,2}\.\d{4}(\s*г\.?)?)$/iu.test(x));
  return explicit?explicit.replace(/^вх\.?\s*№\s*/iu,'').trim():'ОВОС-ХХХХ/ХХ.ХХ.ХХХХ г.';
 };
+// A case-bound document must retain the expert-confirmed kind of administrative action.
+const isPanel01Request=(line,body)=>
+ Number(String(line||'').match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0)===1 &&
+ /(?:необходимо\s+е\s+да\s+представите|изисквам\s+да\s+представите|указвам\s+(?:ви\s+)?да\s+(?:представите|допълните)|да\s+допълните\s+представената\s+документация|представете\s+допълнителн[а-я]*\s+(?:документ|информац)|допълнителна\s+информация[,\s]+включваща)/iu.test(String(body||''));
 const documentLabel=line=>{
  const name=clean(line).replace(/^ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\s*[—–-]?\s*/iu,'');
  return name||'Административен документ';
@@ -132,9 +136,7 @@ function initialize(){
    const normalized=formatDraftSubject(data.draft);
    if(normalized.warning){editorialIssues.push(normalized.warning);editorialContent.append(make('p',normalized.warning));editorial.hidden=false;}
    // Client-side safety guard is required even while an older Worker may be live.
-   const selectedPanelId=Number(line.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0);
-   const requestInsteadOfNotice=selectedPanelId===1 &&
-    /(?:необходимо\s+е\s+да\s+представите|изисквам\s+да\s+представите|указвам\s+(?:ви\s+)?да\s+(?:представите|допълните)|да\s+допълните\s+представената\s+документация|представете\s+допълнителн[а-я]*\s+(?:документ|информац)|допълнителна\s+информация[,\s]+включваща)/iu.test(normalized.text);
+   const requestInsteadOfNotice=isPanel01Request(line,normalized.text);
    if(requestInsteadOfNotice){
     editorialIssues.push('Избрано е писмо по чл. 2, ал. 2, но проектът изисква допълнителна информация. Не се допуска потвърждаване или Word. Проверете нормативната основа в Етап 4.');
     editorialContent.replaceChildren(...editorialIssues.map(x=>make('p',x)));editorial.hidden=false;
@@ -163,6 +165,10 @@ function initialize(){
   const v=versions.at(-1),checked=formatDraftSubject(v.text);
   if(checked.warning){
     showDecisionStatus(checked.warning+' Изберете „Редактирай текста“.',true);return;
+  }
+  const selected=source.text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\b[^\n]*/iu)?.[0]||'';
+  if(isPanel01Request(selected,checked.text)){
+   showDecisionStatus('Съдържанието представлява искане за допълнителна информация, а потвърденото направление е панел №01. Преработете текста или извършете нова доказателствена преценка в Етап 4. Не се допуска скрита промяна на вида документ.',true);return;
   }
   // Expert confirms exactly the displayed draft; no last-minute rewriting.
   confirmed=Object.freeze({...v,caseId:source.caseId,stage4Version:source.version,
