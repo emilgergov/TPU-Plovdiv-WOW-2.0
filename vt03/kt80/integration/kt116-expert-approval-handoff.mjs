@@ -23,13 +23,13 @@ if(host&&five){
  const password=mk('input');password.type='password';password.placeholder='Парола за копието (12+ знака)';password.autocomplete='new-password';password.hidden=true;
  ui.append(header,alerts,paper,textarea,actorLabel,actions,note,next,save,password);
  host.append(ui);
- const restoreBar=mk('div');restoreBar.id='kt116Restore';restoreBar.style.cssText='padding:12px;margin:8px 0;color:#efd4a0;font:13px Verdana;background:#173b2b;border:1px solid #7b8e6f;border-radius:7px';
+ const restoreBar=mk('details');restoreBar.id='kt116Restore';restoreBar.style.cssText='padding:12px;margin:8px 0;color:#efd4a0;font:13px Verdana;background:#173b2b;border:1px solid #7b8e6f;border-radius:7px';
  const restoreLabel=mk('label','Повторно отваряне на защитено копие');
  const restoreFile=mk('input');restoreFile.type='file';restoreFile.accept='.json,application/json';
  const restoreKey=mk('input');restoreKey.type='password';restoreKey.placeholder='Парола за копието';restoreKey.autocomplete='off';
  const restoreBtn=mk('button','Отвори копието');restoreBtn.type='button';restoreBtn.style.cssText='background:#d9b874;color:#153a27;padding:9px 13px;border:0;border-radius:6px;font-weight:bold';
  const restoreStatus=mk('p','Копието се зарежда само след проверка на предмета, обхвата и имотите; след възстановяване е необходимо ново потвърждение.');
- restoreBar.append(restoreLabel,restoreFile,restoreKey,restoreBtn,restoreStatus);host.append(restoreBar);
+ restoreBar.append(mk('summary','Отвори запазено предложение'),restoreLabel,restoreFile,restoreKey,restoreBtn,restoreStatus);host.append(restoreBar);
  const stage5=mk('section');stage5.id='kt116Stage5';five.prepend(stage5);
  const evidence=()=>collectStageEvidence(window);
  const current=()=>proposal&&proposal.localId===evidence().caseId&&proposal.revision===evidence().evidenceRevision&&proposal.generation===evidence().generation&&proposal.key===evidence().key;
