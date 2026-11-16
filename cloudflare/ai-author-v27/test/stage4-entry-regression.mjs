@@ -12,5 +12,5 @@ assert(client.includes('.kt80-stage-panel[data-panel=\"4\"] > :not(#kt96EGAuthor
 assert(!/stage-open[^\n]*generate\(/.test(client),'never call AI on stage entry');
 assert(!/if\(window\.KT80WorkflowState\?\.step===4[^\n]*generate\(/.test(client),'never generate on boot');
 assert(client.includes("button.addEventListener('click',()=>generate())"),'explicit human launch required');
-assert(html.includes('kt96-eg-ai-stage4-author.mjs?v=kt106-gis-evidence-20261116-v3'),'fresh module release');
+assert(html.includes('kt96-eg-ai-stage4-author.mjs?v=kt110-normative-precision-20261116-v1'),'fresh module release');
 console.log('PASS: KT105 only established intake evidence and one manual author button at Stage 4 entry.');
