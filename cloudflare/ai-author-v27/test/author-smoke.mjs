@@ -507,6 +507,29 @@ try{
   assert(observedQuality.includes('DRAFT_SELF_CERTIFICATION_NOT_EVIDENCE'),JSON.stringify(observedQuality));
   console.log('PASS: KT123 legal-only uncertainty and unspecified building/property area trigger one bounded expert-safe repair.');
 
+  // KT123: contradictory Art. 2(1) and 2(2) cannot be passed to the expert.
+  const bothPositive=kt110Valid.replace(
+   'ЧЛ. 2, АЛ. 1 НАРЕДБА ЗА ОС: ОТРИЦАТЕЛНА — За описаната складова дейност са проверени релевантните хипотези, без установена приложимост на тези по ал. 1.',
+   'ЧЛ. 2, АЛ. 1 НАРЕДБА ЗА ОС: ПОЛОЖИТЕЛНА — По описанието на дейността и местоположението в урбанизирана територия е предположена необходимост от ОС, въпреки че законовите основания все още не са съпоставени.'
+  );
+  assert.notEqual(bothPositive,kt110Valid,'KT123 fixture must alter the OS1 legal row');
+  let contradictionIssues=[];
+  globalThis.fetch=async (_url,opts)=>{
+   const sent=JSON.parse(opts.body),sys=sent.input[0].content;
+   if(sys.includes('Преработи ПЪЛНИЯ проект')){
+    contradictionIssues=JSON.parse(sent.input[1].content).qualityIssues;
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:kt110Valid}]}]}),{status:200});
+   }
+   if(sys.includes('НЕЗАВИСИМ РЕЦЕНЗЕНТ'))
+    return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({verdict:'pass',issues:[],revisedDraft:''})}]}]}),{status:200});
+   return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:bothPositive}]}]}),{status:200});
+  };
+  const correctedBoth=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
+  assert.equal(correctedBoth.status,200,JSON.stringify(await correctedBoth.clone().json()));
+  assert(contradictionIssues.includes('OS_ART_2_1_AND_2_2_BOTH_POSITIVE'),JSON.stringify(contradictionIssues));
+  assert.equal((await correctedBoth.json()).draft,kt110Valid);
+  console.log('PASS: KT123 Art. 2(1)/Art. 2(2) contradiction triggers authorial correction before expert review.');
+
   // KT113 regression: panel 01 must NEVER be passed when a necessary
   // applicability test is positive or indeterminate instead of negative.
   const undecided=kt110Valid.replace(
