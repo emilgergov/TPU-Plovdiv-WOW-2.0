@@ -14,15 +14,17 @@ function dashboard(){
  const s=w.KT80WorkflowState||{};
  const handoff=w.KT116ExpertHandoff?.snapshot?.();
  const final=w.KT117Document?.snapshot?.();
- const hasCase=!!(s.fileName||s.intake||s.subjectConfirmed);
+ const stage1Done=!!(s.intake||s.subjectConfirmed?.expertConfirmed);
  const stage2=!!(s.subjectConfirmed?.expertConfirmed&&s.subjectConfirmed?.scopeConfirmed);
- const stage3=!!(s.parcelsConfirmed?.expertConfirmed||kt123Progress.stage4Draft||kt123Progress.stage4Confirmed||handoff);
+ const stage3Confirmed=!!s.parcelsConfirmed?.expertConfirmed;
+ const stage3Reviewed=!stage3Confirmed&&!!(kt123Progress.stage4Draft||kt123Progress.stage4Confirmed||handoff);
+ const stage3=stage3Confirmed||stage3Reviewed;
  const stage4=!!(handoff||kt123Progress.stage4Confirmed);
  const stage5=!!final;
  const status=[
-  hasCase?'done':'current',
-  stage2?'done':hasCase?'current':'pending',
-  stage3?'done':stage2?'current':'pending',
+  stage1Done?'done':'current',
+  stage2?'done':stage1Done?'current':'pending',
+  stage3Confirmed?'done':stage3Reviewed?'review':stage2?'current':'pending',
   stage4?'done':kt123Progress.stage4Draft?'review':stage3?'current':'pending',
   stage5?'done':kt123Progress.stage5Draft?'review':stage4?'current':'pending'
  ];
