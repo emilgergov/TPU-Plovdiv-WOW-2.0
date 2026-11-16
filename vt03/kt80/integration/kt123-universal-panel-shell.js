@@ -3,7 +3,7 @@
 (function(){
 'use strict';
 const profile=id=>id===15?'independent':([13,14,16].includes(id)?'potential-independent':'procedural');
-const visibleType=id=>profile(id)==='independent'?'НЕЗАВИСИМ':profile(id)==='potential-independent'?'ИНСТРУМЕНТ · ПРОВЕРКА ЗА САМОСТОЯТЕЛНОСТ':'СПЕЦИАЛИЗИРАН ПАНЕЛ';
+const visibleType=id=>profile(id)==='independent'?'НЕЗАВИСИМ':profile(id)==='potential-independent'?'ЗА ПРОВЕРКА':'';
 const style=document.createElement('style');
 style.textContent=`
 .kt123-panel-mark{display:inline-flex;align-items:center;max-width:100%;padding:4px 9px;border:1px solid #ba9d5c;border-radius:6px;color:#ffdda2;background:#214633;font:700 11px Verdana,Arial;letter-spacing:.02em;margin:5px 0}
@@ -28,6 +28,7 @@ function mark(){
   const m=(kind.textContent||'').match(/№\s*0?(\d{1,2})/u);if(!m)return;
   const id=Number(m[1]);if(id<1||id>22)return;
   card.classList.add('kt123-panel-card');
+  if(!visibleType(id))return;
   const b=document.createElement('span');b.className='kt123-panel-mark';b.dataset.kind=profile(id);b.textContent=visibleType(id);kind.after(b);
  });
  // Ensure a legible state without changing whether an individual stage is complete.
@@ -46,6 +47,7 @@ function mark(){
   const number=(tile.querySelector('.kt80-dashboard-tile-number')?.textContent||tile.textContent||'').match(/№\s*0?(\d{1,2})/u);
   const id=Number(tile.dataset.kt80Index||number?.[1]||0);
   if(id<1||id>22)return;
+  if(!visibleType(id))return;
   if(tile.querySelector('.kt123-panel-mark'))return;
   const markNode=document.createElement('span');markNode.className='kt123-panel-mark';
   markNode.dataset.kind=profile(id);
@@ -58,7 +60,7 @@ function mark(){
  if(m&&meta){
   const id=Number(m[1]);meta.dataset.kt123Profile=profile(id);
   const suffix=' · '+visibleType(id);
-  if(!meta.textContent.includes(suffix))meta.textContent+=suffix;
+  if(visibleType(id)&&!meta.textContent.includes(suffix))meta.textContent+=suffix;
  }
 }
 const root=document.getElementById('groups'),title=document.getElementById('dialogTitle'),dash=document.getElementById('kt80DashboardRoutes'),five=document.getElementById('kt80DashboardFive');
@@ -67,5 +69,5 @@ if(dash)new MutationObserver(mark).observe(dash,{childList:true,subtree:true});
 if(root)new MutationObserver(mark).observe(root,{childList:true,subtree:true});
 if(title)new MutationObserver(mark).observe(title,{childList:true,characterData:true,subtree:true});
 mark();
-window.KT123PanelArchitecture=Object.freeze({version:'KT123-B4',profile,isIndependent:id=>profile(Number(id))==='independent'});
+window.KT123PanelArchitecture=Object.freeze({version:'KT123-E1',profile,isIndependent:id=>profile(Number(id))==='independent'});
 })();
