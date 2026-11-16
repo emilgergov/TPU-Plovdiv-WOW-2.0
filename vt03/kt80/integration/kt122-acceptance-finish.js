@@ -46,6 +46,7 @@ function two(){
  const controls=[...p.querySelectorAll('button')],cancel=controls.find(x=>/Отмени потвърждението и редактирай обхвата/u.test(x.textContent));
  if(cancel)cancel.textContent='Отмени потвърждението';
  const scopeBox=p.querySelector('.kt80-v56-scope-container'),next=$('kt80ToParcels');
+ if(once(sc,'kt122ScopeControlsRefresh'))sc.addEventListener('change',()=>w.setTimeout(two,90));
  if(scopeBox&&next&&sc.closest('label')){
   let row=scopeBox.querySelector('.kt122-scope-action-row');
   if(!row){row=mk('div','kt122-scope-action-row');scopeBox.append(row)}
