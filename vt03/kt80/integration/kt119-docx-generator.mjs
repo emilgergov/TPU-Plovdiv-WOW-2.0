@@ -2,7 +2,7 @@
  * The file is processed locally. Never upload the dossier or template.
  * Only the confirmed expert text is inserted, byte-for-byte per paragraph.
  */
-const TEMPLATE_SHA256='c616f1cb88b9ef69c9f188bbbd9acfedf662ef779d3b3dca20818a04e95d4978';
+const TEMPLATE_SHA256='17637d5122d8f72e29df7aecb71d068745e26d31844fe70421ec6551ebb2004e';
 const W='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const el=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;return x};
 const q=x=>String(x??'').trim();
@@ -14,7 +14,7 @@ function install(){
  const help=root.querySelector('.kt117-note')?.parentElement||root;
  const select=el('div');select.style.cssText='padding:13px;margin:12px 0;border:1px solid #998b5d;background:#183b2c;border-radius:8px;color:#f5e9c9;font:13px/1.5 Verdana,Arial';
  const title=el('strong','Бланка на РИОСВ – Пловдив');title.style.cssText='display:block;color:#f2d190;margin-bottom:7px';
- const description=el('div','Изберете проверения шаблон КТ119 само веднъж за текущата сесия. Файлът остава в браузъра; не се изпраща към сървър.');
+ const description=el('div','Изберете коригираната бланка КТ119 (единият електронен подпис е над адресата), само веднъж за текущата сесия. Файлът остава в браузъра; не се изпраща към сървър.');
  const file=el('input');file.type='file';file.accept='.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document';file.setAttribute('aria-label','Изберете одобрената DOCX бланка');file.style.cssText='display:block;margin:11px 0;color:#f8edd7;max-width:100%';
  const status=el('p','Не е избрана бланка.');status.style.cssText='color:#e8ce99;font-size:12px;margin:5px 0';
  select.append(title,description,file,status);
