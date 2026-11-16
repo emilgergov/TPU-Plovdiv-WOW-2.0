@@ -13,7 +13,7 @@ function formatDraftSubject(draft){
  const direct=value.match(/^(„[^“]+“)([\s\S]*)$/u);
  if(direct){title=direct[1];tail=direct[2]}
  else {
-   const boundary=value.match(/^(.+?)(,\s*(?:разположен[аои]?|находящ[аои]?|в\s+(?:поземлен|ПИ|имот|землището)|попадащ[аои]?|с\s+местоположение|местност)[\s\S]*)$/iu);
+   const boundary=value.match(/^(.+?)(,?\s+(?:(?:разположен[аои]?|находящ[аои]?|попадащ[аои]?)\s+|в\s+(?:поземлен\s+имот|ПИ|имот|землището)|с\s+местоположение|местност\b)[\s\S]*)$/iu);
    if(boundary){title=boundary[1].trim();tail=boundary[2]}
  }
  if(!title)return {text:raw,warning:'Не е разграничено еднозначно наименованието на ИП в „Относно:“. Моля, въведете „Относно: Уведомление за инвестиционно предложение (ИП) „Наименование“ …“.'};
@@ -44,7 +44,7 @@ function initialize(){
  let source=null,versions=[],confirmed=null,busy=false,editorialIssues=[];
  const endpoint='https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/stage5-document';
  const stylesheet=make('style');
- stylesheet.textContent='#kt117Stage5{color:#f7f0df;font:14px/1.6 Verdana,Arial}#kt117Stage5 .kt117-context{padding:14px;background:#264e3b;border:1px solid #8a9b79;border-radius:8px;margin:12px 0}#kt117Stage5 .kt117-heading{font-weight:700;color:#f6d18a;margin:0 0 9px}#kt117Stage5 .kt117-main{font-size:18px;font-weight:700;color:#ffdfa2;margin:8px 0}#kt117Stage5 .kt117-reference{font-weight:700;color:#f6d18a;margin:6px 0 12px}#kt117Stage5 .kt117-paper{padding:16px;background:#284d3c;border-left:4px solid #d9bb7a;white-space:pre-wrap;line-height:1.7;margin:12px 0}#kt117Stage5 .kt117-actions{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}#kt117Stage5 .kt117-actions button{font:700 13px Verdana,Arial;background:#dab972;color:#163a29;border:none;border-radius:6px;padding:11px 14px;cursor:pointer}#kt117Stage5 .kt117-actions button[disabled]{opacity:.5;cursor:default}#kt117Stage5 [hidden]{display:none!important}#kt117Stage5 textarea[hidden]{display:none!important}#kt117Stage5 .kt117-actions button[hidden]{display:none!important}#kt117Stage5 textarea{width:100%;min-height:360px;box-sizing:border-box;font:13px/1.6 Verdana,Arial;background:#fffdf5;color:#142e22;padding:12px;border-radius:6px}#kt117Stage5 .kt117-note{font-size:12px;color:#f2d398;white-space:pre-wrap}#kt117Stage5 details{padding:10px;border:1px solid #68896e;border-radius:7px;margin:10px 0}#kt117Stage5 summary{color:#f5d18b;cursor:pointer}';
+ stylesheet.textContent='#kt117Stage5{color:#f7f0df;font:14px/1.6 Verdana,Arial}#kt117Stage5 .kt117-context{padding:14px;background:#264e3b;border:1px solid #8a9b79;border-radius:8px;margin:12px 0}#kt117Stage5 .kt117-heading{font-weight:700;color:#f6d18a;margin:0 0 9px}#kt117Stage5 .kt117-main{font-size:18px;font-weight:700;color:#ffdfa2;margin:8px 0}#kt117Stage5 .kt117-reference{font-weight:700;color:#f6d18a;margin:6px 0 12px}#kt117Stage5 .kt117-paper{padding:16px;background:#284d3c;border-left:4px solid #d9bb7a;white-space:pre-wrap;line-height:1.7;margin:12px 0}#kt117Stage5 .kt117-actions{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}#kt117Stage5 .kt117-actions button{font:700 13px Verdana,Arial;background:#dab972;color:#163a29;border:none;border-radius:6px;padding:11px 14px;cursor:pointer}#kt117Stage5 .kt117-actions button[disabled]{opacity:.5;cursor:default}#kt117Stage5 [hidden]{display:none!important}#kt117Stage5 textarea[hidden]{display:none!important}#kt117Stage5 .kt117-actions button[hidden]{display:none!important}#kt117Stage5 textarea{width:100%;min-height:360px;box-sizing:border-box;font:13px/1.6 Verdana,Arial;background:#fffdf5;color:#142e22;padding:12px;border-radius:6px}#kt117Stage5 .kt117-note{font-size:12px;color:#f2d398;white-space:pre-wrap}#kt117Stage5 details{padding:10px;border:1px solid #68896e;border-radius:7px;margin:10px 0}#kt117Stage5 summary{color:#f5d18b;cursor:pointer}#kt117Stage5 .kt117-decision-status{padding:12px 14px;border:1px solid #d9bb7a;border-left:5px solid #d9bb7a;border-radius:6px;background:#254e3c;color:#fff0c8;font:700 13px/1.5 Verdana,Arial;margin:6px 0 12px}#kt117Stage5 .kt117-decision-status[data-error="true"]{background:#5b2424;color:#fff7e5;border-color:#e4a08f}';
  document.head.append(stylesheet);
  const ui=make('section');ui.id='kt117Stage5';
  const heading=make('h3','5. Изготвяне на административния документ');
@@ -67,12 +67,14 @@ function initialize(){
  const preview=make('div');preview.className='kt117-paper';preview.hidden=true;
  const textarea=make('textarea');textarea.hidden=true;textarea.style.display='none';textarea.setAttribute('aria-label','Редакция на административния документ');
  const confirmedText=make('div');confirmedText.className='kt117-note';
+ const decisionStatus=make('p');decisionStatus.className='kt117-decision-status';decisionStatus.hidden=true;decisionStatus.setAttribute('role','status');decisionStatus.setAttribute('aria-live','polite');decisionStatus.setAttribute('tabindex','-1');
+ const showDecisionStatus=(message,error=false)=>{decisionStatus.textContent=message;decisionStatus.hidden=false;decisionStatus.dataset.error=String(error);decisionStatus.scrollIntoView({behavior:'smooth',block:'center'});};
  const word=make('button','Създай Word по бланката');word.id='kt119WordCreate';word.disabled=true;
  const wordInfo=make('p','Документът се създава автоматично по одобрения институционален модел на РИОСВ – Пловдив. Използва се само експертно потвърденият текст, без пренаписване.');
  wordInfo.className='kt117-note';
  const original=make('details');original.append(make('summary','Пълен експертно потвърден анализ от Етап 4'),make('pre'));
  const footer=make('div');footer.className='kt117-actions';footer.append(word);
- ui.append(heading,context,action,note,editorial,preview,textarea,reviewActions,confirmedText,footer,wordInfo,original);
+ ui.append(heading,context,action,note,editorial,preview,textarea,reviewActions,decisionStatus,confirmedText,footer,wordInfo,original);
  panel.replaceChildren(ui);
  const live=()=>window.KT116ExpertHandoff?.snapshot?.()||null;
  function sync(){
@@ -126,7 +128,7 @@ function initialize(){
    const normalized=formatDraftSubject(data.draft);
    if(normalized.warning){editorialIssues.push(normalized.warning);editorialContent.append(make('p',normalized.warning));editorial.hidden=false;}
    versions.push({version:versions.length+1,text:normalized.text,kind:'предложение на EG Автора — универсална структура на „Относно:“'});
-   confirmed=null;render();note.textContent=editorialIssues.length?'Проектът е готов. Проверете бележките за редакция преди потвърждение.':'Проектът е готов за експертна редакция или потвърждение.';
+   confirmed=null;decisionStatus.hidden=true;render();note.textContent=editorialIssues.length?'Проектът е готов. Проверете бележките за редакция преди потвърждение.':'Проектът е готов за експертна редакция или потвърждение.';
   }catch{note.textContent='Възникна грешка при изготвянето на текста.';}
   finally{busy=false;generate.disabled=false}
  };
@@ -141,15 +143,30 @@ function initialize(){
  };
  cancel.onclick=render;
  confirm.onclick=()=>{
-  if(!source||!live()||live()?.version!==source.version||!versions.length)return;
-  const v=versions.at(-1);
-  if(!/^Относно:\s*Уведомление за инвестиционно предложение \(ИП\)\s+„[^“]+“/u.test(v.text.trim())){
-    note.textContent='Редът „Относно:“ трябва да съдържа „Уведомление за инвестиционно предложение (ИП)“, следвано от наименованието на ИП в кавички. Редактирайте текста преди потвърждение.';
+  if(!source||!live()||live()?.version!==source.version||!versions.length){
+    showDecisionStatus('Не може да се потвърди: данните или версията на преписката не съответстват на потвърдения Етап 4.',true);
     return;
   }
-  confirmed=Object.freeze({...v,caseId:source.caseId,stage4Version:source.version,
+  const v=versions.at(-1),normalized=formatDraftSubject(v.text);
+  if(normalized.warning){
+    note.textContent=normalized.warning;
+    showDecisionStatus(normalized.warning+' Изберете „Редактирай текста“ и поправете заглавието.',true);
+    return;
+  }
+  // Accepted universal "Относно:" formatting only; no rewriting of the letter body.
+  if(normalized.text!==v.text){
+    versions.push({...v,version:versions.length+1,text:normalized.text,kind:'техническо оформление на „Относно:“'});
+  }
+  const ready=versions.at(-1);
+  if(!/^Относно:\s*Уведомление за инвестиционно предложение \(ИП\)\s+„[^“]+“/u.test(ready.text.trim())){
+    showDecisionStatus('Редът „Относно:“ изисква „Уведомление за инвестиционно предложение (ИП)“ и наименование на ИП в кавички.',true);
+    return;
+  }
+  confirmed=Object.freeze({...ready,caseId:source.caseId,stage4Version:source.version,
     expert:source.expert,confirmedAt:new Date().toISOString()});
-  render();note.textContent='Текстът е потвърден от експерта. Можете да създадете DOCX по проверената бланка.';
+  render();
+  note.textContent='Текстът е потвърден от експерта. Можете да създадете DOCX по проверената бланка.';
+  showDecisionStatus('Текстът е потвърден · версия '+confirmed.version+'. Бутонът „Създай Word по бланката“ е достъпен по-долу.');
  };
  word.addEventListener('click',()=>window.KT119Download?.());
  document.addEventListener('kt119:template-ready',()=>{word.disabled=!(confirmed&&window.KT119TemplateReady?.());});
