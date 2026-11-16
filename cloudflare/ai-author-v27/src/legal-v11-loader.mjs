@@ -64,22 +64,36 @@ async function unpack(id){
  cache.set(id,value);
  return value;
 }
+// KT112: Distinguish real statute headings from mentions split across PDF
+// lines. A wrapped "чл. 6а" inside art. 2 is NOT a heading for art. 6a.
 function articleInText(source,number){
  const n=String(number).toLowerCase();
- const all=[...source.matchAll(/(?:^|\n)[^\S\n]*Чл\.\s*(\d+[а-я]?)(?=\s|\.|\(|\n)/giu)];
- const idx=all.findIndex(x=>x[1].toLowerCase()===n);
+ const headers=[...source.matchAll(/^[^\S\n]*Чл\.[ \t]*(\d+[а-я]?)(?=[ \t]|\.(?!\d)|\(|\n)/gmu)];
+ const idx=headers.findIndex(x=>x[1].toLowerCase()===n);
  if(idx<0)return null;
- const start=all[idx].index+(all[idx][0].startsWith("\n")?1:0);
- const end=idx+1<all.length?all[idx+1].index:source.length;
- return source.slice(start,end).trim();
+ const start=headers[idx].index;
+ const end=idx+1<headers.length?headers[idx+1].index:source.length;
+ const body=source.slice(start,end).trim();
+ if(!body.startsWith('Чл.'))return null;
+ return body;
 }
+// ZOOS annexes use a two-line title: "Приложение № 1\nкъм чл. 92...".
+// Require the ACTUAL ZOOS article reference; a mention of an annex to an
+// international convention inside an earlier article cannot start an annex.
 function annexInText(source,number){
- const all=[...source.matchAll(/(?:^|\n)[^\S\n]*Приложение\s*№\s*(\d+[а-я]?)(?=\s|\n|към)/giu)];
- const i=all.findIndex(x=>x[1]===String(number)&&/към\s+чл\./iu.test(source.slice(x.index,x.index+65)));
+ const wanted=String(number);
+ const articleRef=({'1':'92','2':'93'})[wanted];
+ if(!articleRef)return null;
+ const headers=[...source.matchAll(/^[^\S\n]*Приложение[ \t]*№[ \t]*(\d+[а-я]?)(?=[ \t]|\n)/gmu)];
+ const i=headers.findIndex(x=>x[1]===wanted&&
+  new RegExp('^Приложение\\s*№\\s*'+wanted+'\\s+към\\s+чл\\.\\s*'+articleRef+'\\b','u')
+   .test(source.slice(x.index,x.index+120).trim()));
  if(i<0)return null;
- const start=all[i].index+(all[i][0].startsWith("\n")?1:0);
- const end=i+1<all.length?all[i+1].index:source.length;
- return source.slice(start,end).trim();
+ const start=headers[i].index;
+ const end=i+1<headers.length?headers[i+1].index:source.length;
+ const body=source.slice(start,end).trim();
+ if(!body.startsWith('Приложение № '+wanted))return null;
+ return body;
 }
 function put(target,source,label,body){
  if(!body)return;
