@@ -108,6 +108,9 @@ if(host&&five){
    version:v.version,text:v.text,original:proposal.original,warnings:[...proposal.warnings],
    expert,approvedAt:new Date().toLocaleString('bg-BG'),expertApproved:true});
   note.textContent='Потвърдено. Предложението е готово за Етап 5.';display();render5();
+  document.dispatchEvent(new CustomEvent('kt116:stage4-confirmed',{detail:{
+   caseId:approved.caseId,evidenceRevision:approved.evidenceRevision,version:approved.version
+  }}));
  };
  // KT116-R2: the legacy stage navigation opens a read-only gate dialog.
  // This case-bound confirmation instead opens ONLY the new Stage 5 preview.
@@ -115,6 +118,11 @@ if(host&&five){
  next.onclick=()=>{
   if(!approved||!current())return;
   render5();
+  // Refresh the Stage 5 case-bound input before switching the visible stage.
+  window.KT117Document?.refresh?.();
+  document.dispatchEvent(new CustomEvent('kt116:stage5-open',{detail:{
+   caseId:approved.caseId,evidenceRevision:approved.evidenceRevision,version:approved.version
+  }}));
   document.querySelectorAll('.kt80-stage-panel').forEach(panel=>{
    panel.hidden=panel!==five;
   });
