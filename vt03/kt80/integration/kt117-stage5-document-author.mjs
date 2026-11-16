@@ -1,4 +1,3 @@
-import {kt120ReferenceDraft} from './kt120-approved-reference-draft.mjs';
 import {collectStageEvidence} from './kt95-stage-evidence-handoff.mjs';
 const make=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;return x};
 const clean=x=>String(x??'').trim();
@@ -37,10 +36,9 @@ function initialize(){
  context.append(contextTitle,direction,reference,details,warnings);
  const action=make('div');action.className='kt117-actions';
  const generate=make('button','Изготви текст с EG Автора');
- const approvedReference=make('button','Приложи одобрените абзаци КТ120');approvedReference.hidden=true;
  const edit=make('button','Редактирай текста'),save=make('button','Запази редакцията'),cancel=make('button','Откажи редакцията'),confirm=make('button','Потвърди текста');
  edit.hidden=true;save.hidden=true;cancel.hidden=true;confirm.hidden=true;
- action.append(generate,approvedReference); const reviewActions=make('div'); reviewActions.className='kt117-actions'; reviewActions.append(edit,save,cancel,confirm);
+ action.append(generate); const reviewActions=make('div'); reviewActions.className='kt117-actions'; reviewActions.append(edit,save,cancel,confirm);
  const note=make('p');note.className='kt117-note';
  const editorial=make('details');editorial.hidden=true;
  const editorialTitle=make('summary','Бележки за редакция');editorial.append(editorialTitle);
@@ -64,21 +62,12 @@ function initialize(){
   original.hidden=false;original.querySelector('pre').textContent=a.text;
   let panelLine=a.text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\b[^\n]*/iu)?.[0]||'Административно направление, потвърдено от експерта';
   direction.textContent=documentLabel(panelLine);
-  const subj=clean(window.KT80WorkflowState?.subjectConfirmed?.text);
-  const parcelsForReference=collectStageEvidence(window).parcelIds;
-  const referenceCase=subj.includes('Складове за промишлени стоки и офиси')&&parcelsForReference.includes('56784.13.102');
-  const approvedRoute=/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?1\b/iu.test(panelLine);
-  approvedReference.hidden=!referenceCase;
-  approvedReference.disabled=!approvedRoute;
-  approvedReference.title=approvedRoute?'Приложи седемте заключени абзаца; необходимо е ново експертно потвърждение.':'КТ120 е приета за панел 01. Върнете се към Етап 4 и потвърдете правилното направление.';
   reference.textContent='Представена документация · вх. № '+incomingReference();
   const p=window.KT80WorkflowState?.subjectConfirmed||{};
   const parcels=collectStageEvidence(window).parcelIds;
   details.textContent='Предмет: '+clean(p.text)+'\nИмот(и): '+parcels.join(', ')+'\nЕксперт: '+a.expert+' · Версия: '+a.version;
   warnings.hidden=!a.warnings?.length;warningText.textContent=(a.warnings||[]).join('\n');
-  note.textContent=referenceCase&&!approvedRoute?
-   'Несъответствие с КТ120: заключените абзаци са за „Писмо по чл. 2, ал. 2 от Наредбата за ОС“ (панел 01), но Етап 4 е потвърдил друго направление. Върнете се към Етап 4; не подменяме експертното решение автоматично.':
-   'Изготвянето на документа използва точно това потвърдено направление. Не извършва нова процедурна квалификация.';
+  note.textContent='Изготвянето на документа използва потвърденото направление, без нова процедурна квалификация.';
   preview.hidden=true;textarea.hidden=true;textarea.style.display='none';edit.hidden=true;save.hidden=true;cancel.hidden=true;confirm.hidden=true;generate.hidden=false;
  }
  const render=()=>{
@@ -86,15 +75,6 @@ function initialize(){
   preview.textContent=v.text;preview.hidden=false;textarea.hidden=true;textarea.style.display='none';edit.hidden=false;save.hidden=true;cancel.hidden=true;
   confirm.hidden=!!confirmed;confirmedText.textContent=confirmed?'Потвърден текст · версия '+confirmed.version+'. Експертните редакции остават окончателни за документа.':'';
   footer.hidden=!confirmed;word.disabled=!(confirmed&&window.KT119TemplateReady?.());
- };
- approvedReference.onclick=()=>{
-  sync();
-  if(!source||approvedReference.hidden)return;
-  const draft=kt120ReferenceDraft(incomingReference());
-  versions.push({version:versions.length+1,text:draft,kind:'заключени абзаци КТ120 — контролен образец'});
-  confirmed=null;editorialIssues=[];
-  editorial.hidden=true;render();
-  note.textContent='Заредени са точно одобрените абзаци № 1–7. № 8 и № 9 отпадат. Прегледайте текста и потвърдете изрично преди Word. Само за тази контролна преписка.';
  };
  generate.onclick=async()=>{
   sync();if(!source||busy)return;
