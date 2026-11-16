@@ -24,6 +24,19 @@ function install(){
    const t=WN('t',text);t.setAttribute('xml:space','preserve');
    r.append(prop,t);p.append(r);
  };
+ // Pure presentation rule: when the approved subject begins with a distinct title,
+ // delimit that title typographically without modifying the expert-confirmed body.
+ // Never mistake a quoted locality/address for the title.
+ const quotedSubject=(line)=>{
+   if(!line.startsWith('Относно:'))return line;
+   const rest=line.slice('Относно:'.length);
+   const loc=/\s+(?:в(?:ъв)?\s+(?:позем[еe]н(?:ия)?\s+имот|ПИ\b|УПИ\b|имот\s+с\s+идентификатор|гр\.\s|град\s|с\.\s|землището\s)|,\s*(?:местност|находящ|разположен))/iu;
+   const boundary=loc.exec(rest);
+   if(!boundary)return line;
+   const title=rest.slice(0,boundary.index).trim();
+   if(title.length<5||title.length>180||/[„“]/u.test(title))return line;
+   return 'Относно: '+ '„'+title+'“'+rest.slice(boundary.index);
+ };
  const segmented=(p,line,isSubject=false)=>{
    // Expert-approved recipient block: each complete line is bold.
    if(line==='ДО'||line.startsWith('Възложител:')||line.startsWith('Адрес:')){
@@ -89,7 +102,7 @@ function install(){
    const p=WN('p'),pp=WN('pPr'),spacing=WN('spacing'),lineEl=WN('spacing');
    spacing.setAttributeNS(W,'w:after','0');spacing.setAttributeNS(W,'w:line','240');
    spacing.setAttributeNS(W,'w:before','0');spacing.setAttributeNS(W,'w:lineRule','auto');pp.append(spacing);
-   const indent=WN('ind');indent.setAttributeNS(W,'w:firstLine','850');pp.append(indent); // 1.5 cm first-line indent
+   const indent=WN('ind');indent.setAttributeNS(W,'w:firstLine','567');pp.append(indent); // 1 cm first-line indent
    pp.append(WN('widowControl'));
    const align=WN('jc');align.setAttributeNS(W,'w:val','both');pp.append(align);p.append(pp);
    segmented(p,line);if(textIn(p)!==line)throw Error('Text mismatch in new paragraph');
@@ -111,10 +124,11 @@ function install(){
      const raw=approved.text.replace(/\r\n/g,'\n');
      const lines=raw.split('\n'),subject=lines[0];
      if(!subject?.startsWith('Относно:'))throw Error('Липсва потвърден ред „Относно:“.');
+     const renderedSubject=quotedSubject(subject);
      const bodyLines=lines.slice(1).filter(x=>x.trim().length>0);
      const chosen=stage4.text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\s*[—–-]\s*([^\n]+)/iu);
      if(!chosen)throw Error('Липсва потвърдено наименование на административния документ.');
-     const docTitle=chosen[1].trim();
+     const docTitle=chosen[1].trim().replace(/^[„“"']+|[„“"']+$/gu,'');
      const contents=window.fflate.unzipSync(templateBytes);
      const xml=new TextDecoder().decode(contents['word/document.xml']),dom=new DOMParser().parseFromString(xml,'application/xml');
      if(dom.getElementsByTagName('parsererror').length)throw Error('Невалидна бланка.');
@@ -143,14 +157,14 @@ function install(){
      for(const para of [recipient,recipientParty,recipientAddress])replacePara(para,textIn(para));
      const subj=locate('{{SUBJECT}}'),title=locate('{{DOCUMENT_TITLE}}'),anchor=locate('{{BODY_ANCHOR}}');
      if(!subj||!title||!anchor)throw Error('Липсва динамичен раздел в бланката.');
-     replacePara(subj,subject,true);replacePara(title,docTitle.toLocaleUpperCase('bg-BG'),false,true);
+     replacePara(subj,renderedSubject,true);replacePara(title,docTitle.toLocaleUpperCase('bg-BG'),false,true);
      formatTitle(title);
-     // KT120: Subject is justified, with the same 1.5 cm first-line indent as the body.
+     // KT120: Subject is justified, with the same 1 cm first-line indent as the body.
      let subjectProps=Array.from(subj.childNodes).find(n=>n.namespaceURI===W&&n.localName==='pPr');
      if(!subjectProps){subjectProps=WN('pPr');subj.insertBefore(subjectProps,subj.firstChild)}
      for(const node of Array.from(subjectProps.childNodes).filter(n=>n.namespaceURI===W&&(n.localName==='jc'||n.localName==='ind')))subjectProps.removeChild(node);
      const subjectAlign=WN('jc');subjectAlign.setAttributeNS(W,'w:val','both');subjectProps.append(subjectAlign);
-     const subjectIndent=WN('ind');subjectIndent.setAttributeNS(W,'w:firstLine','850');subjectProps.append(subjectIndent);
+     const subjectIndent=WN('ind');subjectIndent.setAttributeNS(W,'w:firstLine','567');subjectProps.append(subjectIndent);
      subjectProps.append(WN('widowControl'));
      // Retain original confirmed subject content; formatting is independent from proposal text.
      const nodes=bodyLines.map(x=>newPara(x));
@@ -165,7 +179,8 @@ function install(){
      for(const p of nodes)body.insertBefore(p,anchor);
      body.removeChild(anchor);
      const actual=[textIn(subj),...nodes.map(textIn)].join('\n');
-     if(actual.replace(/\n+/g,'\n')!==raw.replace(/\n+/g,'\n').replace(/^\n|\n$/g,''))throw Error('DOCX не съвпада с експертно потвърденото съдържание.');
+     const presentationText=[renderedSubject,...bodyLines].join('\n');
+     if(actual!==presentationText)throw Error('DOCX не съвпада с потвърденото съдържание и единственото разрешено оформление на предмета.');
      // Never rewrite a confirmed run. Formatting changes only the appearance.
      contents['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(dom));
      const bytes=window.fflate.zipSync(contents,{level:6});
