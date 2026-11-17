@@ -328,8 +328,8 @@ function boot(){
     // A server-side legal rejection cannot be solved by a visual refresh.
     const needsWorkerRepair=Array.isArray(data.qualityIssues)&&data.qualityIssues.some(x=>
      x==='MISSING_REASONED_LEGAL_COMPARISON'||x==='ADMIN_PANEL_02_LABEL_MISMATCH');
-    const repairNote=response.status===422 && data.expertPreviewOnly!==true?
-      ' СЪРВЪРЪТ НЕ ПОТВЪРЖДАВА НОВИЯ МЕХАНИЗЪМ КТ115. Проверете публикуването в GitHub Actions; не е необходимо повторно генериране.':
+    const repairNote=data.qualityStage==='source_qualification'?
+      ' Проверка на нормативния и фактическия източник преди изготвяне на текста; не е проблем с публикуването на сървъра.':
       needsWorkerRepair?' За този отказ няма достъпен работен проект; необходима е корекция на защитения EG Worker.':'';
     status.textContent=response.status===413?
       'Преписката надхвърля допустимия технически обем на заявката.':
