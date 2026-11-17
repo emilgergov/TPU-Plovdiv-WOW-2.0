@@ -385,7 +385,7 @@ async function handleStage4Proposal(request,env){
    semanticReview:detail.semanticReview||null},
   gisAnalysis:detail.gis||null,
   provenanceRule:"All document excerpts, semantic candidates and GIS previews require explicit individual verification. Do not promote them to established fact."};
- let lockedQualification=null,qualificationValidation=null;
+ let lockedQualification=null,qualificationValidation=null,qualificationIssues=[];
  const qualificationSources=buildQualificationSources({subject:payload.subject,scope:payload.scope,confirmed,documents:sourceTexts,legalProvisions:verifiedLegalCorpus.legalProvisions});
  const exactSnippets=qualificationEvidenceOptions(qualificationSources);
  // KT124-R1: Explicit, archive-derived legal source IDs for each legal test.
@@ -435,13 +435,14 @@ async function handleStage4Proposal(request,env){
     }))),checked=validateQualification(candidate,qualificationSources);
     if(checked.ok){q=candidate;v=checked}
    }
-   if(!v.ok)return reply({
-    error:"Нормативната квалификация няма проверими доказателствени основания.",
-    projectOnly:true,expertReviewRequired:true,qualityPassed:false,handoffAllowed:false,
-    caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,requestId:payload.requestId,
-    qualityStage:"source_qualification",qualityIssues:v.errors.slice(0,12)
-   },422);
-   lockedQualification=q;qualificationValidation=v;
+   if(!v.ok){
+    // Preserve diagnostic errors, but do not suppress the author/reviewer
+    // draft cycle. Without validated anchors it stays an UNVERIFIED preview.
+    qualificationIssues=[...v.errors];
+    lockedQualification=null;qualificationValidation=v;
+   }else{
+    lockedQualification=q;qualificationValidation=v;
+   }
   }
   const upstream=await fetch("https://api.openai.com/v1/responses",{
    method:"POST",signal:controller.signal,
@@ -612,7 +613,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
    unverifiedDraft:typeof proposal==="string"?proposal.slice(0,12000):"",
    qualityIssues:codes,qualityStage:stage,...extra
   },422);
-  let issues=[...qualityIssues(draft),...(lockedQualification?compareDraftWithQualification(draft,lockedQualification):[])];
+  let issues=[...qualityIssues(draft),...(lockedQualification?compareDraftWithQualification(draft,lockedQualification):[]),...qualificationIssues];
   // KT124-R2: one author proposal, then one independent reviewer; no
   // author-reviewer loop. The reviewer receives unresolved validation issues.
   let authorRepairs=0;
@@ -675,7 +676,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   const verdict=independentReview?.verdict;
   if(!["pass","revise","reject"].includes(verdict))return expertPreview("Независимият преглед е невалиден.",["INVALID_REVIEW"],"independent_review",draft);
   const finalDraft=verdict==="pass"?draft:(text(independentReview.revisedDraft,12000)||draft);
-  const reviewedIssues=[...qualityIssues(finalDraft),...(lockedQualification?compareDraftWithQualification(finalDraft,lockedQualification):[])];
+  const reviewedIssues=[...qualityIssues(finalDraft),...(lockedQualification?compareDraftWithQualification(finalDraft,lockedQualification):[]),...qualificationIssues];
   if(verdict==="reject"||reviewedIssues.length)
    return expertPreview("Рецензирано предложение за експертен преглед; нормативните несъответствия остават видими.",
     [...new Set([...issues,...reviewedIssues,...(verdict==="reject"?["INDEPENDENT_REJECTION"]:[])])],
