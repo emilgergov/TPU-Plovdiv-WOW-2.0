@@ -12,7 +12,7 @@ function db({role="expert",userId="owner",caseOwner="owner",status="active",chan
    async first(){
     if(sql.includes("identity_provider"))return {user_id:userId,organization_id:"riosv",role,active:1};
     if(sql.includes("FROM kt125_cases"))return {case_id:"case-a",owner_id:caseOwner,organization_id:"riosv",status};
-    if(sql.includes("FROM kt125_users WHERE user_id"))return {user_id:"delegate",organization_id:"riosv",role:"expert",active:1};
+    if(sql.includes("FROM kt125_users WHERE user_id"))return {user_id:args[0],organization_id:"riosv",role:"expert",active:1};
     return null;
    },async all(){
     if(sql.includes("FROM kt125_grants WHERE case_id"))return {results:[{
