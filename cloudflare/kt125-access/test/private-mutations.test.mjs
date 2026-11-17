@@ -16,6 +16,7 @@ function makeDB({changes=[1,1],actorRow=actor,targetRow=other,caseRow=resource,f
   if(sql.includes("FROM kt125_cases WHERE case_id"))return caseRow;
   if(sql.includes("FROM kt125_users WHERE user_id"))return targetRow;
   throw Error("Unexpected query");
+ },async all(){return {results:[]}}
  }}}}},async batch(stmts){
    batches.push(stmts);
    if(failBatch)throw Error("Transaction aborted");
@@ -58,5 +59,6 @@ assert.equal((await handler.fetch(req("POST",issuePath),{...env,KT125_DB:makeDB(
 assert.equal((await handler.fetch(req("DELETE",issuePath+"/grant-missing"),{...env,KT125_DB:makeDB({changes:[0,0]})})).status,403);
 const oversize=req("POST",issuePath,{body:{...body,extra:"x".repeat(5000)}});
 assert.equal((await handler.fetch(oversize,env)).status,413);
-assert.equal((await handler.fetch(req("GET",issuePath),env)).status,405);
+assert.equal((await handler.fetch(req("GET",issuePath),env)).status,200);
+assert.equal((await handler.fetch(req("GET","/kt125/admin/users"),env)).status,403);
 console.log("PASS KT125 private endpoints: write authorization, same-origin CSRF, signed principal, atomic audit, denial on stale grant/invalid roles/oversize.");
