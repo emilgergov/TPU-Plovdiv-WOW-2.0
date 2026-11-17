@@ -48,4 +48,37 @@ with conn:
  assert conn.execute(activation_update,(now+30,"staff","riosv",
   "https://testing.cloudflareaccess.com","staff-sub")).rowcount==0
 assert conn.execute("SELECT active,activation_pending FROM kt125_users WHERE user_id='staff'").fetchone()==(0,0)
-print("PASS KT125 SQLite two-step staff activation, no repeat activation and no reactivation after disable.")
+# A different verified subject may not activate a pending colleague's profile.
+conn.execute("""INSERT INTO kt125_users
+ (user_id,organization_id,identity_provider,provider_subject,role,active,created_at_ms,updated_at_ms,activation_pending)
+ VALUES(?,?,?,?,?,?,?,?,?)""",
+ ("staff2","riosv","https://testing.cloudflareaccess.com","staff2-sub","reviewer",0,now,now,1))
+conn.commit()
+with conn:
+ wrong=conn.execute(activation_update,(now+40,"staff2","riosv",
+ "https://testing.cloudflareaccess.com","different-sub")).rowcount
+ assert wrong==0
+assert conn.execute("SELECT active,activation_pending FROM kt125_users WHERE user_id='staff2'").fetchone()==(0,1)
+
+# A database failure in the audit insert MUST roll back the activation update.
+try:
+ with conn:
+  changed=conn.execute(activation_update,(now+50,"staff2","riosv",
+    "https://testing.cloudflareaccess.com","staff2-sub")).rowcount
+  assert changed==1
+  conn.execute(activation_audit,("event-activate",now+50,"request-conflict",
+    '{}',"staff2","riosv"))
+except sqlite3.IntegrityError:
+ pass
+else:
+ raise AssertionError("An audit event collision must reject activation")
+assert conn.execute("SELECT active,activation_pending FROM kt125_users WHERE user_id='staff2'").fetchone()==(0,1)
+
+# A legitimate retry with a unique audit event must now succeed.
+with conn:
+ assert conn.execute(activation_update,(now+60,"staff2","riosv",
+  "https://testing.cloudflareaccess.com","staff2-sub")).rowcount==1
+ assert conn.execute(activation_audit,("event-new",now+60,"request-new",
+  '{}',"staff2","riosv")).rowcount==1
+assert conn.execute("SELECT active,activation_pending FROM kt125_users WHERE user_id='staff2'").fetchone()==(1,0)
+print("PASS KT125 SQLite two-step activation: exact subject, no reactivation, audit rollback and retry.")
