@@ -667,7 +667,8 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
    "КТ123-ФИНАЛ: При НЕОПРЕДЕЛЕНА, оправдана с неясна правна квалификация или объркана площ на имот и сграда, върни revise с конкретна съпоставка и доказателства, без измислени физически липси и без предрешен панел. Не допускай заключителна самооценка за качеството на проекта.",
 "КТ123: Не приемай вътрешни КТ/тестови бележки, самооценки за пълно нормативно съответствие или общо твърдение за липса на противоречия, ако нормативната матрица съдържа НЕОПРЕДЕЛЕНА. При поправим дефект върни revise с доказателствено конкретна формулировка.",
 "При установен поправим проблем върни verdict=revise и пълно преработено предложение, запазващо четирите раздела и водещото предложение. При съществена непроверима грешка verdict=reject. При липса на констатирани логически проблеми verdict=pass.",
-   'Изведи САМО JSON: {"verdict":"pass|revise|reject","issues":["конкретна констатация"],"revisedDraft":"пълният коригиран текст само при revise"}.'
+   "За всички изходи, включително pass, попълни grounds с 2–5 кратки самостоятелни рецензентски аргумента: точна проверена норма, установен факт/конкретен източник, какво е установено и какво остава непроверено. При reject или revise отделно посочи конкретните възражения в issues. Не измисляй липсващ правен факт и не наричай прегледа гаранция за законосъобразност.",
+   'Изведи САМО JSON: {"verdict":"pass|revise|reject","grounds":["независими конкретни мотиви и доказателствени ограничения"],"issues":["конкретна констатация"],"revisedDraft":"пълният коригиран текст само при revise"}.'
   ].join(" ");
   const auditInput={draft,lockedQualification,routeCatalog:KT109_ROUTE_CATALOG,subject:payload.subject,scope:payload.scope,parcelIds,
    establishedFacts:confirmed,uncertainFacts:unresolved,
@@ -685,8 +686,9 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
      schema:{type:"object",additionalProperties:false,properties:{
       verdict:{type:"string",enum:["pass","revise","reject"]},
       issues:{type:"array",items:{type:"string"}},
+      grounds:{type:"array",items:{type:"string"}},
       revisedDraft:{type:"string"}
-     },required:["verdict","issues","revisedDraft"]}}},
+     },required:["verdict","issues","grounds","revisedDraft"]}}},
     input:[{role:"system",content:reviewSystem},{role:"user",content:JSON.stringify(auditInput)}]})
   });
   if(!auditProvider.ok)return expertPreview("Независимият нормативен преглед не е достъпен.",["REVIEW_UNAVAILABLE"],"independent_review",draft);
@@ -695,9 +697,13 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   let independentReview;
   try{independentReview=JSON.parse(auditText.replace(/^\x60\x60\x60(?:json)?\s*|\s*\x60\x60\x60$/giu,""))}
   catch{return expertPreview("Независимият нормативен преглед не върна четим резултат.",["REVIEW_UNREADABLE"],"independent_review",draft)}
+  const reviewerFindings=[
+   ...(Array.isArray(independentReview?.grounds)?independentReview.grounds:[]),
+   ...(Array.isArray(independentReview?.issues)?independentReview.issues:[])
+  ].filter(x=>typeof x==="string"&&x.trim()).slice(0,10);
   const verdict=independentReview?.verdict;
   if(!["pass","revise","reject"].includes(verdict))return expertPreview("Независимият преглед е невалиден.",["INVALID_REVIEW"],"independent_review",draft);
-  if(verdict==="reject")return expertPreview("Независимият преглед не одобрява проекта.",["INDEPENDENT_REJECTION"],"independent_review",draft,{reviewFindings:Array.isArray(independentReview.issues)?independentReview.issues.slice(0,8):[]});
+  if(verdict==="reject")return expertPreview("Независимият преглед не одобрява проекта.",["INDEPENDENT_REJECTION"],"independent_review",draft,{reviewFindings});
   const finalDraft=verdict==="revise"?text(independentReview.revisedDraft,12000):draft;
   if(finalDraft.length<120||qualityIssues(finalDraft).length>0||(lockedQualification&&compareDraftWithQualification(finalDraft,lockedQualification).length>0)||!sectionNames.every(x=>finalDraft.toLocaleLowerCase("bg").includes(x.toLocaleLowerCase("bg")))||
      /преценяван(?:е|ето)\s+на\s+необходимостта\s+от\s+ОС[^.\n]{0,90}чл\.?\s*2\s*,?\s*ал\.?\s*2/iu.test(finalDraft)||
@@ -712,7 +718,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
    qualificationRecord:lockedQualification,qualificationProof,qualificationGate:{sourceAnchorsMatched:qualificationValidation?.ok===true,legalApplicabilityCertified:false,expertConfirmationRequired:true},
     normativeAudit:{reviewed:true,reviewVerdict:verdict,authorRepairs,
      deterministicModel:evaluateDraft(finalDraft).decision,
-     legalApplicabilityAutomaticallyCertified:false,selectedPanelId:Number(finalDraft.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0)||null,fullArticlesVerified:true,allArchiveSourcesExamined:false,verifiedLegalProvisionCount:verifiedLegalCorpus.legalProvisions.length,findings:Array.isArray(independentReview.issues)?independentReview.issues.slice(0,8):[]},
+     legalApplicabilityAutomaticallyCertified:false,selectedPanelId:Number(finalDraft.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0)||null,fullArticlesVerified:true,allArchiveSourcesExamined:false,verifiedLegalProvisionCount:verifiedLegalCorpus.legalProvisions.length,findings:reviewerFindings},
    evidenceReceipt:{documentTextsReceived:sourceTexts.length,
     documentTextsAvailable:context.caseDocuments.sourceTextCount,
     documentTextTruncated:context.caseDocuments.sourceTextTruncated,
