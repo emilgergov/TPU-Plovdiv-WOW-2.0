@@ -38,6 +38,8 @@ jobs:
           }
           const subdomain=await read("/workers/subdomain","WORKERS_SUBDOMAIN");
           if(subdomain?.subdomain)console.log("PRIVATE_WORKER_CANDIDATE_ORIGIN: https://tpu-plovdiv-kt125-private."+subdomain.subdomain+".workers.dev");
+          const providers=await read("/access/identity_providers","IDENTITY_PROVIDERS");
+          if(Array.isArray(providers))console.log("PROVIDER_TYPES: "+JSON.stringify(providers.map(p=>({id:p.id,type:p.type,name:p.name}))));
           const apps=await read("/access/apps","ACCESS_APPLICATIONS");
           if(Array.isArray(apps)){
             const relevant=apps.filter(x=>String(x.domain||"").includes("tpu-plovdiv-kt125-private")||String(x.name||"").toLowerCase().includes("kt125"));
@@ -45,5 +47,5 @@ jobs:
             console.log("KT125_ACCESS_APP_COUNT: "+relevant.length);
           }
           console.log("READ_ONLY_CHECK: no configuration or deployment mutations performed");
-          if(!settings)process.exit(1);
+          if(!providers)process.exit(1);
           NODE
