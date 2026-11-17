@@ -47,6 +47,7 @@ jobs:
           node --check cloudflare/kt125-access/src/staff-activation.mjs
           node cloudflare/kt125-access/test/staff-activation.test.mjs
           node cloudflare/kt125-access/test/private-staff-activation-route.test.mjs
+          node cloudflare/kt125-access/test/staff-invitations-sql.test.mjs
           python3 cloudflare/kt125-access/test/staff_activation_sql.test.py
           python3 cloudflare/kt125-access/test/user_lifecycle_sql.test.py
           node --check cloudflare/kt125-access/src/security-audit.mjs
@@ -61,3 +62,4 @@ jobs:
           test "$(git rev-parse FETCH_HEAD)" = "1e949e654f9d002f51f7e0b0e8629a78f43512d1"
           git diff --quiet FETCH_HEAD --             cloudflare/ai-author-v27/src             vt03/kt80/integration/kt96-eg-ai-stage4-author.mjs             vt03/kt80/integration/kt116-expert-approval-handoff.mjs             vt03/kt80/integration/kt117-stage5-document-author.mjs             vt03/kt80/integration/kt119-docx-generator.mjs
           echo "PASS: R6 author, review, Stage5, Word and visual shell not modified"
+

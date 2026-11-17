@@ -4,6 +4,7 @@
  * audience, subject and time window establishes identity.
  * The user role is subsequently loaded from the private D1 registry.
  */
+import {normalizeKT125Email} from './identity-email.mjs';
 const decoder=new TextDecoder();
 const ascii=new TextEncoder();
 const MAX_TOKEN_LENGTH=16000;
@@ -72,7 +73,10 @@ export function createKT125CloudflareAccessVerifier({
    const verified=await cryptoImpl.subtle.verify("RSASSA-PKCS1-v1_5",key,
      decode64(parts[2]),ascii.encode(parts[0]+"."+parts[1]));
    if(!verified)return deny();
-   return {verified:true,issuer,subject:payload.sub};
+   const identity={verified:true,issuer,subject:payload.sub};
+   const email=payload.type==='app'&&payload.email_verified!==false?normalizeKT125Email(payload.email):null;
+   if(email)identity.email=email;
+   return identity;
   }catch{return deny()}
  }};
 }
@@ -81,3 +85,4 @@ export function kt125CloudflareAccessConfigReady(env){
   typeof env?.KT125_ACCESS_AUD==="string"&&
   /^[a-zA-Z0-9_-]{10,160}$/.test(env.KT125_ACCESS_AUD));
 }
+

@@ -18,7 +18,8 @@ assert(validUser.includes('name="confirm" value="DEACTIVATE"'));
 assert(validUser.includes('action="/kt125/admin/users/expert-a/disable"'));
 assert(!risk.includes('action="/kt125/admin/users/%3Cscript'),"Invalid IDs cannot become action URLs");
 assert(!risk.includes('/disable"'),"Invalid user IDs must not create deactivation forms");
-assert(risk.includes('action="/kt125/admin/users/enroll"'),"The fixed enrollment form must remain available");
+assert(risk.includes('action="/kt125/admin/users/invite"'),"The name/email invitation form must be available");
+assert(!risk.includes('name="subject"'),"The operator must not enter a provider subject");
 const response=kt125PrivateHtmlResponse(risk);
 assert.equal(response.headers.get("X-Frame-Options"),"DENY");
 assert.equal(response.headers.get("cache-control"),"no-store, private");
@@ -75,3 +76,4 @@ const api=await handler.fetch(req("/kt125/admin/users"),{...env,KT125_DB:db()});
 assert.equal(api.status,200);
 assert.equal((await api.json()).section,"users");
 console.log("PASS KT125-VT02: protected HTML, escaped table fields, no scripts/cache, role-specific panels, authorization before content, no real records on public Pages.");
+

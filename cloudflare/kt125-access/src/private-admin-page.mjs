@@ -9,7 +9,7 @@ const sectionNames=Object.freeze({
  overview:"Общ преглед",users:"Потребители",roles:"Роли и права",cases:"Преписки",audit:"Журнал"
 });
 const headers=Object.freeze({
- users:[["user_id","Служебен идентификатор"],["role","Роля"],["active","Активен"],["updated_at_ms","Последна промяна"]],
+ users:[["user_id","Потребител"],["email","Служебен имейл"],["role","Роля"],["active","Активен"],["updated_at_ms","Последна промяна"]],
  cases:[["case_id","Вътрешен идентификатор"],["owner_id","Водещ експерт"],["status","Състояние"],["updated_at_ms","Последна промяна"]],
  audit:[["event_id","Събитие"],["case_id","Преписка"],["actor_id","Извършител"],["action","Действие"],["outcome","Резултат"],["timestamp_ms","Време"]]
 });
@@ -38,10 +38,11 @@ th{background:#28533e;color:#f5d99a}
 `;
 const readable=(key,value)=>{
  if(key==="active")return value===1?"Да":"Не";
+ if(key==="role")return ({egmaster:"ЕГМАСТЕР",administrator:"Администратор",expert:"Експерт",reviewer:"Преглеждащ",delegated_expert:"Упълномощен експерт"})[value]||String(value??"—");
  if(key.endsWith("_ms")&&Number.isSafeInteger(value))return new Date(value).toLocaleString("bg-BG",{timeZone:"Europe/Sofia"});
  return String(value??"—");
 };
-export function renderKT125PrivatePage({section="overview",items=[],hasMore=false}={}){
+export function renderKT125PrivatePage({section="overview",items=[],hasMore=false,invitations=[],invitationsHasMore=false,directoryUnavailable=false}={}){
  if(!Object.hasOwn(sectionNames,section))throw Error("Unknown management section");
  const nav=Object.keys(sectionNames).map(k=>
   `<a href="/kt125/admin/panel/${k}"${k===section?' aria-current="page"':""}>${escapeHtml(sectionNames[k])}</a>`).join("");
@@ -64,21 +65,27 @@ export function renderKT125PrivatePage({section="overview",items=[],hasMore=fals
   if(typeof id!=="string"||!/^[A-Za-z0-9_-]{1,160}$/.test(id))return "<td>—</td>";
   return `<td><a href="/kt125/cases/${escapeHtml(id)}/manage">Виж правата</a></td>`;
  };
- const enrollment=section==="users"?`<div class="state"><strong>Регистрация на служител</strong>
- <p>Само за вече удостоверена служебна самоличност в Cloudflare Access. Въведете точния идентификатор (sub) от удостоверения служебен профил. Това не създава Cloudflare акаунт.</p>
- <form method="post" action="/kt125/admin/users/enroll">
- <label>Идентификатор на служителя (sub) <input name="subject" required maxlength="200" autocomplete="off" aria-label="Идентификатор на служителя"></label>
+ const enrollment=section==="users"?`<div class="state"><strong>Добавяне на потребител</strong>
+ <p>Запишете име, служебен имейл и роля. Профилът се активира, когато поканеният влезе със същия удостоверен имейл и потвърди регистрацията. Поканата е валидна 7 дни.</p>
+ <form method="post" action="/kt125/admin/users/invite">
+ <label>Име <input name="name" required maxlength="80" autocomplete="off" aria-label="Име"></label>
+ <label>Служебен имейл <input name="email" type="email" required maxlength="254" autocomplete="off" aria-label="Служебен имейл"></label>
  <label>Роля <select name="role" required><option value="expert">Експерт</option><option value="reviewer">Преглеждащ</option><option value="delegated_expert">Упълномощен експерт</option></select></label>
- <label><input type="checkbox" name="confirm" value="ENROLL" required> Потвърждавам служебната самоличност</label>
- <button type="submit">Добави служител</button></form>
+ <label><input type="checkbox" name="confirm" value="INVITE" required> Потвърждавам добавянето</label>
+ <button type="submit">Запиши покана</button></form>
+ <p>Поканата се записва тук; имейл не се изпраща автоматично. Служителят отваря общия <a href="/kt125/enrollment/activate">адрес за активиране</a>. Входът му трябва да е допуснат от служебната система за удостоверяване.</p>
  </div>`:"";
+ const invitationStates={pending:"Чака потвърждение",accepted:"Активирана",revoked:"Оттеглена",expired:"Изтекла"};
+ const pendingTable=section!=="users"?"":directoryUnavailable?
+  '<p class="state">Списъкът с покани временно не е достъпен. Не записвайте повторна покана, преди да проверите резултата.</p>':
+  `<h3>Покани</h3>${invitations.length?`<div class="tablewrap"><table><thead><tr><th>Име</th><th>Служебен имейл</th><th>Роля</th><th>Състояние</th><th>Валидна до</th><th>Управление</th></tr></thead><tbody>${invitations.slice(0,50).map(i=>`<tr><td>${escapeHtml(i.display_name)}</td><td>${escapeHtml(i.email)}</td><td>${escapeHtml(readable("role",i.role))}</td><td>${escapeHtml(invitationStates[i.status]||"Неизвестно")}</td><td>${escapeHtml(readable("expires_at_ms",i.expires_at_ms))}</td><td>${["pending","expired"].includes(i.status)&&/^[A-Za-z0-9_-]{1,160}$/.test(i.invitation_id)?`<form method="post" action="/kt125/admin/invitations/${escapeHtml(i.invitation_id)}/revoke"><label><input type="checkbox" name="confirm" value="REVOKE" required> Потвърждавам</label><button type="submit">Оттегли поканата</button></form>`:"—"}</td></tr>`).join("")}</tbody></table></div>`:'<p>Няма записани покани.</p>'}${invitationsHasMore?'<p>Показани са последните 50 покани.</p>':""}<h3>Регистрирани потребители</h3>`;
  const table=section==="overview"
   ?`<div class="state">Защитен служебен режим. Информацията за потребители, преписки и журнал се извлича само след проверка на самоличността и съответните права.</div>
   <p>ЕГМАСТЕР и администраторът не получават автоматичен достъп до съдържанието на преписките.</p>`
   :section==="roles"?roleMatrix
   :items.length
     ?`<div class="tablewrap"><table><thead><tr>${columns.map(([,label])=>`<th scope="col">${escapeHtml(label)}</th>`).join("")}${section==="users"?"<th scope=\"col\">Управление</th>":section==="cases"?"<th scope=\"col\">Права</th>":""}</tr></thead>
-    <tbody>${items.slice(0,50).map(r=>`<tr>${columns.map(([key])=>`<td>${escapeHtml(readable(key,r[key]))}</td>`).join("")}${section==="users"?disableAction(r):section==="cases"?caseGrantLink(r):""}</tr>`).join("")}</tbody></table></div>
+    <tbody>${items.slice(0,50).map(r=>`<tr>${columns.map(([key])=>`<td>${escapeHtml(readable(key,key==="user_id"?(r.display_name||r.user_id):r[key]))}</td>`).join("")}${section==="users"?disableAction(r):section==="cases"?caseGrantLink(r):""}</tr>`).join("")}</tbody></table></div>
     ${hasMore?'<p class="disabled">Показани са първите 50 записа. Разширеното търсене предстои.</p>':""}`
     :`<div class="state">Няма налични записи в този раздел.</div>`;
  return `<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -88,15 +95,23 @@ export function renderKT125PrivatePage({section="overview",items=[],hasMore=fals
  <small>Проверен служебен достъп · защитен регистър</small></header>
  <main><div class="notice">Показват се само разрешените служебни данни. Няма публичен достъп до преписки.</div>
  <div class="layout"><nav aria-label="Управление на достъпа">${nav}</nav>
- <section class="panel"><h2>${escapeHtml(sectionNames[section])}</h2>${enrollment}${table}
+ <section class="panel"><h2>${escapeHtml(sectionNames[section])}</h2>${enrollment}${pendingTable}${table}
  <p class="disabled">За промяна на права се изисква отделно потвърдено служебно действие. Данните не се записват в браузъра.</p>
  </section></div></main></body></html>`;
 }
-export function kt125PrivateHtmlResponse(content){
- return new Response(content,{status:200,headers:{
+export function kt125PrivateHtmlResponse(content,status=200){
+ return new Response(content,{status,headers:{
   "Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store, private",
   "X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY",
   "Referrer-Policy":"no-referrer",
   "Content-Security-Policy":"default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
  }});
 }
+export function kt125AccountFailure({activation=false,emailRequired=false,status=403}={}){
+ const message=activation?(emailRequired?
+  "Входът не предостави удостоверен служебен имейл. Използвайте разрешения служебен начин за вход.":
+  "Профилът не е активиран. Влезте с имейла от поканата. Ако отказът остане, администраторът трябва да провери дали поканата е валидна."):
+  "Поканата не е записана или променена. Проверете името, имейла, избраната роля и списъка с покани. Не подавайте повторно, преди да проверите резултата.";
+ return kt125PrivateHtmlResponse(`<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WOW · Служебна регистрация</title><style>${css}</style></head><body><header><h1>Служебна регистрация</h1></header><main><p class="state">${message}</p><a href="${activation?'/kt125/enrollment/activate':'/kt125/admin/panel/users'}">${activation?'Към потвърждаването':'Към потребителите'}</a></main></body></html>`,status);
+}
+

@@ -61,6 +61,16 @@ assert.equal(kt125CloudflareAccessConfigReady({
 assert.equal(kt125CloudflareAccessConfigReady({
  KT125_ACCESS_TEAM_DOMAIN:"https://attacker.example.com",KT125_ACCESS_AUD:audience
 }),false);
+const emailIdentity=await verifier.verify(req(jwt({type:"app",email:"STAFF@OFFICE.EXAMPLE.INVALID"})));
+assert.equal(emailIdentity.email,"staff@office.example.invalid");
+for(const payload of [{type:"org",email:"staff@office.example.invalid"},
+ {type:"app",email:"staff@office.example.invalid",email_verified:false},
+ {email:"staff@office.example.invalid"},{type:"app",email:"x@example.invalid\n"},
+ {type:"app",email:"*@example.invalid"}])
+ assert.equal((await verifier.verify(req(jwt(payload)))).email,undefined);
+const forgedEmail=jwt({type:"app",email:"outsider@example.invalid"}).split('.');
+forgedEmail[1]=base(JSON.stringify({...JSON.parse(Buffer.from(forgedEmail[1],'base64url').toString()),email:"staff@office.example.invalid"}));
+assert.equal((await verifier.verify(req(forgedEmail.join('.')))).verified,false);
 // Fresh issuers avoid the valid-key cache and exercise the actual fetch boundary.
 for(const status of [200,201,302]){
  const redirectIssuer="https://redirect-"+status+".cloudflareaccess.com";
@@ -77,3 +87,4 @@ for(const status of [200,201,302]){
   "Redirected or non-200 JWKS responses must be rejected");
 }
 console.log("PASS KT125 Cloudflare Access: RS256 signature, aud/iss/sub/time gates, JWKS cache, missing/mismatched/expired/forged JWT denied.");
+

@@ -42,7 +42,9 @@ assert.equal((await handler.fetch(submit({headers:{Origin:"https://attacker.inva
 assert.equal((await handler.fetch(submit(),env(db("expert")))).status,403);
 assert.equal((await handler.fetch(submit({method:"GET"}),env(db()))).status,405);
 const html=renderKT125PrivatePage({section:"users",items:[]});
-assert(html.includes('/kt125/admin/users/enroll'));
+assert(html.includes('/kt125/admin/users/invite'));
+assert(html.includes('name="name"')&&html.includes('name="email"'));
 assert(html.includes('value="expert"')&&html.includes('value="reviewer"'));
 assert(!html.includes('value="egmaster"')&&!html.includes('value="administrator"'));
 console.log("PASS KT125 protected staff enrollment: manager-only, same-origin, restricted roles, confirmation, atomic journal, fail closed.");
+
