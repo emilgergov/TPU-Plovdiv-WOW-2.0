@@ -11,10 +11,13 @@ assert(!risk.includes('<img'));
 assert(risk.includes('&lt;script&gt;'));
 assert(risk.includes("Управление на достъпа"));
 assert(risk.includes("Потребители"));
+assert(risk.includes('name="confirm" value="DEACTIVATE"'));
+assert(risk.includes('action="/kt125/admin/users/'));
 const response=kt125PrivateHtmlResponse(risk);
 assert.equal(response.headers.get("X-Frame-Options"),"DENY");
 assert.equal(response.headers.get("cache-control"),"no-store, private");
 assert(response.headers.get("content-security-policy").includes("default-src 'none'"));
+assert(response.headers.get("content-security-policy").includes("form-action 'self'"));
 assert(!risk.includes("localStorage")&&!risk.includes("fetch("));
 assert.throws(()=>renderKT125PrivatePage({section:"not-a-panel"}));
 
