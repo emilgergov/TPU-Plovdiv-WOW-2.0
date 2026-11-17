@@ -53,8 +53,8 @@ globalThis.fetch=async(_url,opts)=>{
   const law=key=>data.legalSources.find(s=>s.reference===(key==="A1"?"Приложение № 1 към ЗООС":key==="A2"?"Приложение № 2 към ЗООС":"чл. 2")&&(key.startsWith("OS")?s.act==="Наредба за ОС":true));
   const tests=["A1","A2","OS1","OS2"].map(key=>{
    const l=law(key);assert(l,"missing legal source: "+key);
-   return {key,status:statuses[key],legalReference:l.id,legalQuote:l.text.slice(0,130),
-    caseSource:"subject",caseQuote:subject.slice(0,70),
+   return {key,status:statuses[key],legalReference:l.id,legalQuote:l.excerpts[0].id,
+    caseSource:"subject",caseQuote:data.caseSources.find(x=>x.id==="subject").excerpts[0].id,
     criterion:"Проверка на конкретните правни предпоставки по приложимия нормативен режим",
     reason:reasons[key],comparedCategories:key.startsWith("A")?["Относими категории от приложението"]:[]};
   });
