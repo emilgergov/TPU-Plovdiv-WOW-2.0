@@ -10,6 +10,7 @@ import {recordKT125SecurityEvent} from "./security-audit.mjs";
 import {readKT125Management,readKT125CaseGrants,kt125ManagementPrincipal} from "./management-read.mjs";
 import {renderKT125PrivatePage,kt125PrivateHtmlResponse} from "./private-admin-page.mjs";
 import {disableKT125User} from "./user-lifecycle.mjs";
+import {enrollKT125Staff} from "./staff-enrollment.mjs";
 import {renderKT125GrantManagement} from "./grant-admin-page.mjs";
 
 const json=(data,status=200)=>new Response(JSON.stringify(data),{
@@ -23,6 +24,7 @@ const grantsRoute=new RegExp("^/kt125/cases/("+pathId+")/grants$");
 const revokeRoute=new RegExp("^/kt125/cases/("+pathId+")/grants/("+pathId+")$");
 const managementRoute=/^\/kt125\/admin\/(users|cases|audit)$/;
 const privatePanelRoute=/^\/kt125\/admin\/panel\/(overview|users|roles|cases|audit)$/;
+const enrollUserRoute=/^\/kt125\/admin\/users\/enroll$/;
 const disableUserRoute=new RegExp("^/kt125/admin/users/("+pathId+")/disable$");
 const manageGrantsRoute=new RegExp("^/kt125/cases/("+pathId+")/manage$");
 const issueFormRoute=new RegExp("^/kt125/cases/("+pathId+")/grants/form$");
@@ -52,10 +54,11 @@ export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid
   const management=url.pathname.match(managementRoute);
   const privatePanel=url.pathname.match(privatePanelRoute);
   const disableUser=url.pathname.match(disableUserRoute);
+  const enrollUser=enrollUserRoute.test(url.pathname);
   const manageGrants=url.pathname.match(manageGrantsRoute);
   const issueForm=url.pathname.match(issueFormRoute);
   const revokeForm=url.pathname.match(revokeFormRoute);
-  if(!access&&!issue&&!revoke&&!management&&!privatePanel&&!disableUser&&!manageGrants&&!issueForm&&!revokeForm)return json({error:"Неизвестен служебен маршрут."},404);
+  if(!access&&!issue&&!revoke&&!management&&!privatePanel&&!disableUser&&!enrollUser&&!manageGrants&&!issueForm&&!revokeForm)return json({error:"Неизвестен служебен маршрут."},404);
 
   const verifier=typeof getVerifier==="function"?getVerifier(env):
     createKT125CloudflareAccessVerifier({
@@ -109,6 +112,29 @@ export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid
    }
    return new Response(null,{status:303,headers:{
     Location:"/kt125/cases/"+caseId+"/manage","Cache-Control":"no-store"
+   }});
+  }
+  if(enrollUser&&request.method==="POST"){
+   if(!validPrivateMutationOrigin(request,env))return deny();
+   if(!/^application\\/x-www-form-urlencoded(?:\\s*;.*)?$/i.test(request.headers.get("Content-Type")||""))
+    return json({error:"Невалиден формат на заявката."},415);
+   if(Number(request.headers.get("content-length")||0)>600)return json({error:"Заявката е твърде голяма."},413);
+   let data;
+   try{
+    const raw=await request.text();
+    if(raw.length>600)return json({error:"Заявката е твърде голяма."},413);
+    data=new URLSearchParams(raw);
+   }catch{return json({error:"Невалидна заявка."},400)}
+   if([...data.keys()].length!==3||["subject","role","confirm"].some(k=>data.getAll(k).length!==1)||
+      data.get("confirm")!=="ENROLL")
+    return json({error:"Необходимо е изрично потвърждение."},400);
+   const result=await enrollKT125Staff({
+    request,verifier,db:env.KT125_DB,providerSubject:data.get("subject"),
+    role:data.get("role"),nowMs:clock(),uuid
+   });
+   if(!result.ok)return deny();
+   return new Response(null,{status:303,headers:{
+    Location:"/kt125/admin/panel/users","Cache-Control":"no-store"
    }});
   }
   if(disableUser&&request.method==="POST"){
