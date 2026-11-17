@@ -3,7 +3,7 @@ const worker=(await import(new URL('../src/worker.js',import.meta.url))).default
 const oldFetch=globalThis.fetch;
 const ACCESS='integration-token';
 const SHA='8d3851affd72fb44b4d663920196e00ec317c8e45d36fc16c6ad6b0ce965226c';
-const env={OPENAI_API_KEY:'mock-no-paid-api',AI_AUTHOR_ACCESS_TOKEN:ACCESS};
+const env={OPENAI_API_KEY:'mock-no-paid-api',AI_AUTHOR_ACCESS_TOKEN:ACCESS,KT123_TEST_LEGACY_MODE:'true'};
 const scenarios=[
  {name:'А — без пресичане',caseId:'KT105-A-001',parcel:'56784.13.102',gis:'OUTSIDE',source:'A-notification.pdf',description:'склад и офис'},
  {name:'Б — защитена зона',caseId:'KT105-B-002',parcel:'36676.129.457',gis:'INSIDE_N2000',source:'B-notification.pdf',description:'производствено помещение'},
