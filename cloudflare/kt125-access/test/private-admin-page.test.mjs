@@ -23,6 +23,8 @@ assert(!risk.includes('name="subject"'),"The operator must not enter a provider 
 const response=kt125PrivateHtmlResponse(risk);
 assert.equal(response.headers.get("X-Frame-Options"),"DENY");
 assert.equal(response.headers.get("cache-control"),"no-store, private");
+assert.equal(response.headers.get("referrer-policy"),"same-origin",
+ "Native HTML POST forms must retain their real Origin, without cross-origin referrer disclosure");
 assert(response.headers.get("content-security-policy").includes("default-src 'none'"));
 assert(response.headers.get("content-security-policy").includes("form-action 'self'"));
 assert(!risk.includes("localStorage")&&!risk.includes("fetch("));
@@ -58,6 +60,7 @@ const req=(path,token="verified")=>new Request("https://private.example.invalid"
 for(const section of ["overview","users","roles","cases","audit"]){
  let r=await handler.fetch(req("/kt125/admin/panel/"+section),{...env,KT125_DB:db()});
  assert.equal(r.status,200,section);
+ assert.equal(r.headers.get("referrer-policy"),"same-origin",section);
  const html=await r.text();
  assert(html.includes("Управление на достъпа"));
  assert(!html.includes("SECRET"));

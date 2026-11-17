@@ -133,6 +133,7 @@ try{
  for(const body of [good+'&email=other%40example.invalid',good+'&subject=forged-sub',good+'&confirm=INVITE',good.replace('reviewer','administrator')])
   assert.notEqual((await handler.fetch(post(body),env)).status,303);
  assert.equal((await handler.fetch(post(good,{Origin:'https://attacker.invalid'}),env)).status,403);
+ assert.equal((await handler.fetch(post(good,{Origin:'null'}),env)).status,403,'Opaque origins remain forbidden');
  assert.equal((await handler.fetch(post(good,{'Cf-Access-Jwt-Assertion':'forged','Cf-Access-Authenticated-User-Email':'manager@example.invalid'}),env)).status,403);
  assert.equal((await handler.fetch(post('x'.repeat(1801)),env)).status,413);
  principals.route={verified:true,issuer,subject:'route-sub',email:'route@example.invalid'};
@@ -141,6 +142,7 @@ try{
  assert.equal((await handler.fetch(activation,env)).status,200);
  const page=await handler.fetch(new Request(origin+'/kt125/admin/panel/users',{headers:{'Cf-Access-Jwt-Assertion':'manager'}}),env);
  const html=await page.text();assert.equal(page.status,200);assert(html.includes('test1234'));assert(html.includes('staff@office.example.invalid'));
+ assert.equal(page.headers.get('referrer-policy'),'same-origin','Real form page must not null its POST Origin');
  assert(!html.includes('name="subject"'));assert(!html.includes('(sub)'));
  const escaped=renderKT125PrivatePage({section:'users',invitations:[{invitation_id:'valid',display_name:'<img src=x>',email:'<script>',role:'expert',status:'pending',expires_at_ms:now}]});
  assert(!escaped.includes('<img'));assert(!escaped.includes('<script>'));

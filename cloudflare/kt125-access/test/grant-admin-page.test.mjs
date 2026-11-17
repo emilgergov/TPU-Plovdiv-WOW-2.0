@@ -51,6 +51,7 @@ assert(html.includes('name="confirm" value="REVOKE"'));
 assert(html.includes("Предостави достъп"));
 assert(!html.includes("<script"));
 assert.equal(result.headers.get("cache-control"),"no-store, private");
+assert.equal(result.headers.get("referrer-policy"),"same-origin");
 
 for(const options of [{role:"administrator",userId:"admin"},{role:"egmaster",userId:"master"},
  {role:"expert",userId:"owner",status:"archived"}]){
@@ -102,3 +103,4 @@ const hostile=renderKT125GrantManagement({caseId:"case-a",ownerId:"owner",status
 assert(!hostile.includes("<img"));
 assert(!hostile.includes("case.delegate"));
 console.log("PASS KT125-VT02.2: owner-only private forms, exact confirmations, 7-day scope, revocation, manager read-only, malformed/foreign requests denied.");
+

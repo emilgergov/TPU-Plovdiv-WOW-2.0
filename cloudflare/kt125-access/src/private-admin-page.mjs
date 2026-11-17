@@ -103,7 +103,9 @@ export function kt125PrivateHtmlResponse(content,status=200){
  return new Response(content,{status,headers:{
   "Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store, private",
   "X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY",
-  "Referrer-Policy":"no-referrer",
+  // HTML form navigation under no-referrer serializes Origin as null.
+  // same-origin retains the strict POST origin check and sends no cross-origin Referer.
+  "Referrer-Policy":"same-origin",
   "Content-Security-Policy":"default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
  }});
 }

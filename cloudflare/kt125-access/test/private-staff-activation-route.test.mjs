@@ -27,6 +27,8 @@ assert.equal((await handler.fetch(req({headers:{Origin:"https://attacker.invalid
 assert.equal((await handler.fetch(req({token:"forged"}),env)).status,403);
 const screen=await handler.fetch(req({method:"GET"}),env);
 assert.equal(screen.status,200);
+assert.equal(screen.headers.get("referrer-policy"),"same-origin");
 assert((await screen.text()).includes("Активирай моя профил"));
 assert.equal((await handler.fetch(req({method:"DELETE"}),env)).status,405);
 console.log("PASS KT125 staff activation route: identity, same origin, confirmation and no unsafe method.");
+
