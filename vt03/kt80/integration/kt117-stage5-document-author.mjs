@@ -104,7 +104,7 @@ function initialize(){
    caseId:source.caseId,evidenceRevision:source.evidenceRevision,stage4Version:source.version,requestId,
    confirmedStage4Text:source.text,selectedPanelLine:line,subject:clean(p.text),scope:clean(p.scope),
    parcelIds:[...ev.parcelIds],warnings:source.warnings||[],
-    qualificationRecord:source.qualificationRecord||null,qualificationGate:source.qualificationGate||null,
+    qualificationRecord:source.qualificationRecord||null,qualificationProof:source.qualificationProof||null,qualificationGate:source.qualificationGate||null,
    documentTitle:documentLabel(line),incomingReference:incomingReference()};
   busy=true;generate.disabled=true;note.textContent='EG Авторът изготвя проект на административния текст.';
   const activityTicket=window.KT80Busy?.start?.('EG Автор · Изготвя проекта на административния документ…');
@@ -113,7 +113,7 @@ function initialize(){
    const data=await res.json().catch(()=>({}));
    if(!live()||live()?.text!==source.text||live()?.version!==source.version){note.textContent='Данните на преписката са променени. Отговорът не е използван.';return;}
    if(!res.ok){
-    const legalIssue=res.status===422&&['STAGE5_DIRECTION_CONFLICT','UNSUPPORTED_CATEGORICAL_CONCLUSION','STAGE4_LEGAL_MATRIX_CONFLICT','STAGE4_DECISION_MODEL_CONFLICT'].includes(data.error);
+    const legalIssue=res.status===422&&['STAGE5_DIRECTION_CONFLICT','UNSUPPORTED_CATEGORICAL_CONCLUSION','STAGE4_LEGAL_MATRIX_CONFLICT','STAGE4_DECISION_MODEL_CONFLICT','STAGE4_SOURCE_PROOF_MISSING','STAGE4_QUALIFICATION_CHANGED'].includes(data.error);
     const diagnostic=(Array.isArray(data.findings)?data.findings:[]).slice(0,4).map(f=>
      String(f.test||'Предпоставка')+': '+String(f.actual||'неустановена')+
      (f.requiredForDirection?' · необходимо за избраното направление: '+f.requiredForDirection:'')+
