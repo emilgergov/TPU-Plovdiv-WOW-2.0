@@ -502,8 +502,21 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 .kt80-stage-panel[data-panel="5"]>#kt80ProposalInfo,
 .kt80-stage-panel[data-panel="5"]>#kt80ReviewSummary,
 .kt80-stage-panel[data-panel="5"]>label.kt80-check:has(#kt80RouteConfirmation){display:none!important}
-</style><link rel="stylesheet" href="integration/kt122-unified-visual.css?v=kt123-b2-20261116"></head><body>
-<header><div><h1>WOW · Административен пътеводител</h1><small>Изолиран експертен тест · нормативните и ГИС резултати изискват доказателствена проверка</small></div><div class="kt80-header-actions"><button id="kt80ClearAll" type="button" aria-haspopup="dialog" aria-controls="kt80ResetDialog" aria-expanded="false">↺ Изчисти всичко</button><a class="kt80-legacy-float" href="legacy/KT80_V27_35_REFERENCE_CAPSULE_V10.html" title="Портал към началото на WOW — запазената работеща версия V27.35, отваря се в нов прозорец" target="_blank" rel="noopener">✦ Портал към историята · V27.35 ↗</a></div></header>
+</style><link rel="stylesheet" href="integration/kt122-unified-visual.css?v=kt123-b2-20261116"><style id="kt125-access-launcher-style">
+/* KT125 isolated management launcher; original V27.35 bridge remains untouched. */
+#kt125AccessLauncher{display:none}
+body[data-kt80-view="home"] #kt125AccessLauncher{
+ display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+ background:#234c3b;color:#f6e3b0;border:1px solid #b7a16b;
+ border-radius:9px;padding:10px 13px;text-decoration:none;
+ font:700 13px/1.3 Verdana,Arial,sans-serif;
+ box-shadow:inset 0 0 0 1px #3a6650,0 2px 8px #0004;
+}
+body[data-kt80-view="home"] #kt125AccessLauncher:hover{background:#32664f}
+#kt125AccessLauncher:focus-visible{outline:3px solid #f4d48f;outline-offset:3px}
+body:has(#overlay.open) #kt125AccessLauncher{display:none!important}
+</style></head><body>
+<header><div><h1>WOW · Административен пътеводител</h1><small>Изолиран експертен тест · нормативните и ГИС резултати изискват доказателствена проверка</small></div><div class="kt80-header-actions"><button id="kt80ClearAll" type="button" aria-haspopup="dialog" aria-controls="kt80ResetDialog" aria-expanded="false">↺ Изчисти всичко</button><a class="kt80-legacy-float" href="legacy/KT80_V27_35_REFERENCE_CAPSULE_V10.html" title="Портал към началото на WOW — запазената работеща версия V27.35, отваря се в нов прозорец" target="_blank" rel="noopener">✦ Портал към историята · V27.35 ↗</a><a id="kt125AccessLauncher" href="kt125/ACCESS_ADMIN_KT125.html" target="_blank" rel="noopener" title="Управление на достъпа (КТ125) — отваря отделен служебен екран за преглед, без включени реални права">⚙ Управление на достъпа</a></div></header>
 <section id="kt80Dashboard" class="kt80-dashboard" aria-labelledby="kt80DashboardTitle">
 <div class="kt80-dashboard-intro">
 <h2 id="kt80DashboardTitle">Административен пътеводител · Изберете работен панел</h2>
