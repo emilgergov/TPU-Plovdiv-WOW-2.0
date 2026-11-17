@@ -5,32 +5,82 @@
 import {createKT125CloudflareAccessVerifier,kt125CloudflareAccessConfigReady}
  from "./cloudflare-access-verifier.mjs";
 import {authorizeKT125CaseRequest,kt125PublicDenialResponse} from "./server-guard.mjs";
+import {issueKT125Grant,revokeKT125Grant} from "./grant-commands.mjs";
+
 const json=(data,status=200)=>new Response(JSON.stringify(data),{
  status,headers:{"Content-Type":"application/json; charset=utf-8",
  "Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}
 });
 const deny=()=>kt125PublicDenialResponse();
-const ident=v=>typeof v==="string"&&/^[a-zA-Z0-9_-]{1,160}$/.test(v);
-export function createKT125PrivateHandler({getVerifier}={}){
+const pathId="[A-Za-z0-9_-]{1,160}";
+const accessRoute=new RegExp("^/kt125/cases/("+pathId+")/access$");
+const grantsRoute=new RegExp("^/kt125/cases/("+pathId+")/grants$");
+const revokeRoute=new RegExp("^/kt125/cases/("+pathId+")/grants/("+pathId+")$");
+
+function validPrivateMutationOrigin(request,env){
+ try{
+  const expected=new URL(env.KT125_PRIVATE_ORIGIN);
+  const actual=new URL(request.url);
+  if(expected.protocol!=="https:"||expected.origin!==env.KT125_PRIVATE_ORIGIN||
+     expected.origin!==actual.origin)return false;
+  if(request.headers.get("Origin")!==expected.origin)return false;
+  const site=request.headers.get("Sec-Fetch-Site");
+  if(site&&site!=="same-origin")return false;
+  return true;
+ }catch{return false}
+}
+export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid=()=>crypto.randomUUID()}={}){
  return {async fetch(request,env){
   if(!env?.KT125_DB||!kt125CloudflareAccessConfigReady(env))
    return json({error:"Служебният достъп не е конфигуриран."},503);
   const url=new URL(request.url);
-  if(request.method!=="GET")return json({error:"Методът не е разрешен."},405);
-  const match=url.pathname.match(/^\/kt125\/cases\/([A-Za-z0-9_-]{1,160})\/access$/);
-  if(!match)return json({error:"Неизвестен служебен маршрут."},404);
-  if(url.search)return deny(); // Never mix case identity with query overrides.
+  if(url.search)return deny();
+  const access=url.pathname.match(accessRoute);
+  const issue=url.pathname.match(grantsRoute);
+  const revoke=url.pathname.match(revokeRoute);
+  if(!access&&!issue&&!revoke)return json({error:"Неизвестен служебен маршрут."},404);
+
   const verifier=typeof getVerifier==="function"?getVerifier(env):
     createKT125CloudflareAccessVerifier({
      teamDomain:env.KT125_ACCESS_TEAM_DOMAIN,audience:env.KT125_ACCESS_AUD
     });
-  const permission=await authorizeKT125CaseRequest({
-   request,identityVerifier:verifier,db:env.KT125_DB,action:"case.read",
-   caseId:match[1],nowMs:Date.now()
-  });
-  if(!permission.allowed)return deny();
-  // Permission check only: no personal, case or administrative data is returned.
-  return json({allowed:true,caseId:match[1],action:"case.read"});
+  if(access&&request.method==="GET"){
+   const permission=await authorizeKT125CaseRequest({
+    request,identityVerifier:verifier,db:env.KT125_DB,action:"case.read",
+    caseId:access[1],nowMs:clock()
+   });
+   if(!permission.allowed)return deny();
+   return json({allowed:true,caseId:access[1],action:"case.read"});
+  }
+  if((issue&&request.method==="POST")||(revoke&&request.method==="DELETE")){
+   if(!validPrivateMutationOrigin(request,env))return deny();
+   if(typeof env.KT125_DB.batch!=="function")
+    return json({error:"Регистърът не е готов за транзакции."},503);
+   if(issue){
+    if(!/^application\/json(?:\s*;.*)?$/i.test(request.headers.get("Content-Type")||""))
+     return json({error:"Невалиден формат на заявката."},415);
+    if(Number(request.headers.get("content-length")||0)>4096)
+     return json({error:"Заявката е твърде голяма."},413);
+    let body;
+    try{
+     const raw=await request.text();
+     if(raw.length>4096)return json({error:"Заявката е твърде голяма."},413);
+     body=JSON.parse(raw);
+    }catch{return json({error:"Невалидна заявка."},400)}
+    if(!body||Array.isArray(body)||typeof body!=="object")return json({error:"Невалидна заявка."},400);
+    const result=await issueKT125Grant({request,verifier,db:env.KT125_DB,
+     caseId:issue[1],granteeId:body.granteeId,actions:body.actions,
+     notBeforeMs:body.notBeforeMs,expiresAtMs:body.expiresAtMs,
+     nowMs:clock(),uuid});
+    if(!result.ok)return deny();
+    return json({grantId:result.grantId},201);
+   }
+   const result=await revokeKT125Grant({request,verifier,db:env.KT125_DB,
+     caseId:revoke[1],grantId:revoke[2],nowMs:clock(),uuid});
+   if(!result.ok)return deny();
+   return json({revoked:true,grantId:result.grantId});
+  }
+  return json({error:"Методът не е разрешен."},405);
  }};
 }
 export default createKT125PrivateHandler();
