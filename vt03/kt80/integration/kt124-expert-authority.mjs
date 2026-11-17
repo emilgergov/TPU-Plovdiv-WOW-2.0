@@ -8,7 +8,7 @@ const x=v=>String(v??'').trim();
 const mk=(t,body)=>{const el=document.createElement(t);if(body!==undefined)el.textContent=body;return el};
 const select=(options)=>{const el=mk('select');for(const [value,label] of options){const opt=mk('option',label);opt.value=value;el.append(opt)}return el};
 function boot(){
- const host=document.getElementById('kt96EGAuthor');if(!host||document.getElementById('kt124ExpertPanel'))return;
+ const host=document.getElementById('kt96EGAuthor');if(!host)return false;if(document.getElementById('kt124ExpertPanel'))return true;
  let caseRecord=null,pending=false,confirmed=false;
  const root=mk('section');root.id='kt124ExpertPanel';
  root.style.cssText='font:14px/1.5 Verdana,Arial;color:#f7f2e5;margin:15px 0;padding:15px;border:1px solid #bca36c;border-radius:8px;background:#173a2b';
@@ -108,5 +108,7 @@ function boot(){
   finally{pending=false;action.disabled=false}
  };
  ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'].forEach(name=>document.addEventListener(name,clear));
+ return true;
 }
-setTimeout(boot,2700);
+let attempts=0;function attach(){if(boot())return;if(++attempts<20)setTimeout(attach,500)}
+setTimeout(attach,2700);
