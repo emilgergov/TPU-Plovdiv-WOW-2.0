@@ -43,7 +43,14 @@ export async function readKT125Management({request,verifier,db,section}={}){
  }catch{return error("REGISTRY_UNAVAILABLE")}
  if(!Array.isArray(rows?.results))return error("REGISTRY_UNAVAILABLE");
  // No unbounded dump, no cross-org metadata, no arbitrary caller-supplied SQL.
- const data=rows.results.slice(0,50).map(r=>({...r}));
+ const fields=section==="users"
+  ?["user_id","role","active","created_at_ms","updated_at_ms"]
+  :section==="cases"
+   ?["case_id","owner_id","status","created_at_ms","updated_at_ms"]
+   :["event_id","case_id","actor_id","action","outcome","timestamp_ms","request_id"];
+ const data=rows.results.slice(0,50).map(r=>Object.fromEntries(
+  fields.map(k=>[k,r[k]??null])
+ ));
  return success({section,items:data,hasMore:rows.results.length>50});
 }
 export async function readKT125CaseGrants({request,verifier,db,caseId}={}){
