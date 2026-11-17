@@ -371,6 +371,7 @@ function boot(){
    document.dispatchEvent(new CustomEvent('kt115:stage4-draft',{detail:{
     caseId:identity.caseId,evidenceRevision:h.evidenceRevision,requestId,
     sourceDraft:str(data.draft),warnings:[],qualityPassed:true,
+    qualificationRecord:data.qualificationRecord||null,qualificationGate:data.qualificationGate||null,
     originalCaseSignature:identity.signature,caseIdType:identity.caseIdType
    }}));
    button.textContent='Преработи проект с EG Автора';
