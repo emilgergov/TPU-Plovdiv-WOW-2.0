@@ -8,6 +8,14 @@ if(host&&five){
  const style=mk('style');
  style.textContent='#kt116Editor{font:14px/1.55 Verdana,Arial;color:#f9f3e1;margin:16px 0}#kt116Editor h3{font:bold 19px Verdana;color:#efd18f}#kt116Editor h4{font:bold 15px Verdana;color:#f3d08c;margin:22px 0 8px;border-bottom:1px solid #739078;padding:0 0 8px}#kt116Editor p{white-space:pre-wrap;margin:8px 0 15px}#kt116Editor .paper{background:#244a38;padding:17px;border-radius:7px}#kt116Editor .actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}#kt116Editor button,#kt116Stage5 button{background:#d9b874;color:#143b29;border:0;border-radius:7px;padding:11px 15px;font:bold 13px Verdana;cursor:pointer}#kt116Editor button[hidden],#kt116Editor [hidden]{display:none!important}#kt116Editor textarea{width:100%;box-sizing:border-box;min-height:350px;font:13px/1.6 Verdana;padding:12px;color:#132e24;background:#fffdf6}#kt116Editor input{padding:10px;color:#173929;background:#fffdf8}#kt116Editor .note{color:#f0d296;font-size:12px}#kt116Stage5{padding:16px;color:#f7f0dc;background:#193a2b;font:14px/1.6 Verdana}#kt116Stage5 h3,#kt116Stage5 h4{color:#f3ce82}#kt116Stage5 pre{white-space:pre-wrap;font:13px/1.6 Verdana;background:#284938;padding:14px;max-height:550px;overflow:auto}.kt80-stage-panel[data-panel="5"]>:not(#kt116Stage5){display:none!important}';
  document.head.append(style);
+ const emphasisStyle=mk('style');
+ emphasisStyle.textContent=`
+ #kt116Editor .kt124-key-finding{margin:22px 0;padding:16px 19px;border-left:5px solid #e15e58;border-radius:5px;background:#32483b}
+ #kt116Editor .kt124-key-finding .kt124-key-heading{color:#ff9189;font:bold 19px/1.4 Verdana,Arial;margin:0 0 11px;padding:0 0 9px;border-bottom:1px solid #ad6965;letter-spacing:.15px}
+ #kt116Editor .kt124-key-finding .kt124-key-value{color:#fff0de;font:700 16px/1.55 Verdana,Arial;margin:0;white-space:pre-wrap}
+ `;
+ document.head.append(emphasisStyle);
+
  const ui=mk('section');ui.id='kt116Editor';ui.hidden=true;
  const header=mk('h3','Предложение за експертна преценка'),alerts=mk('details'),alertContent=mk('div');
  alerts.append(mk('summary','Бележки от нормативната проверка'),alertContent);
@@ -136,7 +144,17 @@ if(host&&five){
   const normalized=content.replace(/\n(?=(?:ПРИЛОЖЕНИЕ № [12]|ЧЛ\. 2, АЛ\. [12]|ВОДЕЩО ПРЕДЛОЖЕНИЕ|ИЗБРАН ПАНЕЛ|ЗАЩО ТОЗИ ПАНЕЛ|ЗАЩО НЕ АЛТЕРНАТИВИТЕ|Фактическа основа|Нормативни предпоставки и граници|Мотивирано предложение|Данни за експертна проверка))/giu,'\n\n');
   for(const chunk of normalized.split(/\n\s*\n/)){
    const t=val(chunk);if(!t)continue;const m=t.match(titlePattern);
-   if(m){container.append(mk('h4',m[1]));const rest=val(t.slice(m[0].length));if(rest)container.append(mk('p',rest));}
+   if(m){
+    const emphasis=/^(?:ВОДЕЩО ПРЕДЛОЖЕНИЕ|ИЗБРАН ПАНЕЛ)$/iu.test(m[1]);
+    const section=emphasis?mk('section'):container;
+    if(emphasis)section.className='kt124-key-finding';
+    const heading=mk('h4',m[1]);
+    if(emphasis)heading.className='kt124-key-heading';
+    section.append(heading);
+    const rest=val(t.slice(m[0].length));
+    if(rest){const paragraph=mk('p',rest);if(emphasis)paragraph.className='kt124-key-value';section.append(paragraph);}
+    if(emphasis)container.append(section);
+   }
    else container.append(mk('p',t));
   }
  }
