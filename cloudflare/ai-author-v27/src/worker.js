@@ -2,7 +2,7 @@ import {getLegalContext} from "./legal-v11-loader.mjs";
 import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 import {evaluateDraft} from "./kt123-decision-model.mjs";
 import {substantiveDraftIssues} from "./kt123-substance-guard.mjs";
-import {QUALIFICATION_SCHEMA,QUALIFICATION_SYSTEM,buildQualificationSources,validateQualification,compareDraftWithQualification} from "./kt123-evidence-qualification.mjs";
+import {QUALIFICATION_SCHEMA,QUALIFICATION_SYSTEM,buildQualificationSources,qualificationEvidenceOptions,validateQualification,compareDraftWithQualification} from "./kt123-evidence-qualification.mjs";
 import {signQualification,verifyQualification} from "./kt123-handoff-signature.mjs";
 // TPU Plovdiv AI Author V27 — isolated test-only authoring gateway.
 // Never send an OpenAI key to the browser. Authorization is fail-closed.
@@ -386,9 +386,10 @@ async function handleStage4Proposal(request,env){
   provenanceRule:"All document excerpts, semantic candidates and GIS previews require explicit individual verification. Do not promote them to established fact."};
  let lockedQualification=null,qualificationValidation=null;
  const qualificationSources=buildQualificationSources({subject:payload.subject,scope:payload.scope,confirmed,documents:sourceTexts,legalProvisions:verifiedLegalCorpus.legalProvisions});
+ const exactSnippets=qualificationEvidenceOptions(qualificationSources);
  const qualificationInput={
-  caseSources:qualificationSources.facts.map(x=>({id:x.id,text:x.text.slice(0,16000),established:x.established,kind:x.kind,title:x.title||""})),
-  legalSources:qualificationSources.laws.map(x=>({id:x.id,reference:x.reference,act:x.act,text:x.text,verified:x.verified})),
+  caseSources:exactSnippets.facts.map(x=>({id:x.id,text:x.text.slice(0,16000),excerpts:x.excerpts,established:x.established,kind:x.kind,title:x.title||""})),
+  legalSources:exactSnippets.laws.map(x=>({id:x.id,reference:x.reference,act:x.act,text:x.text,excerpts:x.excerpts,verified:x.verified})),
   routeCatalog:KT109_ROUTE_CATALOG,
   evidenceRule:"Case excerpts are attributed sources, not independently confirmed legal truth."
  };
@@ -412,7 +413,14 @@ async function handleStage4Proposal(request,env){
    };
    let q=await callQualification(),v=validateQualification(q,qualificationSources);
    if(!v.ok){
-    const candidate=await callQualification(v.errors),checked=validateQualification(candidate,qualificationSources);
+    const candidate=await callQualification(v.errors.map(code=>({
+     error:code,
+     instruction:code.startsWith("UNVERIFIED_LEGAL_QUOTE")||code.startsWith("UNVERIFIED_CASE_QUOTE")?
+       "Използвай точен excerpts[].id от същия източник. Не създавай свободен текст на цитат.":
+       code.startsWith("WRONG_ANNEX_REFERENCE")?
+       "Използвай правния източник law:N с reference точно Приложение № 1 към ЗООС или Приложение № 2 към ЗООС според теста.":
+       "Свери основанията и не въвеждай недоказано предположение."
+    }))),checked=validateQualification(candidate,qualificationSources);
     if(checked.ok){q=candidate;v=checked}
    }
    if(!v.ok)return reply({
