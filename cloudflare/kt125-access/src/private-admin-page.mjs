@@ -3,7 +3,7 @@
  * Deliberately no scripts or browser-held credentials. Only preauthorized
  * metadata from management-read.mjs is passed here.
  */
-const escapeHtml=v=>String(v??"").replace(/[&<>"']/g,
+export const escapeHtml=v=>String(v??"").replace(/[&<>"']/g,
  c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const sectionNames=Object.freeze({
  overview:"Общ преглед",users:"Потребители",roles:"Роли и права",cases:"Преписки",audit:"Журнал"
@@ -13,7 +13,7 @@ const headers=Object.freeze({
  cases:[["case_id","Вътрешен идентификатор"],["owner_id","Водещ експерт"],["status","Състояние"],["updated_at_ms","Последна промяна"]],
  audit:[["event_id","Събитие"],["case_id","Преписка"],["actor_id","Извършител"],["action","Действие"],["outcome","Резултат"],["timestamp_ms","Време"]]
 });
-const css=`:root{color-scheme:dark;font:14px/1.5 Verdana,Arial,sans-serif;background:#0b271d;color:#f5f0de}
+export const kt125PageCss=`:root{color-scheme:dark;font:14px/1.5 Verdana,Arial,sans-serif;background:#0b271d;color:#f5f0de}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 95% 0,#24563e,transparent 45%),#0b271d}
 main{max-width:1380px;margin:auto;padding:18px}
 header{background:#09221a;border-bottom:1px solid #aa8d52;padding:15px max(16px,calc((100vw - 1380px)/2));}
@@ -29,6 +29,12 @@ p{color:#e0eade}.tablewrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
 form{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 form label{font-size:12px}
+form input[name="name"],form input[name="email"]{display:block;width:min(100%,440px);min-width:280px;font:inherit;padding:9px 10px;border:1px solid #799079;border-radius:6px;background:#092b20;color:#f5f0de}
+form .wide-field{flex:1 1 340px;min-width:0}
+form .wide-field input{width:100%;max-width:none;min-width:0}
+textarea{display:block;width:100%;min-height:120px;resize:vertical;font:inherit;padding:10px;border:1px solid #799079;border-radius:6px;background:#092b20;color:#f5f0de}
+form .full-field{flex:1 0 100%}.request-note{white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:500px){form input[name="name"],form input[name="email"]{min-width:0;width:100%}}
 form button{background:#d9b771;border:1px solid #f0ce8a;color:#153828;border-radius:6px;padding:7px 10px;font:700 12px Verdana,Arial;cursor:pointer}
 form button:focus-visible{outline:3px solid #f3db9b;outline-offset:2px}td,th{text-align:left;padding:10px;border-bottom:1px solid #56745e;vertical-align:top;overflow-wrap:anywhere}
 th{background:#28533e;color:#f5d99a}
@@ -42,7 +48,7 @@ const readable=(key,value)=>{
  if(key.endsWith("_ms")&&Number.isSafeInteger(value))return new Date(value).toLocaleString("bg-BG",{timeZone:"Europe/Sofia"});
  return String(value??"—");
 };
-export function renderKT125PrivatePage({section="overview",items=[],hasMore=false,invitations=[],invitationsHasMore=false,directoryUnavailable=false}={}){
+export function renderKT125PrivatePage({section="overview",items=[],hasMore=false,invitations=[],invitationsHasMore=false,directoryUnavailable=false,accessRequests=[],requestsUnavailable=false,requestsHasMore=false,mailConfigured=false}={}){
  if(!Object.hasOwn(sectionNames,section))throw Error("Unknown management section");
  const nav=Object.keys(sectionNames).map(k=>
   `<a href="/kt125/admin/panel/${k}"${k===section?' aria-current="page"':""}>${escapeHtml(sectionNames[k])}</a>`).join("");
@@ -68,8 +74,8 @@ export function renderKT125PrivatePage({section="overview",items=[],hasMore=fals
  const enrollment=section==="users"?`<div class="state"><strong>Добавяне на потребител</strong>
  <p>Запишете име, служебен имейл и роля. Профилът се активира, когато поканеният влезе със същия удостоверен имейл и потвърди регистрацията. Поканата е валидна 7 дни.</p>
  <form method="post" action="/kt125/admin/users/invite">
- <label>Име <input name="name" required maxlength="80" autocomplete="off" aria-label="Име"></label>
- <label>Служебен имейл <input name="email" type="email" required maxlength="254" autocomplete="off" aria-label="Служебен имейл"></label>
+ <label class="wide-field">Име <input name="name" required maxlength="80" autocomplete="off" aria-label="Име"></label>
+ <label class="wide-field">Служебен имейл <input name="email" type="email" required maxlength="254" autocomplete="off" aria-label="Служебен имейл"></label>
  <label>Роля <select name="role" required><option value="expert">Експерт</option><option value="reviewer">Преглеждащ</option><option value="delegated_expert">Упълномощен експерт</option></select></label>
  <label><input type="checkbox" name="confirm" value="INVITE" required> Потвърждавам добавянето</label>
  <button type="submit">Запиши покана</button></form>
@@ -79,6 +85,9 @@ export function renderKT125PrivatePage({section="overview",items=[],hasMore=fals
  const pendingTable=section!=="users"?"":directoryUnavailable?
   '<p class="state">Списъкът с покани временно не е достъпен. Не записвайте повторна покана, преди да проверите резултата.</p>':
   `<h3>Покани</h3>${invitations.length?`<div class="tablewrap"><table><thead><tr><th>Име</th><th>Служебен имейл</th><th>Роля</th><th>Състояние</th><th>Валидна до</th><th>Управление</th></tr></thead><tbody>${invitations.slice(0,50).map(i=>`<tr><td>${escapeHtml(i.display_name)}</td><td>${escapeHtml(i.email)}</td><td>${escapeHtml(readable("role",i.role))}</td><td>${escapeHtml(invitationStates[i.status]||"Неизвестно")}</td><td>${escapeHtml(readable("expires_at_ms",i.expires_at_ms))}</td><td>${["pending","expired"].includes(i.status)&&/^[A-Za-z0-9_-]{1,160}$/.test(i.invitation_id)?`<form method="post" action="/kt125/admin/invitations/${escapeHtml(i.invitation_id)}/revoke"><label><input type="checkbox" name="confirm" value="REVOKE" required> Потвърждавам</label><button type="submit">Оттегли поканата</button></form>`:"—"}</td></tr>`).join("")}</tbody></table></div>`:'<p>Няма записани покани.</p>'}${invitationsHasMore?'<p>Показани са последните 50 покани.</p>':""}<h3>Регистрирани потребители</h3>`;
+ const requestStates={pending:"Чака одобрение",approved:"Одобрена",rejected:"Отказана"};
+ const mailStates={queued:"Чака изпращане",sending:"Изпращането се проверява",accepted:"Приета за изпращане",failed:"Не е изпратена"};
+ const requestTable=section!=="users"?"":`<h3>Заявки за достъп</h3>${mailConfigured?"":'<p class="state">Автоматичното изпращане на покани по имейл още не е настроено. Одобрените покани остават в изчакване за изпращане.</p>'}${requestsUnavailable?'<p class="state">Заявките временно не са достъпни.</p>':accessRequests.length?`<div class="tablewrap"><table><thead><tr><th>Име и имейл</th><th>Забележка</th><th>Състояние</th><th>Решение</th></tr></thead><tbody>${accessRequests.slice(0,50).map(r=>`<tr><td>${escapeHtml(r.display_name)}<br>${escapeHtml(r.email)}</td><td class="request-note">${escapeHtml(r.note||"—")}</td><td>${escapeHtml(requestStates[r.status]||"Неизвестно")}${r.mail_state?`<br>${escapeHtml(mailStates[r.mail_state]||"Проверете изпращането")}`:""}</td><td>${r.status==="pending"&&/^[A-Za-z0-9_-]{1,160}$/.test(r.request_id)?`<form method="post" action="/kt125/admin/requests/${escapeHtml(r.request_id)}/decide"><label>Роля <select name="role"><option value="expert">Експерт</option><option value="reviewer">Преглеждащ</option><option value="delegated_expert">Упълномощен експерт</option></select></label><label><input type="checkbox" required name="confirm" value="DECIDE"> Потвърждавам решението</label><button name="decision" value="approve">Одобри</button><button name="decision" value="reject">Откажи</button></form>`:r.status==="approved"&&["queued","failed","sending"].includes(r.mail_state)?`<form method="post" action="/kt125/admin/requests/${escapeHtml(r.request_id)}/mail"><label><input type="checkbox" name="confirm" value="SEND" required> Потвърждавам</label><button>Изпрати поканата</button></form>`:"—"}</td></tr>`).join("")}</tbody></table></div>`:'<p>Няма заявки за достъп.</p>'}${requestsHasMore?'<p>Показани са последните 50 заявки.</p>':""}`;
  const table=section==="overview"
   ?`<div class="state">Защитен служебен режим. Информацията за потребители, преписки и журнал се извлича само след проверка на самоличността и съответните права.</div>
   <p>ЕГМАСТЕР и администраторът не получават автоматичен достъп до съдържанието на преписките.</p>`
@@ -90,12 +99,12 @@ export function renderKT125PrivatePage({section="overview",items=[],hasMore=fals
     :`<div class="state">Няма налични записи в този раздел.</div>`;
  return `<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
  <meta name="robots" content="noindex,nofollow"><title>WOW · ЕГМАСТЕР · ${escapeHtml(sectionNames[section])}</title>
- <style>${css}</style></head><body>
+ <style>${kt125PageCss}</style></head><body>
  <header><small>WOW · ЕГМАСТЕР · КТ125</small><h1>Управление на достъпа</h1>
  <small>Проверен служебен достъп · защитен регистър</small></header>
  <main><div class="notice">Показват се само разрешените служебни данни. Няма публичен достъп до преписки.</div>
  <div class="layout"><nav aria-label="Управление на достъпа">${nav}</nav>
- <section class="panel"><h2>${escapeHtml(sectionNames[section])}</h2>${enrollment}${pendingTable}${table}
+ <section class="panel"><h2>${escapeHtml(sectionNames[section])}</h2>${requestTable}${enrollment}${pendingTable}${table}
  <p class="disabled">За промяна на права се изисква отделно потвърдено служебно действие. Данните не се записват в браузъра.</p>
  </section></div></main></body></html>`;
 }
@@ -114,6 +123,6 @@ export function kt125AccountFailure({activation=false,emailRequired=false,status
   "Входът не предостави удостоверен служебен имейл. Използвайте разрешения служебен начин за вход.":
   "Профилът не е активиран. Влезте с имейла от поканата. Ако отказът остане, администраторът трябва да провери дали поканата е валидна."):
   "Поканата не е записана или променена. Проверете името, имейла, избраната роля и списъка с покани. Не подавайте повторно, преди да проверите резултата.";
- return kt125PrivateHtmlResponse(`<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WOW · Служебна регистрация</title><style>${css}</style></head><body><header><h1>Служебна регистрация</h1></header><main><p class="state">${message}</p><a href="${activation?'/kt125/enrollment/activate':'/kt125/admin/panel/users'}">${activation?'Към потвърждаването':'Към потребителите'}</a></main></body></html>`,status);
+ return kt125PrivateHtmlResponse(`<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WOW · Служебна регистрация</title><style>${kt125PageCss}</style></head><body><header><h1>Служебна регистрация</h1></header><main><p class="state">${message}</p><a href="${activation?'/kt125/enrollment/activate':'/kt125/admin/panel/users'}">${activation?'Към потвърждаването':'Към потребителите'}</a></main></body></html>`,status);
 }
 
