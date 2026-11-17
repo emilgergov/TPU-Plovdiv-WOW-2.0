@@ -12,18 +12,21 @@ function boot(){
  let caseRecord=null,pending=false,confirmed=false;
  const root=mk('section');root.id='kt124ExpertPanel';
  root.style.cssText='font:14px/1.5 Verdana,Arial;color:#f7f2e5;margin:15px 0;padding:15px;border:1px solid #bca36c;border-radius:8px;background:#173a2b';
- const css=mk('style');css.textContent='#kt124ExpertPanel h3{font:bold 17px Verdana;color:#f2d393;margin:0 0 12px}#kt124ExpertPanel h4{font:bold 15px Verdana;color:#f1d18e;margin:0 0 10px}#kt124ExpertPanel .k124-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}#kt124ExpertPanel .k124-card{border:1px solid #789c83;padding:12px;background:#234936;border-radius:7px;min-width:0}#kt124ExpertPanel .k124-card pre{white-space:pre-wrap;max-height:240px;overflow:auto;font:12px/1.6 Verdana;margin:8px 0;overflow-wrap:anywhere}#kt124ExpertPanel textarea,#kt124ExpertPanel input,#kt124ExpertPanel select{width:100%;box-sizing:border-box;background:#fffef9;color:#16392c;border:1px solid #8c9a84;border-radius:5px;padding:9px;font:13px/1.5 Verdana}#kt124ExpertPanel textarea{min-height:65px;resize:vertical}#kt124ExpertPanel label{display:block;margin:10px 0 4px;font-weight:700}#kt124ExpertPanel button{border:0;border-radius:7px;background:#dcb977;color:#173929;font:bold 13px Verdana;padding:12px 16px;cursor:pointer}#kt124ExpertPanel button:disabled{opacity:.55;cursor:not-allowed}#kt124ExpertPanel .k124-note{color:#f4d5a1}#kt124ExpertPanel .k124-row{border-top:1px solid #63816b;padding-top:9px;margin-top:10px}@media(max-width:1000px){#kt124ExpertPanel .k124-grid{grid-template-columns:1fr}}';
- root.append(css,mk('h3','КТ123 · Три отделни становища и окончателна експертна преценка'));
+ const css=mk('style');css.textContent='#kt124ExpertPanel h3{font:bold 17px Verdana;color:#f2d393;margin:0 0 12px}#kt124ExpertPanel h4{font:bold 15px Verdana;color:#f1d18e;margin:0 0 10px}#kt124ExpertPanel .k124-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}#kt124ExpertPanel .k124-card{border:1px solid #789c83;padding:12px;background:#234936;border-radius:7px;min-width:0}#kt124ExpertPanel .k124-card pre{white-space:pre-wrap;max-height:320px;overflow:auto;font:12px/1.6 Verdana;margin:8px 0;overflow-wrap:anywhere}#kt124ExpertPanel summary{cursor:pointer;color:#f0d299;font-weight:bold}#kt124ExpertPanel .k124-card p{font:13px/1.5 Verdana;margin:7px 0;color:#f5eee0}#kt124ExpertPanel textarea,#kt124ExpertPanel input,#kt124ExpertPanel select{width:100%;box-sizing:border-box;background:#fffef9;color:#16392c;border:1px solid #8c9a84;border-radius:5px;padding:9px;font:13px/1.5 Verdana}#kt124ExpertPanel textarea{min-height:65px;resize:vertical}#kt124ExpertPanel label{display:block;margin:10px 0 4px;font-weight:700}#kt124ExpertPanel button{border:0;border-radius:7px;background:#dcb977;color:#173929;font:bold 13px Verdana;padding:12px 16px;cursor:pointer}#kt124ExpertPanel button:disabled{opacity:.55;cursor:not-allowed}#kt124ExpertPanel .k124-note{color:#f4d5a1}#kt124ExpertPanel .k124-row{border-top:1px solid #63816b;padding-top:9px;margin-top:10px}@media(max-width:1000px){#kt124ExpertPanel .k124-grid{grid-template-columns:1fr}}';
+ root.append(css,mk('h3','Становища и експертно решение'));
  const grid=mk('div');grid.className='k124-grid';
  const aCard=mk('section');aCard.className='k124-card';
  aCard.append(mk('h4','1. EG Автор · предложение'));
- const authorText=mk('pre','Все още няма предложение.');aCard.append(authorText);
+ const authorStatus=mk('p','Очаква се предложение.');aCard.append(authorStatus);
+ const authorDetails=mk('details');authorDetails.append(mk('summary','Разгледай пълното предложение'));const authorText=mk('pre','Все още няма предложение.');authorDetails.append(authorText);aCard.append(authorDetails);
  const rCard=mk('section');rCard.className='k124-card';
  rCard.append(mk('h4','2. AI рецензент · аргументи'));
- const reviewerText=mk('pre','Няма извършен рецензентски преглед.');rCard.append(reviewerText);
+ const reviewerStatus=mk('p','Няма завършена рецензия.');rCard.append(reviewerStatus);
+ const reviewerDetails=mk('details');reviewerDetails.append(mk('summary','Разгледай аргументите на рецензента'));const reviewerText=mk('pre','Няма извършен рецензентски преглед.');reviewerDetails.append(reviewerText);rCard.append(reviewerDetails);
  const eCard=mk('section');eCard.className='k124-card';
  eCard.append(mk('h4','3. Експерт · собствено решение'));
- const decisionText=mk('pre','Не е потвърдено самостоятелно експертно решение.');eCard.append(decisionText);
+ const decisionStatus=mk('p','Очаква се експертно решение.');eCard.append(decisionStatus);
+ const decisionDetails=mk('details');decisionDetails.append(mk('summary','Разгледай мотивите на експерта'));const decisionText=mk('pre','Не е потвърдено самостоятелно експертно решение.');decisionDetails.append(decisionText);eCard.append(decisionDetails);
  grid.append(aCard,rCard,eCard);root.append(grid);
  const d=mk('details');d.style.cssText='margin-top:13px;border:1px solid #8da88b;border-radius:7px;padding:12px';
  d.append(mk('summary','Самостоятелна експертна преценка · отхвърли и двете AI становища'));
@@ -40,7 +43,7 @@ function boot(){
  consentLabel.append(consent,mk('span','Разгледах наличните AI становища. Потвърждавам самостоятелно мотивирана експертна преценка по тази преписка.'));
  d.append(consentLabel);
  const action=mk('button','Потвърди експертното решение за Етап 5');action.type='button';const note=mk('p');note.className='k124-note';note.setAttribute('aria-live','polite');d.append(action,note);root.append(d);host.append(root);
- function clear(){caseRecord=null;confirmed=false;authorText.textContent='Все още няма предложение.';reviewerText.textContent='Няма извършен рецензентски преглед.';decisionText.textContent='Не е потвърдено самостоятелно експертно решение.';note.textContent='';d.open=false}
+ function clear(){caseRecord=null;confirmed=false;authorStatus.textContent='Очаква се предложение.';reviewerStatus.textContent='Няма завършена рецензия.';decisionStatus.textContent='Очаква се експертно решение.';authorText.textContent='Все още няма предложение.';reviewerText.textContent='Няма извършен рецензентски преглед.';decisionText.textContent='Не е потвърдено самостоятелно експертно решение.';note.textContent='';d.open=false}
  function receive(v){
   const h=collectStageEvidence(window);if(!v?.caseId||v.evidenceRevision!==h.evidenceRevision)return;
   const prior=caseRecord&&caseRecord.caseId===v.caseId?caseRecord:null;
@@ -50,10 +53,12 @@ function boot(){
    reviewerFindings:Array.isArray(v.reviewerFindings)?v.reviewerFindings:[]};
   confirmed=false;
   authorText.textContent=caseRecord.draft||'EG Авторът не е изготвил проверим текст. Констатации: '+caseRecord.issueCodes.join('; ');
+  authorStatus.textContent=caseRecord.draft?'Налично предложение за експертен преглед':'Няма готово предложение · '+caseRecord.issueCodes.slice(0,2).join(', ');
   const name={pass:'Приет без отбелязани възражения',revise:'Препоръчана преработка',reject:'Отхвърлен',not_completed:'Рецензията не е проведена или не е завършена'};
-  reviewerText.textContent=(name[caseRecord.reviewerVerdict]||'Непотвърден рецензентски резултат')+'\n'+
+  reviewerStatus.textContent=name[caseRecord.reviewerVerdict]||'Непотвърден рецензентски резултат';
+  reviewerText.textContent=reviewerStatus.textContent+'\n'+
    (caseRecord.reviewerFindings.length?caseRecord.reviewerFindings.join('\n\n'):'Няма предоставени конкретни аргументи от рецензента.');
-  decisionText.textContent='Предстои собствена експертна преценка.';note.textContent='';
+  decisionText.textContent='Предстои собствена експертна преценка.';decisionStatus.textContent='Решението остава на експерта.';note.textContent='';
  }
  document.addEventListener('kt115:stage4-draft',e=>receive(e.detail));
  document.addEventListener('kt124:stage4-attempt',e=>receive(e.detail));
@@ -87,7 +92,7 @@ function boot(){
    if(current.evidenceRevision!==caseRecord.evidenceRevision||current.key!==caseRecord.key){note.textContent='Данните на преписката са променени. Решението не е предадено.';return}
    if(!result.ok||!data.expertDecisionProof||data.caseId!==body.caseId||data.requestId!==body.requestId||data.evidenceRevision!==body.evidenceRevision){
     note.textContent='Самостоятелното решение не е регистрирано: '+(data.issues?.join(', ')||data.error||result.status);return}
-   confirmed=true;decisionText.textContent='ПОТВЪРДЕНО ОТ ЕКСПЕРТА\nЕксперт: '+data.expertDecision.expert+
+   confirmed=true;decisionStatus.textContent='ПОТВЪРДЕНО · '+data.expertDecision.panelTitle;decisionText.textContent='ПОТВЪРДЕНО ОТ ЕКСПЕРТА\nЕксперт: '+data.expertDecision.expert+
     '\nНаправление: '+String(data.expertDecision.panelId).padStart(2,'0')+' — '+data.expertDecision.panelTitle+
     '\nПравни основания: '+data.expertDecision.legalGrounds+
     '\nФакти: '+data.expertDecision.caseGrounds+
