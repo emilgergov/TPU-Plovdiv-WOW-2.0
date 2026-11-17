@@ -132,7 +132,7 @@ if(host&&five){
  }
  document.addEventListener('kt115:stage4-draft',e=>{
   const d=e.detail||{},h=evidence();if(!d.sourceDraft||d.evidenceRevision!==h.evidenceRevision||d.caseId!==h.caseId&&d.caseIdType!=='shared-verified')return;
-  proposal={caseId:d.caseId,localId:h.caseId,revision:h.evidenceRevision,generation:h.generation,key:h.key,requestId:d.requestId,original:d.sourceDraft,warnings:d.warnings||[],qualificationRecord:d.qualificationRecord||null,qualificationProof:d.qualificationProof||null,qualificationGate:d.qualificationGate||null,serverQualityPassed:d.qualityPassed===true};
+  proposal={caseId:d.caseId,localId:h.caseId,revision:h.evidenceRevision,generation:h.generation,key:h.key,requestId:d.requestId,original:d.sourceDraft,warnings:d.warnings||[],qualificationRecord:d.qualificationRecord||null,qualificationProof:d.qualificationProof||null,qualificationGate:d.qualificationGate||null,serverQualityPassed:d.qualityPassed===true,serverReviewed:['pass','revise'].includes(d.reviewerVerdict)};
   const reviewed=d.reviewed===true||(d.qualityPassed===true&&['pass','revise'].includes(d.reviewerVerdict));
   header.textContent=reviewed?(d.qualityPassed===true?'РЕЦЕНЗИРАНО ПРЕДЛОЖЕНИЕ · за експертна преценка':'РЕЦЕНЗИРАНО ПРЕДЛОЖЕНИЕ · с открити нормативни несъответствия'):'Работен проект · независимата рецензия не е завършена';
   history=[{version:1,text:d.sourceDraft,kind:reviewed?'рецензирано предложение':'непроверен проект',createdAt:new Date().toISOString()}];approved=null;
@@ -180,8 +180,8 @@ if(host&&five){
   if(!current()){note.textContent='Данните по преписката са променени.';return;}
   const expert=val(actor.value);if(expert.length<2){note.textContent='Посочете експерта.';actor.focus();return;}
   const v=history.at(-1);
-  if(proposal.serverQualityPassed!==true){
-   note.textContent='Рецензираният текст все още има непреминати нормативни проверки. Етап 5 няма да получи непроверена преценка.';return;
+  if(proposal.serverQualityPassed!==true||proposal.serverReviewed!==true){
+   note.textContent='Няма завършен и нормативно проверен независим рецензентски резултат. Етап 5 не получава непроверен проект.';return;
   }
   const chosen=changeRadio.checked?Number(routeSelect.value):Number(v.text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0);
   if(!chosen||!routeTitles[chosen-1]){note.textContent='Не е определена конкретна процедура.';return;}
