@@ -45,7 +45,7 @@ const validate=(change=()=>{})=>{
 const good=validate();assert.equal(good.ok,true,JSON.stringify(good.errors));
 const unverifiedCategory=validate(q=>q.tests[0].comparedCategories=["Складова база за стоки и офиси"]);
 assert(unverifiedCategory.errors.includes("POSITIVE_ANNEX_CATEGORY_NOT_IN_LAW:A1"));
-const noCaseMatch=validate(q=>{q.tests[0].caseSource="fact:description";});
+const noCaseMatch=validate(q=>{q.tests[0].caseSource="fact:description";q.tests[0].caseQuote=excerpts.facts.find(x=>x.id==="fact:description").excerpts[0].id;});
 assert.equal(noCaseMatch.ok,true,"A second established source with the same specific facts should work");
 const unknownCase=validate(q=>{q.tests[0].caseSource="doc:0";q.tests[0].caseQuote=excerpts.facts.find(x=>x.id==="doc:0").excerpts[0].id;});
 assert(unknownCase.errors.includes("POSITIVE_ANNEX_UNCONFIRMED_CASE_SOURCE:A1"));
