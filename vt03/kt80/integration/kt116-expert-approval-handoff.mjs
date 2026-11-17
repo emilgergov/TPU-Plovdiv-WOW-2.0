@@ -9,7 +9,7 @@ if(host&&five){
  style.textContent='#kt116Editor{font:14px/1.55 Verdana,Arial;color:#f9f3e1;margin:16px 0}#kt116Editor h3{font:bold 19px Verdana;color:#efd18f}#kt116Editor h4{font:bold 15px Verdana;color:#f3d08c;margin:22px 0 8px;border-bottom:1px solid #739078;padding:0 0 8px}#kt116Editor p{white-space:pre-wrap;margin:8px 0 15px}#kt116Editor .paper{background:#244a38;padding:17px;border-radius:7px}#kt116Editor .actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}#kt116Editor button,#kt116Stage5 button{background:#d9b874;color:#143b29;border:0;border-radius:7px;padding:11px 15px;font:bold 13px Verdana;cursor:pointer}#kt116Editor button[hidden],#kt116Editor [hidden]{display:none!important}#kt116Editor textarea{width:100%;box-sizing:border-box;min-height:350px;font:13px/1.6 Verdana;padding:12px;color:#132e24;background:#fffdf6}#kt116Editor input{padding:10px;color:#173929;background:#fffdf8}#kt116Editor .note{color:#f0d296;font-size:12px}#kt116Stage5{padding:16px;color:#f7f0dc;background:#193a2b;font:14px/1.6 Verdana}#kt116Stage5 h3,#kt116Stage5 h4{color:#f3ce82}#kt116Stage5 pre{white-space:pre-wrap;font:13px/1.6 Verdana;background:#284938;padding:14px;max-height:550px;overflow:auto}.kt80-stage-panel[data-panel="5"]>:not(#kt116Stage5){display:none!important}';
  document.head.append(style);
  const ui=mk('section');ui.id='kt116Editor';ui.hidden=true;
- const header=mk('h3','Предложение за експертен преглед'),alerts=mk('details'),alertContent=mk('div');
+ const header=mk('h3','Предложение за експертна преценка'),alerts=mk('details'),alertContent=mk('div');
  alerts.append(mk('summary','Бележки от нормативната проверка'),alertContent);
  const paper=mk('div');paper.className='paper';
  const textarea=mk('textarea');textarea.hidden=true;textarea.setAttribute('aria-label','Редактиране на предложението');
@@ -105,7 +105,9 @@ if(host&&five){
  document.addEventListener('kt115:stage4-draft',e=>{
   const d=e.detail||{},h=evidence();if(!d.sourceDraft||d.evidenceRevision!==h.evidenceRevision||d.caseId!==h.caseId&&d.caseIdType!=='shared-verified')return;
   proposal={caseId:d.caseId,localId:h.caseId,revision:h.evidenceRevision,generation:h.generation,key:h.key,requestId:d.requestId,original:d.sourceDraft,warnings:d.warnings||[],qualificationRecord:d.qualificationRecord||null,qualificationProof:d.qualificationProof||null,qualificationGate:d.qualificationGate||null,serverQualityPassed:d.qualityPassed===true};
-  history=[{version:1,text:d.sourceDraft,kind:'автор',createdAt:new Date().toISOString()}];approved=null;
+  const reviewed=d.qualityPassed===true&&['pass','revise'].includes(d.reviewerVerdict);
+  header.textContent=reviewed?'РЕЦЕНЗИРАНО ПРЕДЛОЖЕНИЕ · за експертна преценка':'Работен проект · независимата рецензия не е завършена';
+  history=[{version:1,text:d.sourceDraft,kind:reviewed?'рецензирано предложение':'непроверен проект',createdAt:new Date().toISOString()}];approved=null;
   document.getElementById('kt104EGLead').style.display='none';document.getElementById('kt104EGDetails').style.display='none';
   note.textContent='Работен проект. Експертът може да го редактира или потвърди.';display();render5();
  });
@@ -237,7 +239,7 @@ if(host&&five){
   }catch{restoreStatus.textContent='Неуспешно отваряне. Проверете паролата и файла.';}
  };
 
- function clear(){proposal=null;history=[];approved=null;ui.hidden=true;render5();}
+ function clear(){proposal=null;history=[];approved=null;header.textContent='Предложение за експертна преценка';ui.hidden=true;render5();}
  ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'].forEach(n=>document.addEventListener(n,clear));
  window.KT116ExpertHandoff=Object.freeze({snapshot:()=>approved&&current()?approved:null,history:()=>current()?history.map(x=>({version:x.version,kind:x.kind,createdAt:x.createdAt})):[]});
  render5();
