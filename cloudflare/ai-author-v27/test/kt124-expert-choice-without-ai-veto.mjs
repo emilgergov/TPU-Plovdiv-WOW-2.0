@@ -41,6 +41,10 @@ globalThis.fetch=async (_url,options)=>{
   "Template facts and legal findings must never be copied");
  assert(guide.includes("Не повтаряй във втори въвеждащ абзац"),
   "Prevent duplicate law references in a new draft");
+ assert(guide.includes("KT35 Classic A (пространствено непресичане)"),"Read additional Classic A as editorial reference");
+ assert(guide.includes("KT39 Classic Б — СИМУЛАЦИЯ"),"Mark added B example as simulation");
+ assert(guide.includes("симулацията не е валиден източник на география"),"Simulated GIS situation may never override case evidence");
+ assert(guide.includes("не копирай примерни схеми или съоръжения"),"Infrastructure details are case-specific");
  assert(guide.includes("Не извеждай отрицателна категория"),
   "Unverified absence of facts is not proof of legal exclusion");
  assert(String(request.input[1].content).includes("KT124-R6-TEST-CASE")===false);
