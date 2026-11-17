@@ -7,7 +7,8 @@ import {createKT125CloudflareAccessVerifier,kt125CloudflareAccessConfigReady}
 import {authorizeKT125CaseRequest,kt125PublicDenialResponse} from "./server-guard.mjs";
 import {issueKT125Grant,revokeKT125Grant} from "./grant-commands.mjs";
 import {recordKT125SecurityEvent} from "./security-audit.mjs";
-import {readKT125Management,readKT125CaseGrants} from "./management-read.mjs";
+import {readKT125Management,readKT125CaseGrants,kt125ManagementPrincipal} from "./management-read.mjs";
+import {renderKT125PrivatePage,kt125PrivateHtmlResponse} from "./private-admin-page.mjs";
 
 const json=(data,status=200)=>new Response(JSON.stringify(data),{
  status,headers:{"Content-Type":"application/json; charset=utf-8",
@@ -19,6 +20,7 @@ const accessRoute=new RegExp("^/kt125/cases/("+pathId+")/access$");
 const grantsRoute=new RegExp("^/kt125/cases/("+pathId+")/grants$");
 const revokeRoute=new RegExp("^/kt125/cases/("+pathId+")/grants/("+pathId+")$");
 const managementRoute=/^\/kt125\/admin\/(users|cases|audit)$/;
+const privatePanelRoute=/^\/kt125\/admin\/panel\/(overview|users|cases|audit)$/;
 
 function validPrivateMutationOrigin(request,env){
  try{
@@ -42,12 +44,25 @@ export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid
   const issue=url.pathname.match(grantsRoute);
   const revoke=url.pathname.match(revokeRoute);
   const management=url.pathname.match(managementRoute);
-  if(!access&&!issue&&!revoke&&!management)return json({error:"Неизвестен служебен маршрут."},404);
+  const privatePanel=url.pathname.match(privatePanelRoute);
+  if(!access&&!issue&&!revoke&&!management&&!privatePanel)return json({error:"Неизвестен служебен маршрут."},404);
 
   const verifier=typeof getVerifier==="function"?getVerifier(env):
     createKT125CloudflareAccessVerifier({
      teamDomain:env.KT125_ACCESS_TEAM_DOMAIN,audience:env.KT125_ACCESS_AUD
     });
+  if(privatePanel&&request.method==="GET"){
+   if(privatePanel[1]==="overview"){
+    const actor=await kt125ManagementPrincipal({request,verifier,db:env.KT125_DB});
+    if(!actor||!["egmaster","administrator"].includes(actor.role))return deny();
+    return kt125PrivateHtmlResponse(renderKT125PrivatePage({section:"overview"}));
+   }
+   const result=await readKT125Management({
+    request,verifier,db:env.KT125_DB,section:privatePanel[1]
+   });
+   if(!result.ok)return deny();
+   return kt125PrivateHtmlResponse(renderKT125PrivatePage(result.data));
+  }
   if(management&&request.method==="GET"){
    const result=await readKT125Management({
     request,verifier,db:env.KT125_DB,section:management[1]
