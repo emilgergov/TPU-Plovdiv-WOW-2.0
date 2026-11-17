@@ -51,8 +51,8 @@ export function createKT125CloudflareAccessVerifier({
    const cacheKey=issuer;
    let certs=jwksCache.get(cacheKey);
    if(!certs||certs.expires<=clock()||!certs.keys.some(x=>x.kid===header.kid)){
-    const response=await fetchFn(certsUrl,{method:"GET",redirect:"error",cache:"no-store"});
-    if(!response?.ok)return deny();
+    const response=await fetchFn(certsUrl,{method:"GET",redirect:"manual",cache:"no-store"});
+    if(response?.status!==200||response.redirected)return deny();
     const size=Number(response.headers?.get?.("content-length")||0);
     if(size>MAX_JWKS_BYTES)return deny();
     const body=await response.text();
