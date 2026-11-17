@@ -30,7 +30,7 @@ assert(stage5.includes("expertDecision:source.expertDecision||null"));
 assert(stage5.includes("qualificationRecord:source.qualificationRecord||null"));
 assert(stage5.includes("window.KT119Download?.()"));
 assert(worker.includes("if(input?.task===\"confirm_reviewed_panel\")"));
-assert(worker.includes('d.mode==="reviewed_expert_choice"'));
+assert(worker.includes('input.expertDecision?.mode==="reviewed_expert_choice"'));
 assert(worker.includes("if(!independentExpert&&stage5Hard.length)"));
 assert(worker.includes("withReviewConclusion(finalDraft)"));
 console.log("PASS KT124-R2: one reviewed proposal, original evidence/generation, simple expert route choice, signed Stage 5 handoff, original DOCX mechanism.");
