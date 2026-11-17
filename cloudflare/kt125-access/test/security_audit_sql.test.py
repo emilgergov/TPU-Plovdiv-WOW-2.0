@@ -15,6 +15,7 @@ t=1794891600000
 digest="a"*64
 db.execute(sql,("ev-1",t,"req-1","case.read","denied","ACCESS_DENIED",digest,None))
 db.execute(sql,("ev-2",t,"req-2","case.read","allowed","GRANTED",digest,"expert-1"))
+db.commit()  # Baseline records must survive the deliberate failing transactions below.
 assert db.execute("SELECT COUNT(*) FROM kt125_security_events").fetchone()[0]==2
 assert db.execute("SELECT actor_user_id FROM kt125_security_events WHERE event_id='ev-1'").fetchone()[0] is None
 for fields in [
