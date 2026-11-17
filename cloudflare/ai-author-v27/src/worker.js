@@ -703,7 +703,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   ].filter(x=>typeof x==="string"&&x.trim()).slice(0,10);
   const verdict=independentReview?.verdict;
   if(!["pass","revise","reject"].includes(verdict))return expertPreview("Независимият преглед е невалиден.",["INVALID_REVIEW"],"independent_review",draft);
-  if(verdict==="reject")return expertPreview("Независимият преглед не одобрява проекта.",["INDEPENDENT_REJECTION"],"independent_review",draft,{reviewFindings});
+  if(verdict==="reject")return expertPreview("Независимият преглед не одобрява проекта.",["INDEPENDENT_REJECTION"],"independent_review",draft,{reviewFindings:reviewerFindings});
   const finalDraft=verdict==="revise"?text(independentReview.revisedDraft,12000):draft;
   if(finalDraft.length<120||qualityIssues(finalDraft).length>0||(lockedQualification&&compareDraftWithQualification(finalDraft,lockedQualification).length>0)||!sectionNames.every(x=>finalDraft.toLocaleLowerCase("bg").includes(x.toLocaleLowerCase("bg")))||
      /преценяван(?:е|ето)\s+на\s+необходимостта\s+от\s+ОС[^.\n]{0,90}чл\.?\s*2\s*,?\s*ал\.?\s*2/iu.test(finalDraft)||
@@ -724,8 +724,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     documentTextTruncated:context.caseDocuments.sourceTextTruncated,
     caseFactsReceived:evidence.length,gisContextReceived:Boolean(detail.gis),
     archiveArticleTextsReceived:verifiedLegalCorpus.legalProvisions.length,archiveCorpusDocumentsAvailable:verifiedLegalCorpus.indexedDocuments,archiveVerifiedExcerptsReceived:context.verifiedOfflineLegalExcerpts.length,archiveIndexRecordsReceived:sourceHints.length}});
- }catch(error){return reply({error:"Stage 4 AI request failed or timed out",
-  ...(env.KT123_TEST_LEGACY_MODE==="true"?{testDiagnostic:String(error?.stack||error)}:{})},504)}
+ }catch{return reply({error:"Stage 4 AI request failed or timed out"},504)}
  finally{clearTimeout(timer)}
 }
 
