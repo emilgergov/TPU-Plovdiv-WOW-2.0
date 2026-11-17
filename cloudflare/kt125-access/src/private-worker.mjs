@@ -50,6 +50,14 @@ export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid
    return json({error:"Служебният достъп не е конфигуриран."},503);
   const url=new URL(request.url);
   if(url.search)return deny();
+  // Preserve accepted KT125 read-only entry URLs; do not alter R6 or grant access.
+  if(request.method==="GET"&&url.pathname==="/")
+   return new Response(null,{status:302,headers:{Location:"/kt125/admin/panel/overview","Cache-Control":"no-store"}});
+  const legacyPanel=url.pathname.match(/^\/kt125\/admin\/(overview|users|roles|cases|audit)$/);
+  if(request.method==="GET"&&legacyPanel)
+   return new Response(null,{status:302,headers:{Location:"/kt125/admin/panel/"+legacyPanel[1],"Cache-Control":"no-store"}});
+  if(url.pathname==="/kt125/bootstrap"||url.pathname==="/kt125/admin/verify-identity")
+   return json({error:"Временният маршрут е изключен."},410);
   const access=url.pathname.match(accessRoute);
   const issue=url.pathname.match(grantsRoute);
   const revoke=url.pathname.match(revokeRoute);
