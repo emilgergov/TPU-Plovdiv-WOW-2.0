@@ -64,6 +64,14 @@ export function renderKT125PrivatePage({section="overview",items=[],hasMore=fals
   if(typeof id!=="string"||!/^[A-Za-z0-9_-]{1,160}$/.test(id))return "<td>—</td>";
   return `<td><a href="/kt125/cases/${escapeHtml(id)}/manage">Виж правата</a></td>`;
  };
+ const enrollment=section==="users"?`<div class="state"><strong>Регистрация на служител</strong>
+ <p>Само за вече удостоверена служебна самоличност в Cloudflare Access. Въведете точния идентификатор (sub) от удостоверения служебен профил. Това не създава Cloudflare акаунт.</p>
+ <form method="post" action="/kt125/admin/users/enroll">
+ <label>Идентификатор на служителя (sub) <input name="subject" required maxlength="200" autocomplete="off" aria-label="Идентификатор на служителя"></label>
+ <label>Роля <select name="role" required><option value="expert">Експерт</option><option value="reviewer">Преглеждащ</option><option value="delegated_expert">Упълномощен експерт</option></select></label>
+ <label><input type="checkbox" name="confirm" value="ENROLL" required> Потвърждавам служебната самоличност</label>
+ <button type="submit">Добави служител</button></form>
+ </div>`:"";
  const table=section==="overview"
   ?`<div class="state">Защитен служебен режим. Информацията за потребители, преписки и журнал се извлича само след проверка на самоличността и съответните права.</div>
   <p>ЕГМАСТЕР и администраторът не получават автоматичен достъп до съдържанието на преписките.</p>`
@@ -80,7 +88,7 @@ export function renderKT125PrivatePage({section="overview",items=[],hasMore=fals
  <small>Проверен служебен достъп · защитен регистър</small></header>
  <main><div class="notice">Показват се само разрешените служебни данни. Няма публичен достъп до преписки.</div>
  <div class="layout"><nav aria-label="Управление на достъпа">${nav}</nav>
- <section class="panel"><h2>${escapeHtml(sectionNames[section])}</h2>${table}
+ <section class="panel"><h2>${escapeHtml(sectionNames[section])}</h2>${enrollment}${table}
  <p class="disabled">За промяна на права се изисква отделно потвърдено служебно действие. Данните не се записват в браузъра.</p>
  </section></div></main></body></html>`;
 }
