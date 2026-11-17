@@ -22,6 +22,11 @@ const req=(route,token="signed",method="GET")=>new Request("https://service.exam
 let result=await handler.fetch(req("/kt125/cases/case-1/access"),env);
 assert.equal(result.status,200);
 assert.deepEqual(await result.json(),{allowed:true,caseId:"case-1",action:"case.read"});
+const auditUnavailable=createKT125PrivateHandler({getVerifier:()=>verifier,auditEvent:async()=>false});
+const noAudit=await auditUnavailable.fetch(req("/kt125/cases/case-1/access"),env);
+assert.equal(noAudit.status,503,"Authorized access MUST fail closed if security journal is unavailable");
+assert(!JSON.stringify(await noAudit.json()).includes("expert-a"));
+
 for(const [request,settings] of [
  [req("/kt125/cases/case-1/access",""),env],
  [req("/kt125/cases/case-1/access"),{...env,KT125_DB:db({registered:{...user,active:0}})}],
