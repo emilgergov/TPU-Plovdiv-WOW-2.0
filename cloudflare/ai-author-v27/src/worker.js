@@ -388,11 +388,20 @@ async function handleStage4Proposal(request,env){
  let lockedQualification=null,qualificationValidation=null;
  const qualificationSources=buildQualificationSources({subject:payload.subject,scope:payload.scope,confirmed,documents:sourceTexts,legalProvisions:verifiedLegalCorpus.legalProvisions});
  const exactSnippets=qualificationEvidenceOptions(qualificationSources);
+ // KT124-R1: Explicit, archive-derived legal source IDs for each legal test.
+ // This does NOT assign applicability/status or override validation.
+ const qualificationLegalIds=Object.fromEntries([
+  ["A1", x=>x.reference==="Приложение № 1 към ЗООС"&&x.act==="ЗООС"],
+  ["A2", x=>x.reference==="Приложение № 2 към ЗООС"&&x.act==="ЗООС"],
+  ["OS1",x=>x.reference==="чл. 2"&&x.act==="Наредба за ОС"],
+  ["OS2",x=>x.reference==="чл. 2"&&x.act==="Наредба за ОС"]
+ ].map(([key,match])=>[key,exactSnippets.laws.filter(x=>x.verified&&match(x)).map(x=>x.id)]));
  const qualificationInput={
   caseSources:exactSnippets.facts.map(x=>({id:x.id,text:x.text.slice(0,16000),excerpts:x.excerpts,established:x.established,kind:x.kind,title:x.title||""})),
   legalSources:exactSnippets.laws.map(x=>({id:x.id,reference:x.reference,act:x.act,text:x.text,excerpts:x.excerpts,verified:x.verified})),
   routeCatalog:KT109_ROUTE_CATALOG,
-  evidenceRule:"Case excerpts are attributed sources, not independently confirmed legal truth."
+  requiredLegalSourceIds:qualificationLegalIds,
+  evidenceRule:"Use the IDs in requiredLegalSourceIds for each corresponding test; these IDs identify legal texts only, not a predetermined legal status. Case excerpts are attributed sources, not independently confirmed legal truth."
  };
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),115000);
  try{
@@ -419,7 +428,9 @@ async function handleStage4Proposal(request,env){
      instruction:code.startsWith("UNVERIFIED_LEGAL_QUOTE")||code.startsWith("UNVERIFIED_CASE_QUOTE")?
        "Използвай точен excerpts[].id от същия източник. Не създавай свободен текст на цитат.":
        code.startsWith("WRONG_ANNEX_REFERENCE")?
-       "Използвай правния източник law:N с reference точно Приложение № 1 към ЗООС или Приложение № 2 към ЗООС според теста.":
+       "Допустими идентификатори за този тест от проверения архив: "+(qualificationLegalIds[code.split(":")[1]]||[]).join(", ")+". Избери точния ID, без да променяш правния извод само за да преминеш проверката.":
+       code.startsWith("WRONG_OS_ARTICLE")?
+       "Правен източник за този тест: "+(qualificationLegalIds[code.split(":")[1]]||[]).join(", ")+". Точно чл. 2 от Наредбата за ОС, разгледай съответната алинея.":
        "Свери основанията и не въвеждай недоказано предположение."
     }))),checked=validateQualification(candidate,qualificationSources);
     if(checked.ok){q=candidate;v=checked}
