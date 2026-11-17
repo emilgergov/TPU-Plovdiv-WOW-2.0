@@ -36,6 +36,8 @@ jobs:
           node cloudflare/kt125-access/test/management-read.test.mjs
           node --check cloudflare/kt125-access/src/private-admin-page.mjs
           node cloudflare/kt125-access/test/private-admin-page.test.mjs
+          node --check cloudflare/kt125-access/src/grant-admin-page.mjs
+          node cloudflare/kt125-access/test/grant-admin-page.test.mjs
           node --check cloudflare/kt125-access/src/user-lifecycle.mjs
           node cloudflare/kt125-access/test/user-lifecycle.test.mjs
           node cloudflare/kt125-access/test/private-admin-mutations.test.mjs
