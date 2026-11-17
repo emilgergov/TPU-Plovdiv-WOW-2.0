@@ -34,6 +34,8 @@ jobs:
           node cloudflare/kt125-access/test/private-mutations.test.mjs
           node --check cloudflare/kt125-access/src/management-read.mjs
           node cloudflare/kt125-access/test/management-read.test.mjs
+          node --check cloudflare/kt125-access/src/private-admin-page.mjs
+          node cloudflare/kt125-access/test/private-admin-page.test.mjs
           node --check cloudflare/kt125-access/src/security-audit.mjs
           node cloudflare/kt125-access/test/security-audit.test.mjs
           python3 cloudflare/kt125-access/test/atomic_sql.test.py
