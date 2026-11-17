@@ -34,6 +34,7 @@ jobs:
           node cloudflare/ai-author-v27/test/kt123-decision-exhaustive.mjs
           node cloudflare/ai-author-v27/test/kt123-substance-guard.mjs
           node cloudflare/ai-author-v27/test/kt123-source-qualification-handoff.mjs
+          node cloudflare/ai-author-v27/test/kt124-r9-positive-annex-evidence.mjs
           node cloudflare/ai-author-v27/test/kt124-independent-expert-handoff.mjs
           node cloudflare/ai-author-v27/test/kt124-expert-choice-without-ai-veto.mjs
           node cloudflare/ai-author-v27/test/kt124-browser-wiring.mjs
