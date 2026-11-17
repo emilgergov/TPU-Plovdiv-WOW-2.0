@@ -45,7 +45,7 @@ function db(role="egmaster"){
 const handler=createKT125PrivateHandler({getVerifier:()=>verifier,auditEvent:async()=>true});
 const req=(path,token="verified")=>new Request("https://private.example.invalid"+path,{
  headers:{"Cf-Access-Jwt-Assertion":token}});
-for(const section of ["overview","users","cases","audit"]){
+for(const section of ["overview","users","roles","cases","audit"]){
  let r=await handler.fetch(req("/kt125/admin/panel/"+section),{...env,KT125_DB:db()});
  assert.equal(r.status,200,section);
  const html=await r.text();
@@ -57,6 +57,7 @@ for(const section of ["overview","users","cases","audit"]){
  assert.equal(r.status,403,section);
 }
 assert.equal((await handler.fetch(req("/kt125/admin/panel/audit"),{...env,KT125_DB:db("administrator")})).status,403);
+assert.equal((await handler.fetch(req("/kt125/admin/panel/roles"),{...env,KT125_DB:db("administrator")})).status,200);
 assert.equal((await handler.fetch(req("/kt125/admin/panel/users"),{...env,KT125_DB:db("administrator")})).status,200);
 assert.equal((await handler.fetch(req("/kt125/admin/panel/users","spoof"),{...env,KT125_DB:db()})).status,403);
 assert.equal((await handler.fetch(req("/kt125/admin/panel/users"),env)).status,503);
