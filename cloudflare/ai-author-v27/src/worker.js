@@ -4,6 +4,7 @@ import {evaluateDraft} from "./kt123-decision-model.mjs";
 import {substantiveDraftIssues} from "./kt123-substance-guard.mjs";
 import {QUALIFICATION_SCHEMA,QUALIFICATION_SYSTEM,buildQualificationSources,qualificationEvidenceOptions,validateQualification,compareDraftWithQualification} from "./kt123-evidence-qualification.mjs";
 import {signQualification,verifyQualification} from "./kt123-handoff-signature.mjs";
+import {checkExpertDecision,normalizeExpertDecision,expertStage4Text} from "./kt124-expert-decision.mjs";
 // TPU Plovdiv AI Author V27 — isolated test-only authoring gateway.
 // Never send an OpenAI key to the browser. Authorization is fail-closed.
 const headers = { "Content-Type":"application/json; charset=utf-8", "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff", "Access-Control-Allow-Origin":"null" };
@@ -722,6 +723,31 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
 }
 
 
+// KT124: A separately signed, attributable expert decision, not a bypass
+// of dossier identity, authentication, or the preserved Stage 5 document gate.
+async function handleExpertDecision(request,env){
+ if(request.method!=="POST")return reply({error:"Method not allowed"},405);
+ const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN].filter(x=>typeof x==="string"&&x.length>0);
+ if(!tokens.some(t=>request.headers.get("Authorization")==="Bearer "+t))return reply({error:"Unauthorized"},401);
+ let input;
+ try{const raw=await request.text();if(new TextEncoder().encode(raw).length>42000)return reply({error:"Payload too large"},413);input=JSON.parse(raw)}
+ catch{return reply({error:"Invalid request"},400)}
+ if(input?.task!=="confirm_independent_expert_decision"||input?.projectOnly!==true||
+    typeof input.evidenceRevision!=="string"&&typeof input.evidenceRevision!=="number"||
+    !input.requestId||String(input.requestId).length>100)
+  return reply({error:"Invalid expert decision contract"},400);
+ const errors=checkExpertDecision(input);
+ if(errors.length)return reply({error:"EXPERT_DECISION_INCOMPLETE",issues:errors},422);
+ const d=normalizeExpertDecision(input);
+ const signedContext={caseId:input.caseId,evidenceRevision:input.evidenceRevision,subject:input.subject,scope:input.scope};
+ const proof=await signQualification(d,signedContext,env.KT123_HANDOFF_SIGNING_KEY||env.OPENAI_API_KEY);
+ return reply({caseId:input.caseId,evidenceRevision:input.evidenceRevision,requestId:input.requestId,
+  expertDecision:d,expertDecisionProof:proof,draft:expertStage4Text(d),
+  projectOnly:true,expertReviewRequired:true,expertConfirmed:true,
+  selectedPanelId:d.panelId,sourceType:"INDEPENDENT_EXPERT",
+  audit:{recorded:true,aiNotGivenVeto:true,legalApplicabilityAutomaticallyCertified:false}});
+}
+
 async function handleStage5Document(request,env){
  if(request.method!=="POST")return reply({error:"Method not allowed"},405);
  const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN].filter(x=>typeof x==="string"&&x.length);
@@ -747,9 +773,23 @@ async function handleStage5Document(request,env){
  const safeReference=/^ОВОС[-– ]?\d+[-–]\d+\s*\/\s*\d{1,2}\.\d{1,2}\.\d{4}(\s*г\.?)?$/iu.test(incoming)?incoming:placeholder;
  if(title!==expectedTitle)return reply({error:"Document title does not match the expert-confirmed direction"},409);
  const confirmedPanelId=Number(match[1]);
+ let independentExpert=null;
+ if(input.expertDecision||input.expertDecisionProof){
+  const d=input.expertDecision;
+  const valid=!!d&&d.mode==="independent_expert"&&d.explicitOverride===true&&
+   checkExpertDecision({caseId:input.caseId,subject:input.subject,scope:input.scope,parcelIds:input.parcelIds,
+    decision:d}).length===0&&
+   await verifyQualification(d,{caseId:input.caseId,evidenceRevision:input.evidenceRevision,
+    subject:input.subject,scope:input.scope},env.KT123_HANDOFF_SIGNING_KEY||env.OPENAI_API_KEY,input.expertDecisionProof);
+  if(!valid||Number(d.panelId)!==confirmedPanelId||expertStage4Text(d)!==input.confirmedStage4Text)
+   return reply({error:"EXPERT_DECISION_INTEGRITY_ERROR",projectOnly:true,expertReviewRequired:true,
+    message:"Самостоятелната експертна преценка не съответства на удостовереното решение по преписката."},422);
+  independentExpert=d;
+ }
+
  // Server-signed case-bound qualification; prose can be edited but its legal
  // statuses and selected panel cannot be changed without a fresh Stage 4 run.
- if(env.KT123_TEST_LEGACY_MODE!=="true"){
+ if(!independentExpert&&env.KT123_TEST_LEGACY_MODE!=="true"){
   const q=input.qualificationRecord;
   const validProof=q&&await verifyQualification(q,{
    caseId:input.caseId,evidenceRevision:input.evidenceRevision,
@@ -783,12 +823,12 @@ async function handleStage5Document(request,env){
    "PANEL_01_CONTRADICTS_LEGAL_FACTS","MISSING_LEGAL_PREDICATE",
    "UNSUPPORTED_NORMATIVE_REASON","DUPLICATED_LEGAL_PREDICATE"]);
  const stage5Hard=stage5Decision.decision.errors.filter(x=>stage5HardCodes.has(x.code));
- if(stage5Hard.length)return reply({error:"STAGE4_DECISION_MODEL_CONFLICT",expertReviewRequired:true,projectOnly:true,
+ if(!independentExpert&&stage5Hard.length)return reply({error:"STAGE4_DECISION_MODEL_CONFLICT",expertReviewRequired:true,projectOnly:true,
    message:"Потвърдената преценка противоречи на нормативните зависимости. Проверете конкретните основания в Етап 4; направлението не се сменя автоматично.",
    findings:stage5Hard.map(x=>({test:x.test,actual:x.code,reason:x.detail||""}))},422);
  const expectedPanel1={A1:"ОТРИЦАТЕЛНА",A2:"ОТРИЦАТЕЛНА",OS1:"ОТРИЦАТЕЛНА",OS2:"ПОЛОЖИТЕЛНА"};
  const inconsistentPanel1=confirmedPanelId===1?Object.entries(expectedPanel1).filter(([key,expected])=>legalMatrix[key]?.status!==expected):[];
- if(inconsistentPanel1.length)return reply({
+ if(!independentExpert&&inconsistentPanel1.length)return reply({
   error:"STAGE4_LEGAL_MATRIX_CONFLICT",expertReviewRequired:true,projectOnly:true,
   message:"Избраното направление №01 не съответства на конкретните нормативни изводи в Етап 4. Проверете доказателствата за посочените редове; системата не сменя процедурата.",
   findings:inconsistentPanel1.map(([key,expected])=>({test:key,actual:legalMatrix[key]?.status||"НЕУСТАНОВЕНА",requiredForDirection:expected}))
@@ -810,6 +850,8 @@ async function handleStage5Document(request,env){
 
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),55000);
  try{
+ const expertRule=independentExpert?
+ "КТ124: Това е самостоятелно мотивирано решение на компетентния експерт, с документирани нормативни основания и факти. Не променяй решението според AI предложенията, но НЕ представяй недоказани обстоятелства като установени. Запази отделно уведомителния/процедурния характер на избрания панел. ":"";
  const directionRules=confirmedPanelId===1?
   "КРИТИЧЕН И НЕОТМЕНИМ КОНТРОЛ НА ВИДА ДОКУМЕНТ: експертът е избрал ПАНЕЛ №01 — писмо по чл. 2, ал. 2 от Наредбата за ОС. Това НЕ Е искане за допълнителна информация. Не добавяй разпореждания за представяне на липсващи данни, списъци от документи, изисквания за технологии или капацитет, нито диспозитив, характерен за панел №02. Води текста от конкретните експертно потвърдени факти и правен извод. Ако те не обосновават писмо №01, не измисляй обратен извод и не превръщай текста в искане: върни кратък проект само с доказаните констатации за експертна проверка; служебният контрол може да го спре. Правилното заглавие не компенсира погрешен диспозитив. ":
   confirmedPanelId===2?
@@ -818,13 +860,14 @@ async function handleStage5Document(request,env){
  const instructions="Състави само ПРОЕКТ на административен документ на български език, от името на компетентния административен орган РИОСВ – Пловдив. Изказът е ясен, официален, точен и сдържан, без разказвателни обяснения, самореклама или вътрешни означения (AI, EG, панел, тест, сценарий). Изпълнявай единствено потвърденото от експерта административно направление, не го заменяй, не предрешавай нова процедура. Не представяй недоказани факти като установени; не измисляй нормативни реквизити. При неизвестен административен реквизит използвай XXXXXXXX. Подготви текст точно за посочения документ, а не обща правна справка. Не добавяй заглавен ред Относно: и не повтаряй входящия номер: модулът ги поставя автоматично от данните на преписката точно преди твоите абзаци. При първо споменаване на нормативен акт се използва пълното му официално наименование, след което утвърденото кратко име. Само когато Наредбата за ОС е приложима и обоснована от експертно потвърдените мотиви, пълното ѝ наименование може да бъде въведено служебно от модула; не я представяй като универсално приложима. Не започвай с „Във връзка с представения предмет“ или „се уведомява следното“ — въвеждащият абзац е служебно добавен. Започни направо с конкретната нормативна констатация или изричното искане. Не включвай неизведени от документацията изисквания за емисии, отпадъци, технологии или разрешителни: всеки поискан параметър трябва да е свързан с определен липсващ факт и относим правен критерий. Избягвай общи формулировки като „режим на изчакване“, „цялостна техническа документация“ и „обърне необходимото внимание“. Не въвеждай нови факти чрез предположения. Започни директно със съществената административна констатация и изложи конкретно какъв е предметът на писмото — какво уведомяваш или какви точно данни се изискват за конкретно установения предмет на преписката. Посочи конкретни фактически характеристики само ако действително са необходими, а не общ списък с документация. Номерът и датата не се измислят. Не искай общи неопределени документи. Без лого, футър, подписи и технически коментари. Не пишѝ, че писмото или актът вече е издаден, че органът вече се е произнесъл или че процедурата се прекратява, ако това не следва от потвърденото направление и доказаните факти. Не включвай самостоятелна заключителна самооценка на анализа, твърдения за задължителни срокове, правни последици или прекратяване без установено основание. Не добавяй информация за публично обявяване, публикуване на интернет страница или автоматично прекратяване, освен когато това е предметът на експертно потвърденото административно действие и нормативното основание е установено. Не използвай изрази „това писмо има функциите на формален акт“, „настоящият административен акт“, „настоящото писмо е издадено“ или разказвателни обяснения за дейността на органа. Описвай конкретния резултат от правната преценка и конкретните сведения, които се изискват от възложителя. Изрично формулирай отделна конкретна правна констатация след фактическите данни. Ако доказателствата установяват, че приложимият предмет е извън обхвата на чл. 2, ал. 1, но попада в обхвата на чл. 2, ал. 2 от Наредбата за ОС, посочи това с точната разпоредба и фактите, които подкрепят избора. Ако съдържанието на представената информация покрива приложимите реквизити, може да формулираш, че тя се приема като уведомление по приложение № 1 към чл. 10, ал. 1, част Б от Наредбата за ОС. Това НЕ е универсален или задължителен абзац: не заявявай достатъчност на уведомлението, когато липсват данни за съществените му реквизити; тогава посочи конкретно доказаните липси. Правната квалификация и преценката за пълнота са различни проверки. Формулирай заключението в гласа на компетентния административен орган, а не като академичен анализ. При липсващи технически данни формулирай обективно необходимите параметри, а не искане възложителят да извърши правна категоризация. Използвай деловия стил на утвърдените образци на РИОСВ – Пловдив, без да пренасяш факти и заключения от други преписки. Не извеждай липса на въздействия единствено от липса на пространствено пресичане. Не възлагай правната квалификация на възложителя; когато се искат допълнителни данни, посочи само конкретни фактически характеристики. При противоречие между предложението и нормативна предпоставка запази направлението, но отбележи проблема за експертна проверка извън текста на писмото, без да измисляш решение. Стилът е на компетентния административен орган, не на външен коментатор: говори на адресата с „Уведомявам Ви“, „Изисквам да представите“ или „Необходимо е да представите“ когато съответства на основанията; не използвай „компетентният орган следва“, „възложителят следва да бъде уведомена“, „предлага се на органа“, „целесъобразно е да бъде изпратено“ или разказ за бъдещи действия на органа. Различавай установен факт, нормативна предпоставка, правен извод и конкретно указание. Не прави отрицателен категоричен извод за приложения № 1 и № 2, ако едновременно липсват данни, нужни за категоризирането; тогава посочи конкретната доказателствена граница и кои параметри липсват. Не обосновавай само с липса на промяна на предназначение извод за ОС; проверявай относимите предпоставки по чл. 2, ал. 1 и ал. 2 по конкретните факти. Ако потвърденото направление или доказателствата са вътрешно противоречиви, не прикривай това с окончателен правен извод — формулирай неутрално само проверените сведения и върни бележка за експертна проверка. Никога не изисквай възложителят да извършва сам правна категоризация. При възможност пиши от първо лице единствено число на директора като компетентен административен орган, без да твърдиш, че документът вече е издаден. Избягвай повторение на служебната бланка, входящия номер, адресата, заглавието на документа и текста „Относно:“: те се добавят отделно от системата. Текстът подлежи на последващо експертно потвърждение; след това експертните редакции имат абсолютен приоритет.";
  const facts=JSON.stringify({selectedDirection:match[0],documentTitle:title,incomingReference:safeReference,subject:input.subject,scope:input.scope,
  expertConfirmedProposal:input.confirmedStage4Text,
- expertConfirmedQualification:input.qualificationRecord||null,
+ expertConfirmedQualification:independentExpert?null:(input.qualificationRecord||null),
+ independentExpertDecision:independentExpert,
  parcelIds:Array.isArray(input.parcelIds)?input.parcelIds.slice(0,80):[],
  warnings:Array.isArray(input.warnings)?input.warnings.slice(0,12):[]});
  const response=await fetch("https://api.openai.com/v1/responses",{method:"POST",signal:controller.signal,
  headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
  body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:3700,
- input:[{role:"system",content:directionRules+instructions},{role:"user",content:facts}]})});
+ input:[{role:"system",content:expertRule+directionRules+instructions},{role:"user",content:facts}]})});
  if(!response.ok)return reply({error:"Author provider unavailable",providerStatus:response.status},502);
  const data=await response.json();
  let draft=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
@@ -860,7 +903,7 @@ async function handleStage5Document(request,env){
 
  const editorialFlags=[];
  const categoricalOutside=/(?:не\s+попада|извън\s+обхвата)\s+(?:в|на)\s+(?:приложени[ея]|приложения)\s*№\s*[12]|не\s+попада\s+в\s+нито\s+една\s+от\s+категориите|не\s+се\s+отнася\s+към\s+(?:никоя|категориите)/iu.test(draft);
- if(uncertainCategories&&categoricalOutside)return reply({error:"UNSUPPORTED_CATEGORICAL_CONCLUSION",message:"Проектът твърди неприложимост, но конкретна нормативна предпоставка в Етап 4 е неопределена. Проверете посочените редове и доказателствата; изборът на панел не се променя автоматично.",findings:Object.entries(legalMatrix).filter(([,row])=>row?.status==="НЕОПРЕДЕЛЕНА").map(([test,row])=>({test,actual:row.status,reason:row.reason})),expertReviewRequired:true,projectOnly:true},422);
+ if(!independentExpert&&uncertainCategories&&categoricalOutside)return reply({error:"UNSUPPORTED_CATEGORICAL_CONCLUSION",message:"Проектът твърди неприложимост, но конкретна нормативна предпоставка в Етап 4 е неопределена. Проверете посочените редове и доказателствата; изборът на панел не се променя автоматично.",findings:Object.entries(legalMatrix).filter(([,row])=>row?.status==="НЕОПРЕДЕЛЕНА").map(([test,row])=>({test,actual:row.status,reason:row.reason})),expertReviewRequired:true,projectOnly:true},422);
  if(/(?:няма\s+липсващи\s+данни|не\s+са\s+установени\s+(?:липсващи|съществени\s+липси))[\s\S]{0,900}(?:липсват\s+(?:технически\s+)?данни|непълн(?:а|и)\s+(?:информация|данни))/iu.test(draft)||
  /(?:липсват\s+(?:технически\s+)?данни|непълн(?:а|и)\s+(?:информация|данни))[\s\S]{0,900}(?:няма\s+липсващи\s+данни|не\s+са\s+установени\s+(?:липсващи|съществени\s+липси))/iu.test(draft))
    editorialFlags.push("Вътрешно противоречие относно пълнотата на данните — необходима е експертна редакция.");
@@ -891,13 +934,13 @@ export default {
  async fetch(request,env) {
   const url=new URL(request.url);
   const origin=request.headers.get("Origin")||"";
-  if(request.method==="OPTIONS" && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||(url.pathname==="/stage4-proposal"||url.pathname==="/stage5-document"))) {
+  if(request.method==="OPTIONS" && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||(url.pathname==="/stage4-proposal"||url.pathname==="/stage5-document"||url.pathname==="/stage4-expert-decision"))) {
    if(origin!==ALLOWED_ORIGIN) return new Response(null,{status:403});
    return new Response(null,{status:204,headers:{"Access-Control-Allow-Origin":ALLOWED_ORIGIN,"Access-Control-Allow-Methods":"POST","Access-Control-Allow-Headers":"Authorization, Content-Type","Access-Control-Max-Age":"600","Vary":"Origin"}});
   }
-  if(origin===ALLOWED_ORIGIN && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||(url.pathname==="/stage4-proposal"||url.pathname==="/stage5-document")) && request.method==="POST") {
+  if(origin===ALLOWED_ORIGIN && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||(url.pathname==="/stage4-proposal"||url.pathname==="/stage5-document"||url.pathname==="/stage4-expert-decision")) && request.method==="POST") {
    // Return the same authenticated response with exact-origin CORS, never wildcard.
-   const response=url.pathname==="/stage5-document"?await handleStage5Document(request,env):(url.pathname==="/stage4-proposal")?await handleStage4Proposal(request,env):url.pathname==="/scope-improve"?await handleScopeImprove(request,env):url.pathname==="/subject-improve"?await handleSubjectImprove(request,env):await handleAuthor(request,env);
+   const response=url.pathname==="/stage4-expert-decision"?await handleExpertDecision(request,env):url.pathname==="/stage5-document"?await handleStage5Document(request,env):(url.pathname==="/stage4-proposal")?await handleStage4Proposal(request,env):url.pathname==="/scope-improve"?await handleScopeImprove(request,env):url.pathname==="/subject-improve"?await handleSubjectImprove(request,env):await handleAuthor(request,env);
    const h=new Headers(response.headers);h.set("Access-Control-Allow-Origin",ALLOWED_ORIGIN);h.set("Vary","Origin");
    return new Response(response.body,{status:response.status,headers:h});
   }
@@ -922,6 +965,6 @@ export default {
   if(request.method==="GET" && (url.pathname==="/" || url.pathname==="/health")) {
    return reply({service:"TPU Plovdiv AI Author V27",status:"online",stage4Contract:"KT115_EXPERT_PREVIEW_V1",stage5Contract:"KT117_DOCUMENT_DRAFT_V1",apiKeyConfigured:Boolean(env.OPENAI_API_KEY),aiGenerationEnabled:Boolean(env.OPENAI_API_KEY && (env.AI_AUTHOR_PASSWORD_V27 || env.AI_AUTHOR_ACCESS_TOKEN))});
   }
-  return url.pathname==="/stage5-document"?handleStage5Document(request,env):url.pathname==="/stage4-proposal"?handleStage4Proposal(request,env):url.pathname==="/scope-improve"?handleScopeImprove(request,env):url.pathname==="/subject-improve"?handleSubjectImprove(request,env):handleAuthor(request,env);
+  return url.pathname==="/stage4-expert-decision"?handleExpertDecision(request,env):url.pathname==="/stage5-document"?handleStage5Document(request,env):url.pathname==="/stage4-proposal"?handleStage4Proposal(request,env):url.pathname==="/scope-improve"?handleScopeImprove(request,env):url.pathname==="/subject-improve"?handleSubjectImprove(request,env):handleAuthor(request,env);
  }
 };
