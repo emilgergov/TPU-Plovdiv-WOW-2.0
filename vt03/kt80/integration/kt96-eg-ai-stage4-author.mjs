@@ -296,7 +296,32 @@ function boot(){
       UNKNOWN_QUALIFICATION_ROUTE:'Избраният панел липсва в утвърдения каталог',
       ARCHIVE_FULL_TEXT_UNAVAILABLE:'Пълните нормативни текстове не са налични'
     };
-    const issues=Array.isArray(data.qualityIssues)?data.qualityIssues.map(x=>(labels[x]||labels[String(x).split(':')[0]]||'Неизяснена нормативна предпоставка')+' ['+str(x)+']').slice(0,6):[];
+    // KT124-R3: translate technical validator diagnostics into one plain
+    // Bulgarian explanation per substantive issue. Codes remain in server
+    // records; never show them or duplicate synonymous errors to experts.
+    const explainIssue=value=>{
+      const code=str(value).split(':')[0];
+      if(['PANEL_01_NOT_SUPPORTED_BY_NEGATIVE_CLASSIFICATION','PANEL_01_CONTRADICTS_LEGAL_FACTS'].includes(code))
+        return 'Предложеното писмо по чл. 2, ал. 2 от Наредбата за ОС още не е достатъчно обосновано. Трябва да се установи защо предложението не попада в относимите категории по ЗООС и защо е приложима именно тази разпоредба.';
+      if(['REVIEW_UNAVAILABLE','REVIEW_UNREADABLE','INVALID_REVIEW'].includes(code))
+        return 'Независимият рецензент не е завършил проверката. Предложението остава работен проект.';
+      if(code==='INDEPENDENT_REJECTION')
+        return 'Рецензентът е установил съществени несъответствия в предложението, които не са отстранени.';
+      if(code==='REVIEW_REVISION_INVALID')
+        return 'Коригираната версия все още съдържа неизяснени правни или фактически основания.';
+      if(code==='MISSING_OR_UNORDERED_SECTIONS')
+        return 'В предложението липсва задължителна част от анализа или разделите не са подредени правилно.';
+      if(code==='UNDETERMINED_WITHOUT_DECISIVE_FACT'||code==='ALL_APPLICABILITY_TESTS_UNDETERMINED')
+        return 'Не е изяснена приложимостта на нормативните основания. Не е посочен конкретен липсващ факт, който да възпрепятства тази преценка.';
+      if(code==='UNVERIFIED_LEGAL_QUOTE'||code==='WRONG_ANNEX_REFERENCE'||code==='WRONG_OS_ARTICLE')
+        return 'Посоченото правно основание или цитат се нуждае от сверяване с точния текст на нормативния акт.';
+      if(code==='UNVERIFIED_CASE_QUOTE')
+        return 'Част от фактическите твърдения не са потвърдени от документите в преписката.';
+      if(code==='QUALIFICATION_REQUIRES_FOUR_TESTS'||code==='MISSING_QUALIFICATION_TEST')
+        return 'Нормативната съпоставка е непълна: необходимо е да се разгледат двете приложения към ЗООС и двете хипотези на чл. 2 от Наредбата за ОС.';
+      return labels[code]||'Има неизяснено основание, което изисква допълнителна проверка преди експертното потвърждение.';
+    };
+    const issues=[...new Set((Array.isArray(data.qualityIssues)?data.qualityIssues:[]).map(explainIssue))].slice(0,6);
     const checkPhase=data.qualityStage==='source_qualification'?' (проверка на доказателствените основания преди изготвяне на текста)':data.qualityStage==='author_repair'?' (след автоматичната преработка)':data.qualityStage==='independent_review'?' (независим нормативен преглед)':'';
     // KT115: show an unverified AI draft ONLY as expert-readable material.
     // The case-bound response is not cached, approved or exposed to Stage 5.
