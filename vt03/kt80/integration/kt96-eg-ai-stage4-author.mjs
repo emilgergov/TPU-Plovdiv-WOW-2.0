@@ -228,7 +228,7 @@ function boot(){
    constraints:{noInventedFacts:true,noInventedCitations:true,expertApprovalRequired:true,
     legalAppplicabilityMustBeVerified:true,legalApplicabilityMustBeVerified:true,neverIssueAct:true}
   };
-  const activityTicket=window.KT80Busy?.start?.('EG Автор · Изготвя нормативен проект за Етап 4…');
+  const activityTicket=window.KT80Busy?.start?.('ЕГ Автор → независим рецензент · Изготвяне и проверка на предложението…');
   try{
    const prepared=fitStage4Request(request);
    if(!prepared.payload){
@@ -313,13 +313,13 @@ function boot(){
       expanded.style.display='block';expanded.open=true;
       output.textContent='КОНСТАТИРАНИ ПРОБЛЕМИ:\n'+warnings+
        (findings.length?'\nСтановище на рецензента: '+findings.join('; '):'')+
-       '\n\nПЪЛЕН РАБОТЕН ТЕКСТ НА EG АВТОРА (ЗА ЕКСПЕРТНА РЕДАКЦИЯ):\n\n'+str(data.unverifiedDraft);
+       '\n\nРЕЦЕНЗИРАНО ПРЕДЛОЖЕНИЕ / РАБОТЕН ПРОЕКТ (ЗА ЕКСПЕРТЕН ПРЕГЛЕД):\n\n'+str(data.unverifiedDraft);
       output.style.display='block';
-      status.textContent='EG Авторът представи работен проект с отбелязани нормативни проблеми. Експертът може да го прочете и редактира; проектът не е одобрен и не се подава към Етап 5.';
+      status.textContent=(data.reviewed?'AI рецензентът представи коригирано предложение. ':'EG Авторът представи работен проект. ')+'Нормативните проблеми остават видими; проектът не е допуснат автоматично до Етап 5.';
       document.dispatchEvent(new CustomEvent('kt115:stage4-draft',{detail:{
        caseId:identity.caseId,evidenceRevision:h.evidenceRevision,requestId,
-       sourceDraft:str(data.unverifiedDraft),warnings:issues,qualityPassed:false,
-        reviewerVerdict:data.qualityStage==="independent_review"?"reject":"not_completed",
+       sourceDraft:str(data.unverifiedDraft),warnings:issues,qualityPassed:false,reviewed:data.reviewed===true,
+        reviewerVerdict:data.reviewVerdict||(data.qualityStage==="independent_review"?"reject":"not_completed"),
         reviewerFindings:Array.isArray(data.reviewFindings)?data.reviewFindings:[],
        originalCaseSignature:identity.signature,caseIdType:identity.caseIdType
       }}));
@@ -331,7 +331,7 @@ function boot(){
      document.dispatchEvent(new CustomEvent('kt124:stage4-attempt',{detail:{
       caseId:identity.caseId,evidenceRevision:h.evidenceRevision,requestId,
       sourceDraft:str(data.unverifiedDraft),warnings:issues,
-      reviewerVerdict:data.qualityStage==="independent_review"?"reject":"not_completed",
+      reviewerVerdict:data.reviewVerdict||(data.qualityStage==="independent_review"?"reject":"not_completed"),
       reviewerFindings:Array.isArray(data.reviewFindings)?data.reviewFindings:[],
       qualityStage:data.qualityStage,caseIdType:identity.caseIdType
      }}));
