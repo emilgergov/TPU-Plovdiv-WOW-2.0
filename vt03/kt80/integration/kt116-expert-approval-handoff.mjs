@@ -23,19 +23,53 @@ if(host&&five){
  conclusion.style.cssText='margin:13px 0;padding:14px;background:#244c36;border:1px solid #c1a165;border-radius:8px;font:14px/1.5 Verdana';
  const conclusionTitle=mk('h4','Заключение — предложена процедура');
  const currentRoute=mk('p','Очаква се рецензирано предложение.');
- const routeActions=mk('div');routeActions.style.cssText='display:flex;gap:18px;flex-wrap:wrap;margin:8px 0';
+ const routeActions=mk('div');routeActions.className='kt124-route-actions';
  const acceptLabel=mk('label'),acceptRadio=mk('input');acceptRadio.type='radio';acceptRadio.name='kt124Choice';acceptRadio.checked=true;
- acceptLabel.append(acceptRadio,mk('span',' Приемам предложената процедура'));
+ acceptLabel.className='kt124-route-choice';acceptLabel.append(acceptRadio,mk('span','Приемам предложената процедура'));
  const changeLabel=mk('label'),changeRadio=mk('input');changeRadio.type='radio';changeRadio.name='kt124Choice';
- changeLabel.append(changeRadio,mk('span',' Определям друга процедура'));
+ changeLabel.className='kt124-route-choice';changeLabel.append(changeRadio,mk('span','Определям друга процедура'));
  routeActions.append(acceptLabel,changeLabel);
- const routeSelect=mk('select');routeSelect.hidden=true;routeSelect.style.cssText='width:100%;max-width:850px;background:#fffdf5;color:#153827;padding:10px;border-radius:7px;font:13px Verdana';
- routeTitles.forEach((title,i)=>{const opt=mk('option',String(i+1).padStart(2,'0')+' — '+title);opt.value=String(i+1);routeSelect.append(opt)});
+ // The native Windows dropdown ignores the application's visual theme.
+ // Keep a real select for data binding, but present an accessible custom chooser.
+ const routeSelect=mk('select');routeSelect.hidden=true;
+ const routePicker=mk('details');routePicker.className='kt124-route-picker';routePicker.hidden=true;
+ const routeSummary=mk('summary','Избери процедура от каталога');
+ const routeMenu=mk('div');routeMenu.className='kt124-route-menu';
+ const updateRouteSummary=()=>{const i=Number(routeSelect.value)-1;routeSummary.textContent=i>=0&&i<routeTitles.length?
+  String(i+1).padStart(2,'0')+' — '+routeTitles[i]:'Избери процедура от каталога'};
+ routeTitles.forEach((title,i)=>{
+  const opt=mk('option',String(i+1).padStart(2,'0')+' — '+title);opt.value=String(i+1);routeSelect.append(opt);
+  const item=mk('button',String(i+1).padStart(2,'0')+' — '+title);item.type='button';item.className='kt124-route-item';
+  item.onclick=()=>{routeSelect.value=String(i+1);updateRouteSummary();routePicker.open=false};
+  routeMenu.append(item);
+ });
+ routePicker.append(routeSummary,routeMenu);
  const routeInfo=mk('p','Решението за процедурата принадлежи на експерта. Не се изисква спор с AI рецензента.');
  routeInfo.style.cssText='font:12px/1.5 Verdana;color:#ebd8a7';
- conclusion.append(conclusionTitle,currentRoute,routeActions,routeSelect,routeInfo);
- const toggleChoice=()=>{routeSelect.hidden=!changeRadio.checked};
- acceptRadio.onchange=toggleChoice;changeRadio.onchange=toggleChoice;
+ conclusion.append(conclusionTitle,currentRoute,routeActions,routeSelect,routePicker,routeInfo);
+ const toggleChoice=()=>{
+  acceptLabel.classList.toggle('selected',acceptRadio.checked);
+  changeLabel.classList.toggle('selected',changeRadio.checked);
+  routePicker.hidden=!changeRadio.checked;
+  if(!changeRadio.checked)routePicker.open=false;
+ };
+ acceptRadio.onchange=toggleChoice;changeRadio.onchange=toggleChoice;toggleChoice();
+ const choiceStyle=mk('style');
+ choiceStyle.textContent=`
+ #kt124ReviewedConclusion .kt124-route-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:15px 0}
+ #kt124ReviewedConclusion .kt124-route-choice{display:flex;align-items:center;justify-content:center;cursor:pointer;text-align:center;min-height:58px;padding:9px 15px;border:2px solid #bca56d;border-radius:9px;background:#193e2e;color:#f6e6bc;font:700 15px/1.45 Verdana,Arial;box-sizing:border-box;transition:background .15s,border-color .15s}
+ #kt124ReviewedConclusion .kt124-route-choice.selected{background:#d9b874;color:#173c2c;border-color:#f3d994;box-shadow:inset 0 0 0 2px #173c2c}
+ #kt124ReviewedConclusion .kt124-route-choice:focus-within{outline:3px solid #fff0bd;outline-offset:2px}
+ #kt124ReviewedConclusion .kt124-route-choice input{width:18px;height:18px;accent-color:#173c2c;margin:0 12px 0 0;flex-shrink:0}
+ #kt124ReviewedConclusion .kt124-route-picker{max-width:100%;border:2px solid #d9b874;border-radius:9px;background:#193b2c;color:#f7eac9;margin:0 0 14px;overflow:hidden}
+ #kt124ReviewedConclusion .kt124-route-picker summary{cursor:pointer;padding:14px 18px;font:700 15px/1.45 Verdana,Arial;list-style-position:inside}
+ #kt124ReviewedConclusion .kt124-route-picker summary:focus-visible{outline:3px solid #f1cf86;outline-offset:-3px}
+ #kt124ReviewedConclusion .kt124-route-menu{max-height:290px;overflow-y:auto;padding:6px;border-top:1px solid #9f8b57;background:#102f24}
+ #kt124ReviewedConclusion .kt124-route-item{display:block;width:100%;box-sizing:border-box;text-align:left;border:0;border-bottom:1px solid #335846;background:transparent;color:#f5ecd8;padding:11px 13px;font:14px/1.45 Verdana,Arial;cursor:pointer}
+ #kt124ReviewedConclusion .kt124-route-item:hover,#kt124ReviewedConclusion .kt124-route-item:focus-visible{background:#d9b874;color:#163a2a;outline:0}
+ @media(max-width:700px){#kt124ReviewedConclusion .kt124-route-actions{grid-template-columns:1fr}#kt124ReviewedConclusion .kt124-route-choice{justify-content:flex-start}}
+ `;
+ document.head.append(choiceStyle);
  const actorLabel=mk('label','Експерт — име или служебен идентификатор');const actor=mk('input');actor.maxLength=120;actorLabel.append(actor);
  const actions=mk('div');actions.className='actions';
  const change=mk('button','Редактирай целия текст'),confirm=mk('button','Потвърди и продължи към Етап 5'),storeEdit=mk('button','Запази редакцията'),cancel=mk('button','Откажи редакцията');
@@ -115,7 +149,7 @@ if(host&&five){
   const identified=text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu);
   const id=Number(identified?.[1]||0);
   currentRoute.textContent=id>=1&&id<=22?String(id).padStart(2,'0')+' — '+routeTitles[id-1]:'Липсва конкретно предложен панел от каталога.';
-  conclusion.hidden=false;routeSelect.value=String(id||1);
+  conclusion.hidden=false;routeSelect.value=String(id||1);updateRouteSummary();toggleChoice();
   next.hidden=!approved;archiveMenu.hidden=!approved;save.hidden=!approved;password.hidden=!approved;
  }
  function render5(){
