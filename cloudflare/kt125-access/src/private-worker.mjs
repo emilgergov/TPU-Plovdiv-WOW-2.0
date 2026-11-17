@@ -20,7 +20,7 @@ const accessRoute=new RegExp("^/kt125/cases/("+pathId+")/access$");
 const grantsRoute=new RegExp("^/kt125/cases/("+pathId+")/grants$");
 const revokeRoute=new RegExp("^/kt125/cases/("+pathId+")/grants/("+pathId+")$");
 const managementRoute=/^\/kt125\/admin\/(users|cases|audit)$/;
-const privatePanelRoute=/^\/kt125\/admin\/panel\/(overview|users|cases|audit)$/;
+const privatePanelRoute=/^\/kt125\/admin\/panel\/(overview|users|roles|cases|audit)$/;
 
 function validPrivateMutationOrigin(request,env){
  try{
@@ -52,10 +52,10 @@ export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid
      teamDomain:env.KT125_ACCESS_TEAM_DOMAIN,audience:env.KT125_ACCESS_AUD
     });
   if(privatePanel&&request.method==="GET"){
-   if(privatePanel[1]==="overview"){
+   if(privatePanel[1]==="overview"||privatePanel[1]==="roles"){
     const actor=await kt125ManagementPrincipal({request,verifier,db:env.KT125_DB});
     if(!actor||!["egmaster","administrator"].includes(actor.role))return deny();
-    return kt125PrivateHtmlResponse(renderKT125PrivatePage({section:"overview"}));
+    return kt125PrivateHtmlResponse(renderKT125PrivatePage({section:privatePanel[1]}));
    }
    const result=await readKT125Management({
     request,verifier,db:env.KT125_DB,section:privatePanel[1]
