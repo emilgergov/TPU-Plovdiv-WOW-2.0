@@ -15,14 +15,12 @@ export const KT125_ROLES=Object.freeze([
 const ACTIONS=new Set(KT125_ACTIONS),ROLES=new Set(KT125_ROLES);
 const CASE_ACTIONS=new Set(KT125_ACTIONS.filter(x=>x.startsWith("case.")||x.startsWith("document.")));
 const SELF_ACTIONS=new Set(["case.read","case.edit","case.review","case.confirm","document.generate","case.archive"]);
-const REVIEW_ACTIONS=new Set(["case.read","case.review"]);
 const DELEGABLE=new Set(["case.read","case.edit","case.review","case.confirm","document.generate"]);
 const MANAGEMENT=Object.freeze({
  "egmaster":new Set(["users.manage","config.manage","audit.read"]),
  "administrator":new Set(["users.manage","config.manage"]),
  "expert":new Set(),"reviewer":new Set(),"delegated_expert":new Set()
 });
-const own=(obj,key)=>Object.prototype.hasOwnProperty.call(obj,key);
 const str=v=>typeof v==="string"?v.trim():"";
 const validId=v=>str(v).length>0&&str(v).length<=200;
 const reject=reason=>Object.freeze({allowed:false,reason});
@@ -52,7 +50,7 @@ export function authorizeKT125({principal,resource,action,grants=[],nowMs}={}){
     !validId(resource.organizationId))return reject("MISSING_TRUSTED_RESOURCE");
  if(resource.organizationId!==principal.organizationId)
   return reject("OUTSIDE_ORGANIZATION");
- if(resource.status==="sealed"&&action!=="case.read"&&action!=="case.review")
+ if((resource.status==="sealed"||resource.status==="archived")&&action!=="case.read"&&action!=="case.review")
   return reject("SEALED_CASE");
  // EGMASTER and administrator have no implicit dossier access.
  if(resource.ownerId===principal.userId&&roles.includes("expert")){
@@ -65,6 +63,8 @@ export function authorizeKT125({principal,resource,action,grants=[],nowMs}={}){
   grant?.granteeId===principal.userId&&
   grant?.revoked!==true&&grant?.active===true&&
   validId(grant?.grantorId)&&
+  // Delegations cease to confer rights when the case owner changes.
+  grant.grantorId===resource.ownerId&&
   Number.isFinite(grant?.notBeforeMs)&&
   Number.isFinite(grant?.expiresAtMs)&&
   grant.notBeforeMs<=nowMs&&nowMs<grant.expiresAtMs&&
