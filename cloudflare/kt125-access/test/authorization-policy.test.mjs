@@ -35,6 +35,9 @@ const grant={
  notBeforeMs:now-1000,expiresAtMs:now+1000
 };
 check({principal:bob,resource:caseA,action:"case.read",grants:[grant]},true);
+check({principal:bob,resource:{...caseA,ownerId:"new-owner"},action:"case.read",grants:[grant]},false);
+check({principal:bob,resource:{...caseA,status:"archived"},action:"case.edit",grants:[{...grant,actions:["case.edit"]}]},false);
+
 check({principal:bob,resource:caseA,action:"case.review",grants:[grant]},true);
 check({principal:bob,resource:caseA,action:"case.edit",grants:[grant]},false);
 check({principal:bob,resource:caseA,action:"case.delegate",grants:[grant]},false);
