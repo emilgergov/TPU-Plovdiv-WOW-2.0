@@ -47,7 +47,7 @@ function quoteVerified(source,quote){
 // If the factual and legal category cannot be traced, leave it unverified.
 const significantTokens=value=>{
  const generic=new Set(["инвестици","предложен","дейност","производ","инсталац","съоръжен","изграждан","приложен","относим","установе","категори","обект","техниче","промишле","площадка","предвижд","включите","граници","документ","използва","съгласно","разположе","територ","предприят","свързани"]);
- return [...new Set((tidy(value).toLocaleLowerCase("bg").match(/[\\p{L}]{6,}/gu)||[])
+ return [...new Set((tidy(value).toLocaleLowerCase("bg").match(/[А-Яа-яA-Za-z]{6,}/gu)||[])
   .map(w=>w.slice(0,Math.min(w.length,9)))
   .filter(w=>!generic.has(w.slice(0,Math.min(w.length,9)))&&
     ![...generic].some(g=>w.startsWith(g.slice(0,6)))) )];
