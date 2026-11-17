@@ -1,0 +1,40 @@
+name: KT125 - enable approved email OTP provider once
+on:
+  push:
+    branches: [work/kt125-access-register-from-kt124-r6]
+    paths: ['.github/workflows/kt125-enable-email-otp.yml']
+permissions:
+  contents: read
+jobs:
+  approved-otp-provider:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Add only the approved email OTP method; preserve providers and policies
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+        run: |
+          node --input-type=module <<'NODE'
+          if(!process.env.CF_TOKEN)throw Error("Existing credential unavailable");
+          const endpoint="https://api.cloudflare.com/client/v4/accounts/"+process.env.CF_ACCOUNT+"/access/identity_providers";
+          const headers={Authorization:"Bearer "+process.env.CF_TOKEN,"Content-Type":"application/json"};
+          async function call(method,body){
+            const r=await fetch(endpoint,{method,headers,redirect:"error",signal:AbortSignal.timeout(30000),
+              ...(body?{body:JSON.stringify(body)}:{})});
+            const d=await r.json().catch(()=>null);
+            console.log("OTP_PROVIDER_"+method+": HTTP "+r.status+", success="+Boolean(d?.success));
+            if(!r.ok||!d?.success)throw Error("Cloudflare did not permit the requested provider operation");
+            return d.result;
+          }
+          const before=await call("GET");
+          if(!Array.isArray(before))throw Error("Unexpected provider list");
+          const existing=before.filter(p=>p.type==="onetimepin");
+          if(existing.length>1)throw Error("Ambiguous OTP provider configuration; no changes");
+          if(!existing.length)await call("POST",{name:"WOW - Служебен код по имейл",type:"onetimepin",config:{}});
+          const after=await call("GET");
+          if(!Array.isArray(after)||!after.some(p=>p.type==="onetimepin"))throw Error("OTP provider not confirmed");
+          if(before.some(p=>!after.some(a=>a.id===p.id&&a.type===p.type)))throw Error("Existing provider preservation not confirmed");
+          console.log("OTP_PROVIDER_READY: "+JSON.stringify(after.filter(p=>p.type==="onetimepin").map(p=>({id:p.id,name:p.name,type:p.type}))));
+          console.log("POLICIES_UNCHANGED: no application, policy, domain, Worker, D1 or user-role write performed; no emails sent");
+          NODE
