@@ -35,6 +35,7 @@ jobs:
           node cloudflare/ai-author-v27/test/kt123-substance-guard.mjs
           node cloudflare/ai-author-v27/test/kt123-source-qualification-handoff.mjs
           node cloudflare/ai-author-v27/test/kt124-independent-expert-handoff.mjs
+          node cloudflare/ai-author-v27/test/kt124-browser-wiring.mjs
           node --check vt03/kt80/integration/kt124-expert-authority.mjs
           node --check vt03/kt80/integration/kt116-expert-approval-handoff.mjs
           node --check vt03/kt80/integration/kt117-stage5-document-author.mjs
