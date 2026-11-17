@@ -1,0 +1,93 @@
+{
+  "schema": "KT82_B1_SUBSTANTIVE_LEGAL_QA_ROUTES_13_22_V01",
+  "date": "2026-11-13",
+  "source_catalog": "kt80/KT80_E01_B_CONSOLIDATED_MATRIX_V01.json",
+  "status": "SOURCE_VERIFICATION_PARTIAL_NOT_FINAL_APPROVAL",
+  "routes": [
+    {
+      "id": 13,
+      "category": "INTERNAL_TOOL",
+      "role": "Експертно обобщение",
+      "legal_test": "Not an administrative act; protect source provenance, access, individual data and evidence"
+    },
+    {
+      "id": 14,
+      "category": "INTERNAL_TOOL",
+      "role": "Проверка на пълнота и допустимост",
+      "legal_test": "Special procedure controls mandatory annexes; no universal demands without legal basis"
+    },
+    {
+      "id": 15,
+      "category": "INTERNAL_TOOL",
+      "role": "ГИС справка за имоти и режими",
+      "legal_test": "GIS identifies properties, not legal conclusion; individual orders handled by separate resolver"
+    },
+    {
+      "id": 16,
+      "category": "INTERNAL_TOOL",
+      "role": "Архивен пакет",
+      "legal_test": "Provenance, dated versions, integrity and protected user-file access"
+    },
+    {
+      "id": 17,
+      "category": "PROCEDURAL_INTAKE",
+      "role": "Жалба",
+      "legal_test": "Check type and appealability of act, standing, special route, procedural deadline and destination; no automatic reuse of proposal/signal chapter"
+    },
+    {
+      "id": 18,
+      "category": "PROCEDURAL_INTAKE",
+      "role": "Сигнал",
+      "verified": [
+        "АПК чл.107 ал.1–2: separate default for signals with special-law override",
+        "АПК чл.111: form and registration; restrictions",
+        "АПК чл.113: prohibition on determining a complaint against self"
+      ],
+      "needs": "Relate to environmental special law and exact competence"
+    },
+    {
+      "id": 19,
+      "category": "PROCEDURAL_INTAKE",
+      "role": "Възражение",
+      "legal_test": "Depends on pending process and stage; do not automatically classify as AПК chapter eight signal"
+    },
+    {
+      "id": 20,
+      "category": "PROCEDURAL_ACTION",
+      "role": "Препращане",
+      "verified": [
+        "АПК чл.112: proposals/signals to incompetent authority transferred not later than 7 days with notice to submitter"
+      ],
+      "needs": "General administrative proceeding under АПК чл.31 is a distinct hypothesis; never use 7-day limit from Art.112 for all documents"
+    },
+    {
+      "id": 21,
+      "category": "PROCEDURAL_ACTION",
+      "role": "Уведомяване за проверка",
+      "legal_test": "Determine statutory power and documentary form according to case: supervision, signal, act, inspection report; not a universal automatic investigation"
+    },
+    {
+      "id": 22,
+      "category": "PROCEDURAL_INTAKE",
+      "role": "Предложение",
+      "verified": [
+        "АПК чл.107 ал.3 distinguishes proposal from signal, with legal special-procedure exception in ал.2"
+      ],
+      "needs": "Check final decision, legal competence, deadlines and acknowledgment under relevant special law"
+    }
+  ],
+  "official_source": "https://justice.government.bg/home/normdoc/2135521015",
+  "legal_citation_status": {
+    "confirmed_APK_chapter8_only": true,
+    "all_10_routes_legally_approved": false,
+    "no_classic_A_B_dependency": true
+  },
+  "noted_risks": [
+    "Article 112 seven-day forwarding applies to proposals/signals; not all case-file transfers",
+    "Proposal/signal and complaint/objection must not be conflated",
+    "Internal tools 13–16 cannot masquerade as independent final administrative decisions",
+    "Applies default APK only absent a statutory specific route"
+  ],
+  "next": "Read and cross-check APO ch. 5 and 8 including relevant amendments to 2026; per route official law/annex evidence and conditional subacts",
+  "technical_changes_to_live_app": false
+}

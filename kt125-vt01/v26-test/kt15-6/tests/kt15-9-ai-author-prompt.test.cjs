@@ -1,0 +1,13 @@
+'use strict';
+const assert=require('node:assert/strict');
+const author=require('../v26-ai-author-contract.js');
+const prompt=require('../v26-ai-author-prompt.js');
+assert.throws(()=>prompt.messages({ready:false}),/Непълна/);
+const request=author.prepareRequest({dossierId:'TEST-1',editorialBrief:{schema:'KT15_8_EDITORIAL_BRIEF_V1',subject:'Складове',expert:{sections:[]}},gis:{confirmed:true,source:'GIS',findings:[{result:'outside'}]},normative:{confirmed:true,source:'Normative',references:[{act:'ЗБР'}]}});
+assert.equal(request.ready,true);
+const messages=prompt.messages(request);
+assert.equal(messages.length,2);
+assert.equal(messages[0].role,'system');
+assert(messages[0].content.includes('не преписваш'));
+assert.equal(JSON.parse(messages[1].content).dossierId,'TEST-1');
+console.log('PASS KT15.9 AI author prompt contract');

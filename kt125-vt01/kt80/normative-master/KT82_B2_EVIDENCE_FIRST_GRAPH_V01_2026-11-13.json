@@ -1,0 +1,146 @@
+{
+  "schema": "KT82_B2_SUBJECT_FIRST_LEGAL_EVIDENCE_GRAPH_V01",
+  "date": "2026-11-13",
+  "documentary_basis": "KT82_B1_Normative_Master_V10_B1_ARCHIVE_FROZEN_2026-11-13.zip",
+  "source_policy": "ONLY_ARCHIVED_V10_NO_WEB",
+  "source_anchor_checks": [
+    [
+      "ЗООС",
+      "чл.92",
+      "core/ZOOS_2026_51.txt"
+    ],
+    [
+      "ЗООС",
+      "чл.93",
+      "core/ZOOS_2026_51.txt"
+    ],
+    [
+      "ЗБР",
+      "чл.31",
+      "core/ZBR_2024.txt"
+    ],
+    [
+      "Наредба ОС",
+      "чл.2",
+      "additions/N_OS_2025.txt"
+    ],
+    [
+      "Наредба ОС",
+      "чл.6а",
+      "additions/N_OS_2025.txt"
+    ],
+    [
+      "Наредба ОС",
+      "чл.12",
+      "additions/N_OS_2025.txt"
+    ],
+    [
+      "Наредба ОВОС",
+      "чл.4",
+      "additions/N_OVOS_2022.txt"
+    ],
+    [
+      "Наредба ОВОС",
+      "чл.4а",
+      "additions/N_OVOS_2022.txt"
+    ],
+    [
+      "Наредба ОВОС",
+      "чл.5",
+      "additions/N_OVOS_2022.txt"
+    ],
+    [
+      "Наредба ЕО",
+      "чл.8",
+      "additions/N_EO_2020.txt"
+    ],
+    [
+      "Наредба ЕО",
+      "чл.8а",
+      "additions/N_EO_2020.txt"
+    ],
+    [
+      "АПК",
+      "чл.31",
+      "texts/APK_f79d7532e8ce81b2.txt"
+    ]
+  ],
+  "workflow": [
+    {
+      "stage": 1,
+      "output": "Доказани и недоказани факти с произход от преписката"
+    },
+    {
+      "stage": 2,
+      "output": "Потвърден предмет и обхват; експертното решение има приоритет"
+    },
+    {
+      "stage": 3,
+      "output": "Факултативни имоти/ГИС, без измисляне на ПИ и задължителен PDF1"
+    },
+    {
+      "stage": 4,
+      "output": "Паралелни правни хипотези, преценени според доказаните факти и изключенията на V10"
+    },
+    {
+      "stage": 5,
+      "output": "Мотивирано предложение за процедура и документ СЛЕД правния анализ"
+    }
+  ],
+  "required_input_fields": [
+    "confirmed_subject",
+    "scope_confirmed",
+    "kind",
+    "facts_with_provenance",
+    "disputed_facts",
+    "optional_parcels"
+  ],
+  "hypotheses": [
+    {
+      "id": "eia_mandatory",
+      "if": "Инвестиционно предложение и доказан обхват приложение 1 ЗООС",
+      "law": "ЗООС чл.92"
+    },
+    {
+      "id": "eia_screening",
+      "if": "Инвестиционно предложение и доказана хипотеза по чл.93",
+      "law": "ЗООС чл.93"
+    },
+    {
+      "id": "os",
+      "if": "Приложими условия на ЗБР чл.31/Наредба ОС чл.2; самостоятелност или съвместяване се установяват след квалификация",
+      "law": "ЗБР чл.31; Наредба ОС чл.2,6а,12"
+    },
+    {
+      "id": "eo",
+      "if": "Доказан план или програма",
+      "law": "Наредба ЕО чл.8 и отделно чл.8а"
+    },
+    {
+      "id": "water",
+      "if": "Доказани водовземане, водоползване, заустване или вещества с контакт с води",
+      "law": "Наредба ОВОС чл.4а"
+    },
+    {
+      "id": "competence",
+      "if": "Установени материална и териториална компетентност",
+      "law": "ЗООС, Наредба ОС чл.6а, АПК чл.31"
+    }
+  ],
+  "strict_rules": [
+    "NO_CLASSIC_AB_INHERITANCE",
+    "NO_ROUTE_FIRST",
+    "NO_CATALOG22_AS_LEGAL_DECIDER",
+    "NO_AUTOMATIC_NEGATIVE_OS_FROM_NON_INTERSECTION",
+    "NO_REQUIRED_PARCEL_WHEN_NOT_APPLICABLE",
+    "NO_UNSUPPORTED_FINAL_ACT",
+    "ALWAYS_REASONED_NEXT_PROPOSAL",
+    "NO_WEBSITE_SEARCH_FOR_EVIDENCE"
+  ],
+  "approval": {
+    "B2_independent_model": "DRAFT_READY_FOR_CONTINUED_DEVELOPMENT",
+    "legal_case_signoff": false,
+    "KT80_runtime_integration": false,
+    "v27_35_modified": false
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "checkpoint": "KT47",
+  "result": "LIVE_PAGES_VERIFIED",
+  "verified_repo_sha": "37ffaa0479c86b5bddd03041d4b7f51543b7b80d",
+  "checks": [
+    "HTML serves KT47 loader",
+    "Restored approved A/B Word bridge with no unapproved rewrite",
+    "Verified EKATTE metadata from package",
+    "KT35-A.docx exact binary hash",
+    "KT39-B.docx exact binary hash",
+    "V27-R02.docx exact binary hash"
+  ]
+}

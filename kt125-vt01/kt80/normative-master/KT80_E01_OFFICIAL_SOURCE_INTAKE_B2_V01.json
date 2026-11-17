@@ -1,0 +1,99 @@
+{
+  "schema": "kt80-source-intake-v1",
+  "date": "2026-11-11",
+  "baseline": "v26-test/normative/offline/archive-manifest.json",
+  "locked_legacy_archive": true,
+  "items": [
+    {
+      "id": "BG-APK",
+      "kind": "code",
+      "title": "Административнопроцесуален кодекс",
+      "url": "https://justice.government.bg/home/normdoc/2135521015",
+      "routes": "17–22",
+      "archive_state": "CHECK_EXISTING_FIRST",
+      "full_official_text_verified": false,
+      "physical_copy_added_in_this_checkpoint": false
+    },
+    {
+      "id": "BG-NAREDBA-EO",
+      "kind": "ordinance",
+      "title": "Наредба за екологична оценка на планове и програми",
+      "url": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ekologichna-ocenka-na-planove-i-programi/",
+      "routes": "10–12",
+      "archive_state": "CHECK_EXISTING_FIRST",
+      "full_official_text_verified": false,
+      "physical_copy_added_in_this_checkpoint": false
+    },
+    {
+      "id": "BG-NAREDBA-OVOS",
+      "kind": "ordinance",
+      "title": "Наредба за ОВОС",
+      "url": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ocenka-na-vuzdejstvieto-vurhu-okolnata-sreda/",
+      "routes": "07–09",
+      "archive_state": "CHECK_EXISTING_FIRST",
+      "full_official_text_verified": false,
+      "physical_copy_added_in_this_checkpoint": false
+    },
+    {
+      "id": "MOEW-SERVICE-931",
+      "kind": "service_reference",
+      "title": "Преценяване необходимостта от ОВОС",
+      "url": "https://portal.moew.government.bg/bg/Home/Service?admUnitServiceId=8",
+      "routes": "07",
+      "archive_state": "CHECK_EXISTING_FIRST",
+      "full_official_text_verified": false,
+      "physical_copy_added_in_this_checkpoint": false
+    },
+    {
+      "id": "MOEW-SERVICE-2421",
+      "kind": "service_reference",
+      "title": "Решение по ОВОС",
+      "url": "https://portal.moew.government.bg/bg/Home/Service?admUnitServiceId=9",
+      "routes": "08",
+      "archive_state": "CHECK_EXISTING_FIRST",
+      "full_official_text_verified": false,
+      "physical_copy_added_in_this_checkpoint": false
+    },
+    {
+      "id": "MOEW-SERVICE-3018",
+      "kind": "service_reference",
+      "title": "Писмо за необходимите действия по ЕО",
+      "url": "https://portal.moew.government.bg/bg/Home/Service?admUnitServiceId=4",
+      "routes": "10",
+      "archive_state": "CHECK_EXISTING_FIRST",
+      "full_official_text_verified": false,
+      "physical_copy_added_in_this_checkpoint": false
+    },
+    {
+      "id": "MOEW-SERVICE-748",
+      "kind": "service_reference",
+      "title": "Преценяване необходимостта от ЕО",
+      "url": "https://portal.moew.government.bg/bg/Home/Service?admUnitServiceId=5",
+      "routes": "11",
+      "archive_state": "CHECK_EXISTING_FIRST",
+      "full_official_text_verified": false,
+      "physical_copy_added_in_this_checkpoint": false
+    },
+    {
+      "id": "MOEW-SERVICE-2467",
+      "kind": "service_reference",
+      "title": "Становище по ЕО",
+      "url": "https://portal.moew.government.bg/bg/Home/Service?admUnitServiceId=6",
+      "routes": "12",
+      "archive_state": "CHECK_EXISTING_FIRST",
+      "full_official_text_verified": false,
+      "physical_copy_added_in_this_checkpoint": false
+    },
+    {
+      "id": "MOEW-OS-TERMINATIONS",
+      "kind": "practice_reference",
+      "title": "Публикувани решения за прекратяване на ОС",
+      "url": "https://www.moew.government.bg/bg/priroda/natura-2000/ocenka-za-suvmestimost/resheniya-za-prekratyavane-na-procedurata-po-os/",
+      "routes": "09",
+      "archive_state": "CHECK_EXISTING_FIRST",
+      "full_official_text_verified": false,
+      "physical_copy_added_in_this_checkpoint": false
+    }
+  ],
+  "notes": "Контролен списък, не удостоверение за архивиране. Проверявай хешовете и документа; административната услуга е справка, не първичен нормативен акт."
+}

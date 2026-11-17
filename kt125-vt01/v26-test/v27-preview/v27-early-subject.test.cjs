@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict');const fs=require('node:fs');const vm=require('node:vm');const ctx={};
+for(const name of ['v27-case-evidence.js','v27-early-subject.js'])vm.runInNewContext(fs.readFileSync(__dirname+'/'+name,'utf8'),ctx);
+const evidence=ctx.V27CaseEvidence.create({documents:[{file:'notice.txt',text:'Складове за промишлени стоки в Пловдив.',facts:[{kind:'subject',value:'Складове за промишлени стоки в Пловдив.',quote:'Складове за промишлени стоки в Пловдив.'}]}]});
+const parcelIds=['56784.13.102','56784.13.105','56784.13.106'];
+const req=ctx.V27EarlySubject.requestFromCase({evidence,parcelIds,existingTitle:'Складове'});
+assert.equal(req.task,'subject_title');assert.equal(req.facts.length,1);
+const good={title:'Складове за промишлени стоки',subject:'Изграждане на складове в имоти '+parcelIds.join(', '),evidenceIds:[evidence.facts[0].id]};
+const ok=ctx.V27EarlySubject.validateSuggestion(good,{parcelIds,evidence});
+assert.equal(ok.accepted,true);
+assert.equal(ctx.V27EarlySubject.validateSuggestion({...good,subject:'Изграждане в имот 56784.13.102'},{parcelIds,evidence}).accepted,false);
+assert.equal(ctx.V27EarlySubject.validateSuggestion({...good,evidenceIds:['FAKE']},{parcelIds,evidence}).accepted,false);
+assert.equal(ctx.V27EarlySubject.validateSuggestion({...good,title:'идентификаторентификатор'},{parcelIds,evidence}).accepted,false);
+console.log('V27.1 P4 early subject validation: PASS');

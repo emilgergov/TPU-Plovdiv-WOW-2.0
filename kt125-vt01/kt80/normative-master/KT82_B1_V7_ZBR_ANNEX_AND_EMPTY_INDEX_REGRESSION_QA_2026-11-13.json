@@ -1,0 +1,59 @@
+{
+  "schema": "KT82_B1_V7_LEGAL_INDEX_REPAIR_AND_ZBR_ANNEX_QA",
+  "date": "2026-11-13",
+  "source_file": "ZAKON_za_biologichnoto_raznoobrazie24.pdf",
+  "source_description": "97-page APIS-marked PDF served by MOEW; editorial provenance separate from host domain",
+  "current_text_header": "ДВ, бр.70 от 20.08.2024",
+  "official_index": "https://www.moew.government.bg/bg/priroda/zakonodatelstvo/nacionalno-zakonodatelstvo/zakoni/",
+  "source_pdf": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/ZAKON_za_biologichnoto_raznoobrazie24.pdf",
+  "structural_checks": {
+    "zbr_pdf_pages": 97,
+    "zbr_pdf_sha256": "447dc1ff3175b4ba1c7d49fd78ef15e0d5b2d35777ded6cb361c6c2209715fd3",
+    "annexes_operative_found": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "annexes_explicitly_repealed": [
+      7,
+      8
+    ],
+    "articles_verified_in_consolidated_source": [
+      "чл.12а (ДВ88/2023)",
+      "чл.27 (ДВ88/2023)",
+      "чл.117а (ДВ88/2023)"
+    ],
+    "primary_2023_amendment": "ДВ бр.88/20.10.2023 user-supplied 4-page excerpt"
+  },
+  "index_regression": {
+    "issue": "V6 article page indexes for ZBR_2024 and ZOOS_2026_16 contained empty objects despite full source PDFs",
+    "corrected_in_v7": true,
+    "zbr_distinct_article_headers": 153,
+    "zoos_2026_16_distinct_article_headers": 252,
+    "article_indexes": "PDF page number is 1-based; lexical index, expert review still required"
+  },
+  "private_package": {
+    "file": "KT82_B1_Normative_Master_Local_Pack_V7_REVIEW.zip",
+    "sha256": "91b90f291a1246c183f5775f3bde80ae4122ed2d63726ec2c3a7745e4d41f7c4",
+    "size_bytes": 20604216,
+    "zip_integrity": "PASS",
+    "includes_all_v6_originals": true,
+    "public_pdf_upload": false
+  },
+  "version_uncertainty": "Official MOEW index lists ZBR last amendment DV70/2024. Web search indexes also yield inconsistent 2026 gazette metadata for a DV46/2026 entry, which previously resolved to DV88/2023 detail. Source-of-truth actual new amendment not independently established; do not mark absolute no-2026-amendment as certain.",
+  "remaining": [
+    "Primary-source corroboration for any post-2024 ZBR changes, if present",
+    "Date-specific and competence-specific legal validation for administrative routes",
+    "Other conditional subordinate acts only where a confirmed route requires them"
+  ],
+  "gates": {
+    "auto_citation": false,
+    "kt80_integration": false,
+    "v27_35_capsule_unchanged": true,
+    "classic_AB_not_mandatory_for_KT80": true
+  },
+  "status": "B1_STRUCTURAL_QA_PASS; LEGAL_EFFECTIVITY_FINAL_REVIEW_OPEN"
+}

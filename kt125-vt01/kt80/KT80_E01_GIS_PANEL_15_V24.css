@@ -1,0 +1,124 @@
+/* KT80 V24: focused full-width GIS map. Green/gold KT80, V27.35 controls retained. */
+#kt80FreeGISScreen{display:none;max-width:1740px;margin:0 auto;padding:16px 22px 32px;box-sizing:border-box}
+body[data-kt80-view="gis"] .kt80-dashboard,body[data-kt80-view="gis"] .frame{display:none!important}
+body[data-kt80-view="gis"] .kt80-dashboard-subnav{display:flex}
+body[data-kt80-view="gis"] #kt80FreeGISScreen{display:block}
+#kt80FreeGISScreen .kt80-free-gis{margin:0;background:#123a2a;padding:15px 18px 20px;border-color:#987c43}
+#kt80FreeGISScreen .kt80-free-gis>h3{font-size:21px;margin:0 0 4px}
+#kt80FreeGISScreen .kt80-free-gis>p{margin:4px 0 12px;color:#dae6d9}
+.kt80-gis-intake-compact{border:1px solid #ac9762;background:#1c4b37;border-radius:11px;padding:12px;margin:9px 0}
+.kt80-gis-intake-row{display:grid;grid-template-columns:115px minmax(170px,1fr) auto;gap:10px;align-items:center}
+.kt80-gis-intake-row label{font-weight:750;color:#f4db9c;font-size:13px}
+#kt80GISFreeInput{width:100%;min-height:48px;max-height:100px;resize:vertical;box-sizing:border-box;background:#fbfaf3;border:1px solid #ad996c;border-radius:7px;color:#1a3d2c;padding:10px;font:14px "Segoe UI",sans-serif}
+.kt80-gis-intake-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#kt80FreeGISScreen .kt80-gis-intake-actions button{padding:10px 14px;white-space:nowrap;border-radius:7px}
+#kt80FreeGISScreen #kt80GISFreeCheck{background:#244f3a;color:#f4dfab}
+.kt80-gis-intake-foot{font-size:12px;color:#d9e6d6;margin-top:6px}
+.kt80-gis-compact-status{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 9px}
+#kt80FreeGISScreen #kt80GISStatus,#kt80FreeGISScreen #kt80FullGISReady{font-size:12px;padding:7px 10px;margin:0;border-radius:6px}
+.kt80-gis-backup-compact{font-size:12px;flex-basis:100%;opacity:.92}
+.kt80-gis-index-compact{font-size:12px;flex-basis:100%}
+#kt80FreeGISScreen .kt80-gis-layout-v24{display:flex;flex-direction:column;gap:9px;align-items:stretch}
+#kt80FreeGISScreen #kt80GISMapWrap{width:100%;box-sizing:border-box;min-width:0;border-radius:11px}
+#kt80FreeGISScreen #kt80GISMap{width:100%;height:auto;aspect-ratio:1000/590;min-height:410px;max-height:72vh;background:#e7f0e7}
+#kt80FreeGISScreen .kt80-gis-toolbar{padding:9px 13px;gap:5px}
+#kt80FreeGISScreen .kt80-map-legend{gap:9px}
+#kt80FreeGISScreen .kt80-map-actions{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
+#kt80FreeGISScreen .kt80-map-actions button{padding:7px 10px}
+#kt80FreeGISScreen #kt80GISResults{display:flex;flex-wrap:wrap;gap:6px;max-height:115px;overflow:auto}
+#kt80FreeGISScreen .kt80-gis-row{flex:1 1 180px;padding:6px 10px}
+.kt80-gis-spatial-v24{border:1px solid #799b7c;border-radius:10px;background:#1b4634;padding:11px 14px}
+.kt80-gis-spatial-v24 h4{margin:0 0 7px;color:#f4d58f;font-size:17px}
+#kt80FreeGISScreen .kt80-gis-detail{margin:0;padding:8px 10px;border-radius:7px;display:block}
+#kt80FreeGISScreen #kt80GISDetail{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:4px 15px}
+#kt80FreeGISScreen #kt80GISDetail p{margin:3px 0;font-size:13px}
+#kt80FreeGISScreen .kt80-pi-master-compact{padding:8px 0 0;margin:8px 0 0;border:0;border-top:1px solid #64856a;background:transparent}
+#kt80FreeGISScreen .kt80-pi-master-compact h3{font-size:15px;margin:2px 0 4px}
+#kt80FreeGISScreen .kt80-pi-master-compact>p{margin:2px 0 7px}
+#kt80FreeGISScreen #kt80PIMasterStatus{padding:6px 8px;margin:5px 0}
+#kt80FreeGISScreen #kt80PIMasterResults{grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:7px}
+#kt80FreeGISScreen .kt80-pi-card{padding:9px}
+#kt80FreeGISScreen .kt80-pi-card p{font-size:12px}
+#kt80FreeGISScreen .kt80-pdf1-v24{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;margin:10px 0 0;border-radius:9px}
+#kt80FreeGISScreen .kt80-pdf1-v24>strong{color:#f4d58f}
+#kt80FreeGISScreen .kt80-pdf1-v24>p:not([id]){flex:1 1 220px;margin:0}
+#kt80FreeGISScreen #kt80PDF1Status{flex-basis:100%;margin:0;font-size:12px}
+.kt80-case-gis-note{font-size:12px;color:#d9e6d9}
+@media(max-width:900px){.kt80-gis-intake-row{grid-template-columns:1fr}.kt80-gis-intake-actions{justify-content:flex-start}#kt80FreeGISScreen{padding:9px}#kt80FreeGISScreen #kt80GISMap{min-height:290px;max-height:none}}
+
+/* KT80 V25 compact horizontal evidence — content remains identical and fully accessible. */
+#kt80FreeGISScreen .kt80-gis-spatial-v24{padding:10px 12px}
+#kt80FreeGISScreen .kt80-gis-spatial-v24 h4{margin-bottom:5px}
+#kt80FreeGISScreen .kt80-gis-detail{padding:7px 9px}
+#kt80FreeGISScreen .kt80-gis-detail>strong{display:none}
+#kt80FreeGISScreen #kt80GISDetail{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:stretch;gap:5px 7px}
+#kt80FreeGISScreen #kt80GISDetail>strong{grid-column:1/-1;font-size:12px}
+#kt80FreeGISScreen #kt80GISDetail>p{min-width:0;overflow-wrap:anywhere;font-size:12px;line-height:1.35;border-right:1px solid #c3d6c9;padding:2px 8px;margin:0}
+#kt80FreeGISScreen #kt80GISDetail>p:last-child{border-right:0}
+#kt80FreeGISScreen .kt80-pi-master-compact{margin:6px 0 0;padding:5px 0 0}
+#kt80FreeGISScreen .kt80-pi-master-compact>p{font-size:12px;line-height:1.3}
+#kt80FreeGISScreen #kt80PIMasterStatus{font-size:11px;padding:5px 8px}
+#kt80FreeGISScreen #kt80PIMasterResults{grid-template-columns:1fr}
+#kt80FreeGISScreen .kt80-pi-card{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px 8px;padding:9px 10px}
+#kt80FreeGISScreen .kt80-pi-card h4{grid-column:1/-1;margin:0 0 2px}
+#kt80FreeGISScreen .kt80-pi-card>p{border:1px solid #50755b;border-radius:5px;padding:7px 8px;margin:0;min-width:0;overflow-wrap:anywhere;line-height:1.35}
+#kt80FreeGISScreen .kt80-pi-card>p strong{display:block;color:#eaca80;margin-bottom:3px}
+#kt80FreeGISScreen .kt80-pi-card>p span{display:block;color:#eef6ed}
+#kt80FreeGISScreen .kt80-pi-card .kt80-pi-zones{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px;margin:2px 0;border-top:1px solid #597f62;padding-top:5px}
+#kt80FreeGISScreen .kt80-pi-zones>strong{margin:1px 0;color:#edd18c}
+#kt80FreeGISScreen .kt80-pi-zones>p{margin:0}
+#kt80FreeGISScreen .kt80-pi-card>p:last-child{grid-column:1/-1;padding:3px 8px;border:0;color:#c7dcc9}
+#kt80FreeGISScreen .kt80-pi-card>p:last-child strong,#kt80FreeGISScreen .kt80-pi-card>p:last-child span{display:inline;color:inherit}
+/* Common readable, bounded status strips in every workflow subpanel. */
+.kt80-tiny-status{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.kt80-stage-panel .kt80-hint,.kt80-stage-panel [role="status"]{overflow-wrap:anywhere}
+@media(max-width:1200px){
+ #kt80FreeGISScreen #kt80GISDetail{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #kt80FreeGISScreen .kt80-pi-card{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:680px){
+ #kt80FreeGISScreen #kt80GISDetail{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #kt80FreeGISScreen .kt80-pi-card{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #kt80FreeGISScreen .kt80-pi-card .kt80-pi-zones{grid-template-columns:1fr}
+}
+@media(max-width:430px){
+ #kt80FreeGISScreen #kt80GISDetail,#kt80FreeGISScreen .kt80-pi-card{grid-template-columns:1fr}
+}
+
+/* KT80 V26: visible validation feedback, red GIS context marker, no duplicate spatial heading. */
+#kt80FreeGISScreen #kt80GISFreeCheckStatus[data-check="valid"]{color:#f6e5aa;font-weight:650}
+#kt80FreeGISScreen #kt80GISFreeCheckStatus[data-check="invalid"]{color:#ffd5c3;font-weight:700}
+#kt80FreeGISScreen .kt80-parcel-locator{pointer-events:none}
+#kt80FreeGISScreen .kt80-parcel-locator-label{fill:#ba1224;stroke:#fff;stroke-width:4;paint-order:stroke;font:bold 18px Arial,sans-serif;pointer-events:none}
+#kt80FreeGISScreen .kt80-gis-detail>strong{display:none}
+
+/* KT80 V26 multi-parcel selection: active parcel clear; remaining records collapsed without information loss. */
+#kt80FreeGISScreen .kt80-pi-card.kt80-pi-active{border-color:#e5bd64;box-shadow:inset 0 0 0 1px rgba(229,189,100,.65)}
+#kt80FreeGISScreen .kt80-pi-card.kt80-pi-secondary{display:block;opacity:.92;padding:7px 10px}
+#kt80FreeGISScreen .kt80-pi-card.kt80-pi-secondary>p,#kt80FreeGISScreen .kt80-pi-card.kt80-pi-secondary>.kt80-pi-zones{display:none}
+#kt80FreeGISScreen .kt80-pi-card.kt80-pi-secondary h4{margin:0;font-size:12px}
+#kt80FreeGISScreen .kt80-gis-row:focus-visible{outline:3px solid #e8c36f}
+
+/* Selected parcel only — explicit override for author display:grid rules. */
+#kt80FreeGISScreen .kt80-pi-card[hidden]{display:none!important}
+#kt80FreeGISScreen .kt80-pi-card.kt80-pi-active{display:grid!important}
+#kt80FreeGISScreen .kt80-parcel-locator-label{fill:#b60b25!important;stroke:#fff!important;stroke-width:5!important;paint-order:stroke;font:bold 21px Arial,sans-serif}
+
+/* KT80 V28: map parcel selector is visually and semantically a single active selection. */
+#kt80FreeGISScreen .kt80-gis-row{cursor:pointer;transition:background-color .15s,box-shadow .15s}
+#kt80FreeGISScreen .kt80-gis-row.kt80-gis-row-selected,#kt80FreeGISScreen .kt80-gis-row[aria-pressed="true"]{background:#e4b95f!important;color:#193927!important;box-shadow:inset 0 0 0 2px #0c6542}
+#kt80FreeGISScreen #kt80GISResults{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+#kt80FreeGISScreen .kt80-gis-spatial-v24 h4{margin:0 0 6px}
+#kt80FreeGISScreen .kt80-gis-detail{border:1px solid #cad9cd}
+
+/* V29: Increase dashboard legibility without changing card dimensions or grid. */
+.kt80-dashboard-tile-text{font-size:15.5px!important;line-height:1.31!important}
+.kt80-dashboard-tile-legal{font-size:12.5px!important;line-height:1.31!important}
+.kt80-dashboard-tile-number{font-size:12px!important}
+.kt80-dashboard-tile{gap:8px!important;padding:13px 13px 12px!important}
+.kt80-dashboard-tile-arrow{font-size:23px!important}
+@media(max-width:1250px){.kt80-dashboard-tile-text{font-size:15px!important}.kt80-dashboard-tile-legal{font-size:12px!important}}
+
+/* V29: red map markers are usable controls, not decorative text. */
+#kt80FreeGISScreen [data-parcel-select]{pointer-events:all!important;cursor:pointer}
+#kt80FreeGISScreen [data-parcel-select]:focus{outline:0;filter:drop-shadow(0 0 4px #d21c2a)}

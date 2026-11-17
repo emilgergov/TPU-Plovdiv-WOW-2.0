@@ -1,0 +1,74 @@
+{
+  "schema": "KT82_B1_TWO_LAYER_NORMATIVE_AND_TERRITORIAL_REFERENCE_POLICY_V01",
+  "date": "2026-11-13",
+  "status": "ARCHITECTURE_APPROVED_READ_ONLY_NO_RUNTIME_CHANGE",
+  "decision": "General normative legal instruments are maintained in Normative MASTER. Individual orders for protected sites/territories are maintained via a separate registry/resolver. No mass collection of 32 protected-zone orders or the specific Sveti Duh order is a prerequisite for closing the general normative archive.",
+  "layers": {
+    "normative_master": {
+      "includes": [
+        "laws",
+        "ordinances",
+        "regulations",
+        "general procedural acts",
+        "annexes",
+        "version and effective-date rules"
+      ],
+      "excludes": [
+        "individual designation/amendment orders for protected zones and territories",
+        "case-specific parcel records"
+      ],
+      "completeness_gate": "mandatory full texts, annexes, effective dates, authoritative provenance and verified links for in-scope general legislation"
+    },
+    "territorial_orders_resolver": {
+      "includes": [
+        "Natura 2000 zone designation orders and amendments",
+        "protected territory designation/area/regime orders",
+        "effective date",
+        "source and document URL",
+        "zone/territory identifiers and geometry linkage"
+      ],
+      "lookup": "on demand by the exact identified protected zone/territory and applicable date",
+      "missing_order_behavior": "mark UNVERIFIED, retain source URL, request expert validation; do not fabricate order number, date or legal rule",
+      "not_a_preintegration_archive_requirement": true,
+      "protected_area_case": "Sveti Duh was only a test case, not mandatory fixed record"
+    }
+  },
+  "workflow": [
+    "case files and confirmed subject -> parcels -> GIS identifies intersecting zone/territory IDs (or relevant nearby zones for A)",
+    "resolve specific applicable orders from protected-site/territory sources with explicit category and effective date",
+    "retrieve general in-scope law from Normative MASTER and specific order from territorial resolver",
+    "propose a substantiated procedural route and expose evidence and uncertainty for expert confirmation; never automatically assert an unverifiable legal proposition"
+  ],
+  "separation_checks": {
+    "no_legal_inference_from_GIS_intersection_alone": true,
+    "no_automatic_order_citation_without_primary_source": true,
+    "no_destructive_deletion_of_historical_audit": true,
+    "no_writing_into_approved_documents": true,
+    "no_source_duplication": true,
+    "no_english_UI": true
+  },
+  "preintegration_gate": {
+    "required": [
+      "General normative MASTER full-text/annex/effective-date QA",
+      "route-based mapping to 22 administrative paths using general acts and statutory competence",
+      "dynamic territorial resolver must be designed and testable for relevant cases but need not prearchive every order",
+      "regression suite on existing A, B and B+ZT baselines"
+    ],
+    "not_required": [
+      "bulk download of all 32 designation orders as normative_master content",
+      "fixed Sveti Duh order as a general normative prerequisite"
+    ],
+    "integration_enabled": false
+  },
+  "supersedes_interpretation_of": [
+    "kt80/normative-master/KT82_B1_ZONE_ORDERS_AND_IAOS_AUDIT_V01_2026-11-13.json",
+    "kt80/normative-master/KT82_B1_PREINTEGRATION_INVENTORY_V02_2026-11-13.json",
+    "kt80/normative-master/KT82_B1_ZERO_GAPS_PREINTEGRATION_AUDIT_2026-11-13.json"
+  ],
+  "remaining_real_work": [
+    "Verify remaining general legal texts, amendments and annexes against authoritative sources",
+    "Determine which additional subordinate acts actually apply across 22 procedural routes",
+    "Build design contract for territory-order dynamic lookup with source validation and fallback",
+    "Only then approve integration through a separate control point"
+  ]
+}

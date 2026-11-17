@@ -1,0 +1,13 @@
+{
+  "checkpoint": "KT49",
+  "result": "LIVE_PAGES_VERIFIED",
+  "verified_repo_sha": "a294da392d386e5cba25d0d71e822cdd6fa6f055",
+  "checks": [
+    "HTML serves single KT49 KT42 evidence-restored loader",
+    "KT49 preserves A/B 5 impact headings and restores KT42 evidence source requirements",
+    "Verified EKATTE metadata from package",
+    "KT35-A.docx exact binary hash",
+    "KT39-B.docx exact binary hash",
+    "V27-R02.docx exact binary hash"
+  ]
+}

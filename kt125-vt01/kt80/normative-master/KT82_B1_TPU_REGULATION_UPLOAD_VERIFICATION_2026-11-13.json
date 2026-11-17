@@ -1,0 +1,39 @@
+{
+  "schema": "KT82_B1_UPLOADED_DOCUMENT_VERIFICATION_V01",
+  "document_id": "N-TPU",
+  "canonical_title": "Наредба за условията и реда за разработване и утвърждаване на териториални планове за управление на защитени зони",
+  "document_type": "наредба",
+  "legal_basis": "чл. 28, ал. 1 ЗБР",
+  "adoption": "ПМС № 236 от 07.11.2025 г.",
+  "promulgation": "ДВ, бр. 96 от 11.11.2025 г.",
+  "effective_from": "2025-11-11",
+  "uploaded_filename": "Naredba_TPU(2).pdf",
+  "file_pages": 13,
+  "file_bytes": 665325,
+  "sha256": "234dd8ee737ff3655d1afe307695406880622e6043a82cca16a9774a0399be76",
+  "content_check": {
+    "articles": "чл. 1–28 присъстват",
+    "annexes": [
+      {
+        "title": "Минимални изисквания за структурата и съдържанието на ТПУ",
+        "basis": "приложение към чл. 8, ал. 2",
+        "pdf_pages": "7–13"
+      }
+    ],
+    "spatial_data": "Приложение — изисквания за ГИС геобаза или SHP и WGS84 UTM 35N (стр. 12)",
+    "sensitive_data": "Приложение — лични данни и точни местоположения на чувствителни видове/местообитания в непублични приложения (стр. 13)"
+  },
+  "cross_reference": [
+    "ЗБР чл. 27, чл. 28",
+    "Правилник за устройството и дейността на РИОСВ чл. 6а",
+    "Нормативен MASTER R-N04 (стар указател, не е пълен текст)"
+  ],
+  "status": "CONTENT_AND_SHA256_INSPECTED_INPUT_NOT_YET_PUBLISHED_AS_PROJECT_ASSET",
+  "archiving_decision": "Uploaded document bears APIS attribution; refrain from copying PDF or full extracted text to public GitHub until distribution authorization or independently sourced publishable official PDF is confirmed. Preserve metadata and link in canonical registry; do not falsely mark public local asset available.",
+  "primary_official_source_candidate": "https://www.moew.government.bg/bg/priroda/zakonodatelstvo/nacionalno-zakonodatelstvo/naredbi-pravilnici-instrukcii-tarifi/",
+  "next_actions": [
+    "Намиране на публикуван официален оригинал за законно локално съхранение и индексиране.",
+    "Свързване на акт/редакция/разпоредба с каноничния индекс без дублиране на R-N04.",
+    "Проверка на програмните маршрути и ограниченията за прилагане."
+  ]
+}

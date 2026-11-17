@@ -1,0 +1,46 @@
+{
+  "schema": "KT82_B2_V07_FIVE_CONDITIONS_REPRODUCIBLE_ACCEPTANCE",
+  "date": "2026-11-13",
+  "single_source": "KT82_B1_Normative_Master_V10_B1_ARCHIVE_FROZEN_2026-11-13.zip",
+  "status": "OFFLINE_TECHNICAL_GATES_PASS_SUBSTANTIVE_B2_EXPERT_ACCEPTANCE_OPEN",
+  "test_method": "Executable cross-version source-constrained offline tests against locally mounted V10; not live KT80 and not a real case-file",
+  "test_total": 61,
+  "test_passed": 61,
+  "test_failed": 0,
+  "note": "Per-gate totals should be read from exported canonical V07 QA file; use that exact file if totals differ in this summary.",
+  "local_records": [
+    {
+      "path": "kt82_b2_subject_first/KT82_B2_ACCEPTANCE_GATES_QA_V07.json",
+      "sha256": "b94607b2171b2dca3d9930f5f2719a82af5517cfff60bc767f2302ff1f990ae0"
+    },
+    {
+      "path": "kt82_b2_subject_first/KT82_B2_ACCEPTANCE_PROTOCOL_V07.md",
+      "sha256": "67f31e49f5d500a4611d519f5d1c2d5352d667eac1ad579371cf18b45339322a"
+    }
+  ],
+  "passed_assertions": [
+    "V10 archive ZIP integrity and core source entries",
+    "14 V04 article SHA256+heading excerpts match exact V10 sources",
+    "tri-state and conflict-safe facts",
+    "no default RIOSV with incomplete competence triggers",
+    "calendar month end-of-month not hardcoded 30 days",
+    "separate OVOS notification and screening clocks",
+    "termination reminder included",
+    "independent expert-confirmed subject contract"
+  ],
+  "outstanding_legal_acceptance": [
+    "No real case-file checked with exact document/page/citation",
+    "No exhaustive case-specific competence determination including special exceptions",
+    "No complete event ledger and legally enforceable actual deadline computation",
+    "No proven exhaustive procedure exceptions for a real subject and verified actual input",
+    "No user expert signoff"
+  ],
+  "architecture": {
+    "V27_35_capsulated": true,
+    "classic_AB_presets_forbidden": true,
+    "KT80_new_author_subject_first": true,
+    "integrated_into_KT80": false,
+    "automatic_legal_citation": false
+  },
+  "recommended_next": "One representative dossier-based B2 scenario using its actual files and V10 as exclusive legal evidence; expert review of output. No web source searches."
+}

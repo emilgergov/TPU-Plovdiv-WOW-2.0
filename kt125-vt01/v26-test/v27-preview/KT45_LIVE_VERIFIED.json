@@ -1,0 +1,12 @@
+{
+  "checkpoint": "KT45",
+  "result": "LIVE_PAGES_VERIFIED",
+  "verified_repo_sha": "eb05a20f74343def4f2455dd6f2c8ea0573ebc15",
+  "checks": [
+    "HTML serves KT45 loader",
+    "Live Word bridge contains KT45 safeguards",
+    "KT35-A.docx accessible",
+    "KT39-B.docx accessible",
+    "V27-R02.docx accessible"
+  ]
+}

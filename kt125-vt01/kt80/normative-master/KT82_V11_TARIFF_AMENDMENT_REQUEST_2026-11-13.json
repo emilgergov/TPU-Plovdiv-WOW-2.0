@@ -1,0 +1,28 @@
+{
+  "schema": "KT82_V11_TARIFF_AMENDMENT_REQUEST_V01",
+  "date": "2026-11-13",
+  "requested_by": "Project owner",
+  "purpose": "Include full Tariff of fees collected within the MOEW system as a standalone normative source for independent KT80 author, not a fee copied from another administrative letter",
+  "existing_locked_source": "KT82_B1_Normative_Master_V10_B1_ARCHIVE_FROZEN_2026-11-13.zip",
+  "audit": {
+    "tariff_as_standalone_document_in_V10": false,
+    "partial_tariff_references_in_V10": [
+      "additions/N_EO_2020.txt",
+      "additions/N_OVOS_2022.txt",
+      "official_sources/N_OVOS_MOEW_WEBSITE_2026-11-13.txt"
+    ],
+    "tariff_amount_in_example_letter": "255,65 евро — case datum only, not a general norm"
+  },
+  "next_version": "V11_ONLY_AFTER_USER_SUPPLIES_COMPLETE_TARIFF_DOCUMENT",
+  "required_material": "Owner-provided full tariff text, including available amendments and annexes; no external web lookup",
+  "integration_rules": [
+    "Preserve V10 byte-identical",
+    "Append tariff as new identifiable source with text and index",
+    "Match charged service and relevant fee item on evidence-based procedure determination, never route-first",
+    "No inferred fee based on sample letter",
+    "Make date-of-applicability and exemptions explicit",
+    "Require expert review before calculating or citing fee in output"
+  ],
+  "status": "APPROVED_SCOPE_CHANGE_WAITING_FOR_NORMATIVE_SOURCE_FILE",
+  "runtime_changes": false
+}

@@ -1,0 +1,71 @@
+{
+  "schema": "KT82_B1_DOCUMENT_VERIFICATION_V01",
+  "document_id": "NAO",
+  "title": "Наредба за административното обслужване",
+  "received_filename": "NAO2022_2245.pdf",
+  "uploaded_file": {
+    "format": "PDF",
+    "pages": 63,
+    "bytes": 1148138,
+    "sha256": "631396160ccf2afdfd84182bbcd2642a7c5cc909458153715adace626d77fb82",
+    "pdf_creator": "Microsoft Word 2016",
+    "pdf_creation_date": "2023-04-27"
+  },
+  "enactment": {
+    "accepted": "ПМС № 246 от 13.09.2006 г.",
+    "promulgated": "ДВ, бр. 78/2006",
+    "last_amendment_in_file": "ДВ, бр. 47/2022"
+  },
+  "official_crosscheck": {
+    "government_hosted_full_pdf": "https://www.mlsp.government.bg/uploads/3/administrativno-obsluzhvane/za-administrativno-obsluzhvane-izm-dv-br-47-ot-2022-g.pdf",
+    "same_amendment_stated": "ДВ, бр. 47/2022",
+    "secondary_crosscheck": "https://magistrat.bg/laws/cb4fe2532ef3",
+    "secondary_consolidation_note": "Консолидиран текст към 27.09.2026 без по-късно изменение (информация от сайта; не официално удостоверяване)"
+  },
+  "annex_check": {
+    "present": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8"
+    ],
+    "annex_3": "Отменено, ДВ бр.90/2021, в сила 01.04.2022",
+    "core_items": [
+      "Приложение № 1 — протокол за устно искане",
+      "Приложение № 2 — заявление за комплексно административно обслужване",
+      "Приложения № 5–6 — стандартизирани образци за общински услуги",
+      "Приложение № 7 — общи стандарти за качество",
+      "Приложение № 8 — препоръчителни стандарти"
+    ]
+  },
+  "article_checks": [
+    "чл. 1–2 — обхват и принципи",
+    "чл. 5–8 — подаване, регистрация и прием",
+    "чл. 11–14 — служебно събиране на информация",
+    "чл. 14а–14е — комплексно административно обслужване",
+    "чл. 15–17 — информация и регистър на услугите",
+    "чл. 20 — стандарти за качество"
+  ],
+  "master": {
+    "canonical_id": "NAO",
+    "already_in_60_record_manifest": false,
+    "source": "user_upload",
+    "status": "CONTENT_AND_HASH_CHECKED_FULL_FILE_NOT_YET_MIRRORED_AS_GITHUB_ASSET",
+    "reference_policy": "only one canonical legal act; separate version status; no duplicate reference"
+  },
+  "authorisation": {
+    "stage4": false,
+    "stage5": false,
+    "pdf2": false,
+    "automatic_legal_citation": false
+  },
+  "next": [
+    "Full local archive registration with bytes and article/annex index",
+    "Cross-reference APK/Закон за администрацията/ЗЕУ and electronic registry regulations",
+    "Do not change approved generator/Word/GIS baselines"
+  ]
+}

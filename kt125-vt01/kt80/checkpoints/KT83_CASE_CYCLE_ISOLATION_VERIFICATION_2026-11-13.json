@@ -1,0 +1,56 @@
+{
+  "schema": "KT83_CASE_CYCLE_ISOLATION_VERIFICATION_V1",
+  "date": "2026-11-13",
+  "scope": "Review per-case identity, browser state, asynchronous processing, EG temporary token, and Cloudflare AI request isolation",
+  "result": "ISOLATED_PREVIEW_IMPLEMENTED_AND_AUTOMATED_TESTS_PASS; EXISTING_V598_PARTIAL_ISOLATION_DEFECT_CONFIRMED; BROWSER_VISUAL_AND_LIVE_PROVIDER_TEST_NOT_PERFORMED",
+  "baseline_defects": [
+    {
+      "path": "kt80/KT80_E01_ARCH_WORKFLOW_DASHBOARD_V589.js",
+      "finding": "On file-input change, old subject/scope/parcel/legal fields are not cleared using the full reset path; intakeResults only inserts a subject if existing subject text is empty, so old-case text may survive replacement."
+    },
+    {
+      "path": "kt80/KT80_E01_AI_SUBJECT_IMPROVE_V570.js",
+      "finding": "Only subscribes to kt80:case-reset, not kt80:case-change; same-text A/B cases can allow old pending subject proposal to remain unless a full reset occurs."
+    }
+  ],
+  "controls_verified": [
+    "Worker src sends new independent model input for author, subject-improve and scope-improve without conversation or previous_response_id; all requests use store:false.",
+    "EG access session keeps credential only in RAM, associates it to workflow generation and clears on case reset, change and procedure confirmation.",
+    "New V590 creates an independent caseCycleId on every new file and full reset, with UUID on secure browsers.",
+    "New V590 treats selecting a new dossier file as the same full-reset boundary as Clear All while preserving the chosen input File.",
+    "New V590 aborts old intake and invalidates results through generation counter.",
+    "New V571 clears subject proposal on both change/reset and rejects late AI reply associated with another caseCycleId.",
+    "A->B transfer tests cover subject, scope, parcels, legal notes, confirmations, dossier-derived drafts, same filenames, and delayed document extraction.",
+    "Mocked sequential Worker calls through the same runtime prove no cross-call facts are added to subject or scope inputs."
+  ],
+  "new_artifacts": {
+    "workflow": "kt80/KT80_E01_ARCH_WORKFLOW_DASHBOARD_V590.js",
+    "subject_ai": "kt80/KT80_E01_AI_SUBJECT_IMPROVE_V571.js",
+    "pilot": "kt80/KT83_05_INDEPENDENT_CASE_CYCLE_TEST.html",
+    "regression": "kt80/independence/kt83-case-cycle-isolation.test.mjs",
+    "ci": ".github/workflows/kt83-independent-normative-engine.yml"
+  },
+  "validation": {
+    "run": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/43509745840",
+    "conclusion": "success",
+    "cycle_tests": 12,
+    "all_checks": 89,
+    "preview_url": "https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/kt80/KT83_05_INDEPENDENT_CASE_CYCLE_TEST.html"
+  },
+  "unchanged": [
+    "KT80 original V59.8",
+    "Stable V27.35",
+    "Locked B1/V11 and B2",
+    "KT83 PNI-V3 exploratory hypothesis pilot"
+  ],
+  "caveats": [
+    "New V590/V571 is enabled only in an isolated preview, not retrofitted into the original V59.8 production/test HTML.",
+    "Tests include browser emulation and mocked Worker fetches, not a full visual browser session or a real remote OpenAI request.",
+    "Not every legacy V27 submodule has been exhaustively audited for persisted state or overlapping requests.",
+    "Technical per-case separation does not remove static legal priorities or example-derived assumptions hardcoded into common prompts or source files. Such biases require a separate source-first audit.",
+    "The case ID fallback without crypto.randomUUID is locally unique within the running page, not a guaranteed global UUID.",
+    "store:false does not by itself establish that external providers retain no logs or data for security/abuse monitoring."
+  ],
+  "next_action": "Use isolated preview to visually test selecting A.zip then B.zip without pressing Clear All and confirm all stage panels, evidence and procedural state have reset. Only then consider a reviewed promotion of V590/V571 into live KT80.",
+  "resume_keyword": "WOW-КТ83-ЦИКЪЛ-УНИКАЛНОСТ-А-Б-89-ТЕСТА"
+}
