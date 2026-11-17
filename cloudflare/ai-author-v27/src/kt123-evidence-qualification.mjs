@@ -41,6 +41,30 @@ function quoteVerified(source,quote){
  const anchored=candidates.find(x=>x.id===chosen);
  return anchored?contains(source.text,anchored.text):contains(source.text,chosen);
 }
+// KT124-R9: a positive annex claim must be tied to the verified text of
+// the *specific annex* and to established evidence about this case.
+// Word overlap is only a structural sanity check, NOT legal classification.
+// If the factual and legal category cannot be traced, leave it unverified.
+const significantTokens=value=>{
+ const generic=new Set(["инвестици","предложен","дейност","производ","инсталац","съоръжен","изграждан","приложен","относим","установе","категори","обект","техниче","промишле","площадка","предвижд","включите","граници","документ","използва","съгласно","разположе","територ","предприят","свързани"]);
+ return [...new Set((tidy(value).toLocaleLowerCase("bg").match(/[\\p{L}]{6,}/gu)||[])
+  .map(w=>w.slice(0,Math.min(w.length,9)))
+  .filter(w=>!generic.has(w.slice(0,Math.min(w.length,9)))&&
+    ![...generic].some(g=>w.startsWith(g.slice(0,6)))) )];
+};
+function positiveAnnexEvidence(row,law,fact){
+ const categories=Array.isArray(row.comparedCategories)?row.comparedCategories:[];
+ if(!fact?.established)return {ok:false,code:"POSITIVE_ANNEX_UNCONFIRMED_CASE_SOURCE"};
+ const anchored=categories.filter(x=>tidy(x).length>=18&&contains(law?.text,x));
+ if(!anchored.length)return {ok:false,code:"POSITIVE_ANNEX_CATEGORY_NOT_IN_LAW"};
+ const caseBody=tidy(fact.text).toLocaleLowerCase("bg");
+ // At least one category-specific term must have a correspondence with
+ // the exact established fact. A generic word like "investment" or "facility"
+ // is insufficient for declaring annex applicability.
+ const linked=anchored.some(category=>significantTokens(category).some(term=>caseBody.includes(term.slice(0,6))));
+ if(!linked)return {ok:false,code:"POSITIVE_ANNEX_CATEGORY_FACT_MISMATCH"};
+ return {ok:true};
+}
 export const QUALIFICATION_SCHEMA={
  type:"object",additionalProperties:false,properties:{
   tests:{type:"array",items:{type:"object",additionalProperties:false,properties:{
@@ -66,6 +90,7 @@ export const QUALIFICATION_SYSTEM=[
  "legalQuote и caseQuote трябва да са ИДЕНТИФИКАТОРИ на дословно предоставените snippets (excerpts[].id), които принадлежат съответно на legalReference и caseSource, например law:10#0 и subject#0. НЕ преразказвай цитатите и НЕ пишѝ техния текст; системата извлича цитата от източника по идентификатор.",
  "Посочи конкретен критерий, мотив минимум 70 знака и конкретно проверените категории, без да представяш самото цитиране като доказателство за правна приложимост.",
  "При отрицателна приложимост на приложенията посочи конкретните проверени категории в comparedCategories. Липсата на категория в уведомлението НЕ доказва отрицателен резултат.",
+ "При ПОЛОЖИТЕЛНА приложимост на Приложение №1 или №2: comparedCategories трябва да включва дословно разпознаваема категория от точния правен текст; caseSource трябва да е ПОТВЪРДЕН факт от текущата преписка, а не свободно извлечен или симулиран документ. criterion и reason трябва да съпоставят действителните белези на тази категория с конкретния проверен факт. Не извеждай попадане от общи думи като склад, сграда, инвестиция или застроена площ без установени специфични правнорелевантни параметри.",
  "НЕОПРЕДЕЛЕНА само при конкретен обективно неизяснен правнорелевантен факт, а не юридическо затруднение.",
  "Не измисляй праг по т.10, буква б, приложение 2 ЗООС; различавай площ на имот, застроена площ и РЗП.",
  "ГИС непресичане не е само по себе си доказателство за всички правни хипотези на ОС.",
@@ -114,6 +139,10 @@ export function validateQualification(q,sources){
   if((k==="A1"||k==="A2")&&row.status==="ОТРИЦАТЕЛНА"&&
     (!Array.isArray(row.comparedCategories)||!row.comparedCategories.length))
    errors.push("NEGATIVE_ANNEX_WITHOUT_CATEGORY_REVIEW:"+k);
+  if((k==="A1"||k==="A2")&&row.status==="ПОЛОЖИТЕЛНА"){
+   const proof=positiveAnnexEvidence(row,law,fact);
+   if(!proof.ok)errors.push(proof.code+":"+k);
+  }
   if((k==="A1"||k==="A2")&&law?.reference!=="Приложение № "+(k==="A1"?"1":"2")+" към ЗООС")
    errors.push("WRONG_ANNEX_REFERENCE:"+k);
   if((k==="OS1"||k==="OS2")&&law?.reference!=="чл. 2")
