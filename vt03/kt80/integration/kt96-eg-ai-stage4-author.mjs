@@ -277,10 +277,27 @@ function boot(){
       REVIEW_UNAVAILABLE:'Независимият нормативен преглед не е достъпен',
       REVIEW_UNREADABLE:'Независимият преглед не върна валиден резултат',
       INVALID_REVIEW:'Невалиден резултат от независимия преглед',
+      QUALIFICATION_REQUIRES_FOUR_TESTS:'Липсва пълната структурирана нормативна съпоставка',
+      QUALIFICATION_TEST_KEY_DUPLICATE_OR_UNKNOWN:'Повторена или непозната нормативна предпоставка',
+      QUALIFICATION_STATUS_INVALID:'Невалиден нормативен резултат',
+      UNVERIFIED_LEGAL_QUOTE:'Посоченият правен цитат не е намерен в нормативния MASTER',
+      UNVERIFIED_CASE_QUOTE:'Посоченото фактическо твърдение не е намерено във входния документ',
+      MISSING_LEGAL_CRITERION:'Липсва конкретен законов критерий',
+      INSUFFICIENT_REASON:'Недостатъчно индивидуализирани нормативни мотиви',
+      NEGATIVE_ANNEX_WITHOUT_CATEGORY_REVIEW:'Отрицателният извод не съдържа съпоставка с конкретни категории',
+      WRONG_ANNEX_REFERENCE:'Неточно нормативно основание за приложението към ЗООС',
+      WRONG_OS_ARTICLE:'Неточно основание по Наредбата за ОС',
+      MISSING_QUALIFICATION_TEST:'Липсва една от задължителните нормативни проверки',
+      MISSING_ROUTE_REASON:'Липсват мотиви за предложеното административно действие',
+      PANEL_01_CONTRADICTS_LEGAL_FACTS:'Предложението за панел №01 противоречи на нормативните предпоставки',
+      PANEL_02_REQUIRES_EVIDENCED_PHYSICAL_GAP:'Панел №02 изисква доказана конкретна фактическа липса',
+      OS_ART2_MUTUALLY_EXCLUSIVE:'Несъвместима едновременна приложимост на чл. 2, ал. 1 и 2',
+      OS_ART2_PREMATURE_EXCLUSION:'Ал. 2 е посочена като приложима преди изясняване на ал. 1',
+      UNKNOWN_QUALIFICATION_ROUTE:'Избраният панел липсва в утвърдения каталог',
       ARCHIVE_FULL_TEXT_UNAVAILABLE:'Пълните нормативни текстове не са налични'
     };
-    const issues=Array.isArray(data.qualityIssues)?data.qualityIssues.map(x=>(labels[x]||'Непозната нормативна проверка')+' ['+str(x)+']').slice(0,6):[];
-    const checkPhase=data.qualityStage==='author_repair'?' (след автоматичната преработка)':data.qualityStage==='independent_review'?' (независим нормативен преглед)':'';
+    const issues=Array.isArray(data.qualityIssues)?data.qualityIssues.map(x=>(labels[x]||labels[String(x).split(':')[0]]||'Неизяснена нормативна предпоставка')+' ['+str(x)+']').slice(0,6):[];
+    const checkPhase=data.qualityStage==='source_qualification'?' (проверка на доказателствените основания преди изготвяне на текста)':data.qualityStage==='author_repair'?' (след автоматичната преработка)':data.qualityStage==='independent_review'?' (независим нормативен преглед)':'';
     // KT115: show an unverified AI draft ONLY as expert-readable material.
     // The case-bound response is not cached, approved or exposed to Stage 5.
     if(response.status===422 && data.expertPreviewOnly===true &&
