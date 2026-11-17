@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'cloudflare/ai-author-v27/src/worker.js'
+      - 'cloudflare/ai-author-v27/src/kt123-*.mjs'
       - 'cloudflare/ai-author-v27/src/legal-v11-loader.mjs'
       - 'cloudflare/ai-author-v27/src/legal-v11/**'
       - 'cloudflare/ai-author-v27/test/**'
