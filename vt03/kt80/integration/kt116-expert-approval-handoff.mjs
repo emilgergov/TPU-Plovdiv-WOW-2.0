@@ -133,8 +133,8 @@ if(host&&five){
  document.addEventListener('kt115:stage4-draft',e=>{
   const d=e.detail||{},h=evidence();if(!d.sourceDraft||d.evidenceRevision!==h.evidenceRevision||d.caseId!==h.caseId&&d.caseIdType!=='shared-verified')return;
   proposal={caseId:d.caseId,localId:h.caseId,revision:h.evidenceRevision,generation:h.generation,key:h.key,requestId:d.requestId,original:d.sourceDraft,warnings:d.warnings||[],qualificationRecord:d.qualificationRecord||null,qualificationProof:d.qualificationProof||null,qualificationGate:d.qualificationGate||null,serverQualityPassed:d.qualityPassed===true};
-  const reviewed=d.qualityPassed===true&&['pass','revise'].includes(d.reviewerVerdict);
-  header.textContent=reviewed?'РЕЦЕНЗИРАНО ПРЕДЛОЖЕНИЕ · за експертна преценка':'Работен проект · независимата рецензия не е завършена';
+  const reviewed=d.reviewed===true||(d.qualityPassed===true&&['pass','revise'].includes(d.reviewerVerdict));
+  header.textContent=reviewed?(d.qualityPassed===true?'РЕЦЕНЗИРАНО ПРЕДЛОЖЕНИЕ · за експертна преценка':'РЕЦЕНЗИРАНО ПРЕДЛОЖЕНИЕ · с открити нормативни несъответствия'):'Работен проект · независимата рецензия не е завършена';
   history=[{version:1,text:d.sourceDraft,kind:reviewed?'рецензирано предложение':'непроверен проект',createdAt:new Date().toISOString()}];approved=null;
   document.getElementById('kt104EGLead').style.display='none';document.getElementById('kt104EGDetails').style.display='none';
   acceptRadio.checked=true;changeRadio.checked=false;toggleChoice();
