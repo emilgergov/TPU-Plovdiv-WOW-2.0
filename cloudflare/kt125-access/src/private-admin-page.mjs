@@ -6,7 +6,7 @@
 const escapeHtml=v=>String(v??"").replace(/[&<>"']/g,
  c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const sectionNames=Object.freeze({
- overview:"Общ преглед",users:"Потребители",cases:"Преписки",audit:"Журнал"
+ overview:"Общ преглед",users:"Потребители",roles:"Роли и права",cases:"Преписки",audit:"Журнал"
 });
 const headers=Object.freeze({
  users:[["user_id","Служебен идентификатор"],["role","Роля"],["active","Активен"],["updated_at_ms","Последна промяна"]],
@@ -42,9 +42,16 @@ export function renderKT125PrivatePage({section="overview",items=[],hasMore=fals
  const nav=Object.keys(sectionNames).map(k=>
   `<a href="/kt125/admin/panel/${k}"${k===section?' aria-current="page"':""}>${escapeHtml(sectionNames[k])}</a>`).join("");
  const columns=headers[section]||[];
+ const roleMatrix=`<div class="tablewrap"><table><thead><tr><th>Роля</th><th>Системни права</th><th>Достъп до преписки</th></tr></thead>
+  <tbody><tr><td>ЕГМАСТЕР</td><td>Потребители, настройки, журнал</td><td>Без автоматичен прочит</td></tr>
+  <tr><td>Администратор</td><td>Потребители, настройки</td><td>Без автоматичен прочит</td></tr>
+  <tr><td>Експерт</td><td>Работни действия по лични преписки</td><td>Собствени и изрично делегирани</td></tr>
+  <tr><td>Преглеждащ</td><td>Няма системно администриране</td><td>Само изрично разрешени</td></tr>
+  <tr><td>Упълномощен експерт</td><td>Няма системно администриране</td><td>Само за посочено действие и срок</td></tr></tbody></table></div>`;
  const table=section==="overview"
   ?`<div class="state">Защитен служебен режим. Информацията за потребители, преписки и журнал се извлича само след проверка на самоличността и съответните права.</div>
   <p>ЕГМАСТЕР и администраторът не получават автоматичен достъп до съдържанието на преписките.</p>`
+  :section==="roles"?roleMatrix
   :items.length
     ?`<div class="tablewrap"><table><thead><tr>${columns.map(([,label])=>`<th scope="col">${escapeHtml(label)}</th>`).join("")}</tr></thead>
     <tbody>${items.slice(0,50).map(r=>`<tr>${columns.map(([key])=>`<td>${escapeHtml(readable(key,r[key]))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
