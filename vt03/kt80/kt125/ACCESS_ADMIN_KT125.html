@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>WOW · КТ125 · Управление на достъпа</title>
+<style>
+:root{color-scheme:dark;font:14px/1.5 Verdana,Arial,sans-serif;background:#0b271d;color:#f5f0de}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 90% 0,#24563e,transparent 52%),#0b271d;min-height:100vh}
+button,a{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+header{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:20px max(20px,calc((100vw - 1460px)/2));border-bottom:1px solid #9e895b;background:#0a2119}
+header small{color:#d1dfcf}h1{font:bold 23px/1.35 Georgia,serif;margin:3px 0;color:#f4d58a}
+h2{font:bold 20px Georgia,serif;margin:0 0 12px;color:#f4d58a}
+h3{font:bold 15px Verdana,Arial;margin:0 0 8px;color:#f4d58a}
+.back{display:inline-flex;gap:6px;align-items:center;text-decoration:none;color:#122e23;background:#d6b66d;padding:10px 15px;border-radius:8px;font-weight:700}
+main{max-width:1460px;margin:0 auto;padding:20px}
+.status{border:1px solid #b9a16c;border-left:5px solid #e3bb68;background:#263f2f;padding:15px 18px;border-radius:8px;margin-bottom:16px}
+.status strong{color:#ffe2a1;display:block;margin-bottom:6px;font-size:15px}
+.status p{margin:0;color:#eee9dc}
+.grid{display:grid;grid-template-columns:260px minmax(0,1fr);gap:15px}
+nav{display:flex;flex-direction:column;gap:8px;align-self:start;position:sticky;top:15px}
+nav button{width:100%;text-align:left;border:1px solid #567d67;border-radius:8px;padding:12px;background:#174331;color:#f4f1e4;font-weight:700}
+nav button[aria-selected="true"]{background:#d6b46b;color:#143625;border-color:#f5dfab}
+nav button:focus-visible,.back:focus-visible{outline:3px solid #f9e5b6;outline-offset:2px}
+.panel{border:1px solid #8f8459;border-radius:12px;background:#103428;padding:20px;min-height:490px}
+.panel[hidden]{display:none!important}
+.lead{color:#d9e3d5;margin:0 0 16px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.card{background:#204838;border:1px solid #688b6c;border-radius:8px;padding:14px}
+.card strong{display:block;color:#f8dca0;margin-bottom:7px}
+.card p{margin:0;color:#e0e9dd}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 12px;text-align:left;vertical-align:top;border-bottom:1px solid #466653}
+th{color:#f5d88c;background:#254f3c}
+td{color:#ecf0e5}
+.muted{color:#c3d5c3}.note{margin:13px 0 0;padding:12px;background:#204838;border-left:3px solid #d6b46b;border-radius:6px}
+.empty{background:#1b4030;border:1px dashed #789480;border-radius:9px;padding:24px;text-align:center;color:#d9e9d6}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:17px;align-items:center}
+.btn{padding:11px 14px;background:#d6b66d;border:1px solid #f3d593;color:#17392b;font-weight:700;border-radius:7px}
+.btn[disabled]{cursor:not-allowed;background:#405548;color:#e0e5d7;border-color:#62776a;opacity:.8}
+.explain{font-size:12px;color:#c7d6c5;margin:0}
+footer{font-size:12px;margin:22px 0;color:#c3d6c6}
+@media(max-width:840px){.grid{grid-template-columns:1fr}nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));position:static}.cards{grid-template-columns:1fr}header{flex-wrap:wrap;padding:16px}}
+@media(max-width:540px){nav{grid-template-columns:1fr}.panel{padding:14px}table{display:block;overflow-x:auto;white-space:nowrap}}
+</style>
+</head>
+<body>
+<header>
+  <div><small>WOW · ЕГМАСТЕР · КТ125</small><h1>Управление на достъпа</h1><small>Отделен административен екран · петте експертни етапа не се променят</small></div>
+  <a class="back" href="../KT83_VT02_P1_P6_VISUAL_TEST.html">← Към таблото на WOW</a>
+</header>
+<main>
+<div class="status" role="status">
+  <strong>Режим на преглед · служебният достъп още не е активиран</strong>
+  <p>Тук се виждат структурата и правилата на КТ125. Няма реално заредени служители, преписки или права. Предоставянето, отнемането и промяната на роли ще бъдат достъпни само след удостоверен служебен вход и свързване с отделния защитен регистър.</p>
+</div>
+<div class="grid">
+  <nav aria-label="Раздели на управлението">
+    <button type="button" data-tab="overview" aria-selected="true">01 · Общ преглед</button>
+    <button type="button" data-tab="users" aria-selected="false">02 · Потребители</button>
+    <button type="button" data-tab="roles" aria-selected="false">03 · Роли и права</button>
+    <button type="button" data-tab="cases" aria-selected="false">04 · Достъп до преписки</button>
+    <button type="button" data-tab="audit" aria-selected="false">05 · Журнал и контрол</button>
+  </nav>
+  <div>
+    <section class="panel" id="panel-overview" aria-labelledby="title-overview">
+      <h2 id="title-overview">Състояние на управлението</h2>
+      <p class="lead">Структурата е подготвена за отделен служебен достъп, без да се смесва с паролата за ЕГ Автора.</p>
+      <div class="cards">
+        <div class="card"><strong>5 служебни роли</strong><p>ЕГМАСТЕР, администратор, експерт, преглеждащ и упълномощен експерт.</p></div>
+        <div class="card"><strong>Достъп по преписка</strong><p>Собственик, изрично разрешени действия, срок и отнемане.</p></div>
+        <div class="card"><strong>Защитен журнал</strong><p>Проследяване на решенията за достъп, делегиранията и отказите.</p></div>
+      </div>
+      <p class="note">В този преглед няма възможност за промяна на правата. Сървърната проверка е задължителна и не може да се замести с интерфейсен бутон.</p>
+    </section>
+    <section class="panel" id="panel-users" aria-labelledby="title-users" hidden>
+      <h2 id="title-users">Служебни потребители</h2>
+      <p class="lead">След удостоверяване тук ще се виждат разрешените за администриране профили, ролята, активността и принадлежността към организацията.</p>
+      <div class="empty">Няма връзка със служебния регистър. Не се показват фиктивни потребители.</div>
+      <div class="controls"><button class="btn" type="button" disabled title="Изисква удостоверен служебен вход">Добави експерт</button><button class="btn" type="button" disabled title="Изисква удостоверен служебен вход">Деактивирай профил</button></div>
+      <p class="explain">Деактивирането не може да остави активна преписка без водещ експерт.</p>
+    </section>
+    <section class="panel" id="panel-roles" aria-labelledby="title-roles" hidden>
+      <h2 id="title-roles">Роли и основни права</h2>
+      <p class="lead">Управленските права са отделени от правото да се чете или редактира съдържанието на преписката.</p>
+      <table aria-label="Проектна матрица на ролите"><thead><tr><th>Роля</th><th>Системно управление</th><th>Достъп до преписки</th></tr></thead><tbody>
+      <tr><td>ЕГМАСТЕР</td><td>Настройки, потребители, журнал</td><td>Няма автоматичен достъп</td></tr>
+      <tr><td>Администратор</td><td>Потребители и настройки</td><td>Няма автоматичен достъп</td></tr>
+      <tr><td>Експерт</td><td>Без системно администриране</td><td>Собствени преписки и делегиране</td></tr>
+      <tr><td>Преглеждащ</td><td>Без системно администриране</td><td>Само при изрично възлагане</td></tr>
+      <tr><td>Упълномощен експерт</td><td>Без системно администриране</td><td>Само изрично предоставени действия и срок</td></tr>
+      </tbody></table>
+      <p class="note">Финалните управленски права и служебните лица се утвърждават преди продукционна активация.</p>
+    </section>
+    <section class="panel" id="panel-cases" aria-labelledby="title-cases" hidden>
+      <h2 id="title-cases">Достъп до преписки</h2>
+      <p class="lead">За всяка преписка ще се показват водещият експерт, упълномощените лица, конкретните разрешения и срокът им.</p>
+      <div class="empty">Преписки не са заредени. Защитеният регистър не е активиран.</div>
+      <div class="controls"><button class="btn" type="button" disabled>Предостави достъп</button><button class="btn" type="button" disabled>Отнеми достъп</button><button class="btn" type="button" disabled>Смени водещ експерт</button></div>
+      <p class="explain">При смяна на водещия експерт старите делегирания не остават автоматично валидни.</p>
+    </section>
+    <section class="panel" id="panel-audit" aria-labelledby="title-audit" hidden>
+      <h2 id="title-audit">Журнал и контрол</h2>
+      <p class="lead">Служебният журнал ще показва кой, кога и с какво разрешение е извършил действие. Отказите за достъп също се отчитат, без да се разкриват данни от преписката.</p>
+      <div class="empty">Няма заредени действителни събития. Журналът е достъпен само след служебна идентификация.</div>
+      <p class="note">Журналът не трябва да съхранява пароли, токени или съдържание от преписки. Одитните записи не се редактират през този екран.</p>
+    </section>
+  </div>
+</div>
+<footer>КТ125 · Визуална приемка на административния екран, без реални права или персонални данни · Стабилната КТ124-R6 остава непокътната.</footer>
+</main>
+<script>
+(function(){
+ const buttons=[...document.querySelectorAll('nav button[data-tab]')];
+ const panels=[...document.querySelectorAll('section.panel[id^="panel-"]')];
+ function show(name){
+  if(!buttons.some(b=>b.dataset.tab===name))return;
+  buttons.forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===name)));
+  panels.forEach(p=>p.hidden=p.id!=='panel-'+name);
+ }
+ buttons.forEach(b=>b.addEventListener('click',()=>show(b.dataset.tab)));
+ show('overview');
+})();
+</script>
+</body>
+</html>
