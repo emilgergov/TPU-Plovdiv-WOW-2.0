@@ -1,0 +1,527 @@
+{
+  "schema": "KT82_B1_V9_ROUTE_SPECIFIC_LEGAL_GATES_V01",
+  "date": "2026-11-13",
+  "basis": {
+    "portable_archive": "KT82_B1_Normative_Master_Local_Pack_V9_OVOS_ANNEXES_RESTORED.zip",
+    "route_matrix": "kt80/normative-master/KT82_B1_ROUTE_22_NORMATIVE_DEPENDENCIES_V01_2026-11-13.json"
+  },
+  "conclusion": "All 22 source-route entries have an identified verification requirement. No route is adjudicated production-safe solely through article presence.",
+  "counts": {
+    "all": 22,
+    "internal_tools": 4,
+    "other_catalog_entries": 18,
+    "legal_approval_completed": 0
+  },
+  "route_results": [
+    {
+      "route_id": 1,
+      "name": "Писмо по чл. 2, ал. 2 от Наредбата за ОС",
+      "kind": "restricted_legacy_test",
+      "source_acts_present_in_V9": [
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "focus": [
+        "Наредба ОС чл.2 ал.2; чл.6а; приложение №1"
+      ],
+      "required_procedural_branch": "Предварително доказване извън чл.2 ал.1, без фиксиран отрицателен резултат",
+      "remaining_legal_risk": "2025 чл.12 ал.2; компетентност",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 2,
+      "name": "Искане за допълнителна информация",
+      "kind": "procedural_action",
+      "source_acts_present_in_V9": [
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "APK",
+        "N_OVOS_2022",
+        "N_EO_2020"
+      ],
+      "focus": [
+        "Наредба ОС чл.2 ал.4",
+        "Наредба ОВОС чл.5 ал.4–6",
+        "Наредба ЕО — приложим отделен ред"
+      ],
+      "required_procedural_branch": "Изискване на данни само по правилния специален ред",
+      "remaining_legal_risk": "Не пренася срокове между ОС/ОВОС/ЕО",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 3,
+      "name": "Искане за институционално становище",
+      "kind": "procedural_action",
+      "source_acts_present_in_V9": [
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "APK",
+        "N_OVOS_2022",
+        "N_EO_2020",
+        "NAO",
+        "ZA"
+      ],
+      "focus": [
+        "Наредба ОВОС чл.4а",
+        "Наредба ОВОС чл.7 ал.2"
+      ],
+      "required_procedural_branch": "РЗИ/БД и други консултации само при законово установените факти",
+      "remaining_legal_risk": "Да се разграничат задължителни и факултативни становища",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 4,
+      "name": "Указания по процедурата за ОВОС",
+      "kind": "procedural_action",
+      "source_acts_present_in_V9": [
+        "N_OVOS_2022",
+        "ZOOS",
+        "N_OS_2025",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "focus": [
+        "Наредба ОВОС чл.4–5",
+        "ЗООС приложения 1–2"
+      ],
+      "required_procedural_branch": "Правна квалификация на ИП и евентуално изменение/разширение",
+      "remaining_legal_risk": "Компетентност/материален обхват",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 5,
+      "name": "Указания по процедурата за ОС",
+      "kind": "procedural_action",
+      "source_acts_present_in_V9": [
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "focus": [
+        "Наредба ОС чл.2, чл.4, чл.5, чл.6а"
+      ],
+      "required_procedural_branch": "Самостоятелен/съвместен ред, чл.2 ал.1 срещу ал.2",
+      "remaining_legal_risk": "Без автоматично използване Classic A/B",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 6,
+      "name": "Решение за преценяване вероятна степен на отрицателно въздействие",
+      "kind": "administrative_act",
+      "source_acts_present_in_V9": [
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "focus": [
+        "ЗБР чл.31",
+        "Наредба ОС чл.18–20"
+      ],
+      "required_procedural_branch": "Самостоятелна ОС срещу съвместена ОС",
+      "remaining_legal_risk": "Форма и срок на акта зависят от клона",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 7,
+      "name": "Решение за преценяване необходимостта от ОВОС",
+      "kind": "administrative_act",
+      "source_acts_present_in_V9": [
+        "N_OVOS_2022",
+        "ZOOS",
+        "N_OS_2025",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "focus": [
+        "ЗООС чл.93",
+        "Наредба ОВОС чл.6–8"
+      ],
+      "required_procedural_branch": "Решение за необходимост от ОВОС",
+      "remaining_legal_risk": "Информация по приложение №2, консултации РЗИ и обществен достъп",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 8,
+      "name": "Решение по ОВОС",
+      "kind": "administrative_act",
+      "source_acts_present_in_V9": [
+        "N_OVOS_2022",
+        "ZOOS",
+        "N_OS_2025",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "focus": [
+        "ЗООС чл.94–99",
+        "Наредба ОВОС чл.9–19"
+      ],
+      "required_procedural_branch": "Решение по извършен ОВОС",
+      "remaining_legal_risk": "Доклад/обсъждане/съвместяване и условия",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 9,
+      "name": "Прекратяване на процедура",
+      "kind": "procedural_action",
+      "source_acts_present_in_V9": [
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "APK",
+        "N_OVOS_2022",
+        "N_EO_2020",
+        "NAO",
+        "ZA"
+      ],
+      "focus": [
+        "Наредба ОВОС чл.2а",
+        "Наредба ОС — съответната глава",
+        "Наредба ЕО — съответната глава",
+        "АПК — приложимото производство"
+      ],
+      "required_procedural_branch": "Проверка на вида на производството, фактическия повод и основанията за прекратяване",
+      "remaining_legal_risk": "Не е универсален автоматичен акт",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 10,
+      "name": "Писмо за необходимите действия по ЕО",
+      "kind": "procedural_action",
+      "source_acts_present_in_V9": [
+        "N_EO_2020",
+        "ZOOS",
+        "N_OS_2025",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "focus": [
+        "Наредба ЕО чл.8"
+      ],
+      "required_procedural_branch": "Определяне на приложимостта на ЕО към план/програма",
+      "remaining_legal_risk": "Не смесвай уведомление чл.8 и искане чл.8а",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 11,
+      "name": "Решение за преценяване необходимостта от ЕО",
+      "kind": "administrative_act",
+      "source_acts_present_in_V9": [
+        "N_EO_2020",
+        "ZOOS",
+        "N_OS_2025",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "focus": [
+        "ЗООС чл.85",
+        "Наредба ЕО чл.8а и чл.14"
+      ],
+      "required_procedural_branch": "Решение по преценка необходимостта от ЕО",
+      "remaining_legal_risk": "Доказателства и компетентност",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 12,
+      "name": "Становище по ЕО",
+      "kind": "administrative_act",
+      "source_acts_present_in_V9": [
+        "N_EO_2020",
+        "ZOOS",
+        "N_OS_2025",
+        "PRAVILNIK_RIOSV",
+        "APK"
+      ],
+      "focus": [
+        "ЗООС чл.82, чл.85",
+        "Наредба ЕО — пълна процедура"
+      ],
+      "required_procedural_branch": "Становище по ЕО след процедура",
+      "remaining_legal_risk": "Не извеждай окончателен акт само от ранно уведомление",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 13,
+      "name": "Експертно обобщение",
+      "kind": "internal_tool",
+      "source_acts_present_in_V9": [
+        "APK",
+        "ZA",
+        "NAO",
+        "ZEU",
+        "NAR"
+      ],
+      "focus": [],
+      "required_procedural_branch": "Вътрешен доказателствен инструмент, не административен акт",
+      "remaining_legal_risk": "Източник/проследимост",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 14,
+      "name": "Проверка на пълнота и допустимост",
+      "kind": "internal_tool",
+      "source_acts_present_in_V9": [
+        "APK",
+        "ZA",
+        "NAO",
+        "ZEU",
+        "NAR",
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "N_OVOS_2022",
+        "N_EO_2020"
+      ],
+      "focus": [],
+      "required_procedural_branch": "Вътрешен контрол на комплектност по специалния режим",
+      "remaining_legal_risk": "Да няма недължими документи",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 15,
+      "name": "ГИС справка за имоти и режими",
+      "kind": "internal_tool",
+      "source_acts_present_in_V9": [
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "PRAVILNIK_RIOSV",
+        "APK",
+        "ZZT_2023"
+      ],
+      "focus": [
+        "ЗБР",
+        "ЗЗТ"
+      ],
+      "required_procedural_branch": "ГИС/ПИ справка без правен извод; заповеди се извличат по казус",
+      "remaining_legal_risk": "Не е самостоятелен издаван административен акт",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 16,
+      "name": "Архивен пакет",
+      "kind": "internal_tool",
+      "source_acts_present_in_V9": [
+        "APK",
+        "ZA",
+        "NAO",
+        "ZEU",
+        "NAR"
+      ],
+      "focus": [],
+      "required_procedural_branch": "Технически архив на преписка и доказателства",
+      "remaining_legal_risk": "Не е административно решение",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 17,
+      "name": "Жалба — квалификация",
+      "kind": "procedural_intake",
+      "source_acts_present_in_V9": [
+        "APK",
+        "NAO",
+        "ZA",
+        "PRAVILNIK_RIOSV"
+      ],
+      "focus": [
+        "АПК — ред за оспорване; специален закон"
+      ],
+      "required_procedural_branch": "Жалба срещу конкретен обжалваем акт",
+      "remaining_legal_risk": "Не прилагай по аналогия АПК глава осма за сигнали",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 18,
+      "name": "Сигнал — решение или уведомяване",
+      "kind": "procedural_intake",
+      "source_acts_present_in_V9": [
+        "APK",
+        "NAO",
+        "ZA",
+        "PRAVILNIK_RIOSV"
+      ],
+      "focus": [
+        "АПК чл.107–123"
+      ],
+      "required_procedural_branch": "Сигнал, освен ако специалният закон предвижда друг ред",
+      "remaining_legal_risk": "Подател/предмет/компетентност",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 19,
+      "name": "Възражение",
+      "kind": "procedural_intake",
+      "source_acts_present_in_V9": [
+        "APK",
+        "NAO",
+        "ZA",
+        "PRAVILNIK_RIOSV",
+        "N_OS_2025",
+        "ZBR",
+        "ZOOS",
+        "N_OVOS_2022",
+        "N_EO_2020"
+      ],
+      "focus": [
+        "АПК — висящо производство; специален ред"
+      ],
+      "required_procedural_branch": "Възражение в конкретния етап",
+      "remaining_legal_risk": "Не класифицирай автоматично като жалба или сигнал",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 20,
+      "name": "Препращане по компетентност",
+      "kind": "procedural_action",
+      "source_acts_present_in_V9": [
+        "APK",
+        "NAO",
+        "ZA",
+        "PRAVILNIK_RIOSV"
+      ],
+      "focus": [
+        "АПК чл.31",
+        "АПК чл.112"
+      ],
+      "required_procedural_branch": "Чл.31 е за искане по общо производство; чл.112 за предложения и сигнали",
+      "remaining_legal_risk": "7-дневният срок по чл.112 не се пренася универсално",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 21,
+      "name": "Уведомяване за проверка",
+      "kind": "procedural_action",
+      "source_acts_present_in_V9": [
+        "APK",
+        "NAO",
+        "ZA",
+        "PRAVILNIK_RIOSV",
+        "ZOOS",
+        "ZBR",
+        "ZZT_2023"
+      ],
+      "focus": [
+        "ЗООС чл.14",
+        "специални контролни закони"
+      ],
+      "required_procedural_branch": "Проверка/протокол/предписание само при компетентност",
+      "remaining_legal_risk": "Без универсална форма",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    },
+    {
+      "route_id": 22,
+      "name": "Предложение — решение",
+      "kind": "procedural_intake",
+      "source_acts_present_in_V9": [
+        "APK",
+        "NAO",
+        "ZA",
+        "PRAVILNIK_RIOSV"
+      ],
+      "focus": [
+        "АПК чл.107",
+        "АПК чл.117–118"
+      ],
+      "required_procedural_branch": "Предложение по глава осма или по специален ред",
+      "remaining_legal_risk": "Не смесвай със сигнал",
+      "article_presence_is_legal_approval": false,
+      "final_effective_date_validated": false,
+      "expert_approved": false,
+      "can_automatically_cite": false
+    }
+  ],
+  "legal_preintegration_blockers": [
+    "Verify date-specific effectiveness and exact procedural branch at article/subarticle level for core six environmental statutes/ordinances plus APK",
+    "Verify competent actor MOEW vs RIOSV and other authorities per branch",
+    "Check route-specific notification, public consultation, clock suspension, appeal and termination; do not copy between legal regimes",
+    "Verify current gazette amendment history against consolidated sources, including 2026 claims and post-2024 ZBR developments",
+    "For conditional sectoral competence obtain up-to-date special acts when a defined route and dossier trigger it"
+  ],
+  "architecture": {
+    "classic_ab_only": "encapsulated V27.35",
+    "kt80_author": "independent free AI author",
+    "individual_territory_orders": "case-specific resolver",
+    "runtime_untouched": true
+  },
+  "gate": {
+    "phase": "B1_SOURCE_LEVEL_QA",
+    "runtime_enable": false,
+    "auto_citations": false,
+    "expert_approval_required": true
+  }
+}

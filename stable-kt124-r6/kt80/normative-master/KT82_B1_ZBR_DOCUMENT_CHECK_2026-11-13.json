@@ -1,0 +1,63 @@
+{
+  "schema": "KT82_B1_DOCUMENT_VERIFICATION_V01",
+  "document_id": "ZBR",
+  "registry_id": "R-N01",
+  "document_title": "Закон за биологичното разнообразие",
+  "input_file": "ZAKON_za_biologichnoto_raznoobrazie24.pdf",
+  "sha256": "447dc1ff3175b4ba1c7d49fd78ef15e0d5b2d35777ded6cb361c6c2209715fd3",
+  "page_count": 97,
+  "existing_local_file": "v26-test/normative/offline/assets/447dc1ff3175b4ba1c7d49fd.pdf",
+  "duplicate_of_existing_archive": true,
+  "last_amendment_in_pdf": "ДВ, бр. 70 от 20.08.2024 г.",
+  "annexes": [
+    {
+      "number": "1",
+      "page": 52
+    },
+    {
+      "number": "2",
+      "page": 55
+    },
+    {
+      "number": "2а",
+      "page": 65
+    },
+    {
+      "number": "3",
+      "page": 67
+    },
+    {
+      "number": "4",
+      "page": 91
+    },
+    {
+      "number": "4а",
+      "page": 94
+    },
+    {
+      "number": "5",
+      "page": 95
+    },
+    {
+      "number": "6",
+      "page": 96
+    },
+    {
+      "number": "7",
+      "page": 97,
+      "status": "отменено"
+    },
+    {
+      "number": "8",
+      "page": 97,
+      "status": "отменено"
+    }
+  ],
+  "official_source_page": "https://www.moew.government.bg/bg/priroda/zakonodatelstvo/nacionalno-zakonodatelstvo/zakoni/",
+  "official_page_last_amendment": "ДВ, бр. 70 от 20.08.2024 г.",
+  "draft_change_2026": "Публикуван проект за изменение от 27.05.2026 г. не е доказателство за приет закон",
+  "legal_citation_ready": false,
+  "status": "ARCHIVED_IDENTICAL_VERSION_ANNEXES_INSPECTED",
+  "next_action": "Проверка на изменения след 20.08.2024 г. и приложима редакция към дата на преписката, без да се дублира PDF.",
+  "copyright_note": "Предоставеният PDF е генериран от информационна система АПИС; не се публикува ново копие, а се ползва вече регистрираният идентичен локален файл."
+}

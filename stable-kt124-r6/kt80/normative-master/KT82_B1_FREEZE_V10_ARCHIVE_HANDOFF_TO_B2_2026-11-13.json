@@ -1,0 +1,63 @@
+{
+  "schema": "KT82_B1_FREEZE_V10_ARCHIVE_HANDOFF_TO_B2",
+  "date": "2026-11-13",
+  "status": "B1_DOCUMENTARY_ARCHIVE_FROZEN_B2_SEPARATE",
+  "archive": {
+    "name": "KT82_B1_Normative_Master_V10_B1_ARCHIVE_FROZEN_2026-11-13.zip",
+    "sha256": "605956c29134ebe755d24dacc6bb2a3c062f410043cdc7b39df46e5a34d963cd",
+    "bytes": 21133878,
+    "entry_count": 70,
+    "retained_v9_entries": 67,
+    "added_control_entries": 3,
+    "documented_primary_general_source_documents": 15,
+    "verification": "zip testzip PASS, source presence PASS, nonempty article index check PASS, restored annex 2 2a 7 9 PASS",
+    "archive_location": "Private user download, no copyright fulltext uploaded to GitHub"
+  },
+  "three_B1_exit_criteria": {
+    "editions": "Document version, dates and provenance recorded with explicit uncertainties; per-case definitive applicability delegated to B2 and recheck",
+    "special_acts": "Conditional, trigger-based seven-category index supplied, individual territorial orders managed case-specifically",
+    "archive_integrity": "Complete V10 file ledger, hashes, historical versions, restored annex contents; no known missing required B1 core sources"
+  },
+  "scope_guardrails": {
+    "documentary_freeze": true,
+    "unrestricted_automatic_legal_citation": false,
+    "individual_routes_expert_accepted": false,
+    "runtime_stage4_5_integrated": false,
+    "legacy_classic_ab_only_v27_35": true,
+    "kt80_ai_author_independent": true,
+    "existing_generators_modified": false
+  },
+  "known_limitations": [
+    "MOEW index records ZBR latest listed amendment DV70/2024; no absolute inference of absence of later Gazette issues",
+    "ZOOS secondary full consolidation shows DV51/2026, official hosted older copy shows DV16/2026; legal citation requires primary Gazette corroboration",
+    "ZZT uploaded copy last DV102/2023; primary currentness must be rechecked when invoked",
+    "Administrative source editions reflect their original copies and are not guaranteed perpetual currentness"
+  ],
+  "B2_entry_contract": {
+    "catalog_routes": 22,
+    "internal_tools": [
+      13,
+      14,
+      15,
+      16
+    ],
+    "reviews": [
+      "exact articles/paragraphs in force at relevant dates",
+      "jurisdiction and signing authority",
+      "administrative route input conditions and exceptions",
+      "prescribed evidence, public consultation, notification, clocks, appeals",
+      "territory orders and conditional special legislation on demand",
+      "regression tests and expert approval prior to author activation"
+    ],
+    "first_batch_recommendation": "Routes 1–6: ОС, completeness, request for opinion, plus OVOS screening, then route 7–12, and administration 17–22"
+  },
+  "provenance": {
+    "official_links": [
+      "https://www.moew.government.bg/bg/priroda/zakonodatelstvo/nacionalno-zakonodatelstvo/zakoni/",
+      "https://www.moew.government.bg/bg/zakon-za-opazvane-na-okolnata-sreda-8793/",
+      "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ekologichna-ocenka-na-planove-i-programi/",
+      "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ocenka-na-vuzdejstvieto-vurhu-okolnata-sreda/"
+    ],
+    "primary_archives_locally_preserved": true
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "schema": "KT82_B1_DOCUMENT_VERIFICATION_V01",
+  "document_id": "APK",
+  "title": "Административнопроцесуален кодекс",
+  "received_filename": "АДМИНИСТРАТИВНОПРОЦЕСУАЛЕН КОДЕКС.pdf",
+  "official_source": "https://justice.government.bg/home/normdoc/2135521015",
+  "source_organization": "Министерство на правосъдието",
+  "first_promulgation": "ДВ, бр. 30 от 11.04.2006 г.",
+  "last_amendment_in_uploaded_text": "ДВ, бр. 17 от 13.02.2026 г.",
+  "physical_file": {
+    "format": "PDF",
+    "pages": 106,
+    "bytes": 1303443,
+    "sha256": "f79d7532e8ce81b2e644feb8befe89efc3d104c35122d953903c7d28f44f5662",
+    "creator": "Mozilla/5.0 Print to PDF",
+    "source": "User-provided official legal webpage rendered as PDF"
+  },
+  "content_checks": {
+    "has_main_code": true,
+    "has_transitional_and_final_provisions": true,
+    "has_european_reference_acts": true,
+    "sections_checked": [
+      "чл. 1–2",
+      "чл. 4–13а",
+      "чл. 18а",
+      "чл. 21",
+      "чл. 24–31",
+      "чл. 111–112",
+      "чл. 150"
+    ],
+    "effective_date_consideration": "Поправките от ДВ 63/2025 имат отложено влизане в сила за част от разпоредбите от 01.07.2026 г.; при използване проверявай съответната дата на преписката"
+  },
+  "status": "UPLOADED_ORIGINAL_VERIFIED_FILE_NOT_YET_MIRRORED_TO_GITHUB",
+  "master_reference": {
+    "canonical_id": "APK",
+    "historical_60_record_archive_contains": false,
+    "source_registry_id": "APK",
+    "source_registry_path": "kt80/normative-master/KT82_B1_OFFICIAL_SOURCE_REGISTER_2026-11-13.json",
+    "duplicate_sha_in_existing_60_entry_archive": false
+  },
+  "workflow_routes": [
+    "административно производство",
+    "искане",
+    "предложение",
+    "сигнал",
+    "жалба",
+    "компетентност и препращане",
+    "съобщаване",
+    "административен акт",
+    "електронна преписка"
+  ],
+  "integration_approvals": {
+    "automatic_legal_citation": false,
+    "stage4": false,
+    "stage5": false,
+    "pdf2": false
+  },
+  "next_actions": [
+    "Публикуване на пълно локално копие в архивния пакет по одобрен път за файлово качване; GitHub metadata alone is not complete local mirror.",
+    "Индексиране по член/алинея/точка, релевантни за 22 административни маршрута.",
+    "Свързване на каноничната референция без променяне на заключените генератори."
+  ],
+  "notes": "Пълният файл е предоставен от потребителя; не бива да се обявява за физически съхранен в публичното GitHub хранилище само на база metadata."
+}

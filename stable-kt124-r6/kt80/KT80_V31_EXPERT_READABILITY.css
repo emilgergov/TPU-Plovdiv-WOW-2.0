@@ -1,0 +1,56 @@
+/* KT80 V31 — FINAL VISUAL PASS / expert readability. Presentation only.
+   No changes to form logic, selected parcel, GIS geometry, legal texts or PDF1. */
+:root { --kt80-type-small:14px; --kt80-type-body:16px; --kt80-type-value:18px; --kt80-type-section:19px; }
+.kt80-dashboard-tile { gap:7px!important; padding:11px 12px 10px!important; }
+.kt80-dashboard-tile-text {font-size:16px!important; line-height:1.27!important; font-weight:720!important; flex:1; }
+.kt80-dashboard-tile-number {font-size:13px!important; }
+.kt80-dashboard-tile-legal {font-size:14px!important;line-height:1.3!important; font-weight:570!important; color:#e5ebda!important; padding-top:5px!important;}
+.kt80-dashboard-tile-arrow {font-size:22px!important;}
+/* Flow cards retain existing dimensions; use stronger labels and less visual noise. */
+.kt80-stage-panel, .kt80-route-panels, .kt80-workflow, #kt80FreeGISScreen {font-size:var(--kt80-type-body);line-height:1.42;}
+.kt80-stage-panel h2, .kt80-route-panels h2, #kt80FreeGISScreen .kt80-free-gis>h3{font-size:23px!important;line-height:1.25!important;}
+.kt80-stage-panel h3, .kt80-route-panels h3, #kt80FreeGISScreen .kt80-gis-spatial-v24 h4 {font-size:var(--kt80-type-section)!important;line-height:1.28!important;}
+.kt80-stage-panel label, .kt80-route-panels label, #kt80FreeGISScreen .kt80-gis-intake-row label{font-size:15px!important;font-weight:700!important;}
+.kt80-stage-panel input,.kt80-stage-panel textarea,.kt80-stage-panel select,
+.kt80-route-panels input,.kt80-route-panels textarea,.kt80-route-panels select,
+#kt80FreeGISScreen #kt80GISFreeInput {font-size:16px!important;line-height:1.4!important;}
+.kt80-stage-panel button,.kt80-route-panels button,
+#kt80FreeGISScreen .kt80-gis-intake-actions button {font-size:15px!important;font-weight:700!important;}
+/* A single visible parcel is the focal point, not a list of full-sized parallel profiles. */
+#kt80FreeGISScreen .kt80-gis-spatial-v24 {padding:11px 13px!important;}
+#kt80FreeGISScreen #kt80GISDetail {grid-template-columns:repeat(5,minmax(0,1fr));}
+#kt80FreeGISScreen #kt80GISDetail>p {font-size:14px!important;line-height:1.42!important;padding:5px 9px!important;}
+#kt80FreeGISScreen .kt80-pi-master-compact h3 {font-size:19px!important;}
+#kt80FreeGISScreen .kt80-pi-master-compact>p,
+#kt80FreeGISScreen #kt80PIMasterStatus {font-size:14px!important;line-height:1.35!important;}
+#kt80FreeGISScreen .kt80-pi-card h4 {font-size:18px!important;line-height:1.25!important;}
+#kt80FreeGISScreen .kt80-pi-card>p {font-size:15px!important;line-height:1.35!important;min-height:57px;}
+#kt80FreeGISScreen .kt80-pi-card>p strong {font-size:14px!important;line-height:1.3!important;}
+#kt80FreeGISScreen .kt80-pi-card>p span {font-size:16px!important;font-weight:680!important;}
+#kt80FreeGISScreen .kt80-pi-zones>strong {font-size:15px!important;}
+#kt80FreeGISScreen .kt80-pi-zones>p {font-size:14px!important;line-height:1.35!important;}
+#kt80FreeGISScreen .kt80-gis-row strong {font-size:16px!important;}
+#kt80FreeGISScreen .kt80-gis-row span {font-size:14px!important;}
+#kt80FreeGISScreen .kt80-gis-intake-foot,
+#kt80FreeGISScreen .kt80-gis-compact-status,
+#kt80FreeGISScreen #kt80GISStatus,
+#kt80FreeGISScreen #kt80FullGISReady {font-size:14px!important;line-height:1.35!important;}
+#kt80FreeGISScreen .kt80-gis-toolbar {font-size:14px!important;}
+#kt80FreeGISScreen .kt80-map-actions button,#kt80FreeGISScreen .kt80-gis-toolbar select {font-size:13px!important;}
+#kt80FreeGISScreen .kt80-pdf1-v24 {font-size:15px!important;}
+#kt80FreeGISScreen .kt80-pdf1-v24>strong {font-size:17px!important;}
+/* Responsive, no horizontal clipping or panel resizing. */
+@media(max-width:1250px){
+ .kt80-dashboard-tile-text {font-size:15px!important;}
+ .kt80-dashboard-tile-legal {font-size:13px!important;}
+ #kt80FreeGISScreen #kt80GISDetail {grid-template-columns:repeat(3,minmax(0,1fr));}
+}
+@media(max-width:750px){
+ .kt80-dashboard-tile-text {font-size:14.5px!important;}
+ .kt80-dashboard-tile-legal {font-size:12.5px!important;}
+ #kt80FreeGISScreen #kt80GISDetail {grid-template-columns:repeat(2,minmax(0,1fr));}
+ #kt80FreeGISScreen .kt80-pi-card {grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media(max-width:430px){
+ #kt80FreeGISScreen #kt80GISDetail,#kt80FreeGISScreen .kt80-pi-card {grid-template-columns:1fr;}
+}

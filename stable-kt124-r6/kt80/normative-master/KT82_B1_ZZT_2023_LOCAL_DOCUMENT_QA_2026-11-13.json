@@ -1,0 +1,41 @@
+{
+  "schema": "KT82_B1_ZZT_2023_LOCAL_CHECK_V01",
+  "date": "2026-11-13",
+  "document": "Закон за защитените територии",
+  "current": {
+    "source": "user PDF downloaded from magistrat.bg, consolidated text printed 2026-11-13",
+    "pages": 35,
+    "sha256": "af1c4483d6a7841d5fc13a80627d9b1bd717041c73fc7594f591e1c591027ce8",
+    "last_amendment_detected": "ДВ бр.102/2023",
+    "annexes": [
+      "1",
+      "2"
+    ],
+    "distinct_article_numbers_indexed": 88,
+    "role": "LEADING_WORKING_COPY_NOT_OFFICIALLY_RECONCILED",
+    "legal_citation_ready": false
+  },
+  "historical": {
+    "last_amendment_detected": "ДВ бр.66/2013",
+    "role": "RETAINED_HISTORICAL"
+  },
+  "portable_pack": {
+    "filename": "KT82_B1_Normative_Master_Local_Pack_V5_REVIEW.zip",
+    "sha256": "4abed4b817bce724d58326b3673392f05981e431602c6746e1bd5b9281047927",
+    "original_document_versions": 14,
+    "zip_integrity": "PASS",
+    "physical_repository_uploaded": false
+  },
+  "remaining": [
+    "Source-by-source official comparison of ZZT 2014-2023 amendment acts and legal effective dates",
+    "All 32 Natura zone designation/amendment orders with original PDF and per-zone record",
+    "ИАOС ЗТ register and Св. Дух designation order primary sources",
+    "Check current special regulations/annexes and 22 administrative route mapping"
+  ],
+  "constraints": [
+    "Do not enable stage 4/5 normative automation",
+    "Do not change Classic A/B, Expert, GIS, PDF1 or PDF2",
+    "APIS/Ciela/private documents remain private, no public GitHub upload"
+  ],
+  "status": "INVENTORY_IN_PROGRESS"
+}

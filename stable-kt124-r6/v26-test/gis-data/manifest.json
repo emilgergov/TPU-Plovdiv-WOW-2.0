@@ -1,0 +1,14 @@
+{
+  "status": "PASS_COUNT_BY_PREFIX",
+  "parcel_geometry": 917418,
+  "parcel_prefixes": 67,
+  "overlap_records_expected": 181154,
+  "version": "V26-2026-10-27",
+  "shards": 258,
+  "formats": [
+    "parcels",
+    "overlays",
+    "parcelgeom",
+    "overlapgeom"
+  ]
+}

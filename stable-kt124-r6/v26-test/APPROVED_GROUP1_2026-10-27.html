@@ -1,0 +1,251 @@
+<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ТПУ Пловдив · ИМОТИ — GIS прототип</title><style>
+:root{font-family:system-ui,Arial,sans-serif;color:#15352b;background:#f3f6f2}*{box-sizing:border-box}body{margin:0}header{background:#124333;color:white;padding:15px 22px;display:flex;align-items:center;justify-content:space-between}header small{color:#cbe3d3}main{display:grid;grid-template-columns:minmax(270px,350px) 1fr;min-height:0}aside{background:white;border-right:1px solid #d9e5dd;padding:20px;display:flex;flex-direction:column;gap:12px}h1,h2,p{margin:0}h1{font-size:20px}h2{font-size:21px}label{font-weight:700}textarea{min-height:140px;resize:vertical;width:100%;padding:12px;border:1px solid #a9c1b1;border-radius:8px;font:inherit}button{border:0;background:#196849;color:white;padding:11px 14px;border-radius:8px;cursor:pointer;font-weight:700}button:disabled{opacity:.55;cursor:not-allowed}button.secondary{background:#e8f1eb;color:#124333}.hint{font-size:13px;color:#526a5e;line-height:1.5}.status{font-size:13px;background:#f0f5f0;padding:10px;border-radius:7px}.result{border:1px solid #dbe7dd;border-radius:9px;padding:10px;margin-top:8px;cursor:pointer}.result[aria-selected=true]{border:2px solid #176b4a;background:#f0f9f2}.error{color:#a12626}.workspace{padding:20px;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:14px;min-width:0;min-height:0}.map{position:relative;border:1px solid #cbdcd1;border-radius:14px;background:#e4efe8;overflow:hidden;min-height:0}.map svg{width:100%;height:100%;display:block;touch-action:none}.map .cad-label{font:600 12px system-ui,Arial,sans-serif;fill:#123b2b;paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round;pointer-events:none}.map .caption{position:absolute;top:12px;left:12px;background:#fffef4ed;border-radius:8px;padding:9px;font-size:12px}.map .controls{position:absolute;right:12px;top:12px;display:grid;gap:5px}.map .controls button{padding:8px 13px}.details{background:white;border:1px solid #dce7dd;border-radius:10px;padding:15px;line-height:1.7}.pill{display:inline-block;background:#dcece1;padding:2px 7px;border-radius:8px;font-size:12px}.warn{color:#865100}footer{font-size:12px;color:#62756b;padding:12px 20px}@media(max-width:760px){main{grid-template-columns:1fr}.workspace{padding:10px}.map{min-height:350px}aside{border-right:0;border-bottom:1px solid #ddd}}
+
+.progress-panel{display:none;border:1px solid #c7dfcf;border-radius:10px;background:#f2f8f3;padding:12px;gap:8px;flex-direction:column}.progress-panel.active{display:flex}.progress-title{font-weight:700;font-size:13px}.progress-track{height:12px;background:#d6e8db;border-radius:99px;overflow:hidden;position:relative}.progress-fill{height:100%;width:34%;background:#187650;border-radius:99px;animation:progressSweep 1.35s ease-in-out infinite alternate}.progress-panel.done .progress-fill{animation:none;width:100%;background:#187650}.progress-panel.failed .progress-fill{animation:none;width:100%;background:#a33d36}@keyframes progressSweep{from{transform:translateX(-100%)}to{transform:translateX(300%)}}@media(prefers-reduced-motion:reduce){.progress-fill{animation:none;width:100%;opacity:.65}}
+textarea#ids:placeholder-shown:not(:focus){animation:v26AwaitInput 2.6s ease-in-out infinite}@keyframes v26AwaitInput{0%,100%{border-color:#a9c1b1;box-shadow:0 0 0 0 rgba(25,104,73,0)}50%{border-color:#2d9468;box-shadow:0 0 0 3px rgba(25,104,73,.13)}}textarea#ids:focus{outline:2px solid #328b66;outline-offset:1px;animation:none}@media(prefers-reduced-motion:reduce){textarea#ids:placeholder-shown:not(:focus){animation:none;border-color:#2d9468}}
+
+/* Single authoritative viewport layout; no fixed positioning or JS measurements. */
+html,body{width:100%;max-width:100%;margin:0}
+header{min-width:0;gap:12px}header>*{min-width:0}
+.map .controls{max-width:calc(100% - 24px)}
+.details{min-width:0;overflow-wrap:anywhere}
+@media(min-width:761px){
+ html,body{height:100%;overflow:hidden!important;overscroll-behavior:none}
+ body{position:fixed!important;inset:0!important;height:100dvh!important;max-height:100dvh!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+ body>#v26-wow341,body>header,body>footer{flex:0 0 auto!important}
+ body>main{flex:1 1 0!important;min-height:0!important;max-height:none!important;overflow:hidden!important}
+
+ body>main{display:grid;grid-template-columns:minmax(260px,300px) minmax(0,1fr);width:100%;height:auto;min-height:0;max-height:100%;overflow:hidden}
+ body>main>aside{min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:14px;gap:9px}
+ body>main>.workspace{min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;padding:12px;grid-template-rows:minmax(0,1fr) auto}
+ body>main .map{min-height:0}
+ body>main textarea#ids{min-height:90px;height:110px}
+ body>footer{min-height:0}
+}
+@media(max-width:760px){
+ html,body{height:auto;overflow-x:hidden}
+ body{display:block}
+ main{height:auto;min-height:0;grid-template-columns:minmax(0,1fr)}
+ .workspace{padding:10px;grid-template-rows:minmax(350px,55dvh) auto}
+ .map{min-height:350px}
+ aside{border-right:0;border-bottom:1px solid #ddd}
+}
+
+/* V26 Group 1: compact chrome and a stable, non-scrolling map. Layout only. */
+@media(min-width:761px){
+ body>#v26-wow341{flex:0 0 auto!important;font-size:12px}
+ body>#v26-wow341>summary{padding:3px 14px!important;line-height:1.35!important}
+ body>header{padding:7px 14px!important;min-height:0!important}
+ body>header h1{font-size:19px!important;margin:0!important;line-height:1.25!important}
+ body>header small{font-size:12px!important}
+ body>main>aside{padding:10px 12px!important;gap:6px!important}
+ body>main>aside h2{margin:0!important}
+ body>main>aside button{padding-top:7px!important;padding-bottom:7px!important;min-height:32px}
+ body>main>aside .hint{margin-top:2px!important;margin-bottom:3px!important}
+ body>main>aside #zipDrop{padding:8px!important;margin:2px 0!important}
+ body>main>aside #v26LocalIndexHost{margin:4px 0!important;padding:7px!important}
+ body>main>.workspace{display:grid!important;grid-template-rows:minmax(0,3fr) minmax(0,2fr)!important;overflow:hidden!important;padding:9px!important;gap:8px!important}
+ body>main>.workspace>.map{min-height:0!important;min-width:0!important;overflow:hidden!important}
+ body>main>.workspace>.details{min-height:0!important;min-width:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain}
+ body>main>.workspace>.details #v26Annex2Static{margin:6px 0!important;padding:8px!important}
+ body>main+div{flex:0 0 auto!important;padding:4px 12px!important;font-size:12px!important;line-height:1.35!important}
+ body>footer{flex:0 0 auto!important;padding:4px 12px!important;font-size:11px!important;line-height:1.3!important}
+}
+
+/* Group 1 corrective patch: force map/details split despite content intrinsic size. */
+@media(min-width:761px){
+ body>main>.workspace{height:100%!important;max-height:100%!important;min-height:0!important;grid-template-rows:minmax(0,65%) minmax(0,35%)!important;align-content:stretch!important}
+ body>main>.workspace>.map{height:100%!important;max-height:100%!important;min-height:0!important}
+ body>main>.workspace>.details{height:100%!important;max-height:100%!important;min-height:0!important;overflow-y:auto!important}
+ body>header{padding:5px 12px!important}
+ body>#v26-wow341{padding:0!important;margin:0!important}
+ body>main+div{padding:3px 10px!important}
+ body>footer{padding:3px 10px!important}
+}
+
+/* Group 1 diagnostic resolution: flex sizing avoids intrinsic grid row expansion. */
+@media(min-width:761px){
+ body>main>.workspace{display:flex!important;flex-direction:column!important;overflow:hidden!important;min-height:0!important}
+ body>main>.workspace>.map{flex:1 1 0!important;height:auto!important;max-height:none!important;min-height:180px!important}
+ body>main>.workspace>.details{flex:0 0 30%!important;height:auto!important;max-height:30%!important;min-height:0!important;overflow-y:auto!important}
+ body>#v26-wow341{padding:3px 12px!important}
+ body>header{padding:5px 12px!important}
+ body>main+div{padding:3px 10px!important}
+ body>footer{padding:3px 10px!important}
+}
+
+/* Group 1 final: compact spatial attributes, responsive to narrow result panes. */
+#details:not(:empty){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px 12px;align-items:start;line-height:1.45}
+#details .v26-spatial-item{min-width:0;overflow-wrap:anywhere}
+#details .v26-spatial-wide{grid-column:1/-1}
+@media(max-width:1000px){#details{grid-template-columns:minmax(0,1fr)!important}}
+
+/* Group 1: spatial attributes use two columns even with legacy plain div output. */
+@media(min-width:761px){
+ .workspace .details #details{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:3px 12px!important;align-items:start!important}
+ .workspace .details #details>div{min-width:0;overflow-wrap:anywhere}
+ .workspace .details #details>div:last-child:nth-child(odd){grid-column:1/-1}
+}
+</style><style id="v26-wow341-announcement">#v26-wow341{background:#edf6ef;color:#173d2a;border-bottom:1px solid #a8c7b2;padding:9px 22px;font:13px/1.5 system-ui,Arial,sans-serif}#v26-wow341 summary{cursor:pointer;font-weight:750}#v26-wow341 ol{margin:7px 0;padding-left:23px}#v26-wow341 a{color:#0b6242}</style></head><body><div id="v26-release-probe" style="position:fixed;bottom:3px;right:8px;z-index:99999;background:#fff;color:#123b2a;border:1px solid #a0b8aa;border-radius:4px;padding:1px 5px;font:11px Arial,sans-serif;pointer-events:none">G1 · 7FFE81F5</div><details id="v26-wow341"><summary>WOW 3.4.1 · Контролна версия · Анонс на довършителните задачи</summary><div>Потвърдено: ZIP преписка, роли, ГИС и технически създаден Word + 2 PDF пакет. Работна версия, не официално становище.<ol><li>PDF №1: ясно разделяне на имоти и площи.</li><li>Финална проверка на общия ZIP.</li><li>Надеждно автоматично възстановяване на локалния индекс.</li><li>Опростяване на работния поток.</li><li>Проверка на нормативните основания по официални източници — непотвърденото „ПРЕДСТОИ“.</li><li>Финален визуален преглед в Chrome 109.</li></ol><a href="../WOW_3.4.1_STATUS_AND_FINISHING.md" target="_blank" rel="noopener">Пълен списък</a> · <a href="../">Начална страница WOW 3.4.1</a></div></details><header><div><h1>ТПУ Пловдив · ИМОТИ</h1><small>Самостоятелен GIS прототип · Етап 3</small></div><span class="pill">Локален тест</span></header><main><aside><h2>ИМОТИ</h2><label for="ids">Кадастрални идентификатори</label><textarea id="ids" placeholder="99999.999.9999" spellcheck="false"></textarea><p class="hint">Разделяйте с интервал, запетая, точка и запетая или нов ред. Идентификаторите на сгради и обекти се свързват с поземления имот. Максимум 100 за една справка.</p><button id="run">Намери имотите</button><label for="casefile">Преписка — един ZIP архив (до 40 MB)</label><div id="zipDrop" role="button" tabindex="0" aria-label="Пуснете ZIP архив или натиснете за избор" style="border:2px dashed #65997c;border-radius:12px;padding:14px;text-align:center;cursor:pointer;margin:8px 0"><strong>Пуснете ZIP архива тук</strong><div>или натиснете за избор</div><div id="zipName" class="hint">Няма избран архив</div></div><input id="casefile" type="file" accept=".zip,application/zip" style="display:none"><div id="v26LocalIndexHost" style="margin:10px 0;padding:10px;border:1px solid #b6d0c0;border-radius:9px"><strong>Кадастрален индекс — локална ГИС справка</strong><div id="v26LocalIndexMount"></div></div><button id="extract" class="secondary">Обработи ZIP преписката</button><p id="intakeResult" class="hint" role="status">Плъзнете ZIP тук или го изберете. Файловете се обработват само в паметта.</p><div id="roleReview" style="display:none;border:1px solid #a9c1b1;border-radius:8px;padding:10px"><strong>Експертна проверка на ролите</strong><p class="hint">Кандидатите не са потвърдени автоматично. Изберете роля за всеки имот и потвърдете.</p><div id="roleRows"></div><button id="confirmRoles" class="secondary" type="button">Потвърди ролите</button><p id="roleStatus" class="hint"></p></div><button id="v26pdf" class="secondary">V26 · ГИС анализ PDF</button><button id="proposal" class="secondary">Предложение за становище · Word + приложения ZIP</button><div id="proposalDownload" style="display:none;margin:8px 0;padding:10px;border:1px solid #14764b;border-radius:8px;background:#eef8f0"><strong>Пакетът е готов.</strong><p class="hint">Съдържа работен Word проект и две PDF приложения.</p><a id="proposalLink" href="#" download="TPU_Plovdiv_Proposal_DRAFT_and_GIS_PDF.zip" style="font-weight:bold;color:#075c3b">Изтегли пакета ZIP</a></div><button id="pdf" class="secondary">GIS справка · Приложение №1</button><button id="reset" class="secondary">Изчисти</button><div id="progressPanel" class="progress-panel" role="status" aria-live="polite"><div id="progressTitle" class="progress-title">Обработване…</div><div class="progress-track" role="progressbar" aria-label="Изпълнение на операцията"><div class="progress-fill"></div></div><div id="progressNote" class="hint">Моля, изчакайте. Програмата работи локално.</div></div><p class="status" id="status" role="status">Въведете идентификатор и натиснете „Намери имотите“.</p><div id="results"></div></aside><section class="workspace"><div class="map"><div class="caption">Схематична карта по реална геометрия · WGS84<br><span style="color:#14764b">■</span> имот &nbsp; <span style="color:#2268bb">━</span> граница на защитена зона &nbsp; <span style="color:#d18117">▨</span> архивно пресичане</div><svg id="map" viewBox="0 0 1000 650" aria-label="Карта на избраните имоти"><defs><pattern id="overlapHatch" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)"><rect width="10" height="10" fill="#f7d9a0" fill-opacity=".34"/><line x1="0" y1="0" x2="0" y2="10" stroke="#c17b13" stroke-width="3"/></pattern></defs><g id="zones"></g><g id="shapes"></g><g id="zoneLabels"></g></svg><div id="zoneStatus" role="status" style="font-size:12px;padding:4px 8px;color:#225a82">Границите се зареждат при избор на имот.</div><div class="controls"><button id="zoomIn" aria-label="Приближи">+</button><button id="zoomOut" aria-label="Отдалечи">−</button><button id="fit">Цялост</button><button id="toggleOverlaps" aria-pressed="true" title="Покажи или скрий архивните пространствени пресичания">Пресичания: ВКЛ.</button><button id="showAll">Всички имоти</button><button id="showSelected">Избран имот</button><label for="labelMode" style="font-size:12px;background:white;padding:5px;border-radius:5px">ИДЕНТИФИКАТОРИ</label><select id="labelMode" aria-label="Етикети на имотите" style="max-width:135px;padding:6px"><option value="auto">Автоматично</option><option value="all">Всички, ако има място</option><option value="none">Скрити</option></select></div></div><div class="details"><strong>Общ преглед на въведените имоти</strong><div id="summary" class="hint">Няма извършена справка.</div><section id="v26Annex2Static" style="margin:12px 0;padding:12px;border:1px solid #c7dfcf;border-radius:8px;background:#fff"><strong>Приложение №2 · Нормативни референции</strong><p id="v26Annex2Info" style="font-size:13px;margin:8px 0">Изчаква се ГИС справка и нормативен регистър.</p><button id="v26Annex2Button" type="button" disabled>Подготви приложение №2 за PDF</button></section><hr><strong>Пространствени данни</strong><div id="details" class="hint">Изберете намерен имот за подробности.</div></div></section></main><div style="padding:10px 18px;background:#edf4ef;border-top:1px solid #d4e4db"><a href="./normative/index.html" target="_blank" rel="noopener" style="font-weight:700;color:#155c44">Нормативни документи · официален браузърен архив</a> <span style="font-size:12px;color:#52675c">— работен каталог, проверка на актуалността преди цитиране</span></div><footer>Само работна GIS справка от архива 20.10.2026. Няма удостоверяване на актуалните граници, правна преценка или избор на План А/Б. Преписки не се качват.</footer><script>
+'use strict';const $=id=>document.getElementById(id);let found=[],selected=0,allFeatures=[],baseBox=null,viewBox=null,combined=false,confirmedRoles=null,caseParcels=[],caseContext=null;const ns='http://www.w3.org/2000/svg';const IDS_SESSION_KEY='tpu-v26-parcels-current-tab';try{const saved=sessionStorage.getItem(IDS_SESSION_KEY);if(saved&&!$('ids').value.trim())$('ids').value=saved;}catch(e){}$('ids').addEventListener('input',()=>{try{sessionStorage.setItem(IDS_SESSION_KEY,$('ids').value)}catch(e){}});function v26EditIds(raw){
+ const original=String(raw||'');
+ const lines=original.replace(/[\u00a0\u200b]/g,' ').split(/[\n;,]+/).flatMap(x=>x.trim().split(/\s+(?=\d{4,6}[.\s])/)).map(x=>x.trim()).filter(Boolean);
+ const output=[],changes=[],uncertain=[],invalid=[];
+ for(const line of lines){
+  const source=line;
+  let s=line.replace(/[，．。]/g,'.').replace(/\s*\.\s*/g,'.').replace(/\.{2,}/g,'.').replace(/^\.+|\.+$/g,'').trim();
+  const compact=s.replace(/\s+/g,'');
+  if(/^\d{4,6}(?:\.\d+){2,4}$/.test(compact)){s=compact}
+  else if(/^\d{4,6}(?:\s+\d+){2,4}$/.test(s)){s=s.replace(/\s+/g,'.')}
+  else if(/^\d{4,6}\d{3}\d{1,4}$/.test(compact)){uncertain.push(source+' → разделянето на цифрите не е еднозначно');continue}
+  else {invalid.push(source);continue}
+  const p=s.split('.');
+  if(!/^\d{4,6}$/.test(p[0])||!/^[0-9]{1,3}$/.test(p[1])||!/^[0-9]{1,4}$/.test(p[2])||p.length>5||p.slice(3).some(x=>!/^[0-9]{1,4}$/.test(x))){invalid.push(source);continue}
+  if(p.length===4 && p[3].length>3){uncertain.push(source+' → проверете идентификатора на сградата');continue}
+  if(p.length===5 && p[4].length>3){uncertain.push(source+' → проверете идентификатора на обекта');continue}
+  if(s!==source)changes.push(source+' → '+s);
+  if(!output.includes(s))output.push(s);
+ }
+ return {ids:output,changes,uncertain,invalid};
+}
+function words(s){return v26EditIds(s).ids};function reviewRoles(d){
+  const toParcel=id=>String(id).split('.').slice(0,3).join('.');
+  const unique=xs=>[...new Set((xs||[]).map(toParcel))];
+  confirmedRoles=null;caseParcels=unique(d.all_parcels);
+  const c={...d.classification,leading_candidates:unique(d.classification.leading_candidates),ancillary_candidates:unique(d.classification.ancillary_candidates)};const host=$('roleRows');host.replaceChildren();
+  for(const id of caseParcels){const line=document.createElement('label');line.style.cssText='display:block;font-size:13px;margin:7px 0';
+    const label=document.createElement('span');label.textContent=id+' · ';line.appendChild(label);
+    const select=document.createElement('select');select.dataset.cadnum=id;select.style.maxWidth='100%';select.onchange=()=>{confirmedRoles=null;$('roleStatus').textContent='Променени роли — потвърдете отново.'};
+    const opts=[['','Непотвърден'],['leading','Водещ'],['ancillary','Съпътстващ']];
+    for(const [v,t] of opts){const o=document.createElement('option');o.value=v;o.textContent=t;select.appendChild(o)}
+    // Candidate information is shown as a hint, never preselected as confirmed.
+    line.appendChild(select);const hint=document.createElement('small');hint.textContent=c.leading_candidates.includes(id)?' (кандидат за водещ)':c.ancillary_candidates.includes(id)?' (кандидат за съпътстващ)':'';line.appendChild(hint);host.appendChild(line);
+  }
+  $('roleReview').style.display=caseParcels.length?'block':'none';$('roleStatus').textContent='Ролите не са потвърдени. Обединени поземлени имоти: '+caseParcels.length+' (контрол 341-ROLE-1).';
+}
+$('confirmRoles').onclick=()=>{const roles={};const selects=[...$('roleRows').querySelectorAll('select')];if(!selects.length)return;
+  for(const s of selects){if(!s.value){confirmedRoles=null;$('roleStatus').textContent='Всички роли трябва да бъдат изрично потвърдени.';return}roles[s.dataset.cadnum]=s.value}
+  confirmedRoles=roles;$('roleStatus').textContent='Потвърдени '+selects.length+' роли за тази преписка.';if(!found.length){$('run').click()}
+};
+function setStatus(t){
+ $('status').textContent=t;
+ const panel=$('progressPanel'),title=$('progressTitle'),note=$('progressNote');
+ const busy=/^(Извличане на данни|Обработка на ZIP|V26: изчисляване|Изготвяне на архивна|Генериране на работен)/.test(t);
+ const failed=/^(Грешка|Неуспешна|Неуспешно|V26: (?!изчисляване)|Предложение:)/.test(t);
+ const done=/^(Готово — ZIP|Намерени \d|V26 PDF е готов|GIS справката е генерирана|Готов е работен)/.test(t);
+ if(busy||failed||done){panel.className='progress-panel active'+(failed?' failed':done?' done':'');title.textContent=failed?'Операцията е прекъсната':done?'Операцията завърши':'Програмата работи…';note.textContent=t;panel.querySelector('[role=progressbar]').setAttribute('aria-valuetext',busy?'Изпълнява се; процентът не е наличен':failed?'Грешка':'Завършено');}
+ else {panel.className='progress-panel';}
+};function elt(name,props){const x=document.createElementNS(ns,name);for(const [k,v] of Object.entries(props||{}))x.setAttribute(k,v);return x}function coords(g){if(!g)return[];if(g.type==='Polygon')return g.coordinates.flat();if(g.type==='MultiPolygon')return g.coordinates.flat(2);return []}function bounds(features){const xy=features.flatMap(f=>coords(f.geometry));if(!xy.length)return null;let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;for(const [x,y] of xy){minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y)}return{minX,maxX,minY,maxY}}function pathFor(g,b){const poly=g.type==='Polygon'?[g.coordinates]:g.type==='MultiPolygon'?g.coordinates:[];const dx=Math.max(b.maxX-b.minX,1e-8),dy=Math.max(b.maxY-b.minY,1e-8);const scale=Math.min(900/dx,530/dy);const ox=500-(b.minX+b.maxX)/2*scale,oy=325+(b.minY+b.maxY)/2*scale;return poly.map(p=>p.map(r=>r.map(([x,y],i)=>(i?'L':'M')+(x*scale+ox).toFixed(2)+' '+(-y*scale+oy).toFixed(2)).join(' ')+' Z').join(' ')).join(' ')}function ringContains(point,ring){let inside=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const a=ring[i],b=ring[j];if(((a[1]>point[1])!==(b[1]>point[1]))&&(point[0]<(b[0]-a[0])*(point[1]-a[1])/(b[1]-a[1])+a[0]))inside=!inside}return inside}
+function pointInPolygon(point,poly){return ringContains(point,poly[0])&&!poly.slice(1).some(r=>ringContains(point,r))}
+function parcelAnchor(g){const polys=g.type==='Polygon'?[g.coordinates]:g.type==='MultiPolygon'?g.coordinates:[];let best=null;for(const poly of polys){if(!poly.length)continue;const ring=poly[0],b=ring.reduce((v,p)=>[Math.min(v[0],p[0]),Math.min(v[1],p[1]),Math.max(v[2],p[0]),Math.max(v[3],p[1])],[Infinity,Infinity,-Infinity,-Infinity]);const area=(b[2]-b[0])*(b[3]-b[1]);if(!best||area>best.area){let point=[(b[0]+b[2])/2,(b[1]+b[3])/2];if(!pointInPolygon(point,poly)){const candidates=[...ring.slice(0,-1).map(p=>[(p[0]+point[0])/2,(p[1]+point[1])/2]),ring[0]];point=candidates.find(p=>pointInPolygon(p,poly))||ring[0]}best={point,area}}}return best?.point||null}
+function labelCandidates(){
+  if(!baseBox||$('labelMode').value==='none')return [];
+  const candidates=[];const vb=viewBox||[0,0,1000,650];const factor=1000/vb[2];
+  // Suppress automatic labels when parcels occupy too little of the current view.
+  for(const f of allFeatures){if(f.properties.role==='archived_intersection')continue;
+    const id=f.properties.cadnum||f.properties.identifier||f.properties.parcel_id||'';
+    if(!id)continue;
+    const b=bounds([f]);if(!b)continue;
+    const dx=Math.max(baseBox.maxX-baseBox.minX,1e-8),dy=Math.max(baseBox.maxY-baseBox.minY,1e-8);
+    const scale=Math.min(900/dx,530/dy);
+    const anchor=parcelAnchor(f.geometry);if(!anchor)continue;
+    const x=500+(anchor[0]-(baseBox.minX+baseBox.maxX)/2)*scale;
+    const y=325-(anchor[1]-(baseBox.minY+baseBox.maxY)/2)*scale;
+    const w=(b.maxX-b.minX)*scale*factor,h=(b.maxY-b.minY)*scale*factor;
+    if(x<vb[0]||x>vb[0]+vb[2]||y<vb[1]||y>vb[1]+vb[3])continue;
+    const text=String(id);const tw=(text.length*7.1+10)/factor,th=18/factor;
+    if($('labelMode').value==='auto'&&(w<tw*1.3||h<th*1.4))continue;
+    candidates.push({x,y,text,tw,th,priority:(found[selected]?.cadnum===text)?2:1});
+  }
+  return candidates;
+}
+function drawLabels(target){
+ const factor=1000/(viewBox?.[2]||1000);const occupied=[];
+ for(const c of labelCandidates().sort((a,b)=>b.priority-a.priority||a.y-b.y||a.x-b.x)){
+  const r=[c.x-c.tw/2,c.y-c.th/2,c.x+c.tw/2,c.y+c.th/2];
+  if(occupied.some(q=>r[0]<q[2]&&r[2]>q[0]&&r[1]<q[3]&&r[3]>q[1]))continue;
+  occupied.push(r);
+  const t=elt('text',{x:c.x,y:c.y,'text-anchor':'middle','dominant-baseline':'middle','class':'cad-label','font-size':12/factor,'stroke-width':3/factor});t.textContent=c.text;target.appendChild(t);
+ }
+}
+// Единен публичен слой: 32 зони, извлечени от SNAP_BG; не е удостоверяване на актуални правни граници.
+let zoneFeatures=[],zoneLoad=null;
+function loadZones(){
+ if(zoneLoad)return zoneLoad;
+ zoneLoad=fetch('./TPU_Plovdiv_N2000_32_zones_full.geojson').then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json()}).then(d=>{
+  if(!Array.isArray(d.features)||d.features.length!==32)throw Error('Непълен набор от зони: '+(d.features?.length||0));
+  zoneFeatures=d.features.map(f=>({...f,_bbox:bounds([f])}));$('zoneStatus').textContent='Заредени граници: 32 защитени зони';redraw();return zoneFeatures;
+ }).catch(e=>{console.warn('N2000 zone boundaries unavailable',e);$('zoneStatus').textContent='Границите не са заредени: '+e.message;return []});
+ return zoneLoad;
+}
+function drawZones(){
+ const target=$('zones');target.replaceChildren();const labels=$('zoneLabels');labels.replaceChildren();if(!baseBox||!zoneFeatures.length)return;
+ const used=new Set(allFeatures.filter(f=>f.properties?.role==='archived_intersection').map(f=>f.properties.sitecode).filter(Boolean));
+ const extent=baseBox,margin=Math.max(extent.maxX-extent.minX,extent.maxY-extent.minY)*.08;
+ for(const f of zoneFeatures){
+  const b=f._bbox;if(!b||b.maxX<extent.minX-margin||b.minX>extent.maxX+margin||b.maxY<extent.minY-margin||b.minY>extent.maxY+margin)continue;
+  // The entire boundary is rendered in the parcel's coordinate frame; the SVG viewport clips it.
+  const path=elt('path',{d:pathFor(f.geometry,extent),fill:'none',stroke:'#2268bb','stroke-width':used.has(f.properties.SITECODE||f.properties.sitecode)?3:2,'stroke-linejoin':'round','pointer-events':'none'});
+  const tip=elt('title');tip.textContent='Защитена зона '+(f.properties.SITECODE||f.properties.sitecode||'')+' — '+(f.properties.NAME_BG||f.properties.name_bg||'');path.appendChild(tip);target.appendChild(path);
+  const code=f.properties.SITECODE||f.properties.sitecode||'';
+  const name=f.properties.NAME_BG||f.properties.name_bg||f.properties.SITENAME||'';
+  if(!code||!name)continue;
+  // Find a label position INSIDE the zone AND the currently visible map viewport.
+  const scale=Math.min(900/Math.max(extent.maxX-extent.minX,1e-8),530/Math.max(extent.maxY-extent.minY,1e-8));
+  const ox=500-(extent.minX+extent.maxX)/2*scale,oy=325+(extent.minY+extent.maxY)/2*scale;
+  const vb=viewBox||[0,0,1000,650],labelWidth=Math.max(140,Math.min(310,name.length*7.5+25));
+  const polygons=f.geometry.type==='Polygon'?[f.geometry.coordinates]:f.geometry.type==='MultiPolygon'?f.geometry.coordinates:[];
+  const candidates=[];
+  const parcelBoxes=allFeatures.filter(q=>q.properties?.role!=='archived_intersection').map(q=>bounds([q])).filter(Boolean);
+  // Prefer centre of visible viewport, then scan outward for an interior point.
+  for(let radius=0;radius<=5;radius++)for(let iy=-radius;iy<=radius;iy++)for(let ix=-radius;ix<=radius;ix++){
+   if(Math.max(Math.abs(ix),Math.abs(iy))!==radius)continue;
+   candidates.push([vb[0]+vb[2]*(.5+ix*.075),vb[1]+vb[3]*(.5+iy*.075)]);
+  }
+  let point=null;
+  for(const [px,py] of candidates){
+   if(px<vb[0]+labelWidth/2+12||px>vb[0]+vb[2]-labelWidth/2-12||py<vb[1]+35||py>vb[1]+vb[3]-35)continue;
+   const geo=[(px-ox)/scale,(oy-py)/scale];
+   // Keep the zone label clear of the cadastral parcel and its identifier.
+   if(parcelBoxes.some(b=>geo[0]>=b.minX-labelWidth/2/scale&&geo[0]<=b.maxX+labelWidth/2/scale&&geo[1]>=b.minY-30/scale&&geo[1]<=b.maxY+30/scale))continue;
+   if(polygons.some(p=>pointInPolygon(geo,p))){point=[px,py];break}
+  }
+  if(!point)continue;
+  const [x,y]=point;
+  const label=elt('g',{'pointer-events':'none'});
+  const width=labelWidth;
+  label.appendChild(elt('rect',{x:x-width/2,y:y-23,width,height:46,rx:7,fill:'#ffffff',opacity:'.9',stroke:'#2268bb','stroke-width':1.5}));
+  const t1=elt('text',{x,y:y-3,'text-anchor':'middle','font-size':14,'font-weight':'bold',fill:'#164e8a'});t1.textContent=code;label.appendChild(t1);
+  const t2=elt('text',{x,y:y+14,'text-anchor':'middle','font-size':12,fill:'#164e8a'});t2.textContent=name;label.appendChild(t2);
+  labels.appendChild(label);
+ }
+}
+let showArchivedOverlaps=true;function redraw(){const target=$('shapes');target.replaceChildren();drawZones();if(!baseBox)return;for(const f of allFeatures){const overlay=f.properties.role==='archived_intersection';if(overlay&&!showArchivedOverlaps)continue;const path=elt('path',{d:pathFor(f.geometry,baseBox),fill:overlay?'url(#overlapHatch)':'#369b6d55',stroke:overlay?'#b97714':'#075c3b','stroke-width':overlay?2:3,'fill-rule':'evenodd'});const cad=f.properties.cadnum||'';const tip=elt('title');tip.textContent=overlay?('Архивно пресичане · '+(f.properties.sitecode||'неизвестна зона')+' · имот '+cad):('Имот · '+cad);path.appendChild(tip);if(!overlay&&cad){path.style.cursor='pointer';path.setAttribute('tabindex','0');path.setAttribute('role','button');path.setAttribute('aria-label','Избери имот '+cad);path.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();const idx=found.findIndex(r=>r.cadnum===cad&&r.status==='Намерен');if(idx>=0)select(idx,combined)}});path.addEventListener('click',()=>{const idx=found.findIndex(r=>r.cadnum===cad&&r.status==='Намерен');if(idx>=0)select(idx,combined)})}target.appendChild(path)}if(viewBox)$('map').setAttribute('viewBox',viewBox.join(' '));drawLabels(target)}function fit(){viewBox=[0,0,1000,650];redraw()}function zoom(f){if(!viewBox)return;const [x,y,w,h]=viewBox;viewBox=[x+w*(1-f)/2,y+h*(1-f)/2,w*f,h*f];redraw()}// Навигация по картата: колелце за мащаб, влачене за преместване.
+(function(){
+ const svg=$('map');let drag=null,moved=false;
+ svg.style.touchAction='none';
+ svg.parentElement.addEventListener('wheel',e=>{
+  if(!viewBox)return;
+  if(e.target.closest && e.target.closest('.controls'))return;
+  e.preventDefault();
+  const rect=svg.getBoundingClientRect();
+  const fx=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
+  const fy=Math.max(0,Math.min(1,(e.clientY-rect.top)/rect.height));
+  const factor=e.deltaY<0?.82:1.22;
+  const [x,y,w,h]=viewBox,nw=Math.max(.01,Math.min(100000,w*factor)),nh=Math.max(.01,Math.min(100000,h*factor));
+  viewBox=[x+(w-nw)*fx,y+(h-nh)*fy,nw,nh];redraw();
+ },{passive:false});
+ svg.addEventListener('pointerdown',e=>{if(!baseBox||e.button!==0)return;drag={x:e.clientX,y:e.clientY,box:[...viewBox]};moved=false;svg.setPointerCapture(e.pointerId)});
+ svg.addEventListener('pointermove',e=>{if(!drag)return;const rect=svg.getBoundingClientRect(),dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>4)moved=true;viewBox=[drag.box[0]-dx*drag.box[2]/rect.width,drag.box[1]-dy*drag.box[3]/rect.height,drag.box[2],drag.box[3]];redraw()});
+ svg.addEventListener('pointerup',()=>{drag=null});
+ svg.addEventListener('pointercancel',()=>{drag=null});
+ svg.addEventListener('click',e=>{if(moved){e.stopPropagation();moved=false}},true);
+})();
+function select(i,keepAll=false){selected=i;const r=found[i];if(!keepAll){combined=false;allFeatures=[...(r?.geojson?.features||[]).map(f=>({...f,properties:{...f.properties,cadnum:r.cadnum}})),...(r?.overlap_geojson?.features||[]).map(f=>({...f,properties:{...f.properties,cadnum:r.cadnum,role:'archived_intersection'}}))];baseBox=bounds(allFeatures);loadZones();fit()}else{combined=true;redraw()};document.querySelectorAll('.result').forEach((x,j)=>x.setAttribute('aria-selected',String(i===j)));const d=$('details');d.replaceChildren();if(!r)return;
+const row=(label,value)=>{const cell=document.createElement('div');cell.style.cssText='flex:1 1 190px;min-width:0;overflow-wrap:anywhere;line-height:1.45';const strong=document.createElement('strong');strong.textContent=label+' ';cell.append(strong,document.createTextNode(String(value)));return cell};
+const pair=document.createElement('div');pair.style.cssText='display:flex;flex-wrap:wrap;gap:4px 18px;align-items:flex-start;width:100%';pair.append(row('Имот:',r.cadnum),row('Статус:',r.status));if(r.settlement)pair.append(row('Населено място:',r.settlement));if(r.locality)pair.append(row('Местност:',r.locality));d.appendChild(pair);
+const full=(label,value)=>{const p=document.createElement('div');p.style.cssText='margin-top:3px;line-height:1.45;overflow-wrap:anywhere';p.append(row(label,value));d.appendChild(p)};
+if(r.area_m2_geometry!=null)full('Геометрична площ:',r.area_m2_geometry+' кв. м');
+for(const z of r.archived_overlay_records||[])full('Архивно пресичане:',z.sitecode+' '+z.name_bg+' · '+(z.order_no||'няма данни за заповед'));
+if(r.caveat)full('Бележка:',r.caveat)}const zipDrop=$('zipDrop'),zipInput=$('casefile');let zipFile=null;function setZip(f){if(!f)return;document.dispatchEvent(new Event('v26:gis-invalidated'));confirmedRoles=null;caseParcels=[];caseContext=null;$('roleReview').style.display='none';if(!f.name.toLowerCase().endsWith('.zip')){$('intakeResult').textContent='Изберете ZIP архив.';return}zipFile=f;$('zipName').textContent=f.name+' ('+(f.size/1024/1024).toFixed(1)+' MB)';$('intakeResult').textContent='Архивът е готов за обработка.'}zipDrop.onclick=()=>zipInput.click();zipDrop.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();zipInput.click()}};zipInput.onchange=()=>setZip(zipInput.files[0]);zipDrop.ondragover=e=>{e.preventDefault();zipDrop.style.background='#e6f3eb'};zipDrop.ondragleave=()=>zipDrop.style.background='';zipDrop.ondrop=e=>{e.preventDefault();zipDrop.style.background='';if(e.dataTransfer.files.length!==1){$('intakeResult').textContent='Пуснете точно един ZIP архив.';return}setZip(e.dataTransfer.files[0])};$('extract').onclick=async()=>{const file=zipFile;if(!file){$('intakeResult').textContent='Изберете ZIP архив на преписката.';return}if(file.size>40*1024*1024){$('intakeResult').textContent='ZIP архивът надвишава 40 MB.';return}$('extract').disabled=true;$('intakeResult').textContent='Обработка на ZIP преписката…';setStatus('Обработка на ZIP преписката…');try{const d=await window.V26LocalIntake.process(file);const c=d.classification;caseContext={archive_name:d.archive_name,files:d.files,evidence:d.evidence};reviewRoles(d);const statuses=d.files.map(f=>f.filename+' — '+f.status).join(' | ');setStatus('Готово — ZIP преписката е обработена. Потвърдете ролите на имотите.');$('intakeResult').textContent='Архив: '+d.archive_name+'. Файлове: '+d.archive_entries+'. Уникални имоти: '+caseParcels.length+'. Кандидати за водещи: '+(c.leading_candidates.join(', ')||'не са установени')+'. '+c.warnings.join(' ')+' Опис: '+statuses+'. План А/Б: неопределен; изисква се експертна проверка.';$('ids').value=[...new Set([...words($('ids').value),...caseParcels])].join('\n');try{sessionStorage.setItem(IDS_SESSION_KEY,$('ids').value)}catch(e){}if(words($('ids').value).length){$('run').click()}else{$('intakeResult').textContent+=' Не са открити кадастрални номера в извлечения текст; въведете ги от преписката за автоматична ГИС справка.'}}catch(e){setStatus('Грешка при ZIP: '+e.message);$('intakeResult').textContent='Грешка: '+e.message}finally{$('extract').disabled=false}};$('run').onclick=async()=>{document.dispatchEvent(new Event('v26:gis-invalidated'));const edit=v26EditIds($('ids').value);if(edit.invalid.length||edit.uncertain.length){setStatus('Проверете въведените идентификатори: '+[...edit.invalid.map(x=>'Невалиден: '+x),...edit.uncertain].join(' | '));$('ids').focus();return}if(edit.changes.length){const msg='Предложени технически корекции:\n'+edit.changes.join('\n')+'\n\nДа бъдат приложени?';if(!window.confirm(msg)){setStatus('Корекциите не са приети. Оригиналният текст е запазен.');return}$('ids').value=edit.ids.join('\n');try{sessionStorage.setItem(IDS_SESSION_KEY,$('ids').value)}catch(e){}}const ids=edit.ids;if(!ids.length){setStatus('Няма въведени идентификатори. Преписката не съдържа автоматично извлечени номера; попълнете полето ИМОТИ.');$('ids').focus();return}if(ids.length>100){setStatus('Максимум 100 идентификатора за една справка.');return}setStatus('Проверка на наличните браузърни ГИС данни…');$('run').disabled=true;try{const data=await window.V26BrowserGIS.lookup(ids);found=data.results;const gisUsable=Array.isArray(data.results)&&data.results.some(x=>x.status==='Намерен'&&Array.isArray(x.geojson?.features)&&x.geojson.features.some(f=>f?.geometry?.type==='Polygon'||f?.geometry?.type==='MultiPolygon'));if(gisUsable)document.dispatchEvent(new CustomEvent('v26:gis-ready',{detail:{results:data.results,summary:data.summary||{},geometry_qa:data.geometry_qa||[],source:'lookup-response'}}));else document.dispatchEvent(new Event('v26:gis-invalidated'));const summary=data.summary||{};const qa=data.geometry_qa||[];$('summary').replaceChildren();const addSummary=t=>{const p=document.createElement('div');p.textContent=t;$('summary').appendChild(p)};addSummary('Намерени имоти: '+(summary.found_count||0)+' от '+(summary.requested_count||0));addSummary('Сбор на площите на намерените имоти: '+(summary.geometry_area_sum_m2||0)+' кв. м (не площ на геометрично обединение)');for(const z of summary.archived_zones||[])addSummary('Архивна зона: '+z.sitecode+' '+z.name_bg+' · '+z.parcel_count+' имот(а)');addSummary(summary.note||'');for(const q of qa){if(q.status==='CHECKED_ARCHIVAL_GEOMETRIES')addSummary('QA '+q.cadnum+': '+q.archive_overlap_count+' архивни геометрии; '+q.overlap_checks.filter(x=>!x.contained_in_parcel).length+' извън геометрията на имота (топологична проверка).')} $('results').replaceChildren();for(let i=0;i<found.length;i++){const r=found[i],b=document.createElement('div');b.className='result'+(r.status==='Намерен'?'':' error');b.setAttribute('role','button');b.tabIndex=0;b.textContent=r.input+' — '+r.status;b.onclick=()=>select(i);b.onkeydown=e=>{if(e.key==='Enter')select(i)};$('results').appendChild(b)}const n=found.filter(x=>x.status==='Намерен').length;setStatus('Намерени '+n+' от '+found.length+' въведени идентификатора.');select(Math.max(0,found.findIndex(x=>x.status==='Намерен')))}catch(e){setStatus('Неуспешна справка: '+e.message)}finally{$('run').disabled=false}};document.addEventListener('v26:index-ready',()=>{const ids=words($('ids').value);if(!ids.length)return;const current=found.map(x=>x.input);if(current.length===ids.length&&ids.every((id,i)=>current[i]===id))return;if(!$('run').disabled)$('run').click()});$('v26pdf').onclick=async()=>{const btn=$('v26pdf');btn.disabled=true;try{if(!found.length)throw Error('Първо изпълнете „Намери имотите“.');const mapSvg=$('map');const clone=mapSvg.cloneNode(true);clone.setAttribute('xmlns','http://www.w3.org/2000/svg');clone.setAttribute('width','1000');clone.setAttribute('height','650');clone.setAttribute('viewBox',mapSvg.getAttribute('viewBox')||'0 0 1000 650');const snapshot=new XMLSerializer().serializeToString(clone);const blob=await window.V26DraftPackage.standalonePDF(found,1,{mapSvg:snapshot,mapViewport:clone.getAttribute('viewBox'),zoneStatus:$('zoneStatus').textContent});const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='TPU_Plovdiv_V26_Prilozhenie_1_GIS.pdf';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);setStatus('Изтеглено е Приложение №1 (PDF). Архивните геометрии са обозначени като такива.')}catch(e){setStatus('PDF №1: '+e.message)}finally{btn.disabled=false}};$('proposal').onclick=async()=>{const ids=words($('ids').value);if(!ids.length||ids.length>100){setStatus('Изберете от 1 до 100 имота.');return}if(!confirmedRoles||!caseParcels.length||caseParcels.length!==ids.length||caseParcels.some(x=>!ids.includes(x))){setStatus('За Word предложение са необходими преписка и потвърдени роли на всички имоти.');return}if(!found.length||found.length!==ids.length||found.some((r,i)=>r.input!==ids[i])){setStatus('Автоматично изпълнение на ГИС справката за пакета…');try{const data=await window.V26BrowserGIS.lookup(ids);found=data.results||[];if(found.length!==ids.length||found.some((r,i)=>r.input!==ids[i]))throw Error('Несъответствие на имотите в ГИС резултата.');const runButton=$('run');if(!runButton.disabled)runButton.click()}catch(e){setStatus('ГИС справка за пакета: '+e.message);return}}if(!window.confirm('Да се създаде РАБОТЕН ZIP с DOCX и две PDF приложения? Това не е официално становище.'))return;const b=$('proposal');b.disabled=true;setStatus('Генериране на работен Word и приложения…');try{const blob=await window.V26DraftPackage.make(found,confirmedRoles,{...(window.V26NormativeRegister||{}),archive:window.V26ArchiveInventory||null,preview:window.V26ArchiveTextPreview||null});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='TPU_Plovdiv_V26_RABOTEN_PAKET.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);setStatus('Готов е работен ZIP: Word DOCX и две PDF приложения.')}catch(e){setStatus('Предложение: '+e.message)}finally{b.disabled=false}};$('pdf').onclick=()=>{$('v26pdf').click()};$('reset').onclick=()=>{confirmedRoles=null;caseParcels=[];caseContext=null;$('roleReview').style.display='none';$('roleRows').replaceChildren();zipFile=null;zipInput.value='';$('proposalDownload').style.display='none';$('zipName').textContent='Няма избран архив';$('intakeResult').textContent='Плъзнете ZIP тук или го изберете. Файловете се обработват само в паметта.';$('ids').value='';try{sessionStorage.removeItem(IDS_SESSION_KEY)}catch(e){}found=[];document.dispatchEvent(new Event('v26:gis-invalidated'));allFeatures=[];baseBox=null;$('results').replaceChildren();$('shapes').replaceChildren();$('details').textContent='Изберете намерен имот за подробности.';$('summary').textContent='Няма извършена справка.';setStatus('Готово за нова справка.');combined=false;selected=0;viewBox=null};$('zoomIn').onclick=()=>zoom(.75);$('zoomOut').onclick=()=>zoom(1.3);$('fit').onclick=fit;$('toggleOverlaps').onclick=()=>{showArchivedOverlaps=!showArchivedOverlaps;const b=$('toggleOverlaps');b.textContent='Пресичания: '+(showArchivedOverlaps?'ВКЛ.':'ИЗКЛ.');b.setAttribute('aria-pressed',String(showArchivedOverlaps));redraw()};$('labelMode').onchange=redraw;
+</script><script src="v26-browser-gis.js"></script><script src="v26-approved-gis-zip.js?v=regexfix-b03f121"></script><script src="v26-full-gis-bridge.js?v=8369a13"></script><script src="v26-browser-zip-inventory.js"></script><script src="v26-local-intake.js?v=341-role-1"></script><script src="v26-normative-register.js?v=norm-20261027-b"></script><script src="v26-pdf1-browser.js"></script><script src="v26-offline-pdf.js"></script><script src="v26-draft-package.js?v=svg-detect-b75df31"></script><script src="v26-annex2-browser.js?v=annex2-20261027-b"></script></body></html>

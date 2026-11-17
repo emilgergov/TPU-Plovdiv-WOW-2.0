@@ -1,0 +1,55 @@
+{
+  "schema": "KT82_B1_OVOS_OFFICIAL_ANNEX_RECOVERY_V9",
+  "date": "2026-11-13",
+  "uploaded_pdf": {
+    "name": "Наредба за условията и реда за извършване на оценка на въздействието върху околната среда _ МОСВ.pdf",
+    "pages": 49,
+    "sha256": "0d573b9f44058883475a353686ea1e89af16cb3612e9bc06362697423ec4d2b8",
+    "official_webpage": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ocenka-na-vuzdejstvieto-vurhu-okolnata-sreda/",
+    "date_of_print": "2026-11-13",
+    "legal_header_latest_DV": "62/2022"
+  },
+  "annexes": [
+    {
+      "id": "2",
+      "pdf_pages": "32–34",
+      "status": "BODY_RESTORED"
+    },
+    {
+      "id": "2а",
+      "pdf_pages": "34–35",
+      "status": "BODY_RESTORED; blank table is the official template"
+    },
+    {
+      "id": "7",
+      "pdf_pages": "42–44",
+      "status": "BODY_RESTORED"
+    },
+    {
+      "id": "9",
+      "pdf_pages": "46–47",
+      "status": "BODY_RESTORED"
+    }
+  ],
+  "preservation": {
+    "rtf_original_unchanged": true,
+    "v8_entries_preserved": true,
+    "public_original_pdf_upload": false,
+    "stages4_5_unchanged": true,
+    "v27_35_untouched": true,
+    "classic_ab_not_mandatory": true
+  },
+  "private_pack": {
+    "name": "KT82_B1_Normative_Master_Local_Pack_V9_OVOS_ANNEXES_RESTORED.zip",
+    "sha256": "4fda28b998e7fe101d38bddc868ddbdb4006363945ad97f42fd992a70b6a78ae",
+    "bytes": 21158657,
+    "zip_integrity": "PASS"
+  },
+  "gate": {
+    "OVOS_annex_body_gap": "RESOLVED",
+    "core_all_effective_date_and_route_check": "STILL_PENDING",
+    "automatic_citations": false,
+    "kt80_integration": false
+  },
+  "next": "Reconcile 2022–2026 currentness with official Gazette and finish route-specific competence/date controls before authorization."
+}

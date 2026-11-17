@@ -1,0 +1,13 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {buildPackage}=require('../v26-final-package.cjs');
+const approved={ready:true,schema:'KT19_7_WORD_PAYLOAD_V1',dossierId:'EXAMPLE-1',approvedBy:'Reviewer'};
+const docs={'GIS_Analysis.pdf':Buffer.from('%PDF-1.4 example'),'Normative_References.pdf':Buffer.from('%PDF-1.4 example'),'Classic_Draft.docx':Buffer.from('PK\x03\x04example'),'Expert_Draft.docx':Buffer.from('PK\x03\x04example')};
+assert.throws(()=>buildPackage({},docs),/approved/);
+assert.throws(()=>buildPackage(approved,{}),/Missing/);
+const zip=buildPackage(approved,docs);
+assert.equal(zip.readUInt32LE(0),0x04034b50);
+assert.equal(zip.readUInt32LE(zip.length-22),0x06054b50);
+assert.equal(zip.readUInt16LE(zip.length-14),5);
+for(const name of [...Object.keys(docs),'README.txt'])assert(zip.includes(Buffer.from(name)));
+console.log('PASS KT19.9: validated ZIP package with 2 PDF, 2 DOCX, README');

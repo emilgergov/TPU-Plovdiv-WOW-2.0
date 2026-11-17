@@ -1,0 +1,90 @@
+{
+  "schema": "KT82_B2_V06_CONSOLIDATED_REGRESSION_AND_ACCEPTANCE_STATUS",
+  "date": "2026-11-13",
+  "canonical_source": "KT82_B1_Normative_Master_V10_B1_ARCHIVE_FROZEN_2026-11-13.zip",
+  "source_policy": "EXCLUSIVE_V10_NO_WEB",
+  "audit": {
+    "type": "re-executed 5 archived local build scripts",
+    "versions": [
+      {
+        "name": "V01",
+        "tests": 8,
+        "passed": 8
+      },
+      {
+        "name": "V02",
+        "tests": 14,
+        "passed": 14
+      },
+      {
+        "name": "V03",
+        "tests": 22,
+        "passed": 22
+      },
+      {
+        "name": "V04",
+        "tests": 17,
+        "passed": 17
+      },
+      {
+        "name": "V05",
+        "tests": 19,
+        "passed": 19
+      }
+    ],
+    "total": 80,
+    "passed": 80,
+    "failed": 0,
+    "all_replays_exit_zero": true,
+    "output_hashes_unchanged": true,
+    "archive_sha256": "605956c29134ebe755d24dacc6bb2a3c062f410043cdc7b39df46e5a34d963cd",
+    "zip_verified": true,
+    "archive_entries": 70,
+    "archive_hash_mismatches": 0,
+    "qualification": "Repeatable deterministic offline mock tests, NOT live app tests or legal/expert approval"
+  },
+  "acceptance": {
+    "B1_archive": "FROZEN",
+    "B2_model_technical_reproducibility": "PASS",
+    "B2_substantive_legal_acceptance": "OPEN",
+    "expert_signoff": "NOT_YET",
+    "automatic_legal_citation": "DISABLED",
+    "KT80_stages_4_5_integration": "NOT_STARTED"
+  },
+  "five_pre_acceptance_requirements": [
+    {
+      "id": 1,
+      "requirement": "Archive-supported case/date-specific applicability of exact provisions with scope and exceptions"
+    },
+    {
+      "id": 2,
+      "requirement": "Exhaustive actual case-specific competent signatory resolution without default local RIOSV assumption"
+    },
+    {
+      "id": 3,
+      "requirement": "Complete event ledger and lawful clock computation including corrections, exclusions and calendar dates"
+    },
+    {
+      "id": 4,
+      "requirement": "Fact-level citation to actual dossier document/page/paragraph/chronology"
+    },
+    {
+      "id": 5,
+      "requirement": "Expert validation that conditional procedures and exceptions are complete and independently reasoned, without preset documents"
+    }
+  ],
+  "post_B2_stage_V": "End-to-end and visual testing of actual KT80 after acceptance; not included in current 80 test count",
+  "architecture": {
+    "subject_first": true,
+    "free_legal_analysis": true,
+    "no_22_route_based_decision": true,
+    "classic_AB_fully_capsulated": true,
+    "V27_35_untouched": true,
+    "KT80_runtime_unchanged": true,
+    "always_reasoned_proposal": true
+  },
+  "local_documents": [
+    "KT82_B2_CONSOLIDATED_QA_V06.json",
+    "KT82_B2_ACCEPTANCE_PROTOCOL_V06.md"
+  ]
+}

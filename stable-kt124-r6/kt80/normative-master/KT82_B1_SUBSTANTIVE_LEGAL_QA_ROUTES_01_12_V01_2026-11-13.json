@@ -1,0 +1,124 @@
+{
+  "schema": "KT82_B1_NORMATIVE_SUBSTANTIVE_QA_ROUTES_01_12_V01",
+  "date": "2026-11-13",
+  "source_catalog": "kt80/KT80_E01_B_CONSOLIDATED_MATRIX_V01.json",
+  "scope": "Substantive source-by-source legal checkpoints for first 12 routes, not approval of all 12",
+  "reviewed_ids": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "checks": [
+    {
+      "routes": [
+        1,
+        5
+      ],
+      "act": "Наредба за ОС (ДВ 96/2025)",
+      "provisions": [
+        "чл.2, ал.1–5",
+        "чл.4–6а",
+        "приложение №1",
+        "чл.12, ал.2"
+      ],
+      "source": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Naredbi/NAREDBA_za_usl_reda_za_izvarshvane_na_ocenka_za_savmestimostta_na_PPPIP_2025.pdf",
+      "finding": "Чл.2 ал.1 и ал.2 са различни хипотези; чл.2 ал.2 е за намерения извън ал.1, включва контролен лист по приложение №1 и преценка по характера/местоположението. Няма презумпция за отрицателен извод. По чл.12 ал.2 (изм. ДВ 96/2025) се проверяват заповеди, ПУ по чл.27 ал.1 ЗБР и заповеди по чл.19 ал.1 ЗБР.",
+      "verification": "TEXT_AND_AMENDMENT_VERIFIED",
+      "remaining": "При конкретен случай: компетентност чл.6а, приложими актове и въздействия; експертна оценка"
+    },
+    {
+      "routes": [
+        2,
+        4,
+        7,
+        8,
+        9
+      ],
+      "act": "Наредба ОВОС (ДВ 62/2022)",
+      "provisions": [
+        "чл.4",
+        "чл.5, ал.1 и ал.4–6"
+      ],
+      "source": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ocenka-na-vuzdejstvieto-vurhu-okolnata-sreda/",
+      "finding": "Уведомяване и квалификация на процедурата по чл.4–5; допълване на непълноти по чл.5 ал.4 с определен срок най-малко 7 дни; последици по ал.5 и изключване на периода по ал.6. Това не замества самостоятелната проверка на други етапи или други специални режими.",
+      "verification": "TEXT_VERIFIED_MOEW",
+      "remaining": "Сверка с актуална ДВ редакция, приложение и компетентност за всеки маршрут"
+    },
+    {
+      "routes": [
+        2,
+        9,
+        10,
+        11,
+        12
+      ],
+      "act": "Наредба ЕО (ДВ 70/2020)",
+      "provisions": [
+        "чл.8",
+        "чл.8а",
+        "чл.14"
+      ],
+      "source": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ekologichna-ocenka-na-planove-i-programi/",
+      "finding": "Чл.8 е уведомяване за определяне на приложимата процедура; чл.8а — отделно искане за преценка; чл.14 регламентира оценяването на необходимостта от ЕО. Маршрут 10 и 11 са различни видове продукти.",
+      "verification": "TEXT_VERIFIED_MOEW",
+      "remaining": "Проверка на пълния ред, специфичните срокове, приложения и участие на обществеността"
+    },
+    {
+      "routes": [
+        6
+      ],
+      "act": "Наредба ОС (ДВ 96/2025)",
+      "provisions": [
+        "чл.18–20"
+      ],
+      "source": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Naredbi/NAREDBA_za_usl_reda_za_izvarshvane_na_ocenka_za_savmestimostta_na_PPPIP_2025.pdf",
+      "finding": "Чл.18–20 се отнасят към самостоятелното производство по глава втора. При съвместена ОС през ЕО или ОВОС приложимите специални текстове изрично изключват прилагането на определени разпоредби от чл.18–20. Не се пренасят автоматично срокове и форма.",
+      "verification": "TEXT_VERIFIED_MOEW",
+      "remaining": "Проверка на конкретния правен клон преди генерация"
+    },
+    {
+      "routes": [
+        3
+      ],
+      "act": "Специални актове по компетентността",
+      "provisions": [],
+      "source": null,
+      "finding": "Искане за становище не е универсално задължително; конкретният предмет определя адресата, основанието и задължителността.",
+      "verification": "WORKFLOW_REQUIREMENT_NOT_UNIVERSAL_LEGAL_RULE",
+      "remaining": "Официална проверка на водни, здравни, специални и контролни основания по конкретна преписка"
+    }
+  ],
+  "critical_distinctions": [
+    "Case-specific orders belong to territory resolver not Normative MASTER",
+    "V27.35 Classic A/B are isolated, not mandatory content templates in KT80",
+    "Route 1 legacy negative branch must not bias KT80 neutral AI-author reasoning",
+    "Route 6 standalone OS decision is not automatically the same as combined EO/OVOS screening",
+    "Route 9 termination branch must check separate law and stage",
+    "Route 3 institution request must not be asserted mandatory without special legal trigger"
+  ],
+  "source_version_status": {
+    "N_OS": "ДВ 96/2025, official MOEW PDF verified",
+    "N_OVOS": "ДВ 62/2022 per uploaded RTF; MOEW webpage corroboration, current amendment recheck pending",
+    "N_EO": "ДВ 70/2020 per uploaded PDF; MOEW webpage corroboration, current amendment recheck pending",
+    "ZZT": "ДВ 102/2023 per user PDF; supplementary EU-notification PDF exhibits amendment list; primary promulgation reconciliation pending"
+  },
+  "preintegration_gates": {
+    "general_act_completeness": "OPEN",
+    "route_articles_effective_dates": "OPEN",
+    "route_01_12_legal_final_approval": false,
+    "route_13_22_legal_substantive_approval": false,
+    "no_runtime_changes": true,
+    "classic_ab_mandatory": false,
+    "automatic_citations": false
+  },
+  "next": "Audit targeted statutory procedures under ZOOS, ZBR, APK and applicable subordinate acts in route 13–22; do not treat internal tools as acts."
+}

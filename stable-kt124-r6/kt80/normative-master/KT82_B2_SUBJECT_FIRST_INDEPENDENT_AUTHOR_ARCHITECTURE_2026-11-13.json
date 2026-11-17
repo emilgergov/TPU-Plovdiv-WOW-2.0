@@ -1,0 +1,64 @@
+{
+  "schema": "KT82_B2_SUBJECT_FIRST_INDEPENDENT_AUTHOR_ARCHITECTURE_V01",
+  "date": "2026-11-13",
+  "status": "BINDING_USER_ARCHITECTURAL_CORRECTION",
+  "canonical_legal_evidence": "KT82_B1_Normative_Master_V10_B1_ARCHIVE_FROZEN_2026-11-13.zip",
+  "principle": "КТ80 е нов независим експертен административен автор. Той НЕ започва с избор на маршрут/готов резултат; НЕ следва заключенията, сценариите, пасажите или образците на Classic A/Б от капсулираната V27.35.",
+  "workflow": [
+    {
+      "stage": 1,
+      "name": "Внасяне и анализ на преписката",
+      "role": "Read dossier, record confirmed/missing facts and confidence with file provenance; no preselected outcome."
+    },
+    {
+      "stage": 2,
+      "name": "Предмет и обхват на ИП",
+      "role": "Independently reconstruct and improve subject and scope; expert-approved subject always wins."
+    },
+    {
+      "stage": 3,
+      "name": "Имоти и пространствен анализ на ИП",
+      "role": "Assess parcels and spatial data only if relevant; no mandatory parcel and no invented GIS."
+    },
+    {
+      "stage": 4,
+      "name": "Нормативна и процедурна преценка на ИП",
+      "role": "Using V10 ONLY, select applicable laws/articles by proved subject, scope and facts, evaluate conditions, exceptions, competence and timing."
+    },
+    {
+      "stage": 5,
+      "name": "Определяне на процедурата по ИП",
+      "role": "Produce an independent, motivated recommendation of proper procedure and administrative output; never choose outcome from Classic presets."
+    }
+  ],
+  "catalog_policy": {
+    "existing_22_entries": "Optional inventory of potential administrative output forms or internal service functions, NOT governing routes, not compulsory order of decisions, not legal presets and not evidence.",
+    "internal_tools_13_16": "Service functions only, never administrative acts.",
+    "document_design": "Single blank standardized RIOSV Plovdiv letterhead, document composed afresh from evidence and legal analysis.",
+    "new_routes": "May propose output outside catalog or multiple linked actions if justified by the archive and facts."
+  },
+  "user_rules": [
+    "НИКОГА без предложение — при недостиг на доказателства предложи конкретна законосъобразна следваща стъпка, но не измисляй категорично решение.",
+    "Нормативен V10 е единствената документална основа; без външно уеб търсене.",
+    "Потвърденият от експерта предмет е водещ и не се заменя автоматично.",
+    "V27.35 Classic A/Б е капсулирана: никакви шаблони, механично копирани изводи, предварително отрицателни/положителни решения или принудителни А/Б сценарии."
+  ],
+  "B2_redefined": [
+    "Извличане на доказателствено-правна матрица от V10 за свободна оценка, не 22 предварителни маршрута.",
+    "Формална логика за входни факти, правна приложимост, компетентност, процедури, срокове и изключения.",
+    "Сравнение на алтернативни законови квалификации, обосновано предложение за действие и изходен документ.",
+    "Сценарийни тестове върху реалистични преписки с различен предмет, в т.ч. без имот, неопределен предмет и противоречиви данни.",
+    "Експертна приемка и едва после интеграция във фази 4–5."
+  ],
+  "superseded_docs": [
+    "KT82_B2_PASSPORTS_ROUTES_01_06_FROM_V10_V01_2026-11-13.json",
+    "KT82_B2_PASSPORTS_ROUTES_07_12_FROM_V10_V01_2026-11-13.json",
+    "KT82_B2_PASSPORTS_ROUTES_13_22_FROM_V10_V01_2026-11-13.json"
+  ],
+  "regression_guards": {
+    "no_runtime_change": true,
+    "no_v27_35_change": true,
+    "no_live_auto_citation": true,
+    "route_first_invalid": true
+  }
+}

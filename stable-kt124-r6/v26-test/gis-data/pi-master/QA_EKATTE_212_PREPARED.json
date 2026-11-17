@@ -1,0 +1,34 @@
+{
+  "checkpoint": "KT78-03_ekatte_inventory",
+  "date": "2026-11-07",
+  "source": "PI_MASTER_KT78_V0_2.sqlite",
+  "parcel_records": 917417,
+  "unique_ekatte_codes": 212,
+  "unique_settlement_name_per_ekatte": true,
+  "municipality_values_present": 0,
+  "province_for_all_parcels": "Пловдив",
+  "locality_optional": true,
+  "address_fields_present": false,
+  "nsi_official_mapping_present": false,
+  "zz_numeric_exceptions_over_100_001_pct": [
+    {
+      "cadnum": "43671.47.137",
+      "sitecode": "BG0002105",
+      "parcel_area_m2": 1044.3618345098,
+      "zz_area_m2": 1044.4279647845876,
+      "percent": 100.00633212289098,
+      "excess_m2": 0.06613027478761069
+    },
+    {
+      "cadnum": "75254.16.97",
+      "sitecode": "BG0002073",
+      "parcel_area_m2": 59.125503503776,
+      "zz_area_m2": 59.12720676634558,
+      "percent": 100.00288075782639,
+      "excess_m2": 0.001703262569577646
+    }
+  ],
+  "automatic_area_correction_performed": false,
+  "csv_sha256": "9f3ad63eb0c127efa5d4af3ac3827eb95530ebc1b24a82f648d4ba3ea26be8dd",
+  "source_sha256": "dbb120813fd052eedf46adf530bb33d39c7d10fef8aa4d106217b2e540b0ccbd"
+}

@@ -1,0 +1,51 @@
+{
+  "schema": "KT82_B_ACCEPTED_HANDOFF_STAGE_V_V01",
+  "date": "2026-11-13",
+  "approval": "Explicit project-owner approval: no critical remarks to TEST_2 expert conclusion; lock B1/V11 and B2 and proceed to stage V.",
+  "status": {
+    "B1_V11": "LOCKED_AS_EXCLUSIVE_DOCUMENTARY_BASIS",
+    "B2": "EXPERT_ACCEPTED_WITH_DOCUMENTED_LIMITATIONS",
+    "stage_V": "STARTED",
+    "stage_G": "NOT_STARTED"
+  },
+  "archive": {
+    "name": "KT82_Normative_MASTER_V11_Tariff_Euro_2026-11-13.zip",
+    "sha256": "8d3851affd72fb44b4d663920196e00ec317c8e45d36fc16c6ad6b0ce965226c",
+    "entries": 82,
+    "preserved_from_V10": 70,
+    "new": 12,
+    "local_only": true
+  },
+  "test_case": {
+    "name": "ТЕСТ_2",
+    "expert_doc": "KT82_B2_TEST2_OKONCHATELEN_EKSPERTEN_IZVOD_RIOSV.docx",
+    "initial_independent_analysis": "V08",
+    "added_basin_evidence": "Subsequent separate source",
+    "accepted": "No critical remarks from project owner",
+    "conclusion": "Motivated proposal to continue EIA screening, not compulsory full EIA"
+  },
+  "binding_architecture": {
+    "first": "Преписка, предмет и потвърден обхват",
+    "second": "Факти + имоти/ГИС когато са приложими",
+    "third": "Независими правни хипотези от V11",
+    "fourth": "Компетентност, срокове, изключения и доказателства",
+    "fifth": "Мотивирано процедурно предложение и документ",
+    "catalog22_decision_engine": false,
+    "classic_AB_from_v27_35": false,
+    "V27_35_untouched": true,
+    "no_web_for_normative_evidence": true,
+    "always_propose_next_action": true
+  },
+  "limitations": [
+    "The archive's tariff PDF incorporates published amendments only up to DV62/2022, do not imply absence of later amendments.",
+    "Acceptance of B2 model does not authorize unverified automatic issuance/signature of official acts.",
+    "No live KT80 functional test has yet occurred; all existing model tests are separate and stage G follows integration."
+  ],
+  "stage_V_sequence": [
+    "V1 implement evidence-bound stage 4 legal engine with explicit V11 source references",
+    "V2 independent stage 5 recommendation and fee from tariff+euro law",
+    "V3 standard RIOSV letterhead outputs and two electronic signature placeholders with no fabricated names",
+    "V4 end-to-end integration QA and stage G controlled deployment"
+  ],
+  "change_policy": "No modifications to stable V27.35 or public WOW index until safe stage V preview and G validation."
+}

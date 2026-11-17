@@ -1,0 +1,88 @@
+{
+  "schema": "KT82_B1_LEGAL_CURRENCY_RECONCILIATION_V01",
+  "date": "2026-11-13",
+  "status": "B1_VERIFICATION_OPEN_NO_INTEGRATION",
+  "method": "Compare uploaded/archive amendments with independently named official sources; keep bibliographic listing/date inconsistencies explicit.",
+  "facts": [
+    {
+      "id": "ZOOS",
+      "title": "Закон за опазване на околната среда",
+      "archive_state": "legacy scraped official portal index and an MOEW PDF to ДВ 16/2026, not consolidated after June 2026",
+      "last_confirmed": "ДВ бр. 51/05.06.2026",
+      "confirmed_change": "Параграф 71 от Закон за противодействие на корупцията сред лица, заемащи публични длъжности, заменя в чл.94 ал.3 препратка към Закона за Сметната палата със Закона за противодействие на корупцията сред лица, заемащи публични длъжности.",
+      "source": "https://www.parliament.bg/bg/laws/ID/166967",
+      "official_pdf_only_to": "ДВ бр.16/2026",
+      "official_pdf": "https://www.moew.government.bg/static/media/ups/articles/attachments/ZAKON_za_opazvane_na_okolnata_sreda_02_2026eae3795e6b1efc439416b86ae570fb09.pdf",
+      "status": "P0_CURRENT_FULL_TEXT_OR_ANNOTATED_AMENDMENT_MERGE_REQUIRED",
+      "notes": "Do not treat MOEW February 2026 PDF as latest in June; full operative text can be patched against specifically verified DV §71 while preserving full original annexes."
+    },
+    {
+      "id": "ZBR",
+      "title": "Закон за биологичното разнообразие",
+      "last_confirmed": "ДВ бр.70/20.08.2024",
+      "official_pdf": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/ZAKON_za_biologichnoto_raznoobrazie24.pdf",
+      "secondary_crosscheck": "https://lex.caselaw.bg/akt/zbr/",
+      "status": "OFFICIAL_CONSOLIDATION_VERSION_CONFIRMED; VERIFY_COMPLETE_ANNEXES_AND_2026_DV_SCOPE",
+      "warning": "Do not claim amendment ДВ бр.46/2026 on basis of a malfunctioning official archive listing: idObj=11363 actually points to ДВ бр.88/2023, confirmed by individual record idMat=200364."
+    },
+    {
+      "id": "ZZT",
+      "title": "Закон за защитените територии",
+      "last_confirmed": "ДВ бр.102/2023",
+      "local_copy": "User consolidated 35 page PDF with two annexes",
+      "secondary_source": "https://magistrat.bg/laws/1212a2e3ba65",
+      "status": "COMPLETE_USER_DOCUMENT; PRIMARY_AMENDMENT_RECONCILIATION_PENDING"
+    },
+    {
+      "id": "N_OS",
+      "title": "Наредба за ОС",
+      "last_confirmed": "ДВ бр.96/11.11.2025",
+      "local_copy": "User 29 page PDF, annexes 1–4",
+      "official_pdf": "https://www.moew.government.bg/static/media/ups/tiny/filebase/Nature/Legislation/Naredbi/NAREDBA_za_usl_reda_za_izvarshvane_na_ocenka_za_savmestimostta_na_PPPIP_2025.pdf",
+      "status": "CORE_DOCUMENT_COMPLETE_WORKING_REVIEW; CHECK_DATE_DEPENDENT_RULES"
+    },
+    {
+      "id": "N_OVOS",
+      "title": "Наредба за ОВОС",
+      "last_confirmed": "ДВ бр.62/05.08.2022",
+      "local_copy": "User RTF with annexes 1–9 incl. 2а",
+      "official": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ocenka-na-vuzdejstvieto-vurhu-okolnata-sreda/",
+      "status": "CORE_DOCUMENT_COMPLETE; FURTHER_2026_LEGAL_CURRENCY_RECHECK"
+    },
+    {
+      "id": "N_EO",
+      "title": "Наредба за ЕО",
+      "last_confirmed": "ДВ бр.70/07.08.2020",
+      "local_copy": "User PDF with annexes 1–5",
+      "official": "https://www.moew.government.bg/bg/naredba-za-usloviyata-i-reda-za-izvurshvane-na-ekologichna-ocenka-na-planove-i-programi/",
+      "status": "CORE_DOCUMENT_COMPLETE; FURTHER_2026_LEGAL_CURRENCY_RECHECK"
+    }
+  ],
+  "subordinate_scope": {
+    "required_core": "Norms of ОС/ОВОС/ЕО as above; ZООС/ZБР/ЗЗТ and АПК/РИОСВ competence",
+    "conditional": [
+      "Закон за водите and basin authority rules if water intake/discharge/impact triggers",
+      "ЗУТ and special plan rules only for relevant plan/programme and planning dossier",
+      "Sectoral acts (waste, air, chemicals, protected territories management) only if project's confirmed subject or route requires"
+    ],
+    "not_automatic": [
+      "All national park directorate staff regulations",
+      "All basin directorate institutional rules",
+      "All tariffs",
+      "All protected-site individual orders within Normative MASTER"
+    ]
+  },
+  "archive_gates": {
+    "core_six_audited": 6,
+    "unconditional_full_law_currentness_missing": [
+      "ZOOS 2026 DV51 annotated consolidation"
+    ],
+    "primary_reconciliation_pending": [
+      "ZZT 2023"
+    ],
+    "automated_citation_approved": false,
+    "generators_changed": false,
+    "classic_ab_mandatory": false
+  },
+  "next": "Reconcile ZOOS 2026 DV51 against full 132-page official 16/2026 PDF and Annex 1/2; inspect source archive true full text and ZBR 2024 annexes; then risk-based statutory audit for routes with water impact or EIA screening."
+}

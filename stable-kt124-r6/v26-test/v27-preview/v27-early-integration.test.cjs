@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict');const fs=require('node:fs');
+const html=fs.readFileSync(__dirname+'/index.html','utf8');
+const bridge=fs.readFileSync(__dirname+'/v27-early-subject-bridge.js','utf8');
+const worker=fs.readFileSync(__dirname+'/../cloudflare/ai-author-v27/src/worker.js','utf8');
+for(const path of ['v27-case-evidence.js','v27-early-subject.js','v27-early-subject-bridge.js'])assert.ok(html.includes('src="'+path+'?'));
+assert.ok(html.includes('id="v26SubjectConfirm"'));
+assert.ok(html.includes('v26-browser-zip-inventory.js'));
+assert.ok(html.includes('v26-approved-gis-zip.js'));
+assert.ok(bridge.includes('root.confirm('));
+assert.ok(bridge.includes('root.prompt('));
+assert.ok(bridge.includes("heading.dispatchEvent(new Event('input'"));
+assert.ok(worker.includes('handleEarlySubject(request,env)'));
+assert.ok(worker.includes('url.pathname==="/author"'));
+console.log('V27.1 P4 integration static contract: PASS');

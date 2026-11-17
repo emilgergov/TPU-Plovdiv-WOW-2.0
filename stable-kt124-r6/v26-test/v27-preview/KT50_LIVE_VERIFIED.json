@@ -1,0 +1,15 @@
+{
+  "checkpoint": "KT50",
+  "result": "LIVE_PAGES_VERIFIED",
+  "kind": "original_pre_KT43_source_restoration_not_general_quality_acceptance",
+  "source_commit": "b1d2cfb74abfda26ddc01f4f384e60e3ca54e8c9",
+  "source_blob": "2c879e0f743f9863051f4126769977e8f1dcf842",
+  "tested_sha": "744c1119c8e05c50e855580426b1d609991fa236",
+  "visual_url": "https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/v26-test/v27-preview/kt50-original-kt42.html",
+  "checks": [
+    "historical DOCX A/B/R02 generation and unrelated case rejection",
+    "exact original source JS Git blob",
+    "original 3 Word binaries",
+    "isolated Pages HTML loader"
+  ]
+}

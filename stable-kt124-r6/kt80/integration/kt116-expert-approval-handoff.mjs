@@ -1,0 +1,354 @@
+import {collectStageEvidence} from './kt95-stage-evidence-handoff.mjs';
+const mk=(tag,value)=>{const e=document.createElement(tag);if(value!==undefined)e.textContent=value;return e};
+const val=v=>String(v??'').trim();
+function installKT116(){
+const host=document.getElementById('kt96EGAuthor'),five=document.querySelector('.kt80-stage-panel[data-panel="5"]');
+if(host&&five){
+ let proposal=null,history=[],approved=null;
+ const style=mk('style');
+ style.textContent='#kt116Editor{font:14px/1.55 Verdana,Arial;color:#f9f3e1;margin:16px 0}#kt116Editor h3{font:bold 19px Verdana;color:#efd18f}#kt116Editor h4{font:bold 15px Verdana;color:#f3d08c;margin:22px 0 8px;border-bottom:1px solid #739078;padding:0 0 8px}#kt116Editor p{white-space:pre-wrap;margin:8px 0 15px}#kt116Editor .paper{background:#244a38;padding:17px;border-radius:7px}#kt116Editor .actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}#kt116Editor button,#kt116Stage5 button{background:#d9b874;color:#143b29;border:0;border-radius:7px;padding:11px 15px;font:bold 13px Verdana;cursor:pointer}#kt116Editor button[hidden],#kt116Editor [hidden]{display:none!important}#kt116Editor textarea{width:100%;box-sizing:border-box;min-height:350px;font:13px/1.6 Verdana;padding:12px;color:#132e24;background:#fffdf6}#kt116Editor input{padding:10px;color:#173929;background:#fffdf8}#kt116Editor .note{color:#f0d296;font-size:12px}#kt116Stage5{padding:16px;color:#f7f0dc;background:#193a2b;font:14px/1.6 Verdana}#kt116Stage5 h3,#kt116Stage5 h4{color:#f3ce82}#kt116Stage5 pre{white-space:pre-wrap;font:13px/1.6 Verdana;background:#284938;padding:14px;max-height:550px;overflow:auto}.kt80-stage-panel[data-panel="5"]>:not(#kt116Stage5){display:none!important}';
+ document.head.append(style);
+ const emphasisStyle=mk('style');
+ emphasisStyle.textContent=`
+ #kt116Editor .kt124-key-finding{margin:22px 0;padding:16px 19px;border-left:5px solid #e15e58;border-radius:5px;background:#32483b}
+ #kt116Editor .kt124-key-finding .kt124-key-heading{color:#ff9189;font:bold 19px/1.4 Verdana,Arial;margin:0 0 11px;padding:0 0 9px;border-bottom:1px solid #ad6965;letter-spacing:.15px}
+ #kt116Editor .kt124-key-finding .kt124-key-value{color:#fff0de;font:700 16px/1.55 Verdana,Arial;margin:0;white-space:pre-wrap}
+ `;
+ document.head.append(emphasisStyle);
+
+ const ui=mk('section');ui.id='kt116Editor';ui.hidden=true;
+ const header=mk('h3','Предложение за експертна преценка'),alerts=mk('details'),alertContent=mk('div');
+ alerts.append(mk('summary','Бележки от нормативната проверка'),alertContent);
+ const paper=mk('div');paper.className='paper';
+ const textarea=mk('textarea');textarea.hidden=true;textarea.setAttribute('aria-label','Редактиране на предложението');
+ const routeTitles=["Писмо по чл. 2, ал. 2 от Наредбата за ОС","Писмо за допълнителна информация",
+ "Искане за становище от институция","Писмо за приложима процедура по ОВОС","Писмо за приложима процедура по ОС",
+ "Решение по чл. 18 от НОС","Решение по чл. 93 ЗООС","Решение по ОВОС","Прекратяване на процедура",
+ "Писмо за процедура по ЕО","Решение за преценяване на ЕО","Становище по ЕО","Експертна справка",
+ "Проверка на преписка","Справка за имоти и ограничения","Архив на преписка","Отговор по жалба","Отговор по сигнал",
+ "Произнасяне по възражение","Препращане по компетентност","Уведомяване за резултат от проверка","Произнасяне по предложение"];
+ const conclusion=mk('section');conclusion.id='kt124ReviewedConclusion';
+ conclusion.style.cssText='margin:13px 0;padding:14px;background:#244c36;border:1px solid #c1a165;border-radius:8px;font:14px/1.5 Verdana';
+ const conclusionTitle=mk('h4','Заключение — предложена процедура');
+ const currentRoute=mk('p','Очаква се рецензирано предложение.');
+ const routeActions=mk('div');routeActions.className='kt124-route-actions';
+ const acceptLabel=mk('label'),acceptRadio=mk('input');acceptRadio.type='radio';acceptRadio.name='kt124Choice';acceptRadio.checked=true;
+ acceptLabel.className='kt124-route-choice';acceptLabel.append(acceptRadio,mk('span','Приемам предложената процедура'));
+ const changeLabel=mk('label'),changeRadio=mk('input');changeRadio.type='radio';changeRadio.name='kt124Choice';
+ changeLabel.className='kt124-route-choice';changeLabel.append(changeRadio,mk('span','Определям друга процедура'));
+ routeActions.append(acceptLabel,changeLabel);
+ // The native Windows dropdown ignores the application's visual theme.
+ // Keep a real select for data binding, but present an accessible custom chooser.
+ const routeSelect=mk('select');routeSelect.hidden=true;
+ const routePicker=mk('details');routePicker.className='kt124-route-picker';routePicker.hidden=true;
+ const routeSummary=mk('summary','Избери процедура от каталога');
+ const routeMenu=mk('div');routeMenu.className='kt124-route-menu';
+ const updateRouteSummary=()=>{const i=Number(routeSelect.value)-1;routeSummary.textContent=i>=0&&i<routeTitles.length?
+  String(i+1).padStart(2,'0')+' — '+routeTitles[i]:'Избери процедура от каталога'};
+ routeTitles.forEach((title,i)=>{
+  const opt=mk('option',String(i+1).padStart(2,'0')+' — '+title);opt.value=String(i+1);routeSelect.append(opt);
+  const item=mk('button',String(i+1).padStart(2,'0')+' — '+title);item.type='button';item.className='kt124-route-item';
+  item.onclick=()=>{routeSelect.value=String(i+1);updateRouteSummary();routePicker.open=false};
+  routeMenu.append(item);
+ });
+ routePicker.append(routeSummary,routeMenu);
+ const routeInfo=mk('p','Решението за процедурата принадлежи на експерта. Не се изисква спор с AI рецензента.');
+ routeInfo.style.cssText='font:12px/1.5 Verdana;color:#ebd8a7';
+ conclusion.append(conclusionTitle,currentRoute,routeActions,routeSelect,routePicker,routeInfo);
+ const toggleChoice=()=>{
+  acceptLabel.classList.toggle('selected',acceptRadio.checked);
+  changeLabel.classList.toggle('selected',changeRadio.checked);
+  routePicker.hidden=!changeRadio.checked;
+  if(!changeRadio.checked)routePicker.open=false;
+ };
+ acceptRadio.onchange=toggleChoice;changeRadio.onchange=toggleChoice;toggleChoice();
+ const choiceStyle=mk('style');
+ choiceStyle.textContent=`
+ #kt124ReviewedConclusion .kt124-route-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:15px 0}
+ #kt124ReviewedConclusion .kt124-route-choice{display:flex;align-items:center;justify-content:center;cursor:pointer;text-align:center;min-height:58px;padding:9px 15px;border:2px solid #bca56d;border-radius:9px;background:#193e2e;color:#f6e6bc;font:700 15px/1.45 Verdana,Arial;box-sizing:border-box;transition:background .15s,border-color .15s}
+ #kt124ReviewedConclusion .kt124-route-choice.selected{background:#d9b874;color:#173c2c;border-color:#f3d994;box-shadow:inset 0 0 0 2px #173c2c}
+ #kt124ReviewedConclusion .kt124-route-choice:focus-within{outline:3px solid #fff0bd;outline-offset:2px}
+ #kt124ReviewedConclusion .kt124-route-choice input{width:18px;height:18px;accent-color:#173c2c;margin:0 12px 0 0;flex-shrink:0}
+ #kt124ReviewedConclusion .kt124-route-picker{max-width:100%;border:2px solid #d9b874;border-radius:9px;background:#193b2c;color:#f7eac9;margin:0 0 14px;overflow:hidden}
+ #kt124ReviewedConclusion .kt124-route-picker summary{cursor:pointer;padding:14px 18px;font:700 15px/1.45 Verdana,Arial;list-style-position:inside}
+ #kt124ReviewedConclusion .kt124-route-picker summary:focus-visible{outline:3px solid #f1cf86;outline-offset:-3px}
+ #kt124ReviewedConclusion .kt124-route-menu{max-height:290px;overflow-y:auto;padding:6px;border-top:1px solid #9f8b57;background:#102f24}
+ #kt124ReviewedConclusion .kt124-route-item{display:block;width:100%;box-sizing:border-box;text-align:left;border:0;border-bottom:1px solid #335846;background:transparent;color:#f5ecd8;padding:11px 13px;font:14px/1.45 Verdana,Arial;cursor:pointer}
+ #kt124ReviewedConclusion .kt124-route-item:hover,#kt124ReviewedConclusion .kt124-route-item:focus-visible{background:#d9b874;color:#163a2a;outline:0}
+ @media(max-width:700px){#kt124ReviewedConclusion .kt124-route-actions{grid-template-columns:1fr}#kt124ReviewedConclusion .kt124-route-choice{justify-content:flex-start}}
+ `;
+ document.head.append(choiceStyle);
+ const actorLabel=mk('label','Експерт — име или служебен идентификатор');const actor=mk('input');actor.maxLength=120;actorLabel.append(actor);
+ const actions=mk('div');actions.className='actions';
+ const change=mk('button','Редактирай целия текст'),confirm=mk('button','Потвърди и продължи към Етап 5'),storeEdit=mk('button','Запази редакцията'),cancel=mk('button','Откажи редакцията');
+ storeEdit.hidden=true;cancel.hidden=true;actions.append(change,confirm,storeEdit,cancel);
+ const note=mk('p');note.className='note';
+ const next=mk('button','Продължи към Етап 5');next.hidden=true;
+ const save=mk('button','Запази защитено копие');save.hidden=true;
+ const password=mk('input');password.type='password';password.placeholder='Парола за копието (12+ знака)';password.autocomplete='new-password';password.hidden=true;
+ const archiveMenu=mk('details');archiveMenu.style.cssText='margin:14px 0;border:1px solid #749170;border-radius:7px;padding:10px';
+ archiveMenu.append(mk('summary','Запазване на защитено копие'),password,save);
+ ui.append(header,alerts,paper,textarea,conclusion,actorLabel,actions,note,next,archiveMenu);
+ archiveMenu.hidden=true;
+ host.append(ui);
+ const restoreBar=mk('details');restoreBar.id='kt116Restore';restoreBar.style.cssText='padding:12px;margin:8px 0;color:#efd4a0;font:13px Verdana;background:#173b2b;border:1px solid #7b8e6f;border-radius:7px';
+ const restoreLabel=mk('label','Повторно отваряне на защитено копие');
+ const restoreFile=mk('input');restoreFile.type='file';restoreFile.accept='.json,application/json';
+ const restoreKey=mk('input');restoreKey.type='password';restoreKey.placeholder='Парола за копието';restoreKey.autocomplete='off';
+ const restoreBtn=mk('button','Отвори копието');restoreBtn.type='button';restoreBtn.style.cssText='background:#d9b874;color:#153a27;padding:9px 13px;border:0;border-radius:6px;font-weight:bold';
+ const restoreStatus=mk('p','Копието се зарежда само след проверка на предмета, обхвата и имотите; след възстановяване е необходимо ново потвърждение.');
+ restoreBar.append(mk('summary','Отвори запазено предложение'),restoreLabel,restoreFile,restoreKey,restoreBtn,restoreStatus);host.append(restoreBar);
+ const stage5=mk('section');stage5.id='kt116Stage5';five.prepend(stage5);
+ const confirmDialog=mk('dialog');confirmDialog.id='kt117ConfirmDialog';
+ confirmDialog.style.cssText='background:#153b2d;color:#f4e9ce;border:2px solid #d0b06c;border-radius:10px;padding:20px;max-width:420px;font:14px/1.6 Verdana';
+ const dlgMessage=mk('p'),dlgActions=mk('div');dlgActions.style.cssText='display:flex;gap:12px;justify-content:flex-end;margin-top:18px';
+ const dlgYes=mk('button','Потвърди'),dlgNo=mk('button','Отказ');
+ [dlgYes,dlgNo].forEach(b=>{b.style.cssText='border:0;border-radius:6px;background:#d7b673;color:#153a29;font:bold 13px Verdana;padding:10px 15px;cursor:pointer'});
+ dlgActions.append(dlgNo,dlgYes);confirmDialog.append(dlgMessage,dlgActions);document.body.append(confirmDialog);
+ function confirmStyled(message){
+  dlgMessage.textContent=message;
+  return new Promise(resolve=>{
+   let finished=false;
+   const close=ok=>{if(finished)return;finished=true;confirmDialog.close();resolve(ok)};
+   dlgYes.onclick=()=>close(true);dlgNo.onclick=()=>close(false);
+   confirmDialog.oncancel=e=>{e.preventDefault();close(false)};
+   confirmDialog.showModal();
+  });
+ }
+
+ const evidence=()=>collectStageEvidence(window);
+ const current=()=>proposal&&proposal.localId===evidence().caseId&&proposal.revision===evidence().evidenceRevision&&proposal.generation===evidence().generation&&proposal.key===evidence().key;
+ // KT123 — the same explicit legal matrix as the Worker; the expert may edit
+ // the reasoning, but the selected administrative direction cannot contradict it.
+ const validateStage4Direction=text=>{
+  const normalized=val(text).replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
+  const chosen=Number(normalized.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0);
+  if(!chosen)return 'Посочете еднозначно избрания панел и мотивите за него преди потвърждение.';
+  if(chosen!==1)return '';
+  const defs=[
+   ['Приложение № 1 към ЗООС',/^\s*ПРИЛОЖЕНИЕ\s*№\s*1\s*КЪМ\s*ЗООС\s*:\s*(ПОЛОЖИТЕЛНА|ОТРИЦАТЕЛНА|НЕОПРЕДЕЛЕНА)\s*[—–-]\s*(.+)$/imu,'ОТРИЦАТЕЛНА'],
+   ['Приложение № 2 към ЗООС',/^\s*ПРИЛОЖЕНИЕ\s*№\s*2\s*КЪМ\s*ЗООС\s*:\s*(ПОЛОЖИТЕЛНА|ОТРИЦАТЕЛНА|НЕОПРЕДЕЛЕНА)\s*[—–-]\s*(.+)$/imu,'ОТРИЦАТЕЛНА'],
+   ['Чл. 2, ал. 1 от Наредбата за ОС',/^\s*ЧЛ\.\s*2\s*,?\s*АЛ\.\s*1\s*НАРЕДБА\s*ЗА\s*ОС\s*:\s*(ПОЛОЖИТЕЛНА|ОТРИЦАТЕЛНА|НЕОПРЕДЕЛЕНА)\s*[—–-]\s*(.+)$/imu,'ОТРИЦАТЕЛНА'],
+   ['Чл. 2, ал. 2 от Наредбата за ОС',/^\s*ЧЛ\.\s*2\s*,?\s*АЛ\.\s*2\s*НАРЕДБА\s*ЗА\s*ОС\s*:\s*(ПОЛОЖИТЕЛНА|ОТРИЦАТЕЛНА|НЕОПРЕДЕЛЕНА)\s*[—–-]\s*(.+)$/imu,'ПОЛОЖИТЕЛНА']
+  ];
+  const conflicts=defs.flatMap(([label,re,expected])=>{
+   const row=normalized.match(re);
+   return !row||row[1].toUpperCase()!==expected||row[2].trim().length<45?
+    [label+': '+(row?.[1]||'липсва установен извод')+' — необходимо е изясняване на предпоставките и доказателствата']:[];});
+  return conflicts.length?'Избраният панел №01 не е съгласуван с четирите нормативни проверки:\n'+conflicts.join('\n')+
+   '\nEG Авторът предлага корекция в Етап 4; експертът проверява доказателствата и потвърждава изводите. Не се извършва автоматична смяна на процедура.':'';
+ };
+ const titlePattern=/^(ПРИЛОЖЕНИЕ № [12] КЪМ ЗООС|ЧЛ\. 2, АЛ\. [12] НАРЕДБА ЗА ОС|ВОДЕЩО ПРЕДЛОЖЕНИЕ|ИЗБРАН ПАНЕЛ|ЗАЩО ТОЗИ ПАНЕЛ|ЗАЩО НЕ АЛТЕРНАТИВИТЕ|Фактическа основа|Нормативни предпоставки и граници на проверката|Мотивирано предложение|Данни за експертна проверка)\s*[:：]/iu;
+ function render(container,content){
+  container.replaceChildren();
+  const normalized=content.replace(/\n(?=(?:ПРИЛОЖЕНИЕ № [12]|ЧЛ\. 2, АЛ\. [12]|ВОДЕЩО ПРЕДЛОЖЕНИЕ|ИЗБРАН ПАНЕЛ|ЗАЩО ТОЗИ ПАНЕЛ|ЗАЩО НЕ АЛТЕРНАТИВИТЕ|Фактическа основа|Нормативни предпоставки и граници|Мотивирано предложение|Данни за експертна проверка))/giu,'\n\n');
+  for(const chunk of normalized.split(/\n\s*\n/)){
+   const t=val(chunk);if(!t)continue;const m=t.match(titlePattern);
+   if(m){
+    const emphasis=/^(?:ВОДЕЩО ПРЕДЛОЖЕНИЕ|ИЗБРАН ПАНЕЛ)$/iu.test(m[1]);
+    const section=emphasis?mk('section'):container;
+    if(emphasis)section.className='kt124-key-finding';
+    const heading=mk('h4',m[1]);
+    if(emphasis)heading.className='kt124-key-heading';
+    section.append(heading);
+    const rest=val(t.slice(m[0].length));
+    if(rest){const paragraph=mk('p',rest);if(emphasis)paragraph.className='kt124-key-value';section.append(paragraph);}
+    if(emphasis)container.append(section);
+   }
+   else container.append(mk('p',t));
+  }
+ }
+ function display(){
+  if(!current())return;
+  ui.hidden=false;paper.hidden=false;textarea.hidden=true;change.hidden=approved?.expertDecision?.mode==='independent_expert';confirm.hidden=approved?.expertDecision?.mode==='independent_expert';storeEdit.hidden=true;cancel.hidden=true;
+  render(paper,history.at(-1).text);alertContent.replaceChildren();
+  proposal.warnings.forEach(w=>alertContent.append(mk('p',w)));alerts.hidden=!proposal.warnings.length;
+  const text=history.at(-1).text;
+  const identified=text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu);
+  const id=Number(identified?.[1]||0);
+  currentRoute.textContent=id>=1&&id<=22?String(id).padStart(2,'0')+' — '+routeTitles[id-1]:'Липсва конкретно предложен панел от каталога.';
+  conclusion.hidden=false;routeSelect.value=String(id||1);updateRouteSummary();toggleChoice();
+  next.hidden=!approved;archiveMenu.hidden=!approved;save.hidden=!approved;password.hidden=!approved;
+ }
+ function render5(){
+  if(window.KT117Document)return;
+  stage5.replaceChildren(mk('h3','5. Определяне на процедурата по ИП'));
+  if(!approved||!current()){stage5.append(mk('p','Няма потвърдено предложение за текущата преписка.'));return;}
+  stage5.append(mk('h4','Потвърдена версия '+approved.version));
+  stage5.append(mk('p','Преписка: '+approved.caseId+' · Експерт: '+approved.expert+' · Потвърдено на: '+approved.approvedAt));
+  const selected=approved.text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\b[^\n]*/iu);
+  stage5.append(mk('p',selected?'Предложено направление: '+selected[0]:'Предложеното направление се определя от експерта.'));
+  if(approved.warnings.length)stage5.append(mk('p','Бележки за експертна проверка: '+approved.warnings.join('; ')));
+  stage5.append(mk('h4','Потвърдено предложение'));stage5.append(mk('pre',approved.text));
+  stage5.append(mk('p','Това е тест на предаването към Етап 5. Изготвянето на Word документ по утвърдената бланка все още не е активно.'));
+ }
+ document.addEventListener('kt115:stage4-draft',e=>{
+  const d=e.detail||{},h=evidence();if(!d.sourceDraft||d.evidenceRevision!==h.evidenceRevision||d.caseId!==h.caseId&&d.caseIdType!=='shared-verified')return;
+  proposal={caseId:d.caseId,localId:h.caseId,revision:h.evidenceRevision,generation:h.generation,key:h.key,requestId:d.requestId,original:d.sourceDraft,warnings:d.warnings||[],qualificationRecord:d.qualificationRecord||null,qualificationProof:d.qualificationProof||null,qualificationGate:d.qualificationGate||null,serverQualityPassed:d.qualityPassed===true,serverReviewed:['pass','revise'].includes(d.reviewerVerdict)};
+  const reviewed=d.reviewed===true||(d.qualityPassed===true&&['pass','revise'].includes(d.reviewerVerdict));
+  header.textContent=reviewed?(d.qualityPassed===true?'РЕЦЕНЗИРАНО ПРЕДЛОЖЕНИЕ · за експертна преценка':'РЕЦЕНЗИРАНО ПРЕДЛОЖЕНИЕ · с открити нормативни несъответствия'):'Предложение за експертна преценка';
+  history=[{version:1,text:d.sourceDraft,kind:reviewed?'рецензирано предложение':'непроверен проект',createdAt:new Date().toISOString()}];approved=null;
+  document.getElementById('kt104EGLead').style.display='none';document.getElementById('kt104EGDetails').style.display='none';
+  acceptRadio.checked=true;changeRadio.checked=false;toggleChoice();
+  note.textContent=reviewed?'Рецензираното предложение е готово за експертен избор.':'Непроверен проект: разгледайте бележките. Няма автоматично преминаване към Етап 5.';display();render5();
+ });
+ // Additive signed expert route; does not change KT123's AI acceptance.
+ document.addEventListener('kt124:expert-decision-approved',e=>{
+  const d=e.detail||{},h=evidence(),q=d.expertDecision;
+  if(!q||q.mode!=='independent_expert'||!d.expertDecisionProof||!d.sourceDraft||
+     d.evidenceRevision!==h.evidenceRevision||d.caseId!==h.caseId&&d.caseIdType!=='shared-verified')return;
+  proposal={caseId:d.caseId,localId:h.caseId,revision:h.evidenceRevision,
+   generation:h.generation,key:h.key,requestId:d.requestId,
+   original:q.author?.draft||'Самостоятелна експертна преценка',
+   warnings:Array.isArray(q.reviewer?.findings)?q.reviewer.findings:[],
+   serverQualityPassed:false,expertDecision:q,expertDecisionProof:d.expertDecisionProof};
+  history=[{version:1,text:d.sourceDraft,kind:'самостоятелно експертно решение',createdAt:new Date().toISOString()}];
+  approved=Object.freeze({caseId:d.caseId,requestId:d.requestId,evidenceRevision:h.evidenceRevision,
+   version:1,text:d.sourceDraft,original:proposal.original,warnings:[...proposal.warnings],
+   expertDecision:q,expertDecisionProof:d.expertDecisionProof,
+   qualificationRecord:null,qualificationProof:null,qualificationGate:null,
+   expert:q.expert,approvedAt:new Date().toLocaleString('bg-BG'),
+   expertApproved:true,decisionSource:'INDEPENDENT_EXPERT'});
+  const l=document.getElementById('kt104EGLead'),details=document.getElementById('kt104EGDetails');
+  if(l)l.style.display='none';if(details)details.style.display='none';
+  note.textContent='Самостоятелната експертна преценка е потвърдена. В Етап 5 се предава точно избраното от експерта направление.';
+  display();render5();
+  document.dispatchEvent(new CustomEvent('kt116:stage4-confirmed',{detail:{
+   caseId:approved.caseId,evidenceRevision:approved.evidenceRevision,version:approved.version,
+   decisionSource:'INDEPENDENT_EXPERT'
+  }}));
+ });
+ change.onclick=()=>{
+  if(!current())return;textarea.value=history.at(-1).text;textarea.hidden=false;paper.hidden=true;
+  change.hidden=true;confirm.hidden=true;storeEdit.hidden=false;cancel.hidden=false;
+ };
+ storeEdit.onclick=()=>{
+  if(!current()||val(textarea.value).length<120){note.textContent='Проверете съдържанието и данните на преписката.';return;}
+  history.push({version:history.length+1,text:val(textarea.value),kind:'експертна редакция',createdAt:new Date().toISOString()});
+  approved=null;note.textContent='Редакцията е запазена за тази работна сесия.';display();render5();
+ };
+ cancel.onclick=display;
+ confirm.onclick=async()=>{
+  if(!current()){note.textContent='Данните по преписката са променени.';return;}
+  const expert=val(actor.value);if(expert.length<2){note.textContent='Посочете експерта.';actor.focus();return;}
+  const v=history.at(-1);
+  // KT124-R6: Reviewer status is advisory. The expert's express
+  // decision is recorded independently, with unresolved warnings preserved.
+  const chosen=changeRadio.checked?Number(routeSelect.value):Number(v.text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0);
+  if(!chosen||!routeTitles[chosen-1]){note.textContent='Не е определена конкретна процедура.';return;}
+  if(!window.KT80EGSession?.hasAccess?.()){note.textContent='Необходим е действащ достъп до EG Автора в текущата сесия.';return;}
+  if(!await confirmStyled('Потвърждавате като експерт панел '+String(chosen).padStart(2,'0')+' — '+routeTitles[chosen-1]+'? AI бележките остават в преписката; това е проект за последваща експертна проверка.'))return;
+  confirm.disabled=true;note.textContent='Регистриране на експертния избор…';
+  try{
+   const h=evidence(),p=window.KT80WorkflowState?.subjectConfirmed||{},requestId=crypto.randomUUID();
+   const payload={task:'confirm_reviewed_panel',projectOnly:true,caseId:proposal.caseId,
+    evidenceRevision:proposal.revision,requestId,subject:val(p.text),scope:val(p.scope),
+    parcelIds:[...h.parcelIds],expert,panelId:chosen,reviewedText:v.text,
+    reviewerVerdict:proposal.serverReviewed?'reviewed':'not_completed',
+    expertExplicitConfirm:true,validationWarnings:proposal.warnings,
+    qualificationRecord:proposal.qualificationRecord,
+    qualificationProof:proposal.qualificationProof,qualificationGate:proposal.qualificationGate};
+   const response=await window.KT80EGSession.request(
+    'https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/stage4-expert-decision',JSON.stringify(payload));
+   const data=await response.json().catch(()=>({}));
+   if(!current()||!response.ok||!data.expertDecisionProof||!data.draft||
+      data.caseId!==proposal.caseId||data.requestId!==requestId||data.evidenceRevision!==proposal.revision){
+    note.textContent='Експертният избор не е регистриран: '+(data.issues?.join(', ')||data.error||response.status);return;
+   }
+   history.push({version:history.length+1,text:data.draft,kind:'експертно потвърдена процедура',createdAt:new Date().toISOString()});
+   approved=Object.freeze({caseId:proposal.caseId,requestId,evidenceRevision:proposal.revision,
+    version:history.at(-1).version,text:data.draft,original:proposal.original,warnings:[...proposal.warnings],
+    qualificationRecord:proposal.qualificationRecord,qualificationProof:proposal.qualificationProof,
+    qualificationGate:proposal.qualificationGate,expertDecision:data.expertDecision,
+    expertDecisionProof:data.expertDecisionProof,
+    expert,approvedAt:new Date().toLocaleString('bg-BG'),expertApproved:true});
+   note.textContent='Експертното направление е регистрирано. Непотвърдените AI констатации остават видими в преписката.';
+   document.dispatchEvent(new CustomEvent('kt116:stage4-confirmed',{detail:{
+    caseId:approved.caseId,evidenceRevision:approved.evidenceRevision,version:approved.version
+   }}));
+   display();render5();next.click();
+  }catch(e){note.textContent='Неуспешно регистриране на експертния избор. Проверете връзката.'}
+  finally{confirm.disabled=false;}
+ };
+ // KT116-R2: the legacy stage navigation opens a read-only gate dialog.
+ // This case-bound confirmation instead opens ONLY the new Stage 5 preview.
+ // No procedure activation, external document, or normative approval occurs.
+ next.onclick=()=>{
+  if(!approved||!current())return;
+  render5();
+  // Refresh the Stage 5 case-bound input before switching the visible stage.
+  window.KT117Document?.refresh?.();
+  document.dispatchEvent(new CustomEvent('kt116:stage5-open',{detail:{
+   caseId:approved.caseId,evidenceRevision:approved.evidenceRevision,version:approved.version
+  }}));
+  document.querySelectorAll('.kt80-stage-panel').forEach(panel=>{
+   panel.hidden=panel!==five;
+  });
+  document.querySelectorAll('.kt80-step').forEach(nav=>{
+   if(nav.dataset.step==='5')nav.setAttribute('aria-current','step');
+   else nav.removeAttribute('aria-current');
+  });
+  five.hidden=false;
+  five.scrollIntoView({behavior:'smooth',block:'start'});
+ };
+ save.onclick=async()=>{
+  if(!approved||!current())return;
+  if(password.value.length<12){note.textContent='Въведете парола от поне 12 знака.';return;}
+  try{
+   const enc=new TextEncoder(),salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+   const key0=await crypto.subtle.importKey('raw',enc.encode(password.value),'PBKDF2',false,['deriveKey']);
+   const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:210000,hash:'SHA-256'},key0,{name:'AES-GCM',length:256},false,['encrypt']);
+   const w=window.KT80WorkflowState||{},h=evidence();
+   const payload={approved,history,caseBinding:{caseId:proposal.caseId,evidenceRevision:proposal.revision,
+    subject:val(w.subjectConfirmed?.text),scope:val(w.subjectConfirmed?.scope),parcelIds:[...h.parcelIds]}};
+   const bytes=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(JSON.stringify(payload))));
+   const b64=a=>btoa(Array.from(a,x=>String.fromCharCode(x)).join(''));
+   const obj={format:'WOW-KT116-ENCRYPTED-V1',salt:b64(salt),iv:b64(iv),ciphertext:b64(bytes)};
+   const url=URL.createObjectURL(new Blob([JSON.stringify(obj)],{type:'application/json'}));const link=mk('a');link.href=url;
+   link.download='WOW_Е4_защитено_копие.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+   password.value='';note.textContent='Шифрованото копие е изтеглено. Няма централен архив; пазете файла и паролата отделно.';
+  }catch{note.textContent='Неуспешен защитен запис.';}
+ };
+ async function decrypt(data,secret){
+  if(data?.format!=='WOW-KT116-ENCRYPTED-V1')throw Error('Неподдържан формат');
+  const bytes=x=>Uint8Array.from(atob(x),v=>v.charCodeAt(0));
+  const enc=new TextEncoder(),raw=await crypto.subtle.importKey('raw',enc.encode(secret),'PBKDF2',false,['deriveKey']);
+  const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:bytes(data.salt),iterations:210000,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['decrypt']);
+  const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:bytes(data.iv)},key,bytes(data.ciphertext));
+  return JSON.parse(new TextDecoder().decode(plain));
+ }
+ restoreBtn.onclick=async()=>{
+  const file=restoreFile.files?.[0],h=evidence(),w=window.KT80WorkflowState||{};
+  if(!file||!restoreKey.value){restoreStatus.textContent='Изберете защитения файл и въведете паролата.';return;}
+  if(!w.subjectConfirmed?.expertConfirmed||!w.subjectConfirmed?.scopeConfirmed){restoreStatus.textContent='Първо потвърдете предмета и обхвата в Етап 2.';return;}
+  try{
+   const data=await decrypt(JSON.parse(await file.text()),restoreKey.value);
+   const binding=data?.caseBinding||{},sameSubject=val(binding.subject)===val(w.subjectConfirmed.text),
+    sameScope=val(binding.scope)===val(w.subjectConfirmed.scope),
+    sameParcels=JSON.stringify(binding.parcelIds||[])===JSON.stringify([...h.parcelIds]);
+   if(!sameSubject||!sameScope||!sameParcels||!Array.isArray(data.history)||!data.history.length||
+      !val(data.approved?.original)||!val(data.approved?.text)){
+    restoreStatus.textContent='Копието не съответства на потвърдените предмет, обхват и имоти. Няма възстановени данни.';return;
+   }
+   proposal={caseId:h.caseId,localId:h.caseId,revision:h.evidenceRevision,generation:h.generation,
+    key:h.key,requestId:'restored-expert-copy',serverQualityPassed:false,original:data.approved.original,
+    warnings:Array.isArray(data.approved.warnings)?data.approved.warnings:[]};
+   history=data.history.filter(x=>x&&typeof x.text==='string').map((x,i)=>({version:i+1,text:x.text,
+    kind:x.kind,createdAt:x.createdAt})).slice(0,30);
+   if(!history.length)throw Error('Няма съдържание');
+   approved=null;restoreKey.value='';restoreFile.value='';
+   ui.hidden=false;document.getElementById('kt104EGLead').style.display='none';
+   document.getElementById('kt104EGDetails').style.display='none';
+   note.textContent='Възстановен работен текст. Изисква се ново експертно потвърждение за текущата преписка.';
+   restoreStatus.textContent='Копието е отворено за редакция и ново потвърждение.';
+   display();render5();
+  }catch{restoreStatus.textContent='Неуспешно отваряне. Проверете паролата и файла.';}
+ };
+
+ function clear(){proposal=null;history=[];approved=null;header.textContent='Предложение за експертна преценка';ui.hidden=true;render5();}
+ ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'].forEach(n=>document.addEventListener(n,clear));
+ window.KT116ExpertHandoff=Object.freeze({snapshot:()=>approved&&current()?approved:null,history:()=>current()?history.map(x=>({version:x.version,kind:x.kind,createdAt:x.createdAt})):[]});
+ render5();
+}
+}
+setTimeout(installKT116,2400);
