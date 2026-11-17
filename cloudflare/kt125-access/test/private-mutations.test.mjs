@@ -17,7 +17,7 @@ function makeDB({changes=[1,1],actorRow=actor,targetRow=other,caseRow=resource,f
   if(sql.includes("FROM kt125_users WHERE user_id"))return targetRow;
   throw Error("Unexpected query");
  },async all(){return {results:[]}}
- }}}}},async batch(stmts){
+ }}}},async batch(stmts){
    batches.push(stmts);
    if(failBatch)throw Error("Transaction aborted");
    assert.equal(stmts.length,2);
