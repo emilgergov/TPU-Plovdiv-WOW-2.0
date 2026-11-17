@@ -26,7 +26,11 @@ nav a{display:block;text-decoration:none;padding:11px 12px;border:1px solid #799
 nav a[aria-current="page"]{background:#d6b66d;color:#173829}
 .panel{background:#123629;border:1px solid #8c865c;border-radius:10px;min-height:420px;padding:19px}
 p{color:#e0eade}.tablewrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:10px;border-bottom:1px solid #56745e;vertical-align:top;overflow-wrap:anywhere}
+table{width:100%;border-collapse:collapse}
+form{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+form label{font-size:12px}
+form button{background:#d9b771;border:1px solid #f0ce8a;color:#153828;border-radius:6px;padding:7px 10px;font:700 12px Verdana,Arial;cursor:pointer}
+form button:focus-visible{outline:3px solid #f3db9b;outline-offset:2px}td,th{text-align:left;padding:10px;border-bottom:1px solid #56745e;vertical-align:top;overflow-wrap:anywhere}
 th{background:#28533e;color:#f5d99a}
 .state{padding:10px;border:1px dashed #77907c;border-radius:8px;background:#224836}
 .disabled{color:#c3d0c3;font-size:12px;margin-top:15px}
@@ -48,13 +52,20 @@ export function renderKT125PrivatePage({section="overview",items=[],hasMore=fals
   <tr><td>Експерт</td><td>Работни действия по лични преписки</td><td>Собствени и изрично делегирани</td></tr>
   <tr><td>Преглеждащ</td><td>Няма системно администриране</td><td>Само изрично разрешени</td></tr>
   <tr><td>Упълномощен експерт</td><td>Няма системно администриране</td><td>Само за посочено действие и срок</td></tr></tbody></table></div>`;
+ const disableAction=r=>{
+   const target=r.user_id;
+   if(typeof target!=="string"||!/^[A-Za-z0-9_-]{1,160}$/.test(target)||r.active!==1)return "<td>—</td>";
+   return `<td><form method="post" action="/kt125/admin/users/${escapeHtml(target)}/disable">
+   <label><input type="checkbox" required name="confirm" value="DEACTIVATE"> Потвърждавам</label>
+   <button type="submit">Деактивирай</button></form></td>`;
+ };
  const table=section==="overview"
   ?`<div class="state">Защитен служебен режим. Информацията за потребители, преписки и журнал се извлича само след проверка на самоличността и съответните права.</div>
   <p>ЕГМАСТЕР и администраторът не получават автоматичен достъп до съдържанието на преписките.</p>`
   :section==="roles"?roleMatrix
   :items.length
-    ?`<div class="tablewrap"><table><thead><tr>${columns.map(([,label])=>`<th scope="col">${escapeHtml(label)}</th>`).join("")}</tr></thead>
-    <tbody>${items.slice(0,50).map(r=>`<tr>${columns.map(([key])=>`<td>${escapeHtml(readable(key,r[key]))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    ?`<div class="tablewrap"><table><thead><tr>${columns.map(([,label])=>`<th scope="col">${escapeHtml(label)}</th>`).join("")}${section==="users"?"<th scope=\"col\">Управление</th>":""}</tr></thead>
+    <tbody>${items.slice(0,50).map(r=>`<tr>${columns.map(([key])=>`<td>${escapeHtml(readable(key,r[key]))}</td>`).join("")}${section==="users"?disableAction(r):""}</tr>`).join("")}</tbody></table></div>
     ${hasMore?'<p class="disabled">Показани са първите 50 записа. Разширеното търсене предстои.</p>':""}`
     :`<div class="state">Няма налични записи в този раздел.</div>`;
  return `<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -73,6 +84,6 @@ export function kt125PrivateHtmlResponse(content){
   "Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store, private",
   "X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY",
   "Referrer-Policy":"no-referrer",
-  "Content-Security-Policy":"default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+  "Content-Security-Policy":"default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
  }});
 }
