@@ -14,6 +14,7 @@ import {enrollKT125Staff} from "./staff-enrollment.mjs";
 import {activateKT125Staff} from "./staff-activation.mjs";
 import {inviteKT125Staff,acceptKT125Invitation,revokeKT125Invitation,readKT125InvitationDirectory} from "./staff-invitations.mjs";
 import {kt125RequestIdentity,readKT125OwnRequest,renderKT125AccessRequest,submitKT125AccessRequest,readKT125AccessRequests,decideKT125AccessRequest} from "./access-requests.mjs";
+import {linkKT125ExistingMember} from "./member-auth/link-existing.mjs";
 import {sendKT125InvitationMail} from "./invitation-mail.mjs";
 import {renderKT125GrantManagement} from "./grant-admin-page.mjs";
 
@@ -33,7 +34,7 @@ const inviteUserRoute="/kt125/admin/users/invite";
 const revokeInvitationRoute=new RegExp("^/kt125/admin/invitations/("+pathId+")/revoke$");
 const requestUserRoute="/kt125/enrollment/request";
 const requestResultRoute="/kt125/enrollment/request/received";
-const decideRequestRoute=new RegExp("^/kt125/admin/requests/("+pathId+")/(decide|mail)$");
+const decideRequestRoute=new RegExp("^/kt125/admin/requests/("+pathId+")/(decide|mail|link)$");
 const activateUserRoute="/kt125/enrollment/activate";
 const disableUserRoute=new RegExp("^/kt125/admin/users/("+pathId+")/disable$");
 const manageGrantsRoute=new RegExp("^/kt125/cases/("+pathId+")/manage$");
@@ -52,9 +53,9 @@ function validPrivateMutationOrigin(request,env){
   return true;
  }catch{return false}
 }
-export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid=()=>crypto.randomUUID(),auditEvent=recordKT125SecurityEvent}={}){
+export function createKT125PrivateHandler({getVerifier,identityConfigReady=kt125CloudflareAccessConfigReady,clock=()=>Date.now(),uuid=()=>crypto.randomUUID(),auditEvent=recordKT125SecurityEvent}={}){
  return {async fetch(request,env){
-  if(!env?.KT125_DB||!kt125CloudflareAccessConfigReady(env))
+  if(!env?.KT125_DB||!identityConfigReady(env))
    return json({error:"Служебният достъп не е конфигуриран."},503);
   const url=new URL(request.url);
   if(url.search)return deny();
@@ -106,9 +107,9 @@ export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid
    if(!/^application\/x-www-form-urlencoded(?:\s*;.*)?$/i.test(request.headers.get("Content-Type")||""))return json({error:"Невалиден формат на заявката."},415);
    if(Number(request.headers.get("content-length")||0)>16000)return json({error:"Заявката е твърде голяма."},413);
    let data;try{const raw=await request.text();if(raw.length>16000)return json({error:"Заявката е твърде голяма."},413);data=new URLSearchParams(raw);}catch{return json({error:"Невалидна заявка."},400)}
-   const isMail=decideRequest?.[2]==="mail";
-   const fields=requestUser?["name","email","note","confirm"]:isMail?["confirm"]:["role","decision","confirm"];
-   if([...data.keys()].length!==fields.length||fields.some(k=>data.getAll(k).length!==1)||data.get("confirm")!==(requestUser?"REQUEST":isMail?"SEND":"DECIDE"))return json({error:"Необходимо е изрично потвърждение."},400);
+   const isMail=decideRequest?.[2]==="mail",isLink=decideRequest?.[2]==="link";
+   const fields=requestUser?["name","email","note","confirm"]:isMail?["confirm"]:isLink?["target_user_id","confirm"]:["role","decision","confirm"];
+   if([...data.keys()].length!==fields.length||fields.some(k=>data.getAll(k).length!==1)||data.get("confirm")!==(requestUser?"REQUEST":isMail?"SEND":isLink?"LINK":"DECIDE"))return json({error:"Необходимо е изрично потвърждение."},400);
    const args={request,verifier,db:env.KT125_DB,nowMs:clock(),uuid};
    if(requestUser){
     const result=await submitKT125AccessRequest({...args,organizationId:env.KT125_REQUEST_ORGANIZATION,name:data.get("name"),email:data.get("email"),note:data.get("note")});
@@ -122,7 +123,7 @@ export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid
     const sent=await sendKT125InvitationMail({...args,invitationId:invitation.invitation_id,env});
     if(!sent.ok)return renderKT125AccessRequest({message:"Поканата остава записана. Изпращането по имейл не е потвърдено. Проверете състоянието в панела за потребители.",status:503});
    }else{
-    const result=await decideKT125AccessRequest({...args,requestId:decideRequest[1],decision:data.get("decision"),role:data.get("role")});
+    const result=isLink?await linkKT125ExistingMember({...args,requestId:decideRequest[1],targetUserId:data.get("target_user_id")}):await decideKT125AccessRequest({...args,requestId:decideRequest[1],decision:data.get("decision"),role:data.get("role")});
     if(!result.ok)return deny();
     // The decision and outbox commit first. A transport failure never reverts approval
     // or silently grants an active account; panel shows the actual mail state.

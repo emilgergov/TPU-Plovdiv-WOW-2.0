@@ -26,7 +26,7 @@ export const KT125_REQUEST_SCHEMA=[
  invitation_id TEXT PRIMARY KEY NOT NULL,organization_id TEXT NOT NULL,
  state TEXT NOT NULL CHECK(state IN ('queued','sending','accepted','failed')),
  first_attempt_ms INTEGER,attempt_at_ms INTEGER,provider_id TEXT,
- from_email TEXT,activation_origin TEXT,
+ from_email TEXT,activation_origin TEXT,payload_json TEXT,
  FOREIGN KEY(invitation_id) REFERENCES kt125_staff_invitations(invitation_id))`
 ];
 export async function kt125RequestIdentity(request,verifier){
@@ -70,7 +70,19 @@ export async function readKT125AccessRequests(args){
    FROM kt125_access_requests r LEFT JOIN kt125_invitation_mail m ON m.invitation_id=r.invitation_id
    WHERE r.organization_id=? ORDER BY r.created_at_ms DESC,r.request_id LIMIT 51`).bind(actor.organizationId).all();
   if(!Array.isArray(result?.results))return fail('REQUESTS_UNAVAILABLE');
-  return {ok:true,items:result.results.slice(0,50),hasMore:result.results.length>50};
+  const items=result.results.slice(0,50);
+  // An optional, explicitly confirmed migration preserves a legacy expert ID.
+  try{
+   const matches=await args.db.prepare(`SELECT r.request_id,u.user_id,u.role FROM kt125_access_requests r
+    JOIN kt125_member_accounts a ON a.request_id=r.request_id
+    JOIN kt125_staff_profiles p ON p.email=r.email AND p.organization_id=r.organization_id
+    JOIN kt125_users u ON u.user_id=p.user_id AND u.organization_id=r.organization_id
+    WHERE r.organization_id=? AND r.status='pending' AND a.linked_user_id IS NULL
+     AND u.active=1 AND u.role IN ('expert','reviewer','delegated_expert') LIMIT 51`).bind(actor.organizationId).all();
+   const byId=new Map((matches.results||[]).map(m=>[m.request_id,m]));
+   for(const row of items){const m=byId.get(row.request_id);if(m){row.existing_user_id=m.user_id;row.existing_role=m.role;}}
+  }catch{/* The existing invitation flow also works before schema 006 exists. */}
+  return {ok:true,items,hasMore:result.results.length>50};
  }catch(e){
   if(/no such table: (?:main\.)?kt125_(?:access_requests|invitation_mail)/i.test(String(e?.message)+' '+String(e?.cause?.message)))return {ok:true,items:[],hasMore:false};
   return fail('REQUESTS_UNAVAILABLE');
@@ -95,7 +107,7 @@ export async function decideKT125AccessRequest({request,verifier,db,requestId,de
     FROM kt125_access_requests r WHERE r.request_id=? AND r.organization_id=? AND r.status='pending'
      AND ${liveManager}
      AND NOT EXISTS(SELECT 1 FROM kt125_users u WHERE u.identity_provider=r.identity_provider AND u.provider_subject=r.provider_subject)
-     AND NOT EXISTS(SELECT 1 FROM kt125_staff_profiles p WHERE p.identity_provider=r.identity_provider AND p.email=r.email)
+     AND NOT EXISTS(SELECT 1 FROM kt125_staff_profiles p WHERE p.email=r.email AND p.organization_id=r.organization_id)
    `).bind(invitationId,role,actor.userId,nowMs,nowMs+7*86400000,nowMs,requestId,actor.organizationId,...params));
    writes.push(db.prepare(`UPDATE kt125_access_requests SET status='approved',decided_by=?,invitation_id=?,updated_at_ms=?
     WHERE request_id=? AND organization_id=? AND status='pending' AND changes()=1`).bind(actor.userId,invitationId,nowMs,requestId,actor.organizationId));

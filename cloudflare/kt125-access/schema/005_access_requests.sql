@@ -16,5 +16,5 @@ CREATE TABLE IF NOT EXISTS kt125_invitation_mail (
  invitation_id TEXT PRIMARY KEY NOT NULL,organization_id TEXT NOT NULL,
  state TEXT NOT NULL CHECK(state IN ('queued','sending','accepted','failed')),
  first_attempt_ms INTEGER,attempt_at_ms INTEGER,provider_id TEXT,
- from_email TEXT,activation_origin TEXT,
+ from_email TEXT,activation_origin TEXT,payload_json TEXT,
  FOREIGN KEY(invitation_id) REFERENCES kt125_staff_invitations(invitation_id));

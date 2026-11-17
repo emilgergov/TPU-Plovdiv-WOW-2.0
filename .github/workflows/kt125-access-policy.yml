@@ -49,6 +49,8 @@ jobs:
           node cloudflare/kt125-access/test/private-staff-activation-route.test.mjs
           node cloudflare/kt125-access/test/staff-invitations-sql.test.mjs
           node cloudflare/kt125-access/test/access-requests-sql.test.mjs
+          node --check cloudflare/kt125-access/src/member-auth/worker.mjs
+          node cloudflare/kt125-access/test/member-auth-sql.test.mjs
           python3 cloudflare/kt125-access/test/staff_activation_sql.test.py
           python3 cloudflare/kt125-access/test/user_lifecycle_sql.test.py
           node --check cloudflare/kt125-access/src/security-audit.mjs

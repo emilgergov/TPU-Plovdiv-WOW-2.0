@@ -28,3 +28,14 @@ jobs:
           path: dist/kt125-private-worker.mjs
           if-no-files-found: error
           retention-days: 7
+
+      - name: Bundle the separate username/password Worker (disabled until configured)
+        run: |
+          npm_config_yes=true npx --yes esbuild@0.25.12 cloudflare/kt125-access/src/member-auth/worker.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt125-member-password-worker.mjs
+          node --check dist/kt125-member-password-worker.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KT125-MEMBER-PASSWORD-WORKER-SINGLE-FILE
+          path: dist/kt125-member-password-worker.mjs
+          if-no-files-found: error
+          retention-days: 7
