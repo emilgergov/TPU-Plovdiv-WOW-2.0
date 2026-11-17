@@ -1,6 +1,7 @@
 import {getLegalContext} from "./legal-v11-loader.mjs";
 import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 import {evaluateDraft} from "./kt123-decision-model.mjs";
+import {substantiveDraftIssues} from "./kt123-substance-guard.mjs";
 // TPU Plovdiv AI Author V27 — isolated test-only authoring gateway.
 // Never send an OpenAI key to the browser. Authorization is fail-closed.
 const headers = { "Content-Type":"application/json; charset=utf-8", "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff", "Access-Control-Allow-Origin":"null" };
@@ -539,7 +540,8 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   if(noEiaDecision&&/(?:липса\s+на\s+(?:доказателства|данни)\s+за\s+(?:значително\s+)?(?:отрицателно\s+)?въздействие|няма\s+доказателства\s+за\s+емисии)/iu.test(leading)&&annexPremiseMissing)
    issues.push("EIA_NO_IMPACT_DATA_USED_AS_SCREENING_DECISION");
 
-  return issues;
+  issues.push(...substantiveDraftIssues(value));
+  return [...new Set(issues)];
 
   }
   // KT115: expose a flagged draft to the current expert without accepting it.
