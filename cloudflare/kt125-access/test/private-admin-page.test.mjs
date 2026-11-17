@@ -11,8 +11,12 @@ assert(!risk.includes('<img'));
 assert(risk.includes('&lt;script&gt;'));
 assert(risk.includes("Управление на достъпа"));
 assert(risk.includes("Потребители"));
-assert(risk.includes('name="confirm" value="DEACTIVATE"'));
-assert(risk.includes('action="/kt125/admin/users/'));
+const validUser=renderKT125PrivatePage({section:"users",items:[
+ {user_id:"expert-a",role:"expert",active:1,updated_at_ms:1794891600000}
+]});
+assert(validUser.includes('name="confirm" value="DEACTIVATE"'));
+assert(validUser.includes('action="/kt125/admin/users/expert-a/disable"'));
+assert(!risk.includes('action="/kt125/admin/users/'),"Invalid IDs cannot become action URLs");
 const response=kt125PrivateHtmlResponse(risk);
 assert.equal(response.headers.get("X-Frame-Options"),"DENY");
 assert.equal(response.headers.get("cache-control"),"no-store, private");
