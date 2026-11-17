@@ -61,4 +61,14 @@ const oversize=req("POST",issuePath,{body:{...body,extra:"x".repeat(5000)}});
 assert.equal((await handler.fetch(oversize,env)).status,413);
 assert.equal((await handler.fetch(req("GET",issuePath),env)).status,200);
 assert.equal((await handler.fetch(req("GET","/kt125/admin/users"),env)).status,403);
+// Legacy browser URLs redirect only to protected panels; API callers still get an authorization denial.
+for(const section of ["users","cases","audit"]){
+ const path="/kt125/admin/"+section;
+ assert.equal((await handler.fetch(req("GET",path),env)).status,403);
+ const navigation=await handler.fetch(req("GET",path,{headers:{Accept:"text/html,application/xhtml+xml"}}),env);
+ assert.equal(navigation.status,302);
+ assert.equal(navigation.headers.get("Location"),"/kt125/admin/panel/"+section);
+ // Following the redirect cannot grant an expert management access.
+ assert.equal((await handler.fetch(req("GET",navigation.headers.get("Location")),env)).status,403);
+}
 console.log("PASS KT125 private endpoints: write authorization, same-origin CSRF, signed principal, atomic audit, denial on stale grant/invalid roles/oversize.");
