@@ -16,7 +16,10 @@ const jwt=(payload={},header={})=>{
  return h+"."+p+"."+signer.sign(privateKey).toString("base64url");
 };
 let calls=0;
-const fetchFn=async url=>{
+const fetchFn=async (url,options)=>{
+ assert.equal(options.method,"GET");
+ assert.equal(options.redirect,"manual","Cloudflare Workers requires manual redirect mode");
+ assert.equal(options.cache,"no-store");
  assert.equal(url,issuer+"/cdn-cgi/access/certs");
  calls++;
  return new Response(JSON.stringify({keys:[{kty:"RSA",kid,n:exported.n,e:exported.e,alg:"RS256"}]}),{
@@ -58,4 +61,19 @@ assert.equal(kt125CloudflareAccessConfigReady({
 assert.equal(kt125CloudflareAccessConfigReady({
  KT125_ACCESS_TEAM_DOMAIN:"https://attacker.example.com",KT125_ACCESS_AUD:audience
 }),false);
+// Fresh issuers avoid the valid-key cache and exercise the actual fetch boundary.
+for(const status of [200,201,302]){
+ const redirectIssuer="https://redirect-"+status+".cloudflareaccess.com";
+ const redirectVerifier=createKT125CloudflareAccessVerifier({
+  teamDomain:redirectIssuer,audience,cryptoImpl:webcrypto,clock:()=>now,
+  fetchFn:async(url,options)=>{
+   assert.equal(url,redirectIssuer+"/cdn-cgi/access/certs");
+   assert.equal(options.redirect,"manual");
+   return {status,ok:status>=200&&status<300,redirected:status===200,
+    headers:new Headers(),text:async()=>JSON.stringify({keys:[{kty:"RSA",kid,n:exported.n,e:exported.e}]})};
+  }
+ });
+ assert.equal((await redirectVerifier.verify(req(jwt({iss:redirectIssuer})))).verified,false,
+  "Redirected or non-200 JWKS responses must be rejected");
+}
 console.log("PASS KT125 Cloudflare Access: RS256 signature, aud/iss/sub/time gates, JWKS cache, missing/mismatched/expired/forged JWT denied.");
