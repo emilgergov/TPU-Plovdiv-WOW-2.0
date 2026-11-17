@@ -779,7 +779,7 @@ async function handleExpertDecision(request,env){
  if(input?.task==="confirm_reviewed_panel"){
   const q=input.qualificationRecord;
   const ctx={caseId:input.caseId,evidenceRevision:input.evidenceRevision,subject:input.subject,scope:input.scope};
-  const valid=Boolean(input.projectOnly===true&&input.qualificationGate?.sourceAnchorsMatched===true&&
+  const valid=Boolean(input.projectOnly===true&&input.expertExplicitConfirm===true&&
    typeof input.caseId==="string"&&input.caseId.length>=2&&input.caseId.length<=200&&
    typeof input.requestId==="string"&&input.requestId.length<=100&&
    (typeof input.evidenceRevision==="string"||typeof input.evidenceRevision==="number")&&
@@ -789,15 +789,17 @@ async function handleExpertDecision(request,env){
    KT109_ROUTE_BY_ID.has(Number(input.panelId))&&
    Array.isArray(input.parcelIds)&&input.parcelIds.length<=100);
   if(!valid)return reply({error:"REVIEWED_EXPERT_CHOICE_INVALID"},422);
-  if(!q||!await verifyQualification(q,ctx,env.KT123_HANDOFF_SIGNING_KEY||env.OPENAI_API_KEY,input.qualificationProof)||
-     compareDraftWithQualification(input.reviewedText,q).length)
-   return reply({error:"STAGE4_SOURCE_PROOF_MISSING",message:"Рецензираният текст няма съгласувана и подписана нормативна квалификация."},422);
+  // Qualification is an AI assistance record, not a veto on an explicit
+  // expert direction. Never claim it is valid when it cannot be verified.
+  const qualified=Boolean(q&&input.qualificationGate?.sourceAnchorsMatched===true&&
+   await verifyQualification(q,ctx,env.KT123_HANDOFF_SIGNING_KEY||env.OPENAI_API_KEY,input.qualificationProof)&&
+   compareDraftWithQualification(input.reviewedText,q).length===0);
   const original=input.reviewedText;
   const panel=KT109_ROUTE_BY_ID.get(Number(input.panelId));
   const chosen="ИЗБРАН ПАНЕЛ: "+String(input.panelId).padStart(2,"0")+" — "+panel.title;
   const change=original.replace(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\b[^\n]*/iu,chosen);
-  if(change===original&&Number(q.selectedPanel)!==Number(input.panelId))
-   return reply({error:"REVIEWED_PANEL_REPLACEMENT_FAILED"},422);
+  if(!/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\b/iu.test(original))
+   return reply({error:"EXPERT_PANEL_SOURCE_MISSING",message:"В предложението няма ясно посочено административно направление."},422);
   const finalText=change.replace(/\n+\s*ЗАКЛЮЧЕНИЕ ЗА ПРОЦЕДУРАТА\s*:[^\n]*/giu,"").trim()+
    "\n\nЗАКЛЮЧЕНИЕ ЗА ПРОЦЕДУРАТА: "+chosen;
   const decision=evaluateDraft(finalText).decision;
@@ -805,13 +807,21 @@ async function handleExpertDecision(request,env){
    "MISSING_LEGAL_PREDICATE","UNSUPPORTED_NORMATIVE_REASON","DUPLICATED_LEGAL_PREDICATE",
    "FORMAL_ACT_REQUIRES_VERIFIED_PROCEDURAL_RECORD"]);
   const incompat=decision.errors.filter(e=>hard.has(e.code));
-  if(incompat.length)return reply({error:"EXPERT_PANEL_LEGAL_CONFLICT",issues:incompat.map(e=>e.code)},422);
+  const warnings=[...new Set([
+   ...(Array.isArray(input.validationWarnings)?input.validationWarnings.filter(x=>typeof x==="string").map(x=>x.slice(0,500)):[]),
+   ...incompat.map(e=>String(e.detail||e.code).slice(0,500))
+  ])].slice(0,16);
+  // Explicit expert choice is not automatic legal certification. Record
+  // outstanding objections without making the reviewer the deciding authority.
   const signed={mode:"reviewed_expert_choice",expert:input.expert.trim(),panelId:Number(input.panelId),
-   panelTitle:panel.title,originalText:original,confirmedText:finalText,reviewerVerdict:String(input.reviewerVerdict||""),
-   reviewed:true,decisionSource:"EXPERT_REVIEWED_PANEL"};
+   panelTitle:panel.title,originalText:original,confirmedText:finalText,
+   reviewerVerdict:String(input.reviewerVerdict||""),qualificationVerified:qualified,
+   warnings,reviewed:input.reviewerVerdict==="reviewed",
+   expertConfirmed:true,decisionSource:"EXPERT_REVIEWED_PANEL"};
   const proof=await signQualification(signed,ctx,env.KT123_HANDOFF_SIGNING_KEY||env.OPENAI_API_KEY);
   return reply({caseId:input.caseId,evidenceRevision:input.evidenceRevision,requestId:input.requestId,
-   expertDecision:signed,expertDecisionProof:proof,draft:finalText,projectOnly:true,expertConfirmed:true});
+   expertDecision:signed,expertDecisionProof:proof,draft:finalText,projectOnly:true,expertConfirmed:true,
+   warningCount:warnings.length,qualificationVerified:qualified});
  }
  if(input?.task!=="confirm_independent_expert_decision"||input?.projectOnly!==true||
     typeof input.evidenceRevision!=="string"&&typeof input.evidenceRevision!=="number"||
@@ -862,7 +872,7 @@ async function handleStage5Document(request,env){
    subject:input.subject,scope:input.scope
   },env.KT123_HANDOFF_SIGNING_KEY||env.OPENAI_API_KEY,input.expertDecisionProof);
   if(!verified||d.confirmedText!==input.confirmedStage4Text||
-     Number(d.panelId)!==confirmedPanelId||d.reviewed!==true||
+     Number(d.panelId)!==confirmedPanelId||d.expertConfirmed!==true||
      !KT109_ROUTE_BY_ID.has(confirmedPanelId))
    return reply({error:"EXPERT_REVIEWED_CHOICE_INTEGRITY_ERROR"},422);
   reviewedExpertChoice=d;
@@ -881,7 +891,7 @@ async function handleStage5Document(request,env){
 
  // Server-signed case-bound qualification; prose can be edited but its legal
  // statuses and selected panel cannot be changed without a fresh Stage 4 run.
- if(!independentExpert&&env.KT123_TEST_LEGACY_MODE!=="true"){
+ if(!independentExpert&&!reviewedExpertChoice&&env.KT123_TEST_LEGACY_MODE!=="true"){
   const q=input.qualificationRecord;
   const validProof=q&&await verifyQualification(q,{
    caseId:input.caseId,evidenceRevision:input.evidenceRevision,
@@ -925,12 +935,12 @@ async function handleStage5Document(request,env){
    "PANEL_01_CONTRADICTS_LEGAL_FACTS","MISSING_LEGAL_PREDICATE",
    "UNSUPPORTED_NORMATIVE_REASON","DUPLICATED_LEGAL_PREDICATE"]);
  const stage5Hard=stage5Decision.decision.errors.filter(x=>stage5HardCodes.has(x.code));
- if(!independentExpert&&stage5Hard.length)return reply({error:"STAGE4_DECISION_MODEL_CONFLICT",expertReviewRequired:true,projectOnly:true,
+ if(!independentExpert&&!reviewedExpertChoice&&stage5Hard.length)return reply({error:"STAGE4_DECISION_MODEL_CONFLICT",expertReviewRequired:true,projectOnly:true,
    message:"Потвърдената преценка противоречи на нормативните зависимости. Проверете конкретните основания в Етап 4; направлението не се сменя автоматично.",
    findings:stage5Hard.map(x=>({test:x.test,actual:x.code,reason:x.detail||""}))},422);
  const expectedPanel1={A1:"ОТРИЦАТЕЛНА",A2:"ОТРИЦАТЕЛНА",OS1:"ОТРИЦАТЕЛНА",OS2:"ПОЛОЖИТЕЛНА"};
  const inconsistentPanel1=confirmedPanelId===1?Object.entries(expectedPanel1).filter(([key,expected])=>legalMatrix[key]?.status!==expected):[];
- if(!independentExpert&&inconsistentPanel1.length)return reply({
+ if(!independentExpert&&!reviewedExpertChoice&&inconsistentPanel1.length)return reply({
   error:"STAGE4_LEGAL_MATRIX_CONFLICT",expertReviewRequired:true,projectOnly:true,
   message:"Избраното направление №01 не съответства на конкретните нормативни изводи в Етап 4. Проверете доказателствата за посочените редове; системата не сменя процедурата.",
   findings:inconsistentPanel1.map(([key,expected])=>({test:key,actual:legalMatrix[key]?.status||"НЕУСТАНОВЕНА",requiredForDirection:expected}))
@@ -952,7 +962,8 @@ async function handleStage5Document(request,env){
 
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),55000);
  try{
- const expertRule=independentExpert?
+ const expertRule=reviewedExpertChoice?
+ "КТ124: Това е изрично експертно избрано направление, независимо от становището на AI рецензента. Запази избрания вид документ и следвай доказаните факти. При липса на доказано правно основание не измисляй факти или правен извод, а остави ясно обозначен проект за експертен преглед. Няма автоматично удостоверяване на законосъобразност или издаване на акт. ":independentExpert?
  "КТ124: Това е самостоятелно мотивирано решение на компетентния експерт, с документирани нормативни основания и факти. Не променяй решението според AI предложенията, но НЕ представяй недоказани обстоятелства като установени. Запази отделно уведомителния/процедурния характер на избрания панел. ":"";
  const directionRules=confirmedPanelId===1?
   "КРИТИЧЕН И НЕОТМЕНИМ КОНТРОЛ НА ВИДА ДОКУМЕНТ: експертът е избрал ПАНЕЛ №01 — писмо по чл. 2, ал. 2 от Наредбата за ОС. Това НЕ Е искане за допълнителна информация. Не добавяй разпореждания за представяне на липсващи данни, списъци от документи, изисквания за технологии или капацитет, нито диспозитив, характерен за панел №02. Води текста от конкретните експертно потвърдени факти и правен извод. Ако те не обосновават писмо №01, не измисляй обратен извод и не превръщай текста в искане: върни кратък проект само с доказаните констатации за експертна проверка; служебният контрол може да го спре. Правилното заглавие не компенсира погрешен диспозитив. ":
