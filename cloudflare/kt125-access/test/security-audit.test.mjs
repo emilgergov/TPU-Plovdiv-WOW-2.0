@@ -1,0 +1,27 @@
+import assert from "node:assert/strict";
+import {webcrypto} from "node:crypto";
+import {recordKT125SecurityEvent} from "../src/security-audit.mjs";
+const now=1794891600000;
+let seq=0;
+const uuid=()=> "id-"+(++seq);
+const captured=[];
+const db={prepare(sql){
+ assert(sql.includes("INSERT INTO kt125_security_events"));
+ return {bind(...args){captured.push(args);return {async run(){return {success:true,meta:{changes:1}}}}}};
+}};
+const common={db,caseId:"secret-case-101",nowMs:now,uuid,cryptoImpl:webcrypto};
+assert.equal(await recordKT125SecurityEvent({...common,action:"case.read",outcome:"denied",reason:"ACCESS_DENIED"}),true);
+assert.equal(captured.length,1);
+assert.equal(captured[0][3],"case.read");
+assert.equal(captured[0][4],"denied");
+assert.equal(captured[0][7],null);
+assert.match(captured[0][6],/^[a-f0-9]{64}$/);
+assert(!JSON.stringify(captured).includes("secret-case-101"));
+assert.equal(await recordKT125SecurityEvent({...common,action:"case.read",outcome:"allowed",reason:"GRANTED",actorUserId:"alice"}),true);
+assert.equal(captured[1][7],"alice");
+assert.equal(await recordKT125SecurityEvent({...common,action:"case.delete",outcome:"denied",reason:"ACCESS_DENIED"}),false);
+assert.equal(await recordKT125SecurityEvent({...common,action:"case.read",outcome:"denied",reason:"UNKNOWN_REASON"}),false);
+assert.equal(await recordKT125SecurityEvent({...common,action:"case.read",outcome:"denied",reason:"ACCESS_DENIED",actorUserId:"alice\nsecret"}),false);
+assert.equal(await recordKT125SecurityEvent({...common,db:{prepare(){throw Error("Database offline")}},action:"case.read",outcome:"denied",reason:"ACCESS_DENIED"}),false);
+assert.equal(await recordKT125SecurityEvent({...common,db:{prepare(){return {bind(){return {run:async()=>({success:false})}}}}},action:"case.read",outcome:"allowed",reason:"GRANTED"}),false);
+console.log("PASS KT125 audit: anonymous denies, authorized access, SHA256 case reference, constrained event fields, fail-closed DB failure.");
