@@ -59,13 +59,18 @@ export function renderKT125PrivatePage({section="overview",items=[],hasMore=fals
    <label><input type="checkbox" required name="confirm" value="DEACTIVATE"> Потвърждавам</label>
    <button type="submit">Деактивирай</button></form></td>`;
  };
+ const caseGrantLink=r=>{
+  const id=r.case_id;
+  if(typeof id!=="string"||!/^[A-Za-z0-9_-]{1,160}$/.test(id))return "<td>—</td>";
+  return `<td><a href="/kt125/cases/${escapeHtml(id)}/manage">Виж правата</a></td>`;
+ };
  const table=section==="overview"
   ?`<div class="state">Защитен служебен режим. Информацията за потребители, преписки и журнал се извлича само след проверка на самоличността и съответните права.</div>
   <p>ЕГМАСТЕР и администраторът не получават автоматичен достъп до съдържанието на преписките.</p>`
   :section==="roles"?roleMatrix
   :items.length
-    ?`<div class="tablewrap"><table><thead><tr>${columns.map(([,label])=>`<th scope="col">${escapeHtml(label)}</th>`).join("")}${section==="users"?"<th scope=\"col\">Управление</th>":""}</tr></thead>
-    <tbody>${items.slice(0,50).map(r=>`<tr>${columns.map(([key])=>`<td>${escapeHtml(readable(key,r[key]))}</td>`).join("")}${section==="users"?disableAction(r):""}</tr>`).join("")}</tbody></table></div>
+    ?`<div class="tablewrap"><table><thead><tr>${columns.map(([,label])=>`<th scope="col">${escapeHtml(label)}</th>`).join("")}${section==="users"?"<th scope=\"col\">Управление</th>":section==="cases"?"<th scope=\"col\">Права</th>":""}</tr></thead>
+    <tbody>${items.slice(0,50).map(r=>`<tr>${columns.map(([key])=>`<td>${escapeHtml(readable(key,r[key]))}</td>`).join("")}${section==="users"?disableAction(r):section==="cases"?caseGrantLink(r):""}</tr>`).join("")}</tbody></table></div>
     ${hasMore?'<p class="disabled">Показани са първите 50 записа. Разширеното търсене предстои.</p>':""}`
     :`<div class="state">Няма налични записи в този раздел.</div>`;
  return `<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
