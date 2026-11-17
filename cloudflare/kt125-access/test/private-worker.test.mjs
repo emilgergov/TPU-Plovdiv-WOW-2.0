@@ -15,7 +15,7 @@ const env={KT125_DB:db(),KT125_ACCESS_TEAM_DOMAIN:"https://testing.cloudflareacc
 const verifier={async verify(request){return request.headers.get("Cf-Access-Jwt-Assertion")==="signed"?
  {verified:true,issuer:"https://testing.cloudflareaccess.com",subject:"provider-sub"}:
  {verified:false}}};
-const handler=createKT125PrivateHandler({getVerifier:()=>verifier});
+const handler=createKT125PrivateHandler({getVerifier:()=>verifier,auditEvent:async()=>true});
 const req=(route,token="signed",method="GET")=>new Request("https://service.example.invalid"+route,{
  method,headers:{"Cf-Access-Jwt-Assertion":token,"X-Role":"egmaster"}
 });
