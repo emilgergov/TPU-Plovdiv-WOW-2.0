@@ -6,6 +6,7 @@ import {createKT125CloudflareAccessVerifier,kt125CloudflareAccessConfigReady}
  from "./cloudflare-access-verifier.mjs";
 import {authorizeKT125CaseRequest,kt125PublicDenialResponse} from "./server-guard.mjs";
 import {issueKT125Grant,revokeKT125Grant} from "./grant-commands.mjs";
+import {recordKT125SecurityEvent} from "./security-audit.mjs";
 
 const json=(data,status=200)=>new Response(JSON.stringify(data),{
  status,headers:{"Content-Type":"application/json; charset=utf-8",
@@ -29,7 +30,7 @@ function validPrivateMutationOrigin(request,env){
   return true;
  }catch{return false}
 }
-export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid=()=>crypto.randomUUID()}={}){
+export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid=()=>crypto.randomUUID(),auditEvent=recordKT125SecurityEvent}={}){
  return {async fetch(request,env){
   if(!env?.KT125_DB||!kt125CloudflareAccessConfigReady(env))
    return json({error:"Служебният достъп не е конфигуриран."},503);
@@ -49,11 +50,20 @@ export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid
     request,identityVerifier:verifier,db:env.KT125_DB,action:"case.read",
     caseId:access[1],nowMs:clock()
    });
+   const logged=await auditEvent({db:env.KT125_DB,action:"case.read",
+    outcome:permission.allowed?"allowed":"denied",
+    reason:permission.allowed?"GRANTED":"ACCESS_DENIED",
+    caseId:access[1],nowMs:clock(),uuid});
    if(!permission.allowed)return deny();
+   if(!logged)return json({error:"Защитният журнал не е достъпен."},503);
    return json({allowed:true,caseId:access[1],action:"case.read"});
   }
   if((issue&&request.method==="POST")||(revoke&&request.method==="DELETE")){
-   if(!validPrivateMutationOrigin(request,env))return deny();
+   if(!validPrivateMutationOrigin(request,env)){
+    await auditEvent({db:env.KT125_DB,action:issue?"case.delegate":"grant.revoke",
+     outcome:"denied",reason:"INVALID_ORIGIN",caseId:(issue||revoke)[1],nowMs:clock(),uuid});
+    return deny();
+   }
    if(typeof env.KT125_DB.batch!=="function")
     return json({error:"Регистърът не е готов за транзакции."},503);
    if(issue){
@@ -72,12 +82,20 @@ export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid
      caseId:issue[1],granteeId:body.granteeId,actions:body.actions,
      notBeforeMs:body.notBeforeMs,expiresAtMs:body.expiresAtMs,
      nowMs:clock(),uuid});
-    if(!result.ok)return deny();
+    if(!result.ok){
+     await auditEvent({db:env.KT125_DB,action:"case.delegate",outcome:"denied",
+      reason:"UNAUTHORIZED_MUTATION",caseId:issue[1],nowMs:clock(),uuid});
+     return deny();
+    }
     return json({grantId:result.grantId},201);
    }
    const result=await revokeKT125Grant({request,verifier,db:env.KT125_DB,
      caseId:revoke[1],grantId:revoke[2],nowMs:clock(),uuid});
-   if(!result.ok)return deny();
+   if(!result.ok){
+    await auditEvent({db:env.KT125_DB,action:"grant.revoke",outcome:"denied",
+     reason:"UNAUTHORIZED_MUTATION",caseId:revoke[1],nowMs:clock(),uuid});
+    return deny();
+   }
    return json({revoked:true,grantId:result.grantId});
   }
   return json({error:"Методът не е разрешен."},405);
