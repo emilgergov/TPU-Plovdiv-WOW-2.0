@@ -253,7 +253,7 @@ try{
     return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:second?review:ordinary}]}]}),{status:200});
   };
   const independentReject=await worker.fetch(stage4Post('test-access-token',stage4Body),env);
-  assert.equal(independentReject.status,422);
+  assert.equal(independentReject.status,422,JSON.stringify(await independentReject.clone().json()));
   assert((await independentReject.json()).qualityIssues.includes('INDEPENDENT_REJECTION'));
   console.log('PASS: KT105-C reviewer rejection blocks unsupported normative claim.');
   // KT105-C: a review revision must replace the first draft, not append or silently pass.
