@@ -724,7 +724,8 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     documentTextTruncated:context.caseDocuments.sourceTextTruncated,
     caseFactsReceived:evidence.length,gisContextReceived:Boolean(detail.gis),
     archiveArticleTextsReceived:verifiedLegalCorpus.legalProvisions.length,archiveCorpusDocumentsAvailable:verifiedLegalCorpus.indexedDocuments,archiveVerifiedExcerptsReceived:context.verifiedOfflineLegalExcerpts.length,archiveIndexRecordsReceived:sourceHints.length}});
- }catch{return reply({error:"Stage 4 AI request failed or timed out"},504)}
+ }catch(error){return reply({error:"Stage 4 AI request failed or timed out",
+  ...(env.KT123_TEST_LEGACY_MODE==="true"?{testDiagnostic:String(error?.stack||error)}:{})},504)}
  finally{clearTimeout(timer)}
 }
 
