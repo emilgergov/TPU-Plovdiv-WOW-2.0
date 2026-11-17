@@ -232,20 +232,21 @@ if(host&&five){
   if(!current()){note.textContent='Данните по преписката са променени.';return;}
   const expert=val(actor.value);if(expert.length<2){note.textContent='Посочете експерта.';actor.focus();return;}
   const v=history.at(-1);
-  if(proposal.serverQualityPassed!==true||proposal.serverReviewed!==true){
-   note.textContent='Няма завършен и нормативно проверен независим рецензентски резултат. Етап 5 не получава непроверен проект.';return;
-  }
+  // KT124-R6: Reviewer status is advisory. The expert's express
+  // decision is recorded independently, with unresolved warnings preserved.
   const chosen=changeRadio.checked?Number(routeSelect.value):Number(v.text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0);
   if(!chosen||!routeTitles[chosen-1]){note.textContent='Не е определена конкретна процедура.';return;}
   if(!window.KT80EGSession?.hasAccess?.()){note.textContent='Необходим е действащ достъп до EG Автора в текущата сесия.';return;}
-  if(!await confirmStyled('Потвърждавате панел '+String(chosen).padStart(2,'0')+' — '+routeTitles[chosen-1]+' за Етап 5?'))return;
+  if(!await confirmStyled('Потвърждавате като експерт панел '+String(chosen).padStart(2,'0')+' — '+routeTitles[chosen-1]+'? AI бележките остават в преписката; това е проект за последваща експертна проверка.'))return;
   confirm.disabled=true;note.textContent='Регистриране на експертния избор…';
   try{
    const h=evidence(),p=window.KT80WorkflowState?.subjectConfirmed||{},requestId=crypto.randomUUID();
    const payload={task:'confirm_reviewed_panel',projectOnly:true,caseId:proposal.caseId,
     evidenceRevision:proposal.revision,requestId,subject:val(p.text),scope:val(p.scope),
     parcelIds:[...h.parcelIds],expert,panelId:chosen,reviewedText:v.text,
-    reviewerVerdict:'reviewed',qualificationRecord:proposal.qualificationRecord,
+    reviewerVerdict:proposal.serverReviewed?'reviewed':'not_completed',
+    expertExplicitConfirm:true,validationWarnings:proposal.warnings,
+    qualificationRecord:proposal.qualificationRecord,
     qualificationProof:proposal.qualificationProof,qualificationGate:proposal.qualificationGate};
    const response=await window.KT80EGSession.request(
     'https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/stage4-expert-decision',JSON.stringify(payload));
@@ -261,7 +262,7 @@ if(host&&five){
     qualificationGate:proposal.qualificationGate,expertDecision:data.expertDecision,
     expertDecisionProof:data.expertDecisionProof,
     expert,approvedAt:new Date().toLocaleString('bg-BG'),expertApproved:true});
-   note.textContent='Експертното направление е потвърдено. Предаване към Етап 5.';
+   note.textContent='Експертното направление е регистрирано. Непотвърдените AI констатации остават видими в преписката.';
    document.dispatchEvent(new CustomEvent('kt116:stage4-confirmed',{detail:{
     caseId:approved.caseId,evidenceRevision:approved.evidenceRevision,version:approved.version
    }}));
