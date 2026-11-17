@@ -104,6 +104,7 @@ function initialize(){
    caseId:source.caseId,evidenceRevision:source.evidenceRevision,stage4Version:source.version,requestId,
    confirmedStage4Text:source.text,selectedPanelLine:line,subject:clean(p.text),scope:clean(p.scope),
    parcelIds:[...ev.parcelIds],warnings:source.warnings||[],
+    qualificationRecord:source.qualificationRecord||null,qualificationGate:source.qualificationGate||null,
    documentTitle:documentLabel(line),incomingReference:incomingReference()};
   busy=true;generate.disabled=true;note.textContent='EG Авторът изготвя проект на административния текст.';
   const activityTicket=window.KT80Busy?.start?.('EG Автор · Изготвя проекта на административния документ…');
