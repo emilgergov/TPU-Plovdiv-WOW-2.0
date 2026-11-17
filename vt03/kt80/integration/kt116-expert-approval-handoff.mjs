@@ -104,7 +104,7 @@ if(host&&five){
  }
  document.addEventListener('kt115:stage4-draft',e=>{
   const d=e.detail||{},h=evidence();if(!d.sourceDraft||d.evidenceRevision!==h.evidenceRevision||d.caseId!==h.caseId&&d.caseIdType!=='shared-verified')return;
-  proposal={caseId:d.caseId,localId:h.caseId,revision:h.evidenceRevision,generation:h.generation,key:h.key,requestId:d.requestId,original:d.sourceDraft,warnings:d.warnings||[],serverQualityPassed:d.qualityPassed===true};
+  proposal={caseId:d.caseId,localId:h.caseId,revision:h.evidenceRevision,generation:h.generation,key:h.key,requestId:d.requestId,original:d.sourceDraft,warnings:d.warnings||[],qualificationRecord:d.qualificationRecord||null,qualificationGate:d.qualificationGate||null,serverQualityPassed:d.qualityPassed===true};
   history=[{version:1,text:d.sourceDraft,kind:'автор',createdAt:new Date().toISOString()}];approved=null;
   document.getElementById('kt104EGLead').style.display='none';document.getElementById('kt104EGDetails').style.display='none';
   note.textContent='Работен проект. Експертът може да го редактира или потвърди.';display();render5();
@@ -129,6 +129,7 @@ if(host&&five){
   if(!await confirmStyled('Потвърждавате версия '+v.version+' за предаване към Етап 5?'))return;
   approved=Object.freeze({caseId:proposal.caseId,requestId:proposal.requestId,evidenceRevision:proposal.revision,
    version:v.version,text:v.text,original:proposal.original,warnings:[...proposal.warnings],
+   qualificationRecord:proposal.qualificationRecord,qualificationGate:proposal.qualificationGate,
    expert,approvedAt:new Date().toLocaleString('bg-BG'),expertApproved:true});
   note.textContent='Потвърдено. Предложението е готово за Етап 5.';display();render5();
   document.dispatchEvent(new CustomEvent('kt116:stage4-confirmed',{detail:{
