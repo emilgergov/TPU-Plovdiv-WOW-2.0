@@ -4,6 +4,43 @@ import {KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 // string matching nor AI qualification constitutes final legal verification.
 const tidy=s=>String(s||"").normalize("NFC").replace(/\s+/gu," ").trim();
 const contains=(body,needle)=>tidy(needle).length>=12&&tidy(body).includes(tidy(needle));
+// Excerpts are constructed on the server FROM existing source text; the model
+// chooses source identifiers, not invented quotations. Exact quote literal
+// remains supported for existing automated fixtures.
+function excerpts(source,limit=16){
+ const body=String(source.text||"");
+ const chunks=body.split(/\n+/u).map(x=>x.trim()).filter(x=>x.length>=15);
+ const selected=[];
+ const use=x=>{if(!selected.some(y=>y.text===x))selected.push({id:source.id+"#"+selected.length,text:x})};
+ for(const line of chunks.slice(0,6))use(line.slice(0,220));
+ // Include legally decisive categories and facts, not only document headers.
+ for(const line of chunks){
+  if(selected.length>=limit)break;
+  if(/(?:т\.\s*10|урбаниз|склад|офис|площ|поземлен|приложение|чл\.\s*2|ал\.\s*1|ал\.\s*2|ОВОС)/iu.test(line))use(line.slice(0,240));
+ }
+ if(!selected.length&&body.trim().length>=15)use(body.trim().slice(0,180));
+ return selected;
+}
+export function qualificationEvidenceOptions(sources){
+ return {facts:(sources.facts||[]).map(x=>({...x,excerpts:excerpts(x,8)})),
+  laws:(sources.laws||[]).map(x=>({...x,excerpts:excerpts(x,22)}))};
+}
+function resolveSourceId(ref,map){
+ const raw=String(ref||"").trim();
+ if(map.has(raw))return map.get(raw);
+ // Resolve a label ONLY when there is a unique matching source; never let
+ // an ambiguous reference pick a convenient law silently.
+ const matches=[...map.values()].filter(x=>x.reference===raw||
+  (x.title===raw&&x.kind!=="unverified-document-extract"));
+ return matches.length===1?matches[0]:undefined;
+}
+function quoteVerified(source,quote){
+ if(!source)return false;
+ const chosen=String(quote||"").trim();
+ const candidates=excerpts(source,source.id.startsWith("law:")?22:8);
+ const anchored=candidates.find(x=>x.id===chosen);
+ return anchored?contains(source.text,anchored.text):contains(source.text,chosen);
+}
 export const QUALIFICATION_SCHEMA={
  type:"object",additionalProperties:false,properties:{
   tests:{type:"array",items:{type:"object",additionalProperties:false,properties:{
@@ -25,7 +62,9 @@ export const QUALIFICATION_SYSTEM=[
  "Ти си правен квалификатор на конкретна преписка, а НЕ автор на административно писмо.",
  "Първо изследвай точните приложими законови текстове и ВСИЧКИ относими хипотези, включително конкретните категории на приложения 1 и 2 ЗООС и чл. 2, ал. 1/2 Наредба за ОС.",
  "Върни точно ЧЕТИРИ tests (A1,A2,OS1,OS2) и един проектен selectedPanel измежду 22.",
- "За всеки тест: legalReference = ID law:N от legalSources, legalQuote = дословен фрагмент от текста на тази норма, caseSource = ID от caseSources, caseQuote = дословен фрагмент от източника, конкретен критерий, мотив минимум 70 знака, и проверените относими категории.",
+ "За всеки тест: legalReference е точно legalSources[].id (например law:10), НЕ наименование на нормативния акт; caseSource е точно caseSources[].id (например subject или doc:0).",
+ "legalQuote и caseQuote трябва да са ИДЕНТИФИКАТОРИ на дословно предоставените snippets (excerpts[].id), които принадлежат съответно на legalReference и caseSource, например law:10#0 и subject#0. НЕ преразказвай цитатите и НЕ пишѝ техния текст; системата извлича цитата от източника по идентификатор.",
+ "Посочи конкретен критерий, мотив минимум 70 знака и конкретно проверените категории, без да представяш самото цитиране като доказателство за правна приложимост.",
  "При отрицателна приложимост на приложенията посочи конкретните проверени категории в comparedCategories. Липсата на категория в уведомлението НЕ доказва отрицателен резултат.",
  "НЕОПРЕДЕЛЕНА само при конкретен обективно неизяснен правнорелевантен факт, а не юридическо затруднение.",
  "Не измисляй праг по т.10, буква б, приложение 2 ЗООС; различавай площ на имот, застроена площ и РЗП.",
@@ -63,10 +102,10 @@ export function validateQualification(q,sources){
   if(!TEST_KEYS.includes(k)||seen.has(k)){errors.push("QUALIFICATION_TEST_KEY_DUPLICATE_OR_UNKNOWN");continue;}
   seen.add(k);
   if(!STATUSES.includes(row.status))errors.push("QUALIFICATION_STATUS_INVALID:"+k);
-  const law=laws.get(row.legalReference),fact=facts.get(row.caseSource);
-  if(!law?.verified||!contains(law.text,row.legalQuote))
+  const law=resolveSourceId(row.legalReference,laws),fact=resolveSourceId(row.caseSource,facts);
+  if(!law?.verified||!quoteVerified(law,row.legalQuote))
    errors.push("UNVERIFIED_LEGAL_QUOTE:"+k);
-  if(!fact||!contains(fact.text,row.caseQuote))
+  if(!fact||!quoteVerified(fact,row.caseQuote))
    errors.push("UNVERIFIED_CASE_QUOTE:"+k);
   if(!tidy(row.criterion)||tidy(row.criterion).length<15)
    errors.push("MISSING_LEGAL_CRITERION:"+k);
