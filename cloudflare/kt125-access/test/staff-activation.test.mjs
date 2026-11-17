@@ -10,7 +10,7 @@ let seq=0;const uuid=()=>"event-"+(++seq);
 function db({row=pending,changes=[1,1],fail=false}={}){
  const queries=[],batches=[];
  return {queries,batches,prepare(sql){return {bind(...args){queries.push({sql,args});
- return {sql,args,async first(){return row;}};}};},
+ return {sql,args,async first(){return args[0]==="https://testing.cloudflareaccess.com"&&args[1]==="employee-sub"?row:null;}};}};},
  async batch(stmts){batches.push(stmts);if(fail)throw Error("transaction failed");
  return changes.map(n=>({meta:{changes:n}}));}};
 }
