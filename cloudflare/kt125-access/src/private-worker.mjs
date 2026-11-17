@@ -54,7 +54,9 @@ export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid
   if(request.method==="GET"&&url.pathname==="/")
    return new Response(null,{status:302,headers:{Location:"/kt125/admin/panel/overview","Cache-Control":"no-store"}});
   const legacyPanel=url.pathname.match(/^\/kt125\/admin\/(overview|users|roles|cases|audit)$/);
-  if(request.method==="GET"&&legacyPanel)
+  // Browser navigation keeps the legacy HTML URLs; API reads retain authorization and JSON responses.
+  const wantsHtml=(request.headers.get("Accept")||"").split(",").some(type=>type.trim().split(";")[0].toLowerCase()==="text/html");
+  if(request.method==="GET"&&legacyPanel&&(wantsHtml||["overview","roles"].includes(legacyPanel[1])))
    return new Response(null,{status:302,headers:{Location:"/kt125/admin/panel/"+legacyPanel[1],"Cache-Control":"no-store"}});
   if(url.pathname==="/kt125/bootstrap"||url.pathname==="/kt125/admin/verify-identity")
    return json({error:"Временният маршрут е изключен."},410);
