@@ -105,6 +105,7 @@ function initialize(){
    confirmedStage4Text:source.text,selectedPanelLine:line,subject:clean(p.text),scope:clean(p.scope),
    parcelIds:[...ev.parcelIds],warnings:source.warnings||[],
     qualificationRecord:source.qualificationRecord||null,qualificationProof:source.qualificationProof||null,qualificationGate:source.qualificationGate||null,
+     expertDecision:source.expertDecision||null,expertDecisionProof:source.expertDecisionProof||null,
    documentTitle:documentLabel(line),incomingReference:incomingReference()};
   busy=true;generate.disabled=true;note.textContent='EG Авторът изготвя проект на административния текст.';
   const activityTicket=window.KT80Busy?.start?.('EG Автор · Изготвя проекта на административния документ…');
