@@ -72,7 +72,7 @@ export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid
   }
   if((issueForm||revokeForm)&&request.method==="POST"){
    if(!validPrivateMutationOrigin(request,env))return deny();
-   if(!/^application\\/x-www-form-urlencoded(?:\\s*;.*)?$/i.test(request.headers.get("Content-Type")||""))
+   if(!/^application\/x-www-form-urlencoded(?:\s*;.*)?$/i.test(request.headers.get("Content-Type")||""))
     return json({error:"Невалиден формат на заявката."},415);
    if(Number(request.headers.get("content-length")||0)>1500)return json({error:"Заявката е твърде голяма."},413);
    let data;
