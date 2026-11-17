@@ -83,7 +83,8 @@ export async function issueKT125Grant({
    INSERT INTO kt125_audit
    (event_id,organization_id,case_id,actor_id,action,outcome,timestamp_ms,request_id,details_json)
    SELECT ?,g.organization_id,g.case_id,?,'case.delegate','created',?,?,?
-   FROM kt125_grants g WHERE g.grant_id=? AND g.grantor_id=?\n   AND changes()=1
+   FROM kt125_grants g WHERE g.grant_id=? AND g.grantor_id=?
+   AND changes()=1
   `).bind(eventId,actor.userId,nowMs,requestId,JSON.stringify({grant_id:grantId,
     grantee_id:granteeId,actions}),grantId,actor.userId);
   const result=await db.batch([insert,audit]);
@@ -122,7 +123,8 @@ export async function revokeKT125Grant({
    (event_id,organization_id,case_id,actor_id,action,outcome,timestamp_ms,request_id,details_json)
    SELECT ?,g.organization_id,g.case_id,?,'case.delegate','revoked',?,?,?
    FROM kt125_grants g WHERE g.grant_id=? AND g.case_id=?
-    AND g.grantor_id=? AND g.revoked_at_ms=?\n   AND changes()=1
+    AND g.grantor_id=? AND g.revoked_at_ms=?
+   AND changes()=1
   `).bind(eventId,actor.userId,nowMs,requestId,
     JSON.stringify({grant_id:grantId}),grantId,caseId,actor.userId,nowMs);
   const result=await db.batch([update,audit]);
