@@ -27,7 +27,7 @@ function makeDB({changes=[1,1],actorRow=actor,targetRow=other,caseRow=resource,f
 const db=makeDB(), env={KT125_DB:db,
  KT125_ACCESS_TEAM_DOMAIN:"https://testing.cloudflareaccess.com",
  KT125_ACCESS_AUD:"kt125-test-application-audience",KT125_PRIVATE_ORIGIN:origin};
-const handler=createKT125PrivateHandler({getVerifier:()=>verifier,clock:()=>now,uuid});
+const handler=createKT125PrivateHandler({getVerifier:()=>verifier,clock:()=>now,uuid,auditEvent:async()=>true});
 const body={granteeId:"bob",actions:["case.read"],notBeforeMs:now,expiresAtMs:now+100000};
 function req(method,path,options={}){
  return new Request(origin+path,{
