@@ -1,0 +1,65 @@
+name: KT124-R6 Restore Stable Worker (frozen 1e949e65)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt124-r6-restore-live-worker.yml'
+permissions:
+  contents: read
+concurrency:
+  group: kt124-r6-worker-restoration
+  cancel-in-progress: false
+jobs:
+  deploy-frozen-r6:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact accepted KT124-R6 commit (NOT current main)
+        uses: actions/checkout@v4
+        with:
+          ref: 1e949e654f9d002f51f7e0b0e8629a78f43512d1
+          persist-credentials: false
+      - name: Verify frozen source identity and bundle
+        run: |
+          set -euo pipefail
+          [[ "$(git rev-parse HEAD)" == "1e949e654f9d002f51f7e0b0e8629a78f43512d1" ]]
+          npx --yes esbuild@0.25.12 cloudflare/ai-author-v27/src/worker.js --bundle --platform=browser --format=esm --target=es2022 --outfile=/tmp/kt124-r6-stable-worker.mjs
+          node --check /tmp/kt124-r6-stable-worker.mjs
+          test "$(wc -c </tmp/kt124-r6-stable-worker.mjs)" -gt 100000
+      - name: Deploy frozen R6 onto existing Worker (preserve existing secret bindings)
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+        run: |
+          set -euo pipefail
+          test -n "$CF_TOKEN"
+          printf '%s' '{"main_module":"worker.js","compatibility_date":"2026-10-01","keep_bindings":["secret_text"]}' >/tmp/kt124-r6-metadata.json
+          curl --fail --silent --show-error --max-time 90             -X PUT "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/tpu-plovdiv-ai-author-v27"             -H "Authorization: Bearer $CF_TOKEN"             -F "metadata=@/tmp/kt124-r6-metadata.json;type=application/json"             -F "worker.js=@/tmp/kt124-r6-stable-worker.mjs;filename=worker.js;type=application/javascript+module"             -o /tmp/kt124-r6-upload.json
+          node -e 'const d=require("/tmp/kt124-r6-upload.json");if(!d.success){console.error(d.errors);process.exit(1)}console.log("R6 uploaded; Cloudflare accepted script")'
+      - name: Activate uploaded R6 version
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --max-time 30             -H "Authorization: Bearer $CF_TOKEN"             "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/tpu-plovdiv-ai-author-v27/versions?per_page=5"             -o /tmp/kt124-r6-versions.json
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const d=JSON.parse(fs.readFileSync('/tmp/kt124-r6-versions.json','utf8'));
+          if(!d.success)throw new Error('Cannot verify Worker versions');
+          const versions=Array.isArray(d.result)?d.result:d.result?.items||[];
+          const id=versions[0]?.id||versions[0]?.version_id;
+          if(!id)throw new Error('No newly uploaded version');
+          fs.writeFileSync('/tmp/kt124-r6-activate.json',JSON.stringify({strategy:'percentage',versions:[{version_id:id,percentage:100}]}));
+          NODE
+          curl --fail --silent --show-error --max-time 30             -X POST "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/tpu-plovdiv-ai-author-v27/deployments"             -H "Authorization: Bearer $CF_TOKEN" -H "Content-Type: application/json"             --data-binary @/tmp/kt124-r6-activate.json -o /tmp/kt124-r6-deployed.json
+          node -e 'const d=require("/tmp/kt124-r6-deployed.json");if(!d.success){console.error(d.errors);process.exit(1)}console.log("Exact KT124-R6 Worker active")'
+      - name: Verify original endpoint is accessible and protected
+        run: |
+          set -euo pipefail
+          base="https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev"
+          curl --fail --silent --show-error --retry 5 --retry-delay 3 "$base/health" -o /tmp/kt124-r6-health.json
+          node -e 'const d=require("/tmp/kt124-r6-health.json");if(d.status!=="online"||d.stage4Contract!=="KT115_EXPERT_PREVIEW_V1"||d.stage5Contract!=="KT117_DOCUMENT_DRAFT_V1")throw Error("Unexpected service contract");console.log("Frozen R6 backend online; Stage4 and Stage5 available")'
+          code="$(curl -sS -o /dev/null -w '%{http_code}' -X POST "$base/stage4-proposal" -H 'Content-Type: application/json' --data '{"task":"draft_normative_proposal"}')"
+          [[ "$code" == "401" || "$code" == "503" ]]
+          echo 'R6 worker protected against unauthorized requests'
