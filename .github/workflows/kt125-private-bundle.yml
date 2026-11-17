@@ -1,0 +1,30 @@
+name: KT125 Private Worker — one-file build (no deployment)
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'work/kt125-access-register-from-kt124-r6'
+    paths:
+      - 'cloudflare/kt125-access/src/**'
+      - '.github/workflows/kt125-private-bundle.yml'
+permissions:
+  contents: read
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Bundle the private Worker into one ES module
+        run: |
+          npm_config_yes=true npx --yes esbuild@0.25.12 cloudflare/kt125-access/src/private-worker.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt125-private-worker.mjs
+          node --check dist/kt125-private-worker.mjs
+          test -s dist/kt125-private-worker.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KT125-PRIVATE-WORKER-SINGLE-FILE
+          path: dist/kt125-private-worker.mjs
+          if-no-files-found: error
+          retention-days: 7
