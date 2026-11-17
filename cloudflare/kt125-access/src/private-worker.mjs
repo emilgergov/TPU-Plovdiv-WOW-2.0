@@ -7,6 +7,7 @@ import {createKT125CloudflareAccessVerifier,kt125CloudflareAccessConfigReady}
 import {authorizeKT125CaseRequest,kt125PublicDenialResponse} from "./server-guard.mjs";
 import {issueKT125Grant,revokeKT125Grant} from "./grant-commands.mjs";
 import {recordKT125SecurityEvent} from "./security-audit.mjs";
+import {readKT125Management,readKT125CaseGrants} from "./management-read.mjs";
 
 const json=(data,status=200)=>new Response(JSON.stringify(data),{
  status,headers:{"Content-Type":"application/json; charset=utf-8",
@@ -17,6 +18,7 @@ const pathId="[A-Za-z0-9_-]{1,160}";
 const accessRoute=new RegExp("^/kt125/cases/("+pathId+")/access$");
 const grantsRoute=new RegExp("^/kt125/cases/("+pathId+")/grants$");
 const revokeRoute=new RegExp("^/kt125/cases/("+pathId+")/grants/("+pathId+")$");
+const managementRoute=/^\/kt125\/admin\/(users|cases|audit)$/;
 
 function validPrivateMutationOrigin(request,env){
  try{
@@ -39,12 +41,27 @@ export function createKT125PrivateHandler({getVerifier,clock=()=>Date.now(),uuid
   const access=url.pathname.match(accessRoute);
   const issue=url.pathname.match(grantsRoute);
   const revoke=url.pathname.match(revokeRoute);
-  if(!access&&!issue&&!revoke)return json({error:"Неизвестен служебен маршрут."},404);
+  const management=url.pathname.match(managementRoute);
+  if(!access&&!issue&&!revoke&&!management)return json({error:"Неизвестен служебен маршрут."},404);
 
   const verifier=typeof getVerifier==="function"?getVerifier(env):
     createKT125CloudflareAccessVerifier({
      teamDomain:env.KT125_ACCESS_TEAM_DOMAIN,audience:env.KT125_ACCESS_AUD
     });
+  if(management&&request.method==="GET"){
+   const result=await readKT125Management({
+    request,verifier,db:env.KT125_DB,section:management[1]
+   });
+   if(!result.ok)return deny();
+   return json(result.data);
+  }
+  if(issue&&request.method==="GET"){
+   const result=await readKT125CaseGrants({
+    request,verifier,db:env.KT125_DB,caseId:issue[1]
+   });
+   if(!result.ok)return deny();
+   return json(result.data);
+  }
   if(access&&request.method==="GET"){
    const permission=await authorizeKT125CaseRequest({
     request,identityVerifier:verifier,db:env.KT125_DB,action:"case.read",
