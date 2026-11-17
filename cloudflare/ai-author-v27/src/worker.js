@@ -3,6 +3,7 @@ import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 import {evaluateDraft} from "./kt123-decision-model.mjs";
 import {substantiveDraftIssues} from "./kt123-substance-guard.mjs";
 import {QUALIFICATION_SCHEMA,QUALIFICATION_SYSTEM,buildQualificationSources,validateQualification,compareDraftWithQualification} from "./kt123-evidence-qualification.mjs";
+import {signQualification,verifyQualification} from "./kt123-handoff-signature.mjs";
 // TPU Plovdiv AI Author V27 — isolated test-only authoring gateway.
 // Never send an OpenAI key to the browser. Authorization is fail-closed.
 const headers = { "Content-Type":"application/json; charset=utf-8", "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff", "Access-Control-Allow-Origin":"null" };
@@ -692,10 +693,13 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
      /преценяван(?:е|ето)\s+на\s+необходимостта\s+от\s+ОС[^.\n]{0,90}чл\.?\s*2\s*,?\s*ал\.?\s*2/iu.test(finalDraft)||
      /(?:наредба\s+за\s+)?оценка\s+за?\s*съвместимост(?:та)?\s+(?:с|на)\s+околната\s+среда/iu.test(finalDraft))
    return expertPreview("Преработеният проект не премина нормативната проверка.",["REVIEW_REVISION_INVALID",...qualityIssues(finalDraft),...(lockedQualification?compareDraftWithQualification(finalDraft,lockedQualification):[])],"independent_review",finalDraft);
+  const qualificationProof=lockedQualification?await signQualification(
+   lockedQualification,{caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
+    subject:payload.subject,scope:payload.scope},env.KT123_HANDOFF_SIGNING_KEY||env.OPENAI_API_KEY):null;
   return reply({caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
    requestId:payload.requestId,projectOnly:true,expertReviewRequired:true,
    archiveEvidenceVerified:true,draft:finalDraft,
-   qualificationRecord:lockedQualification,qualificationGate:{sourceAnchorsMatched:qualificationValidation?.ok===true,legalApplicabilityCertified:false,expertConfirmationRequired:true},
+   qualificationRecord:lockedQualification,qualificationProof,qualificationGate:{sourceAnchorsMatched:qualificationValidation?.ok===true,legalApplicabilityCertified:false,expertConfirmationRequired:true},
     normativeAudit:{reviewed:true,reviewVerdict:verdict,authorRepairs,
      deterministicModel:evaluateDraft(finalDraft).decision,
      legalApplicabilityAutomaticallyCertified:false,selectedPanelId:Number(finalDraft.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0)||null,fullArticlesVerified:true,allArchiveSourcesExamined:false,verifiedLegalProvisionCount:verifiedLegalCorpus.legalProvisions.length,findings:Array.isArray(independentReview.issues)?independentReview.issues.slice(0,8):[]},
@@ -734,6 +738,24 @@ async function handleStage5Document(request,env){
  const safeReference=/^ОВОС[-– ]?\d+[-–]\d+\s*\/\s*\d{1,2}\.\d{1,2}\.\d{4}(\s*г\.?)?$/iu.test(incoming)?incoming:placeholder;
  if(title!==expectedTitle)return reply({error:"Document title does not match the expert-confirmed direction"},409);
  const confirmedPanelId=Number(match[1]);
+ // Server-signed case-bound qualification; prose can be edited but its legal
+ // statuses and selected panel cannot be changed without a fresh Stage 4 run.
+ if(env.KT123_TEST_LEGACY_MODE!=="true"){
+  const q=input.qualificationRecord;
+  const validProof=q&&await verifyQualification(q,{
+   caseId:input.caseId,evidenceRevision:input.evidenceRevision,
+   subject:input.subject,scope:input.scope
+  },env.KT123_HANDOFF_SIGNING_KEY||env.OPENAI_API_KEY,input.qualificationProof);
+  if(!validProof||input.qualificationGate?.sourceAnchorsMatched!==true)
+   return reply({error:"STAGE4_SOURCE_PROOF_MISSING",projectOnly:true,expertReviewRequired:true,
+    message:"Липсва валидна нормативна квалификация от Етап 4. Не може да се възстанови само от свободния текст."},422);
+  const divergence=compareDraftWithQualification(input.confirmedStage4Text,q);
+  if(divergence.length||Number(q.selectedPanel)!==confirmedPanelId)
+   return reply({error:"STAGE4_QUALIFICATION_CHANGED",projectOnly:true,expertReviewRequired:true,
+    message:"Редактираният текст променя нормативния извод или панела без нова експертна проверка.",
+    findings:divergence.map(x=>({test:"Нормативна квалификация",actual:x}))},422);
+ }
+
  const evidence=input.confirmedStage4Text.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
  // KT123: The source of legal certainty is the exact four-row expert-confirmed
  // matrix, never a loose search across unrelated hypotheses and alternatives.
@@ -787,6 +809,7 @@ async function handleStage5Document(request,env){
  const instructions="Състави само ПРОЕКТ на административен документ на български език, от името на компетентния административен орган РИОСВ – Пловдив. Изказът е ясен, официален, точен и сдържан, без разказвателни обяснения, самореклама или вътрешни означения (AI, EG, панел, тест, сценарий). Изпълнявай единствено потвърденото от експерта административно направление, не го заменяй, не предрешавай нова процедура. Не представяй недоказани факти като установени; не измисляй нормативни реквизити. При неизвестен административен реквизит използвай XXXXXXXX. Подготви текст точно за посочения документ, а не обща правна справка. Не добавяй заглавен ред Относно: и не повтаряй входящия номер: модулът ги поставя автоматично от данните на преписката точно преди твоите абзаци. При първо споменаване на нормативен акт се използва пълното му официално наименование, след което утвърденото кратко име. Само когато Наредбата за ОС е приложима и обоснована от експертно потвърдените мотиви, пълното ѝ наименование може да бъде въведено служебно от модула; не я представяй като универсално приложима. Не започвай с „Във връзка с представения предмет“ или „се уведомява следното“ — въвеждащият абзац е служебно добавен. Започни направо с конкретната нормативна констатация или изричното искане. Не включвай неизведени от документацията изисквания за емисии, отпадъци, технологии или разрешителни: всеки поискан параметър трябва да е свързан с определен липсващ факт и относим правен критерий. Избягвай общи формулировки като „режим на изчакване“, „цялостна техническа документация“ и „обърне необходимото внимание“. Не въвеждай нови факти чрез предположения. Започни директно със съществената административна констатация и изложи конкретно какъв е предметът на писмото — какво уведомяваш или какви точно данни се изискват за конкретно установения предмет на преписката. Посочи конкретни фактически характеристики само ако действително са необходими, а не общ списък с документация. Номерът и датата не се измислят. Не искай общи неопределени документи. Без лого, футър, подписи и технически коментари. Не пишѝ, че писмото или актът вече е издаден, че органът вече се е произнесъл или че процедурата се прекратява, ако това не следва от потвърденото направление и доказаните факти. Не включвай самостоятелна заключителна самооценка на анализа, твърдения за задължителни срокове, правни последици или прекратяване без установено основание. Не добавяй информация за публично обявяване, публикуване на интернет страница или автоматично прекратяване, освен когато това е предметът на експертно потвърденото административно действие и нормативното основание е установено. Не използвай изрази „това писмо има функциите на формален акт“, „настоящият административен акт“, „настоящото писмо е издадено“ или разказвателни обяснения за дейността на органа. Описвай конкретния резултат от правната преценка и конкретните сведения, които се изискват от възложителя. Изрично формулирай отделна конкретна правна констатация след фактическите данни. Ако доказателствата установяват, че приложимият предмет е извън обхвата на чл. 2, ал. 1, но попада в обхвата на чл. 2, ал. 2 от Наредбата за ОС, посочи това с точната разпоредба и фактите, които подкрепят избора. Ако съдържанието на представената информация покрива приложимите реквизити, може да формулираш, че тя се приема като уведомление по приложение № 1 към чл. 10, ал. 1, част Б от Наредбата за ОС. Това НЕ е универсален или задължителен абзац: не заявявай достатъчност на уведомлението, когато липсват данни за съществените му реквизити; тогава посочи конкретно доказаните липси. Правната квалификация и преценката за пълнота са различни проверки. Формулирай заключението в гласа на компетентния административен орган, а не като академичен анализ. При липсващи технически данни формулирай обективно необходимите параметри, а не искане възложителят да извърши правна категоризация. Използвай деловия стил на утвърдените образци на РИОСВ – Пловдив, без да пренасяш факти и заключения от други преписки. Не извеждай липса на въздействия единствено от липса на пространствено пресичане. Не възлагай правната квалификация на възложителя; когато се искат допълнителни данни, посочи само конкретни фактически характеристики. При противоречие между предложението и нормативна предпоставка запази направлението, но отбележи проблема за експертна проверка извън текста на писмото, без да измисляш решение. Стилът е на компетентния административен орган, не на външен коментатор: говори на адресата с „Уведомявам Ви“, „Изисквам да представите“ или „Необходимо е да представите“ когато съответства на основанията; не използвай „компетентният орган следва“, „възложителят следва да бъде уведомена“, „предлага се на органа“, „целесъобразно е да бъде изпратено“ или разказ за бъдещи действия на органа. Различавай установен факт, нормативна предпоставка, правен извод и конкретно указание. Не прави отрицателен категоричен извод за приложения № 1 и № 2, ако едновременно липсват данни, нужни за категоризирането; тогава посочи конкретната доказателствена граница и кои параметри липсват. Не обосновавай само с липса на промяна на предназначение извод за ОС; проверявай относимите предпоставки по чл. 2, ал. 1 и ал. 2 по конкретните факти. Ако потвърденото направление или доказателствата са вътрешно противоречиви, не прикривай това с окончателен правен извод — формулирай неутрално само проверените сведения и върни бележка за експертна проверка. Никога не изисквай възложителят да извършва сам правна категоризация. При възможност пиши от първо лице единствено число на директора като компетентен административен орган, без да твърдиш, че документът вече е издаден. Избягвай повторение на служебната бланка, входящия номер, адресата, заглавието на документа и текста „Относно:“: те се добавят отделно от системата. Текстът подлежи на последващо експертно потвърждение; след това експертните редакции имат абсолютен приоритет.";
  const facts=JSON.stringify({selectedDirection:match[0],documentTitle:title,incomingReference:safeReference,subject:input.subject,scope:input.scope,
  expertConfirmedProposal:input.confirmedStage4Text,
+ expertConfirmedQualification:input.qualificationRecord||null,
  parcelIds:Array.isArray(input.parcelIds)?input.parcelIds.slice(0,80):[],
  warnings:Array.isArray(input.warnings)?input.warnings.slice(0,12):[]});
  const response=await fetch("https://api.openai.com/v1/responses",{method:"POST",signal:controller.signal,
