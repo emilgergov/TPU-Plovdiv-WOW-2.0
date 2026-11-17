@@ -319,12 +319,23 @@ function boot(){
       document.dispatchEvent(new CustomEvent('kt115:stage4-draft',{detail:{
        caseId:identity.caseId,evidenceRevision:h.evidenceRevision,requestId,
        sourceDraft:str(data.unverifiedDraft),warnings:issues,qualityPassed:false,
+        reviewerVerdict:data.qualityStage==="independent_review"?"reject":"not_completed",
+        reviewerFindings:Array.isArray(data.reviewFindings)?data.reviewFindings:[],
        originalCaseSignature:identity.signature,caseIdType:identity.caseIdType
       }}));
       button.textContent='Преработи проект с EG Автора';
       return;
     }
 
+    if(response.status===422 && data.caseId===identity.caseId&&data.evidenceRevision===h.evidenceRevision&&data.requestId===requestId){
+     document.dispatchEvent(new CustomEvent('kt124:stage4-attempt',{detail:{
+      caseId:identity.caseId,evidenceRevision:h.evidenceRevision,requestId,
+      sourceDraft:str(data.unverifiedDraft),warnings:issues,
+      reviewerVerdict:data.qualityStage==="independent_review"?"reject":"not_completed",
+      reviewerFindings:Array.isArray(data.reviewFindings)?data.reviewFindings:[],
+      qualityStage:data.qualityStage,caseIdType:identity.caseIdType
+     }}));
+    }
     // A server-side legal rejection cannot be solved by a visual refresh.
     const needsWorkerRepair=Array.isArray(data.qualityIssues)&&data.qualityIssues.some(x=>
      x==='MISSING_REASONED_LEGAL_COMPARISON'||x==='ADMIN_PANEL_02_LABEL_MISMATCH');
@@ -388,6 +399,8 @@ function boot(){
    document.dispatchEvent(new CustomEvent('kt115:stage4-draft',{detail:{
     caseId:identity.caseId,evidenceRevision:h.evidenceRevision,requestId,
     sourceDraft:str(data.draft),warnings:[],qualityPassed:true,
+     reviewerVerdict:audit.reviewVerdict||"not_completed",
+     reviewerFindings:Array.isArray(audit.findings)?audit.findings:[],
     qualificationRecord:data.qualificationRecord||null,qualificationProof:data.qualificationProof||null,qualificationGate:data.qualificationGate||null,
     originalCaseSignature:identity.signature,caseIdType:identity.caseIdType
    }}));
