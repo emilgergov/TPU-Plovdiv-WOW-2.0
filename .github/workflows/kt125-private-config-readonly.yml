@@ -1,0 +1,49 @@
+name: KT125 Private Cloudflare - read-only configuration check
+on:
+  push:
+    branches: [work/kt125-access-register-from-kt124-r6]
+    paths: ['.github/workflows/kt125-private-config-readonly.yml']
+permissions:
+  contents: read
+jobs:
+  inspect-private-worker-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Read existing private Worker configuration without changes
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+        run: |
+          node --input-type=module <<'NODE'
+          const token=process.env.CF_TOKEN;
+          if(!token){console.log("CONFIG_CHECK: existing Cloudflare credential unavailable");process.exit(1)}
+          const base="https://api.cloudflare.com/client/v4/accounts/"+process.env.CF_ACCOUNT;
+          async function read(path,label){
+            const r=await fetch(base+path,{headers:{Authorization:"Bearer "+token},signal:AbortSignal.timeout(30000)});
+            const d=await r.json().catch(()=>null);
+            console.log(label+": HTTP "+r.status+", success="+Boolean(d?.success));
+            if(!r.ok||!d?.success)return null;
+            return d.result;
+          }
+          const settings=await read("/workers/scripts/tpu-plovdiv-kt125-private/settings","PRIVATE_WORKER_SETTINGS");
+          if(settings){
+            const bindings=settings.bindings||[];
+            for(const name of ["KT125_ACCESS_TEAM_DOMAIN","KT125_ACCESS_AUD","KT125_PRIVATE_ORIGIN"]){
+              const b=bindings.find(x=>x.name===name);
+              console.log(name+": "+(!b?"MISSING":b.type==="plain_text"?String(b.text||"EMPTY"):"PRESENT ("+b.type+", value hidden)"));
+            }
+            const db=bindings.find(x=>x.name==="KT125_DB");
+            console.log("KT125_DB: "+(db?.type==="d1"?"D1_BOUND":"MISSING_OR_WRONG_TYPE"));
+          }
+          const subdomain=await read("/workers/subdomain","WORKERS_SUBDOMAIN");
+          if(subdomain?.subdomain)console.log("PRIVATE_WORKER_CANDIDATE_ORIGIN: https://tpu-plovdiv-kt125-private."+subdomain.subdomain+".workers.dev");
+          const apps=await read("/access/apps","ACCESS_APPLICATIONS");
+          if(Array.isArray(apps)){
+            const relevant=apps.filter(x=>String(x.domain||"").includes("tpu-plovdiv-kt125-private")||String(x.name||"").toLowerCase().includes("kt125"));
+            for(const x of relevant)console.log("KT125_ACCESS_APP: "+JSON.stringify({name:x.name,domain:x.domain,aud:x.aud,type:x.type}));
+            console.log("KT125_ACCESS_APP_COUNT: "+relevant.length);
+          }
+          console.log("READ_ONLY_CHECK: no configuration or deployment mutations performed");
+          if(!settings)process.exit(1);
+          NODE
