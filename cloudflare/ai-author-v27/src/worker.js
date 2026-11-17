@@ -605,12 +605,23 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   return [...new Set(issues)];
 
   }
+  // KT124-R2: every reviewer output ends with a concrete proposed catalog
+  // direction; this is a proposal, never an automatically issued act.
+  const withReviewConclusion=value=>{
+   const t=String(value||"").trim();
+   const id=Number(t.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0);
+   const route=KT109_ROUTE_BY_ID.get(id);
+   if(!route)return t;
+   return t.replace(/\n+\s*ЗАКЛЮЧЕНИЕ ЗА ПРОЦЕДУРАТА\s*:[^\n]*/giu,"").trim()+
+    "\n\nЗАКЛЮЧЕНИЕ ЗА ПРОЦЕДУРАТА: Предлага се панел №"+
+    String(id).padStart(2,"0")+" — "+route.title+".";
+  };
   // KT115: expose a flagged draft to the current expert without accepting it.
   const expertPreview=(reason,codes,stage,proposal=draft,extra={})=>reply({
    error:reason,caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
    requestId:payload.requestId,projectOnly:true,expertReviewRequired:true,
    expertPreviewOnly:true,qualityPassed:false,handoffAllowed:false,
-   unverifiedDraft:typeof proposal==="string"?proposal.slice(0,12000):"",
+   unverifiedDraft:typeof proposal==="string"?withReviewConclusion(proposal).slice(0,12000):"",
    qualityIssues:codes,qualityStage:stage,...extra
   },422);
   let issues=[...qualityIssues(draft),...(lockedQualification?compareDraftWithQualification(draft,lockedQualification):[]),...qualificationIssues];
@@ -690,7 +701,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     subject:payload.subject,scope:payload.scope},env.KT123_HANDOFF_SIGNING_KEY||env.OPENAI_API_KEY):null;
   return reply({caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
    requestId:payload.requestId,projectOnly:true,expertReviewRequired:true,
-   archiveEvidenceVerified:true,draft:finalDraft,authorDraft:draft,
+   archiveEvidenceVerified:true,draft:withReviewConclusion(finalDraft),authorDraft:draft,
    qualificationRecord:lockedQualification,qualificationProof,qualificationGate:{sourceAnchorsMatched:qualificationValidation?.ok===true,legalApplicabilityCertified:false,expertConfirmationRequired:true},
     normativeAudit:{reviewed:true,reviewVerdict:verdict,authorRepairs,
      deterministicModel:evaluateDraft(finalDraft).decision,
