@@ -24,7 +24,7 @@ globalThis.fetch=async (_url,opts)=>{
   assert.equal(request.model,'gpt-4.1-mini');
   return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:sampleDraft}]}]}),{status:200,headers:{'Content-Type':'application/json'}});
 };
-const env={OPENAI_API_KEY:'test-openai-key',AI_AUTHOR_ACCESS_TOKEN:'test-access-token'};
+const env={OPENAI_API_KEY:'test-openai-key',AI_AUTHOR_ACCESS_TOKEN:'test-access-token',KT123_TEST_LEGACY_MODE:'true'};
 const url='https://example.test/author';
 const facts={subject:'Тестово инвестиционно предложение',parcelIds:['99999.999.9999'],gisFindings:'НЯМА ДАННИ',legalReferences:'НЯМА ДАННИ'};
 const post=(token,body)=>new Request(url,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body)});
