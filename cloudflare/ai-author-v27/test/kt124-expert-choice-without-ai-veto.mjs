@@ -34,6 +34,15 @@ globalThis.fetch=async (_url,options)=>{
  calls++;
  const request=JSON.parse(options.body);
  assert(String(request.input[1].content).includes("expertConfirmedReviewedChoice"));
+ const guide=String(request.input[0].content);
+ assert(guide.includes("ОДОБРЕН РЕДАКЦИОНЕН ОРИЕНТИР CLASSIC A/Б (САМО ЗА ПАНЕЛ №01)"),
+  "Panel 01 should have the accepted Classic A/B editorial guidance");
+ assert(guide.includes("без да копираш негови факти, имоти, заповеди"),
+  "Template facts and legal findings must never be copied");
+ assert(guide.includes("Не повтаряй във втори въвеждащ абзац"),
+  "Prevent duplicate law references in a new draft");
+ assert(guide.includes("Не извеждай отрицателна категория"),
+  "Unverified absence of facts is not proof of legal exclusion");
  assert(String(request.input[1].content).includes("KT124-R6-TEST-CASE")===false);
  return new Response(JSON.stringify({output:[{content:[{type:"output_text",
   text:"Уведомявам Ви, че представените документи за складове и офиси са разгледани с оглед на изложените факти. За окончателна нормативна преценка следва да бъдат проверени относимите законови предпоставки и конкретните доказателства по преписката, без настоящият проект да удостоверява издаден административен акт."
