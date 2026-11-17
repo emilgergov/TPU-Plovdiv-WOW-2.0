@@ -85,7 +85,7 @@ if(host&&five){
  }
  function display(){
   if(!current())return;
-  ui.hidden=false;paper.hidden=false;textarea.hidden=true;change.hidden=false;confirm.hidden=false;storeEdit.hidden=true;cancel.hidden=true;
+  ui.hidden=false;paper.hidden=false;textarea.hidden=true;change.hidden=approved?.expertDecision?.mode==='independent_expert';confirm.hidden=approved?.expertDecision?.mode==='independent_expert';storeEdit.hidden=true;cancel.hidden=true;
   render(paper,history.at(-1).text);alertContent.replaceChildren();
   proposal.warnings.forEach(w=>alertContent.append(mk('p',w)));alerts.hidden=!proposal.warnings.length;
   next.hidden=!approved;archiveMenu.hidden=!approved;save.hidden=!approved;password.hidden=!approved;
@@ -108,6 +108,32 @@ if(host&&five){
   history=[{version:1,text:d.sourceDraft,kind:'автор',createdAt:new Date().toISOString()}];approved=null;
   document.getElementById('kt104EGLead').style.display='none';document.getElementById('kt104EGDetails').style.display='none';
   note.textContent='Работен проект. Експертът може да го редактира или потвърди.';display();render5();
+ });
+ // Additive signed expert route; does not change KT123's AI acceptance.
+ document.addEventListener('kt124:expert-decision-approved',e=>{
+  const d=e.detail||{},h=evidence(),q=d.expertDecision;
+  if(!q||q.mode!=='independent_expert'||!d.expertDecisionProof||!d.sourceDraft||
+     d.evidenceRevision!==h.evidenceRevision||d.caseId!==h.caseId&&d.caseIdType!=='shared-verified')return;
+  proposal={caseId:d.caseId,localId:h.caseId,revision:h.evidenceRevision,
+   generation:h.generation,key:h.key,requestId:d.requestId,
+   original:q.author?.draft||'Самостоятелна експертна преценка',
+   warnings:Array.isArray(q.reviewer?.findings)?q.reviewer.findings:[],
+   serverQualityPassed:false,expertDecision:q,expertDecisionProof:d.expertDecisionProof};
+  history=[{version:1,text:d.sourceDraft,kind:'самостоятелно експертно решение',createdAt:new Date().toISOString()}];
+  approved=Object.freeze({caseId:d.caseId,requestId:d.requestId,evidenceRevision:h.evidenceRevision,
+   version:1,text:d.sourceDraft,original:proposal.original,warnings:[...proposal.warnings],
+   expertDecision:q,expertDecisionProof:d.expertDecisionProof,
+   qualificationRecord:null,qualificationProof:null,qualificationGate:null,
+   expert:q.expert,approvedAt:new Date().toLocaleString('bg-BG'),
+   expertApproved:true,decisionSource:'INDEPENDENT_EXPERT'});
+  const l=document.getElementById('kt104EGLead'),details=document.getElementById('kt104EGDetails');
+  if(l)l.style.display='none';if(details)details.style.display='none';
+  note.textContent='Самостоятелната експертна преценка е потвърдена. В Етап 5 се предава точно избраното от експерта направление.';
+  display();render5();
+  document.dispatchEvent(new CustomEvent('kt116:stage4-confirmed',{detail:{
+   caseId:approved.caseId,evidenceRevision:approved.evidenceRevision,version:approved.version,
+   decisionSource:'INDEPENDENT_EXPERT'
+  }}));
  });
  change.onclick=()=>{
   if(!current())return;textarea.value=history.at(-1).text;textarea.hidden=false;paper.hidden=true;
