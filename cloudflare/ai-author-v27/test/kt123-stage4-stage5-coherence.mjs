@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import worker from '../src/worker.js';
 const savedFetch=globalThis.fetch;
-const env={OPENAI_API_KEY:'mock-openai',AI_AUTHOR_ACCESS_TOKEN:'test-access-token'};
+const env={OPENAI_API_KEY:'mock-openai',AI_AUTHOR_ACCESS_TOKEN:'test-access-token',KT123_TEST_LEGACY_MODE:'true'};
 const direction='ИЗБРАН ПАНЕЛ: 01 — Писмо по чл. 2, ал. 2 от Наредбата за ОС';
 const lines=[
  'ПРИЛОЖЕНИЕ № 1 КЪМ ЗООС: ОТРИЦАТЕЛНА — Съпоставени са установените характеристики и относимите категории по приложение № 1; не е установено съответствие с правните критерии.',
