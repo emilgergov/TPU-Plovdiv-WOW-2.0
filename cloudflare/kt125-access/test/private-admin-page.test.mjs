@@ -16,7 +16,9 @@ const validUser=renderKT125PrivatePage({section:"users",items:[
 ]});
 assert(validUser.includes('name="confirm" value="DEACTIVATE"'));
 assert(validUser.includes('action="/kt125/admin/users/expert-a/disable"'));
-assert(!risk.includes('action="/kt125/admin/users/'),"Invalid IDs cannot become action URLs");
+assert(!risk.includes('action="/kt125/admin/users/%3Cscript'),"Invalid IDs cannot become action URLs");
+assert(!risk.includes('/disable"'),"Invalid user IDs must not create deactivation forms");
+assert(risk.includes('action="/kt125/admin/users/enroll"'),"The fixed enrollment form must remain available");
 const response=kt125PrivateHtmlResponse(risk);
 assert.equal(response.headers.get("X-Frame-Options"),"DENY");
 assert.equal(response.headers.get("cache-control"),"no-store, private");
