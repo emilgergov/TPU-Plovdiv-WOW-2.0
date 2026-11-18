@@ -1,3 +1,4 @@
+import {APPLICABILITY_MEANINGS} from './kt130-applicability-meaning.mjs';
 import {evaluateDecision,TEST_KEYS,STATUSES} from "./kt123-decision-model.mjs";
 import {KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 // All facts and exact legal texts below are passed by reference only. Neither
@@ -59,6 +60,7 @@ export const QUALIFICATION_SCHEMA={
  },required:["tests","selectedPanel","routeReason","missingFact"]
 };
 export const QUALIFICATION_SYSTEM=[
+ APPLICABILITY_MEANINGS,
  "Ти си правен квалификатор на конкретна преписка, а НЕ автор на административно писмо.",
  "Първо изследвай точните приложими законови текстове и ВСИЧКИ относими хипотези, включително конкретните категории на приложения 1 и 2 ЗООС и чл. 2, ал. 1/2 Наредба за ОС.",
  "Върни точно ЧЕТИРИ tests (A1,A2,OS1,OS2) и един проектен selectedPanel измежду 22.",

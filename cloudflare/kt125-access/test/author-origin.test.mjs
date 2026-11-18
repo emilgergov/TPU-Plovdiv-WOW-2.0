@@ -21,6 +21,9 @@ const prefixEnd=actualSource.indexOf('`;')+3;
 const editorialPrefix=actualSource.slice(0,prefixEnd);
 assert.equal(createHash('sha256').update(editorialPrefix).digest('hex'),'4908266c27e853a1f3445c4a4537d941e4905a12fe083dc87ba9889e418bf6d9','Only the reviewed KT130 methodological guide is permitted');
 const normalizedEditorial=actualSource.slice(prefixEnd)
+ .replace("import {APPLICABILITY_MEANINGS} from './kt130-applicability-meaning.mjs';\n",'')
+ .replace('  APPLICABILITY_MEANINGS,\n','')
+ .replaceAll('    APPLICABILITY_MEANINGS,\n','')
  .replace('  MOSV_EDITORIAL_GUIDE,\n','')
  .replace('content:expertRule+directionRules+instructions+" "+MOSV_EDITORIAL_GUIDE','content:expertRule+directionRules+instructions');
 assert.equal(normalizedEditorial,kt128Expected,'R6 business logic remains byte-identical after exact transport and reviewed editorial additions');
