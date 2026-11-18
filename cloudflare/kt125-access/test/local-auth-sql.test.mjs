@@ -169,6 +169,12 @@ try{
  const sent=await deliverSmtp(smtpEnv,{to:'staff@example.invalid',subject:'Approved',text:'Body',messageId:'<fixture@example.invalid>'},{createTransport:o=>{options=o;return {sendMail:async m=>{message=m;return {accepted:['staff@example.invalid']}},close(){}}}});
  assert.equal(sent.state,'accepted');assert.equal(options.requireTLS,true);assert.equal(options.tls.rejectUnauthorized,true);assert.equal(options.tls.minVersion,'TLSv1.2');assert(message.disableFileAccess&&message.disableUrlAccess);
  assert.equal((await deliverSmtp(smtpEnv,{},{createTransport:()=>({sendMail:async()=>{throw Object.assign(Error('secret should not escape'),{code:'ETIMEDOUT',command:'DATA'})},close(){}})})).state,'uncertain');
+ // Existing Cyrillic/space-named module assets remain readable; encoded traversal stays denied.
+ assert.equal((await handler.fetch(get('/module/data/'+encodeURIComponent('Защитени зони')+'.json',ownerSession),env)).status,200);
+ const callsBeforeTraversal=moduleCalls;
+ assert.equal((await handler.fetch(get('/module/%252e%252e/private.json',ownerSession),env)).status,404);
+ assert.equal((await handler.fetch(get('/module/%ZZ/file.json',ownerSession),env)).status,404);
+ assert.equal(moduleCalls,callsBeforeTraversal);
  // Password recovery never reveals mailbox existence or bypasses active approval.
  query({mode:'query',sql:'DELETE FROM kt125_local_limits'});
  assert.equal((await handler.fetch(get('/auth/admin'),env)).status,200);

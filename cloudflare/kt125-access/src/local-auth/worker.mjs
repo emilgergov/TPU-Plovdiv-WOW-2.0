@@ -107,8 +107,8 @@ export function createLocalHandler({clock=()=>Date.now(),uuid=()=>crypto.randomU
    if(!['GET','HEAD'].includes(request.method))return new Response(null,{status:405});
    if(path==='/module/')return redirect('/module/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html');
    // Fixed read-only source; never proxy caller-supplied origins or credentials.
-   const rel=path.slice('/module/'.length);
-   if(!rel||rel.includes('..')||/%(?:2e|2f|5c)/i.test(rel)||!/^[-a-zA-Z0-9_./ ()]+$/.test(rel))return new Response(null,{status:404});
+   let rel;try{rel=decodeURIComponent(path.slice('/module/'.length));}catch{return new Response(null,{status:404});}
+   if(!rel||rel.includes('..')||/%(?:2e|2f|5c)/i.test(rel)||!/^[-\p{L}\p{N}_./ ()]+$/u.test(rel))return new Response(null,{status:404});
    const upstream=new URL('https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/2652e375cf90f03570a77158335ef364d4a48a5f/'+rel);
    try{
     const response=await moduleFetch(upstream.href,{method:request.method,redirect:'manual',headers:{Accept:request.headers.get('Accept')||'*/*'}});

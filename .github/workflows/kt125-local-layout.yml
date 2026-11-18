@@ -2,7 +2,7 @@ name: KT125 LOCAL100 password recovery and administrative entrance
 on:
   push:
     branches: [work/kt125-access-register-from-kt124-r6]
-    paths: ['cloudflare/kt125-access/src/local-auth/pages.mjs', '.github/workflows/kt125-local-layout.yml']
+    paths: ['cloudflare/kt125-access/src/local-auth/**', '.github/workflows/kt125-local-layout.yml']
 permissions:
   contents: read
 concurrency:
