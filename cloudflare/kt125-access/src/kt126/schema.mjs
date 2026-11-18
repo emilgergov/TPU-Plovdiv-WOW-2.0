@@ -1,0 +1,7 @@
+export const REGISTRY_SCHEMA=[
+ `CREATE TABLE IF NOT EXISTS kt126_claims(organization_id TEXT NOT NULL,actor_id TEXT NOT NULL,request_key TEXT NOT NULL,case_id TEXT NOT NULL UNIQUE,payload_hash TEXT NOT NULL,year INTEGER NOT NULL,PRIMARY KEY(organization_id,actor_id,request_key))`,
+ `CREATE TABLE IF NOT EXISTS kt126_counters(organization_id TEXT NOT NULL,year INTEGER NOT NULL,last_number INTEGER NOT NULL CHECK(last_number>0),PRIMARY KEY(organization_id,year))`,
+ `CREATE TABLE IF NOT EXISTS kt126_registry(case_id TEXT PRIMARY KEY NOT NULL,organization_id TEXT NOT NULL,year INTEGER NOT NULL,sequence INTEGER NOT NULL,internal_number TEXT NOT NULL,source_name TEXT NOT NULL,source_hash TEXT NOT NULL,revision INTEGER NOT NULL DEFAULT 0,external_number TEXT,external_status TEXT NOT NULL DEFAULT 'pending' CHECK(external_status IN ('pending','confirmed','omitted')),external_by TEXT,external_at_ms INTEGER,external_evidence_json TEXT NOT NULL DEFAULT '{}',created_at_ms INTEGER NOT NULL,UNIQUE(organization_id,year,sequence),UNIQUE(organization_id,internal_number),FOREIGN KEY(case_id) REFERENCES kt125_cases(case_id))`,
+ `CREATE TABLE IF NOT EXISTS kt126_versions(case_id TEXT NOT NULL,revision INTEGER NOT NULL,actor_id TEXT NOT NULL,kind TEXT NOT NULL CHECK(kind IN ('external','state')),content_json TEXT NOT NULL,created_at_ms INTEGER NOT NULL,PRIMARY KEY(case_id,revision),FOREIGN KEY(case_id) REFERENCES kt125_cases(case_id))`,
+ `CREATE INDEX IF NOT EXISTS idx_kt126_claims_case ON kt126_claims(case_id)`
+];

@@ -1,0 +1,20 @@
+name: KT126 registry targeted verification
+on:
+  push:
+    branches: [work/kt125-access-register-from-kt124-r6]
+    paths: ['cloudflare/kt125-access/src/kt126/**','cloudflare/kt125-access/test/kt126-registry.test.mjs','.github/workflows/kt126-registry.yml']
+permissions:
+  contents: read
+jobs:
+  registry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --prefix cloudflare/kt125-access
+      - name: Verify real D1 atomic registry and expert confirmation
+        working-directory: cloudflare/kt125-access
+        run: node test/kt126-registry.test.mjs
