@@ -2,7 +2,7 @@ name: KT126 verified registry rollout
 on:
   push:
     branches: [work/kt125-access-register-from-kt124-r6]
-    paths: ['.github/workflows/kt126-deploy.yml','cloudflare/kt125-access/deploy/kt126-rollout.mjs','cloudflare/kt125-access/src/kt126/**','cloudflare/kt125-access/src/local-auth/**','cloudflare/ai-author-v27/src/worker.js','cloudflare/kt125-access/test/kt126-gateway.test.mjs']
+    paths: ['.github/workflows/kt126-deploy.yml','cloudflare/kt125-access/deploy/kt126-rollout.mjs','cloudflare/kt125-access/src/kt126/**','cloudflare/kt125-access/src/local-auth/**','cloudflare/ai-author-v27/src/worker.js','cloudflare/kt125-access/test/kt126-gateway.test.mjs','cloudflare/kt125-access/src/private-admin-page.mjs','cloudflare/kt125-access/test/presentation.test.mjs']
 permissions:
   contents: read
 concurrency:
@@ -23,6 +23,8 @@ jobs:
         run: |
           node test/kt126-registry.test.mjs
           node test/kt126-gateway.test.mjs
+          node test/presentation.test.mjs
+          node test/private-admin-page.test.mjs
           node_modules/.bin/esbuild src/local-auth/service.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=../../dist/kt126-native.mjs
           KT125_RUNTIME_BUNDLE="$GITHUB_WORKSPACE/dist/kt126-native.mjs" node test/local-auth-runtime.test.mjs
       - name: Verify unchanged R6 legal logic and confirmed-number authorization

@@ -6,7 +6,7 @@
 export const escapeHtml=v=>String(v??"").replace(/[&<>"']/g,
  c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const sectionNames=Object.freeze({
- overview:"Общ преглед",users:"Потребители",roles:"Роли и права",cases:"Преписки",audit:"Журнал"
+ overview:"Общ преглед",users:"Потребители",roles:"Роли и права",cases:"Преписки",audit:"Журнал",presentation:"Покани за презентация"
 });
 const headers=Object.freeze({
  users:[["user_id","Потребител"],["email","Служебен имейл"],["role","Роля"],["active","Активен"],["updated_at_ms","Последна промяна"]],
@@ -44,6 +44,7 @@ form button:focus-visible{outline:3px solid #f3db9b;outline-offset:2px}td,th{tex
 th{background:#28533e;color:#f5d99a}
 .state{padding:10px;border:1px dashed #77907c;border-radius:8px;background:#224836}
 .disabled{color:#c3d0c3;font-size:12px;margin-top:15px}
+fieldset{width:100%;min-width:0;border:1px solid #799079;border-radius:8px;padding:16px;margin:0 0 12px}legend{font-weight:bold;color:#f5d588;padding:0 8px}fieldset label{display:block;margin:8px 0}fieldset input:not([type=checkbox]){width:100%;font:inherit;padding:10px;border:1px solid #799079;border-radius:6px;background:#092b20;color:#f5f0de}fieldset textarea{min-height:80px}.recipient-list{max-height:260px;overflow:auto;background:#092b20;padding:10px;border-radius:6px}.recipient-list label{padding:5px}.invite-edit-panel{background:#244535;padding:10px;margin:10px 0;border-left:3px solid #d9b771;border-radius:6px}
 @media(max-width:790px){.layout{grid-template-columns:1fr}nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:12px}}
 `;
 const readable=(key,value)=>{
@@ -52,7 +53,7 @@ const readable=(key,value)=>{
  if(key.endsWith("_ms")&&Number.isSafeInteger(value))return new Date(value).toLocaleString("bg-BG",{timeZone:"Europe/Sofia"});
  return String(value??"—");
 };
-export function renderKT125PrivatePage({section="overview",items=[],hasMore=false,invitations=[],invitationsHasMore=false,directoryUnavailable=false,accessRequests=[],requestsUnavailable=false,requestsHasMore=false,mailConfigured=false,localMode=false,localOrigin=""}={}){
+export function renderKT125PrivatePage({section="overview",items=[],hasMore=false,invitations=[],invitationsHasMore=false,directoryUnavailable=false,accessRequests=[],requestsUnavailable=false,requestsHasMore=false,mailConfigured=false,localMode=false,localOrigin="",presentationContent=""}={}){
  if(!Object.hasOwn(sectionNames,section))throw Error("Unknown management section");
  const nav=Object.keys(sectionNames).map(k=>
   `<a href="/kt125/admin/panel/${k}"${k===section?' aria-current="page"':""}>${escapeHtml(sectionNames[k])}</a>`).join("");
@@ -92,7 +93,7 @@ export function renderKT125PrivatePage({section="overview",items=[],hasMore=fals
  const requestStates={pending:"Чака одобрение",approved:"Одобрена",rejected:"Отказана"};
  const mailStates={queued:"Чака изпращане",sending:"Изпращането се проверява",accepted:"Приета за изпращане",failed:"Не е изпратена",uncertain:"Неясен резултат — проверете изпращането"};
  const requestTable=section!=="users"?"":`<h3>Заявки за достъп</h3>${mailConfigured?"":'<p class="state">Автоматичното изпращане на покани по имейл още не е настроено. Одобрените покани остават в изчакване за изпращане.</p>'}${requestsUnavailable?'<p class="state">Заявките временно не са достъпни.</p>':accessRequests.length?`<div class="tablewrap"><table class="requests-table"><thead><tr><th>Име и имейл</th><th>Забележка</th><th>Състояние</th><th>Решение</th></tr></thead><tbody>${accessRequests.slice(0,50).map(r=>`<tr><td>${escapeHtml(r.display_name)}<br>${escapeHtml(r.email)}</td><td class="request-note">${escapeHtml(r.note||"—")}</td><td>${escapeHtml(requestStates[r.status]||"Неизвестно")}${r.auth_kind==="local"?`<br>${r.activated_at_ms?"Първият вход е потвърден":"Очаква първоначално активиране"}`:""}${r.mail_state?`<br>${escapeHtml(mailStates[r.mail_state]||"Проверете изпращането")}`:""}</td><td>${r.status==="pending"&&/^[A-Za-z0-9_-]{1,160}$/.test(r.existing_user_id||"")?`<p>Наличен служебен профил. Ролята се запазва.</p><form method="post" action="/kt125/admin/requests/${escapeHtml(r.request_id)}/link"><input type="hidden" name="target_user_id" value="${escapeHtml(r.existing_user_id)}"><label><input type="checkbox" name="confirm" value="LINK" required> Потвърждавам свързването с този профил</label><button>Свържи профила</button></form>`:""}${r.status==="pending"&&/^[A-Za-z0-9_-]{1,160}$/.test(r.request_id)?`<form method="post" action="/kt125/admin/requests/${escapeHtml(r.request_id)}/decide"><label>Роля <select name="role"><option value="expert">Експерт</option><option value="reviewer">Преглеждащ</option><option value="delegated_expert">Упълномощен експерт</option></select></label><label><input type="checkbox" required name="confirm" value="DECIDE"> Потвърждавам решението</label>${r.existing_user_id?"":'<button name="decision" value="approve">Одобри</button>'}<button name="decision" value="reject">Откажи</button></form>`:r.status==="approved"&&(r.auth_kind==="local"?["queued","failed"]:["queued","failed","sending"]).includes(r.mail_state)?`<form method="post" action="/kt125/admin/requests/${escapeHtml(r.request_id)}/mail"><label><input type="checkbox" name="confirm" value="SEND" required> Потвърждавам</label><button>Изпрати поканата</button></form>`:"—"}${r.auth_kind==="local"&&r.status==="approved"&&!r.activated_at_ms?`<form method="post" action="/kt125/admin/requests/${escapeHtml(r.request_id)}/renew"><label><input type="checkbox" name="confirm" value="RENEW" required> Обезсилвам старата връзка</label><button>Изпрати нова връзка</button></form>`:""}</td></tr>`).join("")}</tbody></table></div>`:'<p>Няма заявки за достъп.</p>'}${requestsHasMore?'<p>Показани са последните 50 заявки.</p>':""}`;
- const table=section==="overview"
+ const table=section==="presentation"?presentationContent:section==="overview"
   ?`<div class="state">Защитен служебен режим. Информацията за потребители, преписки и журнал се извлича само след проверка на самоличността и съответните права.</div>
   <p>ЕГМАСТЕР и администраторът не получават автоматичен достъп до съдържанието на преписките.</p>`
   :section==="roles"?roleMatrix

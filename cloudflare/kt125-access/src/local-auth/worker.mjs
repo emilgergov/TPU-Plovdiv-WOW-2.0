@@ -1,3 +1,4 @@
+import {presentationHttp} from './presentation.mjs';
 import {registryHttp} from '../kt126/http.mjs';
 import {proxyAuthor} from '../kt126/author-proxy.mjs';
 import {registryClientSource} from '../kt126/client.mjs';
@@ -110,6 +111,9 @@ export function createLocalHandler({clock=()=>Date.now(),uuid=()=>crypto.randomU
   }
   const who=await identity({db,request,config,now});
   if(!who)return path.startsWith('/module/')?redirect('/auth/login',cookie('',0)):page({message:'Няма разрешен достъп.',status:403});
+  if(path==='/kt125/admin/panel/presentation'||path.startsWith('/kt125/admin/presentation/')){
+   try{return withSessionBanner(await presentationHttp({request,env,who,config,now}),who)}catch{return new Response('Поканите временно не са достъпни. Опитайте отново.',{status:503,headers:{'Cache-Control':'no-store, private'}})}
+  }
   if(path.startsWith('/kt126/')){
    if(env.KT126_REGISTRY_ENABLED!=='true')return new Response(null,{status:404});
    try{
