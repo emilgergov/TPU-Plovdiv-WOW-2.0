@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
-import {overlaySpatialHandoff} from '../src/kt126/spatial-handoff.mjs';
+import {overlaySpatialHandoff,spatialEvidenceSummary} from '../src/kt126/spatial-handoff.mjs';
 import {notificationParcelCandidates,overlayParcelCandidates} from '../src/kt126/parcel-candidates.mjs';
 const read=path=>readFile(new URL('../../..'+ '/'+path,import.meta.url),'utf8');
 const autoPath='vt03/kt80/integration/kt83-p2-automatic-pdf1.js';
@@ -32,6 +32,11 @@ for(const spatialClass of ['INTERSECTS','MIXED','OUTSIDE','UNDETERMINED']){
  assert.equal(collectStageEvidence(context).observations.find(x=>x.factId==='spatial_intersection').value,'unknown','PDF cannot establish missing geometry');
 }
 overlaySpatialHandoff(authorPath,await read(authorPath));
+const summary=spatialEvidenceSummary({ids:['12345.1.2'],valid:true,intersections:true,spatialClass:'INTERSECTS',pdfOK:false,live:{results:[{input:'12345.1.2',geojson:{coordinates:'irrelevant geometry'.repeat(10000)},verified_zone_intersections:[{sitecode:'BG0000001',name_bg:'Зона',area_m2:123.45}]}]}});
+assert.equal(summary.spatialClass,'INTERSECTS');assert.equal(summary.pdf1Current,false);
+assert.equal(summary.parcels[0].verifiedZoneIntersections[0].area_m2,123.45);
+assert.equal(JSON.stringify(summary).includes('coordinates'),false,'Coordinates must not crowd verified facts out of the author budget');
+assert.equal(summary.parcels[0].verifiedOutside,false);
 assert.throws(()=>overlaySpatialHandoff(autoPath,auto),/contract mismatch/);
 console.log('PASS KT130: replacement GIS retriggers PDF once, stale receipt rejected, spatial facts independent of PDF and never promoted to legal truth');
 const notification='УВЕДОМЛЕНИЕ за инвестиционно предложение';
