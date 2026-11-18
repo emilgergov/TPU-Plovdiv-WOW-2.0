@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {overlaySignatureTemplate,signatureParagraph} from '../src/kt126/signature-lines.mjs';
+const source=fs.readFileSync(new URL('../../../vt03/kt80/integration/kt120-embedded-word-template.mjs',import.meta.url),'utf8');
+const patched=overlaySignatureTemplate(source);
+globalThis.window={fflate:{zipSync:x=>x}};
+const module=await import('data:text/javascript;base64,'+Buffer.from(patched).toString('base64'));
+const parts=module.makeAutomaticTemplate(),xml=new TextDecoder().decode(parts['word/document.xml']);
+assert.equal((xml.match(/<o:signatureline /g)||[]).length,2);
+assert.equal((xml.match(/Електронен подпис:/g)||[]).length,2);
+assert.equal((xml.match(/________________/g)||[]).length,0);
+assert.equal(new Set([...xml.matchAll(/<o:signatureline[^>]* id="([^"]+)/g)].map(x=>x[1])).size,2);
+assert.match(xml,/width:130pt;height:16pt/);
+assert.ok(parts['word/media/signature-line.png'].length);
+assert.match(new TextDecoder().decode(parts['word/_rels/document.xml.rels']),/Id="rIdEGSignature"/);
+assert.notEqual(signatureParagraph(1),signatureParagraph(1));
+assert.throws(()=>overlaySignatureTemplate(patched));
+console.log('Common DOCX template: two unsigned Office signature objects, image relationship, stable layout anchors');

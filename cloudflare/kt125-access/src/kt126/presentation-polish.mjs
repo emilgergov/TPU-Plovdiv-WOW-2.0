@@ -1,3 +1,4 @@
+import {overlaySignatureTemplate} from './signature-lines.mjs';
 import {stage5CaseEvidence,stage5ReceiptText} from '../../../ai-author-v27/src/kt130-stage5-context.mjs';
 import {spatialEvidenceSummary} from './spatial-handoff.mjs';
 // Presentation only: preserve draft text, evidence, expert actions and server authorization.
@@ -7,6 +8,7 @@ export function displayApplicability(text){
  return String(text??'').replace(/^(\s*(?:ПРИЛОЖЕНИЕ\s*№\s*[12]\s*КЪМ\s*ЗООС|ЧЛ\.\s*2\s*,?\s*АЛ\.\s*[12]\s*НАРЕДБА\s*ЗА\s*ОС)\s*[:：]\s*)(ПОЛОЖИТЕЛНА|ОТРИЦАТЕЛНА|НЕОПРЕДЕЛЕНА)(?=\s*[—–-])/gimu,(_,heading,status)=>heading+labels[status.toUpperCase()]);
 }
 export function overlayPresentationPolish(rel,source){
+ if(rel.endsWith('/kt120-embedded-word-template.mjs'))return overlaySignatureTemplate(source);
  if(rel.endsWith('/KT82_STAGE4_V11_SOURCE_GATE_V610.js')){
   source=once(source,"  const proof=root.KT83P2Automatic?.current?.();\n  if(!valid||!proof||!root.KT83P2SpatialGate?.pdfReceiptMatches?.(proof,receipt))return;","  // Retain a case-bound receipt while prerequisites settle; data() still requires the complete P2 proof.\n  if(!valid||!Number.isFinite(receipt.bytes)||receipt.bytes<=0)return;");
  }
