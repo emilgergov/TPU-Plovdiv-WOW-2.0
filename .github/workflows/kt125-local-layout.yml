@@ -1,0 +1,58 @@
+name: KT125 LOCAL98 compact green and gold forms
+on:
+  push:
+    branches: [work/kt125-access-register-from-kt124-r6]
+    paths: ['cloudflare/kt125-access/src/local-auth/pages.mjs', '.github/workflows/kt125-local-layout.yml']
+permissions:
+  contents: read
+concurrency:
+  group: kt125-local97-deployment
+  cancel-in-progress: false
+jobs:
+  update-layout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build local service
+        run: |
+          npm ci --prefix cloudflare/kt125-access
+          node --check cloudflare/kt125-access/src/local-auth/pages.mjs
+          cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/src/local-auth/service.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=dist/kt125-local-auth-worker.mjs
+      - name: Verify runtime without changing credentials
+        working-directory: cloudflare/kt125-access
+        env:
+          KT125_RUNTIME_BUNDLE: ${{ github.workspace }}/dist/kt125-local-auth-worker.mjs
+        run: node test/local-auth-runtime.test.mjs
+      - name: Update existing native-auth service preserving bindings and secrets
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const base="https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1/workers/scripts/tpu-plovdiv-kt125-local-auth";
+          const headers={Authorization:"Bearer "+process.env.CF_TOKEN};
+          const before=await fetch(base+"/settings",{headers}).then(r=>r.json());
+          if(!before.success)throw Error("Cannot inspect existing native auth settings");
+          const settings=before.result,bindings=settings.bindings||[];
+          if(!bindings.some(b=>b.name==="KT125_AUTH_SECRET"&&b.type==="secret_text")||!bindings.some(b=>b.name==="KT125_PASSWORDS"&&b.type==="durable_object_namespace"))throw Error("Unexpected service configuration");
+          const metadata={main_module:"worker.mjs",compatibility_date:settings.compatibility_date,compatibility_flags:settings.compatibility_flags,keep_bindings:["secret_text"],bindings:bindings.filter(b=>b.type!=="secret_text")};
+          const form=new FormData();
+          form.set("metadata",new Blob([JSON.stringify(metadata)],{type:"application/json"}));
+          form.set("worker.mjs",new Blob([readFileSync("dist/kt125-local-auth-worker.mjs")],{type:"application/javascript+module"}),"worker.mjs");
+          const upload=await fetch(base,{method:"PUT",headers,body:form}).then(r=>r.json());
+          if(!upload.success)throw Error("Layout deployment rejected; codes "+JSON.stringify(upload.errors?.map(e=>e.code)));
+          const after=await fetch(base+"/settings",{headers}).then(r=>r.json());
+          const names=x=>(x||[]).map(b=>b.name+":"+b.type).sort().join("|");
+          if(!after.success||names(after.result.bindings)!==names(bindings))throw Error("Binding list changed");
+          const origin="https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev";
+          for(const path of ["/auth/register","/auth/login"]){
+            const r=await fetch(origin+path);const html=await r.text();
+            if(r.status!==200||!html.includes('data-layout="local98"'))throw Error("Live layout check failed for "+path);
+            console.log("LOCAL98_LIVE "+path+": HTTP200, compact layout");
+          }
+          console.log("LOCAL98: existing sessions, password secret, D1 and DO bindings retained; no data or role changes");
+          NODE
