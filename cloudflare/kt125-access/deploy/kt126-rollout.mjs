@@ -16,7 +16,8 @@ async function deploy(name,before,file,bindings){
  for(const key of ['observability','logpush','placement','limits','tail_consumers'])if(before[key]!==undefined)metadata[key]=before[key];
  const form=new FormData();form.set('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));form.set('worker.mjs',new Blob([readFileSync(file)],{type:'application/javascript+module'}),'worker.mjs');
  await api(path(name),{method:'PUT',body:form});
- const after=await api(path(name)+'/settings');if(names(after.bindings)!==names(bindings))throw Error('Unexpected binding change in '+name);
+ let after;for(let attempt=0;attempt<12;attempt++){after=await api(path(name)+'/settings');if(names(after.bindings)===names(bindings))break;await new Promise(resolve=>setTimeout(resolve,1500));}
+ if(names(after.bindings)!==names(bindings)){const expected=names(bindings).split('|'),actual=names(after.bindings).split('|');console.log('BINDING_NAMES_ONLY',JSON.stringify({service:name,missing:expected.filter(x=>!actual.includes(x)),extra:actual.filter(x=>!expected.includes(x))}));throw Error('Unexpected binding change in '+name);}
  for(const binding of before.bindings.filter(b=>b.type==='secret_text'))if(!after.bindings.some(b=>b.name===binding.name&&b.type==='secret_text'))throw Error('Secret binding missing');
  return after;
 }
