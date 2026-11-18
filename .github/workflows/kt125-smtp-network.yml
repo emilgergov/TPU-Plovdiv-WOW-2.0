@@ -1,0 +1,33 @@
+name: KT125 SMTP DNS and TLS read-only diagnosis
+on:
+  push:
+    branches: [work/kt125-access-register-from-kt124-r6]
+    paths: ['.github/workflows/kt125-smtp-network.yml']
+permissions:
+  contents: read
+jobs:
+  smtp-network:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Verify published SMTP DNS and TLS without credentials or email
+        run: |
+          node --input-type=module <<'NODE'
+          import dns from "node:dns/promises";
+          import tls from "node:tls";
+          for(const host of ["mail.plovdiv.riew.gov.bg","plovdiv.riew.gov.bg"]){
+            try{
+              const addresses=await dns.lookup(host,{all:true});
+              console.log("SMTP_DNS",host,JSON.stringify(addresses.map(x=>x.address)));
+              await new Promise(resolve=>{
+                const socket=tls.connect({host,port:465,servername:host,rejectUnauthorized:true,minVersion:"TLSv1.2"});
+                let finished=false;
+                const done=(state,code)=>{if(finished)return;finished=true;console.log("SMTP_TLS",host,state,code||"");socket.destroy();resolve()};
+                socket.setTimeout(10000,()=>done("FAILED","TIMEOUT"));
+                socket.once("error",e=>done("FAILED",String(e.code||"UNKNOWN").replace(/[^A-Z0-9_]/g,"")));
+                socket.once("secureConnect",()=>{console.log("SMTP_CERT",host,JSON.stringify({cn:socket.getPeerCertificate()?.subject?.CN,protocol:socket.getProtocol()}));done("VERIFIED")});
+              });
+            }catch(e){console.log("SMTP_DNS",host,"FAILED",String(e.code||"UNKNOWN").replace(/[^A-Z0-9_]/g,""))}
+          }
+          console.log("READ_ONLY: no passwords, authentication attempts or emails used; no configuration changed");
+          NODE
