@@ -5,7 +5,7 @@ export function overlayModule(rel,source){
  if(rel.endsWith('/KT83_WORKFLOW_CASE_V591.js')){
   source=replaceOnce(source,'  const result=await root.V26LocalIntake.process(file);','  const result=root.KT126Registry?.restoredIntake()||await root.V26LocalIntake.process(file);');
   source=replaceOnce(source," if(currentFileRef&&currentFileRef!==file)state.caseCycleId=newCaseCycleId();"," if(root.KT126Registry){$('kt80ProcessFile').disabled=true;try{await root.KT126Registry.beforeProcess(file)}catch(e){$('kt80ProcessFile').disabled=false;return say(e.message)}}\n if(currentFileRef&&currentFileRef!==file&&!root.KT126Registry?.current())state.caseCycleId=newCaseCycleId();");
-  source=replaceOnce(source,'  intakeResults(result);',"  if(root.KT126Registry){root.KT80Busy?.finish(workId);await root.KT126Registry.afterRead(result);if(!isCurrent())return;}\n  intakeResults(result);");
+  source=replaceOnce(source,'  intakeResults(result);',"  if(root.KT126Registry){root.KT80Busy?.finish(workId);if((await root.KT126Registry.afterRead(result))===false){say('Прегледът е затворен. Отворете „Преглед на Деловоден №“, когато сте готови.');return;}if(!isCurrent())return;}\n  intakeResults(result);");
   source=replaceOnce(source,"  const all=Array.isArray(result?.files)?result.files:[];",'  await root.KT126Registry?.afterProcess();\n  const all=Array.isArray(result?.files)?result.files:[];');
   source=replaceOnce(source,"function setBadge(){ ","function setBadge(){ queueMicrotask(()=>root.KT126Registry?.refreshBadge()); ");
  }
