@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {readFile} from 'node:fs/promises';
+import {overlaySpatialHandoff} from '../src/kt126/spatial-handoff.mjs';
+const read=path=>readFile(new URL('../../..'+ '/'+path,import.meta.url),'utf8');
+const autoPath='vt03/kt80/integration/kt83-p2-automatic-pdf1.js';
+const handPath='vt03/kt80/integration/kt95-stage-evidence-handoff.mjs';
+const authorPath='vt03/kt80/integration/kt96-eg-ai-stage4-author.mjs';
+const auto=overlaySpatialHandoff(autoPath,await read(autoPath));
+const handlers=new Map(),document={readyState:'complete',getElementById:id=>id==='kt80ParcelInput'?{value:'12345.1.2'}:null,addEventListener:(name,fn)=>{handlers.set(name,[...(handlers.get(name)||[]),fn])}};
+const emit=(name,detail)=>{for(const fn of handlers.get(name)||[])fn({detail})};
+let calls=0;
+const root={KT80WorkflowState:{step:3,caseCycleId:'case-a',generation:1,normativeGate:{decision:'REQUIRED',expertConfirmed:true}},V26ParcelEditor:{normalize:()=>({ids:['12345.1.2']})},KT82EvidenceInvalidation:{getRevision:()=>1},KT80FreeGISResults:{ids:['12345.1.2'],results:[]},KT80PIMaster:{getResult:()=>({})},KT80FreeGIS:{getMap:()=>({zones:[]})},KT83P2SpatialGate:{check:x=>({ok:true,key:[x.caseId,x.generation,x.evidenceRevision,...x.ids].join('|')}),pdfReceiptMatches:(x,r)=>r.caseId===x.caseId&&r.source===x.live},setTimeout};
+root.KT80PDF1Bridge={makePDF:()=>{calls++;emit('kt82:pdf1-completed',{caseId:root.KT80WorkflowState.caseCycleId,source:root.KT80FreeGISResults});return Promise.resolve()}};
+vm.runInNewContext(auto,{window:root,document,Promise});
+root.KT83P2Automatic.begin();await Promise.resolve();assert.equal(calls,1);
+root.KT83P2Automatic.begin();await Promise.resolve();assert.equal(calls,1,'No second PDF for same live GIS');
+const stale=root.KT80FreeGISResults;root.KT80FreeGISResults={ids:['12345.1.2'],results:[]};
+root.KT83P2Automatic.begin();await Promise.resolve();assert.equal(calls,2,'Replacement GIS source requires current PDF even with same IDs/revision');
+emit('kt82:pdf1-completed',{caseId:'case-a',source:stale});root.KT83P2Automatic.begin();assert.equal(calls,2,'Stale receipt must not disturb current receipt');
+root.KT80WorkflowState.step=4;root.KT80FreeGISResults={};root.KT83P2Automatic.begin();assert.equal(calls,2,'Never trigger outside Stage3');
+const hand=overlaySpatialHandoff(handPath,await read(handPath));
+const {collectStageEvidence}=await import('data:text/javascript;base64,'+Buffer.from(hand).toString('base64'));
+for(const spatialClass of ['INTERSECTS','MIXED','OUTSIDE','UNDETERMINED']){
+ const context={KT80WorkflowState:{caseCycleId:'case-a',generation:1,subjectConfirmed:{},parcelsConfirmed:{ids:['12345.1.2'],expertConfirmed:true}},KT83NormativeBridge:{getEvidence:()=>({ids:['12345.1.2'],spatialClass,valid:true,intersections:spatialClass!=='UNDETERMINED',pdfOK:false})}};
+ const packet=collectStageEvidence(context),fact=packet.observations.find(x=>x.factId==='spatial_intersection');
+ assert.equal(fact.value,spatialClass==='UNDETERMINED'?'unknown':spatialClass==='OUTSIDE'?'false':'true');
+ assert.equal(packet.observations.find(x=>x.factId==='pdf1_created').value,'unknown','Missing PDF stays missing');
+ assert.equal(packet.legalInputs.some(x=>x.factId==='spatial_intersection'),false,'Geometry must not become established legal prerequisite');
+ context.KT83NormativeBridge.getEvidence=()=>({spatialClass,valid:false,intersections:true,pdfOK:true});
+ assert.equal(collectStageEvidence(context).observations.find(x=>x.factId==='spatial_intersection').value,'unknown','PDF cannot establish missing geometry');
+}
+overlaySpatialHandoff(authorPath,await read(authorPath));
+assert.throws(()=>overlaySpatialHandoff(autoPath,auto),/contract mismatch/);
+console.log('PASS KT130: replacement GIS retriggers PDF once, stale receipt rejected, spatial facts independent of PDF and never promoted to legal truth');
