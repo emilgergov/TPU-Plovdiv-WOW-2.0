@@ -31,5 +31,13 @@ jobs:
               console.log("EXISTING_D1_FOUND: "+Boolean(db));
             }
           }
+          const origin="https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev";
+          for(const [path,expected] of [["/auth/register",200],["/auth/login",200],["/auth/forgot",200],["/module/",303],["/kt125/admin/panel/users",403]]){
+            const r=await fetch(origin+path,{redirect:"manual",signal:AbortSignal.timeout(20000)});
+            console.log("LOCAL97_PUBLIC_GET "+path+": HTTP "+r.status);
+            if(r.status!==expected)throw Error("Unexpected public status for "+path);
+            if((path==="/auth/register"||path==="/auth/login")&&!(await r.text()).includes('name="password"'))throw Error("Password form missing");
+            if(path==="/module/"&&r.headers.get("location")!=="/auth/login")throw Error("Protected module did not redirect to login");
+          }
           console.log("READ_ONLY: no Workers, settings, users, emails or database contents changed");
           NODE
