@@ -17,6 +17,14 @@ export class LocalAuthService extends WorkerEntrypoint {
  }
  async queueStandardPresentation(input){return queueStandardPresentation(this.env,input)}
  async sendPresentationBatch(batchId){return sendPresentationBatch(this.env,batchId)}
+ async verifyAuthorTransport(){
+  if(!this.env.KT128_AUTHOR)return {configured:false};
+  try{const config=localConfig(this.env);if(!config)return {configured:true,guarded:false};
+   const response=await this.env.KT128_AUTHOR.fetch(new Request('https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/subject-improve',{method:'POST',headers:{Origin:config.origin,'Content-Type':'application/json','X-KT126-Case':'11111111-1111-4111-8111-111111111111','X-KT126-Session':'invalid'},body:'{"caseId":"11111111-1111-4111-8111-111111111111","subject":"diagnostic","facts":[]}'}));
+   const json=response.headers.get('Content-Type')?.includes('application/json')||false;
+   return {configured:true,status:response.status,json,guarded:response.status===403&&json};
+  }catch{return {configured:true,guarded:false}}
+ }
  async sendResetNotification(resetId){return sendResetNotification(this.env,resetId)}
  async verifyMailTransport(){return verifySmtpConnection(this.env)}
  async getStatus(){return {configured:Boolean(smtpConfig(this.env))}}

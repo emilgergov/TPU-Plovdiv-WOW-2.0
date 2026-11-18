@@ -89,4 +89,10 @@ try{
  assert.equal((await proxyAuthor({...bridgeArgs,who:{verified:true,userId:'bob'},request:bridgeRequest()})).status,403);assert.equal(bridgeCalls,1);
  console.log('PASS KT128 native proxy: inactive/read-only/foreign users denied before author; valid expert audited; caller bearer stripped');
 
+
+ let privateCalls=0;
+ const privateBridge=await proxyAuthor({...bridgeArgs,request:bridgeRequest(),env:{KT125_DB:db,KT128_AUTHOR:{fetch:async request=>{privateCalls++;assert.equal(new URL(request.url).pathname,'/subject-improve');assert.equal(request.headers.get('X-KT126-Session'),'opaque');assert.equal(request.headers.get('Authorization'),null);return new Response('{}',{headers:{'Content-Type':'application/json'}})}}},authorFetch:async()=>{throw Error('Public Worker-to-Worker route must not be used')}});
+ assert.equal(privateBridge.status,200);assert.equal(privateCalls,1);
+ console.log('PASS KT128 private transport: native author service binding takes precedence, case/session guard retained, no browser bearer');
+
 }finally{await mf.dispose()}

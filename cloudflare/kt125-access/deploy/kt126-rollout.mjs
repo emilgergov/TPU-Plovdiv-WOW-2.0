@@ -29,7 +29,9 @@ if(!columns[0]?.results?.some(x=>x.name==='source_id'))throw Error('Unexpected p
 const binding={name:'KT126_REGISTRY',type:'service',service:native,entrypoint:'LocalAuthService'};
 const existing=authorBefore.bindings.find(b=>b.name===binding.name);if(existing&&(existing.type!==binding.type||existing.service!==native||existing.entrypoint!==binding.entrypoint))throw Error('Unexpected registry service binding');
 const authorBindings=[...authorBefore.bindings.filter(b=>b.name!==binding.name),binding];
-const nativeBindings=[...nativeBefore.bindings.filter(b=>b.name!=='KT126_REGISTRY_ENABLED'),{name:'KT126_REGISTRY_ENABLED',type:'plain_text',text:'true'}];
+const authorTransport={name:'KT128_AUTHOR',type:'service',service:author};
+const priorTransport=nativeBefore.bindings.find(b=>b.name===authorTransport.name);if(priorTransport&&(priorTransport.type!=='service'||priorTransport.service!==author||priorTransport.entrypoint))throw Error('Unexpected native author transport binding');
+const nativeBindings=[...nativeBefore.bindings.filter(b=>!['KT126_REGISTRY_ENABLED','KT128_AUTHOR'].includes(b.name)),{name:'KT126_REGISTRY_ENABLED',type:'plain_text',text:'true'},authorTransport];
 let nativePublished=false;
 try{
  // The existing native service already exposes the disabled, tested private RPC.
