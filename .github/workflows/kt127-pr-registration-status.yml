@@ -1,0 +1,27 @@
+name: KT127 check PR registration status
+on:
+  push:
+    branches: [work/kt125-access-register-from-kt124-r6]
+    paths: ['.github/workflows/kt127-pr-registration-status.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read only the requested PR registration status
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          const base='https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1',headers={Authorization:'Bearer '+process.env.CF_TOKEN};
+          const settings=await fetch(base+'/workers/scripts/tpu-plovdiv-kt125-local-auth/settings',{headers}).then(r=>r.json());if(!settings.success)throw Error('Settings unavailable');
+          const id=settings.result.bindings.find(b=>b.name==='KT125_DB'&&b.type==='d1')?.id;if(!id)throw Error('Registry unavailable');
+          const sql="SELECT a.state,a.created_at_ms,a.activated_at_ms,(SELECT o.state FROM kt125_local_outbox o WHERE o.account_id=a.account_id AND o.organization_id=a.organization_id ORDER BY o.created_at_ms DESC LIMIT 1) AS mail_state FROM kt125_local_accounts a WHERE a.organization_id=? AND a.email=? ORDER BY a.created_at_ms DESC LIMIT 1";
+          const data=await fetch(base+'/d1/database/'+id+'/query',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({sql,params:['riosv-plovdiv','pr@plovdiv.riew.gov.bg']})}).then(r=>r.json());if(!data.success)throw Error('Status query unavailable');
+          const row=data.result[0]?.results?.[0];console.log('PR_REGISTRATION_STATUS '+JSON.stringify(row?{found:true,...row}:{found:false}));
+          NODE
