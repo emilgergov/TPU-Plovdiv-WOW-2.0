@@ -1,3 +1,5 @@
+import {stage5CaseEvidence} from '../../../ai-author-v27/src/kt130-stage5-context.mjs';
+import {spatialEvidenceSummary} from './spatial-handoff.mjs';
 // Presentation only: preserve draft text, evidence, expert actions and server authorization.
 const once=(s,a,b)=>{if(s.split(a).length!==2)throw Error('KT130 presentation source contract mismatch');return s.replace(a,b)};
 export function displayApplicability(text){
@@ -40,6 +42,9 @@ export function overlayPresentationPolish(rel,source){
  \`;document.head.append(identityStyle);`);
  }
  if(rel.endsWith('/kt117-stage5-document-author.mjs')){
+  source=once(source,'function initialize(){',`const kt130Stage5Evidence=${stage5CaseEvidence.toString()};\nconst kt130Stage5Spatial=${spatialEvidenceSummary.toString()};\nfunction initialize(){`);
+  source=once(source,'  const requestId=crypto.randomUUID();const payload=',`  let stage5Evidence;\n  try{stage5Evidence=kt130Stage5Evidence(window,source,ev,kt130Stage5Spatial(window.KT83NormativeBridge?.getEvidence?.()))}\n  catch{note.textContent='Доказателствата са променени. Върнете се към потвърдения анализ на текущата преписка.';return;}\n  const requestId=crypto.randomUUID();const payload=`);
+  source=once(source,'   documentTitle:documentLabel(line),incomingReference:incomingReference()};','   documentTitle:documentLabel(line),incomingReference:incomingReference(),completeCaseEvidence:stage5Evidence};');
   source=once(source,"original.querySelector('pre').textContent=a.text;","original.querySelector('pre').textContent=("+displayApplicability.toString()+")(a.text);");
  }
  return source;

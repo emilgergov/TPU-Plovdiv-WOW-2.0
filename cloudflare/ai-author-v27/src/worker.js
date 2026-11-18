@@ -6,6 +6,8 @@ const MOSV_EDITORIAL_GUIDE=`Методическа опора КТ130: пред�
 Оформление: утвърдената бланка на РИОСВ – Пловдив е водеща. Лого, адресат, задължителни реквизити, два електронни подписа, конфиденциалност, футър, Verdana 10, междуредие 1, отстъп 1 см и приетите bold/italic се управляват от модула. Не добавяй нова бланка, чужд подпис, лого, заглавен блок или промени по форматирането от сканирания образец. Експертните редакции и потвърденото направление се запазват.`;
 import {APPLICABILITY_MEANINGS} from './kt130-applicability-meaning.mjs';
 import {getLegalContext} from "./legal-v11-loader.mjs";
+import {readStage5Evidence,STAGE5_SOURCE_RULES,stripRepeatedStage5Intro,needsStage5VoiceEdit} from "./kt130-stage5-context.mjs";
+import {territorialContext} from "./kt130-territorial-context.mjs";
 import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 import {evaluateDraft} from "./kt123-decision-model.mjs";
 import {substantiveDraftIssues} from "./kt123-substance-guard.mjs";
@@ -857,7 +859,7 @@ async function handleStage5Document(request,env){
  if(!env.OPENAI_API_KEY||!tokens.length)return reply({error:"Service unavailable"},503);
  if(!tokens.some(t=>request.headers.get("Authorization")==="Bearer "+t))return reply({error:"Unauthorized"},401);
  let input;
- try{const raw=await request.text();if(new TextEncoder().encode(raw).length>42000)return reply({error:"Payload too large"},413);input=JSON.parse(raw)}
+ try{const raw=await request.text();if(new TextEncoder().encode(raw).length>180000)return reply({error:"Payload too large"},413);input=JSON.parse(raw)}
  catch{return reply({error:"Invalid request"},400)}
  const ok=x=>typeof x==="string"&&x.length>0;
  if(input?.task!=="draft_stage5_document"||!ok(input.caseId)||input.caseId.length>200||
@@ -960,6 +962,13 @@ async function handleStage5Document(request,env){
   findings:inconsistentPanel1.map(([key,expected])=>({test:key,actual:legalMatrix[key]?.status||"НЕУСТАНОВЕНА",requiredForDirection:expected}))
  },422);
  const uncertainCategories=Object.values(legalMatrix).some(row=>row?.status==="НЕОПРЕДЕЛЕНА");
+ let caseEvidence,territorialSources,stage5Legal;
+ try{caseEvidence=readStage5Evidence(input)}
+ catch{return reply({error:"STAGE5_EVIDENCE_IDENTITY_MISMATCH",projectOnly:true},409)}
+ try{
+  territorialSources=await territorialContext(caseEvidence.zoneCodes);
+  stage5Legal=await getLegalContext({archiveSHA256:KT100_ARCHIVE_SHA,subject:input.subject,scope:input.scope,caseTexts:[input.confirmedStage4Text]});
+ }catch{return reply({error:"STAGE5_SOURCE_CONTEXT_UNAVAILABLE",projectOnly:true},503)}
 
 
  // Build the subject from the verified case-specific description, not an assumed "ИП".
@@ -987,6 +996,7 @@ async function handleStage5Document(request,env){
  const instructions="Състави само ПРОЕКТ на административен документ на български език, от името на компетентния административен орган РИОСВ – Пловдив. Изказът е ясен, официален, точен и сдържан, без разказвателни обяснения, самореклама или вътрешни означения (AI, EG, панел, тест, сценарий). Изпълнявай единствено потвърденото от експерта административно направление, не го заменяй, не предрешавай нова процедура. Не представяй недоказани факти като установени; не измисляй нормативни реквизити. При неизвестен административен реквизит използвай XXXXXXXX. Подготви текст точно за посочения документ, а не обща правна справка. Не добавяй заглавен ред Относно: и не повтаряй входящия номер: модулът ги поставя автоматично от данните на преписката точно преди твоите абзаци. При първо споменаване на нормативен акт се използва пълното му официално наименование, след което утвърденото кратко име. Само когато Наредбата за ОС е приложима и обоснована от експертно потвърдените мотиви, пълното ѝ наименование може да бъде въведено служебно от модула; не я представяй като универсално приложима. Не започвай с „Във връзка с представения предмет“ или „се уведомява следното“ — въвеждащият абзац е служебно добавен. Започни направо с конкретната нормативна констатация или изричното искане. Не включвай неизведени от документацията изисквания за емисии, отпадъци, технологии или разрешителни: всеки поискан параметър трябва да е свързан с определен липсващ факт и относим правен критерий. Избягвай общи формулировки като „режим на изчакване“, „цялостна техническа документация“ и „обърне необходимото внимание“. Не въвеждай нови факти чрез предположения. Започни директно със съществената административна констатация и изложи конкретно какъв е предметът на писмото — какво уведомяваш или какви точно данни се изискват за конкретно установения предмет на преписката. Посочи конкретни фактически характеристики само ако действително са необходими, а не общ списък с документация. Номерът и датата не се измислят. Не искай общи неопределени документи. Без лого, футър, подписи и технически коментари. Не пишѝ, че писмото или актът вече е издаден, че органът вече се е произнесъл или че процедурата се прекратява, ако това не следва от потвърденото направление и доказаните факти. Не включвай самостоятелна заключителна самооценка на анализа, твърдения за задължителни срокове, правни последици или прекратяване без установено основание. Не добавяй информация за публично обявяване, публикуване на интернет страница или автоматично прекратяване, освен когато това е предметът на експертно потвърденото административно действие и нормативното основание е установено. Не използвай изрази „това писмо има функциите на формален акт“, „настоящият административен акт“, „настоящото писмо е издадено“ или разказвателни обяснения за дейността на органа. Описвай конкретния резултат от правната преценка и конкретните сведения, които се изискват от възложителя. Изрично формулирай отделна конкретна правна констатация след фактическите данни. Ако доказателствата установяват, че приложимият предмет е извън обхвата на чл. 2, ал. 1, но попада в обхвата на чл. 2, ал. 2 от Наредбата за ОС, посочи това с точната разпоредба и фактите, които подкрепят избора. Ако съдържанието на представената информация покрива приложимите реквизити, може да формулираш, че тя се приема като уведомление по приложение № 1 към чл. 10, ал. 1, част Б от Наредбата за ОС. Това НЕ е универсален или задължителен абзац: не заявявай достатъчност на уведомлението, когато липсват данни за съществените му реквизити; тогава посочи конкретно доказаните липси. Правната квалификация и преценката за пълнота са различни проверки. Формулирай заключението в гласа на компетентния административен орган, а не като академичен анализ. При липсващи технически данни формулирай обективно необходимите параметри, а не искане възложителят да извърши правна категоризация. Използвай деловия стил на утвърдените образци на РИОСВ – Пловдив, без да пренасяш факти и заключения от други преписки. Не извеждай липса на въздействия единствено от липса на пространствено пресичане. Не възлагай правната квалификация на възложителя; когато се искат допълнителни данни, посочи само конкретни фактически характеристики. При противоречие между предложението и нормативна предпоставка запази направлението, но отбележи проблема за експертна проверка извън текста на писмото, без да измисляш решение. Стилът е на компетентния административен орган, не на външен коментатор: говори на адресата с „Уведомявам Ви“, „Изисквам да представите“ или „Необходимо е да представите“ когато съответства на основанията; не използвай „компетентният орган следва“, „възложителят следва да бъде уведомена“, „предлага се на органа“, „целесъобразно е да бъде изпратено“ или разказ за бъдещи действия на органа. Различавай установен факт, нормативна предпоставка, правен извод и конкретно указание. Не прави отрицателен категоричен извод за приложения № 1 и № 2, ако едновременно липсват данни, нужни за категоризирането; тогава посочи конкретната доказателствена граница и кои параметри липсват. Не обосновавай само с липса на промяна на предназначение извод за ОС; проверявай относимите предпоставки по чл. 2, ал. 1 и ал. 2 по конкретните факти. Ако потвърденото направление или доказателствата са вътрешно противоречиви, не прикривай това с окончателен правен извод — формулирай неутрално само проверените сведения и върни бележка за експертна проверка. Никога не изисквай възложителят да извършва сам правна категоризация. При възможност пиши от първо лице единствено число на директора като компетентен административен орган, без да твърдиш, че документът вече е издаден. Избягвай повторение на служебната бланка, входящия номер, адресата, заглавието на документа и текста „Относно:“: те се добавят отделно от системата. Текстът подлежи на последващо експертно потвърждение; след това експертните редакции имат абсолютен приоритет.";
  const facts=JSON.stringify({selectedDirection:match[0],documentTitle:title,incomingReference:safeReference,subject:input.subject,scope:input.scope,
  expertConfirmedProposal:input.confirmedStage4Text,
+ caseEvidence,territorialSources,legalTextsExact:stage5Legal.legalProvisions,
  expertConfirmedQualification:independentExpert||reviewedExpertChoice?null:(input.qualificationRecord||null),
  independentExpertDecision:independentExpert,
  expertConfirmedReviewedChoice:reviewedExpertChoice||null,
@@ -996,10 +1006,24 @@ async function handleStage5Document(request,env){
  const response=await fetch("https://api.openai.com/v1/responses",{method:"POST",signal:controller.signal,
  headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
  body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:3700,
- input:[{role:"system",content:expertRule+directionRules+instructions+" "+MOSV_EDITORIAL_GUIDE},{role:"user",content:facts}]})});
+ input:[{role:"system",content:expertRule+directionRules+instructions+" "+MOSV_EDITORIAL_GUIDE+" "+STAGE5_SOURCE_RULES},{role:"user",content:facts}]})});
  if(!response.ok)return reply({error:"Author provider unavailable",providerStatus:response.status},502);
  const data=await response.json();
  let draft=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
+ // One bounded editorial pass only for a detected narrator voice, never a new qualification.
+ if(needsStage5VoiceEdit(draft)){
+  const edit=await fetch("https://api.openai.com/v1/responses",{method:"POST",signal:controller.signal,
+   headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
+   body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:3700,
+    input:[{role:"system",content:expertRule+directionRules+instructions+" "+MOSV_EDITORIAL_GUIDE+" "+STAGE5_SOURCE_RULES+
+     " РЕДАКЦИЯ: запази конкретните факти, установените граници и избрания вид документ. Превърни разказа за бъдещо писмо в самия текст от името на органа. Не дописвай липсващ правен извод и не сменяй експертното направление. Върни целия редактиран текст без служебно въведение."},
+     {role:"user",content:JSON.stringify({caseSources:JSON.parse(facts),draft})}]})});
+  if(edit.ok){
+   const edited=await edit.json();
+   const revised=(edited.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
+   if(revised.length>=120&&revised.length<=18000)draft=revised;
+  }
+ }
  // Server-side contract check: a selected direction cannot silently become another administrative act.
  const unauthorizedRequest=confirmedPanelId===1 &&
   /(?:необходимо\s+е\s+да\s+представите|изисквам\s+да\s+представите|указвам\s+(?:ви\s+)?да\s+(?:представите|допълните)|да\s+допълните\s+представената\s+документация|представете\s+допълнителн[а-я]*\s+(?:документ|информац)|допълнителна\s+информация[,\s]+включваща)/iu.test(draft);
@@ -1028,6 +1052,7 @@ async function handleStage5Document(request,env){
  // Remove only the duplicated model-generated introduction, not its substantive legal reasoning.
  // Anchored to the start of the draft so expert-authored later paragraphs are untouched.
  draft=draft.replace(/^\s*(?:Във\s+връзка\s+с\s+(?:инвестиционното\s+предложение|представената\s+документация)|По\s+повод\s+(?:инвестиционното\s+предложение|постъпилото\s+уведомление))[^\n]{0,1100}?(?:Ви\s+уведомявам\s+следното|се\s+уведомява\s+следното)\s*:\s*/iu,"").trim();
+ draft=stripRepeatedStage5Intro(draft);
  draft=subjectLine+"\n\n"+refLine+"\n\n"+draft;
 
  const editorialFlags=[];
@@ -1036,7 +1061,7 @@ async function handleStage5Document(request,env){
  if(/(?:няма\s+липсващи\s+данни|не\s+са\s+установени\s+(?:липсващи|съществени\s+липси))[\s\S]{0,900}(?:липсват\s+(?:технически\s+)?данни|непълн(?:а|и)\s+(?:информация|данни))/iu.test(draft)||
  /(?:липсват\s+(?:технически\s+)?данни|непълн(?:а|и)\s+(?:информация|данни))[\s\S]{0,900}(?:няма\s+липсващи\s+данни|не\s+са\s+установени\s+(?:липсващи|съществени\s+липси))/iu.test(draft))
    editorialFlags.push("Вътрешно противоречие относно пълнотата на данните — необходима е експертна редакция.");
- if(/(?:следва\s+да\s+бъде\s+(?:изпратено|изготвено)|предлага\s+се\s+(?:да\s+се\s+)?(?:издаде|изпрати)|компетентният\s+орган\s+следва|целесъобразно\s+е\s+да\s+(?:се\s+)?изпрати)/iu.test(draft))
+ if(needsStage5VoiceEdit(draft)||/(?:следва\s+да\s+бъде\s+(?:изпратено|изготвено)|предлага\s+се\s+(?:да\s+се\s+)?(?:издаде|изпрати)|компетентният\s+орган\s+следва|целесъобразно\s+е\s+да\s+(?:се\s+)?изпрати)/iu.test(draft))
    editorialFlags.push("Неинституционален повествователен глас: писмото трябва да съдържа волеизявление на компетентния орган, а не предложение към него.");
  if(/^(?:РЕГИОНАЛНА\s+ИНСПЕКЦИЯ|Вх\.?\s*№|Изх\.?\s*№|ДО\s*$)/miu.test(draft))
    editorialFlags.push("Дублирани служебни реквизити в проекта — премахнете ги от съдържателния текст.");

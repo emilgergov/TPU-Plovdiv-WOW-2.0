@@ -64,11 +64,12 @@ assert(APPLICABILITY_MEANINGS.includes('не доказва буферна зо�
 assert(!APPLICABILITY_MEANINGS.includes('ЗАВЪРШЕНА ВЕРИГА НА ПРЕДЛОЖЕНИЕТО:'),'Rejected action-completion instruction withdrawn');
 console.log('PASS KT130 rollback: rejected action-completion instruction removed; OS2 applicability/result distinction and exact spatial types preserved');
 
-// Stage5 displays the same meanings without mutating the signed Stage4 source.
+// Stage5 meanings and source handoff preserve the signed text and expert actions.
 const stage5Path='vt03/kt80/integration/kt117-stage5-document-author.mjs';
 const stage5Before=await read(stage5Path),stage5After=overlayPresentationPolish(stage5Path,stage5Before);
-const stage5Anchor="original.querySelector('pre').textContent=a.text;";
-assert(stage5Before.includes(stage5Anchor));
-assert.equal(stage5After,stage5Before.replace(stage5Anchor,"original.querySelector('pre').textContent=("+displayApplicability.toString()+")(a.text);"));
-
-console.log('PASS KT130 Stage5: display-only applicability labels; signed analysis, generation and expert actions unchanged');
+assert(stage5After.includes("original.querySelector('pre').textContent=("+displayApplicability.toString()+")(a.text);"));
+assert(stage5After.includes('completeCaseEvidence:stage5Evidence'));
+const stage5Tail=s=>s.slice(s.indexOf(' edit.onclick='));
+assert(stage5Tail(stage5Before).length>100);
+assert.equal(stage5Tail(stage5After),stage5Tail(stage5Before),'Expert editing/confirmation/export unchanged');
+console.log('PASS KT130 Stage5: display meanings and current-case source handoff; expert editing/confirmation/export unchanged');
