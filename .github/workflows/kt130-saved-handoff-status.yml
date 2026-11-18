@@ -1,0 +1,31 @@
+name: KT130 read-only saved GIS handoff diagnostic
+on:
+  push:
+    branches: [work/kt125-access-register-from-kt124-r6]
+    paths: ['.github/workflows/kt130-saved-handoff-status.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect only saved flags for acceptance case 7
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {gunzipSync} from 'node:zlib';
+          const base='https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1',headers={Authorization:'Bearer '+process.env.CF_TOKEN};
+          const settings=await fetch(base+'/workers/scripts/tpu-plovdiv-kt125-local-auth/settings',{headers}).then(r=>r.json());if(!settings.success)throw Error('Settings unavailable');
+          const id=settings.result.bindings.find(b=>b.name==='KT125_DB'&&b.type==='d1')?.id;if(!id)throw Error('Registry unavailable');
+          const sql="SELECT v.content_json,v.created_at_ms FROM kt126_versions v JOIN kt126_registry r USING(case_id) WHERE r.organization_id=? AND r.internal_number=? AND v.kind='state' ORDER BY v.revision DESC LIMIT 1";
+          const result=await fetch(base+'/d1/database/'+id+'/query',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({sql,params:['riosv-plovdiv','EG-2026-000007']})}).then(r=>r.json());if(!result.success)throw Error('Read-only query failed');
+          const row=result.result[0]?.results?.[0];if(!row){console.log('KT130_SAVED_FLAGS '+JSON.stringify({found:false}));process.exit(0)}
+          let x=JSON.parse(row.content_json);if(x.format==='KT126-GZIP-1')x=JSON.parse(gunzipSync(Buffer.from(x.payload,'base64'),{maxOutputLength:10000000}).toString('utf8'));
+          const w=x.state||{},g=w.normativeGate,p=w.parcelsConfirmed,s=w.subjectConfirmed,l=x.globals?.KT80FreeGISResults;
+          console.log('KT130_SAVED_FLAGS '+JSON.stringify({found:true,savedAt:row.created_at_ms,step:w.step,hasGateKey:Object.hasOwn(w,'normativeGate'),gate:g?{decision:g.decision,expertConfirmed:g.expertConfirmed}:null,subjectConfirmed:s?.expertConfirmed,scopeConfirmed:s?.scopeConfirmed,parcelReview:p?{mode:p.mode,expertConfirmed:p.expertConfirmed,ids:p.ids?.length,spatiallyVerified:p.spatiallyVerified}:null,live:l?{ids:l.ids?.length,results:l.results?.length,verified:l.results?.every(r=>Array.isArray(r.verified_zone_intersections)&&typeof r.intersection_verified_outside==='boolean')}:null}));
+          NODE
