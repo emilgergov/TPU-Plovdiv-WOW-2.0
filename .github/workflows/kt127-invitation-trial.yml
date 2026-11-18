@@ -1,4 +1,4 @@
-name: KT127 authorized first invitation trial
+name: KT127 authorized corrected invitation trial
 on:
   push:
     branches: [work/kt125-access-register-from-kt124-r6]
@@ -32,7 +32,7 @@ jobs:
           const registration=await fetch(origin+'/auth/register',{signal:AbortSignal.timeout(15000)});
           if(registration.status!==200||!(await registration.text()).includes('data-layout="local100"'))throw Error('Registration page check failed; no invitations sent');
           const key=randomBytes(32).toString('hex');
-          const source=`export default {async fetch(r,e){if(r.method!=='POST'||r.headers.get('Authorization')!=='Bearer '+e.PROBE_KEY)return new Response(null,{status:403,headers:{'X-KT127-Trial':'ready'}});const q=await e.LOCAL.queueStandardPresentation({actorUsername:'emilgergov',usernames:['test1234','emilgergov'],extraEmails:['pr@plovdiv.riew.gov.bg'],requestKey:'KT127-20261118-PR-FIRST-TRIAL-V1'});if(!q.ok)return Response.json({ok:false,stage:'resolve-registered-recipients'});return Response.json(await e.LOCAL.sendPresentationBatch(q.batchId));}}`;
+          const source=`export default {async fetch(r,e){if(r.method!=='POST'||r.headers.get('Authorization')!=='Bearer '+e.PROBE_KEY)return new Response(null,{status:403,headers:{'X-KT127-Trial':'ready'}});const q=await e.LOCAL.queueStandardPresentation({actorUsername:'emilgergov',usernames:['test1234','emilgergov'],extraEmails:['pr@plovdiv.riew.gov.bg'],requestKey:'KT127-20261118-PR-FIRST-ROUNDCUBE-V2'});if(!q.ok)return Response.json({ok:false,stage:'resolve-registered-recipients'});return Response.json(await e.LOCAL.sendPresentationBatch(q.batchId));}}`;
           let created=false;
           try{
             const form=new FormData();form.set('metadata',new Blob([JSON.stringify({main_module:'worker.mjs',compatibility_date:before.compatibility_date,observability:{enabled:false},bindings:[{type:'secret_text',name:'PROBE_KEY',text:key},{type:'service',name:'LOCAL',service:name,entrypoint:'LocalAuthService'}]})],{type:'application/json'}));form.set('worker.mjs',new Blob([source],{type:'application/javascript+module'}),'worker.mjs');
