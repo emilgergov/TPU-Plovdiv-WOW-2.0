@@ -54,15 +54,22 @@ jobs:
           if(names(await api(name,"/settings"))!==names(before))throw Error("Binding list changed");
           await new Promise(r=>setTimeout(r,6000));
           const probeKey=randomBytes(32).toString("hex");
-          const source='export default {async fetch(r,e){if(r.method!=="POST"||r.headers.get("Authorization")!=="Bearer "+e.PROBE_KEY)return new Response(null,{status:403});return Response.json(await e.LOCAL.verifyMailTransport())}}';
+          const source='export default {async fetch(r,e){if(r.method!=="POST"||r.headers.get("Authorization")!=="Bearer "+e.PROBE_KEY)return new Response(null,{status:403,headers:{"X-KT125-Mail-Probe":"ready"}});return Response.json(await e.LOCAL.verifyMailTransport())}}';
           let created=false;
           try{
             await upload(helper,source,{compatibility_date:before.compatibility_date,observability:{enabled:false},bindings:[{type:"secret_text",name:"PROBE_KEY",text:probeKey},{type:"service",name:"LOCAL",service:name,entrypoint:"LocalAuthService"}]});created=true;
             await api(helper,"/subdomain",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({enabled:true,previews_enabled:false})});
             const sub=await fetch("https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1/workers/subdomain",{headers}).then(r=>r.json());
             if(!sub.success)throw Error("Worker subdomain unavailable");
-            await new Promise(r=>setTimeout(r,4000));
-            const result=await fetch("https://"+helper+"."+sub.result.subdomain+".workers.dev/check",{method:"POST",headers:{Authorization:"Bearer "+probeKey},signal:AbortSignal.timeout(45000)});
+            const probeUrl="https://"+helper+"."+sub.result.subdomain+".workers.dev/check";
+            let ready=false;
+            for(let n=0;n<20;n++){
+              const r=await fetch(probeUrl,{method:"GET",signal:AbortSignal.timeout(10000)});
+              if(r.status===403&&r.headers.get("X-KT125-Mail-Probe")==="ready"){ready=true;break}
+              await new Promise(resolve=>setTimeout(resolve,3000));
+            }
+            if(!ready)throw Error("Private diagnostic address did not become ready; no SMTP authentication attempted");
+            const result=await fetch(probeUrl,{method:"POST",headers:{Authorization:"Bearer "+probeKey},signal:AbortSignal.timeout(45000)});
             if(!result.ok)throw Error("Private probe response HTTP "+result.status);
             const status=await result.json();
             console.log("PRIVATE_SMTP_RUNTIME_RESULT "+JSON.stringify(status));
