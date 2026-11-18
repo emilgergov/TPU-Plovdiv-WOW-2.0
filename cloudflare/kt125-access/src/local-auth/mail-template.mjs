@@ -17,7 +17,7 @@ export function accountMailHtml({name,link,reset=false}){
 <p style="margin:0 0 16px">Здравейте, ${escape(name)}!</p><p style="margin:0 0 16px">${intro}</p><p style="margin:0 0 24px">${instructions}</p>
 <table role="presentation" cellspacing="0" cellpadding="0"><tr><td bgcolor="#d9b771" style="border-radius:7px"><a href="${escape(link)}" style="display:inline-block;padding:14px 26px;border:1px solid #f0ce8a;border-radius:7px;color:#153828;font:bold 15px/1.4 Verdana,Arial,sans-serif;text-decoration:none">${button}</a></td></tr></table>
 <p style="margin:24px 0 16px;padding:14px 16px;border-left:3px solid #d9b771;background-color:#1c4332;font-size:13px;color:#e0eade">${notice}</p>
-<p style="margin:0 0 16px">${footer}</p><p style="margin:0;font-size:12px;color:#c7d5c9">Вашата парола не се изпраща по имейл и не е достъпна за администратора.</p>
+<p style="margin:0 0 16px">${footer}</p><p style="margin:0 0 16px;font-size:12px;color:#c7d5c9">Парола: от 12 до 128 знака. Няма задължителни главни букви, цифри или специални знаци. Може да използвате запомняща се фраза с интервали.</p><p style="margin:0;font-size:12px;color:#c7d5c9">Вашата парола не се изпраща по имейл и не е достъпна за администратора.</p>
 </td></tr><tr><td style="padding:20px 32px;border-top:1px solid #56745e;font:12px/1.6 Verdana,Arial,sans-serif;color:#c7d5c9">Ако бутонът не се отваря, копирайте целия адрес в браузъра:<br><a href="${escape(link)}" style="color:#e6c680;word-break:break-all;overflow-wrap:anywhere">${escape(link)}</a><p style="margin:18px 0 0;color:#d9b771">WOW · ТПУ Пловдив<br><span style="color:#c7d5c9">Автоматично съобщение за Вашия профил</span></p></td></tr>
 </table></td></tr></table></body></html>`;
 }

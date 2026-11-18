@@ -65,7 +65,7 @@ export async function sendNotification(env,mailId,{deliver=deliverSmtp,now=Date.
   const result=await deliver(env,{to:row.email,subject:'WOW — заявката Ви за достъп е одобрена',
    messageId:`<wow-${mailId}@${new URL(config.origin).hostname}>`,
    html:accountMailHtml({name:row.display_name,link}),
-   text:`Здравейте, ${row.display_name}!\n\nЗаявката Ви за достъп до експертния модул WOW е одобрена.\nЗа първоначалния вход отворете връзката и въведете избраните от Вас потребителско име и парола:\n${link}\n\nВръзката е валидна 7 дни от одобрението. След първоначалния вход използвайте само потребителското си име и парола.\nПаролата Ви не е достъпна за администратора и не се изпраща с това писмо.`});
+   text:`Здравейте, ${row.display_name}!\n\nЗаявката Ви за достъп до експертния модул WOW е одобрена.\nЗа първоначалния вход отворете връзката и въведете избраните от Вас потребителско име и парола:\n${link}\n\nВръзката е валидна 7 дни от одобрението. След първоначалния вход използвайте само потребителското си име и парола.\nПаролата Ви не е достъпна за администратора и не се изпраща с това писмо.\n\nПарола: от 12 до 128 знака. Няма задължителни главни букви, цифри или специални знаци. Може да използвате запомняща се фраза с интервали.`});
   const state=['accepted','failed','uncertain'].includes(result?.state)?result.state:'uncertain';
   await db.prepare("UPDATE kt125_local_outbox SET state=? WHERE mail_id=? AND state='sending' AND attempt_at_ms=?").bind(state,mailId,now).run();
   return {ok:state==='accepted',state};
@@ -88,7 +88,7 @@ export async function sendResetNotification(env,resetId,{deliver=deliverSmtp,now
   if(claim.meta.changes!==1)return {ok:false};
   const result=await deliver(env,{to:row.email,subject:'WOW — възстановяване на парола',messageId:`<wow-reset-${resetId}@${new URL(config.origin).hostname}>`,
    html:accountMailHtml({name:row.display_name,link:config.origin+'/auth/reset?request='+resetId+'&token='+proof,reset:true}),
-   text:`Здравейте, ${row.display_name}!\n\nЗа да зададете нова парола за WOW, отворете следната връзка до 30 минути:\n${config.origin}/auth/reset?request=${resetId}&token=${proof}\n\nАко не сте поискали тази промяна, не предприемайте действие. Паролата Ви остава същата. След успешната промяна всички отворени сесии се прекратяват.`});
+   text:`Здравейте, ${row.display_name}!\n\nЗа да зададете нова парола за WOW, отворете следната връзка до 30 минути:\n${config.origin}/auth/reset?request=${resetId}&token=${proof}\n\nАко не сте поискали тази промяна, не предприемайте действие. Паролата Ви остава същата. След успешната промяна всички отворени сесии се прекратяват.\n\nПарола: от 12 до 128 знака. Няма задължителни главни букви, цифри или специални знаци. Може да използвате запомняща се фраза с интервали.`});
   const state=['accepted','failed','uncertain'].includes(result?.state)?result.state:'uncertain';
   await db.prepare("UPDATE kt125_local_resets SET mail_state=? WHERE reset_id=? AND mail_state='sending'").bind(state,resetId).run();return {ok:state==='accepted',state};
  }catch{return {ok:false,state:'uncertain'}}
