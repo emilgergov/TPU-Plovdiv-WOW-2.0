@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 import {overlaySpatialHandoff} from '../src/kt126/spatial-handoff.mjs';
+import {notificationParcelCandidates,overlayParcelCandidates} from '../src/kt126/parcel-candidates.mjs';
 const read=path=>readFile(new URL('../../..'+ '/'+path,import.meta.url),'utf8');
 const autoPath='vt03/kt80/integration/kt83-p2-automatic-pdf1.js';
 const handPath='vt03/kt80/integration/kt95-stage-evidence-handoff.mjs';
@@ -33,3 +34,15 @@ for(const spatialClass of ['INTERSECTS','MIXED','OUTSIDE','UNDETERMINED']){
 overlaySpatialHandoff(authorPath,await read(authorPath));
 assert.throws(()=>overlaySpatialHandoff(autoPath,auto),/contract mismatch/);
 console.log('PASS KT130: replacement GIS retriggers PDF once, stale receipt rejected, spatial facts independent of PDF and never promoted to legal truth');
+const notification='УВЕДОМЛЕНИЕ за инвестиционно предложение';
+for(const prefix of ['ПИ','ПИ ','ПИ с ИД ','ПИ с идентификатор ','поземлен имот с идентификатор ']){
+ assert.deepEqual(notificationParcelCandidates('Строителство на сграда в '+prefix+'36498.8.100, м. Кантона',notification),['36498.8.100']);
+}
+assert.deepEqual(notificationParcelCandidates('Изграждане в ПИ12345.67.89','УВЕДОМЛЕНИЕ за инвестиционно предложение'),['12345.67.89'],'Universal candidate extraction, independent of filename and sample ID');
+assert.deepEqual(notificationParcelCandidates('ПИ36498.8.100, предишен идентификатор ПИ36498.8.90',notification),[]);
+assert.deepEqual(notificationParcelCandidates('ПИ36498.8.100, съсед ПИ36498.8.101',notification),[]);
+assert.deepEqual(notificationParcelCandidates('ПИ36498.8.100.1',notification),[],'Building ID cannot become parcel');
+assert.deepEqual(notificationParcelCandidates('ПИ36498.8.100','Адресна справка'),[]);
+const intake=await read('vt03/kt80/KT82_E01_SAFE_ZIP_INTAKE_V35.js');
+const patched=overlayParcelCandidates(intake);assert.notEqual(patched,intake);assert.throws(()=>overlayParcelCandidates(patched),/contract mismatch/);
+console.log('PASS KT130: printed/glued PI in notification introduction becomes candidate only; neighbours/former/building IDs and unrelated document rejected');

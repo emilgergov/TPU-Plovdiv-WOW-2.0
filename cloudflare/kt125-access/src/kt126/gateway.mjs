@@ -1,3 +1,4 @@
+import {overlayParcelCandidates} from './parcel-candidates.mjs';
 import {overlaySpatialHandoff} from './spatial-handoff.mjs';
 import {overlayStage3Context} from './stage3-context.mjs';
 import {overlaySessionAccess} from './session-bridge.mjs';
@@ -10,7 +11,7 @@ export function overlayModule(rel,source){
  if(rel.endsWith('/KT85_VT03_STAGE3_HORIZONTAL_V01.js'))return overlayStage3Context(source);
  if(['/KT80_EG_ACCESS_SESSION_V01.js','/KT83_AI_SUBJECT_V572.js','/KT83_AI_SCOPE_V572.js','/kt96-eg-ai-stage4-author.mjs'].some(p=>rel.endsWith(p)))return overlaySessionAccess(rel,source);
  if(rel.endsWith('/KT80_E01_IP_MASTER_SUBJECT_V32.js'))return overlaySubject(source);
- if(rel.endsWith('/KT82_E01_SAFE_ZIP_INTAKE_V35.js'))return overlayReader(source);
+ if(rel.endsWith('/KT82_E01_SAFE_ZIP_INTAKE_V35.js'))return overlayParcelCandidates(overlayReader(source));
  if(rel==='vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html'){if(source.includes('src="/kt126/client.js"'))throw Error('KT126 overlay already applied');source=replaceOnce(source,'<body>','<body data-kt80-view="home">');source=replaceOnce(source,' Избери преписка<input id="kt80InputFile"',' Избери нова преписка<input id="kt80InputFile"');return replaceOnce(source,'</body>','<script defer src="/kt126/client.js"></script></body>');}
  if(rel.endsWith('/KT83_WORKFLOW_CASE_V591.js')){
   source=replaceOnce(source,'  const result=await root.V26LocalIntake.process(file);','  const result=root.KT126Registry?.restoredIntake()||await root.V26LocalIntake.process(file);');
