@@ -80,7 +80,7 @@ export function installRegistryClient(){
    if(!root.Tesseract){await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=resolve;s.onerror=reject;document.head.append(s)})}
    worker=await root.Tesseract.createWorker('bul+eng',1);const result=await worker.recognize(canvas);if(generation!==previewGeneration||!dialog.isConnected||!isCurrent(caseId))return;applyProposal(result.data?.text||'');message.textContent='Разчитането е предложение. Ръкописният номер задължително се проверява от експерта.';
   }catch{message.textContent='Номерът не е разчетен надеждно. Въведете го ръчно или продължете без него.'}finally{button.disabled=false;if(worker)await worker.terminate()}};
-  const active=document.activeElement;dialog.showModal();await refresh();
+  const active=document.activeElement;dialog.showModal();await refresh();if(!input.value&&canvas.width)$('kt126Ocr').click();
   return new Promise(resolve=>{
    const commit=async decision=>{if(!isCurrent(caseId)){dialog.close();dialog.remove();resolve();return}if(decision==='confirm'&&!input.value.trim()){input.focus();message.textContent='Въведете Деловоден № или изберете „Продължи без Деловоден №“.';return}
     const buttons=[...dialog.querySelectorAll('button')];buttons.forEach(b=>b.disabled=true);
