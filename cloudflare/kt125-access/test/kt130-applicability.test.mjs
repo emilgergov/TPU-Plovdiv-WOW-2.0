@@ -63,3 +63,12 @@ console.log('PASS KT130 OS2: applicable basis with no-procedure result allowed, 
 assert(APPLICABILITY_MEANINGS.includes('не доказва буферна зона на ЗТ'));
 assert(!APPLICABILITY_MEANINGS.includes('ЗАВЪРШЕНА ВЕРИГА НА ПРЕДЛОЖЕНИЕТО:'),'Rejected action-completion instruction withdrawn');
 console.log('PASS KT130 rollback: rejected action-completion instruction removed; OS2 applicability/result distinction and exact spatial types preserved');
+
+// Stage5 displays the same meanings without mutating the signed Stage4 source.
+const stage5Path='vt03/kt80/integration/kt117-stage5-document-author.mjs';
+const stage5Before=await read(stage5Path),stage5After=overlayPresentationPolish(stage5Path,stage5Before);
+const stage5Anchor="original.querySelector('pre').textContent=a.text;";
+assert(stage5Before.includes(stage5Anchor));
+assert.equal(stage5After,stage5Before.replace(stage5Anchor,"original.querySelector('pre').textContent=("+displayApplicability.toString()+")(a.text);"));
+
+console.log('PASS KT130 Stage5: display-only applicability labels; signed analysis, generation and expert actions unchanged');

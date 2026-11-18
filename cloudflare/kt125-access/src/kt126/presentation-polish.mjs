@@ -39,5 +39,8 @@ export function overlayPresentationPolish(rel,source){
  @media(max-width:620px){#kt116Editor .kt130-expert-identity{display:grid;grid-template-columns:1fr}#kt116Editor .kt130-expert-identity input{width:100%;max-width:none}}
  \`;document.head.append(identityStyle);`);
  }
+ if(rel.endsWith('/kt117-stage5-document-author.mjs')){
+  source=once(source,"original.querySelector('pre').textContent=a.text;","original.querySelector('pre').textContent=("+displayApplicability.toString()+")(a.text);");
+ }
  return source;
 }
