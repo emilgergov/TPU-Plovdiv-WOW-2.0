@@ -1,3 +1,4 @@
+import {withSessionBanner} from './session-banner.mjs';
 import {requestReset,usableReset,completeReset} from './recovery.mjs';
 import {smtpConfig} from './mail.mjs';
 import {page} from './pages.mjs';
@@ -43,7 +44,7 @@ export function createLocalHandler({clock=()=>Date.now(),uuid=()=>crypto.randomU
    if(path==='/auth/forgot')return page({view:'forgot',mailReady:Boolean(smtpConfig(env))});
    if(path==='/auth/logout')return redirect('/auth/login');
    if(path==='/member'){
-    const who=await identity({db,request,config,now});return who?page({view:'home',user:who}):redirect('/auth/login',cookie('',0));
+    const who=await identity({db,request,config,now});return who?withSessionBanner(page({view:'home',user:who}),who):redirect('/auth/login',cookie('',0));
    }
    return page();
   }
@@ -120,12 +121,13 @@ export function createLocalHandler({clock=()=>Date.now(),uuid=()=>crypto.randomU
      const html=await response.text();
      body=html.replace(/<a id="kt125AccessLauncher"[^>]*>[^<]*<\/a>/g,['egmaster','administrator'].includes(who.role)?'<a id="kt125AccessLauncher" href="/kt125/admin/panel/overview" target="_blank" rel="noopener">⚙ Администратор</a>':'');
     }
-    return new Response(body,{status:response.status,headers});
+    const result=new Response(body,{status:response.status,headers});
+    return request.method==='HEAD'?result:withSessionBanner(result,who);
    }catch{return new Response('Работният екран временно не е достъпен.',{status:502})}
   }
   if(path.startsWith('/kt125/')){
    const verifier={verify:async()=>who};
-   return createKT125PrivateHandler({getVerifier:()=>verifier,identityConfigReady:()=>true,clock,uuid}).fetch(request,{...env,KT125_PRIVATE_ORIGIN:config.origin});
+   return withSessionBanner(await createKT125PrivateHandler({getVerifier:()=>verifier,identityConfigReady:()=>true,clock,uuid}).fetch(request,{...env,KT125_PRIVATE_ORIGIN:config.origin}),who);
   }
   return new Response('Няма такъв екран.',{status:404});
  }};

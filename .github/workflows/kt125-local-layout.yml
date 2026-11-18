@@ -22,6 +22,7 @@ jobs:
           npm ci --prefix cloudflare/kt125-access
           node --check cloudflare/kt125-access/src/local-auth/pages.mjs
           node cloudflare/kt125-access/test/mail-template.test.mjs
+          node cloudflare/kt125-access/test/session-banner.test.mjs
           node cloudflare/kt125-access/test/private-admin-page.test.mjs
           node cloudflare/kt125-access/test/user-lifecycle.test.mjs
           cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/src/private-worker.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt125-private-worker.mjs

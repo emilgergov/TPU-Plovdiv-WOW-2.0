@@ -60,12 +60,12 @@ export async function createSession({db,account,now,sessionToken=token()}){
 }
 export async function identity({db,request,config,now}){
  const t=getCookie(request);if(!t)return null;
- try{const row=await db.prepare(`SELECT u.identity_provider,u.provider_subject,u.user_id,u.role,a.username,a.email
+ try{const row=await db.prepare(`SELECT u.identity_provider,u.provider_subject,u.user_id,u.role,a.username,a.email,a.display_name
  FROM kt125_local_sessions s JOIN kt125_local_accounts a ON a.account_id=s.account_id JOIN kt125_users u ON u.user_id=a.user_id AND u.organization_id=a.organization_id
  WHERE s.token_hash=? AND a.organization_id=? AND a.state='approved' AND a.activated_at_ms IS NOT NULL
   AND s.credential_version=a.credential_version AND s.user_updated_at_ms=u.updated_at_ms
   AND s.expires_at_ms>? AND s.created_at_ms<=? AND u.active=1 AND u.role=a.approved_role`)
- .bind(await digest(t),config.org,now,now).first();return row?{verified:true,issuer:row.identity_provider,subject:row.provider_subject,userId:row.user_id,role:row.role,username:row.username,email:row.email}:null;
+ .bind(await digest(t),config.org,now,now).first();return row?{verified:true,issuer:row.identity_provider,subject:row.provider_subject,userId:row.user_id,role:row.role,username:row.username,displayName:row.display_name,email:row.email}:null;
  }catch{return null}
 }
 export async function logout(db,request){const t=getCookie(request);if(t)await db.prepare('DELETE FROM kt125_local_sessions WHERE token_hash=?').bind(await digest(t)).run();}
