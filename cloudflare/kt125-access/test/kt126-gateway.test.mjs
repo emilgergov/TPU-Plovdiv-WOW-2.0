@@ -63,3 +63,22 @@ const fixedRead=await readScannedFixture(overlayReader(readerSource));
 assert.equal(fixedRead.recognized,13);assert.equal(fixedRead.data.page_text_index.length,13);assert.equal(fixedRead.data.document_texts.length,1);assert(fixedRead.data.document_texts[0].text.includes('Строителство на жилищна сграда'));assert.equal(fixedRead.destroyed,true);
 assert(!fixedRead.data.files[0].status.includes('НЕПРОЧЕТЕН'));assert.equal(fixedRead.data.reader_version,'KT126_PDF_PAGE_BOUNDS_V1');
 console.log('PASS KT126 isolated reader: reproduce the real 90-second failure, preserve all 13 scanned pages with page-local bounds, release PDF resources; number review cannot block or replace the main analysis');
+
+const {overlaySubject,notificationSubject}=await import('../src/kt126/subject.mjs');
+const heading='Строителство на складова сграда без сутерен';
+const full='Уведомяваме Ви, че дружеството има следното инвестиционно предложение: „'+heading+'“ I. Характеристика на инвестиционното предложение 1. Резюме Предвижда се работещите да бъдат 3-4 човека.';
+assert.equal(notificationSubject(full),heading);
+const subjectSource=readFileSync('../../vt03/kt80/KT80_E01_IP_MASTER_SUBJECT_V32.js','utf8');
+const subjectRoot={confirm:()=>true};const subjectElements={kt80SubjectText:{value:'старо'},kt80ScopeText:{value:''}};
+vm.runInNewContext(overlaySubject(subjectSource),{window:subjectRoot,document:{readyState:'complete',getElementById:id=>subjectElements[id]||null,addEventListener:()=>{}}});
+for(const filename of ['generic.pdf','Уведомление.pdf']){
+ const intake={files:[{filename,status:'OCR: за проверка'}],document_texts:[{source:filename,text:full}],subject_candidates:[{title:'работещите да бъдат 3-4 човека',source:filename}]};
+ const proposal=subjectRoot.KT80SubjectMaster.propose(intake);
+ assert.equal(proposal.text,heading);assert.equal(proposal.expertConfirmed,false);assert.equal(proposal.sourceReadStatus,'REVIEW_REQUIRED');
+ intake.files[0].status='НЕПРОЧЕТЕН';
+ assert.notEqual(subjectRoot.KT80SubjectMaster.propose(intake).sourceType,'notification_project_heading');
+}
+const subjectEvents=[];subjectRoot.KT80RebuildKT52=()=>subjectEvents.push('rebuild');subjectRoot.KT80KT53={construct:()=>subjectEvents.push('construct')};
+subjectRoot.KT80SubjectMaster.construct();assert.deepEqual(subjectEvents,['rebuild','construct']);
+subjectRoot.confirm=()=>false;subjectRoot.KT80SubjectMaster.construct();assert.deepEqual(subjectEvents,['rebuild','construct']);
+console.log('KT126 notice subject independent of filename and explicit reconstruction: OK');
