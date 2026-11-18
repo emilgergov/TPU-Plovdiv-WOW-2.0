@@ -8,6 +8,9 @@ export function spatialEvidenceSummary(e){
   limitation:'Само пространствени факти. Липсващ PDF1 не означава непресичане. Пресичането или непресичането не определя категория по ЗООС, значимост на въздействие или приложима процедура.'};
 }
 export function overlaySpatialHandoff(rel,source){
+ if(rel.endsWith('/KT82_A_FREE_GIS_V603.js')){
+  source=once(source,' const gen=++S.epoch;'," root.KT82EvidenceInvalidation?.invalidate?.();\n const gen=++S.epoch;");
+ }
  if(rel.endsWith('/kt83-p2-automatic-pdf1.js')){
   source=once(source,'let serial=0,issued=null;','let serial=0,issued=null,issuedSource=null;');
   source=once(source,'if(issued===check.key)return;','if(issued===check.key&&issuedSource===x.live)return;');

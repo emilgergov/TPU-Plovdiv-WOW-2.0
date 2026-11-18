@@ -65,3 +65,12 @@ assert.equal(clientWindow.restoreGisGateForTest({state:{...confirmed,normativeGa
 assert(client.includes("'activeRoute','normativeGate']"));
 assert(client.includes('w.normativeGate=restoredGisGate(prior)'));
 console.log('PASS KT130: archive retains explicit GIS decision; old parcel-GIS review recovers it without inventing approval for missing/context/changed evidence');
+const gisPath='vt03/kt80/KT82_A_FREE_GIS_V603.js';
+const gis=overlaySpatialHandoff(gisPath,await read(gisPath));
+const findBody=gis.slice(gis.indexOf('async function find(){'),gis.indexOf('function resetPending()'));
+let revisions=0,lookups=0;const button={disabled:false};
+const gisRoot={V26ParcelEditor:{normalize:()=>({ids:['12345.1.2']})},KT82EvidenceInvalidation:{invalidate:()=>{revisions++}},V26BrowserGIS:{lookup:async()=>{assert.equal(revisions,1,'Evidence is invalidated before new lookup');lookups++;throw Error('fixture stops before geometry rendering')}}};
+const gisContext={root:gisRoot,$:id=>id==='kt80ParcelInput'?{value:'12345.1.2'}:button,S:{epoch:0},status:()=>{}};
+vm.createContext(gisContext);vm.runInContext(findBody+'\nthis.find=find;',gisContext);await gisContext.find();
+assert.equal(revisions,1);assert.equal(lookups,1);assert.equal(button.disabled,false);
+console.log('PASS KT130: every accepted GIS refresh starts a fresh evidence revision before lookup; old normative/PDF approvals cannot survive it');
