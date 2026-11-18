@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import {evaluateDecision} from '../../ai-author-v27/src/kt123-decision-model.mjs';
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {displayApplicability,overlayPresentationPolish} from '../src/kt126/presentation-polish.mjs';
@@ -35,5 +36,24 @@ assert(worker.includes('  MOSV_EDITORIAL_GUIDE,\n  APPLICABILITY_MEANINGS,'));as
 // Source guard: only one import and one instruction added to the qualifier.
 const normalized=qual.replace("import {APPLICABILITY_MEANINGS} from './kt130-applicability-meaning.mjs';\n",'').replace(' APPLICABILITY_MEANINGS,\n','');
 assert.equal(createHash('sha256').update(normalized).digest('hex'),'6f201b31383dd33cc2a6d6bec9d962d4f86e6d2b6a26dc4ab44e81eae6f787c5');
-assert.equal(createHash('sha256').update(await read('cloudflare/ai-author-v27/src/kt130-applicability-meaning.mjs')).digest('hex'),'0713b4c1b92982a6324128ec0ce8b5e66f2889d527f0dafdbb612c9e2532a80e','Only the reviewed meanings are accepted');
+assert.equal(createHash('sha256').update(await read('cloudflare/ai-author-v27/src/kt130-applicability-meaning.mjs')).digest('hex'),'956fad9d9ae804bfb1ba62b9a2b7bd075851ed07659257e738445293109abd00','Only the reviewed meanings are accepted');
 console.log('PASS KT130 applicability: three precise meanings shared by qualifier/author/reviewer, faithful display of archived values, quotes preserved, empty proposal box reproduced/fixed, expert confirmation unchanged');
+
+// Compatibility of a stated route is distinct from proving its case-specific grounds.
+const reason='Конкретните предпоставки са съпоставени с проверени факти и точно посочени доказателства.';
+const rows=Object.fromEntries(['A1','A2','OS1','OS2'].map(key=>[key,{status:'ОТРИЦАТЕЛНА',reason,count:1}]));
+const base={rows,selectedPanel:1,legalSourceVerified:true,authoritativeEvidence:{}};
+const negative=evaluateDecision(base);assert(negative.errors.some(e=>e.code==='PANEL_01_CONTRADICTS_LEGAL_FACTS'));
+assert.equal(rows.OS2.status,'ОТРИЦАТЕЛНА','No automatic positive OS2 from three negative assessments');
+const justified={...rows,OS2:{status:'ПОЛОЖИТЕЛНА',reason:'Основание за произнасяне: конкретно обосновани предпоставки по ал. 2; Предложен резултат от проверката: не е необходимо провеждане на процедура по реда на наредбата.',count:1}};
+assert.equal(evaluateDecision({...base,rows:justified}).compatible,true,'Applicable basis and no-procedure result are not contradictory');
+assert.equal(evaluateDecision({...base,rows:justified}).canIssueAdministrativeAct,false,'Compatibility never issues or approves an act');
+const uncertain={...justified,OS2:{status:'НЕОПРЕДЕЛЕНА',reason:'Не е установен конкретен решаващ факт, необходим за преценката по относимата правна предпоставка.',count:1}};
+assert(evaluateDecision({...base,rows:uncertain}).errors.some(e=>e.code==='PANEL_01_CONTRADICTS_LEGAL_FACTS'));assert.equal(uncertain.OS2.status,'НЕОПРЕДЕЛЕНА');
+const overlapping={...justified,OS1:{status:'ПОЛОЖИТЕЛНА',reason,count:1}};assert(evaluateDecision({...base,rows:overlapping}).errors.some(e=>e.code==='OS_ART2_MUTUALLY_EXCLUSIVE'));
+assert(APPLICABILITY_MEANINGS.includes('Основание за произнасяне: …; Предложен резултат от проверката: …'));
+assert(APPLICABILITY_MEANINGS.includes('Първите три отрицателни проверки НЕ са автоматичен алгоритъм'));
+assert(after.includes('Приложима“ може да бъде съчетано с обоснован извод'));
+const twoAxesText='ЧЛ. 2, АЛ. 2 НАРЕДБА ЗА ОС: '+justified.OS2.status+' — '+justified.OS2.reason;
+const view=render(after,twoAxesText);assert(view.textContent.includes('Приложима'));assert(view.textContent.includes('Основание за произнасяне:'));assert(view.textContent.includes('Предложен резултат от проверката: не е необходимо'));
+console.log('PASS KT130 OS2: applicable basis with no-procedure result allowed, no automatic positive from three negatives, uncertainty/conflicts preserved, original compatibility engine and expert authority unchanged');

@@ -16,7 +16,8 @@ export function overlayPresentationPolish(rel,source){
   source=once(source,"const header=mk('h3','Предложение за експертна преценка'),alerts=mk('details'),alertContent=mk('div');",`const header=mk('h3','Предложение за експертна преценка'),alerts=mk('details'),alertContent=mk('div');
  const meanings=mk('details');meanings.id='kt130ApplicabilityMeanings';
  meanings.append(mk('summary','Значение на нормативните оценки'));
- for(const description of ['Приложима — конкретните предпоставки са проверени и изпълнени.','Неприложима — конкретните предпоставки са проверени и е обосновано защо не са изпълнени.','Не може да се определи — посочен е конкретният липсващ факт, който препятства извода.'])meanings.append(mk('p',description));`);
+ for(const description of ['Приложима — конкретните предпоставки са проверени и изпълнени.','Неприложима — конкретните предпоставки са проверени и е обосновано защо не са изпълнени.','Не може да се определи — посочен е конкретният липсващ факт, който препятства извода.'])meanings.append(mk('p',description));
+ meanings.append(mk('p','За чл. 2, ал. 2 се разграничават приложимото основание за произнасяне и резултатът от проверката. „Приложима“ може да бъде съчетано с обоснован извод „Не е необходимо провеждане на процедура по реда на наредбата“. Първите три отрицателни оценки не определят автоматично четвъртата.'));`);
   source=once(source,'ui.append(header,alerts,paper,textarea,conclusion,actorLabel,actions,note,next,archiveMenu);','ui.append(header,meanings,alerts,paper,textarea,conclusion,actorLabel,actions,note,next,archiveMenu);');
   // Keep a heading and every following paragraph together until the next heading.
   source=once(source,'  for(const chunk of normalized.split(/\\n\\s*\\n/)){','  let activeSection=container;\n  for(const chunk of normalized.split(/\\n\\s*\\n/)){');
