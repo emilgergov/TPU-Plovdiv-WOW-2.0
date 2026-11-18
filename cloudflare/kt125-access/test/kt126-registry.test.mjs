@@ -3,6 +3,10 @@ import {readFileSync} from 'node:fs';
 import {Miniflare} from 'miniflare';
 import {REGISTRY_SCHEMA} from '../src/kt126/schema.mjs';
 import {createCase,readCase,listCases,changeCase,readState,registryYear} from '../src/kt126/registry.mjs';
+import {startSource,putSourcePart,finishSource,getSourcePart} from '../src/kt126/files.mjs';
+import {saveArtifact,listArtifacts,readArtifact} from '../src/kt126/artifacts.mjs';
+import {registryHttp} from '../src/kt126/http.mjs';
+import {proxyAuthor} from '../src/kt126/author-proxy.mjs';
 const mf=new Miniflare({modules:true,script:'export default {fetch(){return new Response("ok")}}',d1Databases:{DB:'registry-test'},compatibilityDate:'2026-07-30'});
 try{
  const db=await mf.getD1Database('DB');
@@ -36,5 +40,29 @@ try{
  await db.prepare("CREATE TRIGGER fail_registration BEFORE INSERT ON kt125_audit WHEN NEW.action='case.register' BEGIN SELECT RAISE(ABORT,'fixture audit failure'); END").run();
  await assert.rejects(createCase({...base,input:{requestKey:crypto.randomUUID(),sourceName:'rollback.pdf',sourceHash:'e'.repeat(64)}}));
  assert.equal((await db.prepare('SELECT last_number FROM kt126_counters WHERE organization_id=? AND year=2026').bind('org').first()).last_number,100,'Audit failure rolls back counter and all registry records');
- console.log('PASS KT126: 100 concurrent registrations, atomic numbering/idempotency/rollback, Sofia year boundary, no foreign/admin implicit access, explicit external confirmation, omissions, revision conflicts and restored state');
+ await db.prepare('DROP TRIGGER fail_registration').run();
+ const bytes=new TextEncoder().encode('private original document'),digest=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(x=>x.toString(16).padStart(2,'0')).join('');
+ const fileCase=await createCase({...base,input:{requestKey:crypto.randomUUID(),sourceName:'private.txt',sourceHash:digest}}),fileArgs={...base,caseId:fileCase.record.case_id};
+ assert.equal((await startSource(fileArgs,{filename:'private.txt',size:bytes.length,sha256:digest})).status,200);
+ assert.equal((await finishSource(fileArgs)).status,409,'Incomplete original cannot be sealed');
+ assert.equal((await putSourcePart(fileArgs,0,bytes.buffer)).status,200);
+ assert.equal((await putSourcePart(fileArgs,0,bytes.buffer)).status,200,'Retry same bytes is idempotent');
+ assert.equal((await finishSource(fileArgs)).status,200);
+ assert.deepEqual(new Uint8Array((await getSourcePart(fileArgs,0)).bytes),bytes);
+ assert.equal(await getSourcePart({...fileArgs,who:{verified:true,userId:'bob'}},0),null);
+ const artifact=await saveArtifact(fileArgs,{filename:'EG-2026-test_v1.docx',revision:0,documentVersion:1,bytes:bytes.buffer});assert.equal(artifact.status,200);
+ assert.equal((await saveArtifact(fileArgs,{filename:'EG-2026-test_v1.docx',revision:0,documentVersion:1,bytes:bytes.buffer})).artifact.artifact_id,artifact.artifact.artifact_id);
+ assert.equal((await listArtifacts(fileArgs)).length,1);assert(await readArtifact(fileArgs,artifact.artifact.artifact_id));
+ assert.equal(await readArtifact({...fileArgs,who:{verified:true,userId:'bob'}},artifact.artifact.artifact_id),null);
+ const config={origin:'https://native.invalid',org:'org'},env={KT125_DB:db};
+ const csrf=await registryHttp({env,who,config,now,request:new Request(config.origin+'/kt126/registry/create',{method:'POST',headers:{Origin:'https://evil.invalid','Content-Type':'application/json'},body:JSON.stringify(inputs[0])})});assert.equal(csrf.status,403);
+ const reqId=crypto.randomUUID(),body=JSON.stringify({caseId:fileArgs.caseId,requestId:reqId}),authorRequest=()=>new Request(config.origin+'/kt126/author/subject-improve',{method:'POST',headers:{Origin:config.origin,'Content-Type':'application/json','X-KT126-Case':fileArgs.caseId,'X-KT126-Revision':'0',Cookie:'session=opaque'},body});
+ let calls=0;const authorFetch=async()=>{calls++;return new Response(JSON.stringify({caseId:fileArgs.caseId}),{headers:{'Content-Type':'application/json'}})};
+ // Use real current time for the post-analysis permission check.
+ const proxy=await proxyAuthor({request:authorRequest(),env,who,config,now,authorFetch});assert.equal(proxy.status,200);
+ assert.equal((await proxyAuthor({request:authorRequest(),env,who,config,now,authorFetch})).status,200);assert.equal(calls,1,'Completed analytic retries return the persisted response');
+ await db.prepare('UPDATE kt125_users SET active=0 WHERE user_id=?').bind('alice').run();
+ assert.equal((await proxyAuthor({request:authorRequest(),env,who,config,now,authorFetch})).status,403,'Deactivation blocks even cached analytical results');
+ assert.equal(await getSourcePart(fileArgs,0),null);
+ console.log('PASS KT126: 100 concurrent registrations, annual atomic numbering/rollback, mandatory confirmation/omission, CAS/reopen, private chunked originals and hash verification, immutable Word archive, CSRF, analytic retry deduplication and immediate revocation');
 }finally{await mf.dispose()}

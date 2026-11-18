@@ -2,7 +2,7 @@ name: KT126 registry targeted verification
 on:
   push:
     branches: [work/kt125-access-register-from-kt124-r6]
-    paths: ['cloudflare/kt125-access/src/kt126/**','cloudflare/kt125-access/test/kt126-registry.test.mjs','.github/workflows/kt126-registry.yml']
+    paths: ['cloudflare/kt125-access/src/kt126/**','cloudflare/kt125-access/test/kt126-*.mjs','.github/workflows/kt126-registry.yml']
 permissions:
   contents: read
 jobs:
@@ -15,6 +15,9 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci --prefix cloudflare/kt125-access
-      - name: Verify real D1 atomic registry and expert confirmation
+      - name: Verify real D1 registry, private files, documents and revoked sessions
         working-directory: cloudflare/kt125-access
         run: node test/kt126-registry.test.mjs
+      - name: Verify exact module overlays and Word metadata
+        working-directory: cloudflare/kt125-access
+        run: node test/kt126-gateway.test.mjs

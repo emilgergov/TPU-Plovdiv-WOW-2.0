@@ -81,3 +81,14 @@ export async function readState({db,who,org,caseId,now=Date.now()}){
  const v=await db.prepare("SELECT revision,content_json FROM kt126_versions WHERE case_id=? AND kind='state' ORDER BY revision DESC LIMIT 1").bind(caseId).first();
  return {record,state:v?JSON.parse(v.content_json):null};
 }
+export async function canEditCase({db,who,org,caseId,now=Date.now()}){
+ if(!validCaseId(caseId)||who?.verified!==true)return false;
+ return !!await db.prepare(`SELECT case_id FROM kt126_registry WHERE case_id=? AND ${accessSQL}`).bind(caseId,...accessArgs(who,org,'case.edit',now)).first();
+}
+export const editGuard={sql:accessSQL,args:(who,org,now)=>accessArgs(who,org,'case.edit',now)};
+export async function caseContext({db,who,org,caseId,action='case.read',now=Date.now()}){
+ if(!validCaseId(caseId)||who?.verified!==true)return null;
+ const row=await db.prepare(`SELECT case_id,internal_number,revision,external_number,external_status FROM kt126_registry WHERE case_id=? AND ${accessSQL}`).bind(caseId,...accessArgs(who,org,action,now)).first();
+ return row?{verified:true,caseId:row.case_id,internalNumber:row.internal_number,revision:row.revision,externalNumber:row.external_status==='confirmed'?row.external_number:'',actorId:who.userId}:null;
+}
+export const actionGuard={sql:accessSQL,args:accessArgs};
