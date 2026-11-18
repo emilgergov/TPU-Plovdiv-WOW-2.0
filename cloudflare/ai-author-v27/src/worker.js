@@ -1115,4 +1115,3 @@ export default {
   return url.pathname==="/stage4-expert-decision"?handleExpertDecision(request,env):url.pathname==="/stage5-document"?handleStage5Document(request,env):url.pathname==="/stage4-proposal"?handleStage4Proposal(request,env):url.pathname==="/scope-improve"?handleScopeImprove(request,env):url.pathname==="/subject-improve"?handleSubjectImprove(request,env):handleAuthor(request,env);
  }
 };
-
