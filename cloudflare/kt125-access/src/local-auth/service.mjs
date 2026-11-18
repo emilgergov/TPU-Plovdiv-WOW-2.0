@@ -1,3 +1,4 @@
+import {sendPresentationBatch,queueStandardPresentation} from './presentation-mail.mjs';
 import {WorkerEntrypoint,DurableObject} from 'cloudflare:workers';
 import {hashPassword,verifyPassword} from './password.mjs';
 import handler from './worker.mjs';
@@ -14,6 +15,8 @@ export class LocalAuthService extends WorkerEntrypoint {
   const who=await identity({db:this.env.KT125_DB,request,config,now});
   return who?caseContext({db:this.env.KT125_DB,who,org:config.org,caseId,now,action}):null;
  }
+ async queueStandardPresentation(input){return queueStandardPresentation(this.env,input)}
+ async sendPresentationBatch(batchId){return sendPresentationBatch(this.env,batchId)}
  async sendResetNotification(resetId){return sendResetNotification(this.env,resetId)}
  async verifyMailTransport(){return verifySmtpConnection(this.env)}
  async getStatus(){return {configured:Boolean(smtpConfig(this.env))}}

@@ -37,7 +37,7 @@ export async function deliverSmtp(env,message,{createTransport}={}){
    auth:{user:smtp.user,pass:smtp.password},tls:{minVersion:'TLSv1.2',rejectUnauthorized:true},
    connectionTimeout:10000,greetingTimeout:10000,socketTimeout:20000,
    disableFileAccess:true,disableUrlAccess:true,logger:false,debug:false});
-  const result=await transport.sendMail({from:{name:'WOW · ТПУ Пловдив',address:smtp.from},
+  const result=await transport.sendMail({from:{name:message.senderName||'WOW · ТПУ Пловдив',address:smtp.from},
    to:message.to,subject:message.subject,text:message.text,html:message.html,messageId:message.messageId,
    disableFileAccess:true,disableUrlAccess:true});
   if(result.accepted?.some(a=>normalizeKT125Email(typeof a==='string'?a:a.address)===message.to))return {state:'accepted'};

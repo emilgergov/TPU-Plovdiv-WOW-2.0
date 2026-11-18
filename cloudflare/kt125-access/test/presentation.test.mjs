@@ -29,4 +29,23 @@ try{
  await db.prepare("UPDATE kt125_users SET active=0 WHERE user_id='admin'").run();edit.set('revision','2');assert.equal((await presentationHttp({...base,request:request(edit)})).status,400,'Concurrent revocation prevents draft writes');
  assert.equal((await db.prepare('SELECT revision FROM kt127_presentation_drafts').first()).revision,2);
  console.log('PASS KT127 D1: durable draft/recipient save, preview, no sending, stale-tab protection, administrator isolation and fresh role check');
+ const {queuePresentation,sendPresentationBatch,queueStandardPresentation}=await import('../src/local-auth/presentation-mail.mjs');
+ await db.prepare("UPDATE kt125_users SET active=1 WHERE user_id='admin'").run();
+ const mailEnv={KT125_DB:db,KT125_LOCAL_ENABLED:'true',KT125_LOCAL_ORIGIN:config.origin,KT125_REQUEST_ORGANIZATION:'org',KT125_AUTH_SECRET:'a'.repeat(64),KT125_SMTP_HOST:'smtp.example.invalid',KT125_SMTP_PORT:'465',KT125_SMTP_FROM:'gergov@plovdiv.riew.gov.bg',KT125_SMTP_USER:'gergov@plovdiv.riew.gov.bg',KT125_SMTP_PASSWORD:'fixture-only'};
+ const queue={db,org:'org',actorId:'admin',requestKey:'authorized-trial',data:presentationDefaults,recipients:[{email:'pr@example.bg',label:'PR'},'one@example.bg','two@example.bg']};
+ const [batchId,duplicate]=await Promise.all([queuePresentation(queue),queuePresentation(queue)]);assert.equal(batchId,duplicate);
+ const delivered=[];const deliver=async(_env,message)=>{delivered.push(message);assert.equal(message.senderName,'РИОСВ – Пловдив · WOW');assert.equal(message.cc,undefined);assert.equal(message.bcc,undefined);return {state:'accepted'}};
+ await Promise.all([sendPresentationBatch(mailEnv,batchId,{deliver}),sendPresentationBatch(mailEnv,batchId,{deliver})]);assert.equal(delivered.length,3);assert.equal(new Set(delivered.map(m=>m.to)).size,3);assert(delivered.every(m=>!m.html.includes('one@example.bg')&&!m.html.includes('two@example.bg')));
+ await sendPresentationBatch(mailEnv,batchId,{deliver});assert.equal(delivered.length,3,'Replay does not resend');
+ const ambiguous=await queuePresentation({...queue,requestKey:'ambiguous',recipients:['uncertain@example.bg']});await sendPresentationBatch(mailEnv,ambiguous,{deliver:async()=>{throw Error('fixture private error')}});const report=await sendPresentationBatch(mailEnv,ambiguous,{deliver});assert.equal(report.recipients[0].state,'uncertain');assert.equal(delivered.length,3);
+ const guarded=await queuePresentation({...queue,requestKey:'revoked',recipients:['revoked@example.bg']});await db.prepare("UPDATE kt125_users SET active=0 WHERE user_id='admin'").run();assert.equal((await sendPresentationBatch(mailEnv,guarded,{deliver})).ok,false);assert.equal(delivered.length,3);
+ await db.prepare("UPDATE kt125_users SET active=1 WHERE user_id='admin'").run();assert.equal((await sendPresentationBatch({...mailEnv,KT125_SMTP_FROM:'other@example.bg'},guarded,{deliver})).reason,'sender_not_ready');assert.equal(delivered.length,3);
+ await db.prepare('ALTER TABLE kt125_local_accounts ADD COLUMN user_id TEXT').run();await db.prepare('ALTER TABLE kt125_local_accounts ADD COLUMN username TEXT').run();await db.prepare('ALTER TABLE kt125_local_accounts ADD COLUMN activated_at_ms INTEGER').run();
+ await db.prepare("UPDATE kt125_local_accounts SET user_id='admin',username='operator',activated_at_ms=1").run();
+ const standard=await queueStandardPresentation(mailEnv,{actorUsername:'operator',usernames:['operator'],extraEmails:['pr-first@example.bg'],requestKey:'standard'});assert(standard.ok);assert.equal(standard.report.recipients[0].email,'pr-first@example.bg');assert.equal(standard.report.recipients[1].label,'operator');
+ const order=[];await sendPresentationBatch(mailEnv,standard.batchId,{deliver:async(_env,m)=>{order.push(m.to);return {state:'accepted'}}});assert.deepEqual(order,['pr-first@example.bg','staff@example.bg']);
+ const sendRequest=new Request(config.origin+'/kt125/admin/presentation/send',{method:'POST',headers:{Origin:config.origin,'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({revision:'2',confirm:'SEND'})});
+ let invoked=0;assert.equal((await presentationHttp({...base,env:{...mailEnv,KT125_LOCAL_AUTH:{sendPresentationBatch:async()=>{invoked++}}},request:sendRequest})).status,303);assert.equal(invoked,1);
+ console.log('PASS KT127 email: registered-address resolution, PR first, one envelope per recipient, concurrent idempotency, no automatic ambiguous retry, sender pin, live-role guard, explicit admin form');
+
 }finally{await mf.dispose()}
