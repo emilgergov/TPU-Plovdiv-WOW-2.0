@@ -20,7 +20,9 @@ const actualSource=readFileSync(path,'utf8');
 const prefixEnd=actualSource.indexOf('`;')+3;
 const editorialPrefix=actualSource.slice(0,prefixEnd);
 assert.equal(createHash('sha256').update(editorialPrefix).digest('hex'),'4908266c27e853a1f3445c4a4537d941e4905a12fe083dc87ba9889e418bf6d9','Only the reviewed KT130 methodological guide is permitted');
+assert.equal(actualSource.split("confirmed,documents:sourceTexts,legalProvisions:verifiedLegalCorpus.legalProvisions,gis:context.gisAnalysis});").length,2,'GIS source handoff must have one exact call site');
 const normalizedEditorial=actualSource.slice(prefixEnd)
+ .replace("confirmed,documents:sourceTexts,legalProvisions:verifiedLegalCorpus.legalProvisions,gis:context.gisAnalysis});","confirmed,documents:sourceTexts,legalProvisions:verifiedLegalCorpus.legalProvisions});")
  .replace("import {APPLICABILITY_MEANINGS} from './kt130-applicability-meaning.mjs';\n",'')
  .replace('  APPLICABILITY_MEANINGS,\n','')
  .replaceAll('    APPLICABILITY_MEANINGS,\n','')

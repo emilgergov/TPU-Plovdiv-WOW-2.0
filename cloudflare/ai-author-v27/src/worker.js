@@ -396,7 +396,7 @@ async function handleStage4Proposal(request,env){
   gisAnalysis:detail.gis||null,
   provenanceRule:"All document excerpts, semantic candidates and GIS previews require explicit individual verification. Do not promote them to established fact."};
  let lockedQualification=null,qualificationValidation=null,qualificationIssues=[];
- const qualificationSources=buildQualificationSources({subject:payload.subject,scope:payload.scope,confirmed,documents:sourceTexts,legalProvisions:verifiedLegalCorpus.legalProvisions});
+ const qualificationSources=buildQualificationSources({subject:payload.subject,scope:payload.scope,confirmed,documents:sourceTexts,legalProvisions:verifiedLegalCorpus.legalProvisions,gis:context.gisAnalysis});
  const exactSnippets=qualificationEvidenceOptions(qualificationSources);
  // KT124-R1: Explicit, archive-derived legal source IDs for each legal test.
  // This does NOT assign applicability/status or override validation.

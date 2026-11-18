@@ -76,7 +76,7 @@ export const QUALIFICATION_SYSTEM=[
  "Не избирай предварително панел 01,02,04 или 05. Не възлагай правната категоризация на възложителя.",
  "Не измисляй цитати, източници и факти. Изходът не е административен акт, а проектна квалификация."
 ].join(" ");
-export function buildQualificationSources({subject,scope,confirmed=[],documents=[],legalProvisions=[]}){
+export function buildQualificationSources({subject,scope,confirmed=[],documents=[],legalProvisions=[],gis=null}){
  const facts=[
   {id:"subject",text:String(subject||""),established:true,kind:"expert-confirmed"},
   {id:"scope",text:String(scope||""),established:true,kind:"expert-confirmed"}
@@ -88,6 +88,18 @@ export function buildQualificationSources({subject,scope,confirmed=[],documents=
  documents.slice(0,24).forEach((d,i)=>facts.push({
   id:"doc:"+i,text:String(d.text||""),established:false,kind:"unverified-document-extract",title:String(d.source||"")
  }));
+ // KT130: the same case-bound GIS packet seen by author/reviewer is a citeable
+ // spatial source, never an established legal premise. Preserve status/limits.
+ if(gis&&typeof gis==="object"&&!Array.isArray(gis)){
+  for(const key of ["parcelIds","sourceSummary","piMaster","spatial","stage3","areaContext"]){
+   const value=gis[key];
+   if(value==null||value===""||(Array.isArray(value)&&!value.length))continue;
+   const body=typeof value==="string"?value:JSON.stringify(value);
+   if(!body)continue;
+   facts.push({id:"gis:"+key,text:body,established:false,
+    kind:"case-spatial-context",title:"ГИС Етап 3 — "+key});
+  }
+ }
  const laws=legalProvisions.map((law,i)=>({
   id:"law:"+i,reference:String(law.reference||""),act:String(law.act||""),
   text:String(law.fullLegalText||""),verified:law.quotationFromArchive===true
