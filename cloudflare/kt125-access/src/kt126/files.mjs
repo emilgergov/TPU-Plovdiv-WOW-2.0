@@ -32,7 +32,8 @@ export async function finishSource(args){
  args.db.prepare(`UPDATE kt126_files SET complete=1 WHERE case_id=? AND source_id=? AND complete=0 AND parts=(SELECT COUNT(*) FROM kt126_chunks WHERE case_id=kt126_files.case_id AND source_id=kt126_files.source_id) AND size=(SELECT SUM(size) FROM kt126_chunks WHERE case_id=kt126_files.case_id AND source_id=kt126_files.source_id)
  AND EXISTS(SELECT 1 FROM kt126_registry WHERE kt126_registry.case_id=kt126_files.case_id AND ${editGuard.sql})`).bind(args.caseId,source(args),...editGuard.args(args.who,args.org,args.now)),
  args.db.prepare(`INSERT INTO kt125_audit(event_id,organization_id,case_id,actor_id,action,outcome,timestamp_ms,request_id,details_json)
- SELECT ?,organization_id,case_id,?,'case.source.store','created',?,?,json_object('source_id',?) FROM kt126_registry WHERE case_id=? AND changes()=1`).bind(event,args.who.userId,args.now,event,source(args),args.caseId)
+ SELECT ?,organization_id,case_id,?,'case.source.store','created',?,?,json_object('source_id',?,'revision',revision+1) FROM kt126_registry WHERE case_id=? AND changes()=1`).bind(event,args.who.userId,args.now,event,source(args),args.caseId),
+ args.db.prepare("UPDATE kt126_registry SET revision=revision+1 WHERE case_id=? AND ?<>'original' AND changes()=1").bind(args.caseId,source(args))
  ]);
  const file=await sourceInfo(args);return {status:file?.complete?200:409,file};
 }

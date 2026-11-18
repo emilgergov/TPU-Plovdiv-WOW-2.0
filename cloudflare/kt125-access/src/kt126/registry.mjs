@@ -79,7 +79,8 @@ export async function changeCase({db,who,org,caseId,input,kind,now=Date.now(),uu
 export async function readState({db,who,org,caseId,now=Date.now()}){
  const record=await readCase({db,who,org,caseId,now});if(!record)return null;
  const v=await db.prepare("SELECT revision,content_json FROM kt126_versions WHERE case_id=? AND kind='state' ORDER BY revision DESC LIMIT 1").bind(caseId).first();
- return {record,state:v?JSON.parse(v.content_json):null};
+ const extra=await db.prepare("SELECT MAX(CAST(json_extract(details_json,'$.revision') AS INTEGER)) revision FROM kt125_audit WHERE case_id=? AND action='case.source.store' AND json_extract(details_json,'$.source_id')<>'original'").bind(caseId).first();
+ return {record,state:v?JSON.parse(v.content_json):null,evidenceChanged:(extra?.revision||0)>(v?.revision??0)};
 }
 export async function canEditCase({db,who,org,caseId,now=Date.now()}){
  if(!validCaseId(caseId)||who?.verified!==true)return false;

@@ -57,13 +57,15 @@ try{
  assert.equal((await readCase(fileArgs)).internal_number,fileCase.record.internal_number);
  assert.equal((await db.prepare('SELECT COUNT(*) n FROM kt126_registry WHERE case_id=?').bind(fileArgs.caseId).first()).n,1);
  const damaged={...fileArgs,sourceId:crypto.randomUUID()};assert.equal((await startSource(damaged,{filename:'bad.pdf',size:bytes.length,sha256:digest})).status,200);assert.equal((await putSourcePart(damaged,0,new Uint8Array(bytes.length).buffer)).status,200);assert.equal((await finishSource(damaged)).status,409,'Wrong whole-file digest cannot seal an original');assert.equal(await getSourcePart(damaged,0),null);
- const artifact=await saveArtifact(fileArgs,{filename:'EG-2026-test_v1.docx',revision:0,documentVersion:1,bytes:bytes.buffer});assert.equal(artifact.status,200);
- assert.equal((await saveArtifact(fileArgs,{filename:'EG-2026-test_v1.docx',revision:0,documentVersion:1,bytes:bytes.buffer})).artifact.artifact_id,artifact.artifact.artifact_id);
+ assert.equal((await readState(fileArgs)).evidenceChanged,true,'A newly added original invalidates saved confirmations');
+ const fileRevision=(await readCase(fileArgs)).revision;
+ const artifact=await saveArtifact(fileArgs,{filename:'EG-2026-test_v1.docx',revision:fileRevision,documentVersion:1,bytes:bytes.buffer});assert.equal(artifact.status,200);
+ assert.equal((await saveArtifact(fileArgs,{filename:'EG-2026-test_v1.docx',revision:fileRevision,documentVersion:1,bytes:bytes.buffer})).artifact.artifact_id,artifact.artifact.artifact_id);
  assert.equal((await listArtifacts(fileArgs)).length,1);assert(await readArtifact(fileArgs,artifact.artifact.artifact_id));
  assert.equal(await readArtifact({...fileArgs,who:{verified:true,userId:'bob'}},artifact.artifact.artifact_id),null);
  const config={origin:'https://native.invalid',org:'org'},env={KT125_DB:db};
  const csrf=await registryHttp({env,who,config,now,request:new Request(config.origin+'/kt126/registry/create',{method:'POST',headers:{Origin:'https://evil.invalid','Content-Type':'application/json'},body:JSON.stringify(inputs[0])})});assert.equal(csrf.status,403);
- const reqId=crypto.randomUUID(),body=JSON.stringify({caseId:fileArgs.caseId,requestId:reqId}),authorRequest=()=>new Request(config.origin+'/kt126/author/subject-improve',{method:'POST',headers:{Origin:config.origin,'Content-Type':'application/json','X-KT126-Case':fileArgs.caseId,'X-KT126-Revision':'0',Cookie:'session=opaque'},body});
+ const reqId=crypto.randomUUID(),body=JSON.stringify({caseId:fileArgs.caseId,requestId:reqId}),authorRequest=()=>new Request(config.origin+'/kt126/author/subject-improve',{method:'POST',headers:{Origin:config.origin,'Content-Type':'application/json','X-KT126-Case':fileArgs.caseId,'X-KT126-Revision':String(fileRevision),Cookie:'session=opaque'},body});
  let calls=0;const authorFetch=async()=>{calls++;return new Response(JSON.stringify({caseId:fileArgs.caseId}),{headers:{'Content-Type':'application/json'}})};
  // Use real current time for the post-analysis permission check.
  const proxy=await proxyAuthor({request:authorRequest(),env,who,config,now,authorFetch});assert.equal(proxy.status,200);
