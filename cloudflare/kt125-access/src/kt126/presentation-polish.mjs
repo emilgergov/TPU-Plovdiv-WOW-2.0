@@ -11,6 +11,8 @@ export function overlayPresentationPolish(rel,source){
  if(rel.endsWith('/kt122-acceptance-finish.js'))source=once(source,"mk('span',null,why.slice(0,340))","mk('span',null,why)");
  if(rel.endsWith('/kt96-eg-ai-stage4-author.mjs'))source=once(source,'afterLead.slice(0,1100).trim()','afterLead.trim()');
  if(rel.endsWith('/kt116-expert-approval-handoff.mjs')){
+  source=once(source,'AI бележките остават в преписката','ЕГ бележките остават в преписката');
+  source=once(source,'Не се изисква спор с AI рецензента.','Не се изисква спор с ЕГ рецензента.');
   source=once(source,'function installKT116(){',`const applicabilityDisplay=${displayApplicability.toString()};\nfunction installKT116(){`);
   source=once(source,'const normalized=content.replace(', 'const normalized=applicabilityDisplay(content).replace(');
   source=once(source,"const header=mk('h3','Предложение за експертна преценка'),alerts=mk('details'),alertContent=mk('div');",`const header=mk('h3','Предложение за експертна преценка'),alerts=mk('details'),alertContent=mk('div');

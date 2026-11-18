@@ -29,7 +29,8 @@ const leading=fixed.children.find(n=>n.tag==='section');assert.equal(leading.chi
 assert(after.includes('Значение на нормативните оценки'));for(const entry of Object.values(APPLICABILITY_LABELS))assert(after.includes(entry.label+' — '+entry.definition[0].toLowerCase()+entry.definition.slice(1)));
 // The entire expert confirmation function and its existing overrides remain unchanged.
 const action=s=>{const a=s.indexOf(' confirm.onclick=async()=>{'),b=s.indexOf(' next.onclick=()=>{',a);assert(a>0&&b>a);return s.slice(a,b)};
-assert.equal(action(after),action(before));
+assert(after.includes('ЕГ бележките остават в преписката'));assert(!after.includes('AI бележките остават в преписката'));
+assert.equal(action(after).replace('ЕГ бележките остават в преписката','AI бележките остават в преписката'),action(before));
 const worker=await read('cloudflare/ai-author-v27/src/worker.js');const qual=await read('cloudflare/ai-author-v27/src/kt123-evidence-qualification.mjs');
 assert(qual.includes('export const QUALIFICATION_SYSTEM=[\n APPLICABILITY_MEANINGS,'));
 assert(worker.includes('  MOSV_EDITORIAL_GUIDE,\n  APPLICABILITY_MEANINGS,'));assert(worker.includes('const reviewSystem=[\n    APPLICABILITY_MEANINGS,'));
