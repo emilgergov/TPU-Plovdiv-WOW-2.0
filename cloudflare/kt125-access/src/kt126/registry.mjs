@@ -92,3 +92,7 @@ export async function caseContext({db,who,org,caseId,action='case.read',now=Date
  return row?{verified:true,caseId:row.case_id,internalNumber:row.internal_number,revision:row.revision,externalNumber:row.external_status==='confirmed'?row.external_number:'',actorId:who.userId}:null;
 }
 export const actionGuard={sql:accessSQL,args:accessArgs};
+export async function readHistory(args){
+ if(!await readCase(args))return null;
+ return (await args.db.prepare("SELECT revision,actor_id,kind,created_at_ms,CASE WHEN kind='external' THEN content_json ELSE NULL END AS external_json FROM kt126_versions WHERE case_id=? ORDER BY revision DESC LIMIT 100").bind(args.caseId).all()).results||[];
+}

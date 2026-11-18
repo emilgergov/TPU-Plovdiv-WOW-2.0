@@ -24,7 +24,7 @@ jobs:
       - name: Verify authenticated registry RPC and existing password lifecycle
         working-directory: cloudflare/kt125-access
         run: |
-          node_modules/.bin/esbuild src/local-auth/service.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=../../../dist/kt126-runtime.mjs
+          node_modules/.bin/esbuild src/local-auth/service.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=../../dist/kt126-runtime.mjs
           KT125_RUNTIME_BUNDLE="$GITHUB_WORKSPACE/dist/kt126-runtime.mjs" node test/local-auth-runtime.test.mjs
       - name: Prove preserved R6 author logic and private confirmed-number boundary
         run: |
