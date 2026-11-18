@@ -26,6 +26,7 @@ const base={request:req,verifier,targetUserId:"expert-b",nowMs:now,uuid};
 let db=fake();let result=await disableKT125User({...base,db});
 assert(result.ok&&result.disabledUserId==="expert-b");
 assert.equal(db.batches.length,1);
+assert.equal((await disableKT125User({...base,db:fake({changes:[3,1]})})).ok,true,"Trigger side effects count in D1 metadata");
 for(const options of [
  {actor:{...manager,active:0}},
  {actor:{...manager,role:"expert"}},

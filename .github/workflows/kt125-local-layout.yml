@@ -2,7 +2,7 @@ name: KT125 LOCAL100 password recovery and administrative entrance
 on:
   push:
     branches: [work/kt125-access-register-from-kt124-r6]
-    paths: ['cloudflare/kt125-access/src/local-auth/**', 'cloudflare/kt125-access/src/private-admin-page.mjs', '.github/workflows/kt125-local-layout.yml']
+    paths: ['cloudflare/kt125-access/src/local-auth/**', 'cloudflare/kt125-access/src/private-admin-page.mjs', 'cloudflare/kt125-access/src/user-lifecycle.mjs', '.github/workflows/kt125-local-layout.yml']
 permissions:
   contents: read
 concurrency:
@@ -23,6 +23,7 @@ jobs:
           node --check cloudflare/kt125-access/src/local-auth/pages.mjs
           node cloudflare/kt125-access/test/mail-template.test.mjs
           node cloudflare/kt125-access/test/private-admin-page.test.mjs
+          node cloudflare/kt125-access/test/user-lifecycle.test.mjs
           cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/src/private-worker.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt125-private-worker.mjs
           cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/src/local-auth/service.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=dist/kt125-local-auth-worker.mjs
       - name: Verify runtime without changing credentials

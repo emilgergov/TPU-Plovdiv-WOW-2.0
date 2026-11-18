@@ -1,3 +1,4 @@
+import {createKT125PrivateHandler} from '../src/private-worker.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
@@ -53,7 +54,19 @@ try{
  const replacement=await send('/auth/login',{username:'runtime-user',password:resetBody.password,account:'',activation:''});assert.equal(replacement.status,303);
  const freshCookie=replacement.headers.getSetCookie()[0].split(';')[0];
  assert.equal((await mf.dispatchFetch(origin+'/member',{headers:{Cookie:freshCookie},redirect:'manual'})).status,200);
- await db.prepare('UPDATE kt125_users SET active=0,updated_at_ms=? WHERE user_id=?').bind(Date.now(),ready.user_id||(await db.prepare('SELECT user_id FROM kt125_local_accounts WHERE account_id=?').bind(account.account_id).first()).user_id).run();
+ const targetId=(await db.prepare('SELECT user_id FROM kt125_local_accounts WHERE account_id=?').bind(account.account_id).first()).user_id;
+ const adminHandler=createKT125PrivateHandler({getVerifier:()=>verifier,identityConfigReady:()=>true});
+ const adminAction=async action=>adminHandler.fetch(new Request(origin+'/kt125/admin/users/'+targetId+'/'+action,{method:'POST',headers:{Origin:origin,'Content-Type':'application/x-www-form-urlencoded','Sec-Fetch-Site':'same-origin'},body:new URLSearchParams({confirm:action==='disable'?'DEACTIVATE':'REACTIVATE'})}),{...runtimeEnv,KT125_PRIVATE_ORIGIN:origin});
+ const disabled=await adminAction('disable');assert.equal(disabled.status,303,'Admin disable must report success when trigger also deletes sessions');
+ assert.equal((await db.prepare('SELECT active FROM kt125_users WHERE user_id=?').bind(targetId).first()).active,0);
  assert.equal((await mf.dispatchFetch(origin+'/member',{headers:{Cookie:freshCookie},redirect:'manual'})).status,303);
+ assert.equal((await send('/auth/login',{username:'runtime-user',password:resetBody.password,account:'',activation:''})).status,403);
+ const enabled=await adminAction('enable');assert.equal(enabled.status,303,'Admin enable must report success when trigger updates account epoch');
+ assert.equal((await mf.dispatchFetch(origin+'/member',{headers:{Cookie:freshCookie},redirect:'manual'})).status,303,'Reactivation must not revive old sessions');
+ const relogin=await send('/auth/login',{username:'runtime-user',password:resetBody.password,account:'',activation:''});assert.equal(relogin.status,303);
+ const restoredCookie=relogin.headers.getSetCookie()[0].split(';')[0];
+ assert.equal((await mf.dispatchFetch(origin+'/member',{headers:{Cookie:restoredCookie},redirect:'manual'})).status,200);
+ const deniedAdmin=await send('/kt125/admin/users/owner/disable',{confirm:'DEACTIVATE'},restoredCookie);
+ assert.equal(deniedAdmin.status,403,'Ordinary expert must not disable an administrator');
  console.log('PASS LOCAL97 workerd: actual D1, native scrypt through private SQLite Durable Object RPC, first password session, reset through native KDF with revoked old password/session and single-use link, revocation trigger and mail Service Binding. Elapsed ms:',Math.round(performance.now()-started));
 }finally{await mf.dispose()}

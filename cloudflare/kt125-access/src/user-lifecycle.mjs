@@ -31,6 +31,8 @@ export async function disableKT125User({
  const eventId=uuid(),requestId=uuid();
  if(!validId(eventId)||!validId(requestId)||eventId===requestId)return denied("INVALID_IDENTIFIERS");
  try{
+  // D1 meta.changes includes trigger writes (session revocation and account epoch).
+  // SQL changes() in the audit guard still requires exactly one target user.
   // Server-side guarded UPDATE rechecks role/active and same organization
   // at write time. Dossiers remain owned by the same user when disabled.
   const update=db.prepare(`
@@ -53,7 +55,7 @@ export async function disableKT125User({
   `).bind(eventId,actor.user_id,nowMs,requestId,
     JSON.stringify({target_user_id:targetUserId}),targetUserId,actor.organization_id);
   const result=await db.batch([update,audit]);
-  if(result?.[0]?.meta?.changes!==1||result?.[1]?.meta?.changes!==1)
+  if(!(result?.[0]?.meta?.changes>=1)||result?.[1]?.meta?.changes!==1)
     return denied("NO_ELIGIBLE_USER");
   return ok({disabledUserId:targetUserId});
  }catch{return denied("ATOMIC_WRITE_FAILED")}
@@ -76,6 +78,6 @@ export async function enableKT125User({request,verifier,db,targetUserId,nowMs=Da
   const audit=db.prepare(`INSERT INTO kt125_audit(event_id,organization_id,actor_id,action,outcome,timestamp_ms,request_id,details_json)
    VALUES(?,(SELECT organization_id FROM kt125_users WHERE user_id=? AND organization_id=? AND active=1 AND changes()=1),?,'users.enable','allowed',?,?,?)`)
    .bind(eventId,targetUserId,actor.organization_id,actor.user_id,nowMs,requestId,JSON.stringify({target_user_id:targetUserId}));
-  const result=await db.batch([update,audit]);return result?.length===2&&result.every(r=>r.meta.changes===1)?ok({enabledUserId:targetUserId}):denied('NO_ELIGIBLE_USER');
+  const result=await db.batch([update,audit]);return result?.length===2&&result[0]?.meta?.changes>=1&&result[1]?.meta?.changes===1?ok({enabledUserId:targetUserId}):denied('NO_ELIGIBLE_USER');
  }catch{return denied('ATOMIC_WRITE_FAILED')}
 }
