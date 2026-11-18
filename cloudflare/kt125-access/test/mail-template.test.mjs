@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {accountMailHtml} from '../src/local-auth/mail-template.mjs';
+const link='https://example.invalid/auth/activate?account=fixture&token=not-a-real-token';
+const html=accountMailHtml({name:'Емил <script> & Гергов',link});
+assert(html.includes('Емил &lt;script&gt; &amp; Гергов'));
+assert(!html.includes('<script>'));
+assert(html.includes('href="https://example.invalid/auth/activate?account=fixture&amp;token=not-a-real-token"'));
+assert(html.includes('Активирай профила'));
+assert(html.includes('само за връзката'));
+assert(html.includes('без нов код по имейл'));
+assert(accountMailHtml({name:'Емил',link,reset:true}).includes('30 минути'));
+assert.throws(()=>accountMailHtml({name:'Емил',link:'javascript:alert(1)'}));
+console.log('PASS HTML mail: escaped identity, exact activation link, expiry clarification, reset instructions');

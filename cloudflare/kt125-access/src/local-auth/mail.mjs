@@ -1,3 +1,4 @@
+import {accountMailHtml} from './mail-template.mjs';
 import {connect as connectTls} from 'node:tls';
 
 /** Keep the verified hostname for Workers TLS instead of resolving it to an IP. */
@@ -37,7 +38,7 @@ export async function deliverSmtp(env,message,{createTransport}={}){
    connectionTimeout:10000,greetingTimeout:10000,socketTimeout:20000,
    disableFileAccess:true,disableUrlAccess:true,logger:false,debug:false});
   const result=await transport.sendMail({from:{name:'WOW · ТПУ Пловдив',address:smtp.from},
-   to:message.to,subject:message.subject,text:message.text,messageId:message.messageId,
+   to:message.to,subject:message.subject,text:message.text,html:message.html,messageId:message.messageId,
    disableFileAccess:true,disableUrlAccess:true});
   if(result.accepted?.some(a=>normalizeKT125Email(typeof a==='string'?a:a.address)===message.to))return {state:'accepted'};
   return {state:result.rejected?.length?'failed':'uncertain'};
@@ -63,6 +64,7 @@ export async function sendNotification(env,mailId,{deliver=deliverSmtp,now=Date.
   if(claimed?.meta?.changes!==1)return {ok:false};
   const result=await deliver(env,{to:row.email,subject:'WOW — заявката Ви за достъп е одобрена',
    messageId:`<wow-${mailId}@${new URL(config.origin).hostname}>`,
+   html:accountMailHtml({name:row.display_name,link}),
    text:`Здравейте, ${row.display_name}!\n\nЗаявката Ви за достъп до експертния модул WOW е одобрена.\nЗа първоначалния вход отворете връзката и въведете избраните от Вас потребителско име и парола:\n${link}\n\nВръзката е валидна 7 дни от одобрението. След първоначалния вход използвайте само потребителското си име и парола.\nПаролата Ви не е достъпна за администратора и не се изпраща с това писмо.`});
   const state=['accepted','failed','uncertain'].includes(result?.state)?result.state:'uncertain';
   await db.prepare("UPDATE kt125_local_outbox SET state=? WHERE mail_id=? AND state='sending' AND attempt_at_ms=?").bind(state,mailId,now).run();
@@ -85,6 +87,7 @@ export async function sendResetNotification(env,resetId,{deliver=deliverSmtp,now
    AND EXISTS(SELECT 1 FROM kt125_local_accounts a JOIN kt125_users u ON u.user_id=a.user_id AND u.organization_id=a.organization_id WHERE a.account_id=kt125_local_resets.account_id AND a.credential_version=kt125_local_resets.credential_version AND u.active=1 AND a.state='approved')`).bind(resetId).run();
   if(claim.meta.changes!==1)return {ok:false};
   const result=await deliver(env,{to:row.email,subject:'WOW — възстановяване на парола',messageId:`<wow-reset-${resetId}@${new URL(config.origin).hostname}>`,
+   html:accountMailHtml({name:row.display_name,link:config.origin+'/auth/reset?request='+resetId+'&token='+proof,reset:true}),
    text:`Здравейте, ${row.display_name}!\n\nЗа да зададете нова парола за WOW, отворете следната връзка до 30 минути:\n${config.origin}/auth/reset?request=${resetId}&token=${proof}\n\nАко не сте поискали тази промяна, не предприемайте действие. Паролата Ви остава същата. След успешната промяна всички отворени сесии се прекратяват.`});
   const state=['accepted','failed','uncertain'].includes(result?.state)?result.state:'uncertain';
   await db.prepare("UPDATE kt125_local_resets SET mail_state=? WHERE reset_id=? AND mail_state='sending'").bind(state,resetId).run();return {ok:state==='accepted',state};

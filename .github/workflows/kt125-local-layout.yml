@@ -2,7 +2,7 @@ name: KT125 LOCAL100 password recovery and administrative entrance
 on:
   push:
     branches: [work/kt125-access-register-from-kt124-r6]
-    paths: ['cloudflare/kt125-access/src/local-auth/**', '.github/workflows/kt125-local-layout.yml']
+    paths: ['cloudflare/kt125-access/src/local-auth/**', 'cloudflare/kt125-access/src/private-admin-page.mjs', '.github/workflows/kt125-local-layout.yml']
 permissions:
   contents: read
 concurrency:
@@ -21,6 +21,9 @@ jobs:
         run: |
           npm ci --prefix cloudflare/kt125-access
           node --check cloudflare/kt125-access/src/local-auth/pages.mjs
+          node cloudflare/kt125-access/test/mail-template.test.mjs
+          node cloudflare/kt125-access/test/private-admin-page.test.mjs
+          cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/src/private-worker.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt125-private-worker.mjs
           cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/src/local-auth/service.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=dist/kt125-local-auth-worker.mjs
       - name: Verify runtime without changing credentials
         working-directory: cloudflare/kt125-access
@@ -64,5 +67,17 @@ jobs:
             if(r.status!==200||!html.includes('data-layout="local100"'))throw Error("Live layout check failed for "+path);
             console.log("LOCAL100_LIVE "+path+": HTTP200, compact layout");
           }
+          const privateBase=base.replace("tpu-plovdiv-kt125-local-auth","tpu-plovdiv-kt125-private");
+          const prior=await fetch(privateBase+"/settings",{headers}).then(r=>r.json());
+          if(!prior.success)throw Error("Cannot inspect private admin settings");
+          const p=prior.result;
+          const privateForm=new FormData();
+          privateForm.set("metadata",new Blob([JSON.stringify({main_module:"worker.mjs",compatibility_date:p.compatibility_date,compatibility_flags:p.compatibility_flags,keep_bindings:["secret_text"],bindings:(p.bindings||[]).filter(b=>b.type!=="secret_text")})],{type:"application/json"}));
+          privateForm.set("worker.mjs",new Blob([readFileSync("dist/kt125-private-worker.mjs")],{type:"application/javascript+module"}),"worker.mjs");
+          const saved=await fetch(privateBase,{method:"PUT",headers,body:privateForm}).then(r=>r.json());
+          if(!saved.success)throw Error("Private admin layout deployment rejected");
+          const checked=await fetch(privateBase+"/settings",{headers}).then(r=>r.json());
+          if(!checked.success||names(checked.result.bindings)!==names(p.bindings))throw Error("Private admin bindings changed");
+          console.log("PRIVATE_ADMIN: horizontal layout published; existing bindings retained");
           console.log("LOCAL100: existing sessions, password secret, D1 and DO bindings retained; no data or role changes");
           NODE
