@@ -147,13 +147,17 @@ export function installRegistryClient(){
   }finally{restoring=false}}
   display();await save();
  }
+ async function selectOriginal(expected){
+  const dialog=document.createElement('dialog');dialog.className='kt126-dialog';const h=document.createElement('h2');h.textContent='Продължаване на започнатия запис';const p=document.createElement('p');p.textContent='Изберете същия оригинал: '+expected.source_name+'. Записът ще продължи към '+expected.internal_number+', без нов номер.';const input=document.createElement('input');input.type='file';const message=document.createElement('p'),resume=document.createElement('button'),cancel=document.createElement('button');resume.textContent='Продължи записа';cancel.textContent='Откажи';dialog.append(h,p,input,message,resume,cancel);document.body.append(dialog);dialog.showModal();
+  return new Promise(resolve=>{const close=value=>{dialog.close();dialog.remove();resolve(value)};resume.onclick=async()=>{const file=input.files?.[0];if(!file){message.textContent='Изберете оригиналния файл.';return}resume.disabled=true;try{if(file.name!==expected.source_name||await hash(await file.arrayBuffer())!==expected.source_hash)throw Error('Избраният файл не съвпада с оригинала на тази преписка.');close(file)}catch(e){message.textContent=e.message;resume.disabled=false}};cancel.onclick=()=>close(null);dialog.addEventListener('cancel',e=>{e.preventDefault();close(null)})});
+ }
  async function openCase(id){
-  await queue;if(record)await save();const data=await api('/'+id);const fileInfo=await api('/'+id+'/source');if(!fileInfo.file.complete)throw Error('Оригиналът още не е записан изцяло. Отворете работния прозорец, в който е започнато изпращането.');
+  await queue;if(record)await save();const data=await api('/'+id);let fileInfo;try{fileInfo=await api('/'+id+'/source')}catch{fileInfo={file:null}}const supplied=!fileInfo.file?.complete?await selectOriginal(data.record):null;if(!fileInfo.file?.complete&&!supplied)return;
   if(root.KT80WorkflowState?.intake&&!confirm('Да отворим избраната преписка? Текущата работа е записана.'))return;
   const restored=await unpack(data.state);restoring=true;root.KT80ResetCurrentCase?.();record=data.record;restore=restored;savedFingerprint='';requestKey=crypto.randomUUID();root.KT80WorkflowState.caseCycleId=id;display();say('Възстановяване на оригиналната преписка…');
-  try{const meta=fileInfo.file,parts=new Array(meta.parts);let next=0;
+  try{let file=supplied;if(!file){const meta=fileInfo.file,parts=new Array(meta.parts);let next=0;
    await Promise.all(Array.from({length:Math.min(3,meta.parts)},async()=>{while(next<meta.parts){const n=next++;const r=await fetch('/kt126/registry/'+id+'/source/part/'+n,{credentials:'same-origin',cache:'no-store'});if(!r.ok)throw Error('Оригиналът временно не е достъпен.');parts[n]=await r.arrayBuffer()}}));
-   const file=new File(parts,meta.filename);if(await hash(await file.arrayBuffer())!==meta.sha256)throw Error('Проверката на оригинала не съвпада. Обработката е спряна.');
+   file=new File(parts,meta.filename);if(await hash(await file.arrayBuffer())!==meta.sha256)throw Error('Проверката на оригинала не съвпада. Обработката е спряна.');}
    const transfer=new DataTransfer();transfer.items.add(file);$('kt80InputFile').files=transfer.files;const name=$('kt80SelectedFileName');if(name)name.textContent=file.name;
    restoring=false;$('kt80ProcessFile').click();
   }catch(e){restoring=false;throw e}

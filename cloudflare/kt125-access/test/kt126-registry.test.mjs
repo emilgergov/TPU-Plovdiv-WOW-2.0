@@ -56,6 +56,7 @@ try{
  assert.equal((await listSources(fileArgs)).length,2,'Follow-up originals remain under the same permanent case');
  assert.equal((await readCase(fileArgs)).internal_number,fileCase.record.internal_number);
  assert.equal((await db.prepare('SELECT COUNT(*) n FROM kt126_registry WHERE case_id=?').bind(fileArgs.caseId).first()).n,1);
+ const damaged={...fileArgs,sourceId:crypto.randomUUID()};assert.equal((await startSource(damaged,{filename:'bad.pdf',size:bytes.length,sha256:digest})).status,200);assert.equal((await putSourcePart(damaged,0,new Uint8Array(bytes.length).buffer)).status,200);assert.equal((await finishSource(damaged)).status,409,'Wrong whole-file digest cannot seal an original');assert.equal(await getSourcePart(damaged,0),null);
  const artifact=await saveArtifact(fileArgs,{filename:'EG-2026-test_v1.docx',revision:0,documentVersion:1,bytes:bytes.buffer});assert.equal(artifact.status,200);
  assert.equal((await saveArtifact(fileArgs,{filename:'EG-2026-test_v1.docx',revision:0,documentVersion:1,bytes:bytes.buffer})).artifact.artifact_id,artifact.artifact.artifact_id);
  assert.equal((await listArtifacts(fileArgs)).length,1);assert(await readArtifact(fileArgs,artifact.artifact.artifact_id));

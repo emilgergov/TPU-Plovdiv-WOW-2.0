@@ -10,6 +10,7 @@ const names=x=>(x||[]).map(b=>b.name+':'+b.type).sort().join('|');
 const db=nativeBefore.bindings.find(b=>b.name==='KT125_DB'&&b.type==='d1');
 if(!db?.id||!nativeBefore.bindings.some(b=>b.name==='KT125_AUTH_SECRET'&&b.type==='secret_text')||!nativeBefore.bindings.some(b=>b.name==='KT125_PASSWORDS'&&b.type==='durable_object_namespace'))throw Error('Unexpected native service configuration');
 const healthURL='https://'+author+'.emilgergov.workers.dev/health',healthBefore=await fetch(healthURL).then(r=>r.json());
+if(!healthBefore.apiKeyConfigured||!healthBefore.aiGenerationEnabled)throw Error('Existing author secret readiness is missing; rollout stopped');
 if(healthBefore.stage4Contract!=='KT115_EXPERT_PREVIEW_V1'||healthBefore.stage5Contract!=='KT117_DOCUMENT_DRAFT_V1')throw Error('Unexpected author contract');
 async function deploy(name,before,file,bindings){
  const metadata={main_module:'worker.mjs',compatibility_date:before.compatibility_date,compatibility_flags:before.compatibility_flags||[],keep_bindings:['secret_text'],bindings:bindings.filter(b=>b.type!=='secret_text')};
