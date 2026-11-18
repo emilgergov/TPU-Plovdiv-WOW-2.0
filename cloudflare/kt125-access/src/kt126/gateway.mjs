@@ -1,8 +1,10 @@
+import {overlaySessionAccess} from './session-bridge.mjs';
 import {overlaySubject} from './subject.mjs';
 import {overlayReader} from './reader.mjs';
 // Narrow, asserted overlays over the immutable accepted R6 sources.
 const replaceOnce=(source,anchor,replacement)=>{if(source.split(anchor).length!==2)throw Error('KT126 source contract mismatch');return source.replace(anchor,replacement)};
 export function overlayModule(rel,source){
+ if(['/KT80_EG_ACCESS_SESSION_V01.js','/KT83_AI_SUBJECT_V572.js','/KT83_AI_SCOPE_V572.js','/kt96-eg-ai-stage4-author.mjs'].some(p=>rel.endsWith(p)))return overlaySessionAccess(rel,source);
  if(rel.endsWith('/KT80_E01_IP_MASTER_SUBJECT_V32.js'))return overlaySubject(source);
  if(rel.endsWith('/KT82_E01_SAFE_ZIP_INTAKE_V35.js'))return overlayReader(source);
  if(rel==='vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html'){if(source.includes('src="/kt126/client.js"'))throw Error('KT126 overlay already applied');source=replaceOnce(source,'<body>','<body data-kt80-view="home">');source=replaceOnce(source,' Избери преписка<input id="kt80InputFile"',' Избери нова преписка<input id="kt80InputFile"');return replaceOnce(source,'</body>','<script defer src="/kt126/client.js"></script></body>');}

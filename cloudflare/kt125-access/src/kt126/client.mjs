@@ -151,9 +151,10 @@ export function installRegistryClient(){
   const url=new URL(typeof input==='string'?input:input instanceof URL?input.href:input.url,location.href);
   if(url.origin==='https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev'&&['/author','/subject-improve','/scope-improve','/stage4-proposal','/stage4-expert-decision','/stage5-document'].includes(url.pathname)&&String(options?.method||'GET').toUpperCase()==='POST'){
    if(!record)throw Error('Първо регистрирайте преписката в Етап 1.');await save();const id=record.case_id,revision=record.revision;
-   const body=JSON.parse(options.body);if(body.caseId!==id)throw Error('Анализът е за друга преписка.');
+   const body=JSON.parse(options.body);if(body.caseId&&body.caseId!==id)throw Error('Анализът е за друга преписка.');body.caseId=id;if(!body.requestId)body.requestId=crypto.randomUUID();
    const headers=new Headers(options.headers);headers.set('X-KT126-Case',id);headers.set('X-KT126-Revision',String(revision));
-   return nativeFetch('/kt126/author'+url.pathname,{...options,headers,credentials:'same-origin',cache:'no-store'});
+   headers.delete('Authorization');
+   return nativeFetch('/kt126/author'+url.pathname,{...options,body:JSON.stringify(body),headers,credentials:'same-origin',cache:'no-store'});
   }
   return nativeFetch(input,options);
  };

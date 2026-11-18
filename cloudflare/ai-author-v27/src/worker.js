@@ -1061,6 +1061,17 @@ export default {
    let payload;try{payload=await request.clone().json()}catch{return reply({error:"Invalid case request"},400)}
    if(payload?.caseId!==caseId)return reply({error:"Case request mismatch"},409);
    env={...env,KT126_CASE_CONTEXT:context};
+   // KT128: only a freshly verified native case/session may use the server credential.
+   if(origin==="https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev"){
+    const serverToken=env.AI_AUTHOR_PASSWORD_V27||env.AI_AUTHOR_ACCESS_TOKEN;
+    if(typeof serverToken!=="string"||!serverToken)return reply({error:"Author service not configured"},503);
+    const bridgedHeaders=new Headers(request.headers);bridgedHeaders.set("Authorization","Bearer "+serverToken);bridgedHeaders.delete("Content-Length");
+    const bridgedInit={headers:bridgedHeaders};
+    if(url.pathname==="/subject-improve"||url.pathname==="/scope-improve"){
+     const {caseId:transportCase,requestId:transportRequest,...editorial}=payload;bridgedInit.body=JSON.stringify(editorial);
+    }
+    request=new Request(request,bridgedInit);
+   }
   }
   // End KT126 private RPC boundary.
   if(request.method==="OPTIONS" && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||(url.pathname==="/stage4-proposal"||url.pathname==="/stage5-document"||url.pathname==="/stage4-expert-decision"))) {

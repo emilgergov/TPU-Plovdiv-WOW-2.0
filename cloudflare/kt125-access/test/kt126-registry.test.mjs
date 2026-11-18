@@ -74,4 +74,19 @@ try{
  assert.equal((await proxyAuthor({request:authorRequest(),env,who,config,now,authorFetch})).status,403,'Deactivation blocks even cached analytical results');
  assert.equal(await getSourcePart(fileArgs,0),null);
  console.log('PASS KT126: 100 concurrent registrations, annual atomic numbering/rollback, mandatory confirmation/omission, CAS/reopen, private chunked originals and hash verification, immutable Word archive, CSRF, analytic retry deduplication and immediate revocation');
+
+ await db.prepare("UPDATE kt125_users SET active=1 WHERE user_id='alice'").run();
+ const bridgeOrigin='https://native.example.invalid',bridgeConfig={org:'org',origin:bridgeOrigin};let bridgeCalls=0;
+ const bridgeRecord=await readCase({...base,caseId:id});
+ const bridgeRequest=()=>new Request(bridgeOrigin+'/kt126/author/subject-improve',{method:'POST',headers:{Origin:bridgeOrigin,'Content-Type':'application/json','X-KT126-Case':id,'X-KT126-Revision':String(bridgeRecord.revision),Cookie:'opaque',Authorization:'Bearer do-not-forward'},body:JSON.stringify({caseId:id,requestId:crypto.randomUUID(),subject:'Жилищна сграда',facts:[]})});
+ const bridgeArgs={env:{KT125_DB:db},who,config:bridgeConfig,now,authorFetch:async(_url,options)=>{bridgeCalls++;assert.equal(options.headers.get('Authorization'),null);assert.equal(options.headers.get('X-KT126-Session'),'opaque');return new Response('{}',{headers:{'Content-Type':'application/json'}})}};
+ await db.prepare("UPDATE kt125_users SET active=0 WHERE user_id='alice'").run();
+ assert.equal((await proxyAuthor({...bridgeArgs,request:bridgeRequest()})).status,403);assert.equal(bridgeCalls,0);
+ await db.prepare("UPDATE kt125_users SET active=1,role='reviewer' WHERE user_id='alice'").run();
+ assert.equal((await proxyAuthor({...bridgeArgs,request:bridgeRequest()})).status,403);assert.equal(bridgeCalls,0);
+ await db.prepare("UPDATE kt125_users SET role='expert' WHERE user_id='alice'").run();
+ assert.equal((await proxyAuthor({...bridgeArgs,request:bridgeRequest()})).status,200);assert.equal(bridgeCalls,1);
+ assert.equal((await proxyAuthor({...bridgeArgs,who:{verified:true,userId:'bob'},request:bridgeRequest()})).status,403);assert.equal(bridgeCalls,1);
+ console.log('PASS KT128 native proxy: inactive/read-only/foreign users denied before author; valid expert audited; caller bearer stripped');
+
 }finally{await mf.dispose()}
