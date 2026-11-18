@@ -31,6 +31,11 @@ jobs:
           const origin='https://'+name+'.emilgergov.workers.dev';
           const registration=await fetch(origin+'/auth/register',{signal:AbortSignal.timeout(15000)});
           if(registration.status!==200||!(await registration.text()).includes('data-layout="local100"'))throw Error('Registration page check failed; no invitations sent');
+          const db=before.bindings.find(b=>b.name==='KT125_DB'&&b.type==='d1')?.id;if(!db)throw Error('Registry unavailable');
+          const statusRows=async()=>{const rows=await api('/d1/database/'+db+'/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sql:"SELECT r.state FROM kt127_mail_batches b JOIN kt127_mail_recipients r ON r.batch_id=b.batch_id WHERE b.organization_id=? AND b.request_key=?",params:['riosv-plovdiv','KT127-20261118-KARAMFILOVA-INVITATION-V1']})});return rows[0]?.results||[]};
+          const previous=await statusRows();console.log('LEGAL_INVITATION_EXISTING_STATES '+JSON.stringify(previous));
+          if(previous.length===1&&previous[0].state==='accepted'){console.log('LEGAL_INVITATION_ALREADY_ACCEPTED_NO_RESEND');process.exit(0);}
+          if(previous.some(r=>!['queued'].includes(r.state)))throw Error('Existing sending or uncertain/failed result; stopped without retry');
           const key=randomBytes(32).toString('hex');
           const source=`export default {async fetch(r,e){if(r.method!=='POST'||r.headers.get('Authorization')!=='Bearer '+e.PROBE_KEY)return new Response(null,{status:403,headers:{'X-KT127-Trial':'ready'}});const q=await e.LOCAL.queueStandardPresentation({actorUsername:'emilgergov',usernames:[],extraEmails:['karamfilova@plovdiv.riew.gov.bg'],requestKey:'KT127-20261118-KARAMFILOVA-INVITATION-V1'});if(!q.ok)return Response.json({ok:false,stage:'resolve-registered-recipients'});return Response.json(await e.LOCAL.sendPresentationBatch(q.batchId));}}`;
           let created=false;
@@ -41,9 +46,11 @@ jobs:
             const sub=await api('/workers/subdomain'),url='https://'+helper+'.'+sub.subdomain+'.workers.dev/send';
             let ready=false;for(let i=0;i<20;i++){const r=await fetch(url,{signal:AbortSignal.timeout(10000)});if(r.status===403&&r.headers.get('X-KT127-Trial')==='ready'){ready=true;break}await new Promise(r=>setTimeout(r,2000));}
             if(!ready)throw Error('Private sender endpoint not ready; no send request attempted');
-            // Exactly one POST. The persistent request key also makes a manual
+            // Persistent recipient state is checked before recovering an unavailable endpoint. The request key also makes a manual
             // rerun safe: already-claimed recipients cannot be sent again.
-            const response=await fetch(url,{method:'POST',headers:{Authorization:'Bearer '+key},signal:AbortSignal.timeout(150000)});
+            await new Promise(r=>setTimeout(r,5000));
+            let response=await fetch(url+'?attempt=1',{method:'POST',headers:{Authorization:'Bearer '+key},signal:AbortSignal.timeout(150000)});
+            if(response.status===404){const state=await statusRows();console.log('LEGAL_INVITATION_AFTER_404_STATES '+JSON.stringify(state));if(!state.length||state.every(r=>r.state==='queued')){await new Promise(r=>setTimeout(r,5000));response=await fetch(url+'?attempt=2',{method:'POST',headers:{Authorization:'Bearer '+key},signal:AbortSignal.timeout(150000)});}}
             if(!response.ok)throw Error('Private sender returned HTTP '+response.status+'; inspect saved outbox before taking any further action');
             const result=await response.json();
             console.log('KT127_TRIAL_RESULT '+JSON.stringify({ok:result.ok,batchId:result.batchId,stage:result.stage,recipients:result.recipients?.map((r,i)=>({recipient:'karamfilova',state:r.state}))}));
