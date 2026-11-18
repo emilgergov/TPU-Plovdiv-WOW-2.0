@@ -99,7 +99,9 @@ export function createLocalHandler({clock=()=>Date.now(),uuid=()=>crypto.randomU
     // re-entering while an administrator disables the user or changes rights.
     await logout(db,request);
     const session=await createSession({db,account,now});
-    return session?redirect(path==='/auth/admin'?'/kt125/admin/panel/overview':'/member',cookie(session,SESSION_MS/1000)):page({message:'Профилът няма активен достъп.',status:403});
+    if(session)return redirect(path==='/auth/admin'?'/kt125/admin/panel/overview':'/member',cookie(session,SESSION_MS/1000));
+    const current=await db.prepare('SELECT active FROM kt125_users WHERE user_id=? AND organization_id=?').bind(account.user_id,config.org).first();
+    return page({message:current?.active===0?'Профилът Ви е деактивиран от администратор. За възстановяване на достъпа се обърнете към администратора на модула.':'Профилът няма активен достъп. Обърнете се към администратора на модула.',status:403});
    }catch{return page({message:'Входът временно не е достъпен. Опитайте отново по-късно.',status:503})}
   }
   const who=await identity({db,request,config,now});
