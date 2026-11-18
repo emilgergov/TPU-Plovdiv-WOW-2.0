@@ -1,4 +1,4 @@
-import {stage5CaseEvidence} from '../../../ai-author-v27/src/kt130-stage5-context.mjs';
+import {stage5CaseEvidence,stage5ReceiptText} from '../../../ai-author-v27/src/kt130-stage5-context.mjs';
 import {spatialEvidenceSummary} from './spatial-handoff.mjs';
 // Presentation only: preserve draft text, evidence, expert actions and server authorization.
 const once=(s,a,b)=>{if(s.split(a).length!==2)throw Error('KT130 presentation source contract mismatch');return s.replace(a,b)};
@@ -13,6 +13,7 @@ export function overlayPresentationPolish(rel,source){
  if(rel.endsWith('/kt122-acceptance-finish.js'))source=once(source,"mk('span',null,why.slice(0,340))","mk('span',null,why)");
  if(rel.endsWith('/kt96-eg-ai-stage4-author.mjs'))source=once(source,'afterLead.slice(0,1100).trim()','afterLead.trim()');
  if(rel.endsWith('/kt116-expert-approval-handoff.mjs')){
+  source=once(source,'  render5();\n  // Refresh the Stage 5 case-bound input before switching the visible stage.',"  const workflow=window.KT80WorkflowState;if(workflow){workflow.step=5;workflow.highest=Math.max(5,Number(workflow.highest)||1);}\n  render5();\n  // Refresh the Stage 5 case-bound input before switching the visible stage.");
   source=once(source,'AI бележките остават в преписката','ЕГ бележките остават в преписката');
   source=once(source,'Не се изисква спор с AI рецензента.','Не се изисква спор с ЕГ рецензента.');
   source=once(source,'function installKT116(){',`const applicabilityDisplay=${displayApplicability.toString()};\nfunction installKT116(){`);
@@ -46,6 +47,14 @@ export function overlayPresentationPolish(rel,source){
   source=once(source,'  const requestId=crypto.randomUUID();const payload=',`  let stage5Evidence;\n  try{stage5Evidence=kt130Stage5Evidence(window,source,ev,kt130Stage5Spatial(window.KT83NormativeBridge?.getEvidence?.()))}\n  catch{note.textContent='Доказателствата са променени. Върнете се към потвърдения анализ на текущата преписка.';return;}\n  const requestId=crypto.randomUUID();const payload=`);
   source=once(source,'   documentTitle:documentLabel(line),incomingReference:incomingReference()};','   documentTitle:documentLabel(line),incomingReference:incomingReference(),completeCaseEvidence:stage5Evidence};');
   source=once(source,"original.querySelector('pre').textContent=a.text;","original.querySelector('pre').textContent=("+displayApplicability.toString()+")(a.text);");
+  source=once(source,' action.append(generate); const reviewActions=',` let inspectOnly=false;\n const sourceCheck=make('button','Провери източниците');sourceCheck.type='button';\n const sourceReport=make('details'),sourceReportText=make('pre');sourceReport.append(make('summary','Източници за документа'),sourceReportText);sourceReportText.style.whiteSpace='pre-wrap';\n const showSourceReceipt=r=>{sourceReportText.textContent=(${stage5ReceiptText.toString()})(r);sourceReport.open=true;};\n sourceCheck.onclick=async()=>{if(busy)return;inspectOnly=true;try{await generate.onclick()}finally{inspectOnly=false}};\n action.append(generate,sourceCheck); const reviewActions=`);
+  source=once(source,'ui.append(heading,context,action,note,editorial,preview,textarea,reviewActions,decisionStatus,confirmedText,footer,wordInfo,original);','ui.append(heading,context,action,note,sourceReport,editorial,preview,textarea,reviewActions,decisionStatus,confirmedText,footer,wordInfo,original);');
+  source=once(source,'  const requestId=crypto.randomUUID();const payload=',"  const diagnosticOnly=inspectOnly;\n  const requestId=crypto.randomUUID();const payload=");
+  source=once(source,'completeCaseEvidence:stage5Evidence};','completeCaseEvidence:stage5Evidence,sourcePreviewOnly:diagnosticOnly};');
+  source=once(source,"  const activityTicket=window.KT80Busy?.start?.('EG Автор · Изготвя проекта на административния документ…');","  sourceCheck.disabled=true;if(diagnosticOnly)note.textContent='Проверка на наличните източници, без генериране на текст.';\n  const activityTicket=window.KT80Busy?.start?.(diagnosticOnly?'Проверява източниците…':'EG Автор · Изготвя проекта на административния документ…');");
+  source=once(source,"   if(!res.ok){",`   if(diagnosticOnly){\n    if(res.ok&&data.caseId===source.caseId&&data.evidenceRevision===source.evidenceRevision&&data.stage4Version===source.version&&data.requestId===requestId&&data.providerCalled===false){showSourceReceipt(data.sourceReceipt);note.textContent='Източниците са проверени. Не е генериран нов текст.';}\n    else note.textContent='Проверката на източниците не е завършена (код '+res.status+').';\n    return;\n   }\n   if(!res.ok){`);
+  source=once(source,"   versions.push({version:versions.length+1,text:normalized.text,kind:'предложение на EG Автора — индивидуален предмет'});","   showSourceReceipt(data.sourceReceipt);\n   versions.push({version:versions.length+1,text:normalized.text,sourceReceipt:data.sourceReceipt||null,kind:'предложение на EG Автора — индивидуален предмет'});");
+  source=once(source,'busy=false;generate.disabled=false}','busy=false;generate.disabled=false;sourceCheck.disabled=false}');
  }
  return source;
 }

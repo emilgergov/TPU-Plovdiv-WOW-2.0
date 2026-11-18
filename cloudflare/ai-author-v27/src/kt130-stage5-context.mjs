@@ -65,3 +65,29 @@ export function stripRepeatedStage5Intro(draft){
 export function needsStage5VoiceEdit(draft){
  return /(?:следва\s+да\s+(?:се\s+)?(?:издаде|изпрати|изготви)\s+писмо|предлага\s+се\s+издаване\s+на\s+писмо|компетентният\s+орган\s+(?:следва|да\s+прецени)|настоящото\s+писмо\s+служи)/iu.test(draft);
 }
+
+export function stage5SourceReceipt(caseEvidence,territorialSources){
+ const joined=[...caseEvidence.sourceTexts,...caseEvidence.utilityExcerpts].map(x=>x.text).join('\n');
+ return {schema:'KT130_STAGE5_SOURCES_V2',packetPresent:caseEvidence.available===true,
+  documentCount:caseEvidence.sourceTexts.length,documentChars:caseEvidence.sourceTexts.reduce((n,x)=>n+x.text.length,0),
+  documentNames:caseEvidence.sourceTexts.map(x=>x.source),utilityExcerptCount:caseEvidence.utilityExcerpts.length,
+  utilityTopics:[['Електроснабдяване',/електро/iu],['Водоснабдяване',/водоснабд|водопровод/iu],['Отпадъчни води',/отпадъчн[а-я]*\s+вод|канализац|зауств/iu]].filter(([,re])=>re.test(joined)).map(([label])=>label),
+  gisPresent:!!caseEvidence.gis,geometryVerified:caseEvidence.gis?.spatial?.geometryVerified===true,
+  zoneCodes:caseEvidence.zoneCodes,
+  territorialSources:territorialSources.sources.map(x=>({code:x.zoneCode,title:x.title,selectionLimited:x.selectionLimited,limitation:x.limitation})),
+  missingTerritorialCodes:territorialSources.missing.map(x=>x.code),
+  limitation:'Наличието на източник не удостоверява използването му във всяко изречение или правилност на правния извод.'};
+}
+
+export function stage5ReceiptText(r){
+ if(!r||r.schema!=='KT130_STAGE5_SOURCES_V2')return 'За този запазен проект няма отчет за подадените източници. Проверката не генерира текст.';
+ return [r.packetPresent?'Получен е отделен пакет с източници за текущата преписка.':'Не е получен отделен пакет с източници.',
+  'Документи с текст: '+r.documentCount+'; символи: '+r.documentChars+'.',
+  ...(r.documentNames||[]).map(x=>'Документ: '+x),
+  'Открити теми: '+((r.utilityTopics||[]).join(', ')||'няма разпознати инфраструктурни пасажи')+'.',
+  'ГИС: '+(r.geometryVerified?'проверена геометрия':r.gisPresent?'налични данни с ограничения':'няма отделни данни')+'.',
+  'Кодове на пресечени ЗЗ: '+((r.zoneCodes||[]).join(', ')||'няма потвърдени кодове в пакета')+'.',
+  ...(r.territorialSources||[]).map(x=>'Териториален източник: '+x.code+' — '+x.title+(x.selectionLimited?' (ограничена подборка)':'')),
+  ...(r.missingTerritorialCodes||[]).map(x=>'Без включен първичен териториален източник: '+x),
+  r.limitation].join('\n');
+}

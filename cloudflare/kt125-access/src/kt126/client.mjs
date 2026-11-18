@@ -174,7 +174,8 @@ export function installRegistryClient(){
   const w=root.KT80WorkflowState||{},values={};for(const id of fields){const n=$(id);if(n)values[id]=n.type==='checkbox'?n.checked:n.value}
   const state={};for(const key of ['step','highest','fileName','intake','subjectConfirmed','parcelsConfirmed','lawConfirmed','routeConfirmed','activeRoute','normativeGate'])state[key]=w[key];
   const globals={};for(const key of savedGlobals)if(root[key]!==undefined)globals[key]=root[key];
-  return {format:'KT126-1',values,state,globals,stage4:root.KT116ExpertHandoff?.checkpoint?.()||null,stage5:root.KT117Document?.checkpoint?.()||null};
+  const visibleStep=Number([...document.querySelectorAll('.kt80-stage-panel[data-panel]')].find(p=>!p.hidden)?.dataset.panel)||Number(w.step)||1;
+  return {format:'KT126-1',navigation:{step:Math.min(5,Math.max(1,visibleStep))},values,state,globals,stage4:root.KT116ExpertHandoff?.checkpoint?.()||null,stage5:root.KT117Document?.checkpoint?.()||null};
  }
  function saveSoon(){if(restoring||!record)return;clearTimeout(timer);timer=setTimeout(()=>save().catch(showError),1200)}
  async function pack(state){const text=JSON.stringify(state);if(new TextEncoder().encode(text).length<400000||!root.CompressionStream)return state;const bytes=new Uint8Array(await new Response(new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));return {format:'KT126-GZIP-1',payload:btoa(binary)}}
@@ -189,7 +190,9 @@ export function installRegistryClient(){
    w.caseCycleId=record.case_id;w.normativeGate=restoredGisGate(prior);
    if(prior.stage4&&!root.KT116ExpertHandoff?.restoreCheckpoint?.(prior.stage4))throw Error('Запазеният анализ не съответства на текущите данни. Историята остава в регистъра.');
    if(prior.stage5&&!root.KT117Document?.restoreCheckpoint?.(prior.stage5))throw Error('Запазеният документ не съответства на потвърдения анализ или Деловоден №. Историята остава в регистъра.');
-   const step=Math.min(5,Math.max(1,prior.state?.step||1));
+   const legacyStage5=!prior.navigation&&prior.stage5?.source&&root.KT116ExpertHandoff?.snapshot?.()?.caseId===record.case_id;
+   const step=Math.min(5,Math.max(1,prior.navigation?.step||(legacyStage5?5:prior.state?.step)||1));
+   w.highest=Math.max(step,Number(prior.state?.highest)||1);
    if(step===5&&root.KT116ExpertHandoff?.snapshot?.()?.caseId===record.case_id){w.step=5;document.querySelectorAll('.kt80-stage-panel[data-panel]').forEach(p=>p.hidden=Number(p.dataset.panel)!==5);document.querySelectorAll('.kt80-step').forEach(n=>n.setAttribute('aria-current',n.dataset.step==='5'?'step':'false'));}
    else root.KT80WorkflowGo?.(step);
    if(root.KT80IPMasterDraft)root.KT80IPMaster?.render?.(root.KT80IPMasterDraft);restore=null;

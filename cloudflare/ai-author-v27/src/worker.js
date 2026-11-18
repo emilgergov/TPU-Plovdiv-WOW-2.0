@@ -6,7 +6,7 @@ const MOSV_EDITORIAL_GUIDE=`Методическа опора КТ130: пред�
 Оформление: утвърдената бланка на РИОСВ – Пловдив е водеща. Лого, адресат, задължителни реквизити, два електронни подписа, конфиденциалност, футър, Verdana 10, междуредие 1, отстъп 1 см и приетите bold/italic се управляват от модула. Не добавяй нова бланка, чужд подпис, лого, заглавен блок или промени по форматирането от сканирания образец. Експертните редакции и потвърденото направление се запазват.`;
 import {APPLICABILITY_MEANINGS} from './kt130-applicability-meaning.mjs';
 import {getLegalContext} from "./legal-v11-loader.mjs";
-import {readStage5Evidence,STAGE5_SOURCE_RULES,stripRepeatedStage5Intro,needsStage5VoiceEdit} from "./kt130-stage5-context.mjs";
+import {readStage5Evidence,STAGE5_SOURCE_RULES,stripRepeatedStage5Intro,needsStage5VoiceEdit,stage5SourceReceipt} from "./kt130-stage5-context.mjs";
 import {territorialContext} from "./kt130-territorial-context.mjs";
 import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 import {evaluateDraft} from "./kt123-decision-model.mjs";
@@ -969,6 +969,10 @@ async function handleStage5Document(request,env){
   territorialSources=await territorialContext(caseEvidence.zoneCodes);
   stage5Legal=await getLegalContext({archiveSHA256:KT100_ARCHIVE_SHA,subject:input.subject,scope:input.scope,caseTexts:[input.confirmedStage4Text]});
  }catch{return reply({error:"STAGE5_SOURCE_CONTEXT_UNAVAILABLE",projectOnly:true},503)}
+ const sourceReceipt=stage5SourceReceipt(caseEvidence,territorialSources);
+ if(input.sourcePreviewOnly===true)return reply({caseId:input.caseId,evidenceRevision:input.evidenceRevision,
+  stage4Version:input.stage4Version,requestId:input.requestId,selectedPanelLine:match[0],sourceReceipt,
+  projectOnly:true,documentIssued:false,providerCalled:false});
 
 
  // Build the subject from the verified case-specific description, not an assumed "ИП".
@@ -1079,7 +1083,7 @@ async function handleStage5Document(request,env){
  if(draft.length<120||draft.length>18000)return reply({error:"Draft incomplete"},422);
  return reply({caseId:input.caseId,evidenceRevision:input.evidenceRevision,
  stage4Version:input.stage4Version,requestId:input.requestId,selectedPanelLine:match[0],documentTitle:title,incomingReference:safeReference,
- draft,editorialFlags,projectOnly:true,expertReviewRequired:true,documentIssued:false,wordTemplateApplied:false});
+ draft,sourceReceipt,editorialFlags,projectOnly:true,expertReviewRequired:true,documentIssued:false,wordTemplateApplied:false});
  }catch{return reply({error:"Document drafting failed"},504)}
  finally{clearTimeout(timer)}
 }

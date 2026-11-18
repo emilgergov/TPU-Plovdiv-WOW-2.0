@@ -53,6 +53,15 @@ globalThis.fetch=async(url,options)=>{
  return new Response(JSON.stringify({output:[{content:[{type:'output_text',text}]}]}));
 };
 try{
+ const preview=await worker.fetch(request({...body,sourcePreviewOnly:true}),env);
+ assert.equal(preview.status,200);
+ const previewData=await preview.json();
+ assert.equal(previewData.providerCalled,false);assert.equal(calls,0,'Source inspection never calls provider');
+ assert.equal(previewData.sourceReceipt.packetPresent,true);
+ assert.equal(previewData.sourceReceipt.documentCount,1);
+ assert.equal(previewData.sourceReceipt.territorialSources.length,3);
+ assert(previewData.sourceReceipt.utilityTopics.includes('Водоснабдяване'));
+ assert.equal(previewData.draft,undefined);
  const bad=await worker.fetch(request({...body,completeCaseEvidence:{...packet,caseId:'FOREIGN'}}),env);
  assert.equal(bad.status,409);assert.equal(calls,0);
  const response=await worker.fetch(request(body),env),result=await response.json();
@@ -60,6 +69,7 @@ try{
  assert.equal((result.draft.match(/уведомявам следното/giu)||[]).length,1);
  assert(!needsStage5VoiceEdit(result.draft));
  assert.equal(result.projectOnly,true);assert.equal(result.documentIssued,false);
+ assert.equal(result.sourceReceipt.schema,'KT130_STAGE5_SOURCES_V2');
  assert.equal(result.selectedPanelLine,direction);
  assert.equal(body.confirmedStage4Text,stage4,'Confirmed expert source unchanged');
 }finally{globalThis.fetch=savedFetch;}
