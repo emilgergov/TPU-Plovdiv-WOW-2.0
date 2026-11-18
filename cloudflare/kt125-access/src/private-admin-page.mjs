@@ -67,8 +67,8 @@ export function renderKT125PrivatePage({section="overview",items=[],hasMore=fals
    const target=r.user_id;
    if(typeof target!=="string"||!/^[A-Za-z0-9_-]{1,160}$/.test(target)||![0,1].includes(r.active))return "<td>—</td>";
    return `<td><form method="post" action="/kt125/admin/users/${escapeHtml(target)}/${r.active===1?"disable":"enable"}">
-   <label><input type="checkbox" required name="confirm" value="${r.active===1?"DEACTIVATE":"REACTIVATE"}"> Потвърждавам</label>
-   <button type="submit">${r.active===1?"Деактивирай":"Активирай"}</button></form></td>`;
+   <button type="submit">${r.active===1?"Деактивирай":"Активирай"}</button>
+   <label><input type="checkbox" required name="confirm" value="${r.active===1?"DEACTIVATE":"REACTIVATE"}"> Потвърждавам</label></form></td>`;
  };
  const caseGrantLink=r=>{
   const id=r.case_id;
