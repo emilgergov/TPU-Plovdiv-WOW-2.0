@@ -26,6 +26,7 @@ jobs:
           node test/kt128-session-bridge.test.mjs
           node test/kt129-stage3-context.test.mjs
           node test/kt130-spatial-handoff.test.mjs
+          node test/presentation-polish.test.mjs
           node test/presentation.test.mjs
           node test/private-admin-page.test.mjs
           node_modules/.bin/esbuild src/local-auth/service.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=../../dist/kt126-native.mjs
@@ -42,3 +43,4 @@ jobs:
         env:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: node cloudflare/kt125-access/deploy/kt126-rollout.mjs
+

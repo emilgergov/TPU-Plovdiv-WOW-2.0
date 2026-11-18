@@ -1,3 +1,4 @@
+import {overlayPresentationPolish} from './presentation-polish.mjs';
 import {overlayParcelCandidates} from './parcel-candidates.mjs';
 import {overlaySpatialHandoff} from './spatial-handoff.mjs';
 import {overlayStage3Context} from './stage3-context.mjs';
@@ -7,7 +8,7 @@ import {overlayReader} from './reader.mjs';
 // Narrow, asserted overlays over the immutable accepted R6 sources.
 const replaceOnce=(source,anchor,replacement)=>{if(source.split(anchor).length!==2)throw Error('KT126 source contract mismatch');return source.replace(anchor,replacement)};
 export function overlayModule(rel,source){
- source=overlaySpatialHandoff(rel,source);
+ source=overlayPresentationPolish(rel,overlaySpatialHandoff(rel,source));
  if(rel.endsWith('/KT85_VT03_STAGE3_HORIZONTAL_V01.js'))return overlayStage3Context(source);
  if(['/KT80_EG_ACCESS_SESSION_V01.js','/KT83_AI_SUBJECT_V572.js','/KT83_AI_SCOPE_V572.js','/kt96-eg-ai-stage4-author.mjs'].some(p=>rel.endsWith(p)))return overlaySessionAccess(rel,source);
  if(rel.endsWith('/KT80_E01_IP_MASTER_SUBJECT_V32.js'))return overlaySubject(source);
@@ -47,3 +48,4 @@ export function overlayModule(rel,source){
  }
  return source;
 }
+
