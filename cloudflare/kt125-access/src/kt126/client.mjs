@@ -158,9 +158,21 @@ export function installRegistryClient(){
   }
   return nativeFetch(input,options);
  };
+ function restoredGisGate(saved){
+  const state=saved?.state||{},subject=state.subjectConfirmed||{},parcels=state.parcelsConfirmed||{};
+  if(subject.expertConfirmed!==true||subject.scopeConfirmed!==true)return null;
+  if(Object.prototype.hasOwnProperty.call(state,'normativeGate')){
+   const gate=state.normativeGate;
+   return gate?.expertConfirmed===true&&['REQUIRED','NOT_REQUIRED'].includes(gate.decision)?gate:null;
+  }
+  if(parcels.mode==='PARCEL_GIS'&&parcels.expertConfirmed===true&&Array.isArray(parcels.ids)&&parcels.ids.length){
+   return {decision:'REQUIRED',expertConfirmed:true,reason:'Възстановен експертно потвърден имотен ГИС преглед от архива.',restoredFrom:'PARCEL_GIS'};
+  }
+  return null;
+ }
  function snapshot(){
   const w=root.KT80WorkflowState||{},values={};for(const id of fields){const n=$(id);if(n)values[id]=n.type==='checkbox'?n.checked:n.value}
-  const state={};for(const key of ['step','highest','fileName','intake','subjectConfirmed','parcelsConfirmed','lawConfirmed','routeConfirmed','activeRoute'])state[key]=w[key];
+  const state={};for(const key of ['step','highest','fileName','intake','subjectConfirmed','parcelsConfirmed','lawConfirmed','routeConfirmed','activeRoute','normativeGate'])state[key]=w[key];
   const globals={};for(const key of savedGlobals)if(root[key]!==undefined)globals[key]=root[key];
   return {format:'KT126-1',values,state,globals,stage4:root.KT116ExpertHandoff?.checkpoint?.()||null,stage5:root.KT117Document?.checkpoint?.()||null};
  }
@@ -174,7 +186,7 @@ export function installRegistryClient(){
    for(const [id,value] of Object.entries(prior.values||{})){const n=$(id);if(n){if(n.type==='checkbox')n.checked=!!value;else n.value=value}}
    for(const [key,value] of Object.entries(prior.globals||{}))if(savedGlobals.includes(key))root[key]=value;
    const w=root.KT80WorkflowState;for(const key of ['subjectConfirmed','parcelsConfirmed','lawConfirmed','routeConfirmed','activeRoute'])if(prior.state?.[key]!==undefined)w[key]=prior.state[key];
-   w.caseCycleId=record.case_id;
+   w.caseCycleId=record.case_id;w.normativeGate=restoredGisGate(prior);
    if(prior.stage4&&!root.KT116ExpertHandoff?.restoreCheckpoint?.(prior.stage4))throw Error('Запазеният анализ не съответства на текущите данни. Историята остава в регистъра.');
    if(prior.stage5&&!root.KT117Document?.restoreCheckpoint?.(prior.stage5))throw Error('Запазеният документ не съответства на потвърдения анализ или Деловоден №. Историята остава в регистъра.');
    const step=Math.min(5,Math.max(1,prior.state?.step||1));

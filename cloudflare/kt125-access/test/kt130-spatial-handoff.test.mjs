@@ -51,3 +51,17 @@ assert.deepEqual(notificationParcelCandidates('ПИ36498.8.100','Адресна 
 const intake=await read('vt03/kt80/KT82_E01_SAFE_ZIP_INTAKE_V35.js');
 const patched=overlayParcelCandidates(intake);assert.notEqual(patched,intake);assert.throws(()=>overlayParcelCandidates(patched),/contract mismatch/);
 console.log('PASS KT130: printed/glued PI in notification introduction becomes candidate only; neighbours/former/building IDs and unrelated document rejected');
+const client=await read('cloudflare/kt125-access/src/kt126/client.mjs');
+const clientWindow={};
+const instrumented=client.replace('export function installRegistryClient(){','function installRegistryClient(){').replace('export const registryClientSource=','const registryClientSource=').replace(' const savedGlobals=',' root.restoreGisGateForTest=restoredGisGate;return;const savedGlobals=');
+vm.runInNewContext(instrumented+'\ninstallRegistryClient();',{window:clientWindow,document:{getElementById:()=>null},crypto:{randomUUID:()=> 'case-a'}});
+const confirmed={subjectConfirmed:{expertConfirmed:true,scopeConfirmed:true},parcelsConfirmed:{mode:'PARCEL_GIS',expertConfirmed:true,ids:['12345.1.2']}};
+assert.equal(clientWindow.restoreGisGateForTest({state:confirmed}).decision,'REQUIRED','Old archive: explicit parcel review recovers GIS decision');
+assert.equal(clientWindow.restoreGisGateForTest({state:{...confirmed,normativeGate:null}}),null,'Explicit unconfirmed decision stays unconfirmed');
+assert.equal(clientWindow.restoreGisGateForTest({state:{...confirmed,parcelsConfirmed:{mode:'CONTEXT',expertConfirmed:true}}}),null,'Context is not a confirmed GIS decision');
+assert.equal(clientWindow.restoreGisGateForTest({state:{...confirmed,subjectConfirmed:{expertConfirmed:true}}}),null,'Unconfirmed scope cannot restore GIS approval');
+const notRequired={decision:'NOT_REQUIRED',expertConfirmed:true,reason:'Експертно решение'};
+assert.equal(clientWindow.restoreGisGateForTest({state:{...confirmed,normativeGate:notRequired}}),notRequired,'Saved explicit decision is preserved');
+assert(client.includes("'activeRoute','normativeGate']"));
+assert(client.includes('w.normativeGate=restoredGisGate(prior)'));
+console.log('PASS KT130: archive retains explicit GIS decision; old parcel-GIS review recovers it without inventing approval for missing/context/changed evidence');
