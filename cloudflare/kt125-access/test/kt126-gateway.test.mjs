@@ -1,3 +1,4 @@
+import {overlayReader} from '../src/kt126/reader.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
@@ -43,3 +44,22 @@ const body=new TextEncoder().encode('<word>accepted body unchanged</word>'),cont
 window.KT126Registry.attachDocxMetadata(contents,{caseId:id,version:2});
 assert.equal(contents['word/document.xml'],body);const custom=new TextDecoder().decode(contents['docProps/custom.xml']);assert(custom.includes(id));assert(custom.includes('EG-2026-000001'));assert(custom.includes('АБ-12 &amp; 34/2026'));assert.throws(()=>window.KT126Registry.attachDocxMetadata(contents,{caseId:crypto.randomUUID(),version:2}));
 console.log('PASS KT126 gateway: exact R6 overlay anchors, syntax, reject duplicate patch, untouched body, case-bound DOCX metadata with XML escaping');
+
+const readerSource=readFileSync('../../vt03/kt80/KT82_E01_SAFE_ZIP_INTAKE_V35.js','utf8');
+async function readScannedFixture(source){
+ let destroyed=false,recognized=0;
+ const printed='УВЕДОМЛЕНИЕ за инвестиционно предложение. Уведомяваме Ви, че имаме следното инвестиционно предложение: Строителство на жилищна сграда. Поземлен имот с идентификатор 56784.13.102.';
+ const worker={recognize:async()=>{await new Promise(resolve=>setTimeout(resolve,12));recognized++;return {data:{text:printed}}},terminate:async()=>{}};
+ const page={getViewport:()=>({width:400,height:600}),getTextContent:async()=>({items:[]}),render:()=>({promise:Promise.resolve(),cancel(){}})};
+ const pdf={numPages:13,getPage:async()=>page,destroy:async()=>{destroyed=true}};
+ const root={pdfjsLib:{GlobalWorkerOptions:{},getDocument:()=>({promise:Promise.resolve(pdf)})},Tesseract:{createWorker:async()=>worker}};
+ vm.runInNewContext(source,{window:root,document:{createElement:()=>({getContext:()=>({})})},File,Blob,TextEncoder,TextDecoder,DataView,Uint8Array,ArrayBuffer,performance,URL,console,setTimeout:(callback,ms)=>setTimeout(callback,ms/1000),clearTimeout});
+ const data=await root.V26LocalIntake.process(new File(['synthetic scanned PDF'],'Уведомление.pdf',{type:'application/pdf'}));
+ return {data,destroyed,recognized};
+}
+const oldRead=await readScannedFixture(readerSource);
+assert(oldRead.data.files[0].status.includes('90 сек.'),'Reproduce the recorded original 90-second document deadline failure');
+const fixedRead=await readScannedFixture(overlayReader(readerSource));
+assert.equal(fixedRead.recognized,13);assert.equal(fixedRead.data.page_text_index.length,13);assert.equal(fixedRead.data.document_texts.length,1);assert(fixedRead.data.document_texts[0].text.includes('Строителство на жилищна сграда'));assert.equal(fixedRead.destroyed,true);
+assert(!fixedRead.data.files[0].status.includes('НЕПРОЧЕТЕН'));assert.equal(fixedRead.data.reader_version,'KT126_PDF_PAGE_BOUNDS_V1');
+console.log('PASS KT126 isolated reader: reproduce the real 90-second failure, preserve all 13 scanned pages with page-local bounds, release PDF resources; number review cannot block or replace the main analysis');
