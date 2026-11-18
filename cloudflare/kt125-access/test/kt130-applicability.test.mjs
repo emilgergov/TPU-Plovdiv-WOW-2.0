@@ -36,7 +36,7 @@ assert(worker.includes('  MOSV_EDITORIAL_GUIDE,\n  APPLICABILITY_MEANINGS,'));as
 // Source guard: only one import and one instruction added to the qualifier.
 const normalized=qual.replace("import {APPLICABILITY_MEANINGS} from './kt130-applicability-meaning.mjs';\n",'').replace(' APPLICABILITY_MEANINGS,\n','');
 assert.equal(createHash('sha256').update(normalized).digest('hex'),'6f201b31383dd33cc2a6d6bec9d962d4f86e6d2b6a26dc4ab44e81eae6f787c5');
-assert.equal(createHash('sha256').update(await read('cloudflare/ai-author-v27/src/kt130-applicability-meaning.mjs')).digest('hex'),'2cbc1c32df67bce705283198814afade435a601f67db60f0fe7a8b67696b5f35','Only the reviewed meanings are accepted');
+assert.equal(createHash('sha256').update(await read('cloudflare/ai-author-v27/src/kt130-applicability-meaning.mjs')).digest('hex'),'bdec424d60d60fe48e322311146496ee9116ac35b1653c42e1fa0674a82869d7','Only the reviewed meanings are accepted');
 console.log('PASS KT130 applicability: three precise meanings shared by qualifier/author/reviewer, faithful display of archived values, quotes preserved, empty proposal box reproduced/fixed, expert confirmation unchanged');
 
 // Compatibility of a stated route is distinct from proving its case-specific grounds.
@@ -58,9 +58,6 @@ const twoAxesText='ЧЛ. 2, АЛ. 2 НАРЕДБА ЗА ОС: '+justified.OS2.st
 const view=render(after,twoAxesText);assert(view.textContent.includes('Приложима'));assert(view.textContent.includes('Основание за произнасяне:'));assert(view.textContent.includes('Предложен резултат от проверката: не е необходимо'));
 console.log('PASS KT130 OS2: applicable basis with no-procedure result allowed, no automatic positive from three negatives, uncertainty/conflicts preserved, original compatibility engine and expert authority unchanged');
 
-assert(APPLICABILITY_MEANINGS.includes('ЗАВЪРШЕНА ВЕРИГА НА ПРЕДЛОЖЕНИЕТО:'));
-assert(APPLICABILITY_MEANINGS.includes('възможни, а не предварително предпочетени резултати'));
-assert(APPLICABILITY_MEANINGS.includes('не ограничават 22-та панела'));
 assert(APPLICABILITY_MEANINGS.includes('не доказва буферна зона на ЗТ'));
-assert(APPLICABILITY_MEANINGS.includes('Не избирай „не е необходима процедура“ само защото първите три оценки са отрицателни'));
-console.log('PASS KT130 complete proposal: explicit non-predetermined action, exact evidence types and all 22 routes retained; no new expert veto');
+assert(!APPLICABILITY_MEANINGS.includes('ЗАВЪРШЕНА ВЕРИГА НА ПРЕДЛОЖЕНИЕТО:'),'Rejected action-completion instruction withdrawn');
+console.log('PASS KT130 rollback: rejected action-completion instruction removed; OS2 applicability/result distinction and exact spatial types preserved');
