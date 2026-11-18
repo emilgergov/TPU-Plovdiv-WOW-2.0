@@ -26,6 +26,10 @@ assert.equal(parts.prefix,'ОВОС');assert.equal(parts.number,'2466');assert.e
 assert.equal(reference.composeReference({prefix:'РД',number:'12',suffix:'',date:''}),'РД-12');
 assert.equal(reference.referenceParts('Специален регистър 12/А').structured,false,'Unusual official references remain freely editable');
 assert.equal(reference.validReferenceDate('29.02.2024'),true);assert.equal(reference.validReferenceDate('29.02.2025'),false);assert.equal(reference.validReferenceDate('31.04.2026'),false);assert.equal(reference.validReferenceDate(''),true,'Date remains optional');
+assert.equal(reference.filenameReferences('339-Izdavane-pismo-za-opred-n_OVOS-2466_30_09_2026_1 (1).pdf')[0],'ОВОС-2466/30.09.2026 г.','Filename copy suffix is not a registry supplement');
+assert.equal(reference.filenameReferences('notification_ОВОС-2159-3_12_10_2026.pdf')[0],'ОВОС-2159-3/12.10.2026 г.');
+assert.equal(reference.filenameReferences('РД-12_31_02_2026.pdf').length,0,'Reject impossible filename dates');
+assert.equal(reference.filenameReferences('notification.pdf').length,0,'Do not invent absent numbers');
 await window.KT126Registry.beforeProcess({name:'notice.pdf',size:bytes.length,arrayBuffer:async()=>bytes.buffer});
 const body=new TextEncoder().encode('<word>accepted body unchanged</word>'),contents={'word/document.xml':body,'[Content_Types].xml':new TextEncoder().encode('<Types></Types>'),'_rels/.rels':new TextEncoder().encode('<Relationships></Relationships>')};
 window.KT126Registry.attachDocxMetadata(contents,{caseId:id,version:2});
