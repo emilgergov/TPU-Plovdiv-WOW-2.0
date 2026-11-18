@@ -21,24 +21,25 @@ db.execute("INSERT INTO kt125_cases VALUES(?,?,?,?,?,?)",
 db.commit()
 def disable(target, event, actor="admin",org="riosv"):
  with db:
-  change=db.execute(update,(now+1,target,org,actor,actor)).rowcount
+  change=db.execute(update,(now+1,target,org,actor,actor,actor)).rowcount
   logged=db.execute(audit,(event,actor,now+1,"req-"+event,
    '{"target_user_id":"'+target+'"}',target,org)).rowcount
  return change,logged
 assert disable("unassigned","evt-1")==(1,1)
 assert db.execute("SELECT active FROM kt125_users WHERE user_id='unassigned'").fetchone()==(0,)
 assert disable("unassigned","evt-2")==(0,0)
-assert disable("owner","evt-3")==(0,0)
+assert disable("owner","evt-3")==(1,1)
+assert db.execute("SELECT owner_id,status FROM kt125_cases WHERE case_id='case-a'").fetchone()==("owner","active")
 assert disable("foreign","evt-4")==(0,0)
 assert disable("admin","evt-5")==(0,0)
-assert db.execute("SELECT COUNT(*) FROM kt125_audit").fetchone()[0]==1
+assert db.execute("SELECT COUNT(*) FROM kt125_audit").fetchone()[0]==2
 # An audit failure must rollback the disabling operation in the same transaction.
 db.execute("INSERT INTO kt125_users VALUES(?,?,?,?,?,?,?,?)",
  ("unassigned2","riosv","idp","sub-unassigned2","expert",1,now,now))
 db.commit()
 try:
  with db:
-  db.execute(update,(now+1,"unassigned2","riosv","admin","admin"))
+  db.execute(update,(now+1,"unassigned2","riosv","admin","admin","admin"))
   db.execute(audit,("evt-1","admin",now+1,"req-conflict",
    '{"target_user_id":"unassigned2"}',"unassigned2","riosv"))
 except sqlite3.IntegrityError:
@@ -47,3 +48,4 @@ else:
  raise AssertionError("Audit conflict should abort mutation")
 assert db.execute("SELECT active FROM kt125_users WHERE user_id='unassigned2'").fetchone()==(1,)
 print("PASS KT125-VT02 real SQLite: inactive user, active case owner, foreign organization, self-disable and rollback on audit failure.")
+

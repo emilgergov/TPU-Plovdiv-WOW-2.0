@@ -71,17 +71,27 @@ export async function readKT125AccessRequests(args){
    WHERE r.organization_id=? ORDER BY r.created_at_ms DESC,r.request_id LIMIT 51`).bind(actor.organizationId).all();
   if(!Array.isArray(result?.results))return fail('REQUESTS_UNAVAILABLE');
   const items=result.results.slice(0,50);
-  // An optional, explicitly confirmed migration preserves a legacy expert ID.
   try{
-   const matches=await args.db.prepare(`SELECT r.request_id,u.user_id,u.role FROM kt125_access_requests r
-    JOIN kt125_member_accounts a ON a.request_id=r.request_id
-    JOIN kt125_staff_profiles p ON p.email=r.email AND p.organization_id=r.organization_id
-    JOIN kt125_users u ON u.user_id=p.user_id AND u.organization_id=r.organization_id
-    WHERE r.organization_id=? AND r.status='pending' AND a.linked_user_id IS NULL
-     AND u.active=1 AND u.role IN ('expert','reviewer','delegated_expert') LIMIT 51`).bind(actor.organizationId).all();
-   const byId=new Map((matches.results||[]).map(m=>[m.request_id,m]));
-   for(const row of items){const m=byId.get(row.request_id);if(m){row.existing_user_id=m.user_id;row.existing_role=m.role;}}
-  }catch{/* The existing invitation flow also works before schema 006 exists. */}
+   const local=await args.db.prepare(`SELECT a.request_id,a.email,a.activated_at_ms,o.state AS mail_state,u.user_id AS existing_user_id,u.role AS existing_role
+    FROM kt125_local_accounts a
+    LEFT JOIN kt125_local_outbox o ON o.mail_id=(SELECT mail_id FROM kt125_local_outbox WHERE account_id=a.account_id ORDER BY created_at_ms DESC,mail_id DESC LIMIT 1)
+    LEFT JOIN kt125_staff_profiles p ON p.email=a.email AND p.organization_id=a.organization_id
+    LEFT JOIN kt125_users u ON u.user_id=p.user_id AND u.organization_id=a.organization_id AND u.active=1 AND u.role IN ('expert','reviewer','delegated_expert')
+    WHERE a.request_id IN (SELECT request_id FROM kt125_access_requests WHERE organization_id=? ORDER BY created_at_ms DESC,request_id LIMIT 51)`)
+    .bind(actor.organizationId).all();
+   const byId=new Map((local.results||[]).map(r=>[r.request_id,r]));
+   let signed;try{signed=await args.verifier.verify(args.request)}catch{}
+   const ownerEmail=actor.role==='egmaster'&&signed?.verified?normalizeKT125Email(signed.email):null;
+   for(const row of items){const own=byId.get(row.request_id);if(!own)continue;
+    row.auth_kind='local';row.mail_state=own.mail_state;row.activated_at_ms=own.activated_at_ms;
+    if(row.status==='pending'){
+     row.existing_user_id=own.existing_user_id;row.existing_role=own.existing_role;
+     if(ownerEmail&&ownerEmail===own.email){row.existing_user_id=actor.userId;row.existing_role='egmaster';}
+    }
+   }
+  }catch(e){
+   if(!/no such table: (?:main\.)?kt125_local_(?:accounts|outbox)/i.test(String(e?.message)+' '+String(e?.cause?.message)))return fail('REQUESTS_UNAVAILABLE');
+  }
   return {ok:true,items,hasMore:result.results.length>50};
  }catch(e){
   if(/no such table: (?:main\.)?kt125_(?:access_requests|invitation_mail)/i.test(String(e?.message)+' '+String(e?.cause?.message)))return {ok:true,items:[],hasMore:false};

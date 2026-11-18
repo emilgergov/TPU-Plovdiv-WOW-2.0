@@ -13,8 +13,7 @@ function fake({actor=manager,changes=[1,1],throwBatch=false}={}){
  }}}},async batch(statements){
   batches.push(statements);
   assert.equal(statements.length,2);
-  assert(statements[0].sql.includes("NOT EXISTS"));
-  assert(statements[0].sql.includes("status='active'"));
+  assert(!statements[0].sql.includes("kt125_cases"),"Owning cases must not prevent deactivation");
   assert(statements[0].sql.includes("admin.active=1"));
   assert(statements[1].sql.includes("kt125_audit"));
   assert(statements[1].sql.includes("changes()=1"));
@@ -42,4 +41,5 @@ assert.equal(result.ok,false,"Administrative self-disable must fail");
 result=await disableKT125User({...base,db:fake(),
  request:new Request("https://office.example.invalid/private")});
 assert.equal(result.ok,false,"Unverified actor must fail");
-console.log("PASS KT125 user lifecycle: verified management, no self-disable, no disabling active case owner, atomic audit, denied on DB failures.");
+console.log("PASS KT125 user lifecycle: verified management, no self-disable, deactivation preserves case ownership, atomic audit, denied on DB failures.");
+

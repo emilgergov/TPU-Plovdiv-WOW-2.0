@@ -20,8 +20,9 @@ function mockDB({role="administrator",active=1,changes=[1,1],throwBatch=false}={
  },async batch(stmts){
   mutations.push(stmts);
   if(throwBatch)throw Error("Denied DB write");
-  assert(stmts[0].sql.includes("NOT EXISTS"));
-  assert(stmts[0].sql.includes("status='active'"));
+  assert(stmts[0].sql.includes("admin.organization_id=kt125_users.organization_id"));
+  assert(stmts[0].sql.includes("admin.active=1"));
+  assert(!stmts[0].sql.includes("kt125_cases"));
   assert(stmts[1].sql.includes("kt125_audit"));
   return changes.map(x=>({meta:{changes:x}}));
  }};
@@ -53,4 +54,5 @@ assert.equal((await handler.fetch(req(),env(mockDB({active:0})))).status,403);
 assert.equal((await handler.fetch(req(),env(mockDB({changes:[0,0]})))).status,403);
 assert.equal((await handler.fetch(req(),env(mockDB({throwBatch:true})))).status,403);
 assert.equal((await handler.fetch(req({method:"GET"}),env(mockDB()))).status,405);
-console.log("PASS KT125-VT02: admin deactivation requires verified manager, same-origin confirmed form, atomic audit, active-case owner guard, rejects unverified and forged requests.");
+console.log("PASS KT125-VT02: admin deactivation requires verified manager, same-origin confirmed form, atomic audit, preserved case ownership, rejects unverified and forged requests.");
+

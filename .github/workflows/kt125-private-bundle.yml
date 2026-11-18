@@ -6,6 +6,8 @@ on:
       - 'work/kt125-access-register-from-kt124-r6'
     paths:
       - 'cloudflare/kt125-access/src/**'
+      - 'cloudflare/kt125-access/package*.json'
+      - 'cloudflare/kt125-access/test/local-auth-runtime.test.mjs'
       - '.github/workflows/kt125-private-bundle.yml'
 permissions:
   contents: read
@@ -17,9 +19,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install pinned build and mail dependencies
+        run: npm ci --prefix cloudflare/kt125-access
       - name: Bundle the private Worker into one ES module
         run: |
-          npm_config_yes=true npx --yes esbuild@0.25.12 cloudflare/kt125-access/src/private-worker.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt125-private-worker.mjs
+          cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/src/private-worker.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt125-private-worker.mjs
           node --check dist/kt125-private-worker.mjs
           test -s dist/kt125-private-worker.mjs
       - uses: actions/upload-artifact@v4
@@ -29,13 +33,18 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Bundle the separate username/password Worker (disabled until configured)
+      - name: Bundle our local username/password service
         run: |
-          npm_config_yes=true npx --yes esbuild@0.25.12 cloudflare/kt125-access/src/member-auth/worker.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt125-member-password-worker.mjs
-          node --check dist/kt125-member-password-worker.mjs
+          cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/src/local-auth/service.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=dist/kt125-local-auth-worker.mjs
+          node --check dist/kt125-local-auth-worker.mjs
+      - name: Validate actual Workers runtime, D1 and private password RPC
+        working-directory: cloudflare/kt125-access
+        env:
+          KT125_RUNTIME_BUNDLE: ${{ github.workspace }}/dist/kt125-local-auth-worker.mjs
+        run: node test/local-auth-runtime.test.mjs
       - uses: actions/upload-artifact@v4
         with:
-          name: KT125-MEMBER-PASSWORD-WORKER-SINGLE-FILE
-          path: dist/kt125-member-password-worker.mjs
+          name: KT125-LOCAL97-AUTH-WORKER
+          path: dist/kt125-local-auth-worker.mjs
           if-no-files-found: error
           retention-days: 7

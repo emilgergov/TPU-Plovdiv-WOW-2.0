@@ -1,0 +1,20 @@
+{
+  // Copy to an untracked file and fill the existing D1 UUID before deployment.
+  "name": "tpu-plovdiv-kt125-local-auth",
+  "main": "src/local-auth/service.mjs",
+  "compatibility_date": "2026-07-30",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "vars": {
+    "KT125_LOCAL_ENABLED": "false",
+    "KT125_LOCAL_ORIGIN": "https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev",
+    "KT125_REQUEST_ORGANIZATION": "REPLACE_WITH_EXISTING_ORGANIZATION_ID",
+    "KT125_SMTP_HOST": "mail.plovdiv.riew.gov.bg",
+    "KT125_SMTP_USER": "gergov@plovdiv.riew.gov.bg",
+    "KT125_SMTP_FROM": "gergov@plovdiv.riew.gov.bg"
+  },
+  "d1_databases": [{"binding": "KT125_DB", "database_name": "tpu-plovdiv-kt125-access", "database_id": "REPLACE_WITH_EXISTING_DATABASE_UUID"}],
+  "durable_objects": {"bindings": [{"name": "KT125_PASSWORDS", "class_name": "PasswordKdf"}]},
+  "migrations": [{"tag": "local97-password-kdf", "new_sqlite_classes": ["PasswordKdf"]}],
+  "services": [{"binding": "KT125_LOCAL_AUTH", "service": "tpu-plovdiv-kt125-local-auth", "entrypoint": "LocalAuthService"}]
+}

@@ -1,0 +1,1 @@
+{"name":"wow-kt125-local-auth","private":true,"type":"module","version":"0.0.97","dependencies":{"nodemailer":"10.6.0"},"devDependencies":{"esbuild":"0.25.12","miniflare":"4.20260730.0"}}
