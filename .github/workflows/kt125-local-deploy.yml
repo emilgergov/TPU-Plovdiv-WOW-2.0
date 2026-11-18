@@ -1,0 +1,47 @@
+name: KT125 LOCAL97 isolated auth deployment
+on:
+  push:
+    branches: [work/kt125-access-register-from-kt124-r6]
+    paths:
+      - '.github/workflows/kt125-local-deploy.yml'
+      - 'cloudflare/kt125-access/scripts/deploy-local97.mjs'
+permissions:
+  contents: read
+concurrency:
+  group: kt125-local97-deployment
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned dependencies and build verified auth source
+        run: |
+          npm ci --prefix cloudflare/kt125-access
+          cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/src/private-worker.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt125-private-worker.mjs
+          cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/src/local-auth/service.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=dist/kt125-local-auth-worker.mjs
+          node --check dist/kt125-private-worker.mjs
+          node --check dist/kt125-local-auth-worker.mjs
+      - name: Verify actual Workers password runtime before touching live services
+        working-directory: cloudflare/kt125-access
+        env:
+          KT125_RUNTIME_BUNDLE: ${{ github.workspace }}/dist/kt125-local-auth-worker.mjs
+        run: node test/local-auth-runtime.test.mjs
+      - name: Back up existing settings, add local schema, publish isolated service and admin bridge
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: node cloudflare/kt125-access/scripts/deploy-local97.mjs
+      - name: Preserve rollback snapshot and deployment report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: KT125-LOCAL97-DEPLOYMENT-BACKUP
+          path: |
+            dist/local97-backup/
+            dist/local97-deployment.json
+          if-no-files-found: warn
+          retention-days: 30
