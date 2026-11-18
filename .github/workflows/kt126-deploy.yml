@@ -1,0 +1,39 @@
+name: KT126 verified registry rollout
+on:
+  push:
+    branches: [work/kt125-access-register-from-kt124-r6]
+    paths: ['.github/workflows/kt126-deploy.yml','cloudflare/kt125-access/deploy/kt126-rollout.mjs']
+permissions:
+  contents: read
+concurrency:
+  group: kt125-local97-deployment
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --prefix cloudflare/kt125-access
+      - name: Verify isolated registry, original integrity and exact browser overlays
+        working-directory: cloudflare/kt125-access
+        run: |
+          node test/kt126-registry.test.mjs
+          node test/kt126-gateway.test.mjs
+          node_modules/.bin/esbuild src/local-auth/service.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=../../dist/kt126-native.mjs
+          KT125_RUNTIME_BUNDLE="$GITHUB_WORKSPACE/dist/kt126-native.mjs" node test/local-auth-runtime.test.mjs
+      - name: Verify unchanged R6 legal logic and confirmed-number authorization
+        run: |
+          git fetch origin 1e949e654f9d002f51f7e0b0e8629a78f43512d1 --depth=1
+          node cloudflare/kt125-access/test/author-origin.test.mjs
+          node cloudflare/ai-author-v27/test/kt126-registry-reference.mjs
+          node cloudflare/ai-author-v27/test/kt123-stage4-stage5-coherence.mjs
+          node cloudflare/ai-author-v27/test/kt124-independent-expert-handoff.mjs
+          cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/ai-author-v27/src/worker.js --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt126-author.mjs
+      - name: Publish registry and author binding preserving existing accounts and secrets
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: node cloudflare/kt125-access/deploy/kt126-rollout.mjs

@@ -1,3 +1,4 @@
+import {createLocalHandler} from '../src/local-auth/worker.mjs';
 import {REGISTRY_SCHEMA} from '../src/kt126/schema.mjs';
 import {createKT125PrivateHandler} from '../src/private-worker.mjs';
 import assert from 'node:assert/strict';
@@ -77,6 +78,13 @@ try{
  assert.equal((await mf.dispatchFetch(origin+'/kt126/registry/'+boundCase.case_id,{headers:{Cookie:restoredCookie}})).status,403);
  assert.equal(await bound.KT125_LOCAL_AUTH.getCaseContext({cookie:restoredCookie,caseId:boundCase.case_id,action:'document.generate'}),null,'Private author RPC also sees deactivation immediately');
  assert.equal((await adminAction('enable')).status,303);
+ const finalLogin=await send('/auth/login',{username:'runtime-user',password:resetBody.password,account:'',activation:''});assert.equal(finalLogin.status,303);const finalCookie=finalLogin.headers.getSetCookie()[0].split(';')[0];
+ const moduleHandler=createLocalHandler({passwordHash:async()=>{throw Error('KDF must not run for module reads')},passwordVerify:async()=>false,moduleFetch:async url=>{const relative=new URL(url).pathname.replace(/^.*\/[0-9a-f]{40}\//,'');return new Response(readFileSync('../../'+relative,'utf8'))}});
+ const moduleRequest=path=>new Request(origin+path,{headers:{Cookie:finalCookie}});
+ const registryClient=await moduleHandler.fetch(moduleRequest('/kt126/client.js'),runtimeEnv);assert.equal(registryClient.status,200);assert((await registryClient.text()).includes('KT126Registry'));
+ const master=await moduleHandler.fetch(moduleRequest('/module/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html'),runtimeEnv);assert.equal(master.status,200);const page=await master.text();assert(page.includes('src="/kt126/client.js"'));assert(page.includes('wow-session-banner'));
+ const patchedFlow=await moduleHandler.fetch(moduleRequest('/module/vt03/kt80/KT83_WORKFLOW_CASE_V591.js'),runtimeEnv);assert.equal(patchedFlow.status,200);assert((await patchedFlow.text()).includes('KT126Registry.beforeProcess'));
+ const legacy=await moduleHandler.fetch(moduleRequest('/module/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html'),{...runtimeEnv,KT126_REGISTRY_ENABLED:'false'});assert.equal(legacy.status,200);assert(!(await legacy.text()).includes('src="/kt126/client.js"'),'Disabled rollout preserves the existing module');
  const deniedAdmin=await send('/kt125/admin/users/owner/disable',{confirm:'DEACTIVATE'},restoredCookie);
  assert.equal(deniedAdmin.status,403,'Ordinary expert must not disable an administrator');
  console.log('PASS LOCAL97 workerd: actual D1, native scrypt through private SQLite Durable Object RPC, first password session, reset through native KDF with revoked old password/session and single-use link, revocation trigger and mail Service Binding. Elapsed ms:',Math.round(performance.now()-started));
