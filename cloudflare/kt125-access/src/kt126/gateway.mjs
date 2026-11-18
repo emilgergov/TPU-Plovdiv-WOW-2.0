@@ -12,7 +12,7 @@ export function overlayModule(rel,source){
  if(rel.endsWith('/KT80_E01_DOSSIER_ORIGINALS_V39.js'))source=replaceOnce(source,'Object.freeze({openOriginal,close})',"Object.freeze({openOriginal,close,readBytes:async filename=>{const source=$('kt80InputFile')?.files?.[0];if(!source)throw Error('Първо изберете оригиналната преписка');return /\\.zip$/i.test(source.name)?extractZIP(source,normalize(filename)):source.arrayBuffer()}})");
  if(rel.endsWith('/kt117-stage5-document-author.mjs')){
   source=replaceOnce(source,'const incomingReference=()=>{',"const incomingReference=()=>{\n if(window.KT126Registry)return window.KT126Registry.confirmedExternal();");
-  source=replaceOnce(source,"reference.textContent='Представена документация · вх. № '+incomingReference();","reference.textContent='Представена документация · Деловоден № '+(incomingReference()||'не е посочен');");
+  source=replaceOnce(source,"reference.textContent='Представена документация · вх. № '+incomingReference();","reference.textContent='Представена документация · Деловоден № '+(incomingReference()||'не е посочен');reference.classList.toggle('kt126-external-number',!!incomingReference());");
   source=replaceOnce(source,"['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated']","['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated','kt126:external-change']");
   source=replaceOnce(source,'  refresh:sync',`  checkpoint:()=>source?({source,versions,confirmed,editorialIssues,external:window.KT126Registry?.confirmedExternal()||''}):null,
   restoreCheckpoint:data=>{
