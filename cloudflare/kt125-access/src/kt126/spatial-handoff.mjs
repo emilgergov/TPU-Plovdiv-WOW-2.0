@@ -4,7 +4,7 @@ export function spatialEvidenceSummary(e){
  const d=e||{},ids=Array.isArray(d.ids)?d.ids:[],results=d.live?.results||[];
  return {spatialClass:d.spatialClass||'UNDETERMINED',geometryVerified:d.valid===true,intersectionsVerified:d.intersections===true,pdf1Current:d.pdfOK===true,scenario:d.scenario||'CONTEXT',
   parcelIds:ids,parcels:results.filter(r=>ids.includes(r.input||r.cadnum)).map(r=>({id:r.input||r.cadnum,verifiedOutside:r.intersection_verified_outside===true,
-   verifiedZoneIntersections:(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?{code:z}:{code:z.sitecode||z.code||'',name:z.name_bg||z.name||'',area_m2:z.area_m2??null})})),
+   verifiedZoneIntersections:(r.verified_zone_intersections||[]).map(z=>typeof z==='string'?{kind:'ЗЗ',legalRegime:'ЗБР',code:z}:{kind:'ЗЗ',legalRegime:'ЗБР',code:z.sitecode||z.code||'',name:z.name_bg||z.name||'',area_m2:z.area_m2??null})})),
   limitation:'Само пространствени факти. Липсващ PDF1 не означава непресичане. Пресичането или непресичането не определя категория по ЗООС, значимост на въздействие или приложима процедура.'};
 }
 export function overlaySpatialHandoff(rel,source){

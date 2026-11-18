@@ -74,3 +74,9 @@ const gisContext={root:gisRoot,$:id=>id==='kt80ParcelInput'?{value:'12345.1.2'}:
 vm.createContext(gisContext);vm.runInContext(findBody+'\nthis.find=find;',gisContext);await gisContext.find();
 assert.equal(revisions,1);assert.equal(lookups,1);assert.equal(button.disabled,false);
 console.log('PASS KT130: every accepted GIS refresh starts a fresh evidence revision before lookup; old normative/PDF approvals cannot survive it');
+
+const typed=spatialEvidenceSummary({ids:['12345.1.2'],valid:true,intersections:true,live:{results:[{input:'12345.1.2',verified_zone_intersections:[{sitecode:'BG0000001',name_bg:'Тестова зона – буфер',area_m2:10},'BG0000002']} ]}});
+for(const z of typed.parcels[0].verifiedZoneIntersections){assert.equal(z.kind,'ЗЗ');assert.equal(z.legalRegime,'ЗБР');}
+assert.equal(typed.parcels[0].verifiedZoneIntersections[0].name,'Тестова зона – буфер');
+assert(!JSON.stringify(typed.parcels).includes('ЗЗТ'),'A word in the name never generates a protected-territory record');
+console.log('PASS KT130 typed spatial evidence: exact name/code/area retained, both code-only and named verified zones explicitly ZZ/ZBR, no ZT invented from buffer in name');
