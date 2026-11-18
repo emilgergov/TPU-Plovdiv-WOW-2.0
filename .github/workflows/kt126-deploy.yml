@@ -2,7 +2,7 @@ name: KT126 verified registry rollout
 on:
   push:
     branches: [work/kt125-access-register-from-kt124-r6]
-    paths: ['.github/workflows/kt126-deploy.yml','cloudflare/kt125-access/deploy/kt126-rollout.mjs','cloudflare/kt125-access/src/kt126/**','cloudflare/kt125-access/src/local-auth/**','cloudflare/ai-author-v27/src/worker.js','cloudflare/ai-author-v27/src/kt130-applicability-meaning.mjs','cloudflare/ai-author-v27/src/kt130-stage5-context.mjs','cloudflare/ai-author-v27/src/kt130-territorial-context.mjs','cloudflare/ai-author-v27/src/territorial-archive/**','cloudflare/ai-author-v27/test/kt130-stage5-sources.mjs','cloudflare/ai-author-v27/src/kt123-evidence-qualification.mjs','cloudflare/kt125-access/test/kt126-gateway.test.mjs','cloudflare/kt125-access/src/private-admin-page.mjs','cloudflare/kt125-access/test/presentation.test.mjs','cloudflare/kt125-access/test/kt130-applicability.test.mjs','cloudflare/kt125-access/test/kt130-resume-source-diagnostics.test.mjs','cloudflare/ai-author-v27/test/kt130-gis-qualification-parity.mjs','cloudflare/kt125-access/test/author-origin.test.mjs','cloudflare/kt125-access/test/kt128-session-bridge.test.mjs','cloudflare/kt125-access/test/kt129-stage3-context.test.mjs']
+    paths: ['.github/workflows/kt126-deploy.yml','cloudflare/kt125-access/deploy/kt126-rollout.mjs','cloudflare/kt125-access/src/kt126/**','cloudflare/kt125-access/src/local-auth/**','cloudflare/ai-author-v27/src/worker.js','cloudflare/ai-author-v27/src/kt130-applicability-meaning.mjs','cloudflare/ai-author-v27/src/kt130-stage5-context.mjs','cloudflare/ai-author-v27/src/kt130-territorial-context.mjs','cloudflare/ai-author-v27/src/territorial-archive/**','cloudflare/ai-author-v27/test/kt130-stage5-sources.mjs','cloudflare/ai-author-v27/src/kt123-evidence-qualification.mjs','cloudflare/kt125-access/test/kt126-gateway.test.mjs','cloudflare/kt125-access/src/private-admin-page.mjs','cloudflare/kt125-access/test/presentation.test.mjs','cloudflare/kt125-access/test/kt130-applicability.test.mjs','cloudflare/kt125-access/test/kt130-resume-source-diagnostics.test.mjs','cloudflare/kt125-access/test/kt130-reset-restore-race.test.mjs','cloudflare/ai-author-v27/test/kt130-gis-qualification-parity.mjs','cloudflare/kt125-access/test/author-origin.test.mjs','cloudflare/kt125-access/test/kt128-session-bridge.test.mjs','cloudflare/kt125-access/test/kt129-stage3-context.test.mjs']
 permissions:
   contents: read
 concurrency:
@@ -29,6 +29,7 @@ jobs:
           node test/presentation-polish.test.mjs
           node test/kt130-applicability.test.mjs
           node test/kt130-resume-source-diagnostics.test.mjs
+          node test/kt130-reset-restore-race.test.mjs
           node test/presentation.test.mjs
           node test/private-admin-page.test.mjs
           node_modules/.bin/esbuild src/local-auth/service.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=../../dist/kt126-native.mjs
