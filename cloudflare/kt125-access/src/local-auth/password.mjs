@@ -7,7 +7,7 @@ async function derive(password,salt){
  if(busy)throw Error('PASSWORD_SERVICE_BUSY');busy=true;
  try{return await new Promise((resolve,reject)=>scrypt(password,salt,32,{N,r,p,maxmem},(e,key)=>e?reject(e):resolve(key)))}finally{busy=false}
 }
-export const passwordValid=pw=>typeof pw==='string'&&pw.length>=15&&pw.length<=128&&!pw.includes('\0');
+export const passwordValid=pw=>typeof pw==='string'&&pw.length>=12&&pw.length<=128&&!pw.includes('\0');
 export async function hashPassword(password){
  if(!passwordValid(password))throw Error('INVALID_PASSWORD');
  const salt=randomBytes(16).toString('hex');const key=await derive(password,salt);

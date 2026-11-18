@@ -1,7 +1,7 @@
 import {requestReset,usableReset,completeReset} from './recovery.mjs';
 import {smtpConfig} from './mail.mjs';
 import {page} from './pages.mjs';
-const passwordValid=pw=>typeof pw==='string'&&pw.length>=15&&pw.length<=128&&!pw.includes('\0');
+const passwordValid=pw=>typeof pw==='string'&&pw.length>=12&&pw.length<=128&&!pw.includes('\0');
 import {localConfig,SESSION_MS,cookie,username,rateLimit,purposeToken,equalToken,id} from './common.mjs';
 import {setup,registration,register,findAccount,activate,createSession,identity,logout} from './store.mjs';
 import {createKT125PrivateHandler} from '../private-worker.mjs';
@@ -66,7 +66,7 @@ export function createLocalHandler({clock=()=>Date.now(),uuid=()=>crypto.randomU
     }
     if(path==='/auth/reset'){
      const pw=data.get('password');
-     if(!passwordValid(pw)||pw!==data.get('password_confirm'))return page({view:'reset',resetId:data.get('reset_id'),resetToken:data.get('reset_token'),message:'Паролите трябва да съвпадат и да са поне 15 знака.',status:400});
+     if(!passwordValid(pw)||pw!==data.get('password_confirm'))return page({view:'reset',resetId:data.get('reset_id'),resetToken:data.get('reset_token'),message:'Паролите трябва да съвпадат и да са поне 12 знака.',status:400});
      const row=await usableReset({db,config,env,resetId:data.get('reset_id'),proof:data.get('reset_token'),now});
      if(!row)return page({view:'forgot',mailReady:Boolean(smtpConfig(env)),message:'Връзката е невалидна, изтекла или вече използвана.',status:403});
      const encoded=await doHash(pw);
@@ -76,7 +76,7 @@ export function createLocalHandler({clock=()=>Date.now(),uuid=()=>crypto.randomU
     if(path==='/auth/logout'){await logout(db,request);return redirect('/auth/login',cookie('',0));}
    if(path==='/auth/register'){
      const input=registration(data),pw=data.get('password');
-     if(!input||!passwordValid(pw)||pw!==data.get('password_confirm')||data.get('confirm')!=='REGISTER')return page({view:'register',message:'Проверете данните и съвпадението на паролите. Паролата е поне 15 знака.',status:400});
+     if(!input||!passwordValid(pw)||pw!==data.get('password_confirm')||data.get('confirm')!=='REGISTER')return page({view:'register',message:'Проверете данните и съвпадението на паролите. Паролата е поне 12 знака.',status:400});
      const encoded=await doHash(pw);
      if(!await register({db,config,input,passwordHash:encoded,now,uuid}))return page({view:'register',message:'Заявката не е записана. Възможно е вече да има заявка за това име или имейл.',status:409});
      return redirect('/auth/submitted');

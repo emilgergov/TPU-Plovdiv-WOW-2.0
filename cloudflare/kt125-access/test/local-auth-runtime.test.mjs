@@ -22,9 +22,12 @@ try{
  await db.prepare('ALTER TABLE kt125_users ADD COLUMN activation_pending INTEGER NOT NULL DEFAULT 0').run();
  for(const sql of [...KT125_INVITATION_SCHEMA,...KT125_REQUEST_SCHEMA,...LOCAL_SCHEMA])await db.prepare(sql).run();
  await db.prepare("INSERT INTO kt125_users(user_id,organization_id,identity_provider,provider_subject,role,active,created_at_ms,updated_at_ms) VALUES('owner','riosv','https://test.cloudflareaccess.com','owner-sub','egmaster',1,?,?)").bind(now,now).run();
- const password='A strong local runtime phrase!';
+ const password='Pine!River42';
+ assert.equal(password.length,12);
  const send=(path,body,cookie='')=>mf.dispatchFetch(origin+path,{method:'POST',headers:{Origin:origin,'Content-Type':'application/x-www-form-urlencoded',...(cookie?{Cookie:cookie}:{})},body:new URLSearchParams(body),redirect:'manual'});
  const started=performance.now();
+ const tooShort=await send('/auth/register',{username:'runtime-user',name:'Runtime expert',email:'runtime@example.invalid',password:password.slice(0,11),password_confirm:password.slice(0,11),note:'Boundary test',confirm:'REGISTER'});
+ assert.equal(tooShort.status,400,'Eleven-character registration is rejected');
  const registered=await send('/auth/register',{username:'runtime-user',name:'Runtime expert',email:'runtime@example.invalid',password,password_confirm:password,note:'Runtime test',confirm:'REGISTER'});
  assert.equal(registered.status,303,await registered.text());
  const account=await db.prepare("SELECT * FROM kt125_local_accounts WHERE username='runtime-user'").first();assert(account.password_hash.startsWith('scrypt$32768$8$3$'));
@@ -40,7 +43,9 @@ try{
  assert.equal((await send('/auth/forgot',{email:'runtime@example.invalid'})).status,503);
  const resetId=await requestReset({db,config:localConfig(runtimeEnv),email:'runtime@example.invalid',now:Date.now(),uuid:()=>crypto.randomUUID()});assert(resetId);
  const reset=await db.prepare('SELECT * FROM kt125_local_resets WHERE reset_id=?').bind(resetId).first();
- const resetBody={reset_id:resetId,reset_token:await resetProof(runtimeEnv,reset),password:'A runtime replacement password!',password_confirm:'A runtime replacement password!'};
+ const resetBody={reset_id:resetId,reset_token:await resetProof(runtimeEnv,reset),password:'Oak!Stream73',password_confirm:'Oak!Stream73'};
+ assert.equal(resetBody.password.length,12);
+ assert.equal((await send('/auth/reset',{...resetBody,password:resetBody.password.slice(0,11),password_confirm:resetBody.password.slice(0,11)})).status,400);
  assert.equal((await send('/auth/reset',resetBody)).status,303);
  assert.equal((await mf.dispatchFetch(origin+'/member',{headers:{Cookie:cookie},redirect:'manual'})).status,303);
  assert.equal((await send('/auth/reset',resetBody)).status,403);
