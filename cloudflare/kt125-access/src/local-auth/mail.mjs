@@ -69,3 +69,25 @@ export async function sendResetNotification(env,resetId,{deliver=deliverSmtp,now
   await db.prepare("UPDATE kt125_local_resets SET mail_state=? WHERE reset_id=? AND mail_state='sending'").bind(state,resetId).run();return {ok:state==='accepted',state};
  }catch{return {ok:false,state:'uncertain'}}
 }
+
+/** Private service RPC diagnostic: validates TLS and SMTP authentication only.
+ * Never sends a message and never returns server text, credentials or tokens. */
+export async function verifySmtpConnection(env,{createTransport}={}){
+ const smtp=smtpConfig(env);if(!smtp)return {ok:false,configured:false,code:'CONFIGURATION'};
+ let transport;
+ try{
+  const factory=createTransport||(await import('nodemailer')).default.createTransport;
+  transport=factory({host:smtp.host,port:smtp.port,secure:smtp.port===465,requireTLS:true,ignoreTLS:false,
+   auth:{user:smtp.user,pass:smtp.password},tls:{minVersion:'TLSv1.2',rejectUnauthorized:true},
+   connectionTimeout:10000,greetingTimeout:10000,socketTimeout:15000,
+   disableFileAccess:true,disableUrlAccess:true,logger:false,debug:false});
+  await transport.verify();return {ok:true,configured:true,authenticated:true};
+ }catch(e){
+  const codes=new Set(['EAUTH','EDNS','ECONNECTION','EENVELOPE','ESOCKET','ETIMEDOUT','ETLS','ECONNREFUSED','ERR_NOT_IMPLEMENTED']);
+  const commands=new Set(['CONN','EHLO','HELO','STARTTLS','AUTH','AUTH PLAIN','AUTH LOGIN']);
+  return {ok:false,configured:true,code:codes.has(e?.code)?e.code:'TRANSPORT_ERROR',
+   command:commands.has(e?.command)?e.command:null,
+   responseCode:Number.isInteger(e?.responseCode)&&e.responseCode>=100&&e.responseCode<=599?e.responseCode:null,
+   runtimeUnsupported:/not implemented|is not a function/i.test(String(e?.message||''))};
+ }finally{try{transport?.close()}catch{}}
+}

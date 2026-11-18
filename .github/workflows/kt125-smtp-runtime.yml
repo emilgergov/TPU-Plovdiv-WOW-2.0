@@ -1,0 +1,71 @@
+name: KT125 SMTP private runtime verification (no email)
+on:
+  push:
+    branches: [work/kt125-access-register-from-kt124-r6]
+    paths: ['.github/workflows/kt125-smtp-runtime.yml']
+permissions:
+  contents: read
+concurrency:
+  group: kt125-local97-deployment
+  cancel-in-progress: false
+jobs:
+  smtp-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install and build native mail diagnostic
+        run: |
+          npm ci --prefix cloudflare/kt125-access
+          cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/src/local-auth/service.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=dist/kt125-local-auth-worker.mjs
+          node --check dist/kt125-local-auth-worker.mjs
+      - name: Verify credential redaction and TLS diagnostic without sending mail
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from "node:assert/strict";
+          import {verifySmtpConnection} from "./cloudflare/kt125-access/src/local-auth/mail.mjs";
+          const env={KT125_SMTP_HOST:"smtp.example.invalid",KT125_SMTP_PORT:"465",KT125_SMTP_FROM:"sender@example.invalid",KT125_SMTP_USER:"sender@example.invalid",KT125_SMTP_PASSWORD:"fixture-must-not-leak"};
+          let called=0,closed=0;
+          assert.equal((await verifySmtpConnection(env,{createTransport:o=>{assert(o.secure&&o.requireTLS&&o.tls.rejectUnauthorized);return {verify:async()=>{called++},close(){closed++}}}})).ok,true);
+          assert.equal(called,1);assert.equal(closed,1);
+          const bad=await verifySmtpConnection(env,{createTransport:()=>({verify:async()=>{throw Object.assign(Error("fixture-must-not-leak"),{code:"EAUTH",command:"AUTH PLAIN",responseCode:535})},close(){}})});
+          assert.equal(bad.code,"EAUTH");assert(!JSON.stringify(bad).includes("fixture-must-not-leak"));
+          console.log("PASS: private SMTP verify, no sendMail, strict TLS, sanitized failures");
+          NODE
+      - name: Preserve settings and perform one private SMTP authentication check
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {randomBytes} from "node:crypto";
+          import {readFileSync} from "node:fs";
+          const root="https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1/workers/scripts/";
+          const name="tpu-plovdiv-kt125-local-auth",helper="kt125-mail-check-"+process.env.GITHUB_RUN_ID;
+          const headers={Authorization:"Bearer "+process.env.CF_TOKEN};
+          async function api(script,path="",options={}){const r=await fetch(root+script+path,{...options,headers:{...headers,...options.headers},signal:AbortSignal.timeout(60000)});const d=await r.json().catch(()=>null);if(!r.ok||!d?.success)throw Error("Cloudflare request failed HTTP "+r.status);return d.result}
+          async function upload(script,source,metadata){const f=new FormData();f.set("metadata",new Blob([JSON.stringify({main_module:"worker.mjs",...metadata})],{type:"application/json"}));f.set("worker.mjs",new Blob([source],{type:"application/javascript+module"}),"worker.mjs");return api(script,"",{method:"PUT",body:f})}
+          const before=await api(name,"/settings");
+          const names=s=>(s.bindings||[]).map(x=>x.type+":"+x.name).sort().join("|");
+          if(!(before.bindings||[]).some(b=>b.name==="KT125_SMTP_PASSWORD"&&b.type==="secret_text"))throw Error("SMTP secret binding is missing");
+          await upload(name,readFileSync("dist/kt125-local-auth-worker.mjs"),{compatibility_date:before.compatibility_date,compatibility_flags:before.compatibility_flags,keep_bindings:["secret_text"],bindings:before.bindings.filter(x=>x.type!=="secret_text")});
+          if(names(await api(name,"/settings"))!==names(before))throw Error("Binding list changed");
+          await new Promise(r=>setTimeout(r,6000));
+          const probeKey=randomBytes(32).toString("hex");
+          const source='export default {async fetch(r,e){if(r.method!=="POST"||r.headers.get("Authorization")!=="Bearer "+e.PROBE_KEY)return new Response(null,{status:403});return Response.json(await e.LOCAL.verifyMailTransport())}}';
+          let created=false;
+          try{
+            await upload(helper,source,{compatibility_date:before.compatibility_date,observability:{enabled:false},bindings:[{type:"secret_text",name:"PROBE_KEY",text:probeKey},{type:"service",name:"LOCAL",service:name,entrypoint:"LocalAuthService"}]});created=true;
+            await api(helper,"/subdomain",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({enabled:true,previews_enabled:false})});
+            const sub=await fetch("https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1/workers/subdomain",{headers}).then(r=>r.json());
+            if(!sub.success)throw Error("Worker subdomain unavailable");
+            await new Promise(r=>setTimeout(r,4000));
+            const result=await fetch("https://"+helper+"."+sub.result.subdomain+".workers.dev/check",{method:"POST",headers:{Authorization:"Bearer "+probeKey},signal:AbortSignal.timeout(45000)});
+            if(!result.ok)throw Error("Private probe response HTTP "+result.status);
+            const status=await result.json();
+            console.log("PRIVATE_SMTP_RUNTIME_RESULT "+JSON.stringify(status));
+            console.log("NO_EMAIL_SENT: only TLS/SMTP authentication verified; no password or server text returned");
+          }finally{if(created){await api(helper,"",{method:"DELETE"});console.log("TEMPORARY_PRIVATE_PROBE_REMOVED")}}
+          NODE
