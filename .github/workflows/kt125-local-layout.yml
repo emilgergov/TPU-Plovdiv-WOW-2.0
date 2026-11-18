@@ -1,4 +1,4 @@
-name: KT125 LOCAL99 compact green and gold forms
+name: KT125 LOCAL100 password recovery and administrative entrance
 on:
   push:
     branches: [work/kt125-access-register-from-kt124-r6]
@@ -27,18 +27,27 @@ jobs:
         env:
           KT125_RUNTIME_BUNDLE: ${{ github.workspace }}/dist/kt125-local-auth-worker.mjs
         run: node test/local-auth-runtime.test.mjs
+      - name: Validate password recovery, role boundaries and preserved case identities
+        run: node cloudflare/kt125-access/test/local-auth-sql.test.mjs
       - name: Update existing native-auth service preserving bindings and secrets
         env:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           node --input-type=module <<'NODE'
           import {readFileSync} from 'node:fs';
+          import {RESET_SCHEMA} from './cloudflare/kt125-access/src/local-auth/recovery.mjs';
           const base="https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1/workers/scripts/tpu-plovdiv-kt125-local-auth";
           const headers={Authorization:"Bearer "+process.env.CF_TOKEN};
           const before=await fetch(base+"/settings",{headers}).then(r=>r.json());
           if(!before.success)throw Error("Cannot inspect existing native auth settings");
           const settings=before.result,bindings=settings.bindings||[];
           if(!bindings.some(b=>b.name==="KT125_AUTH_SECRET"&&b.type==="secret_text")||!bindings.some(b=>b.name==="KT125_PASSWORDS"&&b.type==="durable_object_namespace"))throw Error("Unexpected service configuration");
+          const db=bindings.find(b=>b.name==="KT125_DB"&&b.type==="d1");
+          if(!db?.id)throw Error("Existing D1 binding missing");
+          for(const sql of RESET_SCHEMA){
+            const r=await fetch("https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1/d1/database/"+db.id+"/query",{method:"POST",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify({sql,params:[]})}).then(r=>r.json());
+            if(!r.success)throw Error("Additive recovery schema failed");
+          }
           const metadata={main_module:"worker.mjs",compatibility_date:settings.compatibility_date,compatibility_flags:settings.compatibility_flags,keep_bindings:["secret_text"],bindings:bindings.filter(b=>b.type!=="secret_text")};
           const form=new FormData();
           form.set("metadata",new Blob([JSON.stringify(metadata)],{type:"application/json"}));
@@ -50,10 +59,10 @@ jobs:
           if(!after.success||names(after.result.bindings)!==names(bindings))throw Error("Binding list changed");
           const origin="https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev";
           await new Promise(resolve=>setTimeout(resolve,5000));
-          for(const path of ["/auth/register","/auth/login"]){
+          for(const path of ["/auth/register","/auth/login","/auth/admin","/auth/forgot"]){
             const r=await fetch(origin+path);const html=await r.text();
-            if(r.status!==200||!html.includes('data-layout="local99"'))throw Error("Live layout check failed for "+path);
-            console.log("LOCAL99_LIVE "+path+": HTTP200, compact layout");
+            if(r.status!==200||!html.includes('data-layout="local100"'))throw Error("Live layout check failed for "+path);
+            console.log("LOCAL100_LIVE "+path+": HTTP200, compact layout");
           }
-          console.log("LOCAL99: existing sessions, password secret, D1 and DO bindings retained; no data or role changes");
+          console.log("LOCAL100: existing sessions, password secret, D1 and DO bindings retained; no data or role changes");
           NODE

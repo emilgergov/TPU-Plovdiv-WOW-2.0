@@ -1,0 +1,76 @@
+name: KT125 LOCAL100 author exact-origin transport bridge
+on:
+  push:
+    branches: [work/kt125-access-register-from-kt124-r6]
+    paths: ['.github/workflows/kt125-author-origin.yml']
+permissions:
+  contents: read
+concurrency:
+  group: kt125-author-origin-deployment
+  cancel-in-progress: false
+jobs:
+  author-origin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prove exact transport-only change to accepted R6 source
+        run: |
+          git fetch origin 1e949e654f9d002f51f7e0b0e8629a78f43512d1 --depth=1
+          node cloudflare/kt125-access/test/author-origin.test.mjs
+      - name: Bundle author without changing generation, legal archive or document code
+        run: |
+          npm ci --prefix cloudflare/kt125-access
+          cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/ai-author-v27/src/worker.js --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt125-author-origin.mjs
+          node --check dist/kt125-author-origin.mjs
+      - name: Snapshot existing author and preserve all bindings during transport update
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+          const base="https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1/workers/scripts/tpu-plovdiv-ai-author-v27";
+          const headers={Authorization:"Bearer "+process.env.CF_TOKEN};
+          async function api(path="",options={}){const r=await fetch(base+path,{...options,headers:{...headers,...options.headers}});const d=await r.json();if(!r.ok||!d.success)throw Error("Cloudflare request failed HTTP "+r.status);return d.result}
+          const before=await api("/settings");
+          const healthURL="https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/health";
+          const healthBefore=await fetch(healthURL).then(r=>r.json());
+          if(healthBefore.stage4Contract!=="KT115_EXPERT_PREVIEW_V1"||healthBefore.stage5Contract!=="KT117_DOCUMENT_DRAFT_V1")throw Error("Unexpected live author contract");
+          mkdirSync("dist/author-backup",{recursive:true});
+          writeFileSync("dist/author-backup/settings.json",JSON.stringify(before,null,2));
+          const old=await fetch(base,{headers});if(!old.ok)throw Error("Cannot back up live author");
+          writeFileSync("dist/author-backup/source.multipart",Buffer.from(await old.arrayBuffer()));
+          writeFileSync("dist/author-backup/source-content-type.txt",old.headers.get("content-type")||"");
+          const metadata={main_module:"worker.mjs",compatibility_date:before.compatibility_date,compatibility_flags:before.compatibility_flags||[],keep_bindings:["secret_text"],bindings:(before.bindings||[]).filter(b=>b.type!=="secret_text")};
+          for(const key of ["observability","logpush","placement","limits","tail_consumers"])if(before[key]!==undefined)metadata[key]=before[key];
+          const form=new FormData();form.set("metadata",new Blob([JSON.stringify(metadata)],{type:"application/json"}));form.set("worker.mjs",new Blob([readFileSync("dist/kt125-author-origin.mjs")],{type:"application/javascript+module"}),"worker.mjs");
+          await api("",{method:"PUT",body:form});
+          const after=await api("/settings");
+          const bindingNames=x=>(x.bindings||[]).map(b=>b.name+":"+b.type).sort().join("|");
+          if(bindingNames(before)!==bindingNames(after))throw Error("Author bindings changed");
+          await new Promise(r=>setTimeout(r,7000));
+          const root="https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev";
+          for(const endpoint of ["/author","/subject-improve","/scope-improve","/stage4-proposal","/stage5-document","/stage4-expert-decision"]){
+            for(const origin of ["https://emilgergov.github.io","https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev"]){
+              const r=await fetch(root+endpoint,{method:"OPTIONS",headers:{Origin:origin,"Access-Control-Request-Method":"POST","Access-Control-Request-Headers":"authorization,content-type"}});
+              if(r.status!==204||r.headers.get("Access-Control-Allow-Origin")!==origin)throw Error("Origin preflight failed: "+endpoint);
+              const blocked=await fetch(root+endpoint,{method:"POST",headers:{Origin:origin,"Content-Type":"application/json"},body:"{}"});
+              if(![401,503].includes(blocked.status))throw Error("Author auth guard changed: "+endpoint);
+            }
+            const denied=await fetch(root+endpoint,{method:"OPTIONS",headers:{Origin:"https://attacker.invalid"}});
+            if(denied.status!==403)throw Error("Foreign origin allowed");
+          }
+          const healthAfter=await fetch(healthURL).then(r=>r.json());
+          for(const key of ["service","status","stage4Contract","stage5Contract","apiKeyConfigured","aiGenerationEnabled"])if(healthBefore[key]!==healthAfter[key])throw Error("Author health/secret readiness changed");
+          console.log("LOCAL100_AUTHOR_ORIGINS: old and native origins accepted; foreign origins denied; unauthenticated routes blocked; bindings and contracts retained; no AI calls");
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: KT125-LOCAL100-AUTHOR-ROLLBACK
+          path: dist/author-backup/
+          if-no-files-found: warn
+          retention-days: 30

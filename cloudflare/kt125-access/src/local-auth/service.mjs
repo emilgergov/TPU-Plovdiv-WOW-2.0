@@ -1,10 +1,11 @@
 import {WorkerEntrypoint,DurableObject} from 'cloudflare:workers';
 import {hashPassword,verifyPassword} from './password.mjs';
 import handler from './worker.mjs';
-import {sendNotification,smtpConfig} from './mail.mjs';
+import {sendNotification,sendResetNotification,smtpConfig} from './mail.mjs';
 // Only a configured server-side Cloudflare Service Binding can invoke RPC.
 // There is deliberately no public HTTP endpoint for sending approval emails.
 export class LocalAuthService extends WorkerEntrypoint {
+ async sendResetNotification(resetId){return sendResetNotification(this.env,resetId)}
  async getStatus(){return {configured:Boolean(smtpConfig(this.env))}}
  async sendNotification(mailId){return sendNotification(this.env,mailId)}
 }

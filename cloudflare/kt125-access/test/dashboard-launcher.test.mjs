@@ -13,7 +13,7 @@ const css=after.match(/<style id="kt125-access-launcher-style">[\s\S]*?<\/style>
 assert.equal(css.length,1,"Exactly one isolated access launcher stylesheet");
 const link=after.match(/<a id="kt125AccessLauncher"[^>]*>[^<]*<\/a>/g)||[];
 assert.equal(link.length,1,"Exactly one access launcher on dashboard");
-assert(link[0].includes('href="kt125/ACCESS_ADMIN_KT125.html"'));
+assert(link[0].includes('href="https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/auth/admin"'));
 assert(link[0].includes('target="_blank"'));
 assert(css[0].includes('body[data-kt80-view="home"] #kt125AccessLauncher'));
 assert(css[0].includes('body:has(#overlay.open) #kt125AccessLauncher'));
@@ -29,4 +29,5 @@ assert(panel.includes("служебният достъп още не е акти
 assert(!/<form\b/i.test(panel),"Static preview must not take fake credentials");
 assert(!/fetch\s*\(/.test(panel),"Preview must not connect to unconfigured private backend");
 assert(!/localStorage|sessionStorage/.test(panel),"Preview must not store case/session details");
-console.log("PASS KT125 UI: button exactly beside preserved V27.35 bridge, R6 HTML byte-equal apart from launcher, private admin preview has no fake access.");
+console.log("PASS KT125 UI: button exactly beside preserved V27.35 bridge, R6 HTML byte-equal apart from launcher, real administrative entrance linked without modifying R6; historical preview has no fake access.");
+

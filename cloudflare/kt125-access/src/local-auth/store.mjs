@@ -1,7 +1,8 @@
+import {RESET_SCHEMA} from './recovery.mjs';
 import {KT125_INVITATION_SCHEMA} from '../staff-invitations.mjs';
 import {KT125_REQUEST_SCHEMA} from '../access-requests.mjs';
 import {LOCAL_SCHEMA,id,username,normalizeKT125Email,digest,token,SESSION_MS,getCookie} from './common.mjs';
-export async function setup(db){await db.batch([...KT125_INVITATION_SCHEMA,...KT125_REQUEST_SCHEMA,...LOCAL_SCHEMA].map(s=>db.prepare(s)));}
+export async function setup(db){await db.batch([...KT125_INVITATION_SCHEMA,...KT125_REQUEST_SCHEMA,...LOCAL_SCHEMA,...RESET_SCHEMA].map(s=>db.prepare(s)));}
 export function registration(data){
  const un=username(data.get('username')?.trim().toLowerCase()),email=normalizeKT125Email(data.get('email'));
  const name=data.get('name')?.trim(),note=data.get('note')||'';

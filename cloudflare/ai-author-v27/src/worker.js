@@ -9,7 +9,8 @@ import {checkExpertDecision,normalizeExpertDecision,expertStage4Text} from "./kt
 // Never send an OpenAI key to the browser. Authorization is fail-closed.
 const headers = { "Content-Type":"application/json; charset=utf-8", "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff", "Access-Control-Allow-Origin":"null" };
 const ALLOWED_ORIGIN="https://emilgergov.github.io";
-const reply = (body,status=200,origin="") => new Response(JSON.stringify(body),{status,headers:{...headers,...(origin===ALLOWED_ORIGIN?{"Access-Control-Allow-Origin":ALLOWED_ORIGIN,"Vary":"Origin"}:{})}});
+const ALLOWED_ORIGINS=new Set([ALLOWED_ORIGIN,"https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev"]);
+const reply = (body,status=200,origin="") => new Response(JSON.stringify(body),{status,headers:{...headers,...(ALLOWED_ORIGINS.has(origin)?{"Access-Control-Allow-Origin":origin,"Vary":"Origin"}:{})}});
 
 const MAX_BYTES = 36000;
 const allowed = new Set(["classic","expert"]);
@@ -1050,13 +1051,13 @@ export default {
   const url=new URL(request.url);
   const origin=request.headers.get("Origin")||"";
   if(request.method==="OPTIONS" && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||(url.pathname==="/stage4-proposal"||url.pathname==="/stage5-document"||url.pathname==="/stage4-expert-decision"))) {
-   if(origin!==ALLOWED_ORIGIN) return new Response(null,{status:403});
-   return new Response(null,{status:204,headers:{"Access-Control-Allow-Origin":ALLOWED_ORIGIN,"Access-Control-Allow-Methods":"POST","Access-Control-Allow-Headers":"Authorization, Content-Type","Access-Control-Max-Age":"600","Vary":"Origin"}});
+   if(!ALLOWED_ORIGINS.has(origin)) return new Response(null,{status:403});
+   return new Response(null,{status:204,headers:{"Access-Control-Allow-Origin":origin,"Access-Control-Allow-Methods":"POST","Access-Control-Allow-Headers":"Authorization, Content-Type","Access-Control-Max-Age":"600","Vary":"Origin"}});
   }
-  if(origin===ALLOWED_ORIGIN && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||(url.pathname==="/stage4-proposal"||url.pathname==="/stage5-document"||url.pathname==="/stage4-expert-decision")) && request.method==="POST") {
+  if(ALLOWED_ORIGINS.has(origin) && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||(url.pathname==="/stage4-proposal"||url.pathname==="/stage5-document"||url.pathname==="/stage4-expert-decision")) && request.method==="POST") {
    // Return the same authenticated response with exact-origin CORS, never wildcard.
    const response=url.pathname==="/stage4-expert-decision"?await handleExpertDecision(request,env):url.pathname==="/stage5-document"?await handleStage5Document(request,env):(url.pathname==="/stage4-proposal")?await handleStage4Proposal(request,env):url.pathname==="/scope-improve"?await handleScopeImprove(request,env):url.pathname==="/subject-improve"?await handleSubjectImprove(request,env):await handleAuthor(request,env);
-   const h=new Headers(response.headers);h.set("Access-Control-Allow-Origin",ALLOWED_ORIGIN);h.set("Vary","Origin");
+   const h=new Headers(response.headers);h.set("Access-Control-Allow-Origin",origin);h.set("Vary","Origin");
    return new Response(response.body,{status:response.status,headers:h});
   }
 
