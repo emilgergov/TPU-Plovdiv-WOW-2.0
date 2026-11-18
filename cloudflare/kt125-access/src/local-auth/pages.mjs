@@ -26,7 +26,18 @@ export function page({view='login',message='',account='',activation='',user,admi
 .auth-page .auth-actions{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:14px;padding-top:12px;border-top:1px solid #42664e}.auth-page .confirm-field{display:flex;align-items:center;gap:8px;font-size:12px}.auth-page input[type=checkbox]{width:17px;height:17px;accent-color:#d9b771}
 .auth-page form button{padding:10px 22px;font:700 13px Verdana,Arial,sans-serif;border-radius:7px;background:#d9b771;color:#143729;border:1px solid #f0d598;min-height:40px}.auth-page form button:hover{background:#edcf8a}.auth-page a{color:#e6cd91;font-size:12px}.auth-page .auth>p:last-child{margin-bottom:0}
 .auth-page .recovery-request-form{align-items:end}.auth-page .recovery-request-form button{align-self:end;height:39px;min-height:39px}
+.auth-page.auth-profile{display:flex;flex-direction:column;justify-content:center;padding:36px 0}
+.auth-profile header,.auth-profile main{width:100%;max-width:720px;margin:0 auto;text-align:center}
+.auth-profile header{padding-bottom:18px}.auth-profile .auth{padding:28px}
+.auth-profile .auth>p:first-child{margin:0 0 24px;font-size:15px}
+.auth-profile .auth>p:nth-child(2){display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;font-size:0}
+.auth-profile .auth>p:nth-child(2) a{display:inline-block;padding:12px 20px;border:1px solid #d9b771;border-radius:7px;text-decoration:none;font-size:13px;font-weight:bold}
+.auth-profile .auth>p:nth-child(2) a:first-child{background:#d9b771;color:#143729}
+.auth-profile .auth>p:nth-child(2) a:hover{box-shadow:0 0 0 2px #d9b77130}
+.auth-profile form{display:flex;justify-content:center;margin-top:22px;padding-top:18px;border-top:1px solid #42664e}
+.auth-profile form button{min-width:140px;background:transparent;color:#e6cd91;border-color:#73896c}
+.auth-profile form button:hover{background:#244b37}
 @media(max-width:620px){.auth-page header{padding:18px 16px 12px}.auth-page h1{font-size:25px}.auth-page main{padding:0 12px 20px}.auth-page .auth{padding:17px 14px}.auth-page form,.auth-page fieldset{grid-template-columns:1fr}.auth-page .auth-actions{align-items:stretch;flex-direction:column}.auth-page .field-help{grid-column:1/-1}}
 `;
- return kt125PrivateHtmlResponse(`<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WOW · ${e(title)}</title><style>${kt125PageCss}\n${authCss}</style></head><body class="auth-page" data-layout="local100"><header><small>WOW · ЕКСПЕРТЕН МОДУЛ</small><h1>${e(title)}</h1></header><main><section class="panel auth">${message?`<p role="status" class="state">${e(message)}</p>`:''}${body}</section></main></body></html>`,status);
+ return kt125PrivateHtmlResponse(`<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WOW · ${e(title)}</title><style>${kt125PageCss}\n${authCss}</style></head><body class="auth-page${view==='home'?' auth-profile':''}" data-layout="local100"><header><small>WOW · ЕКСПЕРТЕН МОДУЛ</small><h1>${e(title)}</h1></header><main><section class="panel auth">${message?`<p role="status" class="state">${e(message)}</p>`:''}${body}</section></main></body></html>`,status);
 }
