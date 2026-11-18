@@ -1,3 +1,23 @@
+import {connect as connectTls} from 'node:tls';
+
+/** Keep the verified hostname for Workers TLS instead of resolving it to an IP. */
+export function smtpTlsSocket(smtp,{connect=connectTls,timeoutMs=10000}={}){
+ return (_options,callback)=>{
+  let socket,settled=false;
+  const finish=(error)=>{
+   if(settled)return;settled=true;clearTimeout(timer);
+   if(error){try{socket?.destroy()}catch{};callback(error);return}
+   socket.removeListener('error',onError);
+   callback(null,{connection:socket,secured:true});
+  };
+  const onError=error=>finish(error);
+  const timer=setTimeout(()=>finish(Object.assign(new Error('SMTP TLS connection timeout'),{code:'ETIMEDOUT',command:'CONN'})),timeoutMs);
+  try{
+   socket=connect({host:smtp.host,port:smtp.port,servername:smtp.host,minVersion:'TLSv1.2',rejectUnauthorized:true},()=>finish());
+   socket.once('error',onError);
+  }catch(error){finish(error)}
+ };
+}
 import {resetProof} from './recovery.mjs';
 import {localConfig,id,normalizeKT125Email,purposeToken} from './common.mjs';
 export function smtpConfig(env){
@@ -12,6 +32,7 @@ export async function deliverSmtp(env,message,{createTransport}={}){
  try{
   const factory=createTransport||(await import('nodemailer')).default.createTransport;
   transport=factory({host:smtp.host,port:smtp.port,secure:smtp.port===465,requireTLS:true,ignoreTLS:false,
+   ...(smtp.port===465?{getSocket:smtpTlsSocket(smtp)}:{}),
    auth:{user:smtp.user,pass:smtp.password},tls:{minVersion:'TLSv1.2',rejectUnauthorized:true},
    connectionTimeout:10000,greetingTimeout:10000,socketTimeout:20000,
    disableFileAccess:true,disableUrlAccess:true,logger:false,debug:false});
@@ -78,6 +99,7 @@ export async function verifySmtpConnection(env,{createTransport}={}){
  try{
   const factory=createTransport||(await import('nodemailer')).default.createTransport;
   transport=factory({host:smtp.host,port:smtp.port,secure:smtp.port===465,requireTLS:true,ignoreTLS:false,
+   ...(smtp.port===465?{getSocket:smtpTlsSocket(smtp)}:{}),
    auth:{user:smtp.user,pass:smtp.password},tls:{minVersion:'TLSv1.2',rejectUnauthorized:true},
    connectionTimeout:10000,greetingTimeout:10000,socketTimeout:15000,
    disableFileAccess:true,disableUrlAccess:true,logger:false,debug:false});
