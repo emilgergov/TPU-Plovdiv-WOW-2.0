@@ -41,6 +41,11 @@ try{
  await assert.rejects(createCase({...base,input:{requestKey:crypto.randomUUID(),sourceName:'rollback.pdf',sourceHash:'e'.repeat(64)}}));
  assert.equal((await db.prepare('SELECT last_number FROM kt126_counters WHERE organization_id=? AND year=2026').bind('org').first()).last_number,100,'Audit failure rolls back counter and all registry records');
  await db.prepare('DROP TRIGGER fail_registration').run();
+ const freshSameBytes=await createCase({...base,input:{...inputs[0],requestKey:crypto.randomUUID()}});
+ assert.equal(freshSameBytes.status,201,'A genuinely new registration of the same archive remains a new case');
+ assert.notEqual(freshSameBytes.record.case_id,id);
+ assert.equal(freshSameBytes.record.sequence,101);
+ assert.equal((await readCase({...base,caseId:id})).internal_number,all[0].record.internal_number,'Reopening never renumbers the existing case');
  const bytes=new TextEncoder().encode('private original document'),digest=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(x=>x.toString(16).padStart(2,'0')).join('');
  const fileCase=await createCase({...base,input:{requestKey:crypto.randomUUID(),sourceName:'private.txt',sourceHash:digest}}),fileArgs={...base,caseId:fileCase.record.case_id};
  assert.equal((await startSource(fileArgs,{filename:'private.txt',size:bytes.length,sha256:digest})).status,200);
@@ -73,11 +78,6 @@ try{
  await db.prepare('UPDATE kt125_users SET active=0 WHERE user_id=?').bind('alice').run();
  assert.equal((await proxyAuthor({request:authorRequest(),env,who,config,now,authorFetch})).status,403,'Deactivation blocks even cached analytical results');
  assert.equal(await getSourcePart(fileArgs,0),null);
- const freshSameBytes=await createCase({...base,input:{...inputs[0],requestKey:crypto.randomUUID()}});
- assert.equal(freshSameBytes.status,201,'A genuinely new registration of the same archive remains a new case');
- assert.notEqual(freshSameBytes.record.case_id,id);
- assert.equal(freshSameBytes.record.sequence,101);
- assert.equal((await readCase({...base,caseId:id})).internal_number,all[0].record.internal_number,'Reopening never renumbers the existing case');
  console.log('PASS KT126: 100 concurrent registrations, annual atomic numbering/rollback, mandatory confirmation/omission, CAS/reopen, private chunked originals and hash verification, immutable Word archive, CSRF, analytic retry deduplication and immediate revocation');
 
  await db.prepare("UPDATE kt125_users SET active=1 WHERE user_id='alice'").run();
