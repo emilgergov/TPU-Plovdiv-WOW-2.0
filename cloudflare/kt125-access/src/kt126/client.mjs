@@ -2,7 +2,7 @@
 export function installRegistryClient(){
  'use strict';
  const root=window,$=id=>document.getElementById(id),CHUNK=256*1024;
- let record=null,requestKey=crypto.randomUUID(),queue=Promise.resolve(),restore=null,timer=null,restoring=false,savedFingerprint='',pendingRead=null;
+ let record=null,requestKey=crypto.randomUUID(),queue=Promise.resolve(),restore=null,timer=null,restoring=false,savedFingerprint='';
  const savedGlobals=['KT80FreeGISResults','KT80IPMasterDraft','KT80DossierAudit','KT80CH2Passport','KT80CH21Draft','KT80KT51Draft','KT80KT52Draft','KT80ParcelsConfirmed','KT80KT53Draft','KT82Location','KT81ContextResult'];
  const fields=['kt80SubjectText','kt80ScopeText','kt80ParcelInput','kt80LegalNotes','kt80Authority','kt80ProcedureSelect','kt80SubjectConfirmation','kt80ScopeConfirmation','kt80ParcelsConfirmation','kt80LawConfirmed','kt80RouteConfirmation'];
  const say=text=>{const n=$('kt126Message');if(n)n.textContent=text};
@@ -122,12 +122,12 @@ export function installRegistryClient(){
     catch(e){committing=false;message.textContent=e.message;buttons.forEach(b=>b.disabled=false)}
    };
    $('kt126ConfirmExternal').onclick=()=>commit('confirm');$('kt126OmitExternal').onclick=()=>commit('omit');
-   const cancelReview=()=>{if(committing){message.textContent='Записва се решението. Изчакайте потвърждението от сървъра.';return}dialog.close();dialog.remove();active?.focus?.();say('Прегледът е затворен без потвърждение. Прочетеното е запазено в текущия работен екран.');resolve(false)};
+   const cancelReview=()=>{if(committing){message.textContent='Записва се решението. Изчакайте потвърждението от сървъра.';return}dialog.close();dialog.remove();active?.focus?.();say('Прегледът на номера е затворен без потвърждение. Анализът на преписката е запазен и остава непроменен.');resolve(false)};
    $('kt126CancelExternal').onclick=cancelReview;close.onclick=cancelReview;dialog.addEventListener('cancel',event=>{event.preventDefault();cancelReview()});
    refresh().then(()=>{if(dialog.isConnected&&!input.value&&canvas.width)$('kt126Ocr')?.click()});
   });
  }
- async function afterRead(intake){pendingRead=intake;if(record?.external_status==='pending')return chooseExternal(intake);return true}
+ async function afterRead(intake){if(record?.external_status==='pending'){try{return await chooseExternal(intake)}catch(e){showError(e);return false}}return true}
  function attachDocxMetadata(contents,approved){
   if(!record||approved.caseId!==record.case_id)throw Error('Документът е за друга преписка.');
   const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
@@ -181,7 +181,7 @@ export function installRegistryClient(){
    else root.KT80WorkflowGo?.(step);
    if(root.KT80IPMasterDraft)root.KT80IPMaster?.render?.(root.KT80IPMasterDraft);restore=null;
   }finally{restoring=false}}
-  display();pendingRead=null;await save();
+  display();await save();
  }
  async function selectOriginal(expected){
   const dialog=document.createElement('dialog');dialog.className='kt126-dialog';const h=document.createElement('h2');h.textContent='Продължаване на започнатия запис';const p=document.createElement('p');p.textContent='Изберете същия оригинал: '+expected.source_name+'. Записът ще продължи към '+expected.internal_number+', без нов номер.';const input=document.createElement('input');input.type='file';const message=document.createElement('p'),resume=document.createElement('button'),cancel=document.createElement('button');resume.textContent='Продължи записа';cancel.textContent='Откажи';dialog.append(h,p,input,message,resume,cancel);document.body.append(dialog);dialog.showModal();
@@ -236,14 +236,14 @@ export function installRegistryClient(){
   const box=document.createElement('section');box.id='kt126Registry';box.innerHTML='<strong id="kt126Number">Нова преписка — номерът се присвоява при регистриране</strong><div id="kt126External">Деловоден № — предстои преглед</div><div class="kt126-actions"><button type="button" id="kt126OpenRegister">Моите преписки</button><button type="button" id="kt126Save">Запази преписката</button><button type="button" id="kt126EditExternal">Преглед на Деловоден №</button></div><p id="kt126Message" role="status">Постоянният номер се създава еднократно преди анализа. Деловоден № е незадължителен.</p>';stage.insertBefore(box,stage.firstChild);
   const documents=document.createElement('button');documents.type='button';documents.textContent='Документи и история';documents.onclick=()=>record?showCaseFiles(record.case_id).catch(showError):say('Първо регистрирайте преписката.');box.querySelector('.kt126-actions').append(documents);
   const manual=document.createElement('button');manual.type='button';manual.textContent='Регистрирай без файл';manual.onclick=async()=>{manual.disabled=true;try{await registerManual()}catch(e){showError(e)}finally{manual.disabled=false}};box.querySelector('.kt126-actions').append(manual);
-  $('kt126OpenRegister').onclick=()=>showRegister().catch(showError);$('kt126Save').onclick=()=>save().catch(showError);$('kt126EditExternal').onclick=async()=>{if(!record)return say('Първо регистрирайте преписката чрез „Обработи преписката“.');const pending=record.external_status==='pending';try{const done=await chooseExternal(pendingRead||root.KT80WorkflowState.intake);if(done&&pending&&pendingRead)$('kt80ProcessFile').click()}catch(e){showError(e)}};
-  document.addEventListener('kt80:case-reset',()=>{clearTimeout(timer);record=null;restore=null;pendingRead=null;requestKey=crypto.randomUUID();display();say('Нова преписка. Предишните записи остават в регистъра.')});
+  $('kt126OpenRegister').onclick=()=>showRegister().catch(showError);$('kt126Save').onclick=()=>save().catch(showError);$('kt126EditExternal').onclick=async()=>{if(!record)return say('Първо регистрирайте преписката чрез „Обработи преписката“.');try{await chooseExternal(root.KT80WorkflowState.intake)}catch(e){showError(e)}};
+  document.addEventListener('kt80:case-reset',()=>{clearTimeout(timer);record=null;restore=null;requestKey=crypto.randomUUID();display();say('Нова преписка. Предишните записи остават в регистъра.')});
   document.addEventListener('input',e=>{if(fields.includes(e.target.id))saveSoon()});document.addEventListener('change',e=>{if(fields.includes(e.target.id))saveSoon()});
   document.addEventListener('click',e=>{if(!e.target.closest('#kt126Registry,.kt126-dialog,#wow-session-banner'))saveSoon()});
   for(const event of ['kt115:stage4-draft','kt116:stage4-confirmed','kt116:stage5-open'])document.addEventListener(event,saveSoon);
   new MutationObserver(changes=>{if(changes.some(x=>x.target instanceof Element&&x.target.closest('#kt116Editor,#kt117Stage5')))saveSoon()}).observe(document.body,{subtree:true,childList:true,characterData:true});
  }
- root.KT126Registry=Object.freeze({beforeProcess,afterRead,afterProcess,saveSoon,attachDocxMetadata,saveGeneratedDocument,referenceParts,composeReference,validReferenceDate,filenameReferences,refreshBadge:display,restoredIntake:()=>pendingRead||restore?.state?.intake||null,current:()=>record,confirmedExternal:()=>record?.external_status==='confirmed'?record.external_number:'',caseNumber:()=>record?.internal_number||''});
+ root.KT126Registry=Object.freeze({beforeProcess,afterRead,afterProcess,saveSoon,attachDocxMetadata,saveGeneratedDocument,referenceParts,composeReference,validReferenceDate,filenameReferences,refreshBadge:display,restoredIntake:()=>restore?.state?.intake||null,current:()=>record,confirmedExternal:()=>record?.external_status==='confirmed'?record.external_number:'',caseNumber:()=>record?.internal_number||''});
  if(document.readyState==='loading'||document.readyState==='interactive'&&!root.KT80WorkflowState)document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 }
 export const registryClientSource='('+installRegistryClient.toString()+')();';

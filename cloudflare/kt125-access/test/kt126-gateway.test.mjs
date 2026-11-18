@@ -7,6 +7,14 @@ import {registryClientSource} from '../src/kt126/client.mjs';
 const paths=['vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html','vt03/kt80/KT83_WORKFLOW_CASE_V591.js','vt03/kt80/KT80_E01_DOSSIER_ORIGINALS_V39.js','vt03/kt80/integration/kt116-expert-approval-handoff.mjs','vt03/kt80/integration/kt117-stage5-document-author.mjs','vt03/kt80/integration/kt119-docx-generator.mjs'];
 for(const path of paths){const original=readFileSync('../../'+path,'utf8'),patched=overlayModule(path,original);assert.notEqual(patched,original);if(!path.endsWith('.html'))await transform(patched,{loader:'js',format:'esm'});assert.throws(()=>overlayModule(path,patched),'An already applied overlay cannot silently patch twice');}
 assert.equal(overlayModule('untouched.js','const original=1;'),'const original=1;');
+const workflowSource=overlayModule('vt03/kt80/KT83_WORKFLOW_CASE_V591.js',readFileSync('../../vt03/kt80/KT83_WORKFLOW_CASE_V591.js','utf8'));
+const processSource=workflowSource.slice(workflowSource.indexOf('async function process(){'),workflowSource.indexOf('\nfunction confirmSubject'));
+const events=[],flowState={generation:0,abort:null,caseCycleId:crypto.randomUUID()},flowNodes=new Map();
+const flowRoot={V26LocalIntake:{process:async()=>{events.push('read');return {files:[]}}},KT126Registry:{beforeProcess:async()=>{},current:()=>({external_status:'pending'}),afterProcess:async()=>events.push('saved'),afterRead:()=>{events.push('number-review');return new Promise(()=>{})}},KT80Busy:{start:()=>1,finish:()=>{}}};
+const complete=vm.runInNewContext(processSource+'\nprocess()',{root:flowRoot,state:flowState,currentFileRef:null,$:id=>{if(!flowNodes.has(id))flowNodes.set(id,{files:[{name:'notice.pdf'}]});return flowNodes.get(id)},newCaseCycleId:()=>crypto.randomUUID(),document:{dispatchEvent(){}},Event,AbortController,setBadge(){},say(){},intakeResults:()=>events.push('analysis')});
+await Promise.race([complete,new Promise((_,reject)=>setTimeout(()=>reject(Error('Registry-number review blocked the independent case analysis')),1000))]);
+assert.deepEqual(events,['read','analysis','saved','number-review'],'Main read, analysis and save finish before the isolated number review; an unanswered review cannot block them');
+
 const id=crypto.randomUUID(),bytes=new TextEncoder().encode('original'),hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(x=>x.toString(16).padStart(2,'0')).join('');
 let record={case_id:id,internal_number:'EG-2026-000001',source_name:'notice.pdf',source_hash:hash,external_status:'confirmed',external_number:'АБ-12 & 34/2026',revision:0};
 const styles=[];
