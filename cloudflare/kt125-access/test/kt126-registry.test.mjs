@@ -73,6 +73,11 @@ try{
  await db.prepare('UPDATE kt125_users SET active=0 WHERE user_id=?').bind('alice').run();
  assert.equal((await proxyAuthor({request:authorRequest(),env,who,config,now,authorFetch})).status,403,'Deactivation blocks even cached analytical results');
  assert.equal(await getSourcePart(fileArgs,0),null);
+ const freshSameBytes=await createCase({...base,input:{...inputs[0],requestKey:crypto.randomUUID()}});
+ assert.equal(freshSameBytes.status,201,'A genuinely new registration of the same archive remains a new case');
+ assert.notEqual(freshSameBytes.record.case_id,id);
+ assert.equal(freshSameBytes.record.sequence,101);
+ assert.equal((await readCase({...base,caseId:id})).internal_number,all[0].record.internal_number,'Reopening never renumbers the existing case');
  console.log('PASS KT126: 100 concurrent registrations, annual atomic numbering/rollback, mandatory confirmation/omission, CAS/reopen, private chunked originals and hash verification, immutable Word archive, CSRF, analytic retry deduplication and immediate revocation');
 
  await db.prepare("UPDATE kt125_users SET active=1 WHERE user_id='alice'").run();

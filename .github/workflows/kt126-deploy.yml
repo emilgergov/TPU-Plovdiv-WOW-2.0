@@ -28,6 +28,7 @@ jobs:
           node test/kt130-spatial-handoff.test.mjs
           node test/presentation-polish.test.mjs
           node test/kt131-signature-lines.test.mjs
+          node test/kt130-release-review.test.mjs
           node test/kt130-applicability.test.mjs
           node test/kt130-resume-source-diagnostics.test.mjs
           node test/kt130-reset-restore-race.test.mjs
