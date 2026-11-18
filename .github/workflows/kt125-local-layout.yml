@@ -1,4 +1,4 @@
-name: KT125 LOCAL98 compact green and gold forms
+name: KT125 LOCAL99 compact green and gold forms
 on:
   push:
     branches: [work/kt125-access-register-from-kt124-r6]
@@ -49,10 +49,11 @@ jobs:
           const names=x=>(x||[]).map(b=>b.name+":"+b.type).sort().join("|");
           if(!after.success||names(after.result.bindings)!==names(bindings))throw Error("Binding list changed");
           const origin="https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev";
+          await new Promise(resolve=>setTimeout(resolve,5000));
           for(const path of ["/auth/register","/auth/login"]){
             const r=await fetch(origin+path);const html=await r.text();
-            if(r.status!==200||!html.includes('data-layout="local98"'))throw Error("Live layout check failed for "+path);
-            console.log("LOCAL98_LIVE "+path+": HTTP200, compact layout");
+            if(r.status!==200||!html.includes('data-layout="local99"'))throw Error("Live layout check failed for "+path);
+            console.log("LOCAL99_LIVE "+path+": HTTP200, compact layout");
           }
-          console.log("LOCAL98: existing sessions, password secret, D1 and DO bindings retained; no data or role changes");
+          console.log("LOCAL99: existing sessions, password secret, D1 and DO bindings retained; no data or role changes");
           NODE
