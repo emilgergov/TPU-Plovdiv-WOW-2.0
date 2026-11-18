@@ -1,0 +1,60 @@
+name: KT127 authorized KR colleague invitation
+on:
+  push:
+    branches: [work/kt125-access-register-from-kt124-r6]
+    paths: ['.github/workflows/kt127-invitation-kr.yml']
+permissions:
+  contents: read
+concurrency:
+  group: kt125-local97-deployment
+  cancel-in-progress: false
+jobs:
+  trial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Send only the expressly authorized KR colleague invitation
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {randomBytes} from 'node:crypto';
+          const root='https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1';
+          const name='tpu-plovdiv-kt125-local-auth',helper='kt127-invitation-trial-'+process.env.GKRHUB_RUN_ID;
+          const headers={Authorization:'Bearer '+process.env.CF_TOKEN};
+          async function api(path,options={}){const r=await fetch(root+path,{...options,headers:{...headers,...options.headers},signal:AbortSignal.timeout(60000)});const d=await r.json().catch(()=>null);if(!r.ok||!d?.success)throw Error('Cloudflare operation failed HTTP '+r.status);return d.result;}
+          const before=await api('/workers/scripts/'+name+'/settings');
+          if(before.bindings.find(b=>b.name==='KT125_SMTP_FROM'&&b.type==='plain_text')?.text!=='gergov@plovdiv.riew.gov.bg'||!before.bindings.some(b=>b.name==='KT125_SMTP_PASSWORD'&&b.type==='secret_text'))throw Error('Expected service sender is not ready');
+          const origin='https://'+name+'.emilgergov.workers.dev';
+          const registration=await fetch(origin+'/auth/register',{signal:AbortSignal.timeout(15000)});
+          if(registration.status!==200||!(await registration.text()).includes('data-layout="local100"'))throw Error('Registration page check failed; no invitations sent');
+          const db=before.bindings.find(b=>b.name==='KT125_DB'&&b.type==='d1')?.id;if(!db)throw Error('Registry unavailable');
+          const statusRows=async()=>{const rows=await api('/d1/database/'+db+'/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sql:"SELECT r.state FROM kt127_mail_batches b JOIN kt127_mail_recipients r ON r.batch_id=b.batch_id WHERE b.organization_id=? AND b.request_key=?",params:['riosv-plovdiv','KT127-20261118-KR-INVKRATION-V1']})});return rows[0]?.results||[]};
+          const previous=await statusRows();console.log('KR_INVKRATION_EXISTING_STATES '+JSON.stringify(previous));
+          if(previous.length===1&&previous[0].state==='accepted'){console.log('KR_INVKRATION_ALREADY_ACCEPTED_NO_RESEND');process.exit(0);}
+          if(previous.some(r=>!['queued'].includes(r.state)))throw Error('Existing sending or uncertain/failed result; stopped without retry');
+          const key=randomBytes(32).toString('hex');
+          const source=`export default {async fetch(r,e){if(r.method!=='POST'||r.headers.get('Authorization')!=='Bearer '+e.PROBE_KEY)return new Response(null,{status:403,headers:{'X-KT127-Trial':'ready'}});const q=await e.LOCAL.queueStandardPresentation({actorUsername:'emilgergov',usernames:[],extraEmails:['kr@plovdiv.riew.gov.bg'],requestKey:'KT127-20261118-KR-INVKRATION-V1'});if(!q.ok)return Response.json({ok:false,stage:'resolve-registered-recipients'});return Response.json(await e.LOCAL.sendPresentationBatch(q.batchId));}}`;
+          let created=false;
+          try{
+            const form=new FormData();form.set('metadata',new Blob([JSON.stringify({main_module:'worker.mjs',compatibility_date:before.compatibility_date,observability:{enabled:false},bindings:[{type:'secret_text',name:'PROBE_KEY',text:key},{type:'service',name:'LOCAL',service:name,entrypoint:'LocalAuthService'}]})],{type:'application/json'}));form.set('worker.mjs',new Blob([source],{type:'application/javascript+module'}),'worker.mjs');
+            await api('/workers/scripts/'+helper,{method:'PUT',body:form});created=true;
+            await api('/workers/scripts/'+helper+'/subdomain',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled:true,previews_enabled:false})});
+            const sub=await api('/workers/subdomain'),url='https://'+helper+'.'+sub.subdomain+'.workers.dev/send';
+            let ready=false;for(let i=0;i<20;i++){const r=await fetch(url,{signal:AbortSignal.timeout(10000)});if(r.status===403&&r.headers.get('X-KT127-Trial')==='ready'){ready=true;break}await new Promise(r=>setTimeout(r,2000));}
+            if(!ready)throw Error('Private sender endpoint not ready; no send request attempted');
+            // Persistent recipient state is checked before recovering an unavailable endpoint. The request key also makes a manual
+            // rerun safe: already-claimed recipients cannot be sent again.
+            await new Promise(r=>setTimeout(r,5000));
+            let response=await fetch(url+'?attempt=1',{method:'POST',headers:{Authorization:'Bearer '+key},signal:AbortSignal.timeout(150000)});
+            if(response.status===404){const state=await statusRows();console.log('KR_INVKRATION_AFTER_404_STATES '+JSON.stringify(state));if(!state.length||state.every(r=>r.state==='queued')){await new Promise(r=>setTimeout(r,5000));response=await fetch(url+'?attempt=2',{method:'POST',headers:{Authorization:'Bearer '+key},signal:AbortSignal.timeout(150000)});}}
+            if(!response.ok)throw Error('Private sender returned HTTP '+response.status+'; inspect saved outbox before taking any further action');
+            const result=await response.json();
+            console.log('KT127_TRIAL_RESULT '+JSON.stringify({ok:result.ok,batchId:result.batchId,stage:result.stage,recipients:result.recipients?.map((r,i)=>({recipient:'KR',state:r.state}))}));
+            if(!result.ok)throw Error('One or more invitations were not accepted; consult saved per-recipient history, do not resend automatically');
+            console.log('KR_COLLEAGUE_INVKRATION_ACCEPTED_BY_SMTP; inbox arrival still requires recipient confirmation.');
+          }finally{if(created){await api('/workers/scripts/'+helper,{method:'DELETE'});console.log('TEMPORARY_PRIVATE_SENDER_REMOVED');}}
+          NODE
