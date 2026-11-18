@@ -16,7 +16,7 @@ export function installRegistryClient(){
   const ext=$('kt126External');if(ext)ext.textContent=record?.external_status==='confirmed'?'Деловоден № '+record.external_number:record?.external_status==='omitted'?'Без Деловоден №':'Деловоден № — предстои преглед';
   const badge=$('kt80CaseBadge');if(record&&badge)badge.textContent='Преписка '+record.internal_number;
   const who=document.querySelector('#wow-session-banner .wow-session-who');
-  if(who){let tag=$('kt126ActiveCase');if(!tag){tag=document.createElement('span');tag.id='kt126ActiveCase';who.append(tag)}tag.textContent=record?'Преписка '+record.internal_number:''}
+  if(who){let tag=$('kt126ActiveCase');if(!tag){tag=document.createElement('span');tag.id='kt126ActiveCase';who.append(tag)}tag.style.overflowWrap='anywhere';tag.style.maxWidth='100%';tag.textContent=record?'Вътрешен № '+record.internal_number+' · '+(record.external_status==='confirmed'?'Деловоден № '+record.external_number:record.external_status==='omitted'?'Без Деловоден №':'Деловоден № — предстои потвърждение'):''}
  }
  async function storeSource(file,id,sourceId='original',sourceHash=record.source_hash){
   const base='/'+id+'/source'+(sourceId==='original'?'':'/'+sourceId);
