@@ -27,7 +27,7 @@ export function installStage3Context(){
   if(isContext){
    if(normalActions.parentElement!==actions)actions.append(normalActions);
    if(confirmation&&confirmation.textContent.trim()!==contextConfirmation)confirmation.replaceChildren(checkbox,document.createTextNode(' '+contextConfirmation));
-  }else if(actionHome&&normalActions.parentElement!==actionHome)actionHome.append(normalActions);
+  }else if(actionHome&&normalActions.parentElement!==actionHome)actionHome.insertBefore(normalActions,actionHome.firstChild);
 
  }
  function schedule(){if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;sync()})}
