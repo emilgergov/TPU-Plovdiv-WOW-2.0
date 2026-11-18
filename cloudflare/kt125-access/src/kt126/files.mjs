@@ -23,7 +23,7 @@ export async function finishSource(args){
  const original=await sourceInfo(args);if(!original)return {status:404};
  if(!original.complete){
   const digest=createHash('sha256');let total=0;
-  for(let n=0;n<original.parts;n++){const row=await args.db.prepare('SELECT bytes,size FROM kt126_chunks WHERE case_id=? AND part=?').bind(args.caseId,n).first();if(!row)return {status:409};const bytes=new Uint8Array(row.bytes);total+=bytes.byteLength;digest.update(bytes)}
+  for(let n=0;n<original.parts;n+=8){const rows=(await args.db.prepare('SELECT part,bytes,size FROM kt126_chunks WHERE case_id=? AND part>=? AND part<? ORDER BY part').bind(args.caseId,n,Math.min(n+8,original.parts)).all()).results||[];if(rows.length!==Math.min(8,original.parts-n))return {status:409};for(const row of rows){const bytes=new Uint8Array(row.bytes);total+=bytes.byteLength;digest.update(bytes)}}
   if(total!==original.size||digest.digest('hex')!==original.sha256)return {status:409};
  }
  await args.db.batch([

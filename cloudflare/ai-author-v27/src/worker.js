@@ -862,7 +862,9 @@ async function handleStage5Document(request,env){
  const incoming=typeof input.incomingReference==="string"?input.incomingReference.trim():"";
  const expectedTitle=match[0].replace(/^ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\s*[—–-]?\s*/iu,"").trim();
  const placeholder="ОВОС-ХХХХ/ХХ.ХХ.ХХХХ г.";
- const safeReference=/^ОВОС[-– ]?\d+[-–]\d+\s*\/\s*\d{1,2}\.\d{1,2}\.\d{4}(\s*г\.?)?$/iu.test(incoming)?incoming:placeholder;
+ // KT126 confirmed external number comes only from the private registry RPC.
+ const registryReference=env.KT126_CASE_CONTEXT?.caseId===input.caseId?env.KT126_CASE_CONTEXT.externalNumber:null;
+ const safeReference=registryReference!==null&&registryReference!==undefined?registryReference:/^ОВОС[-– ]?\d+[-–]\d+\s*\/\s*\d{1,2}\.\d{1,2}\.\d{4}(\s*г\.?)?$/iu.test(incoming)?incoming:placeholder;
  if(title!==expectedTitle)return reply({error:"Document title does not match the expert-confirmed direction"},409);
  const confirmedPanelId=Number(match[1]);
  let independentExpert=null,reviewedExpertChoice=null;
@@ -1002,7 +1004,7 @@ async function handleStage5Document(request,env){
  const confirmedOSArticle=confirmedOS && /^ИЗБРАН\s+ПАНЕЛ\s*:\s*0?1\b/iu.test(match[0]);
  const legalBasis=confirmedOSArticle?"на основание чл. 2, ал. 2 от "+osFirstCitation+", ":
    confirmedOS?"съобразно "+osFirstCitation+", ":"";
- const refLine="Във връзка с постъпилата документация с вх. № "+safeReference+
+ const refLine="Във връзка с постъпилата документация"+(registryReference!==null&&registryReference!==undefined?(safeReference?" с Деловоден № "+safeReference:""):" с вх. № "+safeReference)+
    ", "+legalBasis+"Ви уведомявам следното:";
  // Exclude provider-generated letterhead/recipient metadata; these are controlled by
  // the approved DOCX form. Strip only leading blocks, not facts in body paragraphs.
@@ -1050,6 +1052,17 @@ export default {
  async fetch(request,env) {
   const url=new URL(request.url);
   const origin=request.headers.get("Origin")||"";
+  // KT126: private RPC rechecks identity, active user and case-specific permission.
+  if(request.headers.has("X-KT126-Case")){
+   const caseId=request.headers.get("X-KT126-Case"),cookie=request.headers.get("X-KT126-Session");
+   if(!env.KT126_REGISTRY||!cookie||request.method!=="POST")return reply({error:"Case authorization required"},403);
+   let context;try{context=await env.KT126_REGISTRY.getCaseContext({cookie,caseId,action:url.pathname==="/stage5-document"?"document.generate":url.pathname==="/stage4-expert-decision"?"case.confirm":"case.edit"})}catch{return reply({error:"Case authorization unavailable"},503)}
+   if(!context||context.verified!==true||context.caseId!==caseId)return reply({error:"Case access denied"},403);
+   let payload;try{payload=await request.clone().json()}catch{return reply({error:"Invalid case request"},400)}
+   if(payload?.caseId!==caseId)return reply({error:"Case request mismatch"},409);
+   env={...env,KT126_CASE_CONTEXT:context};
+  }
+  // End KT126 private RPC boundary.
   if(request.method==="OPTIONS" && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||(url.pathname==="/stage4-proposal"||url.pathname==="/stage5-document"||url.pathname==="/stage4-expert-decision"))) {
    if(!ALLOWED_ORIGINS.has(origin)) return new Response(null,{status:403});
    return new Response(null,{status:204,headers:{"Access-Control-Allow-Origin":origin,"Access-Control-Allow-Methods":"POST","Access-Control-Allow-Headers":"Authorization, Content-Type","Access-Control-Max-Age":"600","Vary":"Origin"}});

@@ -1,3 +1,4 @@
+import {REGISTRY_SCHEMA} from '../src/kt126/schema.mjs';
 import {createKT125PrivateHandler} from '../src/private-worker.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -10,7 +11,7 @@ import {requestReset,resetProof} from '../src/local-auth/recovery.mjs';
 import {localConfig} from '../src/local-auth/common.mjs';
 import {decideLocal} from '../src/local-auth/admin.mjs';
 const origin='https://office.example.invalid',now=Date.now();
-const env={KT125_LOCAL_ENABLED:'true',KT125_LOCAL_ORIGIN:origin,KT125_REQUEST_ORGANIZATION:'riosv',KT125_AUTH_SECRET:'a'.repeat(64)};
+const env={KT126_REGISTRY_ENABLED:'true',KT125_LOCAL_ENABLED:'true',KT125_LOCAL_ORIGIN:origin,KT125_REQUEST_ORGANIZATION:'riosv',KT125_AUTH_SECRET:'a'.repeat(64)};
 const bundlePath=resolve(process.env.KT125_RUNTIME_BUNDLE||'../../../kt125-local-auth-worker.mjs');
 const mf=new Miniflare({name:'local97',modules:true,modulesRoot:dirname(bundlePath),scriptPath:bundlePath,
  compatibilityDate:'2026-07-30',compatibilityFlags:['nodejs_compat'],bindings:env,
@@ -21,7 +22,7 @@ try{
  const ddl=readFileSync(new URL('../schema/001_private_access.sql',import.meta.url),'utf8').replace(/--[^\n]*/g,'').replace('PRAGMA foreign_keys = ON;','');
  for(const sql of ddl.split(';').filter(s=>s.trim()))await db.prepare(sql).run();
  await db.prepare('ALTER TABLE kt125_users ADD COLUMN activation_pending INTEGER NOT NULL DEFAULT 0').run();
- for(const sql of [...KT125_INVITATION_SCHEMA,...KT125_REQUEST_SCHEMA,...LOCAL_SCHEMA])await db.prepare(sql).run();
+ for(const sql of [...KT125_INVITATION_SCHEMA,...KT125_REQUEST_SCHEMA,...LOCAL_SCHEMA,...REGISTRY_SCHEMA])await db.prepare(sql).run();
  await db.prepare("INSERT INTO kt125_users(user_id,organization_id,identity_provider,provider_subject,role,active,created_at_ms,updated_at_ms) VALUES('owner','riosv','https://test.cloudflareaccess.com','owner-sub','egmaster',1,?,?)").bind(now,now).run();
  const password='Pine!River42';
  assert.equal(password.length,12);
@@ -66,7 +67,18 @@ try{
  const relogin=await send('/auth/login',{username:'runtime-user',password:resetBody.password,account:'',activation:''});assert.equal(relogin.status,303);
  const restoredCookie=relogin.headers.getSetCookie()[0].split(';')[0];
  assert.equal((await mf.dispatchFetch(origin+'/member',{headers:{Cookie:restoredCookie},redirect:'manual'})).status,200);
+ const registryResponse=await mf.dispatchFetch(origin+'/kt126/registry/create',{method:'POST',headers:{Origin:origin,Cookie:restoredCookie,'Content-Type':'application/json'},body:JSON.stringify({requestKey:crypto.randomUUID(),sourceName:'runtime-notice.pdf',sourceHash:'a'.repeat(64)})});
+ assert.equal(registryResponse.status,201);const boundCase=(await registryResponse.json()).record;
+ assert.equal(boundCase.owner_id,targetId,'Registry owner comes from native session');
+ const caseContext=await bound.KT125_LOCAL_AUTH.getCaseContext({cookie:restoredCookie,caseId:boundCase.case_id,action:'document.generate'});assert.equal(caseContext.caseId,boundCase.case_id);assert.equal(caseContext.externalNumber,'');
+ assert.equal(await bound.KT125_LOCAL_AUTH.getCaseContext({cookie:'',caseId:boundCase.case_id,action:'document.generate'}),null);
+ assert.equal((await mf.dispatchFetch(origin+'/kt126/registry/'+boundCase.case_id,{headers:{Cookie:cookie}})).status,403,'Expired password-reset session cannot reopen registry');
+ const deactivated=await adminAction('disable');assert.equal(deactivated.status,303);
+ assert.equal((await mf.dispatchFetch(origin+'/kt126/registry/'+boundCase.case_id,{headers:{Cookie:restoredCookie}})).status,403);
+ assert.equal(await bound.KT125_LOCAL_AUTH.getCaseContext({cookie:restoredCookie,caseId:boundCase.case_id,action:'document.generate'}),null,'Private author RPC also sees deactivation immediately');
+ assert.equal((await adminAction('enable')).status,303);
  const deniedAdmin=await send('/kt125/admin/users/owner/disable',{confirm:'DEACTIVATE'},restoredCookie);
  assert.equal(deniedAdmin.status,403,'Ordinary expert must not disable an administrator');
  console.log('PASS LOCAL97 workerd: actual D1, native scrypt through private SQLite Durable Object RPC, first password session, reset through native KDF with revoked old password/session and single-use link, revocation trigger and mail Service Binding. Elapsed ms:',Math.round(performance.now()-started));
 }finally{await mf.dispose()}
+

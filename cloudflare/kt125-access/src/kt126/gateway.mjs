@@ -13,7 +13,22 @@ export function overlayModule(rel,source){
   source=replaceOnce(source,'const incomingReference=()=>{',"const incomingReference=()=>{\n if(window.KT126Registry)return window.KT126Registry.confirmedExternal();");
   source=replaceOnce(source,"reference.textContent='Представена документация · вх. № '+incomingReference();","reference.textContent='Представена документация · Деловоден № '+(incomingReference()||'не е посочен');");
   source=replaceOnce(source,"['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated']","['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated','kt126:external-change']");
+  source=replaceOnce(source,'  refresh:sync',`  checkpoint:()=>({source,versions,confirmed,editorialIssues,external:window.KT126Registry?.confirmedExternal()||''}),
+  restoreCheckpoint:data=>{
+   sync();const a=live();if(!a||data?.source?.caseId!==a.caseId||data.source.version!==a.version||data.source.text!==a.text||data.external!==(window.KT126Registry?.confirmedExternal()||''))return false;
+   if(!Array.isArray(data.versions)||data.versions.some(x=>typeof x?.text!=='string')||data.confirmed&&data.confirmed.caseId!==a.caseId)return false;
+   source=a;versions=data.versions;confirmed=data.confirmed||null;editorialIssues=data.editorialIssues||[];render();return true;
+  },
+  refresh:sync`);
  }
+ if(rel.endsWith('/kt116-expert-approval-handoff.mjs'))source=replaceOnce(source,'window.KT116ExpertHandoff=Object.freeze({snapshot:',`window.KT116ExpertHandoff=Object.freeze({
+ checkpoint:()=>({proposal,history,approved,binding:{caseId:evidence().caseId,subject:val(window.KT80WorkflowState?.subjectConfirmed?.text),scope:val(window.KT80WorkflowState?.subjectConfirmed?.scope),ids:[...evidence().parcelIds]}}),
+ restoreCheckpoint:data=>{
+  const e=evidence(),w=window.KT80WorkflowState||{},b=data?.binding;
+  if(!b||b.caseId!==e.caseId||b.subject!==val(w.subjectConfirmed?.text)||b.scope!==val(w.subjectConfirmed?.scope)||JSON.stringify(b.ids)!==JSON.stringify([...e.parcelIds])||!data.proposal||!Array.isArray(data.history)||data.approved&&data.approved.caseId!==e.caseId)return false;
+  proposal={...data.proposal,localId:e.caseId,caseId:e.caseId,revision:e.evidenceRevision,generation:e.generation,key:e.key};history=data.history;approved=data.approved||null;
+  ui.hidden=false;display();render5();return true;
+ },snapshot:`);
  if(rel.endsWith('/kt119-docx-generator.mjs')){
   source=replaceOnce(source,"     const bytes=window.fflate.zipSync(contents,{level:6});",'     window.KT126Registry?.attachDocxMetadata(contents,approved);\n     const bytes=window.fflate.zipSync(contents,{level:6});');
   source=replaceOnce(source,"     const blob=new Blob([bytes],{type:","     const kt126Filename=window.KT126Registry?window.KT126Registry.caseNumber()+'_v'+approved.version+'.docx':null;\n     if(window.KT126Registry)await window.KT126Registry.saveGeneratedDocument(bytes,kt126Filename,approved);\n     const blob=new Blob([bytes],{type:");

@@ -1,3 +1,7 @@
+import {registryHttp} from '../kt126/http.mjs';
+import {proxyAuthor} from '../kt126/author-proxy.mjs';
+import {registryClientSource} from '../kt126/client.mjs';
+import {overlayModule} from '../kt126/gateway.mjs';
 import {withSessionBanner} from './session-banner.mjs';
 import {requestReset,usableReset,completeReset} from './recovery.mjs';
 import {smtpConfig} from './mail.mjs';
@@ -13,7 +17,7 @@ async function readForm(request,fields){
  if(reader)while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>16000){await reader.cancel();return null;}raw+=decoder.decode(value,{stream:true});}raw+=decoder.decode();
  const data=new URLSearchParams(raw);return [...data.keys()].length===fields.length&&fields.every(k=>data.getAll(k).length===1)?data:null;}catch{return null}
 }
-export function createLocalHandler({clock=()=>Date.now(),uuid=()=>crypto.randomUUID(),passwordHash,passwordVerify,moduleFetch=fetch}={}){
+export function createLocalHandler({clock=()=>Date.now(),uuid=()=>crypto.randomUUID(),passwordHash,passwordVerify,moduleFetch=fetch,authorFetch=fetch}={}){
  return {async fetch(request,env,ctx){
   const config=localConfig(env);if(!config||new URL(request.url).origin!==config.origin)return page({view:'unavailable',status:503});
   const kdf=env.KT125_PASSWORDS?.getByName('password-kdf');
@@ -106,6 +110,14 @@ export function createLocalHandler({clock=()=>Date.now(),uuid=()=>crypto.randomU
   }
   const who=await identity({db,request,config,now});
   if(!who)return path.startsWith('/module/')?redirect('/auth/login',cookie('',0)):page({message:'Няма разрешен достъп.',status:403});
+  if(path.startsWith('/kt126/')){
+   if(env.KT126_REGISTRY_ENABLED!=='true')return new Response(null,{status:404});
+   try{
+    if(path==='/kt126/client.js'&&request.method==='GET')return new Response(registryClientSource,{headers:{'Content-Type':'application/javascript; charset=utf-8','Cache-Control':'no-store, private','X-Content-Type-Options':'nosniff'}});
+    if(path.startsWith('/kt126/author/'))return await proxyAuthor({request,env,who,config,now,authorFetch});
+    return await registryHttp({request,env,who,config,now});
+   }catch{return new Response(JSON.stringify({error:'Операцията не е завършена. Опитайте отново.'}),{status:503,headers:{'Content-Type':'application/json','Cache-Control':'no-store, private'}})}
+  }
   if(path.startsWith('/module/')){
    if(!['GET','HEAD'].includes(request.method))return new Response(null,{status:405});
    if(path==='/module/')return redirect('/module/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html');
@@ -123,6 +135,10 @@ export function createLocalHandler({clock=()=>Date.now(),uuid=()=>crypto.randomU
      const html=await response.text();
      body=html.replace(/<a id="kt125AccessLauncher"[^>]*>[^<]*<\/a>/g,['egmaster','administrator'].includes(who.role)?'<a id="kt125AccessLauncher" href="/kt125/admin/panel/overview" target="_blank" rel="noopener">⚙ Администратор</a>':'');
     }
+    if(request.method!=='HEAD'&&env.KT126_REGISTRY_ENABLED==='true'){
+     const overlayText=typeof body==='string'?body:['js','mjs'].includes(ext)?await response.text():null;
+     if(overlayText!==null)body=overlayModule(rel,overlayText);
+    }
     const result=new Response(body,{status:response.status,headers});
     return request.method==='HEAD'?result:withSessionBanner(result,who);
    }catch{return new Response('Работният екран временно не е достъпен.',{status:502})}
@@ -135,3 +151,4 @@ export function createLocalHandler({clock=()=>Date.now(),uuid=()=>crypto.randomU
  }};
 }
 export default createLocalHandler();
+

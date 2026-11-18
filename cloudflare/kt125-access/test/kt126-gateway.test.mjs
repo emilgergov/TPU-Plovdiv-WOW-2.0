@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import {transform} from 'esbuild';
 import {overlayModule} from '../src/kt126/gateway.mjs';
 import {registryClientSource} from '../src/kt126/client.mjs';
-const paths=['vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html','vt03/kt80/KT83_WORKFLOW_CASE_V591.js','vt03/kt80/KT80_E01_DOSSIER_ORIGINALS_V39.js','vt03/kt80/integration/kt117-stage5-document-author.mjs','vt03/kt80/integration/kt119-docx-generator.mjs'];
+const paths=['vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html','vt03/kt80/KT83_WORKFLOW_CASE_V591.js','vt03/kt80/KT80_E01_DOSSIER_ORIGINALS_V39.js','vt03/kt80/integration/kt116-expert-approval-handoff.mjs','vt03/kt80/integration/kt117-stage5-document-author.mjs','vt03/kt80/integration/kt119-docx-generator.mjs'];
 for(const path of paths){const original=readFileSync('../../'+path,'utf8'),patched=overlayModule(path,original);assert.notEqual(patched,original);if(!path.endsWith('.html'))await transform(patched,{loader:'js',format:'esm'});assert.throws(()=>overlayModule(path,patched),'An already applied overlay cannot silently patch twice');}
 assert.equal(overlayModule('untouched.js','const original=1;'),'const original=1;');
 const id=crypto.randomUUID(),bytes=new TextEncoder().encode('original'),hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(x=>x.toString(16).padStart(2,'0')).join('');

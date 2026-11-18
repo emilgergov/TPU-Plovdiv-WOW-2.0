@@ -122,7 +122,7 @@ export function installRegistryClient(){
   const w=root.KT80WorkflowState||{},values={};for(const id of fields){const n=$(id);if(n)values[id]=n.type==='checkbox'?n.checked:n.value}
   const state={};for(const key of ['step','highest','fileName','intake','subjectConfirmed','parcelsConfirmed','lawConfirmed','routeConfirmed','activeRoute'])state[key]=w[key];
   const globals={};for(const key of savedGlobals)if(root[key]!==undefined)globals[key]=root[key];
-  return {format:'KT126-1',values,state,globals};
+  return {format:'KT126-1',values,state,globals,stage4:root.KT116ExpertHandoff?.checkpoint?.()||null,stage5:root.KT117Document?.checkpoint?.()||null};
  }
  function saveSoon(){if(restoring||!record)return;clearTimeout(timer);timer=setTimeout(()=>save().catch(showError),1200)}
  async function save(){const id=record?.case_id;if(!id)return;const state=snapshot(),fingerprint=JSON.stringify(state);await serial(async()=>{if(!isCurrent(id)||fingerprint===savedFingerprint)return;const data=await api('/'+id+'/state',{revision:record.revision,state});if(isCurrent(id)){record=data.record;savedFingerprint=fingerprint;say('Запазена преписка '+record.internal_number+'.')}})}
@@ -131,7 +131,12 @@ export function installRegistryClient(){
    for(const [id,value] of Object.entries(prior.values||{})){const n=$(id);if(n){if(n.type==='checkbox')n.checked=!!value;else n.value=value}}
    for(const [key,value] of Object.entries(prior.globals||{}))if(savedGlobals.includes(key))root[key]=value;
    const w=root.KT80WorkflowState;for(const key of ['subjectConfirmed','parcelsConfirmed','lawConfirmed','routeConfirmed','activeRoute'])if(prior.state?.[key]!==undefined)w[key]=prior.state[key];
-   w.caseCycleId=record.case_id;root.KT80WorkflowGo?.(Math.min(5,Math.max(1,prior.state?.step||1)));
+   w.caseCycleId=record.case_id;
+   if(prior.stage4)root.KT116ExpertHandoff?.restoreCheckpoint?.(prior.stage4);
+   if(prior.stage5)root.KT117Document?.restoreCheckpoint?.(prior.stage5);
+   const step=Math.min(5,Math.max(1,prior.state?.step||1));
+   if(step===5&&root.KT116ExpertHandoff?.snapshot?.()?.caseId===record.case_id){w.step=5;document.querySelectorAll('.kt80-stage-panel[data-panel]').forEach(p=>p.hidden=Number(p.dataset.panel)!==5);document.querySelectorAll('.kt80-step').forEach(n=>n.setAttribute('aria-current',n.dataset.step==='5'?'step':'false'));}
+   else root.KT80WorkflowGo?.(step);
    if(root.KT80IPMasterDraft)root.KT80IPMaster?.render?.(root.KT80IPMasterDraft);
   }finally{restoring=false}}
   display();await save();
@@ -154,15 +159,24 @@ export function installRegistryClient(){
   for(const item of items){const row=document.createElement('div');row.className='kt126-register-row';const label=document.createElement('span');label.textContent=item.internal_number+' · '+item.source_name+(item.external_status==='confirmed'?' · Деловоден № '+item.external_number:'');const button=document.createElement('button');button.textContent='Отвори';button.onclick=async()=>{button.disabled=true;try{await openCase(item.case_id);dialog.close();dialog.remove()}catch(e){showError(e);button.disabled=false}};row.append(label,button);dialog.append(row)}
   document.body.append(dialog);dialog.showModal();
  }
+ async function registerManual(){
+  if(record)return say('Вече има регистрирана преписка.');
+  const file=new File(['Ръчно въведена преписка. Фактите и документите подлежат на експертна проверка.'],'Ръчно въведена преписка.txt',{type:'text/plain'});
+  await beforeProcess(file);const transfer=new DataTransfer();transfer.items.add(file);$('kt80InputFile').files=transfer.files;
+  root.KT80WorkflowState.fileName=file.name;await chooseExternal(null);await save();display();
+ }
  function init(){
   const stage=document.querySelector('.kt80-stage-panel[data-panel="1"]');if(!stage||!root.KT80WorkflowState)return;
   const style=document.createElement('style');style.textContent='#kt126Registry{border:1px solid #9a8751;border-top:3px solid #d9b771;border-radius:9px;padding:14px 18px;background:#153d2d;margin:12px 0 18px;font:13px/1.6 Verdana,Arial;color:#f5f0de}#kt126Registry strong{color:#f5d588}#kt126Registry .kt126-actions,.kt126-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.kt126-dialog{color:#f5f0de;background:#123729;border:1px solid #d9b771;border-radius:12px;padding:22px;max-width:min(1100px,94vw);max-height:92vh;overflow:auto;font:14px/1.6 Verdana,Arial}.kt126-dialog::backdrop{background:#00180ed9}.kt126-dialog h2{color:#f5d588}.kt126-dialog button,#kt126Registry button{cursor:pointer;padding:9px 14px;border:1px solid #d9b771;border-radius:6px;background:#d9b771;color:#143729;font:700 12px Verdana,Arial}.kt126-dialog .kt126-confirm{background:#80362e;color:#fff5e1;border-color:#cb8b73}.kt126-dialog input,.kt126-dialog select{font:14px Verdana,Arial;background:#09291f;color:#f5f0de;border:1px solid #73896c;border-radius:6px;padding:9px;max-width:100%}.kt126-number-label{display:block;font-weight:bold;margin-top:14px}.kt126-number-label input{display:block;width:100%;margin-top:6px}.kt126-crop{overflow:auto;max-height:45vh;border:1px solid #54725a;background:white}.kt126-crop canvas{display:block;max-width:100%;height:auto}.kt126-crop canvas.kt126-zoomed{max-width:none}.kt126-register-row{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:12px 0;border-bottom:1px solid #54725a}.kt126-register-row span{overflow-wrap:anywhere}';document.head.append(style);
   const box=document.createElement('section');box.id='kt126Registry';box.innerHTML='<strong id="kt126Number">Нова преписка — номерът се присвоява при регистриране</strong><div id="kt126External">Деловоден № — предстои преглед</div><div class="kt126-actions"><button type="button" id="kt126OpenRegister">Моите преписки</button><button type="button" id="kt126Save">Запази преписката</button><button type="button" id="kt126EditExternal">Преглед на Деловоден №</button><button type="button" id="kt126NewCase">Нова преписка</button></div><p id="kt126Message" role="status">Постоянният номер се създава еднократно преди анализа. Деловоден № е незадължителен.</p>';stage.insertBefore(box,stage.firstChild);
+  const manual=document.createElement('button');manual.type='button';manual.textContent='Регистрирай без файл';manual.onclick=async()=>{manual.disabled=true;try{await registerManual()}catch(e){showError(e)}finally{manual.disabled=false}};box.querySelector('.kt126-actions').append(manual);
   $('kt126OpenRegister').onclick=()=>showRegister().catch(showError);$('kt126Save').onclick=()=>save().catch(showError);$('kt126EditExternal').onclick=()=>record?chooseExternal(root.KT80WorkflowState.intake).catch(showError):say('Първо регистрирайте преписката чрез „Обработи преписката“.');
   $('kt126NewCase').onclick=async()=>{try{if(record)await save();if(confirm('Да започнем нова преписка? Записаната преписка остава в регистъра.'))root.KT80ResetCurrentCase?.()}catch(e){showError(e)}};
   document.addEventListener('kt80:case-reset',()=>{clearTimeout(timer);record=null;restore=null;requestKey=crypto.randomUUID();display();say('Нова преписка. Предишните записи остават в регистъра.')});
   document.addEventListener('input',e=>{if(fields.includes(e.target.id))saveSoon()});document.addEventListener('change',e=>{if(fields.includes(e.target.id))saveSoon()});
   document.addEventListener('click',e=>{if(!e.target.closest('#kt126Registry,.kt126-dialog,#wow-session-banner'))saveSoon()});
+  for(const event of ['kt115:stage4-draft','kt116:stage4-confirmed','kt116:stage5-open'])document.addEventListener(event,saveSoon);
+  new MutationObserver(changes=>{if(changes.some(x=>x.target instanceof Element&&x.target.closest('#kt116Editor,#kt117Stage5')))saveSoon()}).observe(document.body,{subtree:true,childList:true,characterData:true});
  }
  root.KT126Registry=Object.freeze({beforeProcess,afterRead,afterProcess,saveSoon,attachDocxMetadata,saveGeneratedDocument,refreshBadge:display,current:()=>record,confirmedExternal:()=>record?.external_status==='confirmed'?record.external_number:'',caseNumber:()=>record?.internal_number||''});
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
