@@ -1,0 +1,35 @@
+name: KT125 LOCAL97 deployment readiness (read only)
+on:
+  push:
+    branches: [work/kt125-access-register-from-kt124-r6]
+    paths: ['.github/workflows/kt125-local-readiness.yml']
+permissions:
+  contents: read
+jobs:
+  readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check existing Cloudflare deployment permissions without changing resources
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          if (!process.env.CF_TOKEN) throw Error("Existing deployment credential is unavailable");
+          const base="https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1";
+          const headers={Authorization:"Bearer "+process.env.CF_TOKEN};
+          for(const [label,path] of [
+            ["WORKER_CONFIG_READ","/workers/scripts/tpu-plovdiv-kt125-private/settings"],
+            ["DURABLE_OBJECT_NAMESPACE_READ","/workers/durable_objects/namespaces"],
+            ["EXISTING_D1_READ","/d1/database?name=tpu-plovdiv-kt125-access"]
+          ]){
+            const r=await fetch(base+path,{headers,signal:AbortSignal.timeout(25000)});
+            const d=await r.json().catch(()=>null);
+            console.log(label+": HTTP "+r.status+", success="+Boolean(d?.success));
+            if(label==="EXISTING_D1_READ"&&Array.isArray(d?.result)){
+              const db=d.result.find(x=>x.name==="tpu-plovdiv-kt125-access");
+              console.log("EXISTING_D1_FOUND: "+Boolean(db));
+            }
+          }
+          console.log("READ_ONLY: no Workers, settings, users, emails or database contents changed");
+          NODE
