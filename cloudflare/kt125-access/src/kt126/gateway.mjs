@@ -1,7 +1,7 @@
 // Narrow, asserted overlays over the immutable accepted R6 sources.
 const replaceOnce=(source,anchor,replacement)=>{if(source.split(anchor).length!==2)throw Error('KT126 source contract mismatch');return source.replace(anchor,replacement)};
 export function overlayModule(rel,source){
- if(rel==='vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html'){if(source.includes('src="/kt126/client.js"'))throw Error('KT126 overlay already applied');return replaceOnce(source,'</body>','<script defer src="/kt126/client.js"></script></body>');}
+ if(rel==='vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html'){if(source.includes('src="/kt126/client.js"'))throw Error('KT126 overlay already applied');source=replaceOnce(source,'<body>','<body data-kt80-view="home">');return replaceOnce(source,'</body>','<script defer src="/kt126/client.js"></script></body>');}
  if(rel.endsWith('/KT83_WORKFLOW_CASE_V591.js')){
   source=replaceOnce(source,'  const result=await root.V26LocalIntake.process(file);','  const result=root.KT126Registry?.restoredIntake()||await root.V26LocalIntake.process(file);');
   source=replaceOnce(source," if(currentFileRef&&currentFileRef!==file)state.caseCycleId=newCaseCycleId();"," if(root.KT126Registry){$('kt80ProcessFile').disabled=true;try{await root.KT126Registry.beforeProcess(file)}catch(e){$('kt80ProcessFile').disabled=false;return say(e.message)}}\n if(currentFileRef&&currentFileRef!==file&&!root.KT126Registry?.current())state.caseCycleId=newCaseCycleId();");
