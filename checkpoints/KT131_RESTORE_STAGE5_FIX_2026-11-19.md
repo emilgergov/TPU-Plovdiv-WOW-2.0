@@ -12,3 +12,7 @@ Regression coverage:
 - Existing source anchors, transport handling, editor, registry and reset/race suites continue to run before the isolated preview rollout.
 
 No private case content is included in fixtures or diagnostic logs. The diagnostic outputs only snapshot structure. Production public versions remain unchanged; fix is deployed to the existing KT131 test route after checks.
+
+Verification: GitHub Actions run 44491298156, commit 6ab29e36e167d079375d91d45d808facd9bdc5a6 — SUCCESS. Actual composed Stage5 Chrome test passed: saved version5/confirmation/Word readiness restored, expert draft enables intelligent editor, foreign archive rejected. Isolated preview rollout and readiness passed at the existing KT131 URL; default public stable traffic remains unchanged. No database restoration/mutation was performed by the diagnostic.
+
+User continuation: hard refresh the KT131 page, reopen the existing case from the profile and return to Stage5. Do not upload a new original or rerun the normative author for this test.
