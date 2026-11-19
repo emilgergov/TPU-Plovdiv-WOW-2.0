@@ -64,13 +64,32 @@ function conciseScopeDraft(subject,reconstruction){
   activityEvidenceVerified:known.length>0,
   unresolvedEvidence:!known.length||Boolean(relevance?.crucial?.length)};
 }
+function reviewRequestSource(intake){
+ const files=(intake?.files||[]).filter(file=>!file.expertIgnored&&!file.ignored&&/текстът е прочетен/iu.test(file.status||''));
+ const documents=(intake?.document_texts||[]).map(doc=>({file:tidy(doc.source),text:String(doc.text||'')}));
+ const kind=/^(?:иск(?:ане|ам|аме)\s+за\s+преразглеждане|възражение(?:\s+срещу)?|жалба(?:\s+срещу)?)(?=\s|[:.,]|$)/iu;
+ const matches=files.flatMap(file=>{
+  const name=tidy(file.filename);
+  const first=tidy(documents.find(doc=>doc.file===name)?.text?.slice(0,3000));
+  if(!first)return [];
+  const header=first.match(/(?:^|\s)(?:относно\s*[:–-]\s*)?(иск(?:ане|ам|аме)\s+за\s+преразглеждане|възражение\s+срещу|жалба\s+срещу)(?=\s|[:.,]|$)/iu);
+  const filename=name.split(/[\\/]/u).at(-1).replace(/\.[^.]+$/u,'');
+  if(!header&&!kind.test(filename))return [];
+  if(!/преразглежд|оспорв|възразяв|обжалв/iu.test(first)||!/писм/iu.test(first))return [];
+  const label=header?.[1]||filename;
+  return [{file:name,kind:/жалба/iu.test(label)?'Жалба срещу':/възражение/iu.test(label)?'Възражение срещу':'Искане за преразглеждане на'}];
+ });
+ return matches.length===1?matches[0]:null;
+}
 function proposition(reconstruction){
  const reasons=[...(reconstruction?.unresolved||[])];
  const facts=listSources(reconstruction);
  const major=(reconstruction?.suggestedActivityTypes||[]).filter(x=>labelType[x]);
  const invalidated=String(reconstruction?.subjectCandidate||'').startsWith('НЯМА НАДЕЖДЕН');
  const source=tidy(reconstruction?.subjectCandidate);
- const subject=invalidated?'':root.KT80KT52?.normalizeSubject?.(source)||source;
+ const originalSubject=invalidated?'':root.KT80KT52?.normalizeSubject?.(source)||source;
+ const request=reviewRequestSource(root.KT80WorkflowState?.intake);
+ const subject=request?request.kind+' писмо'+(originalSubject&&originalSubject!=='НЯМА ДАННИ'?' относно ИП „'+originalSubject+'“':''):originalSubject;
  const usableSubject=subject&&subject!=='НЯМА ДАННИ'&&!bad.test(subject);
  const subjectStatus=major.length===1&&!reconstruction?.activityTypeAmbiguous&&usableSubject?'КАНДИДАТ С ИЗТОЧНИЦИ':'НУЖДА ОТ ЕКСПЕРТНА РЕКОНСТРУКЦИЯ';
  if(major.length===0)reasons.push('Не е установен достатъчно надежден характер на основната дейност.');
@@ -110,7 +129,7 @@ function proposition(reconstruction){
  const unsupported=!facts.length;
  if(unsupported)reasons.push('Няма проверими извлечени факти с оригинален документ.');
  return Object.freeze({schema:'KT80-KT53-SUBJECT-SCOPE-V53',
-  subject:usableSubject?subject:'',subjectStatus,
+  subject:usableSubject?subject:'',subjectStatus,subjectSource:request?.file||null,
   scope:scope,scopeSummary:{approvedParameters:concise.approved,pendingTopics:concise.pending,scopeSufficient:concise.scopeSufficient},relevance:concise.relevance,
   evidence:evidenceMap,sourceCount:facts.length,
   unresolved:[...new Set(reasons)],expertConfirmed:false,aiGenerated:false,
@@ -173,6 +192,7 @@ function fill(p,{force=false}={}){
   const para=document.createElement('p');
   para.textContent='Доказателствени откъси: '+p.sourceCount+' · Статус: '+p.evidenceReliability+'. Документите с експертно игнориране и изключените технически стойности не се използват.';
   sources.append(para);
+  if(p.subjectSource){const lead=document.createElement('p');lead.textContent='Водещ документ за предмета: '+p.subjectSource;sources.append(lead);}
   if(p.relevance){
    const report=document.createElement('details');report.className='kt80-kt53-relevance';
    const header=document.createElement('summary');header.textContent='Релевантност за процедурната преценка · '+p.relevance.review.length+' теми за проверка · '+p.relevance.excluded.length+' непотвърдени споменавания';report.append(header);
@@ -201,7 +221,7 @@ function fill(p,{force=false}={}){
    sources.append(line);
   }
  }
- promptStatus('КТ53.1 · Проект на обхват за експертна проверка · '+(p.scopeSummary?.approvedParameters||0)+' потвърдени характеристики · '+(p.scopeSummary?.pendingTopics||0)+' теми за проверка.');
+ promptStatus((p.subjectSource?'Водещ документ: '+p.subjectSource+' · ':'')+'КТ53.1 · Проект на обхват за експертна проверка · '+(p.scopeSummary?.approvedParameters||0)+' потвърдени характеристики · '+(p.scopeSummary?.pendingTopics||0)+' теми за проверка.');
  const warning=$('kt80KT53Warnings');if(warning)warning.textContent=p.unresolved.length?'За проверка: '+p.unresolved.join(' | '):'Няма допълнителни алгоритмични сигнали. Всеки факт остава за експертна проверка.';
 }
 function construct({force=false}={}){
