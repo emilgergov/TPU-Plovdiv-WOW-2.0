@@ -113,6 +113,12 @@ function initialize(){
  wordInfo.after(transition);
  panel.replaceChildren(ui);
  const live=()=>window.KT116ExpertHandoff?.snapshot?.()||null;
+ const savedSpatialConfirmation=handoff=>versions.some(version=>{
+  const saved=version.spatialConfirmation;
+  return saved?.caseId===handoff.caseId&&saved.decisionVersion===handoff.decisionVersion&&
+   saved.evidenceRevision===handoff.evidenceRevision&&
+   JSON.stringify(saved.parcelIds)===JSON.stringify(handoff.parcelIds);
+ });
  openPanel.onclick=()=>{
   const handoff=panelHandoff(window,live());
   if(handoff?.panelId!==1)return;
@@ -122,9 +128,10 @@ function initialize(){
   if(handoff.scope)confirmedData.append(make('p','Готово · Обхват: '+handoff.scope));
   const pending=make('div');
   pending.append(make('h4','Необходими действия'));
+  const spatialStatus=handoff.gisStatus==='pending'&&savedSpatialConfirmation(handoff)?'confirmed':handoff.gisStatus;
   const spatialLabel={confirmed:'Готово · ГИС и PDF1',not_applicable:'ГИС · Неприложимо',
-   pending:'ГИС и PDF1 · Потвърждението не е налично в панела',unverified:'ГИС · Относимостта е непотвърдена'}[handoff.gisStatus];
-  (['confirmed','not_applicable'].includes(handoff.gisStatus)?confirmedData:pending).append(make('p',spatialLabel));
+   pending:'ГИС и PDF1 · Потвърждението не е налично в панела',unverified:'ГИС · Относимостта е непотвърдена'}[spatialStatus];
+  (['confirmed','not_applicable'].includes(spatialStatus)?confirmedData:pending).append(make('p',spatialLabel));
   const project=versions.at(-1);
   pending.append(make('p',project?'Преглед на проекта по преписката':'Изготвяне на проект по потвърдената процедура'));
   const columns=make('div');columns.className='kt117-pilot-columns';columns.append(confirmedData,pending);
@@ -217,6 +224,11 @@ function initialize(){
     note.textContent='Отхвърлен е проект с различно административно действие. Резултатът не е запазен за потвърждаване.';return;
    }
    versions.push({version:versions.length+1,text:normalized.text,kind:'предложение на EG Автора — индивидуален предмет'});
+   const handoff=panelHandoff(window,source);
+   if(handoff?.gisStatus==='confirmed'){
+    const {caseId,decisionVersion,evidenceRevision,parcelIds}=handoff;
+    versions.at(-1).spatialConfirmation={caseId,decisionVersion,evidenceRevision,parcelIds};
+   }
    document.dispatchEvent(new CustomEvent('kt123:stage5-draft',{detail:{caseId:source.caseId,stage4Version:source.version}}));
    confirmed=null;decisionStatus.hidden=true;render();note.textContent=editorialIssues.length?'Проектът е готов. Проверете бележките за редакция преди потвърждение.':'Проектът е готов за експертна редакция или потвърждение.';
   }catch{note.textContent='Възникна грешка при изготвянето на текста.';}
