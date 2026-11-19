@@ -53,6 +53,13 @@ jobs:
           authorSource=patchOnce(authorSource,'  const reviewSystem=[','  const reviewSystem=[\n   '+JSON.stringify(guidance)+',');
           const qualityAnchor='  const heads=sectionNames.map(s=>normalized.indexOf(s.toLocaleLowerCase("bg")));\n  const issues=[];';
           authorSource=patchOnce(authorSource,qualityAnchor,qualityAnchor+'\n'+"  const reviewSubject=/преразглеждане|възражение|жалба/iu.test(String(payload.subject||\"\"));\n  const reviewScope=/(?:преразглеждане|промяна|корекция|оспорване)\\s+на\\s+(?:вече\\s+издаденото\\s+)?писмо(?:то)?/iu.test(String(payload.scope||\"\"));\n  if(reviewSubject&&reviewScope&&/ИЗБРАН\\s+ПАНЕЛ\\s*[:：]\\s*0?1\\b/iu.test(value))\n   issues.push(\"PANEL_01_DOES_NOT_ADDRESS_CURRENT_REVIEW_REQUEST\");");
+          const sourceAnchor=' const qualificationSources=buildQualificationSources(';
+          authorSource=patchOnce(authorSource,sourceAnchor," const reviewOfIssuedLetter=/преразглеждане|възражение|жалба/iu.test(String(payload.subject||\"\"))&&/(?:преразглеждане|промяна|корекция|оспорване)\\s+на\\s+(?:вече\\s+издаденото\\s+)?писмо(?:то)?/iu.test(String(payload.scope||\"\"));\n const validateCurrentRequest=(q,sources)=>reviewOfIssuedLetter&&Number(q?.selectedPanel)===1?\n  {ok:false,errors:[\"PANEL_01_DOES_NOT_ADDRESS_CURRENT_REVIEW_REQUEST\"]}:validateQualification(q,sources);"+'\n'+sourceAnchor);
+          for(const result of ['q','candidate']){
+            const anchor='validateQualification('+result+',qualificationSources)';
+            authorSource=patchOnce(authorSource,anchor,'validateCurrentRequest('+result+',qualificationSources)');
+          }
+          authorSource=patchOnce(authorSource,'       "Свери основанията и не въвеждай недоказано предположение."', '       code==="PANEL_01_DOES_NOT_ADDRESS_CURRENT_REVIEW_REQUEST"?guidancePlaceholder: "Свери основанията и не въвеждай недоказано предположение."'.replace('guidancePlaceholder',JSON.stringify(guidance)));
           writeFileSync(authorWorker,authorSource);
           const worker=root+'src/local-auth/worker.mjs';
           let code=readFileSync(worker,'utf8');
