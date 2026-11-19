@@ -50,7 +50,10 @@ function panelHandoff(root, approval){
  return Object.freeze({panelId,caseId:approval.caseId,evidenceRevision:evidence.evidenceRevision,
   decisionVersion:approval.version,result:documentLabel(panelLine?.[0]||''),
   decision:approval.text,subject:clean(subject.text),scope:clean(subject.scope),
-  gisStatus,parcelIds:Object.freeze([...evidence.parcelIds]),observations:Object.freeze([...evidence.observations]),
+  gisStatus,gisReason:clean(gate?.reason),pdf1:gisStatus==='confirmed'?{
+   spatialClass:clean(spatial.spatialClass),evidenceRevision:evidence.evidenceRevision,
+   receiptStamp:root.KT83NormativeBridge?.pdfStatus?.().stamp||null
+  }:null,parcelIds:Object.freeze([...evidence.parcelIds]),observations:Object.freeze([...evidence.observations]),
   warnings:Object.freeze([...(approval.warnings||[])])});
 }
 
@@ -113,14 +116,19 @@ function initialize(){
  wordInfo.after(transition);
  panel.replaceChildren(ui);
  const live=()=>window.KT116ExpertHandoff?.snapshot?.()||null;
- const savedSpatialConfirmation=handoff=>versions.some(version=>{
-  const saved=version.spatialConfirmation;
-  return saved?.caseId===handoff.caseId&&saved.decisionVersion===handoff.decisionVersion&&
-   saved.evidenceRevision===handoff.evidenceRevision&&
-   JSON.stringify(saved.parcelIds)===JSON.stringify(handoff.parcelIds);
- });
+ const confirmedPanelOutput=()=>{
+  if(!source||!confirmed||confirmed.caseId!==source.caseId||confirmed.stage4Version!==source.version)return null;
+  const output=confirmed.stage5Output;
+  if(output){
+   return output.caseId===confirmed.caseId&&output.decisionVersion===confirmed.stage4Version&&
+    output.documentVersion===confirmed.version?output:null;
+  }
+  // Legacy documents can be reviewed without attributing current GIS to an old decision.
+  const legacy=panelHandoff(window,source);
+  return legacy?{...legacy,gisStatus:'legacy',gisReason:'',pdf1:null,documentVersion:confirmed.version}:null;
+ };
  openPanel.onclick=()=>{
-  const handoff=panelHandoff(window,live());
+  const handoff=live()?confirmedPanelOutput():null;
   if(handoff?.panelId!==1)return;
   const confirmedData=make('div');
   confirmedData.append(make('h4','Потвърдени данни'));
@@ -128,11 +136,12 @@ function initialize(){
   if(handoff.scope)confirmedData.append(make('p','Готово · Обхват: '+handoff.scope));
   const pending=make('div');
   pending.append(make('h4','Необходими действия'));
-  const spatialStatus=handoff.gisStatus==='pending'&&savedSpatialConfirmation(handoff)?'confirmed':handoff.gisStatus;
-  const spatialLabel={confirmed:'Готово · ГИС и PDF1',not_applicable:'ГИС · Неприложимо',
+  const spatialStatus=handoff.gisStatus;
+  const spatialLabel={confirmed:'Готово · ГИС и PDF1',not_applicable:'ГИС · Неприложимо. PDF1 не се изисква.'+(handoff.gisReason?' '+handoff.gisReason:''),
+   legacy:'Запазеният проект няма връзка към конкретен ГИС резултат и PDF1.',
    pending:'ГИС и PDF1 · Потвърждението не е налично в панела',unverified:'ГИС · Относимостта е непотвърдена'}[spatialStatus];
   (['confirmed','not_applicable'].includes(spatialStatus)?confirmedData:pending).append(make('p',spatialLabel));
-  const project=versions.at(-1);
+  const project=confirmed;
   pending.append(make('p',project?'Преглед на проекта по преписката':'Изготвяне на проект по потвърдената процедура'));
   const columns=make('div');columns.className='kt117-pilot-columns';columns.append(confirmedData,pending);
   const rationale=make('details'),decision=make('p',handoff.decision);
@@ -149,7 +158,7 @@ function initialize(){
  };
  function sync(){
   const a=live();
-  if(!a){transition.hidden=true;addressed.close();source=null;versions=[];confirmed=null;editorialIssues=[];editorial.hidden=true;context.hidden=true;action.hidden=true;preview.hidden=true;textarea.hidden=true;textarea.style.display='none';reviewActions.hidden=true;footer.hidden=true;original.hidden=true;note.textContent='Няма потвърдено предложение по текущата преписка.';return;}
+  if(!a){confirmedText.textContent='';decisionStatus.hidden=true;transition.hidden=true;addressed.close();source=null;versions=[];confirmed=null;editorialIssues=[];editorial.hidden=true;context.hidden=true;action.hidden=true;preview.hidden=true;textarea.hidden=true;textarea.style.display='none';reviewActions.hidden=true;footer.hidden=true;original.hidden=true;note.textContent='Няма потвърдено предложение по текущата преписка.';return;}
   if(source&&source.caseId===a.caseId&&source.version===a.version&&source.text===a.text)return;
   addressed.close();
   source=a;versions=[];confirmed=null;editorialIssues=[];editorial.hidden=true;context.hidden=false;action.hidden=false;reviewActions.hidden=false;footer.hidden=true;
@@ -160,8 +169,8 @@ function initialize(){
   const p=window.KT80WorkflowState?.subjectConfirmed||{};
   const handoff=panelHandoff(window,a);
   const parcels=handoff?.parcelIds||collectStageEvidence(window).parcelIds;
-  transition.hidden=handoff?.panelId!==1;
-  destination.textContent=transition.hidden?'':'Адресиран панел №01 · '+handoff.result;
+  transition.hidden=true;
+  destination.textContent=handoff?.panelId===1?'Адресиран панел №01 · '+handoff.result:'';
   details.textContent='Предмет: '+clean(p.text)+'\nИмот(и): '+parcels.join(', ')+'\nЕксперт: '+a.expert+' · Версия: '+a.version;
   warnings.hidden=!a.warnings?.length;warningText.textContent=(a.warnings||[]).join('\n');
   note.textContent='Изготвянето на документа използва потвърденото направление, без нова процедурна квалификация.';
@@ -171,6 +180,9 @@ function initialize(){
   const v=versions.at(-1);if(!v)return;
   preview.textContent=v.text;preview.hidden=false;textarea.hidden=true;textarea.style.display='none';edit.hidden=false;save.hidden=true;cancel.hidden=true;
   confirm.hidden=!!confirmed;confirmedText.textContent=confirmed?'Потвърден текст · версия '+confirmed.version+'. Експертните редакции остават окончателни за документа.':'';
+  const output=confirmedPanelOutput();
+  transition.hidden=output?.panelId!==1;
+  if(!transition.hidden)destination.textContent='Адресиран панел №01 · '+output.result;
   footer.hidden=!confirmed;word.disabled=!(confirmed&&window.KT119TemplateReady?.());
  };
  generate.onclick=async()=>{
@@ -256,9 +268,14 @@ function initialize(){
   if(isPanel01Request(selected,checked.text)){
    showDecisionStatus('Съдържанието представлява искане за допълнителна информация, а потвърденото направление е панел №01. Преработете текста или извършете нова доказателствена преценка в Етап 4. Не се допуска скрита промяна на вида документ.',true);return;
   }
+  const handoff=panelHandoff(window,source);
+  if(handoff&&['pending','unverified'].includes(handoff.gisStatus)){
+   showDecisionStatus('Етап 5 очаква потвърден ГИС резултат и PDF1 или мотивирано решение за неприложимост.',true);return;
+  }
+  const stage5Output=handoff?{...handoff,documentVersion:v.version}:null;
   // Expert confirms exactly the displayed draft; no last-minute rewriting.
   confirmed=Object.freeze({...v,caseId:source.caseId,stage4Version:source.version,
-    expert:source.expert,confirmedAt:new Date().toISOString()});
+    stage5Output,expert:source.expert,confirmedAt:new Date().toISOString()});
   document.dispatchEvent(new CustomEvent('kt123:stage5-confirmed',{detail:{caseId:source.caseId,stage4Version:source.version}}));
   render();
   note.textContent='Текстът е потвърден от експерта. Можете да създадете DOCX по проверената бланка.';
@@ -270,7 +287,7 @@ function initialize(){
  document.addEventListener('kt116:stage5-open',()=>sync());
  ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'].forEach(x=>document.addEventListener(x,()=>{source=null;sync()}));
  window.KT117Document=Object.freeze({
-  panelHandoff:()=>{const approval=live();return approval?panelHandoff(window,approval):null;},
+  panelHandoff:()=>live()?confirmedPanelOutput():null,
   snapshot:()=>confirmed&&live()?.version===confirmed.stage4Version?confirmed:null,
   refresh:sync
  });
