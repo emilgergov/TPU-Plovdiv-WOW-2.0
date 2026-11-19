@@ -7,6 +7,7 @@ async function api(path,options={}){
  const response=await fetch(base+path,{...options,headers:{...headers,...options.headers}});
  const data=await response.json();if(!response.ok||!data.success)throw Error('Cloudflare HTTP '+response.status+' codes '+JSON.stringify(data.errors?.map(x=>x.code)));return data.result;
 }
+const postJSON=(route,body)=>api(route,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
 const path=name=>'/workers/scripts/'+name;
 const getDeployment=async name=>(await api(path(name)+'/deployments')).deployments[0];
 const active=deployment=>{const serving=deployment.versions.filter(v=>v.percentage>0);if(serving.length!==1||serving[0].percentage!==100)throw Error('Expected one unchanged stable version at 100%');return serving[0].version_id};
@@ -14,14 +15,16 @@ const nativeBefore=await getDeployment(native),authorBefore=await getDeployment(
 const nativeStable=active(nativeBefore),authorStable=active(authorBefore);
 const nativeSettings=await api(path(native)+'/settings'),authorSettings=await api(path(author)+'/settings');
 if(!nativeSettings.bindings.some(b=>b.name==='KT125_AUTH_SECRET'&&b.type==='secret_text')||!authorSettings.bindings.some(b=>b.name==='OPENAI_API_KEY'&&b.type==='secret_text'))throw Error('Required existing secret bindings missing');
-if(nativeSettings.bindings.find(b=>b.name==='KT125_LOCAL_ORIGIN')?.text!=='https://'+native+'.emilgergov.workers.dev')throw Error('Unexpected stable native origin');
+if(!['https://'+native+'.emilgergov.workers.dev',origin].includes(nativeSettings.bindings.find(b=>b.name==='KT125_LOCAL_ORIGIN')?.text))throw Error('Unexpected native origin configuration');
+const liveBefore=await fetch('https://'+native+'.emilgergov.workers.dev/auth/login');if(liveBefore.status!==200||(await liveBefore.text()).includes('КТ131 · ТЕСТОВА ВЕРСИЯ'))throw Error('Stable public login is not unchanged');
+const subdomain=await api(path(native)+'/subdomain');if(!subdomain.enabled)throw Error('Unexpected disabled stable hostname');
+if(!subdomain.previews_enabled)await postJSON(path(native)+'/subdomain',{enabled:true,previews_enabled:true});
 async function upload(name,settings,file,overrides=[],alias){
  const replaced=new Set(overrides.map(b=>b.name));
  const metadata={main_module:'worker.mjs',compatibility_date:settings.compatibility_date,compatibility_flags:settings.compatibility_flags||[],bindings:[...settings.bindings.filter(b=>!replaced.has(b.name)).map(b=>({name:b.name,type:'inherit'})),...overrides],annotations:{'workers/message':'KT131 isolated editor test; production stable version remains at 100%','workers/commit_sha':process.env.GITHUB_SHA||'',...(alias?{'workers/alias':alias}:{})}};
  const form=new FormData();form.set('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));form.set('worker.mjs',new Blob([readFileSync(file)],{type:'application/javascript+module'}),'worker.mjs');
- const version=await api(path(name)+'/versions?bindings_inherit=strict',{method:'POST',body:form});if(!/^[0-9a-f-]{36}$/.test(version.id||''))throw Error('Missing uploaded version ID');return version.id;
+ const version=await api(path(name)+'/versions?bindings_inherit=strict',{method:'POST',body:form});if(!/^[0-9a-f-]{36}$/.test(version.id||''))throw Error('Missing uploaded version ID');console.log('UPLOADED_PREVIEW_VERSION',JSON.stringify({service:name,id:version.id,alias:alias||null,hasPreview:version.resources?.script?.hasPreview}));return version.id;
 }
-const postJSON=(route,body)=>api(route,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
 const authorVersion=await upload(author,authorSettings,'dist/kt131-author-preview.mjs');
 const nativeVersion=await upload(native,nativeSettings,'dist/kt131-native-preview.mjs',[
  {name:'KT125_LOCAL_ORIGIN',type:'plain_text',text:origin},
@@ -33,11 +36,9 @@ try{
  // is explicitly 0%; ordinary public requests continue to use the old version.
  if(active(await getDeployment(author))!==authorStable||active(await getDeployment(native))!==nativeStable)throw Error('Stable deployment changed concurrently');
  await postJSON(path(author)+'/deployments',{strategy:'percentage',versions:[{version_id:authorStable,percentage:100},{version_id:authorVersion,percentage:0}]});authorOverrideEnabled=true;
- const subdomain=await api(path(native)+'/subdomain');if(!subdomain.enabled)throw Error('Unexpected disabled stable hostname');
- if(!subdomain.previews_enabled)await postJSON(path(native)+'/subdomain',{enabled:true,previews_enabled:true});
  let ready=false;
  for(let attempt=0;attempt<18;attempt++){
-  try{const r=await fetch(origin+'/kt131/readiness',{signal:AbortSignal.timeout(15000)}),d=await r.json();if(r.ok&&d.authorVersionConfirmed&&d.invalidSessionDenied){ready=true;break}}catch{}
+  try{const r=await fetch(origin+'/kt131/readiness',{signal:AbortSignal.timeout(15000)});const d=await r.json().catch(()=>({}));if(attempt===0||attempt===17)console.log('PREVIEW_READINESS',JSON.stringify({status:r.status,preview:d.preview,authorVersionConfirmed:d.authorVersionConfirmed,invalidSessionDenied:d.invalidSessionDenied}));if(r.ok&&d.authorVersionConfirmed&&d.invalidSessionDenied){ready=true;break}}catch{}
   await new Promise(r=>setTimeout(r,3000));
  }
  if(!ready)throw Error('Preview version routing did not pass readiness checks');
