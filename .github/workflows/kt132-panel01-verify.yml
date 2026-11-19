@@ -46,6 +46,7 @@ jobs:
           const qualification='cloudflare/ai-author-v27/src/kt123-evidence-qualification.mjs';
           let authorSource=readFileSync(qualification,'utf8');
           authorSource=patchOnce(authorSource,' "Върни точно ЧЕТИРИ tests', ' '+JSON.stringify(guidance)+',\n "Върни точно ЧЕТИРИ tests');
+          authorSource=patchOnce(authorSource,' const laws=legalProvisions.map('," if(gis?.applicability===\"NOT_REQUIRED\"&&gis.expertConfirmed===true)\n  facts.push({id:\"gis-applicability\",text:\"По експертно потвърдения маршрут ГИС и PDF1 не се изискват. \"+String(gis.reason||\"\"),established:true,kind:\"expert-confirmed-route\"});"+'\n const laws=legalProvisions.map(');
           writeFileSync(qualification,authorSource);
           const authorWorker='cloudflare/ai-author-v27/src/worker.js';
           authorSource=readFileSync(authorWorker,'utf8');
