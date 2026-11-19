@@ -60,8 +60,12 @@ jobs:
             .replace("],'kt131');", "],'kt132');")
             .replaceAll('КТ131 · ТЕСТОВА ВЕРСИЯ','КТ132 · ТЕСТОВА ВЕРСИЯ')
             .replaceAll('KT131_PREVIEW_READY','KT132_PREVIEW_READY')
-            .replace("const nativeStable=active(nativeBefore),authorStable=active(authorBefore);","const nativeStable=active(nativeBefore),authorStable=active(authorBefore);\nif(nativeBefore.versions.length!==1||authorBefore.versions.length!==1)throw Error('Existing preview allocation must be preserved');")
             .replace(" const login=await fetch(origin+'/auth/login');"," const guarded=await fetch(origin+'/module/vt03/kt80/integration/kt117-stage5-document-author.mjs',{redirect:'manual'});if(![302,303,307].includes(guarded.status)||guarded.headers.get('location')!=='/auth/login')throw Error('Pilot module is not session guarded');\n const login=await fetch(origin+'/auth/login');");
+          for(const [service,stable,version] of [['author','authorStable','authorVersion'],['native','nativeStable','nativeVersion']]){
+            const prior=service+'Before.versions.map(({version_id,percentage})=>({version_id,percentage}))';
+            code=code.replace('versions:[{version_id:'+stable+',percentage:100},{version_id:'+version+',percentage:0}]','versions:[...'+prior+',{version_id:'+version+',percentage:0}]');
+            code=code.replace('versions:[{version_id:'+stable+',percentage:100}]','versions:'+prior);
+          }
           writeFileSync(deployment,code);
           JS
           mkdir -p dist
