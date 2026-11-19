@@ -40,22 +40,22 @@ export async function editPreparedDocument(input,env,provider=fetch,documentInst
   const data=await response.json(),raw=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==='output_text').map(x=>x.text).join('\n').trim();
   let result;try{result=JSON.parse(raw)}catch{return {status:502,body:{error:'INVALID_EDITOR_RESPONSE'}}}
   if(!Array.isArray(result.edits))return {status:502,body:{error:'INVALID_EDITOR_RESPONSE'}};
-  const parts=original.split(/(\n\s*\n)/u),allowed=new Map(paragraphs.map(p=>[p.id,p.text])),seen=new Set(),blocked=new Set(),retained=[];
+  const parts=original.split(/(\n\s*\n)/u),allowed=new Map(paragraphs.map(p=>[p.id,p.text])),seen=new Set(),retained=[];
   for(const edit of result.edits){
    if(!edit||!Number.isInteger(edit.id)||!allowed.has(edit.id)||seen.has(edit.id)||typeof edit.text!=='string'||!edit.text.trim())return {status:422,body:{error:'EDITOR_PROTECTED_CONTENT',findings:['Предложена е промяна извън разрешените абзаци.']}};
    seen.add(edit.id);
    let edited=edit.text;const paragraph=allowed.get(edit.id),protectedFragments=[...paragraph.matchAll(/(?:не\s+се\s+налага|не\s+е\s+необходимо|необходимо\s+е)\s+провеждане(?:то)?[^.!?\n]*/giu)];
    let missing=false;
    for(const fragment of protectedFragments){const marker='⟦ИЗВОД_'+edit.id+'_'+fragment.index+'⟧';if(edited.split(marker).length!==2){missing=true;break;}edited=edited.replace(marker,fragment[0]);}
-   if(missing||/⟦ИЗВОД_/u.test(edited)){blocked.add(edit.id);retained.push('Абзац '+(edit.id/2+1)+': запазен е оригиналът, защото защитен фрагмент не е върнат дословно.');continue;}
+   if(missing||/⟦ИЗВОД_/u.test(edited)){retained.push('Абзац '+(edit.id/2+1)+': предложението на модела е отхвърлено, защото защитен фрагмент не е върнат дословно.');continue;}
    const local=editorGuard('Редакционен абзац '.repeat(10)+'\n\n'+allowed.get(edit.id),'Редакционен абзац '.repeat(10)+'\n\n'+edited);
-   if(local.length){blocked.add(edit.id);retained.push('Абзац '+(edit.id/2+1)+': запазен е оригиналът. '+local.join(' '));continue;}
+   if(local.length){retained.push('Абзац '+(edit.id/2+1)+': предложението на модела е отхвърлено. '+local.join(' '));continue;}
    parts[edit.id]=edited;
   }
   // Apply only known language corrections to editable paragraphs. A failed factual
-  // guard retains that paragraph; no global search/replace over the subject/intro.
+  // guard rejects the model proposal. Narrow verified language rules are independent;
+  // no global search/replace over the subject/intro.
   for(const {id,text} of paragraphs){
-   if(blocked.has(id))continue;
    const styled=administrativeStyle(parts[id]);
    if(!editorGuard('Редакционен абзац '.repeat(10)+'\n\n'+text,'Редакционен абзац '.repeat(10)+'\n\n'+styled).length)parts[id]=styled;
   }
