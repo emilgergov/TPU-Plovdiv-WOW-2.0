@@ -40,6 +40,7 @@ jobs:
           node test/kt131-editor-diff.test.mjs
           node test/kt131-editor-style.test.mjs
           node test/kt131-preview-boundary.test.mjs
+          node test/kt131-preview-router.test.mjs
           node test/kt130-reset-restore-race.test.mjs
       - name: Install isolated browser harness
         run: |
@@ -60,6 +61,7 @@ jobs:
           mkdir -p dist
           cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/preview/author-entry.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt131-author-preview.mjs
           cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/preview/native-entry.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=dist/kt131-native-preview.mjs
+          cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/preview/router-entry.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt131-router.mjs
       - name: Prepare isolated test URL retaining stable public traffic
         env:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
