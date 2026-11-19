@@ -37,6 +37,7 @@ jobs:
           node test/kt126-gateway.test.mjs
           node test/presentation-polish.test.mjs
           node test/kt130-intelligent-editor.test.mjs
+          node test/kt131-editor-proposals.test.mjs
           node test/kt131-editor-diff.test.mjs
           node test/kt131-editor-style.test.mjs
           node test/kt131-preview-boundary.test.mjs

@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {editorialParagraphProposals as propose,applyEditorialProposal as apply} from '../../ai-author-v27/src/kt131-editor-proposals.mjs';
+const panel='ИЗБРАН ПАНЕЛ: 01 — Писмо';
+const text='Относно: „Контролен обект“.\n\nНа основание изложеното уведомявам, че инвестиционното предложение „Контролен обект“ подлежи на разглеждане и издаване на административен акт по чл. 2, ал. 2 от Наредбата за ОС с мотивирано констатиране за отпадане на процедурата по чл. 2, ал. 1. Не е необходима процедура по Наредбата за ОВОС.\n\nИзпълнението на настоящото административно направление подлежи на последващо експертно потвърждение.';
+const choices=propose(text,panel);assert.equal(choices.length,2);
+assert.equal(propose(text,'ИЗБРАН ПАНЕЛ: 02').length,1);
+assert.equal(propose(text.replace('Не е необходима процедура','Необходима е процедура'),panel).length,1);
+const accepted=apply(text,choices[0],panel);assert.ok(accepted.text.includes('Ви уведомявам'));assert.ok(accepted.text.includes('Не е необходима процедура по Наредбата за ОВОС.'));
+assert.equal(apply(text,{...choices[0],before:'Друг текст'},panel),null);
+assert.equal(apply(text,{...choices[0],after:'Произволна промяна'},panel).text,accepted.text);
+const service=propose(accepted.text,panel).find(p=>p.kind==='service_note');const removed=apply(accepted.text,service,panel);assert.ok(!removed.text.includes('последващо експертно потвърждение'));assert.equal(removed.text.split('\n')[0],text.split('\n')[0]);
+assert.equal(propose('Правно условие за последващо експертно потвърждение.',panel).length,0);
+console.log('PASS explicit paragraph proposals: panel, existing conclusion, stale choice, protected references, no arbitrary replacement');
