@@ -2,7 +2,7 @@ name: KT131 isolated reliability and editor checks
 on:
   push:
     branches: [work/kt131-stability-editor]
-    paths: ['cloudflare/**', '.github/workflows/kt131-stability-checks.yml']
+    paths: ['cloudflare/**', 'checks/kt131-editor-browser.mjs', '.github/workflows/kt131-stability-checks.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -34,3 +34,17 @@ jobs:
           node test/kt130-intelligent-editor.test.mjs
           node test/kt131-editor-diff.test.mjs
           node test/kt130-reset-restore-race.test.mjs
+      - name: Install isolated browser harness
+        run: |
+          npm install --prefix "$RUNNER_TEMP/kt131-browser" --no-save playwright@1.56.1
+          echo "KT131_BROWSER_EXECUTABLE=$(command -v google-chrome)" >> "$GITHUB_ENV"
+      - name: Verify editor behavior in browser without provider calls
+        env:
+          KT131_BROWSER_PACKAGE: ${{ runner.temp }}/kt131-browser/node_modules/playwright
+        run: node checks/kt131-editor-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kt131-synthetic-editor-browser
+          path: kt131-browser-qa
+          retention-days: 7
