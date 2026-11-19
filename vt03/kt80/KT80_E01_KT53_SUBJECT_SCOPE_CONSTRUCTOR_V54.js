@@ -64,23 +64,6 @@ function conciseScopeDraft(subject,reconstruction){
   activityEvidenceVerified:known.length>0,
   unresolvedEvidence:!known.length||Boolean(relevance?.crucial?.length)};
 }
-function reviewRequestSource(intake){
- const files=(intake?.files||[]).filter(file=>!file.expertIgnored&&!file.ignored&&/текстът е прочетен/iu.test(file.status||''));
- const documents=(intake?.document_texts||[]).map(doc=>({file:tidy(doc.source),text:String(doc.text||'')}));
- const kind=/^(?:иск(?:ане|ам|аме)\s+за\s+преразглеждане|възражение(?:\s+срещу)?|жалба(?:\s+срещу)?)(?=\s|[:.,]|$)/iu;
- const matches=files.flatMap(file=>{
-  const name=tidy(file.filename);
-  const first=tidy(documents.find(doc=>doc.file===name)?.text?.slice(0,3000));
-  if(!first)return [];
-  const header=first.match(/(?:^|\s)(?:относно\s*[:–-]\s*)?(иск(?:ане|ам|аме)\s+за\s+преразглеждане|възражение\s+срещу|жалба\s+срещу)(?=\s|[:.,]|$)/iu);
-  const filename=name.split(/[\\/]/u).at(-1).replace(/\.[^.]+$/u,'');
-  if(!header&&!kind.test(filename))return [];
-  if(!/преразглежд|оспорв|възразяв|обжалв/iu.test(first)||!/писм/iu.test(first))return [];
-  const label=header?.[1]||filename;
-  return [{file:name,kind:/жалба/iu.test(label)?'Жалба срещу':/възражение/iu.test(label)?'Възражение срещу':'Искане за преразглеждане на'}];
- });
- return matches.length===1?matches[0]:null;
-}
 function proposition(reconstruction){
  const reasons=[...(reconstruction?.unresolved||[])];
  const facts=listSources(reconstruction);
@@ -88,7 +71,7 @@ function proposition(reconstruction){
  const invalidated=String(reconstruction?.subjectCandidate||'').startsWith('НЯМА НАДЕЖДЕН');
  const source=tidy(reconstruction?.subjectCandidate);
  const originalSubject=invalidated?'':root.KT80KT52?.normalizeSubject?.(source)||source;
- const request=reviewRequestSource(root.KT80WorkflowState?.intake);
+ const request=root.KT80SubjectMaster?.reviewRequestSource?.(root.KT80WorkflowState?.intake);
  const subject=request?request.kind+' писмо'+(originalSubject&&originalSubject!=='НЯМА ДАННИ'?' относно ИП „'+originalSubject+'“':''):originalSubject;
  const usableSubject=subject&&subject!=='НЯМА ДАННИ'&&!bad.test(subject);
  const subjectStatus=major.length===1&&!reconstruction?.activityTypeAmbiguous&&usableSubject?'КАНДИДАТ С ИЗТОЧНИЦИ':'НУЖДА ОТ ЕКСПЕРТНА РЕКОНСТРУКЦИЯ';
