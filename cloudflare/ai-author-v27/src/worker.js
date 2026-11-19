@@ -937,7 +937,7 @@ async function handleStage5Document(request,env){
  // Optional text-only editor: authorization and the signed Stage 4 handoff above still apply.
  if(input.editorialOnly===true){
   if(input.sourcePreviewOnly===true)return reply({error:"INVALID_EDITOR_INPUT"},400);
-  const result=await editPreparedDocument(input,env);
+  const result=await editPreparedDocument(input,env,undefined,MOSV_EDITORIAL_GUIDE);
   return reply(result.body,result.status);
  }
 

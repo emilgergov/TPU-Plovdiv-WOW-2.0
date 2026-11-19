@@ -7,7 +7,7 @@ const direction='ИЗБРАН ПАНЕЛ: 01 — Писмо по чл. 2, ал. 
 const body={task:'draft_stage5_document',editorialOnly:true,caseId:'editor-case',evidenceRevision:3,requestId:'editor-request',stage4Version:2,projectOnly:true,expertConfirmed:true,confirmedStage4Text:direction,selectedPanelLine:direction,documentTitle:'Писмо по чл. 2, ал. 2 от Наредбата за ОС',subject:'Контролен обект',scope:'Контролна дейност',documentVersion:1,baseTextHash:await textHash(text),currentText:text};
 const env={OPENAI_API_KEY:'test',AI_AUTHOR_ACCESS_TOKEN:'test-access'};
 const request=(body,token='test-access')=>new Request('https://example.invalid/stage5-document',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body)});
-const saved=globalThis.fetch;let calls=0;globalThis.fetch=async(_url,options)=>{calls++;const p=JSON.parse(options.body);assert.deepEqual(JSON.parse(p.input[1].content),{text});return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({text:edited,notes:[]})}]}]}));};
+const saved=globalThis.fetch;let calls=0;globalThis.fetch=async(_url,options)=>{calls++;const p=JSON.parse(options.body);assert(p.input[0].content.includes('предоставени указания на МОСВ от 2022 г.'));assert.deepEqual(JSON.parse(p.input[1].content),{text});return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({text:edited,notes:[]})}]}]}));};
 try{
  assert.equal((await worker.fetch(request(body,'wrong'),env)).status,401);
  assert.equal((await worker.fetch(request(body),env)).status,422);assert.equal(calls,0,'Unsigned approval cannot use optional editor');

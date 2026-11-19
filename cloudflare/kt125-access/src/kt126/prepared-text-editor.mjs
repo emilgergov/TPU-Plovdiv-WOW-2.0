@@ -19,6 +19,7 @@ export function installPreparedTextEditor(api){
  function refresh(){
   const s=api.state(),v=s.versions.at(-1),key=s.source?String(s.source.caseId)+'|'+s.source.version:'';
   if(key!==contextKey){contextKey=key;previous=null;edited=null;history.hidden=true;before.textContent='';changes.replaceChildren();notes.replaceChildren();}
+  if(v?.kind==='предложение на Интелигентния редактор'&&!previous&&s.versions.length>1){previous=s.versions.at(-2).text;edited=v.text;before.textContent=previous;differences(previous,edited);notes.replaceChildren(...(v.editorialNotes||[]).filter(x=>typeof x==='string').map(x=>make('p',x)));history.hidden=false;}
   smart.hidden=!v;smart.disabled=s.busy||!!s.confirmed||!textarea.hidden;
   edit.disabled=s.busy;confirm.disabled=s.busy;generate.disabled=s.busy;sourceCheck.disabled=s.busy;restore.disabled=s.busy||!previous||v?.text!==edited;
   word.disabled=s.busy||!(s.confirmed&&window.KT119TemplateReady?.());
@@ -43,7 +44,7 @@ export function installPreparedTextEditor(api){
    if(!live||live.caseId!==approval.caseId||live.version!==approval.version||live.text!==stage4Text||now.source!==approval||now.versions.at(-1)!==v)return;
    if(!response.ok){note.textContent=data.error==='EDITOR_PROTECTED_CONTENT'?'Редакцията не е приложена: засегнато е защитено съдържание. Предишният текст е запазен. '+(data.findings||[]).join(' '):'Интелигентната редакция не е получена (код '+response.status+'). Предишният текст е запазен.';return;}
    if(data.caseId!==approval.caseId||data.requestId!==requestId||data.evidenceRevision!==approval.evidenceRevision||data.stage4Version!==approval.version||data.documentVersion!==baseVersion||data.baseTextHash!==baseTextHash||data.editorialOnly!==true||data.expertReviewRequired!==true||typeof data.text!=='string'||data.text.length<120){note.textContent='Редакцията не съответства на текущата версия. Не е приложена.';return;}
-   previous=original;edited=data.text;api.apply(data.text,'предложение на Интелигентния редактор');
+   previous=original;edited=data.text;api.apply(data.text,'предложение на Интелигентния редактор',{editorialNotes:(data.notes||[]).filter(x=>typeof x==='string').slice(0,8)});
    before.textContent=original;differences(original,data.text);notes.replaceChildren(...(data.notes||[]).filter(x=>typeof x==='string').map(x=>make('p',x)));history.hidden=false;
    note.textContent=data.text===original?'ЕГ редакторът не предлага стилови промени. Прегледайте бележките и потвърдете текста.':'Интелигентната редакция е приложена като нова непотвърдена версия. Прегледайте промените и бележките; можете да редактирате експертно или да върнете предишния вариант.';
    document.dispatchEvent(new CustomEvent('kt123:stage5-draft',{detail:{caseId:approval.caseId,stage4Version:approval.version}}));
@@ -63,7 +64,7 @@ export function overlayPreparedTextEditor(rel,source){
  once("busy=false;generate.disabled=false;sourceCheck.disabled=false}","busy=false;generate.disabled=false;sourceCheck.disabled=false;styleEditor.refresh()}");
  once(" window.KT117Document=Object.freeze({",` const styleEditor=installPreparedTextEditor({make,reviewActions,preview,textarea,edit,confirm,generate,sourceCheck,word,note,endpoint,
   state:()=>({source,versions,confirmed,busy}),sync,live,evidence:()=>collectStageEvidence(window),label:documentLabel,reference:incomingReference,
-  busy:value=>{busy=value},apply:(text,kind)=>{versions.push({version:versions.length+1,text,kind});confirmed=null;decisionStatus.hidden=true;render();}});
+  busy:value=>{busy=value},apply:(text,kind,metadata={})=>{versions.push({version:versions.length+1,text,kind,...metadata});confirmed=null;decisionStatus.hidden=true;render();}});
  window.KT117Document=Object.freeze({`);
  once(' sync();\n}', ' sync();styleEditor.refresh();\n}');
  source=source.replaceAll('Изберете „Редактирай текста“','Изберете „Експертна редакция“');
