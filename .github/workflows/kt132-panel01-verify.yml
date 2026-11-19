@@ -64,6 +64,13 @@ jobs:
           authorSource=patchOnce(authorSource,"if(issues.length)return expertPreview(\"Проектът изисква експертен преглед на нормативните несъответствия.\",issues,\"author_repair\",draft,{authorRepairs});","if(issues.length&&!issues.includes(\"PANEL_01_DOES_NOT_ADDRESS_CURRENT_REVIEW_REQUEST\"))return expertPreview(\"Проектът изисква експертен преглед на нормативните несъответствия.\",issues,\"author_repair\",draft,{authorRepairs});");
           authorSource=patchOnce(authorSource,"error:reason,caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,","error:codes.includes(\"PANEL_01_DOES_NOT_ADDRESS_CURRENT_REVIEW_REQUEST\")?\"Проектът предлага ново първоначално писмо вместо произнасяне по текущото искане за преразглеждане.\":reason,caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,");
           authorSource=patchOnce(authorSource,'unverifiedDraft:typeof proposal==="string"?','unverifiedDraft:!codes.includes("PANEL_01_DOES_NOT_ADDRESS_CURRENT_REVIEW_REQUEST")&&typeof proposal==="string"?');
+          authorSource=patchOnce(authorSource,"sourceTexts:sourceTexts.slice(0,12).map(x=>({source:x.source,text:x.text.slice(0,2500),truncated:x.truncated||x.text.length>2500})),","sourceTexts, sourceTextCoverage,");
+          authorSource=patchOnce(authorSource,"caseDocumentExcerpts:sourceTexts.slice(0,20).map(x=>({source:x.source,text:x.text.slice(0,2500),truncated:x.truncated||x.text.length>2500})),","sourceTexts, sourceTextCoverage,");
+          assert.equal(authorSource.split("caseDocumentRecords:documentRecords.slice(0,20),gisEvidence:detail.gis||null,").length,3);
+          authorSource=authorSource.replaceAll("caseDocumentRecords:documentRecords.slice(0,20),gisEvidence:detail.gis||null,","caseDocumentRecords:documentRecords,gisEvidence:detail.gis||null,");
+          authorSource=patchOnce(authorSource," const documentRecords="," const sourceTextCoverage={available:Number(detail.sourceTextCount)||0, included:sourceTexts.length, incomplete:detail.sourceTextTruncated===true||sourceTexts.length!==(Number(detail.sourceTextCount)||0)||sourceTexts.some(d=>d.truncated||d.totalChars>d.text.length)};\n const documentRecords=");
+          authorSource=patchOnce(authorSource,"sourceTextTruncated:detail.sourceTextTruncated===true,","sourceTextTruncated:sourceTextCoverage.incomplete,");
+          authorSource=patchOnce(authorSource,"   sourceTexts,sourceTextCount:","   sourceTexts,sourceTextCoverage,sourceTextCount:");
           writeFileSync(authorWorker,authorSource);
           const worker=root+'src/local-auth/worker.mjs';
           let code=readFileSync(worker,'utf8');
