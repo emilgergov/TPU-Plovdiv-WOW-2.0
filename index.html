@@ -69,6 +69,15 @@
 #kt130PublicEntry.kt130-tree-entry{top:clamp(120px,24vh,195px)}
 #classicPanel .doclinks .kt130-previous{background:transparent;font-weight:500}
 @media(max-width:700px){#kt130PublicEntry{top:52px;right:12px;padding:10px 13px;font-size:15px;max-width:calc(100vw - 24px)}#kt130PublicEntry small{font-size:12px}#kt130PublicEntry.kt130-tree-entry{top:clamp(120px,24vh,195px)}}
+
+/* KT130 cosmetic harmonization is scoped to the opening presentation only. */
+#intro .bottom{left:50%;right:auto;bottom:18px;transform:translateX(-50%);width:min(1100px,calc(100% - 44px));padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:stretch}
+#intro .bottom button,#intro .bottom .classic-link,#kt130PublicEntry{font-family:Verdana,Arial,sans-serif;font-size:15px;font-weight:700;border:1px solid #d5b46d;border-radius:12px;background:#dfc17b;color:#0c3326;box-shadow:0 3px 12px #0005;text-decoration:none}
+#intro .bottom button,#intro .bottom .classic-link{display:flex;align-items:center;justify-content:center;min-width:0;min-height:48px;padding:11px 14px;line-height:1.3;white-space:normal;text-align:center}
+#intro .bottom button:hover,#intro .bottom .classic-link:hover,#kt130PublicEntry:hover{background:#ecd397;border-color:#f6df9f;color:#08291e}
+#intro .bottom button:focus-visible,#intro .bottom .classic-link:focus-visible,#kt130PublicEntry:focus-visible{outline:3px solid #fff0bc;outline-offset:3px}
+#kt130PublicEntry small{color:#254936;font-family:Verdana,Arial,sans-serif;font-size:12px}
+@media(max-width:700px){#intro .bottom{bottom:14px;width:calc(100% - 24px);grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#intro .bottom button,#intro .bottom .classic-link{min-height:44px;font-size:14px;padding:9px 10px}#kt130PublicEntry{font-size:14px}}
 </style></head><body>
 <a id="kt130PublicEntry" href="https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/auth/login" target="_blank" rel="noopener" title="Потребителски вход към Експертния модул V27.36"><span>Ново · Експертен модул</span><small>V27.36 · Стабилна тестова версия</small></a>
 <iframe id="app" title="Интерактивна работна основа на ТПУ Пловдив" ></iframe>
@@ -249,9 +258,15 @@ if(location.hash==='#media')openMediaHub();else if(location.hash==='#video')open
   const media=document.getElementById('wowMediaHub');
   entry.hidden=(!inIntro&&!inTree)||!classic.hidden||!video.hidden||!!(media&&!media.hidden);
   entry.classList.toggle('kt130-tree-entry',!inIntro&&inTree);
+  entry.style.top='';
+  if(!inIntro&&inTree&&!entry.hidden){
+   const map=tree.querySelector('[data-route="map"]'),r=entry.getBoundingClientRect(),m=map?.getBoundingClientRect();
+   if(m&&r.x<m.right&&r.right>m.x&&r.y<m.bottom&&r.bottom>m.y)entry.style.top=Math.round(m.bottom+12)+'px';
+  }
  }
  for(const node of [intro,tree,classic,video])new MutationObserver(refresh).observe(node,{attributes:true,attributeFilter:['class','hidden']});
  const media=document.getElementById('wowMediaHub');if(media)new MutationObserver(refresh).observe(media,{attributes:true,attributeFilter:['hidden','style']});
+ window.addEventListener('resize',refresh);tree.querySelector('img')?.addEventListener('load',refresh);
  refresh();
 })();
 </script></body></html>

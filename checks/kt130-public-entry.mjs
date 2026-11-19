@@ -23,6 +23,10 @@ try{
   assert.equal(await entry.evaluate(x=>x.parentElement.tagName),'BODY','Entry must be outside timed intro');
   await page.locator('#frame').evaluate(img=>img.complete?Promise.resolve():new Promise(r=>{img.onload=r;img.onerror=r}));
   await page.screenshot({path:'kt130-public-qa/'+label+'-intro.png'});
+  const buttons=page.locator('#intro .bottom button,#intro .bottom .classic-link'),boxes=await buttons.evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect(),c=getComputedStyle(n);return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,height:r.height,color:c.color,background:c.backgroundColor}}));
+  for(const r of boxes)assert(r.x>=0&&r.right<=width&&r.bottom<=height);
+  assert.equal(new Set(boxes.map(r=>r.background)).size,1);assert.equal(new Set(boxes.map(r=>r.height)).size,1);
+  for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){const a=boxes[i],b=boxes[j];assert(!(a.x<b.right&&a.right>b.x&&a.y<b.bottom&&a.bottom>b.y),'Opening buttons must not overlap');}
   const counter=await page.locator('#counter').textContent();
   await page.clock.fastForward(4300);assert.notEqual(await page.locator('#counter').textContent(),counter);
   assert(await entry.isVisible(),'Automatic slide change must not hide entry');
