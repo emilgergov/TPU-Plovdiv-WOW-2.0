@@ -31,7 +31,7 @@ try{
   await page.clock.fastForward(4300);assert.notEqual(await page.locator('#counter').textContent(),counter);
   assert(await entry.isVisible(),'Automatic slide change must not hide entry');
   const popupPromise=page.waitForEvent('popup');
-  await entry.click();const popup=await popupPromise;await popup.waitForLoadState('domcontentloaded');
+  await entry.click();const popup=await popupPromise;await popup.waitForURL(url=>url.origin===new URL(login).origin,{timeout:30000});await popup.waitForLoadState('domcontentloaded');
   assert.equal(new URL(popup.url()).origin,'https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev');await popup.close();
   for(let i=0;i<11;i++)await page.clock.fastForward(4300);
   assert(await page.locator('#tree').isVisible());assert(await entry.isVisible(),'Entry must survive automatic transition to tree');
