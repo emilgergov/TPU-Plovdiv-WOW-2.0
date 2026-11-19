@@ -77,6 +77,6 @@ const normalizedStage5Tail=stage5Tail(stage5After)
  .replace(editorInstallation,'')
  .replace('footer.hidden=true;styleEditor.refresh();','footer.hidden=true;')
  .replace('Изберете „Експертна редакция“','Изберете „Редактирай текста“')
- .replace(' sync();styleEditor.refresh();\\n}', ' sync();\\n}');
+ .replace(' sync();styleEditor.refresh();', ' sync();');
 assert.equal(normalizedStage5Tail,stage5Tail(stage5Before),'Expert editing/confirmation/export unchanged apart from reviewed editor busy refresh and renamed label');
 console.log('PASS KT130 Stage5: display meanings and current-case source handoff; expert editing/confirmation/export unchanged');
