@@ -1,3 +1,5 @@
+import {readFileSync} from 'node:fs';
+import {overlayModule} from '../cloudflare/kt125-access/src/kt126/gateway.mjs';
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {mkdir,writeFile} from 'node:fs/promises';
@@ -36,5 +38,40 @@ try{
   const restore=[...document.querySelectorAll('button')].find(n=>n.textContent==='Върни предишния вариант');restore.click();check(state.versions.at(-1).text===original&&state.confirmed===null,'Undo retains expert confirmation requirement');
   check(started===finished&&!state.busy,'No stuck indicator');return {started,finished,versions:state.versions.length};
  });
- assert.deepEqual(errors,[]);await mkdir('kt131-browser-qa',{recursive:true});await page.screenshot({path:'kt131-browser-qa/editor.png',fullPage:true});await writeFile('kt131-browser-qa/result.json',JSON.stringify(result,null,2));console.log('PASS browser synthetic editor: quota feedback, control release, whitespace no-op, partial word differences and undo.');
+ await page.goto('http://127.0.0.1:'+server.address().port);
+ await page.evaluate(()=>{
+  document.querySelector('main').id='kt116Stage5';
+  window.__restoreApproval={caseId:'synthetic-browser-restore',version:3,evidenceRevision:1,text:'ИЗБРАН ПАНЕЛ: 01 — Контролен документ',expert:'Контролен експерт'};
+  window.__restoreEvidence={caseId:'synthetic-browser-restore',parcelIds:[]};
+  window.KT80WorkflowState={subjectConfirmed:{text:'Контролен предмет',scope:'Контролен обхват'}};
+  window.KT116ExpertHandoff={snapshot:()=>window.__restoreApproval};
+  window.KT126Registry={confirmedExternal:()=>''};window.KT119TemplateReady=()=>true;
+ });
+ const restoreRel='vt03/kt80/integration/kt117-stage5-document-author.mjs';
+ const originalModule=readFileSync(new URL('../'+restoreRel,import.meta.url),'utf8');
+ let restoreModule=overlayModule(restoreRel,originalModule);
+ const evidenceImport="import {collectStageEvidence} from './kt95-stage-evidence-handoff.mjs';";
+ assert.equal(restoreModule.split(evidenceImport).length,2);
+ restoreModule=restoreModule.replace(evidenceImport,'const collectStageEvidence=()=>window.__restoreEvidence;');
+ await page.addScriptTag({type:'module',content:restoreModule});
+ await page.waitForFunction(()=>typeof window.KT117Document?.restoreCheckpoint==='function');
+ const restored=await page.evaluate(()=>{
+  const text='Относно: „Контролен обект“.\n\n'+ 'Контролен вече подготвен административен текст. '.repeat(5);
+  const versions=Array.from({length:5},(_,i)=>({version:i+1,text:text+' Версия '+(i+1)}));
+  const archived={source:window.__restoreApproval,versions,confirmed:{caseId:window.__restoreApproval.caseId,stage4Version:3,version:5,text:versions[4].text},editorialIssues:[],external:''};
+  const check=(v,m)=>{if(!v)throw Error(m)};
+  check(window.KT117Document.restoreCheckpoint(archived),'Composed module must accept matching archive');
+  check(document.querySelector('.kt117-paper').textContent===versions[4].text,'Saved fifth text must be visible');
+  check(window.KT117Document.snapshot()?.version===5,'Expert-confirmed fifth document restored');
+  check(!document.querySelector('#kt119WordCreate').disabled,'Restored confirmation enables Word when template is ready');
+  const edit=[...document.querySelectorAll('button')].find(b=>b.textContent==='Експертна редакция');edit.click();
+  [...document.querySelectorAll('button')].find(b=>b.textContent==='Запази редакцията').click();
+  check(window.KT117Document.checkpoint().versions.length===6,'Expert can create a fresh draft without rerunning stages');
+  check(window.KT117Document.snapshot()===null,'Fresh draft requires confirmation');
+  check(!document.querySelector('#kt130IntelligentEditor').disabled,'Intelligent editor usable on restored draft');
+  check(!window.KT117Document.restoreCheckpoint({...archived,source:{...archived.source,caseId:'foreign'}}),'Cross-case archive rejected');
+  return {visibleSavedVersion:5,newDraftVersion:6};
+ });
+ console.log('PASS actual composed Stage5 in Chrome: saved text/confirmation/Word restored, expert draft enables editor, foreign archive rejected.');
+ assert.deepEqual(errors,[]);await mkdir('kt131-browser-qa',{recursive:true});await page.screenshot({path:'kt131-browser-qa/editor.png',fullPage:true});await writeFile('kt131-browser-qa/result.json',JSON.stringify({editor:result,restoration:restored},null,2));console.log('PASS browser synthetic editor: quota feedback, control release, whitespace no-op, partial word differences and undo.');
 }finally{await browser?.close();await new Promise(r=>server.close(r))}
