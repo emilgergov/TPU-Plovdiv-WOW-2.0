@@ -44,6 +44,23 @@ function candidates(intake){
   if(['activity','subject','title','project_name','investment_proposal'].includes(fact?.key))add(fact.value,doc.file||fact.source,'dossier_fact');
  return out;
 }
+function reviewRequestSource(intake){
+ const files=(intake?.files||[]).filter(file=>!file.expertIgnored&&!file.ignored&&/текстът е прочетен/iu.test(file.status||''));
+ const documents=(intake?.document_texts||[]).map(doc=>({file:clean(doc.source),text:String(doc.text||'')}));
+ const kind=/^(?:иск(?:ане|ам|аме)\s+за\s+преразглеждане|възражение(?:\s+срещу)?|жалба(?:\s+срещу)?)(?=\s|[:.,]|$)/iu;
+ const matches=files.flatMap(file=>{
+  const name=clean(file.filename);
+  const first=clean(documents.find(doc=>doc.file===name)?.text?.slice(0,3000));
+  if(!first)return [];
+  const header=first.match(/(?:^|\s)(?:относно\s*[:–-]\s*)?(иск(?:ане|ам|аме)\s+за\s+преразглеждане|възражение\s+срещу|жалба\s+срещу)(?=\s|[:.,]|$)/iu);
+  const filename=name.split(/[\\/]/u).at(-1).replace(/\.[^.]+$/u,'');
+  if(!header&&!kind.test(filename))return [];
+  if(!/преразглежд|оспорв|възразяв|обжалв/iu.test(first)||!/писм/iu.test(first))return [];
+  const label=header?.[1]||filename;
+  return [{file:name,kind:/жалба/iu.test(label)?'Жалба срещу':/възражение/iu.test(label)?'Възражение срещу':'Искане за преразглеждане на'}];
+ });
+ return matches.length===1?matches[0]:null;
+}
 function propose(intake){
  const options=candidates(intake);
  // Prefer the actual title/subject read from a notification; never synthesize missing engineering details.
@@ -52,6 +69,12 @@ function propose(intake){
     +(x.kind==='subject_heading'?4:x.kind==='dossier_fact'?3:0)
     +(x.text.length>=30&&x.text.length<=250?2:0);
  const ordered=[...options].sort((a,b)=>score(b)-score(a));
+ const lead=reviewRequestSource(intake);
+ if(lead){
+  const context=ordered.find(option=>option.source!==lead.file&&option.sourceReadStatus==='TEXT_EXTRACTED')?.text;
+  ordered.unshift({text:lead.kind+' писмо'+(context?' относно ИП „'+context+'“':''),source:lead.file,
+   kind:'procedural_request',sourceReadStatus:'TEXT_EXTRACTED',requiresExpertReview:true});
+ }
  const best=ordered[0]||null;
  return Object.freeze({schema:'KT80-IP-SUBJECT-V32',status:best?'EXTRACTED_CANDIDATE_REQUIRES_EXPERT':'NO_RELIABLE_SOURCE',text:best?.text||'',source:best?.source||null,
   candidates:ordered.slice(0,12),sourceType:best?.kind||null,sourceReadStatus:best?.sourceReadStatus||'NOT_READ',expertConfirmed:false,
