@@ -71,5 +71,12 @@ assert(stage5After.includes("original.querySelector('pre').textContent=("+displa
 assert(stage5After.includes('completeCaseEvidence:stage5Evidence'));
 const stage5Tail=s=>s.slice(s.indexOf(' edit.onclick='));
 assert(stage5Tail(stage5Before).length>100);
-assert.equal(stage5Tail(stage5After),stage5Tail(stage5Before),'Expert editing/confirmation/export unchanged');
+const editorInstallation=" const styleEditor=installPreparedTextEditor({make,reviewActions,preview,textarea,edit,confirm,generate,sourceCheck,word,note,endpoint,\n  state:()=>({source,versions,confirmed,busy}),sync,live,evidence:()=>collectStageEvidence(window),label:documentLabel,reference:incomingReference,\n  busy:value=>{busy=value},apply:(text,kind,metadata={})=>{versions.push({version:versions.length+1,text,kind,...metadata});confirmed=null;decisionStatus.hidden=true;render();}});\n";
+assert.equal(stage5After.split(editorInstallation).length,2,'One optional editor installation');
+const normalizedStage5Tail=stage5Tail(stage5After)
+ .replace(editorInstallation,'')
+ .replace('footer.hidden=true;styleEditor.refresh();','footer.hidden=true;')
+ .replace('Изберете „Експертна редакция“','Изберете „Редактирай текста“')
+ .replace(' sync();styleEditor.refresh();\\n}', ' sync();\\n}');
+assert.equal(normalizedStage5Tail,stage5Tail(stage5Before),'Expert editing/confirmation/export unchanged apart from reviewed editor busy refresh and renamed label');
 console.log('PASS KT130 Stage5: display meanings and current-case source handoff; expert editing/confirmation/export unchanged');
