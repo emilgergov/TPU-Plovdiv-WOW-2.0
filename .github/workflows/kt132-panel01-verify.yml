@@ -49,6 +49,14 @@ jobs:
           assert.match(pinned,/^[a-f0-9]{40}$/);
           code=code.replace(old,"'https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/'+(['vt03/kt80/integration/kt116-expert-approval-handoff.mjs','vt03/kt80/integration/kt117-stage5-document-author.mjs'].includes(rel)?'"+pinned+"':'2652e375cf90f03570a77158335ef364d4a48a5f')+'/'+rel");
           writeFileSync(worker,code);
+          const gateway=root+'src/kt126/gateway.mjs';
+          code=readFileSync(gateway,'utf8');
+          const anchor='  source=replaceOnce(source,"link.href=url;link.download=';
+          const index=code.indexOf(anchor);
+          assert.ok(index>0);
+          const success="   }catch(e){status.textContent='Неуспешно генериране:";
+          code=code.slice(0,index)+"  source=replaceOnce(source,"+JSON.stringify(success)+","+JSON.stringify("     return true;\n"+success)+");\n"+code.slice(index);
+          writeFileSync(gateway,code);
           for(const f of ['preview/author-entry.mjs','preview/native-entry.mjs','preview/router-entry.mjs']){
             const name=root+f;
             writeFileSync(name,readFileSync(name,'utf8').replaceAll('kt131-tpu-plovdiv-kt125-local-auth','kt132-tpu-plovdiv-kt125-local-auth').replaceAll('КТ131 · ТЕСТОВА ВЕРСИЯ','КТ132 · ТЕСТОВА ВЕРСИЯ'));
