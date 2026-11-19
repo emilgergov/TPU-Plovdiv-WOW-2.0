@@ -1,5 +1,5 @@
-import candidate from '../src/local-auth/service.mjs';
-export {LocalAuthService,PasswordKdf} from '../src/local-auth/service.mjs';
+// Preview binds the already-deployed password service; it declares no new DO.
+import candidate from '../src/local-auth/worker.mjs';
 const origin='https://kt131-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev';
 export default {async fetch(request,env,ctx){
  if(new URL(request.url).origin!==origin)return new Response('Недостъпен тестов адрес.',{status:404});

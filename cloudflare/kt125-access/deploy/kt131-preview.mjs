@@ -23,10 +23,11 @@ async function upload(name,settings,file,overrides=[],alias){
  const replaced=new Set(overrides.map(b=>b.name));
  const metadata={main_module:'worker.mjs',compatibility_date:settings.compatibility_date,compatibility_flags:settings.compatibility_flags||[],bindings:[...settings.bindings.filter(b=>!replaced.has(b.name)).map(b=>({name:b.name,type:'inherit'})),...overrides],annotations:{'workers/message':'KT131 isolated editor test; production stable version remains at 100%','workers/commit_sha':process.env.GITHUB_SHA||'',...(alias?{'workers/alias':alias}:{})}};
  const form=new FormData();form.set('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));form.set('worker.mjs',new Blob([readFileSync(file)],{type:'application/javascript+module'}),'worker.mjs');
- const version=await api(path(name)+'/versions?bindings_inherit=strict',{method:'POST',body:form});if(!/^[0-9a-f-]{36}$/.test(version.id||''))throw Error('Missing uploaded version ID');console.log('UPLOADED_PREVIEW_VERSION',JSON.stringify({service:name,id:version.id,alias:alias||null,hasPreview:version.resources?.script?.hasPreview}));return version.id;
+ const version=await api(path(name)+'/versions?bindings_inherit=strict',{method:'POST',body:form});if(!/^[0-9a-f-]{36}$/.test(version.id||''))throw Error('Missing uploaded version ID');console.log('UPLOADED_PREVIEW_VERSION',JSON.stringify({service:name,id:version.id,alias:alias||null,hasPreview:version.metadata?.has_preview??version.resources?.script?.hasPreview}));return version.id;
 }
 const authorVersion=await upload(author,authorSettings,'dist/kt131-author-preview.mjs');
 const nativeVersion=await upload(native,nativeSettings,'dist/kt131-native-preview.mjs',[
+ {...nativeSettings.bindings.find(b=>b.name==='KT125_PASSWORDS'),script_name:native},
  {name:'KT125_LOCAL_ORIGIN',type:'plain_text',text:origin},
  {name:'KT131_AUTHOR_VERSION',type:'plain_text',text:authorVersion}
 ],'kt131');
