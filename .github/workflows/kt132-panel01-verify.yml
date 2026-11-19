@@ -47,7 +47,7 @@ jobs:
           assert.ok(code.includes(old));
           const pinned=process.env.GITHUB_SHA;
           assert.match(pinned,/^[a-f0-9]{40}$/);
-          code=code.replace(old,"'https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/'+(['vt03/kt80/integration/kt116-expert-approval-handoff.mjs','vt03/kt80/integration/kt117-stage5-document-author.mjs'].includes(rel)?'"+pinned+"':'2652e375cf90f03570a77158335ef364d4a48a5f')+'/'+rel");
+          code=code.replace(old,"'https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/'+(['vt03/kt80/integration/kt116-expert-approval-handoff.mjs','vt03/kt80/integration/kt117-stage5-document-author.mjs','vt03/kt80/KT80_E01_KT53_SUBJECT_SCOPE_CONSTRUCTOR_V54.js'].includes(rel)?'"+pinned+"':'2652e375cf90f03570a77158335ef364d4a48a5f')+'/'+rel");
           writeFileSync(worker,code);
           const gateway=root+'src/kt126/gateway.mjs';
           code=readFileSync(gateway,'utf8');
