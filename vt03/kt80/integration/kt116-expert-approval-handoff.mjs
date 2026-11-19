@@ -257,7 +257,7 @@ if(host&&five){
    }
    history.push({version:history.length+1,text:data.draft,kind:'експертно потвърдена процедура',createdAt:new Date().toISOString()});
    approved=Object.freeze({caseId:proposal.caseId,requestId,evidenceRevision:proposal.revision,
-    version:history.at(-1).version,text:data.draft,original:proposal.original,warnings:[...proposal.warnings],
+    version:history.at(-1).version,panelId:chosen,text:data.draft,original:proposal.original,warnings:[...proposal.warnings],
     qualificationRecord:proposal.qualificationRecord,qualificationProof:proposal.qualificationProof,
     qualificationGate:proposal.qualificationGate,expertDecision:data.expertDecision,
     expertDecisionProof:data.expertDecisionProof,
