@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {editPreparedDocument,editorGuard,textHash,editableParagraphs} from '../../ai-author-v27/src/kt130-intelligent-editor.mjs';
+import {editPreparedDocument,editorGuard,textHash,editableParagraphs,editorParagraphPayload} from '../../ai-author-v27/src/kt130-intelligent-editor.mjs';
 import {installPreparedTextEditor} from '../src/kt126/prepared-text-editor.mjs';
 const original='Относно: „Контролна сграда“ в ПИ 12345.1.2.\n\nВъв връзка с постъпилата документация Ви уведомявам следното:\n\nНяма данни за опасни вещества.\n\nНа основание чл. 2, ал. 2 следва да се издаде писмо с констатация, че не се налага провеждане на процедура по оценка за съвместимост.';
 const revised=original.replace('следва да се издаде писмо с констатация, че','Ви уведомявам, че');
@@ -9,7 +9,7 @@ assert(editorGuard(original,revised.replace('Няма данни за опасн
 assert(editorGuard(original,revised.replace('не се налага','налага се')).length);
 const input={caseId:'editor-case',requestId:'editor-request',evidenceRevision:3,stage4Version:2,documentVersion:1,currentText:original,baseTextHash:await textHash(original)};
 let calls=0;
-const provider=async(url,options)=>{calls++;const p=JSON.parse(options.body);assert.equal(p.store,false);assert.deepEqual(JSON.parse(p.input[1].content),{paragraphs:editableParagraphs(original)});assert(!p.input[1].content.includes('Относно:'));return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({edits:editableParagraphs(original).map(p=>({id:p.id,text:p.text.replace('следва да се издаде писмо с констатация, че','Ви уведомявам, че')})),notes:['Спорен извод остава за експертен преглед.']})}]}]}));};
+const provider=async(url,options)=>{calls++;const p=JSON.parse(options.body);assert.equal(p.store,false);assert.deepEqual(JSON.parse(p.input[1].content),{paragraphs:editorParagraphPayload(original)});assert(!p.input[1].content.includes('Относно:'));return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({edits:editorParagraphPayload(original).map(p=>({id:p.id,text:p.text.replace('следва да се издаде писмо с констатация, че','Ви уведомявам, че')})),notes:['Спорен извод остава за експертен преглед.']})}]}]}));};
 const response=await editPreparedDocument(input,{OPENAI_API_KEY:'fake'},provider);assert.equal(response.status,200);assert.equal(calls,1);assert.equal(response.body.baseTextHash,input.baseTextHash);
 assert.equal((await editPreparedDocument({...input,baseTextHash:'wrong'},{},provider)).status,400);assert.equal(calls,1);
 
@@ -17,6 +17,12 @@ const badProvider=async()=>new Response(JSON.stringify({output:[{content:[{type:
 assert.equal((await editPreparedDocument(input,{},badProvider)).status,422,'Model cannot address frozen subject');
 const short='Относно: „Обект“.\n\nВъв връзка с документацията Ви уведомявам следното:\n\n'+ 'Необходимо е ясно уведомяване. '.repeat(4);
 assert.equal(editableParagraphs(short)[0].id,4);
+const missingMarker=async()=>new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({edits:[{id:editableParagraphs(original)[0].id,text:'Предложен е различен процедурен извод.'}],notes:[]})}]}]}));
+const retainedResult=await editPreparedDocument(input,{},missingMarker);assert.equal(retainedResult.status,200);assert.equal(retainedResult.body.text,original);assert.match(retainedResult.body.notes[0],/запазен е оригиналът/);
+const mixedText=original+'\n\nКонстатациите обосновават необходимостта от издаване на писмо.';
+const mixedProvider=async()=>new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({edits:[{id:6,text:'Променен извод.'},{id:8,text:'С настоящото писмо Ви уведомявам за изложените констатации.'}],notes:[]})}]}]}));
+const mixed=await editPreparedDocument({...input,currentText:mixedText,baseTextHash:await textHash(mixedText)}, {},mixedProvider);
+assert.equal(mixed.status,200);assert(mixed.body.text.includes('следва да се издаде писмо с констатация, че не се налага'));assert(mixed.body.text.includes('С настоящото писмо Ви уведомявам'));assert(mixed.body.notes.length);
 class E{constructor(tag,text){this.tag=tag;this.textContent=text||'';this.children=[];this.style={};this.hidden=false;this.disabled=false;this.classList={add(){}};}append(...n){this.children.push(...n)}prepend(...n){this.children.unshift(...n)}after(n){this.afterNode=n}replaceChildren(...n){this.children=n} }
 globalThis.document={createTextNode:t=>new E('text',t),head:new E('head'),addEventListener(){},dispatchEvent(){}};globalThis.CustomEvent=class{constructor(t,o){this.type=t;this.detail=o?.detail}};
 const names=['reviewActions','preview','textarea','edit','confirm','generate','sourceCheck','word','note'];const nodes=Object.fromEntries(names.map(x=>[x,new E(x)]));nodes.textarea.hidden=true;nodes.reviewActions.append(nodes.edit,nodes.confirm);
