@@ -15,7 +15,7 @@ const versions={};versions[author]=await upload(author,'dist/kt131-public-author
 const publish=(n,entries)=>api(path(n)+'/deployments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({strategy:'percentage',versions:entries})});
 const changed=[];
 try{
- for(const n of [author,native]){if(active(await deployment(n))!==active(before[n].deployment))throw Error('Production changed concurrently');await publish(n,[{version_id:versions[n],percentage:100},...before[n].deployment.versions.filter(v=>v.version_id!==versions[n]).map(v=>({version_id:v.version_id,percentage:0}))]);changed.push(n);}
+ for(const n of [author,native]){if(active(await deployment(n))!==active(before[n].deployment))throw Error('Production changed concurrently');await publish(n,[{version_id:versions[n],percentage:100},{version_id:(before[n].deployment.versions.find(v=>v.percentage===0)||before[n].deployment.versions[0]).version_id,percentage:0}]);changed.push(n);}
  let ready=false;
  for(let i=0;i<16;i++){const r=await fetch(origin+'/auth/login',{signal:AbortSignal.timeout(15000)});if(r.status===200&&r.headers.get('X-WOW-Release')===release){ready=true;break;}await new Promise(r=>setTimeout(r,2000));}if(!ready)throw Error('Public release did not become ready');
  for(const route of ['/auth/login','/auth/register','/auth/admin','/auth/forgot']){const r=await fetch(origin+route);const text=await r.text();if(r.status!==200||r.headers.get('X-WOW-Release')!==release||!text.includes('data-layout="local100"')||text.includes('КТ131 · ТЕСТОВА ВЕРСИЯ'))throw Error('Public login verification failed');}
