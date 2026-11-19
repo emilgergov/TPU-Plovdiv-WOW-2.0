@@ -10,7 +10,7 @@ const old='v26-test/v27-preview/KT79_25_V27_35_STABLE_WORKING_BLOCK06.html';
 assert(html.includes(login));assert(html.includes(old));
 for(const script of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gu))new vm.Script(script[1]);
 mkdirSync('kt130-public-qa',{recursive:true});
-const browser=await chromium.launch({headless:true});
+const browser=await chromium.launch({headless:true,...(process.env.KT130_BROWSER_EXECUTABLE?{executablePath:process.env.KT130_BROWSER_EXECUTABLE}:{})});
 try{
  for(const [label,width,height] of [['desktop',1920,1080],['mobile',390,844]]){
   const context=await browser.newContext({viewport:{width,height}}),page=await context.newPage(),errors=[];

@@ -21,7 +21,11 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/kt130-browser"
           npm install --prefix "$RUNNER_TEMP/kt130-browser" --no-save playwright@1.56.1
-          "$RUNNER_TEMP/kt130-browser/node_modules/.bin/playwright" install --with-deps chromium
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "KT130_BROWSER_EXECUTABLE=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          else
+            "$RUNNER_TEMP/kt130-browser/node_modules/.bin/playwright" install chromium
+          fi
       - name: Verify publication candidate in desktop and mobile Chrome
         env:
           KT130_BROWSER_PACKAGE: ${{ runner.temp }}/kt130-browser/node_modules/playwright
