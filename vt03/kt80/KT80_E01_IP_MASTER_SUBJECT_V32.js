@@ -57,20 +57,29 @@ function reviewRequestSource(intake){
  const files=(intake?.files||[]).filter(file=>!file.expertIgnored&&!file.ignored&&/текстът е прочетен/iu.test(file.status||''));
  const documents=(intake?.document_texts||[]).map(doc=>({file:clean(doc.source),text:String(doc.text||'')}));
  const kind=/^(?:иск(?:ане|ам|аме)\s+за\s+преразглеждане|възражение(?:\s+срещу)?|жалба(?:\s+срещу)?)(?=\s|[:.,]|$)/iu;
+ const basename=name=>fileKey(name).split('/').at(-1);
+ const isRegistered=name=>Boolean(confirmedFile)&&(fileKey(name)===fileKey(confirmedFile)||
+  (basename(name)===basename(confirmedFile)&&files.filter(file=>basename(file.filename)===basename(confirmedFile)).length===1));
  const matches=files.flatMap(file=>{
   const name=clean(file.filename);
   const first=clean(documents.find(doc=>fileKey(doc.file)===fileKey(name))?.text?.slice(0,12000)||
    (intake?.page_text_index||[]).filter(page=>fileKey(page.file||page.filename)===fileKey(name)).slice(0,3).map(page=>page.text||'').join(' '));
-  if(!first)return [];
+  const registered=isRegistered(name);
+  if(!first&&!registered)return [];
   const header=first.match(/(?:^|\s)(?:относно\s*[:–-]\s*)?(иск(?:ане|ам|аме)\s+за\s+преразглеждане|възражение\s+срещу|жалба\s+срещу)(?=\s|[:.,]|$)/iu);
   const filename=name.split(/[\\/]/u).at(-1).replace(/\.[^.]+$/u,'');
   if(!header&&!kind.test(filename))return [];
-  if(!/преразглежд|оспорв|възразяв|обжалв/iu.test(first)||!/писм/iu.test(first))return [];
+  const letter=/писм/iu.test(first);
+  if(!registered&&(!/преразглежд|оспорв|възразяв|обжалв/iu.test(first)||!letter))return [];
   const label=header?.[1]||filename;
-  return [{file:name,kind:/жалба/iu.test(label)?'Жалба срещу':/възражение/iu.test(label)?'Възражение срещу':'Искане за преразглеждане на'}];
+  return [{file:name,registered,letter,kind:/жалба/iu.test(label)?'Жалба срещу':/възражение/iu.test(label)?'Възражение срещу':'Искане за преразглеждане на'}];
  });
- const preferred=confirmedFile?matches.find(match=>fileKey(match.file)===fileKey(confirmedFile)):null;
+ const preferred=matches.find(match=>match.registered);
  return preferred||(matches.length===1?matches[0]:null);
+}
+function requestTitle(lead,context){
+ const action=lead.letter?lead.kind+' писмо':lead.kind.replace(/\s+(?:на|срещу)$/u,'');
+ return action+(context?' относно ИП „'+context+'“':'');
 }
 function propose(intake){
  const options=candidates(intake);
@@ -83,7 +92,7 @@ function propose(intake){
  const lead=reviewRequestSource(intake);
  if(lead){
   const context=ordered.find(option=>option.source!==lead.file&&option.sourceReadStatus==='TEXT_EXTRACTED')?.text;
-  ordered.unshift({text:lead.kind+' писмо'+(context?' относно ИП „'+context+'“':''),source:lead.file,
+  ordered.unshift({text:requestTitle(lead,context),source:lead.file,
    kind:'procedural_request',sourceReadStatus:'TEXT_EXTRACTED',requiresExpertReview:true});
  }
  const best=ordered[0]||null;
@@ -173,7 +182,7 @@ function init(){
  $('kt80ConstructSubject')?.addEventListener('click',constructed);
  $('kt80EditSubject')?.addEventListener('click',correction);
  document.addEventListener('kt80:case-reset',reset);
- root.KT80SubjectMaster=Object.freeze({propose,show,reviewRequestSource,construct:constructed,confirmedSubject,reset,getDraft:()=>draft,getAccepted:()=>accepted});
+ root.KT80SubjectMaster=Object.freeze({propose,show,reviewRequestSource,requestTitle,construct:constructed,confirmedSubject,reset,getDraft:()=>draft,getAccepted:()=>accepted});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })(window);
