@@ -1,0 +1,38 @@
+name: KT130 public V27.36 entry verification
+on:
+  push:
+    branches: [main, work/kt125-access-register-from-kt124-r6]
+    paths:
+      - index.html
+      - checks/kt130-public-entry.mjs
+      - .github/workflows/kt130-public-entry.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated browser verification
+        run: |
+          mkdir -p "$RUNNER_TEMP/kt130-browser"
+          npm install --prefix "$RUNNER_TEMP/kt130-browser" --no-save playwright@1.56.1
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "KT130_BROWSER_EXECUTABLE=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          else
+            "$RUNNER_TEMP/kt130-browser/node_modules/.bin/playwright" install chromium
+          fi
+      - name: Verify publication candidate in desktop and mobile Chrome
+        env:
+          KT130_BROWSER_PACKAGE: ${{ runner.temp }}/kt130-browser/node_modules/playwright
+        run: node checks/kt130-public-entry.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kt130-public-entry-visual-check
+          path: kt130-public-qa
+          retention-days: 7
