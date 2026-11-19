@@ -56,6 +56,7 @@ function reviewRequestSource(intake){
  const fileKey=name=>clean(name).replace(/\\/g,'/').normalize('NFC');
  const files=(intake?.files||[]).filter(file=>!file.expertIgnored&&!file.ignored&&/текстът е прочетен/iu.test(file.status||''));
  const documents=(intake?.document_texts||[]).map(doc=>({file:clean(doc.source),text:String(doc.text||'')}));
+ const normalizedRequest=text=>clean(text).replace(/преразг\s+леждане/giu,'преразглеждане');
  const kind=/^(?:иск(?:ане|ам|аме)\s+за\s+преразглеждане|възражение(?:\s+срещу)?|жалба(?:\s+срещу)?)(?=\s|[:.,]|$)/iu;
  const basename=name=>fileKey(name).split('/').at(-1);
  const isRegistered=name=>Boolean(confirmedFile)&&(fileKey(name)===fileKey(confirmedFile)||
@@ -66,8 +67,8 @@ function reviewRequestSource(intake){
    (intake?.page_text_index||[]).filter(page=>fileKey(page.file||page.filename)===fileKey(name)).slice(0,3).map(page=>page.text||'').join(' '));
   const registered=isRegistered(name);
   if(!first&&!registered)return [];
-  const header=first.match(/(?:^|\s)(?:относно\s*[:–-]\s*)?(иск(?:ане|ам|аме)\s+за\s+преразглеждане|възражение\s+срещу|жалба\s+срещу)(?=\s|[:.,]|$)/iu);
-  const filename=name.split(/[\\/]/u).at(-1).replace(/\.[^.]+$/u,'');
+  const header=normalizedRequest(first).match(/(?:^|\s)(?:относно\s*[:–-]\s*)?(иск(?:ане|ам|аме)\s+за\s+преразглеждане|възражение\s+срещу|жалба\s+срещу)(?=\s|[:.,]|$)/iu);
+  const filename=normalizedRequest(name.split(/[\\/]/u).at(-1).replace(/\.[^.]+$/u,''));
   if(!header&&!kind.test(filename))return [];
   const letter=/писм/iu.test(first);
   if(!registered&&(!/преразглежд|оспорв|възразяв|обжалв/iu.test(first)||!letter))return [];
