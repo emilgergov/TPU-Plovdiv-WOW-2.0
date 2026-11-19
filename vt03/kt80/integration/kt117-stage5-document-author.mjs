@@ -62,11 +62,15 @@ function initialize(){
  const stylesheet=make('style');
  stylesheet.textContent='#kt117Stage5{color:#f7f0df;font:14px/1.6 Verdana,Arial}#kt117Stage5 .kt117-context{padding:14px;background:#264e3b;border:1px solid #8a9b79;border-radius:8px;margin:12px 0}#kt117Stage5 .kt117-heading{font-weight:700;color:#f6d18a;margin:0 0 9px}#kt117Stage5 .kt117-main{font-size:18px;font-weight:700;color:#ffdfa2;margin:8px 0}#kt117Stage5 .kt117-reference{font-weight:700;color:#f6d18a;margin:6px 0 12px}#kt117Stage5 .kt117-paper{padding:16px;background:#284d3c;border-left:4px solid #d9bb7a;white-space:pre-wrap;line-height:1.7;margin:12px 0}#kt117Stage5 .kt117-actions{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}#kt117Stage5 .kt117-actions button{font:700 13px Verdana,Arial;background:#dab972;color:#163a29;border:none;border-radius:6px;padding:11px 14px;cursor:pointer}#kt117Stage5 .kt117-actions button[disabled]{opacity:.5;cursor:default}#kt117Stage5 [hidden]{display:none!important}#kt117Stage5 textarea[hidden]{display:none!important}#kt117Stage5 .kt117-actions button[hidden]{display:none!important}#kt117Stage5 textarea{width:100%;min-height:360px;box-sizing:border-box;font:13px/1.6 Verdana,Arial;background:#fffdf5;color:#142e22;padding:12px;border-radius:6px}#kt117Stage5 .kt117-note{font-size:12px;color:#f2d398;white-space:pre-wrap}#kt117Stage5 details{padding:10px;border:1px solid #68896e;border-radius:7px;margin:10px 0}#kt117Stage5 summary{color:#f5d18b;cursor:pointer}#kt117Stage5 .kt117-decision-status{padding:12px 14px;border:1px solid #d9bb7a;border-left:5px solid #d9bb7a;border-radius:6px;background:#254e3c;color:#fff0c8;font:700 13px/1.5 Verdana,Arial;margin:6px 0 12px}#kt117Stage5 .kt117-decision-status[data-error="true"]{background:#5b2424;color:#fff7e5;border-color:#e4a08f}';
  stylesheet.textContent+=`
- #kt117Stage5 .kt117-pilot-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
- #kt117Stage5 .kt117-pilot-columns>div{background:#163b2c;border:1px solid #68896e;padding:12px;border-radius:8px}
- #kt117Stage5 .kt117-pilot h4{margin:0;color:#f6d18a}
- #kt117Stage5 .kt117-pilot>h4{margin-top:16px}
- @media(max-width:650px){#kt117Stage5 .kt117-pilot-columns{grid-template-columns:1fr}}`;
+ #kt132AddressedPanel{color:#f7f0df;background:#123529;border:1px solid #bda168;border-radius:12px;padding:22px;width:min(960px,calc(100vw - 36px));box-sizing:border-box;max-height:88vh}
+ #kt132AddressedPanel::backdrop{background:#061811bd}
+ #kt132AddressedPanel h3{color:#f6d18a}
+ #kt132AddressedPanel button,#kt117PanelTransition button{font:700 13px Verdana,Arial;background:#dab972;color:#163a29;border:0;border-radius:6px;padding:11px 14px;cursor:pointer}
+ #kt132AddressedPanel .kt117-pilot-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ #kt132AddressedPanel .kt117-pilot-columns>div{background:#163b2c;border:1px solid #68896e;padding:12px;border-radius:8px}
+ #kt132AddressedPanel .kt117-pilot h4{margin:0;color:#f6d18a}
+ #kt132AddressedPanel .kt117-pilot>h4{margin-top:16px}
+ @media(max-width:650px){#kt132AddressedPanel .kt117-pilot-columns{grid-template-columns:1fr}}`;
  document.head.append(stylesheet);
  const ui=make('section');ui.id='kt117Stage5';
  const heading=make('h3','5. Изготвяне на административния документ');
@@ -76,8 +80,16 @@ function initialize(){
  const reference=make('div');reference.className='kt117-reference';
  const details=make('div'), warnings=make('details'),warningText=make('div');
  warnings.append(make('summary','Бележки от нормативния преглед'),warningText);
- const pilot=make('div');pilot.className='kt117-pilot';pilot.hidden=true;
- context.append(contextTitle,direction,reference,details,pilot,warnings);
+ context.append(contextTitle,direction,reference,details,warnings);
+ const addressed=make('dialog');addressed.id='kt132AddressedPanel';
+ addressed.setAttribute('aria-label','Работен екран на адресирания панел');
+ const pilot=make('div');pilot.className='kt117-pilot';
+ const back=make('button','Към Етап 5');back.type='button';back.onclick=()=>addressed.close();
+ addressed.append(back,pilot);
+ document.body.append(addressed);
+ const transition=make('section');transition.id='kt117PanelTransition';transition.hidden=true;
+ const destination=make('p'),openPanel=make('button','Към панел №01');openPanel.type='button';
+ transition.append(destination,openPanel);
  const action=make('div');action.className='kt117-actions';
  const generate=make('button','Изготви текст с EG Автора');
  const edit=make('button','Редактирай текста'),save=make('button','Запази редакцията'),cancel=make('button','Откажи редакцията'),confirm=make('button','Потвърди текста');
@@ -98,12 +110,41 @@ function initialize(){
  const original=make('details');original.append(make('summary','Пълен експертно потвърден анализ от Етап 4'),make('pre'));
  const footer=make('div');footer.className='kt117-actions';footer.append(word);
  ui.append(heading,context,action,note,editorial,preview,textarea,reviewActions,decisionStatus,confirmedText,footer,wordInfo,original);
+ wordInfo.after(transition);
  panel.replaceChildren(ui);
  const live=()=>window.KT116ExpertHandoff?.snapshot?.()||null;
+ openPanel.onclick=()=>{
+  const handoff=panelHandoff(window,live());
+  if(handoff?.panelId!==1)return;
+  const confirmedData=make('div');
+  confirmedData.append(make('h4','Потвърдени данни'));
+  if(handoff.subject)confirmedData.append(make('p','Готово · Предмет: '+handoff.subject));
+  if(handoff.scope)confirmedData.append(make('p','Готово · Обхват: '+handoff.scope));
+  const pending=make('div');
+  pending.append(make('h4','Необходими действия'));
+  const spatialLabel={confirmed:'Готово · ГИС и PDF1',not_applicable:'ГИС · Неприложимо',
+   pending:'Очаква проверка · ГИС и PDF1',unverified:'ГИС · Относимостта е непотвърдена'}[handoff.gisStatus];
+  (['confirmed','not_applicable'].includes(handoff.gisStatus)?confirmedData:pending).append(make('p',spatialLabel));
+  const project=versions.at(-1);
+  pending.append(make('p',project?'Преглед на проекта по преписката':'Изготвяне на проект по потвърдената процедура'));
+  const columns=make('div');columns.className='kt117-pilot-columns';columns.append(confirmedData,pending);
+  const rationale=make('details'),decision=make('p',handoff.decision);
+  decision.style.whiteSpace='pre-wrap';
+  rationale.append(make('summary','Виж потвърденото решение'),decision);
+  const caseNumber=window.KT126Registry?.caseNumber?.()||'Отворена преписка';
+  pilot.replaceChildren(make('h3','Панел №01 · '+handoff.result),make('h4','Защо преписката е тук'),
+   make('p',caseNumber+' · Потвърден избор от Етап 5'),rationale,columns);
+  if(project){
+   const draft=make('details'),text=make('p',project.text);text.style.whiteSpace='pre-wrap';
+   draft.append(make('summary','Прегледай проекта'),text);pilot.append(draft);
+  }
+  addressed.showModal();
+ };
  function sync(){
   const a=live();
-  if(!a){source=null;versions=[];confirmed=null;editorialIssues=[];editorial.hidden=true;context.hidden=true;action.hidden=true;preview.hidden=true;textarea.hidden=true;textarea.style.display='none';reviewActions.hidden=true;footer.hidden=true;original.hidden=true;note.textContent='Няма потвърдено предложение по текущата преписка.';return;}
+  if(!a){transition.hidden=true;addressed.close();source=null;versions=[];confirmed=null;editorialIssues=[];editorial.hidden=true;context.hidden=true;action.hidden=true;preview.hidden=true;textarea.hidden=true;textarea.style.display='none';reviewActions.hidden=true;footer.hidden=true;original.hidden=true;note.textContent='Няма потвърдено предложение по текущата преписка.';return;}
   if(source&&source.caseId===a.caseId&&source.version===a.version&&source.text===a.text)return;
+  addressed.close();
   source=a;versions=[];confirmed=null;editorialIssues=[];editorial.hidden=true;context.hidden=false;action.hidden=false;reviewActions.hidden=false;footer.hidden=true;
   original.hidden=false;original.querySelector('pre').textContent=a.text;
   let panelLine=a.text.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\b[^\n]*/iu)?.[0]||'Административно направление, потвърдено от експерта';
@@ -112,26 +153,8 @@ function initialize(){
   const p=window.KT80WorkflowState?.subjectConfirmed||{};
   const handoff=panelHandoff(window,a);
   const parcels=handoff?.parcelIds||collectStageEvidence(window).parcelIds;
-  pilot.hidden=handoff?.panelId!==1;
-  contextTitle.textContent=pilot.hidden?'Потвърдено предложение от Етап 4':'Резултат · проект на административно писмо';
-  generate.textContent=pilot.hidden?'Изготви текст с EG Автора':'Изготви проект';
-  if(!pilot.hidden){
-   direction.textContent='Проект на '+handoff.result.charAt(0).toLowerCase()+handoff.result.slice(1);
-   const confirmedData=make('div');
-   confirmedData.append(make('h4','Потвърдени данни'));
-   if(handoff.subject)confirmedData.append(make('p','Готово · Предмет: '+handoff.subject));
-   if(handoff.scope)confirmedData.append(make('p','Готово · Обхват: '+handoff.scope));
-   const pending=make('div');
-   pending.append(make('h4','Необходими действия'));
-   const spatialLabel={confirmed:'Готово · ГИС и PDF1',not_applicable:'ГИС · Неприложимо',
-    pending:'Очаква проверка · ГИС и PDF1',unverified:'ГИС · Относимостта е непотвърдена'}[handoff.gisStatus];
-   (['confirmed','not_applicable'].includes(handoff.gisStatus)?confirmedData:pending).append(make('p',spatialLabel));
-   pending.append(make('p','Изработване и експертен преглед на проекта'));
-   const columns=make('div');columns.className='kt117-pilot-columns';columns.append(confirmedData,pending);
-   pilot.replaceChildren(make('h4','Защо преписката е тук'),
-    make('p','Преписка '+handoff.caseId+' · Потвърдено направление: панел №01'),columns);
-  }
-  details.hidden=!pilot.hidden;
+  transition.hidden=handoff?.panelId!==1;
+  destination.textContent=transition.hidden?'':'Адресиран панел №01 · '+handoff.result;
   details.textContent='Предмет: '+clean(p.text)+'\nИмот(и): '+parcels.join(', ')+'\nЕксперт: '+a.expert+' · Версия: '+a.version;
   warnings.hidden=!a.warnings?.length;warningText.textContent=(a.warnings||[]).join('\n');
   note.textContent='Изготвянето на документа използва потвърденото направление, без нова процедурна квалификация.';
