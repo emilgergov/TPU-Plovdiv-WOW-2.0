@@ -9,10 +9,29 @@ const generic=/^(?:предмет|наименование|описание|ин
 const headingOnly=/^(?:уведомление|инвестиционно предложение|предмет|описание|съдържание|техническа информация)$/i;
 function candidates(intake){
  const out=[];
+ // Provenance is derived from the actual extracted text and the individual
+ // reader status. File names or generated subject_candidates are NOT proof.
+ const parsed=new Map((intake?.files||[]).map(x=>[clean(x?.filename),String(x?.status||'')]));
+ const extracted=new Set((intake?.document_texts||[])
+  .filter(x=>clean(x?.text)).map(x=>clean(x?.source)));
+ function sourceState(filename){
+  if(!filename||!parsed.has(filename)||!extracted.has(filename))return 'NOT_READ';
+  const reader=parsed.get(filename);
+  if(/НЕПРОЧЕТЕН|неуспешно|няма извлекаем/iu.test(reader))return 'NOT_READ';
+  if(/\\.doc$/iu.test(filename)||/OCR:|ПРОВЕРКА:|експертна проверка|частич/iu.test(reader))
+   return 'REVIEW_REQUIRED';
+  return /текстът е прочетен/iu.test(reader)?'TEXT_EXTRACTED':'REVIEW_REQUIRED';
+ }
  function add(text,source,kind){
-  let v=clean(text); if(!v||v.length<12||v.length>1500)return;
+  let v=clean(text);if(!v||v.length<12||v.length>1500)return;
   v=clean(v.replace(generic,''));if(!v||headingOnly.test(v))return;
-  if(!out.some(x=>x.text===v))out.push({text:v,source:clean(source)||'НЕУСТАНОВЕН ДОКУМЕНТ',kind});
+  const file=clean(source);
+  const sourceReadStatus=sourceState(file);
+  // Keep an unverified candidate visible for human reconstruction, but never
+  // describe it as read or silently apply it to the confirmed subject field.
+  if(!out.some(x=>x.text===v&&x.source===file))
+   out.push({text:v,source:file||'НЕУСТАНОВЕН ДОКУМЕНТ',kind,
+    sourceReadStatus,requiresExpertReview:sourceReadStatus!=='TEXT_EXTRACTED'});
  }
  for(const s of intake?.subject_candidates||[]){
   if(typeof s==='string'){add(s,null,'subject_candidate');continue}
@@ -28,14 +47,19 @@ function candidates(intake){
 function propose(intake){
  const options=candidates(intake);
  // Prefer the actual title/subject read from a notification; never synthesize missing engineering details.
- const score=x=>(/уведомлен|notification|uvedomlen/i.test(x.source)?10:0)
+ const score=x=>(x.sourceReadStatus==='TEXT_EXTRACTED'?30:x.sourceReadStatus==='REVIEW_REQUIRED'?15:-30)
+  +(/уведомлен|notification|uvedomlen/i.test(x.source)?10:0)
     +(x.kind==='subject_heading'?4:x.kind==='dossier_fact'?3:0)
     +(x.text.length>=30&&x.text.length<=250?2:0);
  const ordered=[...options].sort((a,b)=>score(b)-score(a));
  const best=ordered[0]||null;
  return Object.freeze({schema:'KT80-IP-SUBJECT-V32',status:best?'EXTRACTED_CANDIDATE_REQUIRES_EXPERT':'NO_RELIABLE_SOURCE',text:best?.text||'',source:best?.source||null,
-  candidates:ordered.slice(0,12),sourceType:best?.kind||null,expertConfirmed:false,
-  warning:'Алгоритмично предложение въз основа на прочетения източник; няма автоматична проверка на правна процедура, капацитет, инфраструктура или пространствено положение.'});
+  candidates:ordered.slice(0,12),sourceType:best?.kind||null,sourceReadStatus:best?.sourceReadStatus||'NOT_READ',expertConfirmed:false,
+  warning:best?.sourceReadStatus==='NOT_READ'
+   ?'Не е удостоверен извлечен текст от посочения източник. Проверете оригиналния документ или редактирайте ръчно.'
+   :best?.sourceReadStatus==='REVIEW_REQUIRED'
+   ?'Текстът е извлечен, но документът изисква проверка в оригинала. Няма автоматично удостоверяване на предмета.'
+   :'Извлечен текст — фактическата вярност и предметът изискват експертна проверка.'});
 }
 function status(t){const el=$('kt80SubjectProposalStatus');if(el)el.textContent=t}
 function show(proposal,{apply=false}={}){
@@ -47,16 +71,21 @@ function show(proposal,{apply=false}={}){
   box.append(lead);
   for(const c of proposal.candidates.slice(0,5)){
    const b=document.createElement('button');b.type='button';b.className='kt80-subject-source-choice';
-   b.textContent=c.text+' · Източник: '+c.source;
+   b.textContent=c.text+' · Източник: '+c.source+
+    (c.sourceReadStatus==='TEXT_EXTRACTED'?' · извлечен текст':c.sourceReadStatus==='REVIEW_REQUIRED'?' · ЗА ПРОВЕРКА':' · НЯМА УДОСТОВЕРЕН ПРОЧИТ');
    b.addEventListener('click',()=>{const input=$('kt80SubjectText');if(!input)return;input.value=c.text;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();status('Избран откъс от '+c.source+'. Текстът изисква експертно потвърждение.')});
    box.append(b);
   }
  }
- if(apply&&proposal.text&&!$('kt80SubjectText')?.value.trim()){
+ if(apply&&proposal.text&&proposal.sourceReadStatus!=='NOT_READ'&&!$('kt80SubjectText')?.value.trim()){
   $('kt80SubjectText').value=proposal.text;
   $('kt80SubjectText').dispatchEvent(new Event('input',{bubbles:true}));
  }
- status(proposal.text?'Извлечен кандидат за предмет · източник: '+proposal.source+'. Проверете съдържанието и местоположението.':'Няма доказан кандидат от преписката. Допустимо е ръчно въвеждане.');
+ status(proposal.text?'Кандидат за предмет · източник: '+proposal.source+' · '+
+  (proposal.sourceReadStatus==='TEXT_EXTRACTED'?'ИЗВЛЕЧЕН ТЕКСТ, БЕЗ ЕКСПЕРТНО ПОТВЪРЖДЕНИЕ':
+   proposal.sourceReadStatus==='REVIEW_REQUIRED'?'ЗА ПРОВЕРКА В ОРИГИНАЛА':
+   'НЕ Е УДОСТОВЕРЕН ПРОЧИТ')+'. '+proposal.warning:
+  'Няма доказан кандидат от преписката. Въведете предмет ръчно въз основа на проверени документи.');
 }
 function constructed(){
  // A repeated deterministic reconstruction must not silently overwrite expert text.

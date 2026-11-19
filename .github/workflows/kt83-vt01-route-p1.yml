@@ -1,0 +1,32 @@
+name: KT83 VT01 P1 independent route checks
+on:
+  push:
+    branches:
+      - kt83-vt01-automatic-route-p1
+    paths:
+      - kt80/integration/kt83-vt01-automatic-route-p1.js
+      - tests/kt83-vt01-route-p1.test.cjs
+      - kt80/integration/kt83-vt01-route-binding.js
+      - kt80/integration/kt83-vt01-v11-handoff.js
+      - kt80/KT83_VT01_P1_AUTOMATIC_ROUTE_TEST.html
+      - kt80/KT82_STAGE3_CONSOLIDATED_V600.js
+      - .github/workflows/kt83-vt01-route-p1.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - kt80/integration/kt83-vt01-automatic-route-p1.js
+      - kt80/integration/kt83-vt01-route-binding.js
+      - tests/kt83-vt01-route-p1.test.cjs
+      - .github/workflows/kt83-vt01-route-p1.yml
+  workflow_dispatch:
+jobs:
+  route-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Проверка на маршрута и изолацията на преписките
+        run: node --test tests/kt83-vt01-route-p1.test.cjs

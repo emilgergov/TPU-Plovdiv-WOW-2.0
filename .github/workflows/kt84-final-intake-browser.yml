@@ -1,0 +1,30 @@
+name: KT84 FINAL real ZIP to subject browser integration
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - 'tests/kt84-final-intake-chain-browser.mjs'
+      - '.github/workflows/kt84-final-intake-browser.yml'
+      - 'kt80/KT83_WORKFLOW_CASE_V591.js'
+      - 'kt80/KT80_E01_KT52_PROJECT_RECONSTRUCTION_V52.js'
+      - 'kt80/KT80_E01_IP_MASTER_SUBJECT_V32.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-intake-chain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright@1.57.0 fflate@0.8.2
+          npx playwright install chromium
+      - run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/kt84-final-intake.log 2>&1 &
+          for n in $(seq 1 30); do curl -sf http://127.0.0.1:8765/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html >/dev/null && break; sleep 1; done
+      - name: Run actual reader, audit, subject construction on a synthetic ZIP
+        run: node tests/kt84-final-intake-chain-browser.mjs

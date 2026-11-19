@@ -18,7 +18,24 @@ function invalidate(level){
  setBadge();
 }
 function go(step){
- // Navigation is unrestricted; legal progression and procedural acceptance remain gated by confirmation.
+ // KT84-03: only the OPTIONAL private Access-protected shell may authorize
+ // navigation for a bound permanent case. Without that shell the existing
+ // isolated KT83 acceptance workflow is unchanged. This is a UX boundary;
+ // the private Worker remains the actual authorization authority.
+ if(root.KT84ProtectedWorkflow&&
+    root.KT84ProtectedWorkflow.canUseStage(Number(step))!==true){
+   say('Достъпът до този етап трябва да бъде проверен за текущия експерт и преписка.');
+   return false;
+ }
+ // KT83–VT01 P1 (isolated branch only): legal access is controlled centrally.
+ // Expert may inspect earlier stages, but stage 5 cannot be opened without
+ // a case-bound independently verified V11 assessment.
+ if(Number(step)===5&&typeof root.KT83RouteAccess?.canOpenStage==='function'
+    &&root.KT83RouteAccess.canOpenStage(5)!==true){
+   if(root.KT83SafeStageFive?.open?.()===true)return false;
+   root.KT83RouteAccess?.denied?.(5);
+   return false;
+ }
  state.step=step;state.highest=Math.max(step,state.highest);
  document.querySelectorAll('.kt80-stage-panel[data-panel]').forEach(p=>p.hidden=Number(p.dataset.panel)!==step);
  document.querySelectorAll('.kt80-step').forEach(b=>{const i=Number(b.dataset.step);b.disabled=false;b.setAttribute('aria-current',i===step?'step':'false')});
@@ -33,9 +50,12 @@ function routes(){
 function intakeResults(data){
  state.intake=data;invalidate(2);
  const docs=data.files||[],subjects=data.subject_candidates||[],ids=data.classification?.leading_candidates||[];
- $('kt80InputStatus').textContent='Прочетени файлове: '+docs.length+'; кандидати за предмет: '+subjects.length+'; кандидати за водещи имоти: '+ids.length+'.\nИзвличането е предварително и изисква преглед.';
- const title=subjects.map(x=>typeof x==='string'?x:x?.title||x?.heading||'').find(x=>typeof x==='string'&&x.trim());
- if(title&&!$('kt80SubjectText').value.trim()){$('kt80SubjectText').value=title;$('kt80SubjectHint').textContent='Кандидат от прочетеното (непотвърден); редактирайте и потвърдете.'}
+ $('kt80InputStatus').textContent='Инвентаризирани файлове: '+docs.length+'; кандидати за предмет: '+subjects.length+'; кандидати за водещи имоти: '+ids.length+'.\nИзвличането е предварително и изисква преглед.';
+ // Candidate titles cannot be promoted by the workflow before the independent
+ // reader/source audit. KT80SubjectMaster is the sole provenance-checked entry.
+ // A failed/unchecked DOC reader must never prefill the subject as reliable.
+ if(!$('kt80SubjectText').value.trim())
+  $('kt80SubjectHint').textContent='Кандидатите за предмет се проверяват по действително извлечен текст и оригинален документ. Допустима е експертна редакция.';
  if(ids.length&&!$('kt80ParcelInput').value.trim()){$('kt80ParcelInput').value=ids.join('; ');$('kt80ParcelNormalize').click()}
  const possible=[];for(const d of docs){
  const nm=String(d.filename||d.file||d.name||'').toLocaleLowerCase('bg');
@@ -63,6 +83,14 @@ async function process(){
    const audit=root.KT80DossierCompleteness.audit(result);
    root.KT80DossierCompleteness.render(audit);
    root.KT80DossierAudit=audit;
+   const confirmed=audit.records.filter(r=>r.state==='TEXT_EXTRACTED').length;
+   const review=audit.records.filter(r=>r.state==='REVIEW_REQUIRED').length;
+   const unread=audit.records.filter(r=>r.state==='NOT_READ'||r.state==='UNSUPPORTED').length;
+   $('kt80InputStatus').textContent='Инвентаризирани файлове: '+audit.filesEnumerated+
+    ' · извлечен текст: '+confirmed+' · за проверка: '+review+' · непрочетени: '+unread+
+    '. Кандидати за предмет: '+(result.subject_candidates||[]).length+
+    '; кандидати за водещи имоти: '+(result.classification?.leading_candidates||[]).length+
+    '. Извличането не удостоверява фактическа вярност.';
   }
   root.KT80CH2Evidence?.reset?.();root.KT80ParameterQA?.reset?.();
   if(root.KT80IPMaster){
@@ -84,7 +112,12 @@ async function process(){
   if(isCurrent())root.KT82UniversalDossier?.apply?.(result);
   if(typeof root.KT80FormMatcher?.compare==='function')await root.KT80FormMatcher.compare(result,{isCurrent,signal:state.abort.signal});
   if(!isCurrent())return;
-  say('Прочитът приключи. Следва проверка на предмета и имотите от експерта.');
+  const all=Array.isArray(result?.files)?result.files:[];
+  const unread=all.filter(f=>/непрочетен|unread|failed|unsupported/i.test(String(f?.status||f?.readingStatus||f?.read_status||''))).length;
+  const uncertain=all.filter(f=>/проверка|review|partial|uncertain/i.test(String(f?.status||f?.readingStatus||f?.read_status||''))).length;
+  say('Автоматичната обработка приключи. Прегледайте статуса на всеки документ;'+
+    (unread||uncertain?' за '+unread+' файла е отчетен проблем с прочита и '+uncertain+' изискват проверка.':' автоматичният резултат не означава експертно прочетена преписка.')+
+    ' Следва проверка на предмета и обхвата от експерта.');
  }catch(e){
   if(!isCurrent())return;
   $('kt80InputStatus').textContent='Обработката не успя: '+String(e?.message||e);
@@ -230,10 +263,22 @@ function init(){
  $('kt80LegalNotes').addEventListener('input',()=>invalidate(4));
  $('kt80Authority').addEventListener('change',()=>invalidate(4));
  $('kt80InputFile').addEventListener('change',()=>{
-  // Every file replacement creates a FRESH case cycle using the same full
-  // cleanup path as Clear All, but preserves the newly chosen File object.
-  resetAll({preserveSelectedFile:true});
-  document.dispatchEvent(new Event('kt80:case-change'));
+  const input=$('kt80InputFile'),selected=input?.files?.[0];
+  if(!selected)return;
+  // Selecting the FIRST file must never reset the case or leave Stage 1.
+  // A case reset requires an explicit expert action, never a file-change event.
+  if(!state.intake&&!state.fileName){
+   const name=$('kt80SelectedFileName');
+   if(name){name.textContent=selected.name;name.title=selected.name}
+   $('kt80InputStatus').textContent='Избран файл: '+selected.name+'. Натиснете „Обработи преписката“.';
+   say('Преписката е избрана. Следва обработка на входните документи.');
+   return;
+  }
+  // Do not silently replace an active or partially processed dossier.
+  input.value='';
+  const previous=$('kt80SelectedFileName');
+  if(previous){previous.textContent=state.fileName||'Няма избран файл';previous.title=state.fileName||''}
+  say('Има започната преписка. За нова преписка използвайте изрично „Изчисти работния екран“. Текущите данни не са променени.');
  });
  go(1);root.KT80WorkflowState=state;root.KT80WorkflowGo=go;root.KT80ResetCurrentCase=resetAll;
  root.KT80RebuildKT52=()=>{

@@ -39,6 +39,11 @@ export function createUniversalOutSession({cryptoAPI=globalThis.crypto,zipEngine
   const stamp=round,source=original;
   const scope=()=>currentRecord();
   const before=scope();
+  // The expert may edit title, addressee, address or incoming reference while
+  // DOCX composition is running. The completed draft must match that version.
+  if(before?.documentSignature!==undefined&&
+     (typeof before.documentSignature!=='string'||!before.documentSignature))
+   fail('липсва идентичност на реквизитите за изходящия проект');
   if(!before||before.caseId!==record.caseId||before.generation!==record.generation||
      before.evidenceRevision!==record.evidenceRevision||before.confirmedSubject!==record.subject||
      before.assessmentCurrent!==true)
@@ -51,6 +56,7 @@ export function createUniversalOutSession({cryptoAPI=globalThis.crypto,zipEngine
      after.caseId!==before.caseId||after.generation!==before.generation||
      after.evidenceRevision!==before.evidenceRevision||
      after.confirmedSubject!==before.confirmedSubject||
+     after.documentSignature!==before.documentSignature||
      after.assessmentCurrent!==true)
    fail('преписката или оригиналната бланка е променена при генерирането');
   return Object.freeze({...result,sessionTemplateRevision:stamp});

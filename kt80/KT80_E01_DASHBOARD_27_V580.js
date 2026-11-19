@@ -16,6 +16,12 @@ function home(){
  if(lastTile?.isConnected)try{lastTile.focus({preventScroll:true})}catch(e){}
 }
 function stage(step){
+ // Independent route guard must apply even to direct dashboard navigation.
+ if(Number(step)===5&&root.KT83RouteAccess?.canOpenStage?.(5)===false){
+  if(root.KT83SafeStageFive?.open?.()===true)return false;
+  root.KT83RouteAccess?.denied?.(5);
+  return false;
+ }
  const b=document.querySelector('.kt80-step[data-step="'+step+'"]');
  viewMode('stage',b?.textContent?.trim()||('Етап '+step));
  document.dispatchEvent(new CustomEvent('kt80:stage-open',{detail:{step}}));

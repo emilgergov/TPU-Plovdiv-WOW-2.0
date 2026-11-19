@@ -53,11 +53,21 @@ function boot(){
   const intersections=!!valid&&zoneStatuses.every(x=>x!=='UNVERIFIED');
   const spatialClass=!intersections?'UNDETERMINED':zoneStatuses.every(x=>x==='OUTSIDE')?'OUTSIDE':zoneStatuses.every(x=>x==='INTERSECTS')?'INTERSECTS':'MIXED';
   const piOK=valid&&!!pi&&idKey(pi.ids||[])===idKey(ids)&&pi.items?.length===ids.length&&pi.items.every(x=>x?.status==='FOUND'&&x.profile);
-  const pdfOK=!!valid&&pdf.ready&&idKey(pdf.ids)===idKey(ids)&&pdf.caseId===workflow.caseCycleId&&pdf.generation===workflow.generation&&pdf.source===live&&pdf.evidenceRevision===(root.KT82EvidenceInvalidation?.getRevision?.()??null);
+  // PDF1 status requires the full original P2 proof, not a loose event.
+  const proof=root.KT83P2Automatic?.current?.()||null;
+  const pdfOK=!!valid&&!!proof&&!!root.KT83P2SpatialGate?.pdfReceiptMatches?.(proof,pdf)
+   &&pdf.ready===true&&idKey(pdf.ids)===idKey(ids)&&pdf.caseId===workflow.caseCycleId
+   &&pdf.generation===workflow.generation&&pdf.source===live
+   &&pdf.evidenceRevision===(root.KT82EvidenceInvalidation?.getRevision?.()??null);
   
   const gate=workflow.normativeGate||null;
   const gisNotRequired=gate?.expertConfirmed===true&&gate.decision==='NOT_REQUIRED'&&workflow.parcelsConfirmed?.mode==='GIS_NOT_REQUIRED';
-  const scenario=gisNotRequired?'GIS_NOT_REQUIRED':valid?(pdfOK?'FULL_GIS_PDF1':intersections?'FULL_GIS_VERIFIED':'GIS_INCOMPLETE'):'CONTEXT';
+  // Full-GIS verification requires every PI MASTER profile and all 32 zone
+  // boundaries; polygon availability plus intersections alone is insufficient.
+  const fullSpatial=valid&&intersections&&piOK&&
+   root.KT80FreeGIS?.getMap?.()?.zones?.length===32;
+  const scenario=gisNotRequired?'GIS_NOT_REQUIRED':
+   valid?(pdfOK?'FULL_GIS_PDF1':fullSpatial?'FULL_GIS_VERIFIED':'GIS_INCOMPLETE'):'CONTEXT';
   const spatialEvidence=root.KT82SpatialEvidence?.get?.()||null;
   return {ids,live,pi,place,context,stage3,workflow,gate,gisNotRequired,valid,intersections,spatialClass,zoneStatuses,piOK,pdfOK,scenario,spatialEvidence};
  }
@@ -162,7 +172,7 @@ function boot(){
    d.scenario==='FULL_GIS_VERIFIED'?'ПЪЛЕН ГИС АНАЛИЗ · ПРОВЕРЕНИ ЗЗ · PDF1 не е изготвен':
    d.scenario==='GIS_INCOMPLETE'?'ИМОТИ С ГЕОМЕТРИЯ · проверките не са завършени':
    d.scenario==='GIS_NOT_REQUIRED'?'ГИС НЕ Е НЕОБХОДИМ · експертно потвърдено след №2':
-   'КОНТЕКСТЕН АНАЛИЗ · НЯМА УДОСТОВЕРЕНА ИМОТНА ГЕОМЕТРИЯ';
+   (d.ids?.length?'ИДЕНТИФИЦИРАНИ ИМОТИ · НЯМА УДОСТОВЕРЕНА ГЕОМЕТРИЯ':'КОНТЕКСТЕН АНАЛИЗ · НЯМА УДОСТОВЕРЕНА ИМОТНА ГЕОМЕТРИЯ');
   paragraphs.replaceChildren();
   for(const [a,b] of [['Работна процедурна хипотеза',p.hypothesis],['Пространствени доказателства',p.spatial],['Предложение за действие',p.conclusion]]){
    const item=node('div',undefined,'kt83-pair');item.append(node('strong',a),node('p',b));paragraphs.append(item);
@@ -196,8 +206,9 @@ function boot(){
    &&receipt.source===live&&Array.isArray(receipt.ids)&&ids.length>0
    &&idKey(receipt.ids)===idKey(ids)&&live?.results?.every(geometryValid)
    &&receipt.evidenceRevision===(root.KT82EvidenceInvalidation?.getRevision?.()??null);
-  if(!valid)return;
-  pdf={ready:true,ids:[...ids],stamp:Date.now(),caseId:receipt.caseId,generation:receipt.generation,source:live,evidenceRevision:receipt.evidenceRevision};
+  const proof=root.KT83P2Automatic?.current?.();
+  if(!valid||!proof||!root.KT83P2SpatialGate?.pdfReceiptMatches?.(proof,receipt))return;
+  pdf={ready:true,ids:[...ids],stamp:Date.now(),caseId:receipt.caseId,generation:receipt.generation,source:live,evidenceRevision:receipt.evidenceRevision,bytes:receipt.bytes};
   lastSignature='';if(!panel.hidden)draw();
  };
  document.addEventListener('kt82:pdf1-completed',pdfReceipt);

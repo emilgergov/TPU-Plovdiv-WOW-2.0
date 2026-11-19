@@ -1,0 +1,23 @@
+name: KT84-04 two expert private-case integration
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - kt84/private-api-worker.mjs
+      - kt84/access-policy.mjs
+      - kt84/expert-case-session.mjs
+      - tests/kt84-two-expert-integration.test.mjs
+      - .github/workflows/kt84-two-expert-integration.yml
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  two-experts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test two simulated experts, access revocation, case listings, concurrent edits and R2
+        run: node --test tests/kt84-two-expert-integration.test.mjs tests/kt84-private-api.test.mjs tests/kt84-expert-case-session.test.mjs tests/kt84-access-policy.test.mjs

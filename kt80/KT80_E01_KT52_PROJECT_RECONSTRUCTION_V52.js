@@ -110,7 +110,12 @@ function build(intake,ip,semantic,parameterQA,opts={}){
  // Negative or mixed-temporal assertions cannot establish the nature of the proposal.
  const reliableTypeCandidates=types.filter(k=>byRule.get(k).some(f=>!neg.test(f.excerpt)&&determineTense(f.excerpt)!=='СЪЩЕСТВУВАЩО — КАНДИДАТ'));
  const isMixed=reliableTypeCandidates.length>1;
- const sourceTitle=ip?.proposedSubject&&ip.proposedSubject!=='НЯМА ДАННИ'?ip.proposedSubject:(intake?.subject_candidates||[]).map(x=>typeof x==='string'?x:x?.title).find(Boolean)||'';
+ // Use the same case-bound source quality as the subject editor; never
+ // reconstruct an unattended title from an unread DOC or filename.
+ const sourceReview=root.KT80SubjectMaster?.propose?.(intake)||null;
+ const sourceTitle=sourceReview?.sourceReadStatus&&
+  sourceReview.sourceReadStatus!=='NOT_READ'?String(sourceReview.text||''):'';
+ const unreliableSource=!!sourceReview?.text&&!sourceTitle;
  const excludedSubject=sourceTitle&&issues.some(x=>{
   const source=lc(sourceTitle),origin=lc(x.original);
   if(x.document&&ip?.subjectSource&&x.document!==ip.subjectSource)return false;
@@ -129,6 +134,7 @@ function build(intake,ip,semantic,parameterQA,opts={}){
  const outstanding=[
   ...(issues.length?['Има оспорени/игнорирани доказателства; повторната оценка трябва да изключи съответните откъси.']:[]),
   ...(excludedSubject?['Първоначалното предложение за предмет е основано на оспорен източник и е изключено от кандидатите.']:[]),
+  ...(unreliableSource?['Кандидатът за предмет не е обвързан с достоверно извлечен текст. Проверете оригинала или въведете ръчно.']:[]),
   ...(rejectedParameters.length?['Има експертно изключени технически стойности и свързаните с тях откъси се изключват от реконструкцията.']:[]),
   ...(isMixed?['Едновременно са засечени различни видове основна намеса; необходим е контекстен експертен преглед.']:[]),
   ...(files.some(x=>x.state==='UNSUPPORTED'||x.state==='NOT_READ')?['Има непрочетени материали. Преписката не може да бъде приета за изчерпателно анализирана.']:[]),

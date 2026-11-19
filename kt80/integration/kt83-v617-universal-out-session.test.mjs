@@ -144,3 +144,37 @@ test('delayed SHA verification cannot restore an original cleared while attachme
   assert.equal(out.status().hasOriginal,false);
  });
 });
+
+test('changed recipient or document heading during DOCX rendering aborts the stale download',async()=>{
+ await withSyntheticFingerprint(async()=>{
+  let documentSignature='Писмо|Адресат А|Адрес А|ОВОС-1';
+  const codec={...fflate,zipSync:(parts,options)=>{
+   documentSignature='Писмо|Адресат Б|Адрес А|ОВОС-1';
+   return fflate.zipSync(parts,options);
+  }};
+  const session=createUniversalOutSession({cryptoAPI:globalThis.crypto,zipEngine:codec});
+  await session.attach(fflate.zipSync(pack()));
+  const currentRecord=()=>({
+   caseId:'test-case-616',generation:2,evidenceRevision:null,
+   confirmedSubject:'Тестов предмет',assessmentCurrent:true,documentSignature
+  });
+  await assert.rejects(session.render(record(),{currentRecord}),/променена при генерирането/);
+  assert.equal(session.status().hasOriginal,true,'accepted original blank remains available');
+ });
+});
+
+test('unchanged document metadata allows an unsigned review draft on the original blank',async()=>{
+ await withSyntheticFingerprint(async()=>{
+  const session=createUniversalOutSession({cryptoAPI:globalThis.crypto,zipEngine:fflate});
+  await session.attach(fflate.zipSync(pack()));
+  const currentRecord=()=>({
+   caseId:'test-case-616',generation:2,evidenceRevision:null,
+   confirmedSubject:'Тестов предмет',assessmentCurrent:true,
+   documentSignature:JSON.stringify(['Работно писмо','Адресат А','Адрес А','ОВОС-1'])
+  });
+  const result=await session.render(record(),{currentRecord});
+  assert.equal(result.status,'EXPERT_REVIEW_ONLY');
+  assert.equal(result.signaturesUnsigned,true);
+  assert.equal(result.headerFooterMediaUnmodified,true);
+ });
+});

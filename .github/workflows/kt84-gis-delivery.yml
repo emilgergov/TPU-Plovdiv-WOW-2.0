@@ -1,0 +1,26 @@
+name: KT84-A GIS delivery - repository vs public site
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - 'tests/kt84_gis_delivery_probe.py'
+      - '.github/workflows/kt84-gis-delivery.yml'
+      - 'v26-test/v26-approved-gis-zip.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  repository-gis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate actual hosted GIS files in working branch
+        run: python3 tests/kt84_gis_delivery_probe.py --local
+  public-gis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Diagnose public GitHub Pages HTTP GET responses
+        run: python3 tests/kt84_gis_delivery_probe.py --public

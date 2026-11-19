@@ -167,8 +167,10 @@ function bodyContent(checked,profiles,zones){
 }
 async function generate(){
  if(busy)return;const live=root.KT80FreeGISResults;if(!live?.results?.length)return message('Първо натиснете „Намери имотите“.');
- const gen=epoch,caseCycleId=root.KT80WorkflowState?.caseCycleId||null,caseGeneration=root.KT80WorkflowState?.generation??null;
- const sameCase=()=>caseCycleId===(root.KT80WorkflowState?.caseCycleId||null)&&caseGeneration===(root.KT80WorkflowState?.generation??null);
+ const gen=epoch,caseCycleId=root.KT80WorkflowState?.caseCycleId||null,caseGeneration=root.KT80WorkflowState?.generation??null,
+  evidenceRevision=root.KT82EvidenceInvalidation?.getRevision?.()??null;
+ const sameCase=()=>caseCycleId===(root.KT80WorkflowState?.caseCycleId||null)&&caseGeneration===(root.KT80WorkflowState?.generation??null)
+  &&evidenceRevision===(root.KT82EvidenceInvalidation?.getRevision?.()??null);
  const editor=root.V26ParcelEditor?.normalize($('kt80ParcelInput')?.value||'');
  if(!editor||editor.invalid?.length||editor.uncertain?.length||editor.ids.length!==live.ids.length||editor.ids.some((v,i)=>v!==live.ids[i]))
   return message('Проверете имотните идентификатори и повторете справката.');
@@ -191,7 +193,7 @@ async function generate(){
   if(gen!==epoch||!sameCase()||root.KT80FreeGISResults!==live)return;
   const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='TPU_Plovdiv_KT80_GIS_analiz_PDF1.pdf';
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
-  const receipt=Object.freeze({caseId:caseCycleId,generation:caseGeneration,ids:Object.freeze([...live.ids]),source:live,evidenceRevision:root.KT82EvidenceInvalidation?.getRevision?.()??null,bytes:blob.size});
+  const receipt=Object.freeze({caseId:caseCycleId,generation:caseGeneration,ids:Object.freeze([...live.ids]),source:live,evidenceRevision:evidenceRevision,bytes:blob.size});
   document.dispatchEvent(new CustomEvent('kt82:pdf1-completed',{detail:receipt}));
   message('Готово! PDF1 е изготвен с карти, административни данни и таблици за ЗЗ и ЗТ. Проверете го като експерт.');
  }catch(e){if(gen===epoch&&sameCase())message('Не успяхме да изготвим PDF1: '+String(e?.message||e))}
@@ -206,6 +208,7 @@ function init(){
  $('kt80ParcelInput')?.addEventListener('input',reset);
  document.addEventListener('kt80:case-reset',reset);
  document.addEventListener('kt80:case-change',reset);
+ document.addEventListener('kt82:evidence-invalidated',reset);
  root.KT80PDF1Bridge=Object.freeze({makePDF:generate,invalidate:reset});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();

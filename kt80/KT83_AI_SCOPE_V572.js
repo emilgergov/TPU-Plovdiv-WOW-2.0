@@ -171,7 +171,7 @@ function init(){
    pending={proposal:filtered.text,caseId:requestIdentity.caseId,generation:requestIdentity.generation,revision:requestIdentity.revision};
    render(pending.proposal,field.value,subject,filtered.note);
    say('Изготвено е ново предложение за експертна преценка. Непотвърдени технически твърдения не се добавят.');
-  }catch(e){if(requestId===serial){const m='Интелигентното подобряване не успя: '+String(e.message||e)+'. Обхватът е запазен.';root.KT80AdministrativeNotice?.showError('scope',m);if(!root.KT80AdministrativeNotice)say(m)}}
+  }catch(e){if(requestId===serial){const m='Интелигентното подобряване не успя: '+(String(e?.message||e)==='Failed to fetch'?'Няма връзка с EG услугата. Проверете мрежата и разрешенията за достъп':String(e?.message||e))+'. Обхватът е запазен.';root.KT80AdministrativeNotice?.showError('scope',m);if(!root.KT80AdministrativeNotice)say(m)}}
   finally{root.KT83CaseBoundary.cancel(requestIdentity);improve.disabled=false}
 }
  form.addEventListener('submit',event=>{event.preventDefault();const token=password.value;password.value='';dialog.close();runImprovement(token);});

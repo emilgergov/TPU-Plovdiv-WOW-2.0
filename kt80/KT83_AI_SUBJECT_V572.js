@@ -90,7 +90,7 @@ function init(){
    pending={proposal:data.proposal.trim(),caseId:requestIdentity.caseId,generation:requestIdentity.generation,revision:requestIdentity.revision};
    render(pending.proposal,$('kt80SubjectText').value);
    status('Изготвена е редакция на предмета. Прегледайте предложението.');
-  }catch(e){if(currentId===serial){const m='Интелигентното подобряване не успя: '+String(e.message||e)+'. Предметът е запазен.';root.KT80AdministrativeNotice?.showError('subject',m);if(!root.KT80AdministrativeNotice)status(m)}}
+  }catch(e){if(currentId===serial){const m='Интелигентното подобряване не успя: '+(String(e?.message||e)==='Failed to fetch'?'Няма връзка с EG услугата. Проверете мрежата и разрешенията за достъп':String(e?.message||e))+'. Предметът е запазен.';root.KT80AdministrativeNotice?.showError('subject',m);if(!root.KT80AdministrativeNotice)status(m)}}
   finally{root.KT83CaseBoundary.cancel(requestIdentity);if(currentId===serial)action.disabled=false}
 }
  form.addEventListener('submit',event=>{event.preventDefault();const token=password.value;password.value='';dialog.close();runImprovement(token);});

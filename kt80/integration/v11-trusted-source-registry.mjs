@@ -7,6 +7,37 @@
 export const LOCKED_ARCHIVE = 'KT82_Normative_MASTER_V11_Tariff_Euro_2026-11-13.zip';
 export const LOCKED_ARCHIVE_SHA256 = '8d3851affd72fb44b4d663920196e00ec317c8e45d36fc16c6ad6b0ce965226c';
 const records = {
+  // Verified against the original 82-entry frozen V11 ZIP, 14 November 2026.
+  // Article digest is the EXACT UTF-8 archive text span from the indicated
+  // article heading up to (but not including) the next article heading.
+  // An archival match does NOT certify case-specific applicability or later amendments.
+  "N_OS_6A": {
+    "id":"N_OS_6A",
+    "act":"Наредба за условията и реда за извършване на оценка за съвместимостта на планове, програми, проекти и инвестиционни предложения с предмета и целите на опазване на защитените зони",
+    "article":"чл. 6а",
+    "archivePath":"additions/N_OS_2025.txt",
+    "documentSha256":"2ff40c1a607a0f88cf1b25ff2a587d472dbe0bcda26313922330ad0c25de814d",
+    "articleSha256":"7d230f385ef9c7f1fc25f693b5cbccaa847193648d89f64fac1141d9218a1152",
+    "anchor":"Компетентни органи за\nиздаване на административни актове по реда на наредбата"
+  },
+  "PRAVILNIK_RIOSV_TERRITORY": {
+    "id":"PRAVILNIK_RIOSV_TERRITORY",
+    "act":"Правилник за устройството и дейността на регионалните инспекции по околната среда и водите",
+    "article":"приложение към чл. 1, ал. 2",
+    "archivePath":"texts/PRAVILNIK_RIOSV_e847f8bd5279401a.txt",
+    "documentSha256":"2dce4d3a9122e8b4fb69f30ba53a079ae24002373945d0e6ec522e91f51aa577",
+    "articleSha256":"70c5f6c6f800e9cd0f31c982a3740c3af34278bb1214901a82f38779c9da5a46",
+    "anchor":"Седалище и териториален обхват на дейност на РИОСВ"
+  },
+  "PRAVILNIK_RIOSV_1": {
+    "id":"PRAVILNIK_RIOSV_1",
+    "act":"Правилник за устройството и дейността на регионалните инспекции по околната среда и водите",
+    "article":"чл. 1",
+    "archivePath":"texts/PRAVILNIK_RIOSV_e847f8bd5279401a.txt",
+    "documentSha256":"2dce4d3a9122e8b4fb69f30ba53a079ae24002373945d0e6ec522e91f51aa577",
+    "articleSha256":"a8b23f4fa876f804a925cc63f3096f73a4771e569cc1d416e8e9ffd7410fdb79",
+    "anchor":"С този правилник се определят структурата, функциите, организацията и\nтериториалният обхват"
+  },
   "TARIFA_8": {
   "id": "TARIFA_8",
   "act": "Тарифа за таксите в системата на МОСВ",

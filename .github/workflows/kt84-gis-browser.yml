@@ -1,0 +1,36 @@
+name: KT84-A isolated Chromium GIS integration preview
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - 'tests/kt84_gis_browser_smoke.mjs'
+      - '.github/workflows/kt84-gis-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated Chromium harness
+        run: |
+          npm install --no-save playwright@1.57.0
+          npx playwright install chromium
+      - name: Start private HTTP preview for current branch
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/kt84-http.log 2>&1 &
+          for n in $(seq 1 30); do curl -sf http://127.0.0.1:8765/v26-test/gis-data/manifest.json >/dev/null && break; sleep 1; done
+      - name: Real browser GIS geometry + integrated HTML test
+        run: node tests/kt84_gis_browser_smoke.mjs
+      - name: Keep screenshot and diagnostic if available
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kt84-gis-browser-evidence
+          path: test-results/kt84/
+          if-no-files-found: ignore

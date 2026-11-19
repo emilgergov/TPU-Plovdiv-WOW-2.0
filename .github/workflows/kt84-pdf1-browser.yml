@@ -1,0 +1,36 @@
+name: KT84-A isolated PDF1 real browser generation
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - 'tests/kt84_pdf1_browser_smoke.mjs'
+      - '.github/workflows/kt84-pdf1-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-pdf1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install private Chromium testing harness
+        run: |
+          npm install --no-save playwright@1.57.0
+          npx playwright install chromium
+      - name: Start private local branch server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/kt84-pdf1-server.log 2>&1 &
+          for n in $(seq 1 30); do curl -sf http://127.0.0.1:8765/v26-test/gis-data/manifest.json >/dev/null && break; sleep 1; done
+      - name: Generate real PDF1 from actual full GIS and PI MASTER
+        run: node tests/kt84_pdf1_browser_smoke.mjs
+      - name: Preserve PDF1 evidence for expert layout inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kt84-pdf1-real-browser
+          path: test-results/kt84-pdf1/
+          if-no-files-found: ignore

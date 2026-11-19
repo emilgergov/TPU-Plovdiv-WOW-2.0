@@ -1,0 +1,29 @@
+name: KT84-G Stage 5 must reject unverified V11
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - 'tests/kt84-g-stage5-gate-browser.mjs'
+      - '.github/workflows/kt84-g-stage5-gate.yml'
+      - 'kt80/integration/kt83-v617-universal-out-session.mjs'
+      - 'kt80/integration/kt83-v617-universal-out-preview.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stage5-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright@1.57.0
+          npx playwright install chromium
+      - run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/kt84-stage5.log 2>&1 &
+          for n in $(seq 1 30); do curl -sf http://127.0.0.1:8765/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html >/dev/null && break; sleep 1; done
+      - name: Attempt Stage 5 navigation without validated V11
+        run: node tests/kt84-g-stage5-gate-browser.mjs

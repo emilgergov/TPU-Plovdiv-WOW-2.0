@@ -1,0 +1,30 @@
+name: KT84-E visual hierarchy and concise Stage 5 preview
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - 'kt80/KT84_E_ADMIN_VISUAL_HIERARCHY_V01.js'
+      - 'kt80/KT83_UX_BATCH_V01.js'
+      - 'kt80/KT83_VT02_P1_P6_VISUAL_TEST.html'
+      - 'tests/kt84-e-interface-browser.mjs'
+      - '.github/workflows/kt84-e-interface.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  visual-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright@1.57.0
+          npx playwright install chromium
+      - run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/kt84-e-http.log 2>&1 &
+          for n in $(seq 1 30); do curl -sf http://127.0.0.1:8765/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html >/dev/null && break; sleep 1; done
+      - name: Verify legal findings dominate controls and Stage 5 is concise
+        run: node tests/kt84-e-interface-browser.mjs

@@ -195,6 +195,14 @@ async function verifyIntersections(run){
   const count=S.results.reduce((n,r)=>n+(r.verified_zone_intersections?.length||0),0);
   const checked=S.results.filter(r=>Array.isArray(r.verified_zone_intersections)&&typeof r.intersection_verified_outside==='boolean').length;
   status('Имотни геометрии: '+S.results.filter(r=>featuresOf(r).length).length+' · ГИС проверка: '+checked+' от '+S.results.length+' имота · Доказани пресичания със ЗЗ: '+count+'.');
+  // KT83 P2: signal completion only for the active, case-bound GIS run.
+  document.dispatchEvent(new CustomEvent('kt83:gis-intersections-checked',{detail:Object.freeze({
+   caseId:root.KT80WorkflowState?.caseCycleId||null,
+   generation:root.KT80WorkflowState?.generation??null,
+   evidenceRevision:root.KT82EvidenceInvalidation?.getRevision?.()??null,
+   source:root.KT80FreeGISResults,ids:Object.freeze([...S.results.map(r=>String(r.input||r.cadnum))]),
+   checked,total:S.results.length
+  })}));
  }catch(e){
   if(run===S.epoch)status('Имотите са намерени, но проверката на пресичанията не е завършена: '+String(e?.message||e));
  }

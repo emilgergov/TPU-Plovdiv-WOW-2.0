@@ -1,0 +1,23 @@
+name: KT84-C legal evidence independence regression
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - 'tests/kt84-c-legal-independence.test.mjs'
+      - '.github/workflows/kt84-legal-independence.yml'
+      - 'kt80/integration/stage4-independent-legal-engine.mjs'
+      - 'kt80/integration/kt83-p5-expert-review-ui.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-legal-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate V11 legal independence for missing, conflicting, stale and proven facts
+        run: node --test tests/kt84-c-legal-independence.test.mjs

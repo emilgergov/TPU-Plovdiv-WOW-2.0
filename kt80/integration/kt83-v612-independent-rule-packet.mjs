@@ -8,7 +8,7 @@ const trim=s=>typeof s==='string'?s.trim():'';
 const unique=arr=>Array.isArray(arr)&&new Set(arr).size===arr.length;
 const FACT=/^[a-zA-Z0-9_:-]{1,100}$/;
 const ALLOWED_HYPOTHESIS=new Set(['id','title','registryId','requirements','exceptions','exceptionAudit','missingFactProposal','supportedProposal','notSupportedProposal']);
-const ALLOWED_FACT=new Set(['factId','value','sourceId','sourceType','sourceLocation','reason','observedAt']);
+const ALLOWED_FACT=new Set(['factId','value','sourceId','sourceType','sourceLocation','reason','sourceQuote','observedAt']);
 function factIds(input,name){
  if(!Array.isArray(input)||!input.length||!unique(input)||input.some(x=>typeof x!=='string'||!FACT.test(x)))
   throw new TypeError(name+': нужен е непразен списък с уникални идентификатори на факти');
@@ -67,7 +67,7 @@ export function validateFactLedger(entries,rules){
    throw new TypeError('Недоказан факт, несъществуваща предпоставка или липсващ източник и експертен мотив');
   ledger.push(Object.freeze({factId:e.factId,value:e.value,sourceId:e.sourceId,
    sourceType:e.sourceType,sourceLocation:e.sourceLocation,
-   observedAt:trim(e.observedAt)}));
+   sourceQuote:trim(e.sourceQuote),observedAt:trim(e.observedAt)}));
  }
  return Object.freeze(ledger);
 }

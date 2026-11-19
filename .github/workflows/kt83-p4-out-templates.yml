@@ -1,0 +1,25 @@
+name: KT83 P4 original institutional OUT blank
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - kt80/integration/kt83-v614-review-document.mjs
+      - kt80/integration/kt83-v616-original-riosv-blank.mjs
+      - kt80/integration/kt83-v617-universal-out-preview.mjs
+      - kt80/integration/kt83-v617-universal-out-session.mjs
+      - kt80/KT83_VT01_P1_AUTOMATIC_ROUTE_TEST.html
+      - tests/kt83-p4-single-riosv-blank.test.mjs
+      - .github/workflows/kt83-p4-out-templates.yml
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  original-blank:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm free OUT composition on original RIOSV letterhead and immutable V27.35
+        run: node --test tests/kt83-p4-single-riosv-blank.test.mjs

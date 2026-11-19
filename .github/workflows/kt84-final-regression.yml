@@ -1,0 +1,81 @@
+name: KT84 FINAL common functional evidence regressions
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - 'kt80/KT80_E01_IP_MASTER_SUBJECT_V32.js'
+      - 'kt80/KT83_WORKFLOW_CASE_V591.js'
+      - 'kt80/KT80_E01_KT52_PROJECT_RECONSTRUCTION_V52.js'
+      - 'kt80/integration/kt83-p2-automatic-pdf1.js'
+      - 'tests/kt83-p2-spatial-gate.test.cjs'
+      - 'tests/kt83-p6-integrated-evidence-to-v11.test.mjs'
+      - 'tests/kt84-final-v11-to-original-word.test.mjs'
+      - 'kt80/integration/kt83-v613-competence-gate.mjs'
+      - 'kt80/integration/kt83-v613-case-bound-b2-bridge.mjs'
+      - 'tests/kt84-e-interface-browser.mjs'
+      - 'tests/kt84-final-real-gis-abc-browser.mjs'
+      - 'tests/kt84-final-intake-chain-browser.mjs'
+      - 'kt80/integration/kt83-v617-universal-out-session.mjs'
+      - 'tests/kt84-final-dossier-subject-provenance.test.mjs'
+      - '.github/workflows/kt84-final-regression.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  provenance-and-independent-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install approved test-only dependencies for original OUT blank
+        run: npm install --no-save --no-package-lock --ignore-scripts fflate@0.8.3 @xmldom/xmldom@0.9.8
+      - name: Syntax of active dossier and subject modules
+        run: |
+          node --check kt80/KT80_E01_IP_MASTER_SUBJECT_V32.js
+          node --check kt80/KT83_WORKFLOW_CASE_V591.js
+          node --check kt80/KT80_E01_KT52_PROJECT_RECONSTRUCTION_V52.js
+          node --check kt80/KT82_DOSSIER_COMPLETENESS_V34.js
+          node --check kt80/KT82_E01_SAFE_ZIP_INTAKE_V35.js
+      - name: Unified dossier provenance and normative safety tests
+        run: |
+          node --test tests/kt84-final-dossier-subject-provenance.test.mjs
+          node --test tests/kt84-c-legal-independence.test.mjs
+          node --test tests/kt83-p3-case-review-provider.test.mjs
+          node --test tests/kt83-p2-spatial-gate.test.cjs
+          node --test tests/kt83-vt01-route-p1.test.cjs
+          node --test tests/kt83-p6-integrated-evidence-to-v11.test.mjs
+          node --test kt80/integration/kt83-v617-universal-out-session.test.mjs
+          node --test tests/kt84-final-v11-to-original-word.test.mjs
+
+  browser-acceptance-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated Chromium
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts playwright@1.57.0 fflate@0.8.3 @xmldom/xmldom@0.9.8
+          npx playwright install chromium
+      - name: Serve the exact integrated working-branch screen and GIS archive
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/kt84-vt03-gate.log 2>&1 &
+          for n in $(seq 1 30); do curl -sf http://127.0.0.1:8765/v26-test/gis-data/manifest.json >/dev/null && break; sleep 1; done
+      - name: Real ZIP intake and evidence-bound subject
+        run: node tests/kt84-final-intake-chain-browser.mjs
+      - name: Actual three-parcel GIS PDF1 and Stage4 handoff
+        run: node tests/kt84-final-real-gis-abc-browser.mjs
+      - name: All five stage visual hierarchy and safe Stage5 preview
+        run: node tests/kt84-e-interface-browser.mjs
+      - name: Retain browser-generated original PDF1 for expert inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kt84-vt03-browser-gate-pdf1
+          path: test-results/kt84-final/
+          if-no-files-found: ignore

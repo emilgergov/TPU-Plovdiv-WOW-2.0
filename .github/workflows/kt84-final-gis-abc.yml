@@ -1,0 +1,36 @@
+name: KT84 FINAL three real GIS parcels and original PDF1 integration
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - 'tests/kt84-final-real-gis-abc-browser.mjs'
+      - '.github/workflows/kt84-final-gis-abc.yml'
+      - 'kt80/integration/kt83-p2-automatic-pdf1.js'
+      - 'kt80/integration/kt83-p2-spatial-gate.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-spatial-route:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright@1.57.0
+          npx playwright install chromium
+      - run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/kt84-final-gis.log 2>&1 &
+          for n in $(seq 1 30); do curl -sf http://127.0.0.1:8765/v26-test/gis-data/manifest.json >/dev/null && break; sleep 1; done
+      - name: Verify three actual parcel geometries and original PDF1 handoff
+        run: node tests/kt84-final-real-gis-abc-browser.mjs
+      - name: Retain generated PDF1 test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kt84-final-real-abc-pdf1
+          path: test-results/kt84-final/
+          if-no-files-found: ignore

@@ -9,11 +9,32 @@ async function openArchive(file){
  }
  const next=new global.zip.ZipReader(new global.zip.BlobReader(file));
  let list;try{list=await next.getEntries()}catch(e){await next.close();throw e}
- const m=new Map(list.filter(x=>!x.directory).map(x=>[x.filename.split('/').pop(),x]));
- for(const key of ['parcels_04.json.gz','parcelgeom_04.json.gz','overlays_04.json.gz'])if(!m.has(key)){await next.close();throw Error('Непълен ГИС пакет: '+key)}
+ const files=list.filter(x=>!x.directory);
+ const m=new Map(files.map(x=>[x.filename.split('/').pop(),x]));
+ // Full deployment contract: never treat a partially extracted/demonstration ZIP
+ // as a validated GIS source. Exact shard filenames are checked, not ZIP size.
+ const shards=files.filter(x=>/^(?:parcels|parcelgeom|overlays|overlapgeom)_\d{2}\.json\.gz$/i.test(x.filename.split('/').pop()));
+ let manifest;
+ try{
+  if(!m.has('manifest.json'))throw Error('Липсва ГИС манифест.');
+  const raw=await m.get('manifest.json').getData(new global.zip.TextWriter());
+  manifest=JSON.parse(raw);
+  if(manifest.status!=='PASS_COUNT_BY_PREFIX'||manifest.parcel_geometry!==917418||manifest.overlap_records_expected!==181154||manifest.shards!==258)
+   throw Error('ГИС манифестът не съответства на одобрения пълен набор.');
+  if(shards.length!==258||new Set(shards.map(x=>x.filename.split('/').pop())).size!==258)
+   throw Error('Непълен ГИС архив: очакват се точно 258 уникални пространствени сегмента.');
+  const prefixes={};
+  for(const kind of ['parcels','parcelgeom','overlays','overlapgeom'])
+   prefixes[kind]=new Set(shards.filter(x=>x.filename.split('/').pop().startsWith(kind+'_')).map(x=>x.filename.split('/').pop().split('_')[1].slice(0,2)));
+  const same=(a,b)=>a.size===b.size&&[...a].every(prefix=>b.has(prefix));
+  if(prefixes.parcels.size!==manifest.parcel_prefixes||!same(prefixes.parcels,prefixes.parcelgeom))
+   throw Error('Непълен ГИС архив: кадастралните и геометричните префикси не съвпадат.');
+  if(!same(prefixes.overlays,prefixes.overlapgeom)||[...prefixes.overlays].some(prefix=>!prefixes.parcels.has(prefix)))
+   throw Error('Непълен ГИС архив: слоевете за пресичания не съответстват на кадастралните префикси.');
+ }catch(e){await next.close();throw e}
  if(reader)await reader.close();
- reader=next;entries=m;hostedRoot=null;hostedManifest=null;cache.clear();archiveName=file.name;
- return {name:archiveName,files:m.size};
+ reader=next;entries=m;hostedRoot=null;hostedManifest=manifest;cache.clear();archiveName=file.name;
+ return {name:archiveName,files:m.size,shards:258,parcel_geometry:manifest.parcel_geometry};
 }
 /* Python geometry export may contain non-standard NaN numeric literals. Normalize only tokens outside JSON strings. */
 function normalizeNonFiniteJson(source){
@@ -41,7 +62,24 @@ async function openHosted(base){
  if(!response.ok)throw Error('ГИС сегментите още не са публикувани ('+response.status+').');
  const manifest=await response.json();
  if(manifest.status!=='PASS_COUNT_BY_PREFIX'||manifest.parcel_geometry!==917418||manifest.overlap_records_expected!==181154||manifest.shards!==258)throw Error('Непотвърден ГИС манифест.');
- const probe=await fetch(root+'/parcelgeom_36.json.gz',{method:'HEAD',cache:'no-store'});if(!probe.ok)throw Error('Пълният ГИС пакет не е публикуван: липсва parcelgeom_36.json.gz.');hostedRoot=root;hostedManifest=manifest;cache.clear();return manifest;
+ // HEAD is not a reliable availability test on every static host/proxy.
+ // Inspect the first gzip bytes with a bounded GET; never infer a missing file from a HEAD failure.
+ const probeUrl=root+'/parcelgeom_36.json.gz';
+ let probe;
+ try{probe=await fetch(probeUrl,{method:'GET',headers:{Range:'bytes=0-1'},cache:'no-store'});}
+ catch(e){throw Error('Неуспешна връзка с ГИС сегмента parcelgeom_36.json.gz: '+String(e?.message||e));}
+ if(!probe.ok){probe.body?.cancel?.().catch?.(()=>{});throw Error('ГИС сегмент parcelgeom_36.json.gz не е достъпен (HTTP '+probe.status+'). Проверете адреса и публикуването.');}
+ const reader=probe.body?.getReader?.();
+ if(!reader)throw Error('Не може да се провери съдържанието на ГИС сегмента.');
+ let magic=[];
+ try{
+  while(magic.length<2){
+   const part=await reader.read();if(part.done)break;
+   for(let i=0;i<part.value.length&&magic.length<2;i++)magic.push(part.value[i]);
+  }
+ }finally{await reader.cancel().catch(()=>{});}
+ if(magic[0]!==0x1f||magic[1]!==0x8b)throw Error('Публикуваният ГИС сегмент няма валиден gzip заглавен запис.');
+ hostedRoot=root;hostedManifest=manifest;cache.clear();return manifest;
 }
 async function lookup(ids){
  if(!entries&&!hostedRoot)throw Error('ГИС базата не е заредена.');

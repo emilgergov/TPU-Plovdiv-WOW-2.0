@@ -81,9 +81,9 @@ export async function makeOriginalBlankReviewDOCX({templateBytes,zipEngine,recor
       fail('очаквано празно поле съдържа оригинален материал; отказ');
  }
  rewrite(dom,ps[4],'Получател: '+(trimmed(recipient)||record.recipient));
- rewrite(dom,ps[5],'Адрес: '+(trimmed(address)||'ХХХХХХХХХХХХХ'));
+ rewrite(dom,ps[5],'Адрес: '+(trimmed(address)||trimmed(record.address)||'ХХХХХХХХХХХХХ'));
  rewrite(dom,ps[8],'Относно: '+record.subject);
- rewrite(dom,ps[11],'ПРОЕКТ ЗА ЕКСПЕРТЕН ПРЕГЛЕД',{bold:true});
+ rewrite(dom,ps[11],trimmed(record.caseTitle)||'ПРОЕКТ ЗА ЕКСПЕРТЕН ПРЕГЛЕД',{bold:true});
  for(const p of ps.slice(12,36))body.removeChild(p);
  const closing=ps[36];
  for(const line of ['РАБОТЕН ПРОЕКТ — НЕ Е ИЗХОДЯЩ АДМИНИСТРАТИВЕН АКТ',...bodyLines]){

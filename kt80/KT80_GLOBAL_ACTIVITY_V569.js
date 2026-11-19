@@ -51,11 +51,16 @@ function showError(area,message){
  if(!target)return;
  target.textContent=String(message||'');
  target.dataset.kt80Error='true';target.setAttribute('role','alert');
- target.scrollIntoView({block:'nearest',behavior:'smooth'});
+ // Persistent inline feedback remains beside the EG action. Do not pull the
+ // expert away from the current editor with an unsolicited scroll jump.
 }
 function clearError(area){
  const target=document.getElementById(area==='scope'?'kt80ScopeProposalStatus':'kt80SubjectProposalStatus');
- if(target){delete target.dataset.kt80Error;target.setAttribute('role','status')}
+ if(!target)return;
+ // A recovered editor must not keep a stale failure as if it still applied.
+ if(target.dataset.kt80Error==='true')target.textContent='';
+ delete target.dataset.kt80Error;
+ target.setAttribute('role','status');
 }
 root.KT80AdministrativeNotice=Object.freeze({showError,clearError});
 })(window);

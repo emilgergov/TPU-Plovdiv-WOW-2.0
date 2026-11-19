@@ -6,9 +6,9 @@
 const trimmed=x=>typeof x==='string'?x.replace(/\s+/gu,' ').trim():'';
 const escape=x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const normId=x=>typeof x==='string'&&/^[a-zA-Z0-9_-]{8,128}$/.test(x);
-const allowed=['caseId','generation','subject','proposal','evidenceRevision','recordedAt','recipient','referenceNumber','caseTitle'];
+const allowed=['caseId','generation','subject','proposal','evidenceRevision','recordedAt','recipient','address','referenceNumber','caseTitle'];
 export function createReviewDocument({caseId,generation,subject,proposal,evidenceRevision=null,
- recordedAt=null,recipient=null,referenceNumber=null,caseTitle=null}={}){
+ recordedAt=null,recipient=null,address=null,referenceNumber=null,caseTitle=null}={}){
  if(!normId(caseId)||!Number.isSafeInteger(generation)||generation<0)
   throw new TypeError('Липсва валиден идентификатор и генерация на преписката');
  if(!trimmed(subject)||!proposal||proposal.schema!=='KT80_STAGE5_INDEPENDENT_DRAFT_V01'||
@@ -24,6 +24,7 @@ export function createReviewDocument({caseId,generation,subject,proposal,evidenc
   status:'EXPERT_REVIEW_ONLY',
   caseId,generation,subject:trimmed(subject),
   evidenceRevision,recipient:trimmed(recipient)||'АДРЕСАТ — ЗА ПОПЪЛВАНЕ',
+  address:trimmed(address)||'ХХХХХХХХХХХХХ',
   referenceNumber:trimmed(referenceNumber)||'ВХ. № — ЗА ПОПЪЛВАНЕ',
   caseTitle:trimmed(caseTitle)||'Проект за експертен преглед',
   recordedAt:recordedAt||null,
@@ -51,7 +52,8 @@ export function renderReviewHTML(record){
   '.foot{margin-top:8mm;border-top:1px solid #555;padding-top:3mm;font-size:9pt}.sigs{margin-top:10mm;display:flex;gap:8mm}.sig{flex:1}'+
   '</style></head><body><header><h1>'+escape(record.institutionalHeader)+'</h1>'+
   '<p>'+escape(record.logoStatus)+'</p><p class="notice">'+escape(record.confidentiality)+'</p></header>'+
-  '<p><strong>Адресат:</strong> '+escape(record.recipient)+'</p>'+
+  '<p><strong>Адресат:</strong> '+escape(record.recipient)+'</p>'+ 
+  '<p><strong>Адрес:</strong> '+escape(record.address)+'</p>'+
   '<p><strong>Преписка:</strong> '+escape(record.referenceNumber)+'</p>'+
   '<p><strong>Предмет:</strong> '+escape(record.subject)+'</p><main>'+sections+'</main>'+
   '<div class="sigs">'+record.signatures.map(s=>'<div class="sig">'+escape(s.role)+': '+escape(s.status)+'</div>').join('')+'</div>'+

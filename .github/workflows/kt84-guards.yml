@@ -1,0 +1,28 @@
+name: KT84 GIS and workflow regression guards
+on:
+  push:
+    branches:
+      - kt83-vt01-automatic-route-p1
+    paths:
+      - 'v26-test/v26-approved-gis-zip.js'
+      - 'kt80/KT83_WORKFLOW_CASE_V591.js'
+      - 'kt80/KT82_DOSSIER_COMPLETENESS_V34.js'
+      - 'kt80/KT80_GLOBAL_ACTIVITY_V569.js'
+      - 'kt80/integration/kt83-p2-spatial-gate.js'
+      - 'kt80/integration/kt83-p5-single-route.js'
+      - 'kt80/tests/kt84-guards.test.mjs'
+      - '.github/workflows/kt84-guards.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  safety-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Safety, document and GIS validation
+        run: node --test kt80/tests/kt84-guards.test.mjs

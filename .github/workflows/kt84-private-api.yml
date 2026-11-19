@@ -1,0 +1,22 @@
+name: KT84-02 private Cloudflare API safeguards
+on:
+  push:
+    branches: [kt83-vt01-automatic-route-p1]
+    paths:
+      - kt84/**
+      - tests/kt84-private-api.test.mjs
+      - tests/kt84-access-policy.test.mjs
+      - .github/workflows/kt84-private-api.yml
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  private-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify private API identity boundaries, D1/R2 configuration and personal cases
+        run: node --test tests/kt84-private-api.test.mjs tests/kt84-access-policy.test.mjs
