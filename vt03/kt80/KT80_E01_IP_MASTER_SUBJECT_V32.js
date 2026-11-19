@@ -45,12 +45,22 @@ function candidates(intake){
  return out;
 }
 function reviewRequestSource(intake){
+ const record=root.KT126Registry?.current?.();
+ let confirmedFile='';
+ if(record?.external_status==='confirmed'&&record.case_id===root.KT80WorkflowState?.caseCycleId){
+  try{
+   const evidence=typeof record.external_evidence_json==='string'?JSON.parse(record.external_evidence_json):record.external_evidence_json;
+   confirmedFile=clean(evidence?.file);
+  }catch{}
+ }
+ const fileKey=name=>clean(name).replace(/\\/g,'/').normalize('NFC');
  const files=(intake?.files||[]).filter(file=>!file.expertIgnored&&!file.ignored&&/текстът е прочетен/iu.test(file.status||''));
  const documents=(intake?.document_texts||[]).map(doc=>({file:clean(doc.source),text:String(doc.text||'')}));
  const kind=/^(?:иск(?:ане|ам|аме)\s+за\s+преразглеждане|възражение(?:\s+срещу)?|жалба(?:\s+срещу)?)(?=\s|[:.,]|$)/iu;
  const matches=files.flatMap(file=>{
   const name=clean(file.filename);
-  const first=clean(documents.find(doc=>doc.file===name)?.text?.slice(0,3000));
+  const first=clean(documents.find(doc=>fileKey(doc.file)===fileKey(name))?.text?.slice(0,12000)||
+   (intake?.page_text_index||[]).filter(page=>fileKey(page.file||page.filename)===fileKey(name)).slice(0,3).map(page=>page.text||'').join(' '));
   if(!first)return [];
   const header=first.match(/(?:^|\s)(?:относно\s*[:–-]\s*)?(иск(?:ане|ам|аме)\s+за\s+преразглеждане|възражение\s+срещу|жалба\s+срещу)(?=\s|[:.,]|$)/iu);
   const filename=name.split(/[\\/]/u).at(-1).replace(/\.[^.]+$/u,'');
@@ -59,7 +69,8 @@ function reviewRequestSource(intake){
   const label=header?.[1]||filename;
   return [{file:name,kind:/жалба/iu.test(label)?'Жалба срещу':/възражение/iu.test(label)?'Възражение срещу':'Искане за преразглеждане на'}];
  });
- return matches.length===1?matches[0]:null;
+ const preferred=confirmedFile?matches.find(match=>fileKey(match.file)===fileKey(confirmedFile)):null;
+ return preferred||(matches.length===1?matches[0]:null);
 }
 function propose(intake){
  const options=candidates(intake);
@@ -162,7 +173,7 @@ function init(){
  $('kt80ConstructSubject')?.addEventListener('click',constructed);
  $('kt80EditSubject')?.addEventListener('click',correction);
  document.addEventListener('kt80:case-reset',reset);
- root.KT80SubjectMaster=Object.freeze({propose,show,construct:constructed,confirmedSubject,reset,getDraft:()=>draft,getAccepted:()=>accepted});
+ root.KT80SubjectMaster=Object.freeze({propose,show,reviewRequestSource,construct:constructed,confirmedSubject,reset,getDraft:()=>draft,getAccepted:()=>accepted});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })(window);
