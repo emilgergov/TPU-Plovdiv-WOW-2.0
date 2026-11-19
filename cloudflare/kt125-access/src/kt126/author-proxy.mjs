@@ -1,7 +1,8 @@
+import {withAuthorDeadline} from './author-deadline.mjs';
 import {caseContext,validCaseId,sha256,actionGuard} from './registry.mjs';
 import {registryJson} from './http.mjs';
 const allowed=new Set(['/author','/subject-improve','/scope-improve','/stage4-proposal','/stage4-expert-decision','/stage5-document']);
-export async function proxyAuthor({request,env,who,config,now=Date.now(),authorFetch=fetch}){
+export async function proxyAuthor({request,env,who,config,now=Date.now(),authorFetch=fetch,authorTimeoutMs=130000}){
  const path=new URL(request.url).pathname.slice('/kt126/author'.length);
  if(request.method!=='POST'||!allowed.has(path))return registryJson({error:'Невалидна аналитична операция.'},404);
  if(request.headers.get('Origin')!==config.origin||(request.headers.has('Sec-Fetch-Site')&&request.headers.get('Sec-Fetch-Site')!=='same-origin'))return registryJson({error:'Заявката е отказана.'},403);
@@ -20,8 +21,8 @@ export async function proxyAuthor({request,env,who,config,now=Date.now(),authorF
  if(claim.meta.changes===0){const prior=await db.prepare('SELECT * FROM kt126_operations WHERE case_id=? AND request_id=?').bind(caseId,key).first();if(prior?.payload_hash!==payloadHash||prior?.case_revision!==revision||prior?.actor_id!==who.userId||prior?.endpoint!==path)return registryJson({error:'Повторната заявка има различни данни.'},409);if(prior.status==='done')return new Response(prior.response_json,{status:prior.response_status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store, private'}});return registryJson({error:'Тази заявка вече се обработва. Изчакайте резултата.'},409)}
  const headers=new Headers({'Content-Type':'application/json',Origin:config.origin,'X-KT126-Case':caseId,'X-KT126-Session':request.headers.get('Cookie')||''});
  let status=503,body=JSON.stringify({error:'Анализът не е завършен. Опитайте с нова заявка.'});
- try{const invoke=env.KT128_AUTHOR?.fetch?((url,options)=>env.KT128_AUTHOR.fetch(new Request(url,options))):authorFetch;const response=await invoke('https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev'+path,{method:'POST',headers,body:raw,signal:request.signal});status=response.status;body=await response.text();if(new TextEncoder().encode(body).length>950000||!response.headers.get('Content-Type')?.includes('json')){status=502;body=JSON.stringify({error:'Получен е невалиден аналитичен отговор.'})}}
- catch{}
+ try{const invoke=env.KT128_AUTHOR?.fetch?((url,options)=>env.KT128_AUTHOR.fetch(new Request(url,options))):authorFetch;const result=await withAuthorDeadline(async signal=>{const response=await invoke('https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev'+path,{method:'POST',headers,body:raw,signal});return {response,text:await response.text()}},{signal:request.signal,timeoutMs:authorTimeoutMs});const response=result.response;status=response.status;body=result.text;if(new TextEncoder().encode(body).length>950000||!response.headers.get('Content-Type')?.includes('json')){status=502;body=JSON.stringify({error:'Получен е невалиден аналитичен отговор.'})}}
+ catch(error){status=error?.egTransport?504:503;body=JSON.stringify({error:error?.egTransport?'EG_PROVIDER_TIMEOUT':'EG_PROVIDER_UNAVAILABLE',transportFailure:true,message:error?.egTransport?error.message:'ЕГ услугата временно не е достъпна. Текущите данни са запазени. Опитайте по-късно.'})}
  const fresh=await caseContext({...args,now:Date.now()});if(!fresh||fresh.revision!==revision){status=409;body=JSON.stringify({error:'Преписката е променена по време на анализа. Закъснелият резултат не се прилага.'})}
  const event=crypto.randomUUID();
  await db.batch([

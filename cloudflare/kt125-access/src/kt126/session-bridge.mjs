@@ -1,5 +1,7 @@
+import {withAuthorDeadline} from './author-deadline.mjs';
 export const sessionBridgeSource=`/* KT128: authenticated native session; server is the sole authority. No browser bearer. */
 (function(root){'use strict';
+ const withAuthorDeadline=${withAuthorDeadline.toString()};
  const endpoints=new Set(['/author','/subject-improve','/scope-improve','/stage4-proposal','/stage4-expert-decision','/stage5-document']);
  async function request(endpoint,payload){
   const url=new URL(endpoint,location.href);
@@ -7,7 +9,8 @@ export const sessionBridgeSource=`/* KT128: authenticated native session; server
   const current=root.KT126Registry?.current();if(!current)throw Error('Първо регистрирайте или отворете преписката в Етап 1.');
   const body=JSON.parse(payload);if(!body||Array.isArray(body)||body.caseId&&body.caseId!==current.case_id)throw Error('Заявката е за друга преписка.');
   body.caseId=current.case_id;if(!body.requestId)body.requestId=crypto.randomUUID();
-  return root.fetch(url.href,{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  try{return await withAuthorDeadline(async signal=>{const response=await root.fetch(url.href,{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal});return new Response(await response.text(),{status:response.status,headers:response.headers})},{timeoutMs:150000})}
+  catch(error){return Response.json({error:error?.egTransport?'EG_PROVIDER_TIMEOUT':'EG_PROVIDER_UNAVAILABLE',transportFailure:true,message:error?.egTransport?error.message:'Няма връзка с ЕГ услугата. Текущите данни са запазени. Проверете връзката и опитайте отново.'},{status:error?.egTransport?504:503})}
  }
  root.KT80EGSession=Object.freeze({hasAccess:()=>true,request,clear:()=>{}});
 })(window);`;
@@ -34,5 +37,8 @@ export function overlaySessionAccess(rel,source){
   source=once(source," form.addEventListener('submit',e=>{e.preventDefault();const p=password.value;password.value='';dialog.close();generate(p)});",'');
   source=once(source,'Достъпът до EG Автора е отказан. Паролата за тази сесия е изчистена.','Достъпът до EG Автора е отказан. Проверете активния профил и правата по преписката.');
  }
+ if(rel.endsWith('/KT83_AI_SUBJECT_V572.js')||rel.endsWith('/KT83_AI_SCOPE_V572.js'))source=once(source,'if(!response.ok){',"if(!response.ok){if(data.transportFailure===true&&typeof data.message==='string'){throw Error(data.message);}");
+ if(rel.endsWith('/kt96-eg-ai-stage4-author.mjs'))source=once(source,'   if(!response.ok){',"   if(!response.ok&&data.transportFailure===true&&typeof data.message==='string'){status.textContent=data.message;return;}\n   if(!response.ok){");
+ if(rel.endsWith('/kt117-stage5-document-author.mjs'))source=once(source,'   if(!res.ok){',"   if(!res.ok&&data.transportFailure===true&&typeof data.message==='string'){note.textContent=data.message;return;}\n   if(!res.ok){");
  return source.replaceAll('Въведете отново правилната парола чрез „Интелигентно подобряване“.','Проверете активния профил и правата по преписката.').replaceAll('Липсва парола за EG автора.','Няма действаща потребителска сесия.');
 }

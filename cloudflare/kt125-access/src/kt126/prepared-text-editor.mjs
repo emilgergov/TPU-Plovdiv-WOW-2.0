@@ -1,4 +1,20 @@
-export function installPreparedTextEditor(api){
+export function editorWordChanges(before,after){
+ const tokenize=s=>s.match(/\s+|[\p{L}\p{N}_]+|[^\s\p{L}\p{N}_]/gu)||[];
+ const a=tokenize(before),b=tokenize(after),out=[];
+ const put=(kind,text)=>{if(!text)return;const last=out.at(-1);if(last?.kind===kind)last.text+=text;else out.push({kind,text});};
+ let left=0;while(left<a.length&&left<b.length&&a[left]===b[left])put('same',a[left++]);
+ let endA=a.length,endB=b.length;while(endA>left&&endB>left&&a[endA-1]===b[endB-1]){endA--;endB--;}
+ const n=endA-left,m=endB-left;
+ // Bound allocation for long documents; unchanged prefix/suffix still stay visible.
+ if(n*m>250000){put('removed',a.slice(left,endA).join(''));put('added',b.slice(left,endB).join(''));}
+ else{
+  const rows=Array.from({length:n+1},()=>new Uint16Array(m+1));
+  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)rows[i][j]=a[left+i]===b[left+j]?rows[i+1][j+1]+1:Math.max(rows[i+1][j],rows[i][j+1]);
+  let i=0,j=0;while(i<n||j<m){if(i<n&&j<m&&a[left+i]===b[left+j]){put('same',a[left+i]);i++;j++;}else if(j<m&&(i===n||rows[i][j+1]>=rows[i+1][j]))put('added',b[left+j++]);else put('removed',a[left+i++]);}
+ }
+ put('same',a.slice(endA).join(''));return out;
+}
+export function installPreparedTextEditor(api,wordChanges=editorWordChanges){
  const {make,reviewActions,preview,textarea,edit,confirm,generate,sourceCheck,word,note,endpoint}=api;
  const smart=make('button','Интелигентен редактор');smart.type='button';smart.id='kt130IntelligentEditor';smart.hidden=true;
  edit.textContent='Експертна редакция';reviewActions.prepend(smart);
@@ -11,12 +27,7 @@ export function installPreparedTextEditor(api){
  const hash=async text=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)))].map(x=>x.toString(16).padStart(2,'0')).join('');
  function differences(a,b){
   changes.replaceChildren();
-  const old=a.split(/\n\s*\n/u),next=b.split(/\n\s*\n/u);
-  for(let i=0;i<Math.max(old.length,next.length);i++){
-   if(old[i]===next[i]){if(next[i])changes.append(document.createTextNode(next[i]+'\n\n'));continue;}
-   if(old[i])changes.append(make('del',old[i]+'\n'));
-   if(next[i])changes.append(make('mark',next[i]+'\n\n'));
-  }
+  for(const part of wordChanges(a,b))changes.append(part.kind==='same'?document.createTextNode(part.text):make(part.kind==='removed'?'del':'mark',part.text));
  }
  function refresh(){
   const s=api.state(),v=s.versions.at(-1),key=s.source?String(s.source.caseId)+'|'+s.source.version:'';
@@ -46,9 +57,13 @@ export function installPreparedTextEditor(api){
    if(!live||live.caseId!==approval.caseId||live.version!==approval.version||live.text!==stage4Text||now.source!==approval||now.versions.at(-1)!==v){report('Редакцията не е приложена: текущата преписка или версия е променена. Предишният текст е запазен.');return;}
    if(!response.ok){report(data.transportFailure===true&&typeof data.message==='string'?data.message:data.error==='EDITOR_PROTECTED_CONTENT'?'Редакцията не е приложена: засегнато е защитено съдържание. Предишният текст е запазен. '+(data.findings||[]).join(' '):'Интелигентната редакция не е получена (код '+response.status+'). Предишният текст е запазен.');return;}
    if(data.caseId!==approval.caseId||data.requestId!==requestId||data.evidenceRevision!==approval.evidenceRevision||data.stage4Version!==approval.version||data.documentVersion!==baseVersion||data.baseTextHash!==baseTextHash||data.editorialOnly!==true||data.expertReviewRequired!==true||typeof data.text!=='string'||data.text.length<120){report('Редакцията не съответства на текущата версия. Не е приложена.');return;}
+   if(data.text.replace(/\s+/gu,' ').trim()===original.replace(/\s+/gu,' ').trim()){
+    notes.replaceChildren(...(data.notes||[]).filter(x=>typeof x==='string').map(x=>make('p',x)));before.textContent=original;differences(original,original);history.hidden=false;
+    report('Редакторът не предлага промени в думите или пунктуацията. Не е създадена нова версия. Прегледайте бележките.');return;
+   }
    previous=original;edited=data.text;api.apply(data.text,'предложение на Интелигентния редактор',{editorialNotes:(data.notes||[]).filter(x=>typeof x==='string').slice(0,8)});
    before.textContent=original;differences(original,data.text);notes.replaceChildren(...(data.notes||[]).filter(x=>typeof x==='string').map(x=>make('p',x)));history.hidden=false;
-   report(data.text===original?'ЕГ редакторът не предлага стилови промени. Прегледайте бележките и потвърдете текста.':'Интелигентната редакция е приложена като нова непотвърдена версия. Прегледайте промените и бележките; можете да редактирате експертно или да върнете предишния вариант.');
+   report(data.editStatus==='partial'?'Приложена е частична редакция като непотвърдена версия. Част от предложенията са отхвърлени; прегледайте бележките.':'Интелигентната редакция е приложена като нова непотвърдена версия. Прегледайте промените и бележките; можете да редактирате експертно или да върнете предишния вариант.');
    document.dispatchEvent(new CustomEvent('kt123:stage5-draft',{detail:{caseId:approval.caseId,stage4Version:approval.version}}));
   }catch{report('Интелигентната редакция не е завършена. Предишният текст е запазен.');}
   finally{if(ticket!==undefined)window.KT80Busy?.finish?.(ticket);api.busy(false);refresh();}
@@ -59,7 +74,7 @@ export function installPreparedTextEditor(api){
 export function overlayPreparedTextEditor(rel,source){
  if(!rel.endsWith('/kt117-stage5-document-author.mjs'))return source;
  const once=(a,b)=>{if(source.split(a).length!==2)throw Error('KT130 editor UI contract mismatch');source=source.replace(a,b);};
- once('function initialize(){','const installPreparedTextEditor='+installPreparedTextEditor.toString()+';\nfunction initialize(){');
+ once('function initialize(){','const editorWordChanges='+editorWordChanges.toString()+';\nconst installPreparedTextEditor='+installPreparedTextEditor.toString()+';\nfunction initialize(){');
  once("word.disabled=!(confirmed&&window.KT119TemplateReady?.());\n };","word.disabled=!(confirmed&&window.KT119TemplateReady?.());\n  styleEditor.refresh();\n };");
  once("  const activityTicket=window.KT80Busy?.start?.(","  styleEditor.refresh();\n  const activityTicket=window.KT80Busy?.start?.(");
  once("  edit.hidden=true;confirm.hidden=true;save.hidden=false;cancel.hidden=false;confirmed=null;footer.hidden=true;","  edit.hidden=true;confirm.hidden=true;save.hidden=false;cancel.hidden=false;confirmed=null;footer.hidden=true;styleEditor.refresh();");

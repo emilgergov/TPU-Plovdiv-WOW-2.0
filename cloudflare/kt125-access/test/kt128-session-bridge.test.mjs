@@ -6,7 +6,7 @@ import {sessionBridgeSource,overlaySessionAccess} from '../src/kt126/session-bri
 import worker from '../../ai-author-v27/src/worker.js';
 const origin='https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev',caseId='11111111-1111-4111-8111-111111111111';
 const requests=[],root={KT126Registry:{current:()=>({case_id:caseId})},fetch:async(url,options)=>{requests.push({url,options});return new Response('{}')}};
-vm.runInNewContext(sessionBridgeSource,{window:root,location:{href:origin+'/module/'},URL,crypto,Response});
+vm.runInNewContext(sessionBridgeSource,{window:root,location:{href:origin+'/module/'},URL,crypto,Response,AbortController,setTimeout,clearTimeout});
 assert.equal(root.KT80EGSession.hasAccess(),true);
 await root.KT80EGSession.request('https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/subject-improve',JSON.stringify({subject:'Сграда',facts:[]}),'must-not-be-used');
 assert(!JSON.stringify(requests).includes('must-not-be-used'));assert.equal(requests[0].options.headers.Authorization,undefined);assert.equal(JSON.parse(requests[0].options.body).caseId,caseId);

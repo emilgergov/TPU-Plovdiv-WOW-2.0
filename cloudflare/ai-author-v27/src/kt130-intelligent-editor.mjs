@@ -51,6 +51,6 @@ export async function editPreparedDocument(input,env,provider=fetch,documentInst
   result.text=parts.join('');
   const findings=editorGuard(original,result.text);
   if(findings.length)return {status:422,body:{error:'EDITOR_PROTECTED_CONTENT',findings,expertReviewRequired:true}};
-  return {status:200,body:{caseId:input.caseId,requestId:input.requestId,evidenceRevision:input.evidenceRevision,stage4Version:input.stage4Version,documentVersion:input.documentVersion,baseTextHash:input.baseTextHash,text:result.text,notes:[...retained,...(Array.isArray(result.notes)?result.notes:[])].filter(x=>typeof x==='string').slice(0,8),editorialOnly:true,expertReviewRequired:true,projectOnly:true,documentIssued:false}};
+  return {status:200,body:{caseId:input.caseId,requestId:input.requestId,evidenceRevision:input.evidenceRevision,stage4Version:input.stage4Version,documentVersion:input.documentVersion,baseTextHash:input.baseTextHash,text:result.text,editStatus:result.text.replace(/\s+/gu,' ').trim()===original.replace(/\s+/gu,' ').trim()?'unchanged':retained.length?'partial':'changed',notes:[...retained,...(Array.isArray(result.notes)?result.notes:[])].filter(x=>typeof x==='string').slice(0,8),editorialOnly:true,expertReviewRequired:true,projectOnly:true,documentIssued:false}};
  }catch(error){return providerFailureData(error)||{status:502,body:{error:'EDITOR_UNAVAILABLE'}}}finally{clearTimeout(timer)}
 }

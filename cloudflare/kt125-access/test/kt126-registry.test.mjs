@@ -98,6 +98,13 @@ try{
  let privateCalls=0;
  const privateBridge=await proxyAuthor({...bridgeArgs,request:bridgeRequest(),env:{KT125_DB:db,KT128_AUTHOR:{fetch:async request=>{privateCalls++;assert.equal(new URL(request.url).pathname,'/subject-improve');assert.equal(request.headers.get('X-KT126-Session'),'opaque');assert.equal(request.headers.get('Authorization'),null);return new Response('{}',{headers:{'Content-Type':'application/json'}})}}},authorFetch:async()=>{throw Error('Public Worker-to-Worker route must not be used')}});
  assert.equal(privateBridge.status,200);assert.equal(privateCalls,1);
+ // Failure responses are cached too: clicking again must not incur another provider request.
+ const timeoutRequest=bridgeRequest();const timeoutClone=timeoutRequest.clone();let timeoutCalls=0;
+ const timeoutArgs={...bridgeArgs,authorTimeoutMs:5,authorFetch:async(_url,options)=>{timeoutCalls++;return new Response(new ReadableStream({start(){}}),{headers:{'Content-Type':'application/json'}})}};
+ const timeout=await proxyAuthor({...timeoutArgs,request:timeoutRequest});assert.equal(timeout.status,504);assert.equal((await timeout.clone().json()).transportFailure,true);
+ const cachedTimeout=await proxyAuthor({...timeoutArgs,request:timeoutClone});assert.equal(cachedTimeout.status,504);assert.equal(timeoutCalls,1);assert.equal(await cachedTimeout.text(),await timeout.text());
+ const offline=await proxyAuthor({...bridgeArgs,request:bridgeRequest(),authorFetch:async()=>{throw Error('PRIVATE-UPSTREAM-DETAIL')}});
+ assert.equal(offline.status,503);assert(! (await offline.text()).includes('PRIVATE-UPSTREAM-DETAIL'));
  console.log('PASS KT128 private transport: native author service binding takes precedence, case/session guard retained, no browser bearer');
 
 }finally{await mf.dispose()}
