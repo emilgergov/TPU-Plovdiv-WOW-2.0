@@ -120,7 +120,7 @@ function initialize(){
   if(!source||!confirmed||confirmed.caseId!==source.caseId||confirmed.stage4Version!==source.version)return null;
   const output=confirmed.stage5Output;
   if(output){
-   return output.caseId===confirmed.caseId&&output.decisionVersion===confirmed.stage4Version&&
+   return confirmed.wordSaved===true&&output.caseId===confirmed.caseId&&output.decisionVersion===confirmed.stage4Version&&
     output.documentVersion===confirmed.version?output:null;
   }
   // Legacy documents can be reviewed without attributing current GIS to an old decision.
@@ -247,6 +247,7 @@ function initialize(){
   finally{if(activityTicket!==undefined)window.KT80Busy?.finish?.(activityTicket);busy=false;generate.disabled=false}
  };
  edit.onclick=()=>{
+  transition.hidden=true;
   if(!versions.length)return;textarea.value=versions.at(-1).text;textarea.hidden=false;textarea.style.display='block';preview.hidden=true;
   edit.hidden=true;confirm.hidden=true;save.hidden=false;cancel.hidden=false;confirmed=null;footer.hidden=true;
  };
@@ -281,7 +282,17 @@ function initialize(){
   note.textContent='Текстът е потвърден от експерта. Можете да създадете DOCX по проверената бланка.';
   showDecisionStatus('Текстът е потвърден · версия '+confirmed.version+'. Създаването на Word е достъпно по-долу.');
  };
- word.addEventListener('click',()=>window.KT119Download?.());
+ word.addEventListener('click',async()=>{
+  const version=confirmed;
+  if(!version||word.disabled)return;
+  word.disabled=true;
+  try{
+   if(await window.KT119Download?.()===true&&confirmed===version&&live()?.version===version.stage4Version){
+    confirmed=Object.freeze({...version,wordSaved:true});
+    window.KT126Registry?.saveSoon?.();
+   }
+  }finally{render();}
+ });
  document.addEventListener('kt119:template-ready',()=>{word.disabled=!(confirmed&&window.KT119TemplateReady?.());});
  document.addEventListener('kt116:stage4-confirmed',()=>{source=null;sync()});
  document.addEventListener('kt116:stage5-open',()=>sync());
