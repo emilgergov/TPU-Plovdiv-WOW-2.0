@@ -45,7 +45,7 @@ function panelHandoff(root, approval){
  const gate=state.normativeGate;
  const gisStatus=gate?.expertConfirmed===true&&gate.decision==='NOT_REQUIRED'?'not_applicable':
   gate?.expertConfirmed===true&&gate.decision==='REQUIRED'&&spatial.pdfOK===true&&
-  ['INSIDE','OUTSIDE'].includes(clean(spatial.spatialClass).toUpperCase())?'confirmed':
+  ['INSIDE','INTERSECTS','MIXED','OUTSIDE'].includes(clean(spatial.spatialClass).toUpperCase())?'confirmed':
   gate?.expertConfirmed===true&&gate.decision==='REQUIRED'?'pending':'unverified';
  return Object.freeze({panelId,caseId:approval.caseId,evidenceRevision:evidence.evidenceRevision,
   decisionVersion:approval.version,result:documentLabel(panelLine?.[0]||''),
@@ -123,7 +123,7 @@ function initialize(){
   const pending=make('div');
   pending.append(make('h4','Необходими действия'));
   const spatialLabel={confirmed:'Готово · ГИС и PDF1',not_applicable:'ГИС · Неприложимо',
-   pending:'Очаква проверка · ГИС и PDF1',unverified:'ГИС · Относимостта е непотвърдена'}[handoff.gisStatus];
+   pending:'ГИС и PDF1 · Потвърждението не е налично в панела',unverified:'ГИС · Относимостта е непотвърдена'}[handoff.gisStatus];
   (['confirmed','not_applicable'].includes(handoff.gisStatus)?confirmedData:pending).append(make('p',spatialLabel));
   const project=versions.at(-1);
   pending.append(make('p',project?'Преглед на проекта по преписката':'Изготвяне на проект по потвърдената процедура'));
