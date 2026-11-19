@@ -60,6 +60,9 @@ jobs:
             authorSource=patchOnce(authorSource,anchor,'validateCurrentRequest('+result+',qualificationSources)');
           }
           authorSource=patchOnce(authorSource,'       "Свери основанията и не въвеждай недоказано предположение."', '       code==="PANEL_01_DOES_NOT_ADDRESS_CURRENT_REVIEW_REQUEST"?guidancePlaceholder: "Свери основанията и не въвеждай недоказано предположение."'.replace('guidancePlaceholder',JSON.stringify(guidance)));
+          authorSource=patchOnce(authorSource,"if(issues.length)return expertPreview(\"Проектът изисква експертен преглед на нормативните несъответствия.\",issues,\"author_repair\",draft,{authorRepairs});","if(issues.length&&!issues.includes(\"PANEL_01_DOES_NOT_ADDRESS_CURRENT_REVIEW_REQUEST\"))return expertPreview(\"Проектът изисква експертен преглед на нормативните несъответствия.\",issues,\"author_repair\",draft,{authorRepairs});");
+          authorSource=patchOnce(authorSource,"error:reason,caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,","error:codes.includes(\"PANEL_01_DOES_NOT_ADDRESS_CURRENT_REVIEW_REQUEST\")?\"Проектът предлага ново първоначално писмо вместо произнасяне по текущото искане за преразглеждане.\":reason,caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,");
+          authorSource=patchOnce(authorSource,'unverifiedDraft:typeof proposal==="string"?','unverifiedDraft:!codes.includes("PANEL_01_DOES_NOT_ADDRESS_CURRENT_REVIEW_REQUEST")&&typeof proposal==="string"?');
           writeFileSync(authorWorker,authorSource);
           const worker=root+'src/local-auth/worker.mjs';
           let code=readFileSync(worker,'utf8');
