@@ -1,0 +1,33 @@
+name: KT132 panel 01 compatibility
+on:
+  push:
+    branches: [work/kt132-panel01]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2a9d0bbf2e4f55c902334765bfbfda76a8f81cfc
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply the accepted gateway to the pilot modules
+        run: |
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {execFileSync} from 'node:child_process';
+          import {overlayModule} from './cloudflare/kt125-access/src/kt126/gateway.mjs';
+          for (const file of ['kt116-expert-approval-handoff.mjs','kt117-stage5-document-author.mjs']) {
+            const path = 'vt03/kt80/integration/' + file;
+            const input = execFileSync('git',['show',process.env.GITHUB_SHA+':'+path],{encoding:'utf8'});
+            const output = overlayModule(path,input);
+            execFileSync('node',['--input-type=module','--check'],{input:output});
+            assert.ok(output.includes(file.startsWith('kt116')?'panelId:chosen':'panelHandoff'));
+            if (file.startsWith('kt117')) assert.ok(output.includes('installPreparedTextEditor'));
+          }
+          JS
