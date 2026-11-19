@@ -72,7 +72,7 @@ function proposition(reconstruction){
  const source=tidy(reconstruction?.subjectCandidate);
  const originalSubject=invalidated?'':root.KT80KT52?.normalizeSubject?.(source)||source;
  const request=root.KT80SubjectMaster?.reviewRequestSource?.(root.KT80WorkflowState?.intake);
- const subject=request?request.kind+' писмо'+(originalSubject&&originalSubject!=='НЯМА ДАННИ'?' относно ИП „'+originalSubject+'“':''):originalSubject;
+ const subject=request?root.KT80SubjectMaster.requestTitle(request,originalSubject==='НЯМА ДАННИ'?'':originalSubject):originalSubject;
  const usableSubject=subject&&subject!=='НЯМА ДАННИ'&&!bad.test(subject);
  const subjectStatus=major.length===1&&!reconstruction?.activityTypeAmbiguous&&usableSubject?'КАНДИДАТ С ИЗТОЧНИЦИ':'НУЖДА ОТ ЕКСПЕРТНА РЕКОНСТРУКЦИЯ';
  if(major.length===0)reasons.push('Не е установен достатъчно надежден характер на основната дейност.');
