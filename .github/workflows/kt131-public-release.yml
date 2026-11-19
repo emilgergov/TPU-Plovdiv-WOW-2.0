@@ -1,0 +1,74 @@
+name: KT131 accepted public release
+on:
+  push:
+    branches: [work/kt131-stability-editor]
+    paths: ['.github/workflows/kt131-public-release.yml', 'cloudflare/kt125-access/deploy/kt131-public.mjs', 'cloudflare/kt125-access/release/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: kt131-isolated-preview
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --prefix cloudflare/kt125-access
+      - name: Verify provider classification and exact original business baseline
+        run: |
+          node cloudflare/kt125-access/test/kt131-provider-transport.test.mjs
+          node cloudflare/kt125-access/test/author-origin.test.mjs
+          node cloudflare/ai-author-v27/test/kt130-intelligent-editor.mjs
+          node cloudflare/ai-author-v27/test/kt124-independent-expert-handoff.mjs
+      - name: Verify bounded requests, private registry and editor regressions
+        working-directory: cloudflare/kt125-access
+        run: |
+          node test/kt131-feedback-overlays.test.mjs
+          node test/kt131-author-deadline.test.mjs
+          node test/kt126-registry.test.mjs
+          node test/kt128-session-bridge.test.mjs
+          node test/kt126-gateway.test.mjs
+          node test/presentation-polish.test.mjs
+          node test/kt130-intelligent-editor.test.mjs
+          node test/kt131-editor-proposals.test.mjs
+          node test/kt131-editor-diff.test.mjs
+          node test/kt131-editor-style.test.mjs
+          node test/kt131-preview-boundary.test.mjs
+          node test/kt131-preview-router.test.mjs
+          node test/kt130-reset-restore-race.test.mjs
+      - name: Install isolated browser harness
+        run: |
+          npm install --prefix "$RUNNER_TEMP/kt131-browser" --no-save playwright@1.56.1
+          echo "KT131_BROWSER_EXECUTABLE=$(command -v google-chrome)" >> "$GITHUB_ENV"
+      - name: Verify editor behavior in browser without provider calls
+        env:
+          KT131_BROWSER_PACKAGE: ${{ runner.temp }}/kt131-browser/node_modules/playwright
+        run: node checks/kt131-editor-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kt131-synthetic-editor-browser
+          path: kt131-browser-qa
+          retention-days: 7
+      - name: Build accepted public release
+        run: |
+          mkdir -p dist
+          cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/release/author-entry.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt131-public-author.mjs
+          cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/release/native-entry.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=dist/kt131-public-native.mjs
+      - name: Publish accepted KT131 preserving accounts and case data
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: node cloudflare/kt125-access/deploy/kt131-public.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kt131-public-deployment
+          path: kt131-public-qa
+          retention-days: 14
