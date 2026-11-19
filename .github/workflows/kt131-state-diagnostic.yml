@@ -1,0 +1,21 @@
+name: KT131 read-only saved-state shape diagnostic
+on:
+  push:
+    branches: [work/kt131-stability-editor]
+    paths: ['checks/kt131-private-state-shape.mjs', '.github/workflows/kt131-state-diagnostic.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect snapshot structure only; no content, writes or provider calls
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          KT131_DIAGNOSTIC_TARGET: 9bb2bd9d79017931ac4cba0dc468dcac31f3d15005c7d76d68b8786101b2b1cb
+        run: node checks/kt131-private-state-shape.mjs
