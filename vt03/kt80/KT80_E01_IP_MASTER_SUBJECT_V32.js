@@ -84,9 +84,23 @@ function propose(intake){
    ?'Текстът е извлечен, но документът изисква проверка в оригинала. Няма автоматично удостоверяване на предмета.'
    :'Извлечен текст — фактическата вярност и предметът изискват експертна проверка.'});
 }
+function showSourceNotice(proposal){
+ const statusLine=$('kt80SubjectProposalStatus');
+ if(!statusLine)return;
+ let notice=$('kt80SubjectLeadingNotice');
+ if(!notice){
+  notice=document.createElement('p');notice.id='kt80SubjectLeadingNotice';
+  notice.setAttribute('role','status');
+  notice.style.cssText='padding:.7em .9em;margin:.6em 0;border:1px solid #d7a74d;border-left:5px solid #d7a74d;border-radius:6px;background:#49371e;color:#fff1ca;font-weight:700';
+  statusLine.before(notice);
+ }
+ notice.hidden=!proposal?.source||proposal.sourceReadStatus==='NOT_READ';
+ notice.textContent=notice.hidden?'':'За експертно внимание · Водещ документ за предложения предмет: '+proposal.source+' · Проверете дали документът е поводът за текущата преписка.';
+}
 function status(t){const el=$('kt80SubjectProposalStatus');if(el)el.textContent=t}
 function show(proposal,{apply=false}={}){
  draft=proposal;
+ showSourceNotice(proposal);
  const box=$('kt80SubjectProposalSources');if(box){
   box.replaceChildren();
   const lead=document.createElement('p');
@@ -143,7 +157,7 @@ function confirmedSubject(){
  accepted=t?{text:t,source:draft?.source||null,expertConfirmed:true,mode:draft&&t===draft.text?'SOURCE_CANDIDATE_CONFIRMED':'EXPERT_EDITED'}:null;
  return accepted;
 }
-function reset(){draft=null;accepted=null;const e=$('kt80SubjectProposalSources');if(e)e.replaceChildren();status('Въведете предмет или обработете преписката; предложенията изискват експертна проверка.')}
+function reset(){showSourceNotice(null);draft=null;accepted=null;const e=$('kt80SubjectProposalSources');if(e)e.replaceChildren();status('Въведете предмет или обработете преписката; предложенията изискват експертна проверка.')}
 function init(){
  $('kt80ConstructSubject')?.addEventListener('click',constructed);
  $('kt80EditSubject')?.addEventListener('click',correction);
