@@ -1,0 +1,26 @@
+import assert from 'node:assert/strict';
+import {editPreparedDocument,editorGuard,textHash} from '../../ai-author-v27/src/kt130-intelligent-editor.mjs';
+import {installPreparedTextEditor} from '../src/kt126/prepared-text-editor.mjs';
+const original='Относно: „Контролна сграда“ в ПИ 12345.1.2.\n\nВъв връзка с постъпилата документация Ви уведомявам следното:\n\nНяма данни за опасни вещества.\n\nНа основание чл. 2, ал. 2 следва да се издаде писмо с констатация, че не се налага провеждане на процедура по оценка за съвместимост.';
+const revised=original.replace('следва да се издаде писмо с констатация, че','Ви уведомявам, че');
+assert.deepEqual(editorGuard(original,revised),[]);
+assert(editorGuard(original,revised.replace('12345.1.2','12345.1.3')).length);
+assert(editorGuard(original,revised.replace('Няма данни за опасни вещества.','Няма опасни вещества.')).length);
+assert(editorGuard(original,revised.replace('не се налага','налага се')).length);
+const input={caseId:'editor-case',requestId:'editor-request',evidenceRevision:3,stage4Version:2,documentVersion:1,currentText:original,baseTextHash:await textHash(original)};
+let calls=0;
+const provider=async(url,options)=>{calls++;const p=JSON.parse(options.body);assert.equal(p.store,false);assert.deepEqual(JSON.parse(p.input[1].content),{text:original});return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({text:revised,notes:['Спорен извод остава за експертен преглед.']})}]}]}));};
+const response=await editPreparedDocument(input,{OPENAI_API_KEY:'fake'},provider);assert.equal(response.status,200);assert.equal(calls,1);assert.equal(response.body.baseTextHash,input.baseTextHash);
+assert.equal((await editPreparedDocument({...input,baseTextHash:'wrong'},{},provider)).status,400);assert.equal(calls,1);
+
+class E{constructor(tag,text){this.tag=tag;this.textContent=text||'';this.children=[];this.style={};this.hidden=false;this.disabled=false;this.classList={add(){}};}append(...n){this.children.push(...n)}prepend(...n){this.children.unshift(...n)}after(){}replaceChildren(...n){this.children=n} }
+globalThis.document={createTextNode:t=>new E('text',t),head:new E('head'),addEventListener(){},dispatchEvent(){}};globalThis.CustomEvent=class{constructor(t,o){this.type=t;this.detail=o?.detail}};
+const names=['reviewActions','preview','textarea','edit','confirm','generate','sourceCheck','word','note'];const nodes=Object.fromEntries(names.map(x=>[x,new E(x)]));nodes.textarea.hidden=true;nodes.reviewActions.append(nodes.edit,nodes.confirm);
+const source={caseId:input.caseId,evidenceRevision:3,version:2,text:'ИЗБРАН ПАНЕЛ: 01 — Контролен документ'};let current=source;
+const state={source,versions:[{version:1,text:original}],confirmed:null,busy:false};
+globalThis.window={KT80WorkflowState:{subjectConfirmed:{text:'Контролен предмет',scope:'Контролен обхват'}},KT119TemplateReady:()=>true,KT80EGSession:{hasAccess:()=>true,request:async(_u,body)=>{const p=JSON.parse(body);assert.equal(p.editorialOnly,true);assert.equal(p.currentText,original);assert(!p.completeCaseEvidence);assert(!p.documents);return new Response(JSON.stringify({...response.body,requestId:p.requestId}));}}};
+const api={...nodes,make:(t,s)=>new E(t,s),endpoint:'https://example.invalid/stage5-document',state:()=>state,sync(){},live:()=>current,evidence:()=>({parcelIds:['12345.1.2']}),label:()=> 'Контролен документ',reference:()=>'',busy:v=>{state.busy=v},apply:(text,kind)=>{state.versions.push({version:state.versions.length+1,text,kind});state.confirmed=null}};
+const ui=installPreparedTextEditor(api);ui.refresh();const smart=nodes.reviewActions.children[0];assert.equal(smart.textContent,'Интелигентен редактор');assert.equal(nodes.edit.textContent,'Експертна редакция');assert.equal(smart.hidden,false);
+await smart.onclick();assert.equal(state.versions.length,2);assert.equal(state.versions[0].text,original);assert.equal(state.versions[1].text,revised);assert.equal(state.confirmed,null);assert.equal(nodes.word.disabled,true);assert.equal(state.busy,false);
+let resolve;window.KT80EGSession.request=async()=>new Promise(r=>{resolve=r});state.versions=[{version:1,text:original}];const pending=smart.onclick();while(!resolve)await new Promise(r=>setTimeout(r,0));current={...source,caseId:'other-case'};resolve(new Response(JSON.stringify(response.body)));await pending;assert.equal(state.versions.length,1,'Late edit cannot enter another case');
+console.log('PASS optional editor: one text-only provider call, protected facts and uncertainty, three ordered actions, prior version retained, no confirmation/Word and late response discarded');

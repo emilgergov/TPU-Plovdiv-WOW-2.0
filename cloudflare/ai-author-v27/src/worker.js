@@ -1,3 +1,4 @@
+import {editPreparedDocument} from "./kt130-intelligent-editor.mjs";
 const MOSV_EDITORIAL_GUIDE=`Методическа опора КТ130: предоставени указания на МОСВ от 2022 г., не удостоверяване на действащо право. Нормативният MASTER и приложимият актуален проверен текст имат предимство пред старите примери. Не пренасяй автоматично стари срокове, основания, компетентности или изводи. Използвай само относимите за избрания вид документ редакционни насоки.
 Стр. 3–18: свързвай мотивите с конкретен факт и източник; разграничавай липсващо доказателство от доказана липса на въздействие. Отделяй пряко, косвено и кумулативно въздействие; списък на други проекти или отсъствието им се твърди само при проверен източник. ГИС пресичането не решава правната приложимост или значимостта.
 Стр. 19–39: всеки вид решение има собствен фактически състав, мотиви и разпоредителна част. Не пренасяй от образец факти за извършени консултации, връчвания, проверки, доклади, съгласувания, срокове или условия, които не са установени по конкретната преписка.
@@ -931,6 +932,13 @@ async function handleStage5Document(request,env){
    return reply({error:"STAGE4_QUALIFICATION_CHANGED",projectOnly:true,expertReviewRequired:true,
     message:"Редактираният текст променя нормативния извод или панела без нова експертна проверка.",
     findings:divergence.map(x=>({test:"Нормативна квалификация",actual:x}))},422);
+ }
+
+ // Optional text-only editor: authorization and the signed Stage 4 handoff above still apply.
+ if(input.editorialOnly===true){
+  if(input.sourcePreviewOnly===true)return reply({error:"INVALID_EDITOR_INPUT"},400);
+  const result=await editPreparedDocument(input,env);
+  return reply(result.body,result.status);
  }
 
  const evidence=input.confirmedStage4Text.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");

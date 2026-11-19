@@ -1,3 +1,4 @@
+import {overlayPreparedTextEditor} from './prepared-text-editor.mjs';
 import {overlaySignatureTemplate} from './signature-lines.mjs';
 import {stage5CaseEvidence,stage5ReceiptText} from '../../../ai-author-v27/src/kt130-stage5-context.mjs';
 import {spatialEvidenceSummary} from './spatial-handoff.mjs';
@@ -58,5 +59,5 @@ export function overlayPresentationPolish(rel,source){
   source=once(source,"   versions.push({version:versions.length+1,text:normalized.text,kind:'предложение на EG Автора — индивидуален предмет'});","   showSourceReceipt(data.sourceReceipt);\n   versions.push({version:versions.length+1,text:normalized.text,sourceReceipt:data.sourceReceipt||null,kind:'предложение на EG Автора — индивидуален предмет'});");
   source=once(source,'busy=false;generate.disabled=false}','busy=false;generate.disabled=false;sourceCheck.disabled=false}');
  }
- return source;
+ return overlayPreparedTextEditor(rel,source);
 }
