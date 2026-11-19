@@ -16,4 +16,7 @@ const uncertain=intro+'Няма данни за опасни вещества; �
 const retained=await editPreparedDocument({currentText:uncertain,documentVersion:1,baseTextHash:await textHash(uncertain)}, {},provider);assert.equal(retained.body.text,uncertain,'Uncertainty remains frozen');
 assert.equal(administrativeStyle('Обектът е с площ 580 m² в ПИ 12345.9.8.'),'Обектът е с площ 580 m² в ПИ 12345.9.8.');
 assert.equal(administrativeStyle('Представени са сведения за за обекта.'),'Представени са сведения за обекта.');
+const future=intro+'На основание чл. 2 предложението подлежи на разглеждане и издаване на административен акт.';
+const futureResult=await editPreparedDocument({currentText:future,documentVersion:1,baseTextHash:await textHash(future)}, {},provider);assert.equal(futureResult.body.text,future);assert.equal(futureResult.body.providerCalled,false);assert(futureResult.body.notes.some(n=>n.includes('бъдещо разглеждане')));
+assert(editorGuard(future,future.replace('подлежи на разглеждане и издаване на административен акт','не изисква процедура')).length,'Future action cannot silently become a final determination');
 console.log('PASS KT131 style: direct authority voice, narrow agreement correction, protected uncertainty, identifiers and procedural polarity retained.');

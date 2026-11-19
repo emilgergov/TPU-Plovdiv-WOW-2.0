@@ -25,6 +25,8 @@ jobs:
         run: |
           node cloudflare/kt125-access/test/kt131-provider-transport.test.mjs
           node cloudflare/kt125-access/test/author-origin.test.mjs
+          node cloudflare/ai-author-v27/test/kt130-intelligent-editor.mjs
+          node cloudflare/ai-author-v27/test/kt124-independent-expert-handoff.mjs
       - name: Verify bounded requests, private registry and editor regressions
         working-directory: cloudflare/kt125-access
         run: |
