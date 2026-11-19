@@ -2,6 +2,9 @@ name: KT132 panel 01 compatibility
 on:
   push:
     branches: [work/kt132-panel01]
+concurrency:
+  group: kt131-isolated-preview
+  cancel-in-progress: false
 permissions:
   contents: read
 jobs:
@@ -31,3 +34,46 @@ jobs:
             if (file.startsWith('kt117')) assert.ok(output.includes('installPreparedTextEditor'));
           }
           JS
+      - run: npm ci --prefix cloudflare/kt125-access
+      - name: Build from the accepted release with two pinned pilot modules
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {readFileSync,writeFileSync} from 'node:fs';
+          const root='cloudflare/kt125-access/';
+          const worker=root+'src/local-auth/worker.mjs';
+          let code=readFileSync(worker,'utf8');
+          const old="'https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/2652e375cf90f03570a77158335ef364d4a48a5f/'+rel";
+          assert.ok(code.includes(old));
+          const pinned=process.env.GITHUB_SHA;
+          assert.match(pinned,/^[a-f0-9]{40}$/);
+          code=code.replace(old,"'https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/'+(['vt03/kt80/integration/kt116-expert-approval-handoff.mjs','vt03/kt80/integration/kt117-stage5-document-author.mjs'].includes(rel)?'"+pinned+"':'2652e375cf90f03570a77158335ef364d4a48a5f')+'/'+rel");
+          writeFileSync(worker,code);
+          for(const f of ['preview/author-entry.mjs','preview/native-entry.mjs','preview/router-entry.mjs']){
+            const name=root+f;
+            writeFileSync(name,readFileSync(name,'utf8').replaceAll('kt131-tpu-plovdiv-kt125-local-auth','kt132-tpu-plovdiv-kt125-local-auth').replaceAll('КТ131 · ТЕСТОВА ВЕРСИЯ','КТ132 · ТЕСТОВА ВЕРСИЯ'));
+          }
+          const deployment=root+'deploy/kt131-preview.mjs';
+          code=readFileSync(deployment,'utf8')
+            .replaceAll("router='kt131-","router='kt132-")
+            .replaceAll("'https://kt131-'+native","'https://kt132-'+native")
+            .replace("],'kt131');", "],'kt132');")
+            .replaceAll('КТ131 · ТЕСТОВА ВЕРСИЯ','КТ132 · ТЕСТОВА ВЕРСИЯ')
+            .replaceAll('KT131_PREVIEW_READY','KT132_PREVIEW_READY')
+            .replace("const nativeStable=active(nativeBefore),authorStable=active(authorBefore);","const nativeStable=active(nativeBefore),authorStable=active(authorBefore);\nif(nativeBefore.versions.length!==1||authorBefore.versions.length!==1)throw Error('Existing preview allocation must be preserved');")
+            .replace(" const login=await fetch(origin+'/auth/login');"," const guarded=await fetch(origin+'/module/vt03/kt80/integration/kt117-stage5-document-author.mjs',{redirect:'manual'});if(![302,303,307].includes(guarded.status)||guarded.headers.get('location')!=='/auth/login')throw Error('Pilot module is not session guarded');\n const login=await fetch(origin+'/auth/login');");
+          writeFileSync(deployment,code);
+          JS
+          mkdir -p dist
+          cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/preview/author-entry.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt131-author-preview.mjs
+          cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/preview/native-entry.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=dist/kt131-native-preview.mjs
+          cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/preview/router-entry.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt131-router.mjs
+      - name: Prepare the protected KT132 preview
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: node cloudflare/kt125-access/deploy/kt131-preview.mjs
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: kt132-protected-preview
+          path: kt131-preview-qa
