@@ -2,6 +2,7 @@ name: KT132 panel 01 compatibility
 on:
   push:
     branches: [work/kt132-panel01, work/kt133-panel17]
+  workflow_dispatch:
 concurrency:
   group: kt131-isolated-preview
   cancel-in-progress: false
@@ -155,17 +156,18 @@ jobs:
           code=patchOnce(code,stage4OverlayAnchor,stage4OverlayAnchor+'\n'+" if(rel.endsWith('/kt96-eg-ai-stage4-author.mjs')){\n  source=replaceOnce(source,\" const spatial=window.KT83NormativeBridge?.getEvidence?.()||{};\",\"  if(confirmedNoGis()){\\n   evidenceBox.append(line('Етап 3 · ГИС','Не се изисква по потвърдения маршрут. PDF1 не се изисква.'));\\n   return;\\n  }\\n\"+\" const spatial=window.KT83NormativeBridge?.getEvidence?.()||{};\");\n  source=replaceOnce(source,\"  const activityTicket=window.KT80Busy?.start?.(\",\"  const noGis=confirmedNoGis();\\n  if(noGis){\\n   request.parcelIds=[];\\n   request.evidence=request.evidence.filter(item=>!['parcel_identifiers_confirmed','pdf1_created','spatial_intersection'].includes(item.factId));\\n   request.completeCaseEvidence.gis={applicability:'NOT_REQUIRED',expertConfirmed:true,reason:str(noGis.reason)};\\n  }\\n\"+\"  const activityTicket=window.KT80Busy?.start?.(\");\n  source=replaceOnce(source,\" const button=make('button','Изготви проект с EG Автора');\",\" function confirmedNoGis(){const gate=window.KT80WorkflowState?.normativeGate;return gate?.expertConfirmed===true&&gate.decision==='NOT_REQUIRED'?gate:null;}\\n\"+\" const button=make('button','Изготви проект с EG Автора');\");\n }");
           code=patchOnce(code,stage4OverlayAnchor,stage4OverlayAnchor+'\n'+" if(rel.endsWith('/kt96-eg-ai-stage4-author.mjs'))source=replaceOnce(source,\"     document.dispatchEvent(new CustomEvent('kt124:stage4-attempt',{detail:{\",\"     if(!str(data.unverifiedDraft))document.dispatchEvent(new CustomEvent('kt132:stage4-rejected',{detail:{caseId:h.caseId,evidenceRevision:h.evidenceRevision}}));\\n     document.dispatchEvent(new CustomEvent('kt124:stage4-attempt',{detail:{\");\n if(rel.endsWith('/kt116-expert-approval-handoff.mjs'))source=replaceOnce(source,\" function clear(){\",\" document.addEventListener('kt132:stage4-rejected',event=>{\\n  const currentEvidence=evidence();\\n  if(!approved&&event.detail?.caseId===currentEvidence.caseId&&event.detail.evidenceRevision===currentEvidence.evidenceRevision)clear();\\n });\\n function clear(){\");");
           writeFileSync(gateway,code);
+          const testRelease=process.env.GITHUB_REF_NAME==='work/kt133-panel17'?'133':'132';
           for(const f of ['preview/author-entry.mjs','preview/native-entry.mjs','preview/router-entry.mjs']){
             const name=root+f;
-            writeFileSync(name,readFileSync(name,'utf8').replaceAll('kt131-tpu-plovdiv-kt125-local-auth','kt132-tpu-plovdiv-kt125-local-auth').replaceAll('КТ131 · ТЕСТОВА ВЕРСИЯ','КТ132 · ТЕСТОВА ВЕРСИЯ'));
+            writeFileSync(name,readFileSync(name,'utf8').replaceAll('kt131-tpu-plovdiv-kt125-local-auth','kt'+testRelease+'-tpu-plovdiv-kt125-local-auth').replaceAll('КТ131 · ТЕСТОВА ВЕРСИЯ','КТ'+testRelease+' · ТЕСТОВА ВЕРСИЯ'));
           }
           const deployment=root+'deploy/kt131-preview.mjs';
           code=readFileSync(deployment,'utf8')
-            .replaceAll("router='kt131-","router='kt132-")
-            .replaceAll("'https://kt131-'+native","'https://kt132-'+native")
-            .replace("],'kt131');", "],'kt132');")
-            .replaceAll('КТ131 · ТЕСТОВА ВЕРСИЯ','КТ132 · ТЕСТОВА ВЕРСИЯ')
-            .replaceAll('KT131_PREVIEW_READY','KT132_PREVIEW_READY')
+            .replaceAll("router='kt131-","router='kt"+testRelease+"-")
+            .replaceAll("'https://kt131-'+native","'https://kt"+testRelease+"-'+native")
+            .replace("],'kt131');", "],'kt"+testRelease+"');")
+            .replaceAll('КТ131 · ТЕСТОВА ВЕРСИЯ','КТ'+testRelease+' · ТЕСТОВА ВЕРСИЯ')
+            .replaceAll('KT131_PREVIEW_READY','KT'+testRelease+'_PREVIEW_READY')
             .replace(" const login=await fetch(origin+'/auth/login');"," const guarded=await fetch(origin+'/module/vt03/kt80/integration/kt117-stage5-document-author.mjs',{redirect:'manual'});if(![302,303,307].includes(guarded.status)||guarded.headers.get('location')!=='/auth/login')throw Error('Pilot module is not session guarded');\n const login=await fetch(origin+'/auth/login');");
           for(const [service,stable,version] of [['author','authorStable','authorVersion'],['native','nativeStable','nativeVersion']]){
             const prior=service+'Before.versions.map(({version_id,percentage})=>({version_id,percentage}))';
@@ -178,13 +180,13 @@ jobs:
           cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/preview/author-entry.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt131-author-preview.mjs
           cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/preview/native-entry.mjs --bundle --platform=neutral --format=esm --target=es2022 '--external:node:*' '--external:cloudflare:*' --outfile=dist/kt131-native-preview.mjs
           cloudflare/kt125-access/node_modules/.bin/esbuild cloudflare/kt125-access/preview/router-entry.mjs --bundle --platform=browser --format=esm --target=es2022 --outfile=dist/kt131-router.mjs
-      - name: Prepare the protected KT132 preview
-        if: github.ref_name == 'work/kt132-panel01'
+      - name: Deploy the protected preview
+        if: github.ref_name == 'work/kt132-panel01' || github.ref_name == 'work/kt133-panel17'
         env:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: node cloudflare/kt125-access/deploy/kt131-preview.mjs
       - uses: actions/upload-artifact@v4
-        if: success() && github.ref_name == 'work/kt132-panel01'
+        if: success()
         with:
-          name: kt132-protected-preview
+          name: wow-protected-preview
           path: kt131-preview-qa
