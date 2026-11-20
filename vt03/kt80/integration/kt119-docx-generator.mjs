@@ -118,11 +118,7 @@ function install(){
    status.textContent='Бланката се прилага автоматично; експертът не избира файл.';
  }catch(e){templateBytes=null;status.textContent='Бланката не е готова: '+String(e.message||e)}
  window.KT119TemplateReady=()=>!!templateBytes;
- window.KT119Download=async()=>{
-   const approved=window.KT117Document?.snapshot?.(),stage4=window.KT116ExpertHandoff?.snapshot?.();
-   if(!templateBytes||!approved||!stage4||approved.caseId!==stage4.caseId||
-      approved.stage4Version!==stage4.version){status.textContent='Няма проверена бланка или валиден потвърден текст за текущата преписка.';return;}
-   try{
+ function buildWord(approved,stage4){
      const raw=approved.text.replace(/\r\n/g,'\n');
      const lines=raw.split('\n'),subject=lines[0];
      if(!subject?.startsWith('Относно:'))throw Error('Липсва потвърден ред „Относно:“.');
@@ -185,6 +181,20 @@ function install(){
      if(actual!==presentationText)throw Error('DOCX не съвпада с потвърденото съдържание и единственото разрешено оформление на предмета.');
      // Preserve confirmed body text exactly. The subject may gain only approved title quotation marks.
      contents['word/document.xml']=new TextEncoder().encode(new XMLSerializer().serializeToString(dom));
+     return contents;
+ }
+ window.KT119BuildPanelWord=(text,attachMetadata)=>{
+   if(!templateBytes)throw Error('Няма проверена бланка.');
+   const contents=buildWord({text},{text:'ИЗБРАН ПАНЕЛ: 17 — Отговор по жалба'});
+   attachMetadata(contents);
+   return window.fflate.zipSync(contents,{level:6});
+ };
+ window.KT119Download=async()=>{
+   const approved=window.KT117Document?.snapshot?.(),stage4=window.KT116ExpertHandoff?.snapshot?.();
+   if(!templateBytes||!approved||!stage4||approved.caseId!==stage4.caseId||
+      approved.stage4Version!==stage4.version){status.textContent='Няма проверена бланка или валиден потвърден текст за текущата преписка.';return;}
+   try{
+     const contents=buildWord(approved,stage4);
      const bytes=window.fflate.zipSync(contents,{level:6});
      const blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
      const url=URL.createObjectURL(blob),link=el('a');
