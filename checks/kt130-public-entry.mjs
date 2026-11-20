@@ -5,7 +5,7 @@ import vm from 'node:vm';
 const require=createRequire(process.env.KT130_BROWSER_PACKAGE+'/package.json');
 const {chromium}=require('playwright');
 const html=readFileSync('index.html','utf8');
-const login='https://kt132-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/auth/login';
+const login='https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/auth/login';
 const old='v26-test/v27-preview/KT79_25_V27_35_STABLE_WORKING_BLOCK06.html';
 assert(html.includes(login));assert(html.includes('https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/auth/login'));assert(html.includes(old));
 for(const script of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gu))new vm.Script(script[1]);
@@ -32,7 +32,7 @@ try{
   assert(await entry.isVisible(),'Automatic slide change must not hide entry');
   const popupPromise=page.waitForEvent('popup');
   await entry.click();const popup=await popupPromise;await popup.waitForURL(url=>url.origin===new URL(login).origin,{timeout:30000});await popup.waitForLoadState('domcontentloaded');
-  assert.equal(new URL(popup.url()).origin,'https://kt132-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev');await popup.close();
+  assert.equal(new URL(popup.url()).origin,'https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev');await popup.close();
   for(let i=0;i<11;i++)await page.clock.fastForward(4300);
   assert(await page.locator('#tree').isVisible());assert(await entry.isVisible(),'Entry must survive automatic transition to tree');
   const rect=await entry.boundingBox();assert(rect.x>=0&&rect.x+rect.width<=width&&rect.y+rect.height<=height);
