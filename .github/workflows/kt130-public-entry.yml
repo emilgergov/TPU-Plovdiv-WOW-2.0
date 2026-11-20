@@ -23,6 +23,21 @@ jobs:
         run: |
           gh api "repos/$GITHUB_REPOSITORY/pages" --jq '{build_type, source}'
           gh api --method POST "repos/$GITHUB_REPOSITORY/pages/builds" --jq '{status, url}'
+      - name: Verify KT133 on the live public site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl -fsS --max-time 15 "https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/?verify=$GITHUB_RUN_ID-$attempt" -o "$RUNNER_TEMP/wow-public.html" &&
+              grep -q 'kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/auth/login' "$RUNNER_TEMP/wow-public.html"; then
+              echo "Live GitHub Pages serves the KT133 entry."
+              exit 0
+            fi
+            gh api "repos/$GITHUB_REPOSITORY/pages/builds/latest" --jq '{status, commit, error}' || true
+            sleep 10
+          done
+          echo "::error::The public site did not serve the KT133 entry within the verification window."
+          exit 1
   browser:
     runs-on: ubuntu-24.04
     steps:
