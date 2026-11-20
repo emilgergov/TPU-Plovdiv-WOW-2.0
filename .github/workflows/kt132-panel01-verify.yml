@@ -169,6 +169,9 @@ jobs:
             .replaceAll('КТ131 · ТЕСТОВА ВЕРСИЯ','КТ'+testRelease+' · ТЕСТОВА ВЕРСИЯ')
             .replaceAll('KT131_PREVIEW_READY','KT'+testRelease+'_PREVIEW_READY')
             .replace(" const login=await fetch(origin+'/auth/login');"," const guarded=await fetch(origin+'/module/vt03/kt80/integration/kt117-stage5-document-author.mjs',{redirect:'manual'});if(![302,303,307].includes(guarded.status)||guarded.headers.get('location')!=='/auth/login')throw Error('Pilot module is not session guarded');\n const login=await fetch(origin+'/auth/login');");
+          if(testRelease==='133')code=patchOnce(code,
+            "if(!['https://'+native+'.emilgergov.workers.dev',origin].includes(",
+            "if(!['https://'+native+'.emilgergov.workers.dev','https://kt132-'+native+'.emilgergov.workers.dev',origin].includes(");
           for(const [service,stable,version] of [['author','authorStable','authorVersion'],['native','nativeStable','nativeVersion']]){
             const prior=service+'Before.versions.map(({version_id,percentage})=>({version_id,percentage}))';
             // Replace the old preview allocation. Restore it on failure.
