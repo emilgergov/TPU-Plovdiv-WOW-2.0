@@ -33,8 +33,9 @@ try{
   const popupPromise=page.waitForEvent('popup');
   await entry.click();const popup=await popupPromise;await popup.waitForURL(url=>url.origin===new URL(login).origin,{timeout:30000});await popup.waitForLoadState('domcontentloaded');
   assert.equal(new URL(popup.url()).origin,'https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev');await popup.close();
-  for(let i=0;i<11;i++)await page.clock.fastForward(4300);
-  assert(await page.locator('#tree').isVisible());assert(await entry.isVisible(),'Entry must survive automatic transition to tree');
+  // Run every scheduled scene callback, even if Chromium throttles the opener during popup navigation.
+  await page.clock.runFor(11 * 4200 + 1000);
+  await page.locator('#tree').waitFor({state:'visible',timeout:5000});assert(await entry.isVisible(),'Entry must survive automatic transition to tree');
   const rect=await entry.boundingBox();assert(rect.x>=0&&rect.x+rect.width<=width&&rect.y+rect.height<=height);
   assert(await entry.evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}));
   if(label==='desktop'){
@@ -45,7 +46,10 @@ try{
   await page.screenshot({path:'kt130-public-qa/'+label+'-tree.png'});
   await page.locator('#classicPanel').evaluate(el=>{el.hidden=false});
   await page.waitForTimeout(1);assert(!(await entry.isVisible()),'Do not cover classical document panel');
-  const primary=page.locator('#expert-analysis-v26 a').first(),previous=page.locator('#expert-analysis-v26 a').last();
+  const rows=page.locator('#expert-analysis-v26 .expert-version-list > li');
+  assert.equal(await rows.count(),3);
+  assert.match(await rows.first().innerText(),/Текуща версия[\s\S]*КТ133/u);
+  const primary=rows.first().locator('a'),previous=rows.last().locator('a');
   assert.equal(await primary.getAttribute('href'),login);assert.equal(await previous.getAttribute('href'),old);
   await page.locator('#expert-analysis-v26').scrollIntoViewIfNeeded();await page.screenshot({path:'kt130-public-qa/'+label+'-block06.png'});
   await page.locator('#classicTree').click();assert(await entry.isVisible());
