@@ -55,3 +55,37 @@ export async function renewLocal({request,verifier,db,requestId,now=Date.now(),u
   const out=await db.batch([update,mail,audit]);return out?.length===3&&out.every(r=>r.meta.changes===1)?{ok:true,mailId}:{ok:false};
  }catch{return {ok:false}}
 }
+
+export async function cancelAccessRequest({request,verifier,db,requestId,local,now=Date.now(),uuid=()=>crypto.randomUUID()}){
+ if(!id(requestId))return {ok:false};
+ const actor=await kt125ManagementPrincipal({request,verifier,db});
+ if(!actor||!['egmaster','administrator'].includes(actor.role))return {ok:false};
+ let who;try{who=await verifier.verify(request)}catch{return {ok:false}}
+ if(!who?.verified)return {ok:false};
+ const eventId=uuid(),auditId=uuid();
+ if(!id(eventId)||!id(auditId))return {ok:false};
+ // Release the unique registration identifiers while preserving journal references.
+ const retired='!cancelled:'+requestId;
+ const eligible=local?`r.status IN ('pending','approved') AND EXISTS(
+   SELECT 1 FROM kt125_local_accounts a WHERE a.request_id=r.request_id AND a.organization_id=r.organization_id
+   AND a.state=r.status AND a.activated_at_ms IS NULL AND a.user_id IS NULL)`:`r.status='pending'`;
+ try{
+  const update=db.prepare(`UPDATE kt125_access_requests AS r SET status='rejected',email=?,provider_subject=?,decided_by=?,updated_at_ms=?
+   WHERE request_id=? AND organization_id=? AND invitation_id IS NULL AND ${eligible}
+    AND EXISTS(SELECT 1 FROM kt125_users m WHERE m.user_id=? AND m.organization_id=r.organization_id
+     AND m.identity_provider=? AND m.provider_subject=? AND m.active=1 AND m.role IN ('egmaster','administrator'))`)
+   .bind(retired,retired,actor.userId,now,requestId,actor.organizationId,actor.userId,who.issuer,who.subject);
+  const writes=[update];
+  if(local)writes.push(db.prepare(`UPDATE kt125_local_accounts SET state='rejected',email=?,username=?,
+   activation_nonce=NULL,activation_expires_ms=NULL,approved_role=NULL,existing_user_id=NULL,
+   credential_version=credential_version+1,updated_at_ms=?
+   WHERE request_id=? AND organization_id=? AND activated_at_ms IS NULL AND user_id IS NULL AND changes()=1`)
+   .bind(retired,retired,now,requestId,actor.organizationId));
+  writes.push(db.prepare(`INSERT INTO kt125_audit(event_id,organization_id,actor_id,action,outcome,timestamp_ms,request_id,details_json)
+   VALUES(?,(SELECT organization_id FROM kt125_access_requests WHERE request_id=? AND email=? AND changes()=1),
+    ?,'users.request.cancel','allowed',?,?,?)`)
+   .bind(eventId,requestId,retired,actor.userId,now,auditId,JSON.stringify({access_request_id:requestId})));
+  const result=await db.batch(writes);
+  return {ok:result.length===writes.length&&result.every(row=>row.meta.changes===1)};
+ }catch{return {ok:false}}
+}
