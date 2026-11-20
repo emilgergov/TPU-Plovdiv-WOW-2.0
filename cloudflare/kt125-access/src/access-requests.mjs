@@ -68,7 +68,7 @@ export async function readKT125AccessRequests(args){
  try{
   const result=await args.db.prepare(`SELECT r.request_id,r.display_name,r.email,r.note,r.status,r.created_at_ms,m.state AS mail_state
    FROM kt125_access_requests r LEFT JOIN kt125_invitation_mail m ON m.invitation_id=r.invitation_id
-   WHERE r.organization_id=? ORDER BY r.created_at_ms DESC,r.request_id LIMIT 51`).bind(actor.organizationId).all();
+   WHERE r.organization_id=? AND r.email NOT GLOB '!cancelled:*' ORDER BY r.created_at_ms DESC,r.request_id LIMIT 51`).bind(actor.organizationId).all();
   if(!Array.isArray(result?.results))return fail('REQUESTS_UNAVAILABLE');
   const items=result.results.slice(0,50);
   try{
@@ -77,7 +77,7 @@ export async function readKT125AccessRequests(args){
     LEFT JOIN kt125_local_outbox o ON o.mail_id=(SELECT mail_id FROM kt125_local_outbox WHERE account_id=a.account_id ORDER BY created_at_ms DESC,mail_id DESC LIMIT 1)
     LEFT JOIN kt125_staff_profiles p ON p.email=a.email AND p.organization_id=a.organization_id
     LEFT JOIN kt125_users u ON u.user_id=p.user_id AND u.organization_id=a.organization_id AND u.active=1 AND u.role IN ('expert','reviewer','delegated_expert')
-    WHERE a.request_id IN (SELECT request_id FROM kt125_access_requests WHERE organization_id=? ORDER BY created_at_ms DESC,request_id LIMIT 51)`)
+    WHERE a.request_id IN (SELECT request_id FROM kt125_access_requests WHERE organization_id=? AND email NOT GLOB '!cancelled:*' ORDER BY created_at_ms DESC,request_id LIMIT 51)`)
     .bind(actor.organizationId).all();
    const byId=new Map((local.results||[]).map(r=>[r.request_id,r]));
    let signed;try{signed=await args.verifier.verify(args.request)}catch{}
