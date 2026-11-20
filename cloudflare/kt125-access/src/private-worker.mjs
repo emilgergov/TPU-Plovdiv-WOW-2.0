@@ -14,7 +14,7 @@ import {enrollKT125Staff} from "./staff-enrollment.mjs";
 import {activateKT125Staff} from "./staff-activation.mjs";
 import {inviteKT125Staff,acceptKT125Invitation,revokeKT125Invitation,readKT125InvitationDirectory} from "./staff-invitations.mjs";
 import {kt125RequestIdentity,readKT125OwnRequest,renderKT125AccessRequest,submitKT125AccessRequest,readKT125AccessRequests,decideKT125AccessRequest} from "./access-requests.mjs";
-import {localTarget,decideLocal,renewLocal} from "./local-auth/admin.mjs";
+import {localTarget,decideLocal,renewLocal,cancelAccessRequest} from "./local-auth/admin.mjs";
 import {sendKT125InvitationMail} from "./invitation-mail.mjs";
 import {renderKT125GrantManagement} from "./grant-admin-page.mjs";
 
@@ -34,7 +34,7 @@ const inviteUserRoute="/kt125/admin/users/invite";
 const revokeInvitationRoute=new RegExp("^/kt125/admin/invitations/("+pathId+")/revoke$");
 const requestUserRoute="/kt125/enrollment/request";
 const requestResultRoute="/kt125/enrollment/request/received";
-const decideRequestRoute=new RegExp("^/kt125/admin/requests/("+pathId+")/(decide|mail|link|renew)$");
+const decideRequestRoute=new RegExp("^/kt125/admin/requests/("+pathId+")/(decide|mail|link|renew|cancel)$");
 const activateUserRoute="/kt125/enrollment/activate";
 const enableUserRoute=new RegExp("^/kt125/admin/users/("+pathId+")/enable$");
 const disableUserRoute=new RegExp("^/kt125/admin/users/("+pathId+")/disable$");
@@ -112,9 +112,9 @@ export function createKT125PrivateHandler({getVerifier,identityConfigReady=kt125
    if(!/^application\/x-www-form-urlencoded(?:\s*;.*)?$/i.test(request.headers.get("Content-Type")||""))return json({error:"Невалиден формат на заявката."},415);
    if(Number(request.headers.get("content-length")||0)>16000)return json({error:"Заявката е твърде голяма."},413);
    let data;try{const raw=await request.text();if(raw.length>16000)return json({error:"Заявката е твърде голяма."},413);data=new URLSearchParams(raw);}catch{return json({error:"Невалидна заявка."},400)}
-   const isMail=decideRequest?.[2]==="mail",isLink=decideRequest?.[2]==="link",isRenew=decideRequest?.[2]==="renew";
-   const fields=requestUser?["name","email","note","confirm"]:(isMail||isRenew)?["confirm"]:isLink?["target_user_id","confirm"]:["role","decision","confirm"];
-   if([...data.keys()].length!==fields.length||fields.some(k=>data.getAll(k).length!==1)||data.get("confirm")!==(requestUser?"REQUEST":isMail?"SEND":isRenew?"RENEW":isLink?"LINK":"DECIDE"))return json({error:"Необходимо е изрично потвърждение."},400);
+   const isMail=decideRequest?.[2]==="mail",isLink=decideRequest?.[2]==="link",isRenew=decideRequest?.[2]==="renew",isCancel=decideRequest?.[2]==="cancel";
+   const fields=requestUser?["name","email","note","confirm"]:(isMail||isRenew||isCancel)?["confirm"]:isLink?["target_user_id","confirm"]:["role","decision","confirm"];
+   if([...data.keys()].length!==fields.length||fields.some(k=>data.getAll(k).length!==1)||data.get("confirm")!==(requestUser?"REQUEST":isMail?"SEND":isRenew?"RENEW":isCancel?"CANCEL":isLink?"LINK":"DECIDE"))return json({error:"Необходимо е изрично потвърждение."},400);
    const args={request,verifier,db:env.KT125_DB,nowMs:clock(),uuid};
    if(requestUser){
     const result=await submitKT125AccessRequest({...args,organizationId:env.KT125_REQUEST_ORGANIZATION,name:data.get("name"),email:data.get("email"),note:data.get("note")});
@@ -123,6 +123,11 @@ export function createKT125PrivateHandler({getVerifier,identityConfigReady=kt125
    }
    let ownTarget;
    try{ownTarget=await localTarget(env.KT125_DB,decideRequest[1])}catch{return deny()}
+   if(isCancel){
+    const result=await cancelAccessRequest({...args,now:args.nowMs,requestId:decideRequest[1],local:Boolean(ownTarget)});
+    if(!result.ok)return deny();
+    return new Response(null,{status:303,headers:{Location:"/kt125/admin/panel/users","Cache-Control":"no-store"}});
+   }
    if(ownTarget){
     if(isMail){
      const actor=await kt125ManagementPrincipal(args);if(!actor||!["egmaster","administrator"].includes(actor.role))return deny();
