@@ -33,7 +33,12 @@ const documentLabel=line=>{
  return name||'Административен документ';
 };
 
-// The editor and pilot panel share one case-bound view of the confirmed decision.
+// Catalog routes opt into the shared addressed workspace as they are implemented.
+// Panel 15 stays an independent GIS tool.
+const addressedPanels=new Set([1,17]);
+const panelNumber=id=>String(id).padStart(2,'0');
+
+// The editor and addressed panel share one case-bound view of the confirmed decision.
 function panelHandoff(root, approval){
  const state=root.KT80WorkflowState||{}, subject=state.subjectConfirmed||{};
  const evidence=collectStageEvidence(root);
@@ -91,7 +96,7 @@ function initialize(){
  addressed.append(back,pilot);
  document.body.append(addressed);
  const transition=make('section');transition.id='kt117PanelTransition';transition.hidden=true;
- const destination=make('p'),openPanel=make('button','Към панел №01');openPanel.type='button';
+ const destination=make('p'),openPanel=make('button','Към избрания панел');openPanel.type='button';
  transition.append(destination,openPanel);
  const action=make('div');action.className='kt117-actions';
  const generate=make('button','Изготви текст с EG Автора');
@@ -117,7 +122,10 @@ function initialize(){
  panel.replaceChildren(ui);
  const live=()=>window.KT116ExpertHandoff?.snapshot?.()||null;
  const confirmedPanelOutput=()=>{
-  if(!source||!confirmed||confirmed.caseId!==source.caseId||confirmed.stage4Version!==source.version)return null;
+  const current=live();
+  if(!source||!confirmed||current?.caseId!==source.caseId||current.version!==source.version||
+   current.evidenceRevision!==source.evidenceRevision||current.text!==source.text||
+   confirmed.caseId!==source.caseId||confirmed.stage4Version!==source.version)return null;
   const output=confirmed.stage5Output;
   if(output){
    return confirmed.wordSaved===true&&output.caseId===confirmed.caseId&&output.decisionVersion===confirmed.stage4Version&&
@@ -125,11 +133,11 @@ function initialize(){
   }
   // Legacy documents can be reviewed without attributing current GIS to an old decision.
   const legacy=panelHandoff(window,source);
-  return legacy?{...legacy,gisStatus:'legacy',gisReason:'',pdf1:null,documentVersion:confirmed.version}:null;
+  return legacy?.panelId===1?{...legacy,gisStatus:'legacy',gisReason:'',pdf1:null,documentVersion:confirmed.version}:null;
  };
  openPanel.onclick=()=>{
   const handoff=live()?confirmedPanelOutput():null;
-  if(handoff?.panelId!==1)return;
+  if(!addressedPanels.has(handoff?.panelId))return;
   const confirmedData=make('div');
   confirmedData.append(make('h4','Потвърдени данни'));
   if(handoff.subject)confirmedData.append(make('p','Готово · Предмет: '+handoff.subject));
@@ -147,9 +155,10 @@ function initialize(){
   const rationale=make('details'),decision=make('p',handoff.decision);
   decision.style.whiteSpace='pre-wrap';
   rationale.append(make('summary','Виж потвърденото решение'),decision);
-  const caseNumber=window.KT126Registry?.caseNumber?.()||'Отворена преписка';
-  pilot.replaceChildren(make('h3','Панел №01 · '+handoff.result),make('h4','Защо преписката е тук'),
-   make('p',caseNumber+' · Потвърден избор от Етап 5'),rationale,columns);
+  const caseNumber=window.KT126Registry?.caseNumber?.()||handoff.caseId;
+  pilot.replaceChildren(make('h3','Панел №'+panelNumber(handoff.panelId)+' · '+handoff.result),make('h4','Защо преписката е тук'),
+   make('p',caseNumber+' · Потвърден избор от Етап 5'),
+   make('p','Анализ от Етап 4 · версия '+handoff.decisionVersion+' · Документ · версия '+handoff.documentVersion),rationale,columns);
   if(project){
    const draft=make('details'),text=make('p',project.text);text.style.whiteSpace='pre-wrap';
    draft.append(make('summary','Прегледай проекта'),text);pilot.append(draft);
@@ -170,7 +179,7 @@ function initialize(){
   const handoff=panelHandoff(window,a);
   const parcels=handoff?.parcelIds||collectStageEvidence(window).parcelIds;
   transition.hidden=true;
-  destination.textContent=handoff?.panelId===1?'Адресиран панел №01 · '+handoff.result:'';
+  destination.textContent='';
   details.textContent='Предмет: '+clean(p.text)+'\nИмот(и): '+parcels.join(', ')+'\nЕксперт: '+a.expert+' · Версия: '+a.version;
   warnings.hidden=!a.warnings?.length;warningText.textContent=(a.warnings||[]).join('\n');
   note.textContent='Изготвянето на документа използва потвърденото направление, без нова процедурна квалификация.';
@@ -181,8 +190,12 @@ function initialize(){
   preview.textContent=v.text;preview.hidden=false;textarea.hidden=true;textarea.style.display='none';edit.hidden=false;save.hidden=true;cancel.hidden=true;
   confirm.hidden=!!confirmed;confirmedText.textContent=confirmed?'Потвърден текст · версия '+confirmed.version+'. Експертните редакции остават окончателни за документа.':'';
   const output=confirmedPanelOutput();
-  transition.hidden=output?.panelId!==1;
-  if(!transition.hidden)destination.textContent='Адресиран панел №01 · '+output.result;
+  transition.hidden=!addressedPanels.has(output?.panelId);
+  if(!transition.hidden){
+   const number=panelNumber(output.panelId);
+   destination.textContent='Адресиран панел №'+number+' · '+output.result;
+   openPanel.textContent='Към панел №'+number;
+  }
   footer.hidden=!confirmed;word.disabled=!(confirmed&&window.KT119TemplateReady?.());
  };
  generate.onclick=async()=>{
