@@ -145,15 +145,51 @@ function show(proposal,{apply=false}={}){
    'НЕ Е УДОСТОВЕРЕН ПРОЧИТ')+'. '+proposal.warning:
   'Няма доказан кандидат от преписката. Въведете предмет ръчно въз основа на проверени документи.');
 }
+let reconstructionDialog=null;
 function constructed(){
- // A repeated deterministic reconstruction must not silently overwrite expert text.
  const prior=clean($('kt80SubjectText')?.value);
  const scopePrior=clean($('kt80ScopeText')?.value);
  const confirmed=Boolean($('kt80SubjectConfirmation')?.checked||$('kt80ScopeConfirmation')?.checked||root.KT80WorkflowState?.subjectConfirmed);
- if(prior||scopePrior||confirmed){
-  const answer=root.confirm('Реконструкцията ще изготви повторно предмет и обхват от преписката. Съществуващите редакции и отметки за потвърждение ще бъдат заменени. Продължавате ли?');
-  if(!answer){status('Реконструкцията е отменена. Предметът и обхватът са запазени.');return null;}
- }
+ if(!prior&&!scopePrior&&!confirmed)return reconstruct();
+ if(reconstructionDialog)return null;
+ const trigger=document.activeElement;
+ const dialog=document.createElement('dialog');
+ dialog.className='kt126-dialog';
+ dialog.setAttribute('aria-labelledby','kt80ReconstructTitle');
+ dialog.setAttribute('aria-describedby','kt80ReconstructMessage');
+ const title=document.createElement('h2');
+ title.id='kt80ReconstructTitle';
+ title.textContent='Реконструкция от преписката';
+ const message=document.createElement('p');
+ message.id='kt80ReconstructMessage';
+ message.textContent='Модулът ще изготви отново предмета и обхвата. Текущите редакции и отметките за потвърждение ще бъдат заменени.';
+ const actions=document.createElement('div');
+ actions.className='kt126-actions';
+ const cancel=document.createElement('button');
+ cancel.type='button';
+ cancel.textContent='Отказ';
+ const proceed=document.createElement('button');
+ proceed.type='button';
+ proceed.className='kt126-confirm';
+ proceed.textContent='Реконструирай';
+ actions.append(cancel,proceed);
+ dialog.append(title,message,actions);
+ cancel.addEventListener('click',()=>dialog.close());
+ proceed.addEventListener('click',()=>dialog.close('reconstruct'));
+ dialog.addEventListener('close',()=>{
+  reconstructionDialog=null;
+  dialog.remove();
+  if(trigger?.isConnected)trigger.focus();
+  if(dialog.returnValue==='reconstruct')reconstruct();
+  else if(dialog.returnValue!=='case-reset')status('Реконструкцията е отменена. Предметът и обхватът са запазени.');
+ },{once:true});
+ document.body.append(dialog);
+ reconstructionDialog=dialog;
+ dialog.showModal();
+ cancel.focus();
+ return null;
+}
+function reconstruct(){
  // KT53 is the sole evidence-aware construction route; V32 remains a source-picker.
  if(root.KT80KT53?.construct)return root.KT80KT53.construct({force:true});
  const workflow=root.KT80WorkflowState;
