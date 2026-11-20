@@ -10,6 +10,19 @@ on:
 permissions:
   contents: read
 jobs:
+  publish-pages:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      contents: read
+    steps:
+      - name: Request a build from the configured Pages source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/pages" --jq '{build_type, source}'
+          gh api --method POST "repos/$GITHUB_REPOSITORY/pages/builds" --jq '{status, url}'
   browser:
     runs-on: ubuntu-24.04
     steps:
