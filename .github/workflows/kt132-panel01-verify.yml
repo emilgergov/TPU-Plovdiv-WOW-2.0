@@ -42,6 +42,7 @@ jobs:
           import assert from 'node:assert/strict';
           import {readFileSync,writeFileSync} from 'node:fs';
           const root='cloudflare/kt125-access/';
+          const testRelease=process.env.GITHUB_REF_NAME==='work/kt133-panel17'?'133':'132';
           const patchOnce=(source,anchor,replacement)=>{assert.equal(source.split(anchor).length,2,anchor);return source.replace(anchor,replacement);};
           const stage5Context='cloudflare/ai-author-v27/src/kt130-stage5-context.mjs';
           let stage5Code=readFileSync(stage5Context,'utf8');
@@ -158,7 +159,6 @@ jobs:
           code=patchOnce(code,stage4OverlayAnchor,stage4OverlayAnchor+'\n'+" if(rel.endsWith('/kt96-eg-ai-stage4-author.mjs'))source=replaceOnce(source,\"     document.dispatchEvent(new CustomEvent('kt124:stage4-attempt',{detail:{\",\"     if(!str(data.unverifiedDraft))document.dispatchEvent(new CustomEvent('kt132:stage4-rejected',{detail:{caseId:h.caseId,evidenceRevision:h.evidenceRevision}}));\\n     document.dispatchEvent(new CustomEvent('kt124:stage4-attempt',{detail:{\");\n if(rel.endsWith('/kt116-expert-approval-handoff.mjs'))source=replaceOnce(source,\" function clear(){\",\" document.addEventListener('kt132:stage4-rejected',event=>{\\n  const currentEvidence=evidence();\\n  if(!approved&&event.detail?.caseId===currentEvidence.caseId&&event.detail.evidenceRevision===currentEvidence.evidenceRevision)clear();\\n });\\n function clear(){\");");
           code=patchOnce(code,stage4OverlayAnchor,stage4OverlayAnchor+'\n'+" if(rel.endsWith('/kt96-eg-ai-stage4-author.mjs'))source=replaceOnce(source,\"    status.textContent=response.status===413?\",\"    if(response.status===422&&data.error==='CASE_READING_INCOMPLETE'){\\n     status.textContent=String(data.message||'Пълният прочит не е завършен.');return;\\n    }\\n    status.textContent=response.status===413?\");");
           writeFileSync(gateway,code);
-          const testRelease=process.env.GITHUB_REF_NAME==='work/kt133-panel17'?'133':'132';
           const lookupModule='cloudflare/ai-author-v27/src/kt132-normative-lookup.mjs';
           writeFileSync(lookupModule,patchOnce(readFileSync(lookupModule,'utf8'),'__WOW_TEST_HOST__','kt'+testRelease+'-tpu-plovdiv-kt125-local-auth'));
           for(const f of ['preview/author-entry.mjs','preview/native-entry.mjs','preview/router-entry.mjs']){
