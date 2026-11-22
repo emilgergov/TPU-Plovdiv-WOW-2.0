@@ -3,13 +3,13 @@ const fs=require('node:fs'),assert=require('node:assert/strict');
 const [,,sourcePath,outputPath]=process.argv;
 if(!sourcePath||!outputPath)throw Error('Pass protected Worker source path and candidate output path');
 const original=fs.readFileSync(sourcePath,'utf8');
-const canonical=original.match(/\\bexport\\s+default\\b/g)||[];
-const groups=[...original.matchAll(/\\bexport\\s*\\{([^}]+)\\}\\s*;?/g)];
-const matches=groups.flatMap(g=>g[1].split(',').map(x=>x.trim()).filter(x=>/\\bas\\s+default\\b/.test(x)).map(x=>({group:g,entry:x,ident:(x.match(/^([A-Za-z_$][\\w$]*)\\s+as\\s+default$/)||[])[1]})));
+const canonical=original.match(/\bexport\s+default\b/g)||[];
+const groups=[...original.matchAll(/\bexport\s*\{([^}]+)\}\s*;?/g)];
+const matches=groups.flatMap(g=>g[1].split(',').map(x=>x.trim()).filter(x=>/\bas\s+default\b/.test(x)).map(x=>({group:g,entry:x,ident:(x.match(/^([A-Za-z_$][\w$]*)\s+as\s+default$/)||[])[1]})));
 assert.ok(original.length>200&&original.length<10000,'Unexpected protected gateway length');
 assert.ok(canonical.length===1&&matches.length===0 || canonical.length===0&&matches.length===1&&matches[0].ident,'Unsupported original KT133 module export; no modification allowed');
 let converted;
-if(canonical.length===1){converted=original.replace(/\\bexport\\s+default\\b/,'const __kt133Core =');}
+if(canonical.length===1){converted=original.replace(/\bexport\s+default\b/,'const __kt133Core =');}
 else{
   const {group,entry,ident}=matches[0];
   const remaining=group[1].split(',').map(x=>x.trim()).filter(x=>x&&x!==entry);
