@@ -979,6 +979,9 @@ document.addEventListener('DOMContentLoaded',function(){
  position:relative;
  z-index:2;
  text-wrap:balance;
+ font-size:clamp(20px,1.37vw,22px);
+ line-height:1.27;
+ font-weight:800;
 }
 #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt80-dashboard-tile-number {
  align-self:flex-start;
@@ -989,6 +992,7 @@ document.addEventListener('DOMContentLoaded',function(){
 @media(max-width:800px) {
  #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt80-dashboard-tile-text{
   padding:18px 3px 10px;
+  font-size:clamp(16px,2.6vw,20px);
  }
  #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt134-stage-emblem{
   width:42px;height:42px;top:8px;right:8px;
