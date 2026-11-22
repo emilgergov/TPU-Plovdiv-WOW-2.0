@@ -41,13 +41,13 @@ jobs:
           node - "$RUNNER_TEMP/gateway.mjs" <<'NODE'
           const fs=require('fs');const b=fs.readFileSync(process.argv[2]);const t=b.toString('utf8');
           const flags={
-            jsExportDefault:/\\bexport\\s+default\\b/.test(t),
-            jsExportNamedDefault:/\\bexport\\s*\\{[^}]*\\bdefault\\b/.test(t),
-            legacyListener:/addEventListener\\s*\\(/.test(t),
-            htmlLike:/<html|<!doctype html/i.test(t),
-            multipartLike:/Content-Disposition:|name="metadata"/i.test(t),
-            serviceFetch:/\\.fetch\\s*\\(/.test(t),
-            containsAuthRoute:/\\/auth\\/login/.test(t)
+            jsExportDefault:t.includes('export default'),
+            jsExportNamedDefault:t.includes('as default')||t.includes('export{'),
+            legacyListener:t.includes('addEventListener'),
+            htmlLike:t.includes('<html')||t.includes('<!doctype'),
+            multipartLike:t.includes('Content-Disposition:')||t.includes('name="metadata"'),
+            serviceFetch:t.includes('.fetch('),
+            containsAuthRoute:t.includes('/auth/login')
           };
           console.log('KT133 entry script format probe:',JSON.stringify(flags));
           NODE
