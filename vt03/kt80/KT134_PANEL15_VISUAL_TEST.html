@@ -1228,4 +1228,133 @@ window.KT134FlowCatalogCount=Object.keys(catalog).length;
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
 })();
 </script>
+
+<style id="kt134WorkContainersVisual">
+/* КТ134 — само стилово уеднаквяване на ОРИГИНАЛНИТЕ работни екрани.
+   Входните схеми на №02 и другите панели не се засягат. Няма JS, промяна на действия,
+   нормативни правила, табове, данни, събития или документи. №15 не се обслужва от #overlay. */
+#overlay.open:not(.kt134-flow-mode) .dialog{
+ background:linear-gradient(160deg,#103c2b 0%,#0c3428 65%,#0b3025 100%);
+ border:2px solid #d5af68;
+ border-radius:16px;
+ box-shadow:0 22px 72px #000b,inset 0 0 0 1px #f2d89422;
+ color:#f5edde;
+ padding:clamp(14px,2vw,25px);
+ max-width:1500px;
+}
+#overlay.open:not(.kt134-flow-mode) .dialogtop{
+ position:sticky;top:-28px;z-index:3;
+ background:#103a2b!important;
+ display:flex;align-items:center;justify-content:space-between;gap:14px;
+ padding:5px 0 14px;margin-bottom:15px;
+ border-bottom:1px solid #b6975c88;
+}
+#overlay.open:not(.kt134-flow-mode) #dialogTitle{
+ color:#ffdf9c;
+ font:800 clamp(21px,2vw,28px)/1.25 Georgia,serif;
+ margin:0 0 7px;
+ overflow-wrap:break-word;
+}
+#overlay.open:not(.kt134-flow-mode) #dialogMeta{
+ color:#cbdcc9;font:600 12px/1.5 Verdana,Arial,sans-serif;
+ margin:0;
+}
+#overlay.open:not(.kt134-flow-mode) .close{
+ flex-shrink:0;align-self:flex-start;
+ padding:10px 14px;
+ background:#224f3b;color:#ffe3a3;
+ border:1px solid #cda85e;border-radius:8px;
+ font:750 12px Verdana,Arial,sans-serif;
+}
+#overlay.open:not(.kt134-flow-mode) .warn{
+ margin:0 0 15px;
+ background:#3e3924;
+ border:1px solid #97794d;border-left:4px solid #e1b76c;
+ border-radius:9px;padding:11px 15px;
+ color:#f6e7c2;font:500 12px/1.5 Verdana,Arial,sans-serif;
+}
+#overlay.open:not(.kt134-flow-mode) .tabs{
+ display:grid!important;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:9px!important;
+ margin:10px 0 14px;
+ align-items:stretch;
+}
+#overlay.open:not(.kt134-flow-mode) .tabs button{
+ font:750 13px/1.35 Verdana,Arial,sans-serif!important;
+ border:1px solid #789479;border-radius:10px;
+ color:#f4e2b6;background:#1d4b37;
+ min-height:50px;padding:12px 10px;
+ overflow-wrap:break-word;
+ white-space:normal;
+ box-shadow:none;animation:none;
+}
+#overlay.open:not(.kt134-flow-mode) .tabs button[aria-selected="true"]{
+ color:#183b2d!important;background:#e5c37b!important;
+ border-color:#ffdfa0!important;
+ box-shadow:inset 0 0 0 1px #fff0c377,0 3px 10px #0003!important;
+}
+#overlay.open:not(.kt134-flow-mode) .tabs button:focus-visible,
+#overlay.open:not(.kt134-flow-mode) .close:focus-visible,
+#overlay.open:not(.kt134-flow-mode) .formquick a:focus-visible{
+ outline:3px solid #f2d185;outline-offset:3px;
+}
+#overlay.open:not(.kt134-flow-mode) .rows{
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:10px;align-items:stretch;
+}
+#overlay.open:not(.kt134-flow-mode) .rr{
+ display:flex;align-items:flex-start;gap:12px;
+ min-height:76px;
+ padding:13px 14px;
+ border:1px solid #668a70;
+ border-radius:10px;
+ background:linear-gradient(155deg,#1b4b38,#153e30);
+ box-shadow:inset 0 1px 0 #ffffff10;
+ font:500 12.5px/1.52 Verdana,Arial,sans-serif;
+ color:#f3e9d8;overflow-wrap:anywhere;
+}
+#overlay.open:not(.kt134-flow-mode) .rr .circle{
+ flex:none;color:#eec771;font-size:21px;line-height:1.2;
+}
+#overlay.open:not(.kt134-flow-mode) .rr strong{
+ color:#ffe0a3;font-size:13px;line-height:1.48;font-weight:750;
+}
+#overlay.open:not(.kt134-flow-mode) .rr small{
+ color:#c7d9cb;font-size:11px;line-height:1.5;margin-top:7px;
+}
+#overlay.open:not(.kt134-flow-mode) .formquick{
+ grid-column:1/-1;
+ gap:9px;padding:12px;
+ border:1px solid #b39764;border-radius:10px;
+ background:#184432;
+}
+#overlay.open:not(.kt134-flow-mode) .formquick a{
+ background:linear-gradient(#f3d68e,#deb96d);
+ border:1px solid #e0c17c;border-radius:8px;
+ padding:10px 12px;
+ color:#16392b;
+ font:750 12px/1.35 Verdana,Arial,sans-serif;
+}
+#overlay.open:not(.kt134-flow-mode) .formquick small{
+ color:#dae5d5;font-size:11px;line-height:1.5;
+}
+#overlay.open:not(.kt134-flow-mode) .src{
+ background:#153e30;border:1px solid #658773;
+ border-radius:9px;padding:12px 14px;margin:14px 0 1px;
+ color:#dce6d7;font:500 11.5px/1.55 Verdana,Arial,sans-serif;
+ overflow-wrap:anywhere;
+}
+#overlay.open:not(.kt134-flow-mode) .src strong{color:#f0d28a}
+#overlay.open:not(.kt134-flow-mode) .src a{color:#ffdda0}
+@media(max-width:870px){
+ #overlay.open:not(.kt134-flow-mode) .rows{grid-template-columns:1fr}
+ #overlay.open:not(.kt134-flow-mode) .tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #overlay.open:not(.kt134-flow-mode) .dialogtop{top:-12px}
+}
+@media(max-width:480px){
+ #overlay.open:not(.kt134-flow-mode) .tabs{grid-template-columns:1fr}
+ #overlay.open:not(.kt134-flow-mode) .dialogtop{gap:9px}
+}
+</style>
 </body></html>
