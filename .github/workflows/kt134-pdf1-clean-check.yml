@@ -28,6 +28,7 @@ jobs:
         run: |
           grep -q 'KT82_A_PDF1_V600_KT134_CANDIDATE.js' vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html
           grep -q 'KT82_A_FREE_GIS_V603.js' vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html
+          grep -q 'KT134_PANEL15_REAL_GIS.css' vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html
       - name: Confirm no production changes
         shell: bash
         run: |
