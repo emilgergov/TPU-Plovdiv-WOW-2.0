@@ -15,8 +15,7 @@ if(first.startsWith('--')&&first.length<180){
   const offset=trimmed.indexOf(separator);
   if(offset<0)continue;
   const headers=trimmed.slice(0,offset);
-  if(!/Content-Disposition:/i.test(headers)||!/filename\s*=/i.test(headers))continue;
-  if(!/javascript|\.mjs|\.js/i.test(headers))continue;
+  if(!/Content-Disposition:/i.test(headers)||/name="metadata"/i.test(headers))continue;
   const body=trimmed.slice(offset+separator.length).replace(/\r?\n$/,'');
   modules.push(body);
  }
