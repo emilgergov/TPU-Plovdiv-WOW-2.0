@@ -54,8 +54,8 @@ export default {
  async fetch(request,env,ctx) {
   const u=new URL(request.url);
   const assets={
-   '/__kt133_approved_visuals.css':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/e9865245e740544fe19d0325783841356472c4c9/kt80/KT133_APPROVED_VISUALS.css','text/css; charset=utf-8'],
-   '/__kt133_approved_visuals.js':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/e9865245e740544fe19d0325783841356472c4c9/kt80/KT133_APPROVED_VISUALS.js','text/javascript; charset=utf-8']
+   '/__kt133_approved_visuals.css':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/91a8b9f94671399c973b0b96b459149ee38f60ba/kt80/KT133_APPROVED_VISUALS.css','text/css; charset=utf-8'],
+   '/__kt133_approved_visuals.js':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/91a8b9f94671399c973b0b96b459149ee38f60ba/kt80/KT133_APPROVED_VISUALS.js','text/javascript; charset=utf-8']
   };
   if(Object.prototype.hasOwnProperty.call(assets,u.pathname) && request.method==='GET'){
    const [target,mime]=assets[u.pathname];
