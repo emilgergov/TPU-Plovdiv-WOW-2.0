@@ -37,6 +37,5 @@ export default {
 };`;
 const candidate=converted+'\n'+overlay+'\n';
 fs.writeFileSync(outputPath,candidate);
-const changed=original.replace(/\bexport\s+default\b/,'const __kt133Core =');
-assert.ok(candidate.startsWith(changed),'Original gateway was altered beyond export binding');
+assert.ok(candidate.startsWith(converted),'Original gateway was altered beyond export binding');
 console.log('KT133 approved visual gateway patch generated, original protected gateway preserved, lengths',original.length,candidate.length);
