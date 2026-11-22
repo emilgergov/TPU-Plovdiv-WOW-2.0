@@ -22,6 +22,10 @@
       errors.push('Неопределен статус на пресичането');
     if(parcel.intersectionStatus==='intersects'&&assertArray(parcel.intersections).length===0)
       errors.push('Твърди се пресичане, но липсват доказателствени обекти');
+    if(parcel.intersectionStatus==='none'&&assertArray(parcel.intersections).length!==0)
+      errors.push('Противоречие: статус без пресичане, но има пресечени обекти');
+    if(parcel.intersectionStatus==='unknown'&&assertArray(parcel.intersections).length!==0)
+      errors.push('Противоречие: неопределен статус с потвърдени пресичания');
     for(const zone of assertArray(parcel.intersections)){
       if(!zone||!zone.code||!['ZZ','ZT'].includes(zone.type))
         errors.push('Липсва код или вид на защитен обект');
