@@ -352,7 +352,8 @@ function reconcile(){
   // This caption may be dynamically rendered after the initial page load.
   for(const el of document.querySelectorAll('summary,button')){
    if(el.closest('.kt133-approved-real-entrance'))continue;
-   const texts=[...el.childNodes].filter(n=>n.nodeType===3);
+   const texts=[];const walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
+   while(walker.nextNode())texts.push(walker.currentNode);
    for(const node of texts){
     if(!/Специализирани резултати и инструменти/.test(el.textContent||''))continue;
     const revised=(node.textContent||'')
