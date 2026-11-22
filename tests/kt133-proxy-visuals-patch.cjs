@@ -2,7 +2,29 @@
 const fs=require('node:fs'),assert=require('node:assert/strict');
 const [,,sourcePath,outputPath]=process.argv;
 if(!sourcePath||!outputPath)throw Error('Pass protected Worker source path and candidate output path');
-const original=fs.readFileSync(sourcePath,'utf8');
+let original=fs.readFileSync(sourcePath,'utf8');
+// Cloudflare GET /scripts may return an RFC 7578 module envelope rather than bare JS.
+// Unpack only a single JS entry module, without logging private source.
+const first=original.split(/\r?\n/,1)[0];
+if(first.startsWith('--')&&first.length<180){
+ const parts=original.split(first);
+ const modules=[];
+ for(const part of parts){
+  const trimmed=part.replace(/^\r?\n/,'');
+  const separator=trimmed.includes('\r\n\r\n')?'\r\n\r\n':'\n\n';
+  const offset=trimmed.indexOf(separator);
+  if(offset<0)continue;
+  const headers=trimmed.slice(0,offset);
+  if(!/Content-Disposition:/i.test(headers)||!/filename\s*=/i.test(headers))continue;
+  if(!/javascript|\.mjs|\.js/i.test(headers))continue;
+  const body=trimmed.slice(offset+separator.length).replace(/\r?\n$/,'');
+  modules.push(body);
+ }
+ assert.equal(modules.length,1,'Protected gateway must expose precisely one JS module');
+ original=modules[0];
+ console.log('Cloudflare multipart gateway module extracted for read-only verification');
+}
+
 const canonical=original.match(/\bexport\s+default\b/g)||[];
 const groups=[...original.matchAll(/\bexport\s*\{([^}]+)\}\s*;?/g)];
 const matches=groups.flatMap(g=>g[1].split(',').map(x=>x.trim()).filter(x=>/\bas\s+default\b/.test(x)).map(x=>({group:g,entry:x,ident:(x.match(/^([A-Za-z_$][\w$]*)\s+as\s+default$/)||[])[1]})));
