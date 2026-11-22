@@ -24,6 +24,17 @@ if(first.startsWith('--')&&first.length<180){
  console.log('Cloudflare multipart gateway module extracted for read-only verification');
 }
 
+// A previous approved overlay may already be live. Rebuild from its preserved core,
+// rather than stacking a second HTMLRewriter or injecting duplicate scripts.
+const overlayMarker='/* KT133 approved visual additions. Original functional gateway above is unchanged. */';
+if(original.includes(overlayMarker)){
+ assert.equal(original.split(overlayMarker).length,2,'Unexpected repeated KT133 overlays');
+ const retained=original.slice(0,original.indexOf(overlayMarker)).trimEnd();
+ assert.ok(retained.includes('const __kt133Core ='),'Existing gateway core is not recognizable');
+ original=retained.replace('const __kt133Core =','export default');
+ console.log('Existing KT133 visual overlay unwrapped for safe replacement');
+}
+
 const canonical=original.match(/\bexport\s+default\b/g)||[];
 const groups=[...original.matchAll(/\bexport\s*\{([^}]+)\}\s*;?/g)];
 const matches=groups.flatMap(g=>g[1].split(',').map(x=>x.trim()).filter(x=>/\bas\s+default\b/.test(x)).map(x=>({group:g,entry:x,ident:(x.match(/^([A-Za-z_$][\w$]*)\s+as\s+default$/)||[])[1]})));
@@ -43,8 +54,8 @@ export default {
  async fetch(request,env,ctx) {
   const u=new URL(request.url);
   const assets={
-   '/__kt133_approved_visuals.css':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/1cfc6aa561ad4fbec57a7d2219d3b2aa455a9a26/kt80/KT133_APPROVED_VISUALS.css','text/css; charset=utf-8'],
-   '/__kt133_approved_visuals.js':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/1cfc6aa561ad4fbec57a7d2219d3b2aa455a9a26/kt80/KT133_APPROVED_VISUALS.js','text/javascript; charset=utf-8']
+   '/__kt133_approved_visuals.css':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/83542c056d8c9c9a8b6cbfd71b96d1056782e970/kt80/KT133_APPROVED_VISUALS.css','text/css; charset=utf-8'],
+   '/__kt133_approved_visuals.js':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/83542c056d8c9c9a8b6cbfd71b96d1056782e970/kt80/KT133_APPROVED_VISUALS.js','text/javascript; charset=utf-8']
   };
   if(Object.prototype.hasOwnProperty.call(assets,u.pathname) && request.method==='GET'){
    const [target,mime]=assets[u.pathname];
