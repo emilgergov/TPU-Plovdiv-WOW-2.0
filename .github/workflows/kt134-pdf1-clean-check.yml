@@ -39,6 +39,8 @@ jobs:
         run: node KT134/integration/KT134_DEPENDENCY_ROUTE_AUDIT.test.cjs
       - name: Stage3 GIS gate / PDF1 evidence consistency
         run: node KT134/integration/KT134_SPATIAL_GATE_CONSISTENCY.test.cjs
+      - name: Stage3 automatic trigger to real PDF1 source
+        run: node KT134/integration/KT134_E3_AUTOMATIC_PDF1_CHAIN.test.cjs
       - name: PDF1 lifecycle synthetic E2E
         run: node KT134/integration/KT134_PDF1_LIFECYCLE.test.cjs
       - name: Validate isolated HTML points to candidate and preserves GIS source
