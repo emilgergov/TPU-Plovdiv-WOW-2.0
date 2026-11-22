@@ -524,9 +524,9 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 <section class="kt80-stages" aria-label="Пет работни етапа">
 <button class="kt80-step" type="button" data-step="1">1. Внасяне и анализ на преписката</button>
 <button class="kt80-step" type="button" data-step="2">2. Предмет и обхват на инвестиционното предложение</button>
-<button class="kt80-step" type="button" data-step="3">3. Имоти и пространствен анализ на ИП</button>
-<button class="kt80-step" type="button" data-step="4">4. Нормативна и процедурна преценка на ИП</button>
-<button class="kt80-step" type="button" data-step="5">5. Определяне на процедурата по ИП</button>
+<button class="kt80-step" type="button" data-step="3">3. Имоти и пространствен анализ на инвестиционното предложение</button>
+<button class="kt80-step" type="button" data-step="4">4. Нормативна и процедурна преценка на инвестиционното предложение</button>
+<button class="kt80-step" type="button" data-step="5">5. Определяне на процедурата по инвестиционното предложение</button>
 </section><main class="catalog">
 <div class="kt80-tiny-status" aria-live="polite"><strong id="kt80CaseBadge">Нова преписка</strong><span id="kt80SubjectBadge">Предмет: непотвърден</span><span id="kt80RouteBadge">Процедура: неопределена</span></div>
 <section class="kt80-workflow" aria-label="Основен работен поток">
@@ -996,6 +996,24 @@ document.addEventListener('DOMContentLoaded',function(){
  }
  #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt134-stage-emblem{
   width:42px;height:42px;top:8px;right:8px;
+ }
+}
+</style>
+<style id="kt134FullStageTitlesFit">
+/* Uniform fully spelled stage names while preserving centered text and decorative emblems. */
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="3"] .kt80-dashboard-tile-text,
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="4"] .kt80-dashboard-tile-text,
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="5"] .kt80-dashboard-tile-text{
+ font-size:clamp(18px,1.24vw,21px)!important;
+ line-height:1.22!important;
+ padding:29px 5px 12px!important;
+ overflow-wrap:normal;hyphens:auto;
+}
+@media(max-width:800px){
+ #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="3"] .kt80-dashboard-tile-text,
+ #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="4"] .kt80-dashboard-tile-text,
+ #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="5"] .kt80-dashboard-tile-text{
+  font-size:15px!important;padding:28px 3px 10px!important;
  }
 }
 </style></body></html>
