@@ -52,6 +52,12 @@ jobs:
           grep -q 'KT82_A_PDF1_V600_KT134_CANDIDATE.js' vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html
           grep -q 'KT82_A_FREE_GIS_V603.js' vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html
           grep -q 'KT134_PANEL15_REAL_GIS.css' vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html
+      - name: Install isolated browser-test runtime
+        run: npm install --no-save --ignore-scripts playwright-core@1.56.1
+      - name: Headless integrated UI smoke (Chromium)
+        env:
+          CHROMIUM_PATH: /usr/bin/google-chrome
+        run: node KT134/integration/KT134_BROWSER_SMOKE.test.cjs
       - name: Confirm no production changes
         shell: bash
         run: |
