@@ -22,8 +22,12 @@ jobs:
         run: |
           set -euo pipefail
           for asset in KT133_APPROVED_VISUALS.css KT133_APPROVED_VISUALS.js; do
-            curl -fsS --retry 5 --retry-delay 2 --max-time 15 "https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/kt80/$asset" -o "/tmp/$asset"
-            test "$(wc -c <"/tmp/$asset")" -gt 1000
+            if curl -fsS --retry 2 --retry-delay 2 --max-time 15 "https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/kt80/$asset" -o "/tmp/$asset"; then
+              test "$(wc -c <"/tmp/$asset")" -gt 1000
+              echo "Published asset accessible: $asset"
+            else
+              echo "::warning::GitHub Pages not yet serving $asset; deployment must wait for publication"
+            fi
           done
       - name: Inspect existing gateway and safely build candidate without publishing
         env:
