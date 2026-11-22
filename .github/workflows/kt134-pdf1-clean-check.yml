@@ -24,6 +24,8 @@ jobs:
       - run: node KT134/integration/KT82_A_PDF1_V600_KT134_CANDIDATE.test.cjs
       - name: Worker PDF1 overlay compatibility
         run: node KT134/integration/KT134_WORKER_OVERLAY_COMPAT.test.cjs
+      - name: Exact E1-E5 HTML parity and script order
+        run: node KT134/integration/KT134_STAGE1_5_HTML_PARITY.test.cjs
       - name: Full E1-E5 dependency and route source audit
         run: node KT134/integration/KT134_DEPENDENCY_ROUTE_AUDIT.test.cjs
       - name: PDF1 lifecycle synthetic E2E
