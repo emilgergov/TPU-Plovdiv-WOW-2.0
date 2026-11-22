@@ -958,4 +958,40 @@ document.addEventListener('DOMContentLoaded',function(){
   b.append(motif,emblem);
  }
 });
-</script></body></html>
+</script>
+<style id="kt134FiveStageCenteredHeadings">
+/* KT134 visual refinement: center stage titles in the available middle area;
+   keep index, emblem and navigation arrow in their original positions. */
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] {
+ justify-content:space-between;
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt80-dashboard-tile-text {
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ text-align:center;
+ align-self:stretch;
+ width:100%;
+ max-width:100%;
+ margin:0;
+ padding:20px 10px 12px;
+ flex:1 1 auto;
+ position:relative;
+ z-index:2;
+ text-wrap:balance;
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt80-dashboard-tile-number {
+ align-self:flex-start;
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt134-stage-emblem{
+ top:12px;right:13px;width:55px;height:55px;
+}
+@media(max-width:800px) {
+ #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt80-dashboard-tile-text{
+  padding:18px 3px 10px;
+ }
+ #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt134-stage-emblem{
+  width:42px;height:42px;top:8px;right:8px;
+ }
+}
+</style></body></html>
