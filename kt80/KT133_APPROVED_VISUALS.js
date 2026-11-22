@@ -119,6 +119,7 @@ window.KT134ShowPanel02Entry=function(c){
   partBox.replaceChildren();
   cfg.parts.forEach(value=>{const item=document.createElement('span');item.textContent=value;partBox.append(item)});
 };
+window.KT133ApprovedFlowCatalog=catalog;
 window.KT134FlowCatalogCount=Object.keys(catalog).length;
 })();
 
@@ -256,6 +257,119 @@ function init(){
     const match=text.match(/№\s*0?(\d{1,2})\b/u);
     if(match)show(Number(match[1]));
   }).observe(overlay,{attributes:true,attributeFilter:['class']});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
+else init();
+})();
+
+
+/* KT133 real authenticated entrance adapter: presentation only.
+   Existing modal actions, original route handlers and case state are preserved. */
+(function(){
+'use strict';
+const icons=[
+ '<rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 9h18M7 3v4M12 3v4"/>',
+ '<path d="M7 3h8l4 4v14H5V3zM15 3v5h5M8 12h8M8 16h7"/>',
+ '<path d="M12 3v18M5 6h14M5 6l-3 6h6l-3-6ZM19 6l-3 6h6l-3-6ZM8 21h8"/>',
+ '<path d="M5 3h10l4 4v14H5V3zM15 3v4h4M8 12h8M8 16h8"/>',
+ '<path d="M5 12l4 4L19 6M12 2a10 10 0 1 1-10 10A10 10 0 0 1 12 2z"/>'
+];
+const config02={
+ flow:['ПРЕПИСКА','ПРОВЕРКА НА ЛИПСИТЕ','ПРАВНО ОСНОВАНИЕ','ПРОЕКТ НА ИСКАНЕ','ЕКСПЕРТНО РЕШЕНИЕ'],
+ details:['Получени документи и потвърдени факти','Необходимите данни по приложимия ред',null,'Конкретни въпроси и документи','Преглед, редакция и потвърждение'],
+ result:'Проект на изходящо писмо за предоставяне на допълнителна информация',
+ parts:['Конкретно установени липси и необходими уточнения','Точно формулирани искания за сведения и документи','Мотивирано правно основание, адресат и приложим срок']
+};
+const add=(parent,tag,cls,text)=>{
+ const el=document.createElement(tag);if(cls)el.className=cls;
+ if(text!==undefined)el.textContent=text;parent.append(el);return el;
+};
+function findLegacyModal(heading){
+ let node=heading.parentElement;
+ for(let n=0;node&&n<9;n++,node=node.parentElement){
+  if(node===document.body)break;
+  const text=node.textContent||'';
+  if(text.length>5500)continue;
+  if([...node.querySelectorAll('button')].some(b=>(b.textContent||'').includes('Отвори работния панел')))
+   return node;
+ }
+ return null;
+}
+function findLegacyIntro(modal){
+ return [...modal.querySelectorAll('p,div')].find(el=>
+  el.children.length<=2 && (el.textContent||'').trim().startsWith('Тук експертът преглежда материалите'));
+}
+function hideOldSteps(modal){
+ const blocks=[...modal.querySelectorAll('div,section,ul')].filter(el=>{
+  const t=el.textContent||'';
+  return t.length<900 && t.includes('Постъпила документация') &&
+   t.includes('Проверка за липси') && t.includes('Искане за допълнителна информация') &&
+   !t.includes('Отвори работния панел');
+ });
+ if(blocks.length)blocks.sort((a,b)=>a.textContent.length-b.textContent.length)[0].classList.add('kt133-legacy-intro-hidden');
+}
+function enhance(heading){
+ const idMatch=(heading.textContent||'').match(/^Панел\s*№\s*0?(\d{1,2})\s*[·:—-]/u);
+ if(!idMatch)return;
+ const id=Number(idMatch[1]);
+ if([13,14,15].includes(id))return;
+ const modal=findLegacyModal(heading);
+ if(!modal || modal.querySelector('.kt133-approved-real-entrance'))return;
+ const cfg=id===2?config02:window.KT133ApprovedFlowCatalog?.[id];
+ if(!cfg || !Array.isArray(cfg.flow) || cfg.flow.length!==5)return;
+ const intro=findLegacyIntro(modal);
+ const section=document.createElement('section');
+ section.className='kt133-approved-real-entrance';
+ section.setAttribute('aria-label','Одобрена последователност на работния панел');
+ add(section,'p','kt133-approved-intro','Последователност на работа — от установените факти до проекта на резултат');
+ const chain=add(section,'div','kt133-approved-chain');
+ cfg.flow.forEach((headingText,i)=>{
+  const tile=add(chain,'div','kt133-approved-step');
+  const symbol=add(tile,'span','kt133-approved-icon');
+  symbol.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+icons[i]+'</svg>';
+  add(tile,'strong','',headingText);
+  add(tile,'small','',i===2?'Определя се според преписката':cfg.details[i]||'');
+ });
+ const result=add(section,'div','kt133-approved-result');
+ add(result,'strong','','КРАЕН РЕЗУЛТАТ');
+ add(result,'p','',cfg.result);
+ const parts=add(result,'div','kt133-approved-parts');
+ (cfg.parts||[]).forEach(part=>add(parts,'span','',part));
+ add(result,'em','','Проектът се преглежда, редактира и потвърждава от експерта. Не се изпраща автоматично.');
+ // Keep the original action button and its registered click handler intact.
+ if(intro){intro.before(section);intro.classList.add('kt133-legacy-intro-hidden');}
+ else {
+  const btn=[...modal.querySelectorAll('button')].find(b=>(b.textContent||'').includes('Отвори работния панел'));
+  if(btn)btn.parentElement.before(section);else modal.append(section);
+ }
+ hideOldSteps(modal);
+ modal.classList.add('kt133-approved-entrance-container');
+}
+let running=false;
+function reconcile(){
+ if(running)return;running=true;
+ try{
+  // This caption may be dynamically rendered after the initial page load.
+  for(const el of document.querySelectorAll('summary,button')){
+   if(el.closest('.kt133-approved-real-entrance'))continue;
+   const texts=[...el.childNodes].filter(n=>n.nodeType===3);
+   for(const node of texts){
+    if(!/Специализирани резултати и инструменти/.test(el.textContent||''))continue;
+    const revised=(node.textContent||'')
+     .replace(/покажи\s*22\s*[-–—]?\s*те\s*възможности/giu,'покажи възможностите')
+     .replace(/скрий\s*списъка/giu,'скрий възможностите');
+    if(revised!==node.textContent)node.textContent=revised;
+   }
+  }
+  document.querySelectorAll('#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="13"],#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="14"]').forEach(el=>el.remove());
+  document.querySelectorAll('h1,h2,h3,h4').forEach(enhance);
+ }finally{running=false}
+}
+function init(){
+ reconcile();
+ // Watch added authenticated modal nodes and dynamic headings, not just the legacy #overlay.
+ const observer=new MutationObserver(reconcile);
+ observer.observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
 else init();
