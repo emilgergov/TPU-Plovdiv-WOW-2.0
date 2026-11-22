@@ -27,10 +27,14 @@ jobs:
           grep -q 'KT82_A_PDF1_V600_KT134_CANDIDATE.js' vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html
           grep -q 'KT82_A_FREE_GIS_V603.js' vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html
       - name: Confirm no production changes
+        shell: bash
         run: |
-          CHANGED="$(git diff --name-only origin/main...HEAD)"
-          echo "$CHANGED"
-          if echo "$CHANGED" | grep -v -E '^vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST\\.html$|^KT134/integration/|^\.github/workflows/kt134-pdf1-clean-check\.yml$'; then
-            echo 'ERROR: unrelated change'
-            exit 1
-          fi
+          git diff --name-only origin/main...HEAD | while IFS= read -r changed; do
+            case "$changed" in
+              KT134/integration/*|.github/workflows/kt134-pdf1-clean-check.yml|vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html)
+                echo "Allowed: $changed" ;;
+              *)
+                echo "ERROR: Unexpected production change: $changed"
+                exit 1 ;;
+            esac
+          done
