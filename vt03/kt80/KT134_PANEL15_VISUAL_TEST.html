@@ -1059,13 +1059,13 @@ document.addEventListener('DOMContentLoaded',function(){
 .kt134-flow02-icon svg{width:36px;height:36px;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;fill:none}
 .kt134-flow02-step strong{font-size:14px;line-height:1.33;font-weight:800;color:#ffdf9c}
 .kt134-flow02-step small{font-size:11.5px;line-height:1.43;color:#e6e8d9}
-.kt134-flow02-meta{display:grid;grid-template-columns:1.3fr 1fr;gap:13px;margin:0 0 16px}
-.kt134-flow02-legal,.kt134-flow02-result{border:1px solid #bba2679a;background:#123c30;border-radius:10px;padding:13px 17px;display:flex;gap:12px;align-items:flex-start}
-.kt134-flow02-legal svg,.kt134-flow02-result svg{width:28px;height:28px;flex:none;stroke:#f1cf81;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.kt134-flow02-meta strong{display:block;font-size:13px;color:#f5d88c;margin-bottom:6px}
-.kt134-flow02-meta span{display:block;font-size:12px;line-height:1.5;color:#fff4d9}
-.kt134-flow02-meta em{display:block;color:#d1d5c8;font-size:10.5px;font-style:normal;margin-top:5px}
-.kt134-flow02-actions{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.kt134-flow02-meta{display:block;margin:0 0 16px}
+.kt134-flow02-result{border:1px solid #bba2679a;background:#123c30;border-radius:10px;padding:15px 19px;display:flex;gap:16px;align-items:flex-start}
+.kt134-flow02-result svg{width:35px;height:35px;flex:none;stroke:#f1cf81;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.kt134-flow02-meta strong{display:block;font-size:15px;color:#f5d88c;margin-bottom:7px}
+.kt134-flow02-meta span{display:block;font-size:14px;line-height:1.45;color:#fff4d9;font-weight:700}
+.kt134-flow02-meta em{display:block;color:#d1d5c8;font-size:11px;font-style:normal;margin-top:7px}
+.kt134-flow02-result-items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:11px}.kt134-flow02-result-items span{display:block;font-size:12px;font-weight:500;border-left:2px solid #d9b968;padding:3px 9px;color:#f0e7d3}.kt134-flow02-step:nth-child(3) small{font-size:11px;line-height:1.38;color:#fff0c9;font-weight:600;overflow-wrap:anywhere}.kt134-flow02-actions{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .kt134-flow02-actions button{cursor:pointer;border-radius:8px;font:800 13px Verdana,Arial,sans-serif;padding:13px 18px}
 #kt134Flow02Back{color:#f7dd9f;background:#1c4936;border:1px solid #c6ab77}
 #kt134Flow02Enter{color:#163b2a;background:linear-gradient(180deg,#ffdf99,#e9b85c);border:1px solid #e7c981;box-shadow:0 3px 9px #0004}
@@ -1074,7 +1074,7 @@ document.addEventListener('DOMContentLoaded',function(){
  .kt134-flow02-steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
  .kt134-flow02-step{min-height:140px}
  .kt134-flow02-step::after{display:none}
- .kt134-flow02-meta{grid-template-columns:1fr}
+ .kt134-flow02-result-items{grid-template-columns:1fr}
  .kt134-flow02-actions{flex-wrap:wrap}
 }
 @media(max-width:510px){.kt134-flow02-steps{grid-template-columns:1fr}.kt134-flow02-step{min-height:105px;padding:11px}.kt134-flow02-icon{width:39px;height:39px}.kt134-flow02-icon svg{width:25px;height:25px}}
@@ -1095,7 +1095,7 @@ const icons=[
 const steps=[
  ['ПРЕПИСКА','Получени документи и потвърдени факти'],
  ['ПРОВЕРКА НА ЛИПСИТЕ','Необходимите данни по приложимия ред'],
- ['ПРАВНО ОСНОВАНИЕ','Разпоредби, компетентност и срок'],
+ ['ПРАВНО ОСНОВАНИЕ','По приложимия нормативен ред'],
  ['ПРОЕКТ НА ИСКАНЕ','Конкретни въпроси и документи'],
  ['ЕКСПЕРТНО РЕШЕНИЕ','Преглед, редакция и потвърждение']
 ];
@@ -1103,10 +1103,9 @@ const section=document.createElement('section');section.className='kt134-flow02'
 section.setAttribute('aria-label','Схема на процеса за панел №02');
 const p=document.createElement('p');p.className='kt134-flow02-intro';p.textContent='Последователност на работа — от установените факти до проекта на изходящо писмо';section.append(p);
 const chain=document.createElement('div');chain.className='kt134-flow02-steps';
-steps.forEach((x,i)=>{const b=document.createElement('div');b.className='kt134-flow02-step';b.innerHTML='<div class="kt134-flow02-icon">'+icons[i]+'</div>';const strong=document.createElement('strong');strong.textContent=x[0];const small=document.createElement('small');small.textContent=x[1];b.append(strong,small);chain.append(b)});section.append(chain);
+steps.forEach((x,i)=>{const b=document.createElement('div');b.className='kt134-flow02-step';b.innerHTML='<div class="kt134-flow02-icon">'+icons[i]+'</div>';const strong=document.createElement('strong');strong.textContent=x[0];const small=document.createElement('small');small.textContent=x[1];if(i===2)small.id='kt134Flow02Legal';b.append(strong,small);chain.append(b)});section.append(chain);
 const meta=document.createElement('div');meta.className='kt134-flow02-meta';
-meta.innerHTML='<div class="kt134-flow02-legal">'+svg('<path d="M12 3v18M5 6h14M5 6l-3 6h6l-3-6ZM19 6l-3 6h6l-3-6ZM8 21h8"/>')+'<div><strong>ПРАВНО ОСНОВАНИЕ</strong><span id="kt134Flow02Legal"></span><em>Конкретната приложимост и актуалната редакция се проверяват за всяка преписка.</em></div></div>'+
-'<div class="kt134-flow02-result">'+svg('<path d="M5 3h10l4 4v14H5V3Z"/><path d="M15 3v4h4M8 12h8M8 16h8"/>')+'<div><strong>КРАЕН РЕЗУЛТАТ</strong><span>Проект на искане за допълнителна информация</span><em>Подлежи на експертна преценка и потвърждение.</em></div></div>';
+meta.innerHTML='<div class="kt134-flow02-result">'+svg('<path d="M5 3h10l4 4v14H5V3Z"/><path d="M15 3v4h4M8 12h8M8 16h8"/>')+'<div><strong>КРАЕН РЕЗУЛТАТ</strong><span>Проект на изходящо писмо за предоставяне на допълнителна информация</span><div class="kt134-flow02-result-items"><span>Конкретно установени липси и необходими уточнения</span><span>Точно формулирани искания за сведения и документи</span><span>Мотивирано правно основание, адресат и приложим срок</span></div><em>Проектът подлежи на преглед, редакция и окончателно потвърждение от експерта; не се изпраща автоматично.</em></div></div>';
 section.append(meta);
 const actions=document.createElement('div');actions.className='kt134-flow02-actions';
 const back=document.createElement('button');back.id='kt134Flow02Back';back.type='button';back.textContent='← Към панелите';
@@ -1117,7 +1116,7 @@ back.addEventListener('click',()=>{overlay.classList.remove('kt134-flow-mode');w
 enter.addEventListener('click',()=>{overlay.classList.remove('kt134-flow-mode');const first=dialog.querySelector('.tabs button');if(first)first.focus();else document.getElementById('close')?.focus()});
 window.KT134ShowPanel02Entry=function(c){
  overlay.classList.toggle('kt134-flow-mode',Number(c?.id)===2);
- if(Number(c?.id)===2){document.getElementById('kt134Flow02Legal').textContent=c.legal||'Определя се по приложимия нормативен ред';}
+ if(Number(c?.id)===2){document.getElementById('kt134Flow02Legal').textContent=(c.legal?'Примерно: '+c.legal:'Определя се според преписката');}
 };
 })();
 </script>
