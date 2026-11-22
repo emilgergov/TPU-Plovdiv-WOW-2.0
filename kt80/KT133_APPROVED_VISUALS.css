@@ -299,3 +299,12 @@
 .kt133-approved-entrance-container{width:min(1450px,96vw)!important;max-width:1450px!important}
 @media(max-width:950px){.kt133-approved-chain{grid-template-columns:repeat(2,minmax(0,1fr))}.kt133-approved-step:not(:last-child)::after{display:none}.kt133-approved-parts{grid-template-columns:1fr}}
 @media(max-width:550px){.kt133-approved-chain{grid-template-columns:1fr}.kt133-approved-step{min-height:120px}}
+
+/* KT133: visible original-action delegate, no changes to event handlers or permissions. */
+.kt133-approved-actions{display:flex;justify-content:flex-start;gap:12px;padding:18px 0 0}
+.kt133-approved-launch{appearance:none;display:inline-flex!important;align-items:center;justify-content:center;
+  min-height:48px;padding:12px 20px;border:1px solid #e6c37c;border-radius:9px;
+  background:linear-gradient(180deg,#f7d990,#dcaf5d);color:#133b2c;
+  font:800 13px/1.3 Verdana,Arial,sans-serif;cursor:pointer}
+.kt133-approved-launch:focus-visible{outline:3px solid #ffe4aa;outline-offset:3px}
+.kt133-approved-launch:disabled{opacity:.5;cursor:not-allowed}
