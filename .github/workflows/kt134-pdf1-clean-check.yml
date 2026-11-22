@@ -22,11 +22,15 @@ jobs:
           node-version: '22'
       - run: node --check KT134/integration/KT82_A_PDF1_V600_KT134_CANDIDATE.js
       - run: node KT134/integration/KT82_A_PDF1_V600_KT134_CANDIDATE.test.cjs
+      - name: Validate isolated HTML points to candidate and preserves GIS source
+        run: |
+          grep -q 'KT82_A_PDF1_V600_KT134_CANDIDATE.js' vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html
+          grep -q 'KT82_A_FREE_GIS_V603.js' vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html
       - name: Confirm no production changes
         run: |
           CHANGED="$(git diff --name-only origin/main...HEAD)"
           echo "$CHANGED"
-          if echo "$CHANGED" | grep -v -E '^KT134/integration/|^\.github/workflows/kt134-pdf1-clean-check\.yml$'; then
+          if echo "$CHANGED" | grep -v -E '^vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST\\.html$|^KT134/integration/|^\.github/workflows/kt134-pdf1-clean-check\.yml$'; then
             echo 'ERROR: unrelated change'
             exit 1
           fi
