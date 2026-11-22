@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/kt133-approved-visuals-deploy.yml'
   workflow_dispatch:
+# KT133 visual release: use latest main assets and confirm live gateway, 2026-11-23.
 permissions:
   contents: read
 concurrency:
