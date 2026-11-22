@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/kt133-approved-visuals-deploy.yml'
   workflow_dispatch:
-# KT133: activate approved visuals on actual authenticated modal; keep original entry buttons and rollback.
+# KT133 functional regression fix: retain original action button when hiding legacy introduction; rollback protected.
 permissions:
   contents: read
 concurrency:
