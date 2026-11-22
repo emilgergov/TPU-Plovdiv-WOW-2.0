@@ -29,7 +29,7 @@
     for(const zone of assertArray(parcel.intersections)){
       if(!zone||!zone.code||!['ZZ','ZT'].includes(zone.type))
         errors.push('Липсва код или вид на защитен обект');
-      if(!Number.isFinite(zone.areaSqM)||zone.areaSqM<=0||zone.areaSqM>parcel.areaSqM)
+      if(!zone||!Number.isFinite(zone.areaSqM)||zone.areaSqM<=0||zone.areaSqM>parcel.areaSqM)
         errors.push('Невалидна площ на пресичане');
     }
     return {ok:errors.length===0,errors};
