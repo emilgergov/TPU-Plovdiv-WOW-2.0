@@ -18,7 +18,7 @@ for(const {ref} of productionRefs){
  const resolved=path.normalize(path.join('vt03/kt80',ref.split(/[?#]/)[0])).replaceAll(path.sep,'/');
  if(resolved.startsWith('..')||path.isAbsolute(resolved))throw Error('Unsafe path '+ref);
  const local=fs.readFileSync(path.join(root,resolved));
- const pinned=cp.spawnSync('git',['show',commit+':'+resolved],{cwd:root,maxBuffer:40*1024*1024,encoding:'buffer'});
+ const pinned=cp.spawnSync('git',['show',commit+':'+resolved],{cwd:root,maxBuffer:40*1024*1024,encoding:null});
  if(pinned.status!==0)throw Error('Cannot inspect pinned production source: '+resolved+
   ' (ensure the pinned commit is fetched and accessible)');
  if(!local.equals(pinned.stdout))differences.push(resolved);
