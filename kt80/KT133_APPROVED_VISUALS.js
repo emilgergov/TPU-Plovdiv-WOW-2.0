@@ -139,7 +139,7 @@ document.addEventListener('click',function(event){
    if(!overlay?.classList.contains('open')||typeof window.KT134ShowPanel02Entry!=='function')return;
    const entry=(window.KT80RouteCatalog||[]).find(c=>Number(c.id)===id)||{id,legal:''};
    window.KT134ShowPanel02Entry(entry);
- },25);
+ },380);
 },true);
 })();
 /* kt134FiveStageVisualRuntime — accepted visual-only code copied from approved reference */
@@ -174,21 +174,66 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 
-/* kt134DynamicPanelsCaption — accepted visual-only code copied from approved reference */
-
+/* KT133 approved dashboard presentation fixes: do not alter source route data, case state or navigation handlers. */
 (function(){
  'use strict';
- function setup(){
-  const heading=[...document.querySelectorAll('h3,summary,button')].find(el=>(el.textContent||'').includes('Специализирани резултати и инструменти'));
-  if(!heading)return;
-  function normalize(){
+ function normalizeDashboard(){
+  const root=document.getElementById('kt80Dashboard');
+  if(!root)return;
+  const summary=[...root.querySelectorAll('summary')];
+  for(const heading of summary){
    const before=heading.textContent||'';
-   const after=before.replace(/покажи\s*22\s*[-–—]?\s*те\s*възможности/iu,'покажи възможностите');
-   if(after!==before)heading.textContent=after;
+   if(!before.includes('Специализирани резултати и инструменти'))continue;
+   const after=before.replace(/покажи\s*(?:22\s*[-–—]?\s*те\s*)?възможности/iu,'покажи възможностите')
+     .replace(/скрий\s*списъка/iu,'скрий възможностите');
+   if(before!==after)heading.textContent=after;
   }
-  normalize();
-  new MutationObserver(normalize).observe(heading,{childList:true,characterData:true,subtree:true});
+  const retired=root.querySelectorAll('#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="13"],#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="14"]');
+  retired.forEach(el=>el.remove());
+  const count=document.getElementById('kt80DashboardCount');
+  if(count && /22\s+специализирани/.test(count.textContent||'')){
+    count.textContent='5 основни етапа + 20 специализирани панела';
+  }
  }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
+ function init(){
+  const root=document.getElementById('kt80Dashboard');if(!root)return;
+  normalizeDashboard();
+  const routes=document.getElementById('kt80DashboardRoutes');
+  if(routes)new MutationObserver(normalizeDashboard).observe(routes,{childList:true});
+  root.querySelectorAll('details').forEach(el=>{
+   const summary=el.querySelector('summary');
+   if(summary)new MutationObserver(normalizeDashboard).observe(summary,{childList:true,characterData:true,subtree:true});
+  });
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
+ else init();
 })();
-
+/* KT133 dashboard click navigation animates for 260ms before opening a panel.
+   Drive the accepted five-step entrance from the actual modal-open state as well. */
+(function(){
+ 'use strict';
+ function init(){
+  const overlay=document.getElementById('overlay');
+  const title=document.getElementById('dialogTitle');
+  if(!overlay||!title)return;
+  let activated='';
+  function apply(){
+   if(!overlay.classList.contains('open')){activated='';return;}
+   const text=title.textContent||'';
+   const match=text.match(/№\s*(\d{1,2})\b/u);
+   if(!match)return;
+   const id=Number(match[1]);
+   if([13,14,15].includes(id))return;
+   const key=id+':'+text;
+   if(activated===key || typeof window.KT134ShowPanel02Entry!=='function')return;
+   activated=key;
+   const entry=(window.KT80RouteCatalog||[]).find(c=>Number(c.id)===id);
+   if(entry)window.KT134ShowPanel02Entry(entry);
+  }
+  new MutationObserver(apply).observe(overlay,{attributes:true,attributeFilter:['class']});
+  new MutationObserver(apply).observe(title,{characterData:true,childList:true,subtree:true});
+  apply();
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
+ else init();
+})();
