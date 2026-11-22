@@ -10,10 +10,10 @@ function replaceExactlyOnce(text,oldText,newText){
 let overlaid=source;
 overlaid=replaceExactlyOnce(overlaid,
  "date=new Date().toLocaleDateString('bg-BG')",
- "date=new Date().toLocaleDateString('bg-BG',{day:'2-digit',month:'2-digit',year:'numeric'}).trim()");
+ "date=new Date().toLocaleDateString('bg-BG',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\\s*г\\.?$/u,'').trim()");
 overlaid=replaceExactlyOnce(overlaid,
  'root.KT80Display.ekatte(id,p)',
- "(root.KT80Display.ekatte(id,p)!=='НЯМА ДАННИ'?root.KT80Display.ekatte(id,p):id.slice(0,5))");
+ "(root.KT80Display.ekatte(id,p)!=='НЯМА ДАННИ'?root.KT80Display.ekatte(id,p):(/^\\d{5}\\.\\d+\\.\\d+$/.test(id)?id.slice(0,5):'НЯМА ДАННИ'))");
 assert.match(overlaid,/Противоречиви данни за ГИС пресичане/);
 assert.match(overlaid,/Преписката е променена/);
 assert.match(overlaid,/KT80PDF1Bridge/);
