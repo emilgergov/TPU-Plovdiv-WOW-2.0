@@ -514,7 +514,7 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 <div id="kt80DashboardFive" class="kt80-dashboard-grid" aria-label="Пет основни етапа"></div>
 <h3>Специализирани резултати и инструменти</h3>
 <p id="kt80DashboardCount" class="kt80-dashboard-count"></p>
-<div id="kt80DashboardRoutes" class="kt80-dashboard-grid" aria-label="22 равнопоставени специализирани кандидата"></div>
+<div id="kt80DashboardRoutes" class="kt80-dashboard-grid" aria-label="Активни специализирани резултати и инструменти"></div>
 </section>
 <div id="kt80DashboardSubnav" class="kt80-dashboard-subnav" aria-label="Навигация към началния екран">
 <button type="button" id="kt80DashboardBack" hidden>← Към всички панели</button>
@@ -1209,6 +1209,23 @@ window.KT134ShowPanel02Entry=function(c){
   cfg.parts.forEach(value=>{const item=document.createElement('span');item.textContent=value;partBox.append(item)});
 };
 window.KT134FlowCatalogCount=Object.keys(catalog).length;
+})();
+</script>
+<script id="kt134DynamicPanelsCaption">
+(function(){
+ 'use strict';
+ function setup(){
+  const heading=[...document.querySelectorAll('h3,summary,button')].find(el=>(el.textContent||'').includes('Специализирани резултати и инструменти'));
+  if(!heading)return;
+  function normalize(){
+   const before=heading.textContent||'';
+   const after=before.replace(/покажи\s*22\s*[-–—]?\s*те\s*възможности/iu,'покажи възможностите');
+   if(after!==before)heading.textContent=after;
+  }
+  normalize();
+  new MutationObserver(normalize).observe(heading,{childList:true,characterData:true,subtree:true});
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
 })();
 </script>
 </body></html>
