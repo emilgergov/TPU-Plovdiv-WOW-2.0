@@ -31,6 +31,10 @@ jobs:
         run: node KT134/integration/KT134_PINNED_SOURCE_INTEGRITY.test.cjs
       - name: Exact E1-E5 HTML parity and script order
         run: node KT134/integration/KT134_STAGE1_5_HTML_PARITY.test.cjs
+      - name: Fetch exact general production resource pin
+        run: git fetch --no-tags origin 2652e375cf90f03570a77158335ef364d4a48a5f
+      - name: Verify all unchanged resources match pinned production
+        run: node KT134/integration/KT134_PRODUCTION_RESOURCE_PARITY.test.cjs
       - name: Full E1-E5 dependency and route source audit
         run: node KT134/integration/KT134_DEPENDENCY_ROUTE_AUDIT.test.cjs
       - name: PDF1 lifecycle synthetic E2E
