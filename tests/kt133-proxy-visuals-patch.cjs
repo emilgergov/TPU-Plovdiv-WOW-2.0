@@ -3,10 +3,13 @@ const fs=require('node:fs'),assert=require('node:assert/strict');
 const [,,sourcePath,outputPath]=process.argv;
 if(!sourcePath||!outputPath)throw Error('Pass protected Worker source path and candidate output path');
 const original=fs.readFileSync(sourcePath,'utf8');
-const matches=[...original.matchAll(/\bexport\s+default\b/g)];
-assert.equal(matches.length,1,'Existing KT133 gateway must contain exactly one default export');
+const canonical=original.match(/\\bexport\\s+default\\b/g)||[];
+const minified=[...original.matchAll(/\\bexport\\s*\\{\\s*([A-Za-z_$][\\w$]*)\\s+as\\s+default\\s*\\}\\s*;?/g)];
 assert.ok(original.length>200&&original.length<10000,'Unexpected protected gateway length');
-const converted=original.replace(/\bexport\s+default\b/,'const __kt133Core =');
+assert.ok(canonical.length===1&&minified.length===0 || canonical.length===0&&minified.length===1,'Unsupported original KT133 module export; no modification allowed');
+const converted=canonical.length===1?
+  original.replace(/\\bexport\\s+default\\b/,'const __kt133Core ='):
+  original.replace(minified[0][0], 'const __kt133Core = '+minified[0][1]+';');
 assert.notEqual(converted,original);
 const overlay=`
 /* KT133 approved visual additions. Original functional gateway above is unchanged. */
