@@ -20,4 +20,6 @@ x=validatePackage(p([contradictory]));assert.equal(x.ok,false);assert.equal(x.ca
 const contradictoryUnknown=parcel('56784.13.102','unknown');
 contradictoryUnknown.intersections=[{type:'ZZ',code:'BG0000194',areaSqM:120}];
 assert.equal(validatePackage(p([contradictoryUnknown])).ok,false);
-console.log('KT134 GIS contract smoke tests: 9 PASS');
+const malformed=parcel('36676.129.457','intersects'); malformed.intersections=[null];
+x=validatePackage(p([malformed]));assert.equal(x.ok,false);
+console.log('KT134 GIS contract smoke tests: 10 PASS');
