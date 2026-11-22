@@ -2,7 +2,7 @@ name: KT133 visual-only production patch dry run
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/kt133-visual-dryrun.yml']
+    paths: ['.github/workflows/kt133-visual-dryrun.yml', 'tests/kt133-proxy-visuals-patch.cjs']
   workflow_dispatch:
 permissions:
   contents: read
@@ -22,11 +22,11 @@ jobs:
         run: |
           set -euo pipefail
           for asset in KT133_APPROVED_VISUALS.css KT133_APPROVED_VISUALS.js; do
-            if curl -fsS --retry 2 --retry-delay 2 --max-time 15 "https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/kt80/$asset" -o "/tmp/$asset"; then
+            if curl -fsS --retry 2 --retry-delay 2 --max-time 15 "https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/1cfc6aa561ad4fbec57a7d2219d3b2aa455a9a26/kt80/$asset" -o "/tmp/$asset"; then
               test "$(wc -c <"/tmp/$asset")" -gt 1000
               echo "Published asset accessible: $asset"
             else
-              echo "::warning::GitHub Pages not yet serving $asset; deployment must wait for publication"
+              echo "::warning::Immutable approved asset not yet available: $asset; deployment must be blocked"
             fi
           done
       - name: Inspect existing gateway and safely build candidate without publishing
