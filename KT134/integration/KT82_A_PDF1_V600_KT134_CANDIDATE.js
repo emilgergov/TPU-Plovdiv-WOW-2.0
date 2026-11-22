@@ -211,7 +211,7 @@ async function generate(){
   document.dispatchEvent(new CustomEvent('kt82:pdf1-completed',{detail:receipt}));
   message('Готово! PDF1 е изготвен с карти, административни данни и таблици за ЗЗ и ЗТ. Проверете го като експерт.');
  }catch(e){if(gen===epoch&&sameCase())message('Не успяхме да изготвим PDF1: '+String(e?.message||e))}
- finally{if(gen===epoch&&sameCase()){busy=false;$('kt80PDF1').disabled=false}}
+ finally{if(gen===epoch){busy=false;$('kt80PDF1').disabled=false;if(!sameCase())message('Преписката е променена. Повторете ГИС справката.')}}
 }
 function message(s){if($('kt80PDF1Status'))$('kt80PDF1Status').textContent=s}
 function reset(){epoch++;busy=false;if($('kt80PDF1'))$('kt80PDF1').disabled=false;message('Първо натиснете „Намери имотите“ и прегледайте картата.')}
