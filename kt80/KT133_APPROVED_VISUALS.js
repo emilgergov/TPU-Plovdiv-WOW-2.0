@@ -296,15 +296,20 @@ function findLegacyModal(heading){
  return null;
 }
 function findLegacyIntro(modal){
- return [...modal.querySelectorAll('p,div')].find(el=>
-  el.children.length<=2 && (el.textContent||'').trim().startsWith('Тук експертът преглежда материалите'));
+ // Never hide a wrapper that contains the original working-panel button.
+ return [...modal.querySelectorAll('p,div')].find(el=>{
+  const t=(el.textContent||'').trim();
+  return t.startsWith('Тук експертът преглежда материалите') &&
+   t.length<320 && !el.querySelector('button,a,[role="button"]');
+ });
 }
 function hideOldSteps(modal){
  const blocks=[...modal.querySelectorAll('div,section,ul')].filter(el=>{
   const t=el.textContent||'';
   return t.length<900 && t.includes('Постъпила документация') &&
    t.includes('Проверка за липси') && t.includes('Искане за допълнителна информация') &&
-   !t.includes('Отвори работния панел');
+   !t.includes('Отвори работния панел') &&
+   !el.querySelector('button,a,[role="button"]');
  });
  if(blocks.length)blocks.sort((a,b)=>a.textContent.length-b.textContent.length)[0].classList.add('kt133-legacy-intro-hidden');
 }
@@ -343,6 +348,15 @@ function enhance(heading){
   if(btn)btn.parentElement.before(section);else modal.append(section);
  }
  hideOldSteps(modal);
+ // Functional safety: never leave the original action hidden by presentation-only styles.
+ const originalAction=[...modal.querySelectorAll('button')].find(b=>
+  (b.textContent||'').includes('Отвори работния панел'));
+ if(originalAction){
+  for(let p=originalAction;p&&p!==modal;p=p.parentElement)
+   p.classList.remove('kt133-legacy-intro-hidden');
+  originalAction.hidden=false;
+  originalAction.removeAttribute('aria-hidden');
+ }
  modal.classList.add('kt133-approved-entrance-container');
 }
 let running=false;
