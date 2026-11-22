@@ -13,10 +13,11 @@ once('"integration/kt117-stage5-document-author.mjs','"integration/KT134_PINNED_
 once('"integration/kt119-docx-generator.mjs','"integration/KT134_PINNED_kt119-docx-generator.mjs');
 once('"KT80_E01_KT53_SUBJECT_SCOPE_CONSTRUCTOR_V54.js','"KT134_PINNED_KT80_E01_KT53_SUBJECT_SCOPE_CONSTRUCTOR_V54.js');
 once('"KT80_E01_IP_MASTER_SUBJECT_V32.js','"KT134_PINNED_KT80_E01_IP_MASTER_SUBJECT_V32.js');
-assert.equal(actual,expected,'Integrated HTML differs beyond eight explicitly permitted changes');
+once('"integration/kt96-eg-ai-stage4-author.mjs','"integration/KT134_PINNED_kt96-eg-ai-stage4-author.mjs');
+assert.equal(actual,expected,'Integrated HTML differs beyond nine explicitly permitted changes');
 function scripts(html){return [...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["']/g)].map(x=>x[1])}
 const left=scripts(original),right=scripts(actual);
 assert.equal(left.length,86);assert.equal(right.length,86);
 const normalizeScript=x=>x.replace('KT82_A_PDF1_V600_KT134_CANDIDATE.js?v=kt134-isolated-guard','KT82_A_PDF1_V600.js?v=600-kt83').replace(/KT134_PINNED_/g,'');
 assert.deepEqual(right.map(normalizeScript),left,'E1-E5 script order changed');
-console.log('KT134: exact HTML parity, only eight intentional changes, 86/86 scripts unchanged in sequence');
+console.log('KT134: exact HTML parity, only nine intentional changes, 86/86 scripts unchanged in sequence');
