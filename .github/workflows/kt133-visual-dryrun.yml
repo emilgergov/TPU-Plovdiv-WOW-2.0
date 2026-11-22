@@ -51,6 +51,12 @@ jobs:
           };
           console.log('KT133 entry script format probe:',JSON.stringify(flags));
           NODE
+          node - "$RUNNER_TEMP/gateway.mjs" <<'NODE'
+          const fs=require('fs'),s=fs.readFileSync(process.argv[2],'utf8');
+          const headers=[...s.matchAll(/Content-Disposition:[^\\r\\n]+|Content-Type:[^\\r\\n]+/g)].map(m=>m[0]);
+          console.log('Cloudflare upload envelope part headers:',JSON.stringify(headers));
+          console.log('Possible named original-export pattern',s.includes('as default'), 'raw length',s.length);
+          NODE
           node tests/kt133-proxy-visuals-patch.cjs "$RUNNER_TEMP/gateway.mjs" "$RUNNER_TEMP/candidate.mjs"
           node --check "$RUNNER_TEMP/candidate.mjs"
           curl -fsS --max-time 20 -H "Authorization: Bearer $CF_TOKEN" "$endpoint/settings" -o "$RUNNER_TEMP/settings.json"
