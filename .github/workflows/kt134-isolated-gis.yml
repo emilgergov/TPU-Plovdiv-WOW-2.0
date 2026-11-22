@@ -25,6 +25,8 @@ jobs:
           node-version: '22'
       - name: GIS evidence contract
         run: node KT134/tests/gis-contract.test.cjs
+      - name: PDF1 actual-source guard regression
+        run: node KT134/integration/KT82_A_PDF1_V600_KT134_CANDIDATE.test.cjs
       - name: Stage 3 handoff contract
         run: node KT134/tests/stage3-handoff.test.cjs
       - name: Assert production entry is not modified by this branch
