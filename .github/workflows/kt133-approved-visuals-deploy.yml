@@ -1,5 +1,5 @@
 name: KT133 — Publish approved visual modifications (rollback protected)
-# Re-run 2026-11-23: corrected panel-card IDs, idempotent overlay replacement; backend unchanged.
+# Re-run 2026-11-23: include omitted approved stage illustrations and caption runtime, preserve KT133 backend.
 on:
   push:
     branches: [main]
