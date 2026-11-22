@@ -1,5 +1,5 @@
 name: KT133 — Publish approved visual modifications (rollback protected)
-# Re-run 2026-11-23: include omitted approved stage illustrations and caption runtime, preserve KT133 backend.
+# Re-run 2026-11-23: correct 20 visible routes, caption and animated candidate entry screens; no backend changes.
 on:
   push:
     branches: [main]
