@@ -869,4 +869,95 @@ document.addEventListener('DOMContentLoaded',function(){
     setTimeout(function(){tile.scrollIntoView({block:'center',behavior:'auto'})},200);
   }
 });
+</script>
+<style id="kt134FiveStageVisuals">
+/* KT134 visual-only five-stage tiles. No workflow, DOM navigation, GIS or PDF1 edits. */
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"]{
+ position:relative;isolation:isolate;overflow:hidden!important;min-height:258px;
+ padding:17px 16px 17px;border:3px solid #72967a;border-radius:13px;
+ background:linear-gradient(155deg,#174334 0%,#164d39 62%,#0c3328 100%);
+ box-shadow:inset 0 0 0 1px #aad3a431,0 7px 16px #0003;
+ transition:filter .2s ease,box-shadow .2s ease,transform .2s ease;
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"]::before{
+ content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+ background:
+ repeating-linear-gradient(135deg,transparent 0 55px,#c7e8a50a 56px 58px,transparent 59px 100px),
+ radial-gradient(ellipse at 75% 105%,#b7e19817,transparent 65%);
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] > :not(.kt134-stage-emblem):not(.kt134-stage-illustration){position:relative;z-index:2}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt80-dashboard-tile-number{
+ font:800 14px/1.2 Arial,sans-serif;color:#ffdb81;letter-spacing:.02em
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt80-dashboard-tile-text{
+ font:750 clamp(14px,1.16vw,19px)/1.34 "Segoe UI",Arial,sans-serif;color:#fff9df;
+ text-shadow:0 2px 4px #071e18a8;max-width:95%;padding-top:12px;padding-right:6px
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt80-dashboard-tile-arrow{
+ color:#ffe8a4;font-size:28px;align-self:flex-end;
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="1"]{
+ background:linear-gradient(145deg,#ffe29a 0%,#edc66b 68%,#b98c37 100%);
+ border-color:#f8db8b;box-shadow:inset 0 0 0 1px #fffae4,0 6px 18px #0003
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="1"] .kt80-dashboard-tile-number,
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="1"] .kt80-dashboard-tile-text,
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="1"] .kt80-dashboard-tile-arrow{color:#173b2f;text-shadow:none}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="2"]{
+ background:linear-gradient(155deg,#153b30,#15523c 76%,#103529)
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="3"]{
+ background:linear-gradient(145deg,#144035,#1e6848 76%,#0d3b2d)
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="4"]{
+ background:linear-gradient(145deg,#173f33,#1c4a38 76%,#143629)
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="5"]{
+ background:linear-gradient(145deg,#13382d,#1d503d 76%,#10372a)
+}
+#kt80DashboardFive .kt134-stage-emblem{position:absolute;right:15px;top:12px;z-index:2;width:62px;height:62px;
+ color:#f3c96b;filter:drop-shadow(0 2px 3px #061c1555);pointer-events:none}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="1"] .kt134-stage-emblem{color:#645c21}
+#kt80DashboardFive .kt134-stage-illustration{position:absolute;z-index:1;right:3px;bottom:0;
+ width:98%;height:63%;opacity:.27;pointer-events:none;color:#cfdfb0}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="1"] .kt134-stage-illustration{color:#fff6d5;opacity:.42}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"]:hover,
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"]:focus-visible{
+ filter:brightness(1.12);box-shadow:0 0 0 3px #f3d58480,0 8px 22px #0004!important
+}
+@media(max-width:800px){#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"]{
+ min-height:186px;padding:12px}
+#kt80DashboardFive .kt134-stage-emblem{width:46px;height:46px;right:8px;top:8px}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt80-dashboard-tile-text{font-size:13px}
+}
+</style>
+<script id="kt134FiveStageVisualRuntime">
+/* Decorative, aria-hidden SVGs added to existing five navigation buttons. */
+document.addEventListener('DOMContentLoaded',function(){
+ const strokes={
+  1:'<path d="M8 18h14l5 6h29v29H8z"/><path d="M8 20V12h19l6 6"/><circle cx="45" cy="44" r="11"/><path d="m53 52 9 9"/>',
+  2:'<path d="M20 9H9v13M44 9h11v13M9 43v12h13M55 43v12H43"/><circle cx="32" cy="32" r="11"/><circle cx="32" cy="32" r="3"/>',
+  3:'<path d="m9 44 14-7 16 5 16-7v17l-16 7-16-5-14 7z"/><path d="M23 37v17M39 42v17"/><path d="M32 6c-10 0-16 7-16 16 0 11 16 24 16 24s16-13 16-24C48 13 42 6 32 6z"/><circle cx="32" cy="22" r="5"/>',
+  4:'<path d="M32 7v50M12 19h40M19 19 9 39h20L19 19zM45 19 35 39h20L45 19zM20 57h24"/><path d="M28 11h8"/>',
+  5:'<circle cx="32" cy="46" r="5"/><path d="M32 40V10m0 0-8 9m8-9 8 9M32 36 13 23m0 0 2 9m-2-9 10-1M32 36l19-13m0 0-10-1m10 1-2 9"/><path d="M9 51h15m16 0h15"/>'
+ };
+ const motifs={
+  1:'<g fill="none" stroke="currentColor" stroke-width="2"><path d="M12 85 26 25l51 7-15 66z" fill="currentColor" fill-opacity=".18"/><path d="M42 88 56 15l56 10-13 73z" fill="currentColor" fill-opacity=".35"/><path d="M65 39h34M62 49h30M60 59h29M58 69h28"/></g>',
+  2:'<g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 85c25-45 50-3 75-44s52-8 72-33M5 99c25-45 50-3 75-44s52-8 72-33M5 70c25-45 50-3 75-44s52-8 72-33"/><path d="m52 83 20-26 27 9 3 18-31 12z" fill="currentColor" fill-opacity=".2"/></g>',
+  3:'<g fill="none" stroke="currentColor" stroke-width="2"><path d="M5 75 48 12l52 13 43-9M4 35l46 14 24 49 64-31M24 5l-8 91M88 5l-13 91M135 0l-20 100"/><path d="m58 48 34-3 10 30-35 9-13-21z" fill="currentColor" fill-opacity=".3"/></g>',
+  4:'<g fill="none" stroke="currentColor" stroke-width="2"><path d="m21 89 10-57 42 4-9 57z" fill="currentColor" fill-opacity=".17"/><path d="m63 95 13-73 44 7-11 66z" fill="currentColor" fill-opacity=".22"/><path d="M80 47h28M78 57h28M76 67h27M74 77h24"/><text x="81" y="43" fill="currentColor" font-size="22">§</text></g>',
+  5:'<g fill="none" stroke="currentColor" stroke-width="2"><rect x="46" y="8" width="66" height="20" rx="4"/><rect x="7" y="67" width="45" height="20" rx="4"/><rect x="98" y="67" width="45" height="20" rx="4"/><path d="M79 28v14m0 0-37 18m37-18 37 18"/><path d="m79 42-7 6 14 0z" fill="currentColor"/></g>'
+ };
+ function svg(body,view){const el=document.createElementNS('http://www.w3.org/2000/svg','svg');
+ el.setAttribute('viewBox',view||'0 0 64 64');el.setAttribute('fill','none');el.setAttribute('stroke','currentColor');
+ el.setAttribute('stroke-width','3');el.setAttribute('stroke-linecap','round');el.setAttribute('stroke-linejoin','round');
+ el.setAttribute('aria-hidden','true');el.innerHTML=body;return el;}
+ for(let i=1;i<=5;i++){
+  const b=document.querySelector('#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="'+i+'"]');
+  if(!b||b.querySelector('.kt134-stage-emblem'))continue;
+  const emblem=svg(strokes[i]);emblem.setAttribute('class','kt134-stage-emblem');
+  const motif=svg(motifs[i],'0 0 150 105');motif.setAttribute('class','kt134-stage-illustration');
+  b.append(motif,emblem);
+ }
+});
 </script></body></html>
