@@ -4,12 +4,17 @@ const [,,sourcePath,outputPath]=process.argv;
 if(!sourcePath||!outputPath)throw Error('Pass protected Worker source path and candidate output path');
 const original=fs.readFileSync(sourcePath,'utf8');
 const canonical=original.match(/\\bexport\\s+default\\b/g)||[];
-const minified=[...original.matchAll(/\\bexport\\s*\\{\\s*([A-Za-z_$][\\w$]*)\\s+as\\s+default\\s*\\}\\s*;?/g)];
+const groups=[...original.matchAll(/\\bexport\\s*\\{([^}]+)\\}\\s*;?/g)];
+const matches=groups.flatMap(g=>g[1].split(',').map(x=>x.trim()).filter(x=>/\\bas\\s+default\\b/.test(x)).map(x=>({group:g,entry:x,ident:(x.match(/^([A-Za-z_$][\\w$]*)\\s+as\\s+default$/)||[])[1]})));
 assert.ok(original.length>200&&original.length<10000,'Unexpected protected gateway length');
-assert.ok(canonical.length===1&&minified.length===0 || canonical.length===0&&minified.length===1,'Unsupported original KT133 module export; no modification allowed');
-const converted=canonical.length===1?
-  original.replace(/\\bexport\\s+default\\b/,'const __kt133Core ='):
-  original.replace(minified[0][0], 'const __kt133Core = '+minified[0][1]+';');
+assert.ok(canonical.length===1&&matches.length===0 || canonical.length===0&&matches.length===1&&matches[0].ident,'Unsupported original KT133 module export; no modification allowed');
+let converted;
+if(canonical.length===1){converted=original.replace(/\\bexport\\s+default\\b/,'const __kt133Core =');}
+else{
+  const {group,entry,ident}=matches[0];
+  const remaining=group[1].split(',').map(x=>x.trim()).filter(x=>x&&x!==entry);
+  converted=original.replace(group[0], 'const __kt133Core = '+ident+';'+(remaining.length?'export{'+remaining.join(',')+'};':''));
+}
 assert.notEqual(converted,original);
 const overlay=`
 /* KT133 approved visual additions. Original functional gateway above is unchanged. */
