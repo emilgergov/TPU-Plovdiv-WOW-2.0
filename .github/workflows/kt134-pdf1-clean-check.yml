@@ -39,6 +39,8 @@ jobs:
         run: node KT134/integration/KT134_DEPENDENCY_ROUTE_AUDIT.test.cjs
       - name: Stage3 GIS gate / PDF1 evidence consistency
         run: node KT134/integration/KT134_SPATIAL_GATE_CONSISTENCY.test.cjs
+      - name: Contextual no-GIS route for complaints/objections
+        run: node KT134/integration/KT134_NO_GIS_ROUTE.test.cjs
       - name: E1-E5 expert-confirmed route and no-regression gates
         run: node KT134/integration/KT134_E1_E5_ROUTE_COORDINATOR.test.cjs
       - name: Stage3 automatic trigger to real PDF1 source
