@@ -22,6 +22,8 @@ jobs:
           node-version: '22'
       - run: node --check KT134/integration/KT82_A_PDF1_V600_KT134_CANDIDATE.js
       - run: node KT134/integration/KT82_A_PDF1_V600_KT134_CANDIDATE.test.cjs
+      - name: Worker PDF1 overlay compatibility
+        run: node KT134/integration/KT134_WORKER_OVERLAY_COMPAT.test.cjs
       - name: PDF1 lifecycle synthetic E2E
         run: node KT134/integration/KT134_PDF1_LIFECYCLE.test.cjs
       - name: Validate isolated HTML points to candidate and preserves GIS source
