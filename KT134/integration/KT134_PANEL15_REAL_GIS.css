@@ -1,0 +1,14 @@
+/* WOW KT134: isolated №15 visuals only; do not alter GIS measurements or PDF1. */
+#kt80FreeGISScreen {
+ position:relative;isolation:isolate;border:1px solid #c9a95e;border-radius:14px;
+ background:
+ repeating-linear-gradient(24deg,transparent 0 42px,#d7e6bb12 44px 46px,transparent 48px 96px),
+ repeating-linear-gradient(124deg,transparent 0 62px,#a3be9e16 64px 66px,transparent 68px 120px),
+ radial-gradient(ellipse at 62% 54%,transparent 0 13%,#efd17a25 13.2% 14%,transparent 14.2% 100%),
+ linear-gradient(145deg,#102c22 0%,#194a32 65%,#153c2f 100%);
+ box-shadow:inset 0 0 0 1px #72a77b55,0 8px 24px #03190f55;overflow:hidden;
+}
+#kt80FreeGISScreen :is(h1,h2,h3){color:#f3d588}
+#kt80FreeGISScreen :is(button,a):focus-visible{outline:3px solid #ffe19b;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){#kt80FreeGISScreen *{animation-duration:0s!important}}
+/* No synthetic parcel badges or mock map inside the integrated real-GIS panel. */

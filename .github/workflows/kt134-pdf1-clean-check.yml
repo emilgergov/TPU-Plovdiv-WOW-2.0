@@ -1,0 +1,72 @@
+name: KT134 clean PDF1 evidence regression
+on:
+  push:
+    branches:
+      - work/kt134-pdf1-clean-integration-20261122
+    paths:
+      - 'KT134/integration/**'
+      - '.github/workflows/kt134-pdf1-clean-check.yml'
+      - 'vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html'
+      - 'vt03/kt80/KT134_PINNED_*'
+      - 'vt03/kt80/integration/KT134_PINNED_*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pdf1-isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check KT134/integration/KT82_A_PDF1_V600_KT134_CANDIDATE.js
+      - run: node KT134/integration/KT82_A_PDF1_V600_KT134_CANDIDATE.test.cjs
+      - name: Worker PDF1 overlay compatibility
+        run: node KT134/integration/KT134_WORKER_OVERLAY_COMPAT.test.cjs
+      - name: Verify five exact production pinned scripts
+        run: node KT134/integration/KT134_PINNED_SOURCE_INTEGRITY.test.cjs
+      - name: Exact E1-E5 HTML parity and script order
+        run: node KT134/integration/KT134_STAGE1_5_HTML_PARITY.test.cjs
+      - name: Fetch exact general production resource pin
+        run: git fetch --no-tags origin 2652e375cf90f03570a77158335ef364d4a48a5f
+      - name: Verify all unchanged resources match pinned production
+        run: node KT134/integration/KT134_PRODUCTION_RESOURCE_PARITY.test.cjs
+      - name: Full E1-E5 dependency and route source audit
+        run: node KT134/integration/KT134_DEPENDENCY_ROUTE_AUDIT.test.cjs
+      - name: Stage3 GIS gate / PDF1 evidence consistency
+        run: node KT134/integration/KT134_SPATIAL_GATE_CONSISTENCY.test.cjs
+      - name: Contextual no-GIS route for complaints/objections
+        run: node KT134/integration/KT134_NO_GIS_ROUTE.test.cjs
+      - name: E1-E5 expert-confirmed route and no-regression gates
+        run: node KT134/integration/KT134_E1_E5_ROUTE_COORDINATOR.test.cjs
+      - name: Stage3 automatic trigger to real PDF1 source
+        run: node KT134/integration/KT134_E3_AUTOMATIC_PDF1_CHAIN.test.cjs
+      - name: PDF1 lifecycle synthetic E2E
+        run: node KT134/integration/KT134_PDF1_LIFECYCLE.test.cjs
+      - name: Validate isolated HTML points to candidate and preserves GIS source
+        run: |
+          grep -q 'KT82_A_PDF1_V600_KT134_CANDIDATE.js' vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html
+          grep -q 'KT82_A_FREE_GIS_V603.js' vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html
+          grep -q 'KT134_PANEL15_REAL_GIS.css' vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html
+      - name: Install isolated browser-test runtime
+        run: npm install --no-save --ignore-scripts playwright-core@1.56.1
+      - name: Headless integrated UI smoke (Chromium)
+        env:
+          CHROMIUM_PATH: /usr/bin/google-chrome
+        run: node KT134/integration/KT134_BROWSER_SMOKE.test.cjs
+      - name: Confirm no production changes
+        shell: bash
+        run: |
+          git diff --name-only origin/main...HEAD | while IFS= read -r changed; do
+            case "$changed" in
+              KT134/integration/*|.github/workflows/kt134-pdf1-clean-check.yml|vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html|vt03/kt80/KT134_PINNED_*|vt03/kt80/integration/KT134_PINNED_*)
+                echo "Allowed: $changed" ;;
+              *)
+                echo "ERROR: Unexpected production change: $changed"
+                exit 1 ;;
+            esac
+          done
