@@ -88,7 +88,7 @@ async function test(name,opts,checks){
    assert.equal(f.downloads.length,0);assert.match(f.elems.kt80PDF1Status.textContent,/непълни граници/);
  });
  await test('case change during GIS verify cancels PDF',{changeDuringVerify:true},f=>{
-   assert.equal(f.downloads.length,0);assert.equal(f.events.filter(e=>e.type==='kt82:pdf1-completed').length,0);
+   assert.equal(f.downloads.length,0);assert.equal(f.events.filter(e=>e.type==='kt82:pdf1-completed').length,0);assert.equal(f.elems.kt80PDF1.disabled,false);assert.match(f.elems.kt80PDF1Status.textContent,/Преписката е променена/);
  });
  await test('invalid PDF signature blocked',{invalidPdf:true},f=>{
    assert.equal(f.downloads.length,0);assert.match(f.elems.kt80PDF1Status.textContent,/PDF1 не е генериран/);
