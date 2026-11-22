@@ -1000,20 +1000,38 @@ document.addEventListener('DOMContentLoaded',function(){
 }
 </style>
 <style id="kt134FullStageTitlesFit">
-/* Uniform fully spelled stage names while preserving centered text and decorative emblems. */
-#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="3"] .kt80-dashboard-tile-text,
-#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="4"] .kt80-dashboard-tile-text,
-#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="5"] .kt80-dashboard-tile-text{
- font-size:clamp(18px,1.24vw,21px)!important;
- line-height:1.22!important;
- padding:29px 5px 12px!important;
- overflow-wrap:normal;hyphens:auto;
+/* Five stage headings: no mid-word breaks, readable center alignment, only visual changes. */
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt80-dashboard-tile-text{
+ font-family:"Segoe UI",Arial,sans-serif!important;
+ font-size:19px!important;
+ font-weight:750!important;
+ line-height:1.28!important;
+ text-align:center!important;
+ text-wrap:balance;
+ white-space:normal!important;
+ word-break:normal!important;
+ overflow-wrap:normal!important;
+ hyphens:none!important;
+ padding:15px 9px 9px!important;
+ min-width:0;
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="1"] .kt80-dashboard-tile-text{
+ font-size:21px!important;
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="2"] .kt80-dashboard-tile-text{
+ font-size:19px!important;
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="3"] .kt80-dashboard-tile-text,
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="4"] .kt80-dashboard-tile-text,
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="5"] .kt80-dashboard-tile-text{
+ font-size:17px!important;
 }
 @media(max-width:800px){
- #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="3"] .kt80-dashboard-tile-text,
- #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="4"] .kt80-dashboard-tile-text,
- #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="5"] .kt80-dashboard-tile-text{
-  font-size:15px!important;padding:28px 3px 10px!important;
+ #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt80-dashboard-tile-text{
+  font-size:16px!important;padding:15px 5px 8px!important;
+ }
+ #kt80DashboardFive .kt80-dashboard-tile[data-kt80-index="1"] .kt80-dashboard-tile-text{
+  font-size:18px!important;
  }
 }
 </style></body></html>
