@@ -356,6 +356,18 @@ function enhance(heading){
    p.classList.remove('kt133-legacy-intro-hidden');
   originalAction.hidden=false;
   originalAction.removeAttribute('aria-hidden');
+  // The accepted visual entrance is taller than the legacy dialog. Supply an
+  // always-visible delegate without moving or replacing the original action,
+  // preserving listeners attached to its original parent and authorization.
+  if(!section.querySelector('.kt133-approved-launch')){
+   const actions=add(section,'div','kt133-approved-actions');
+   const launch=add(actions,'button','kt133-approved-launch','Отвори работния панел');
+   launch.type='button';
+   launch.disabled=originalAction.disabled;
+   launch.addEventListener('click',function(){
+    if(originalAction.isConnected && !originalAction.disabled)originalAction.click();
+   });
+  }
  }
  modal.classList.add('kt133-approved-entrance-container');
 }
