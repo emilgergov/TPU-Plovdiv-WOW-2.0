@@ -1,0 +1,31 @@
+name: KT134 — KT133 functional compatibility gate (no production deploy)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tests/kt134-kt133-integration-gate.cjs'
+      - '.github/workflows/kt134-kt133-functional-gate.yml'
+      - 'vt03/kt80/KT134_PANEL15_VISUAL_TEST.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    name: Verify protected route contracts without touching Worker
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Compare approved visual candidate against KT133 functional contracts
+        run: node tests/kt134-kt133-integration-gate.cjs
+      - name: Check case and stage routing
+        run: |
+          node KT134/integration/KT134_E1_E5_ROUTE_COORDINATOR.test.cjs
+          node KT134/integration/KT134_NO_GIS_ROUTE.test.cjs
+      - name: Check PDF1 GIS consistency without production data
+        run: node KT134/integration/KT134_SPATIAL_GATE_CONSISTENCY.test.cjs
+      - name: Confirm this workflow never deploys to Cloudflare
+        run: echo 'No production Worker, D1 or authenticated user data was touched.'
