@@ -45,6 +45,12 @@ async function scenario(name,opts={}){
  assert.equal(downloads.length,expectedDownload,name+': download count');
  assert.equal(events.filter(e=>e==='kt82:pdf1-completed').length,expectedDownload,name+': receipt');
  assert.equal(button.disabled,false,name+': button must be enabled');
+ if(allowed&&!opts.changeCase){
+   // Re-entering Stage 3 must not trigger a second download for the same evidence.
+   doc.dispatchEvent(new customEvent('kt80:stage-open',{detail:{step:3}}));
+   await Promise.resolve();await Promise.resolve();
+   assert.equal(downloads.length,1,name+': no duplicate PDF1 on re-entry');
+ }
  if(opts.changeCase)assert.match(status.textContent,/Преписката е променена/);
  console.log('PASS: '+name);
 }
