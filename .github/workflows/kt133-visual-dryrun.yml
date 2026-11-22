@@ -38,6 +38,19 @@ jobs:
           test -n "$CF_TOKEN"
           endpoint="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/kt133-tpu-plovdiv-kt125-local-auth"
           curl -fsS --max-time 20 -H "Authorization: Bearer $CF_TOKEN" "$endpoint" -o "$RUNNER_TEMP/gateway.mjs"
+          node - "$RUNNER_TEMP/gateway.mjs" <<'NODE'
+          const fs=require('fs');const b=fs.readFileSync(process.argv[2]);const t=b.toString('utf8');
+          const flags={
+            jsExportDefault:/\\bexport\\s+default\\b/.test(t),
+            jsExportNamedDefault:/\\bexport\\s*\\{[^}]*\\bdefault\\b/.test(t),
+            legacyListener:/addEventListener\\s*\\(/.test(t),
+            htmlLike:/<html|<!doctype html/i.test(t),
+            multipartLike:/Content-Disposition:|name="metadata"/i.test(t),
+            serviceFetch:/\\.fetch\\s*\\(/.test(t),
+            containsAuthRoute:/\\/auth\\/login/.test(t)
+          };
+          console.log('KT133 entry script format probe:',JSON.stringify(flags));
+          NODE
           node tests/kt133-proxy-visuals-patch.cjs "$RUNNER_TEMP/gateway.mjs" "$RUNNER_TEMP/candidate.mjs"
           node --check "$RUNNER_TEMP/candidate.mjs"
           curl -fsS --max-time 20 -H "Authorization: Bearer $CF_TOKEN" "$endpoint/settings" -o "$RUNNER_TEMP/settings.json"
