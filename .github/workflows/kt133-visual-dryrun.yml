@@ -1,0 +1,51 @@
+name: KT133 visual-only production patch dry run
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/kt133-visual-dryrun.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  dryrun:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Check approved visual assets compile
+        run: |
+          node --check kt80/KT133_APPROVED_VISUALS.js
+          node --check tests/kt133-proxy-visuals-patch.cjs
+      - name: Check hosted visual assets
+        run: |
+          set -euo pipefail
+          for asset in KT133_APPROVED_VISUALS.css KT133_APPROVED_VISUALS.js; do
+            curl -fsS --retry 5 --retry-delay 2 --max-time 15 "https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/kt80/$asset" -o "/tmp/$asset"
+            test "$(wc -c <"/tmp/$asset")" -gt 1000
+          done
+      - name: Inspect existing gateway and safely build candidate without publishing
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+        run: |
+          set -euo pipefail
+          test -n "$CF_TOKEN"
+          endpoint="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/kt133-tpu-plovdiv-kt125-local-auth"
+          curl -fsS --max-time 20 -H "Authorization: Bearer $CF_TOKEN" "$endpoint" -o "$RUNNER_TEMP/gateway.mjs"
+          node tests/kt133-proxy-visuals-patch.cjs "$RUNNER_TEMP/gateway.mjs" "$RUNNER_TEMP/candidate.mjs"
+          node --check "$RUNNER_TEMP/candidate.mjs"
+          curl -fsS --max-time 20 -H "Authorization: Bearer $CF_TOKEN" "$endpoint/settings" -o "$RUNNER_TEMP/settings.json"
+          node - "$RUNNER_TEMP/settings.json" <<'NODE'
+          const fs=require('fs'),assert=require('assert');
+          const j=JSON.parse(fs.readFileSync(process.argv[2]));
+          assert.equal(j.success,true);
+          const b=j.result.bindings||[];
+          assert.equal(b.filter(x=>x.type==='service').length,1);
+          assert.equal(b.filter(x=>x.type==='plain_text').length,1);
+          assert.equal(b.length,2);
+          console.log('PASS: original KT133 service and text binding count unchanged');
+          NODE
+      - name: Dry run only — no production changes
+        run: echo 'Verified visual patch candidate; production KT133 untouched.'
