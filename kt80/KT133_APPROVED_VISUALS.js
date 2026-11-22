@@ -130,7 +130,8 @@ window.KT133VisualBridgeInstalled=true;
 document.addEventListener('click',function(event){
  const tile=event.target?.closest?.('#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="route"], #groups article.card');
  if(!tile)return;
- const raw=tile.getAttribute('data-kt80-index')||tile.getAttribute('data-panel-id');
+ const raw=tile.getAttribute('data-panel-id') || tile.getAttribute('data-kt80-index') ||
+   (tile.matches('#groups article.card') ? (tile.querySelector('.kind')?.textContent||'').match(/№\\s*(\\d+)/)?.[1] : null);
  const id=Number(raw);
  if(!Number.isInteger(id)||id<1||id===13||id===14||id===15)return;
  setTimeout(function(){
