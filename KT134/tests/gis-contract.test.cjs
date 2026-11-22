@@ -14,4 +14,10 @@ x=validatePackage(p([intersect]));assert.equal(x.ok,true);assert.equal(x.spatial
 intersect.intersections=[{type:'ZZ',code:'BG0000194',areaSqM:2000}];
 assert.equal(validatePackage(p([intersect])).ok,false);
 const invalid=parcel('99999.999.999');invalid.source='';assert.equal(validatePackage(p([invalid])).ok,false);
-console.log('KT134 GIS contract smoke tests: 7 PASS');
+const contradictory=parcel('56784.13.102','none');
+contradictory.intersections=[{type:'ZZ',code:'BG0000194',areaSqM:120}];
+x=validatePackage(p([contradictory]));assert.equal(x.ok,false);assert.equal(x.canStateNoIntersection,false);
+const contradictoryUnknown=parcel('56784.13.102','unknown');
+contradictoryUnknown.intersections=[{type:'ZZ',code:'BG0000194',areaSqM:120}];
+assert.equal(validatePackage(p([contradictoryUnknown])).ok,false);
+console.log('KT134 GIS contract smoke tests: 9 PASS');
