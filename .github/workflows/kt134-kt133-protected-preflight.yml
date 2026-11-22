@@ -49,5 +49,31 @@ jobs:
           console.log('KT133 binding categories:',JSON.stringify(summary));
           console.log('Inspect-only: NO secrets, names, IDs, database values or source content are printed.');
           NODE
+      - name: Identify actual protected application behind KT133 entry (read only)
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - "$RUNNER_TEMP/settings.json" "$RUNNER_TEMP/target-worker" <<'NODE'
+          const fs=require('node:fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          const targets=(d.result?.bindings||[]).filter(b=>b.type==='service').map(b=>b.service).filter(Boolean);
+          if(targets.length!==1)throw Error('Expected exactly one service binding behind KT133');
+          if(!/^[a-zA-Z0-9_-]+$/.test(targets[0]))throw Error('Invalid service name');
+          fs.writeFileSync(process.argv[3],targets[0]);
+          console.log('KT133 entry has one service target (name kept private)');
+          NODE
+          target="$(cat "$RUNNER_TEMP/target-worker")"
+          curl --fail --silent --show-error --max-time 30 -H "Authorization: Bearer $CF_TOKEN"             "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/$target"             -o "$RUNNER_TEMP/kt133-target-source"
+          node - "$RUNNER_TEMP/kt133-target-source" <<'NODE'
+          const fs=require('node:fs'),crypto=require('node:crypto');
+          const s=fs.readFileSync(process.argv[2]),t=s.toString('utf8');
+          const markers=['Преписки в панела','Нова преписка','kt132AddressedPanel','/auth/login','panelId','KT125','PDF1','stage5'];
+          const findings=Object.fromEntries(markers.map(m=>[m,t.includes(m)]));
+          console.log('Target source bytes',s.length,'SHA256',crypto.createHash('sha256').update(s).digest('hex'));
+          console.log('Non-sensitive route marker check:',JSON.stringify(findings));
+          console.log('No Worker source is logged or uploaded.');
+          NODE
       - name: Confirm no change occurred
         run: echo 'READ ONLY / no Cloudflare deployment, migration or D1 writes.'
