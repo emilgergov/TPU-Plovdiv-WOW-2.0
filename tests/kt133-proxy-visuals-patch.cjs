@@ -54,8 +54,8 @@ export default {
  async fetch(request,env,ctx) {
   const u=new URL(request.url);
   const assets={
-   '/__kt133_approved_visuals.css':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/b48f4f5a1f4e4a5c4a0f74407f42af4c8eaced2d/kt80/KT133_APPROVED_VISUALS.css','text/css; charset=utf-8'],
-   '/__kt133_approved_visuals.js':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/b48f4f5a1f4e4a5c4a0f74407f42af4c8eaced2d/kt80/KT133_APPROVED_VISUALS.js','text/javascript; charset=utf-8']
+   '/__kt133_approved_visuals.css':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/07779e7e2c06fcfeabe4b78dbdae44f224e58722/kt80/KT133_APPROVED_VISUALS.css','text/css; charset=utf-8'],
+   '/__kt133_approved_visuals.js':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/07779e7e2c06fcfeabe4b78dbdae44f224e58722/kt80/KT133_APPROVED_VISUALS.js','text/javascript; charset=utf-8']
   };
   if(Object.prototype.hasOwnProperty.call(assets,u.pathname) && request.method==='GET'){
    const [target,mime]=assets[u.pathname];
