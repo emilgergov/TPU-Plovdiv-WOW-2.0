@@ -67,7 +67,7 @@ async function test(name,opts,checks){
    assert.equal(receipt.caseId,'CASE_A');assert.equal(receipt.generation,1);
    assert.equal(receipt.evidenceRevision,4);assert.equal(receipt.ids[0],id);
    assert(f.root.generatedContent.some(c=>c.text?.includes('ЕКАТТЕ 99999')));
-   assert(f.root.generatedContent.some(c=>c.text?.includes('Общ')));
+   assert(f.root.generatedContent.some(c=>c.text?.includes('община Тестова община')));
  });
  await test('valid confirmed intersection',{intersection:[{sitecode:'BG0000000',area_m2:150}],outside:false},f=>{
    assert.equal(f.downloads.length,1);assert.equal(f.events.filter(e=>e.type==='kt82:pdf1-completed').length,1);
