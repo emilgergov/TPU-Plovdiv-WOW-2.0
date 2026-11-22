@@ -174,66 +174,89 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 
-/* KT133 approved dashboard presentation fixes: do not alter source route data, case state or navigation handlers. */
+
+/* KT133 public dashboard presentation patch. Original app model and route handling remain unchanged. */
 (function(){
- 'use strict';
- function normalizeDashboard(){
-  const root=document.getElementById('kt80Dashboard');
-  if(!root)return;
-  const summary=[...root.querySelectorAll('summary')];
-  for(const heading of summary){
-   const before=heading.textContent||'';
-   if(!before.includes('Специализирани резултати и инструменти'))continue;
-   const after=before.replace(/покажи\s*(?:22\s*[-–—]?\s*те\s*)?възможности/iu,'покажи възможностите')
-     .replace(/скрий\s*списъка/iu,'скрий възможностите');
-   if(before!==after)heading.textContent=after;
+'use strict';
+function normalize(){
+  const candidates=document.querySelectorAll('summary,button,h3');
+  for(const el of candidates){
+    if(el.closest('#overlay'))continue;
+    const t=el.textContent||'';
+    if(!t.includes('Специализирани резултати и инструменти'))continue;
+    if(!/(?:покажи|скрий)/iu.test(t))continue;
+    const changed=t.replace(/покажи\s*22\s*[-–—]?\s*те\s*възможности/giu,'покажи възможностите')
+      .replace(/скрий\s*списъка/giu,'скрий възможностите');
+    if(changed!==t){
+      // Preserve the original summary/button element and its click listeners.
+      const textNodes=[...el.childNodes].filter(n=>n.nodeType===3);
+      const node=textNodes.find(n=>(n.textContent||'').includes('22-те възможности'));
+      if(node)node.textContent=node.textContent.replace(/покажи\s*22\s*[-–—]?\s*те\s*възможности/giu,'покажи възможностите');
+      else el.textContent=changed;
+    }
   }
-  const retired=root.querySelectorAll('#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="13"],#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="14"]');
-  retired.forEach(el=>el.remove());
+  document.querySelectorAll('#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="13"],#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="14"]').forEach(e=>e.remove());
   const count=document.getElementById('kt80DashboardCount');
-  if(count && /22\s+специализирани/.test(count.textContent||'')){
-    count.textContent='5 основни етапа + 20 специализирани панела';
-  }
- }
- function init(){
-  const root=document.getElementById('kt80Dashboard');if(!root)return;
-  normalizeDashboard();
+  if(count && /22\s+специализирани/.test(count.textContent||''))count.textContent='5 основни етапа + 20 специализирани панела';
+}
+function init(){
+  normalize();
   const routes=document.getElementById('kt80DashboardRoutes');
-  if(routes)new MutationObserver(normalizeDashboard).observe(routes,{childList:true});
-  root.querySelectorAll('details').forEach(el=>{
-   const summary=el.querySelector('summary');
-   if(summary)new MutationObserver(normalizeDashboard).observe(summary,{childList:true,characterData:true,subtree:true});
-  });
- }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
- else init();
-})();
-/* KT133 dashboard click navigation animates for 260ms before opening a panel.
-   Drive the accepted five-step entrance from the actual modal-open state as well. */
-(function(){
- 'use strict';
- function init(){
-  const overlay=document.getElementById('overlay');
-  const title=document.getElementById('dialogTitle');
-  if(!overlay||!title)return;
-  let activated='';
-  function apply(){
-   if(!overlay.classList.contains('open')){activated='';return;}
-   const text=title.textContent||'';
-   const match=text.match(/№\s*(\d{1,2})\b/u);
-   if(!match)return;
-   const id=Number(match[1]);
-   if([13,14,15].includes(id))return;
-   const key=id+':'+text;
-   if(activated===key || typeof window.KT134ShowPanel02Entry!=='function')return;
-   activated=key;
-   const entry=(window.KT80RouteCatalog||[]).find(c=>Number(c.id)===id);
-   if(entry)window.KT134ShowPanel02Entry(entry);
+  if(routes)new MutationObserver(normalize).observe(routes,{childList:true});
+  for(const el of document.querySelectorAll('summary')){
+    if((el.textContent||'').includes('Специализирани резултати и инструменти'))
+      new MutationObserver(normalize).observe(el,{childList:true,characterData:true,subtree:true});
   }
-  new MutationObserver(apply).observe(overlay,{attributes:true,attributeFilter:['class']});
-  new MutationObserver(apply).observe(title,{characterData:true,childList:true,subtree:true});
-  apply();
- }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
- else init();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
+else init();
+})();
+
+/* KT133 entrance bridge, dashboard click is animated: after the original route
+   handler opens its protected dialog, show the accepted five-step entrance.
+   The independent GIS panel 15 and retired IDs 13/14 are excluded. */
+(function(){
+'use strict';
+function init(){
+  const overlay=document.getElementById('overlay');
+  if(!overlay)return;
+  let last='';
+  function show(id){
+    id=Number(id);
+    if(!Number.isInteger(id)||id<1||[13,14,15].includes(id))return;
+    if(!overlay.classList.contains('open'))return;
+    const title=document.getElementById('dialogTitle');
+    if(!title || !new RegExp('№\\s*0?'+id+'(?:\\D|$)','u').test(title.textContent||''))return;
+    const fn=window.KT134ShowPanel02Entry;
+    if(typeof fn!=='function')return;
+    const c=(window.KT80RouteCatalog||[]).find(x=>Number(x.id)===id);
+    if(!c)return;
+    const key=String(id);
+    if(last===key && overlay.classList.contains('kt134-flow-mode'))return;
+    fn(c);
+    last=key;
+  }
+  document.addEventListener('click',event=>{
+    const tile=event.target?.closest?.('#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-kind="route"]');
+    if(!tile)return;
+    const id=Number(tile.dataset.kt80Index);
+    if(!Number.isInteger(id)||[13,14,15].includes(id))return;
+    // Allow the existing 260ms navigation animation and original dialog handler to finish.
+    setTimeout(()=>show(id),350);
+    setTimeout(()=>show(id),700);
+  },true);
+  const title=document.getElementById('dialogTitle');
+  if(title)new MutationObserver(()=>{
+    const match=(title.textContent||'').match(/№\s*0?(\d{1,2})\b/u);
+    if(match)show(Number(match[1]));
+  }).observe(title,{childList:true,characterData:true,subtree:true});
+  new MutationObserver(()=>{
+    if(!overlay.classList.contains('open')){last='';return}
+    const text=document.getElementById('dialogTitle')?.textContent||'';
+    const match=text.match(/№\s*0?(\d{1,2})\b/u);
+    if(match)show(Number(match[1]));
+  }).observe(overlay,{attributes:true,attributeFilter:['class']});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
+else init();
 })();
