@@ -6,6 +6,9 @@ on:
     paths:
       - 'KT134/integration/**'
       - '.github/workflows/kt134-pdf1-clean-check.yml'
+      - 'vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html'
+      - 'vt03/kt80/KT134_PINNED_*'
+      - 'vt03/kt80/integration/KT134_PINNED_*'
   workflow_dispatch:
 permissions:
   contents: read
@@ -40,7 +43,7 @@ jobs:
         run: |
           git diff --name-only origin/main...HEAD | while IFS= read -r changed; do
             case "$changed" in
-              KT134/integration/*|.github/workflows/kt134-pdf1-clean-check.yml|vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html)
+              KT134/integration/*|.github/workflows/kt134-pdf1-clean-check.yml|vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html|vt03/kt80/KT134_PINNED_*|vt03/kt80/integration/KT134_PINNED_*)
                 echo "Allowed: $changed" ;;
               *)
                 echo "ERROR: Unexpected production change: $changed"
