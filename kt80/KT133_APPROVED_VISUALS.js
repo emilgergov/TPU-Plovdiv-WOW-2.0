@@ -142,3 +142,53 @@ document.addEventListener('click',function(event){
  },25);
 },true);
 })();
+/* kt134FiveStageVisualRuntime — accepted visual-only code copied from approved reference */
+
+/* Decorative, aria-hidden SVGs added to existing five navigation buttons. */
+document.addEventListener('DOMContentLoaded',function(){
+ const strokes={
+  1:'<path d="M8 18h14l5 6h29v29H8z"/><path d="M8 20V12h19l6 6"/><circle cx="45" cy="44" r="11"/><path d="m53 52 9 9"/>',
+  2:'<path d="M20 9H9v13M44 9h11v13M9 43v12h13M55 43v12H43"/><circle cx="32" cy="32" r="11"/><circle cx="32" cy="32" r="3"/>',
+  3:'<path d="m9 44 14-7 16 5 16-7v17l-16 7-16-5-14 7z"/><path d="M23 37v17M39 42v17"/><path d="M32 6c-10 0-16 7-16 16 0 11 16 24 16 24s16-13 16-24C48 13 42 6 32 6z"/><circle cx="32" cy="22" r="5"/>',
+  4:'<path d="M32 7v50M12 19h40M19 19 9 39h20L19 19zM45 19 35 39h20L45 19zM20 57h24"/><path d="M28 11h8"/>',
+  5:'<circle cx="32" cy="46" r="5"/><path d="M32 40V10m0 0-8 9m8-9 8 9M32 36 13 23m0 0 2 9m-2-9 10-1M32 36l19-13m0 0-10-1m10 1-2 9"/><path d="M9 51h15m16 0h15"/>'
+ };
+ const motifs={
+  1:'<g fill="none" stroke="currentColor" stroke-width="2"><path d="M12 85 26 25l51 7-15 66z" fill="currentColor" fill-opacity=".18"/><path d="M42 88 56 15l56 10-13 73z" fill="currentColor" fill-opacity=".35"/><path d="M65 39h34M62 49h30M60 59h29M58 69h28"/></g>',
+  2:'<g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 85c25-45 50-3 75-44s52-8 72-33M5 99c25-45 50-3 75-44s52-8 72-33M5 70c25-45 50-3 75-44s52-8 72-33"/><path d="m52 83 20-26 27 9 3 18-31 12z" fill="currentColor" fill-opacity=".2"/></g>',
+  3:'<g fill="none" stroke="currentColor" stroke-width="2"><path d="M5 75 48 12l52 13 43-9M4 35l46 14 24 49 64-31M24 5l-8 91M88 5l-13 91M135 0l-20 100"/><path d="m58 48 34-3 10 30-35 9-13-21z" fill="currentColor" fill-opacity=".3"/></g>',
+  4:'<g fill="none" stroke="currentColor" stroke-width="2"><path d="m21 89 10-57 42 4-9 57z" fill="currentColor" fill-opacity=".17"/><path d="m63 95 13-73 44 7-11 66z" fill="currentColor" fill-opacity=".22"/><path d="M80 47h28M78 57h28M76 67h27M74 77h24"/><text x="81" y="43" fill="currentColor" font-size="22">§</text></g>',
+  5:'<g fill="none" stroke="currentColor" stroke-width="2"><rect x="46" y="8" width="66" height="20" rx="4"/><rect x="7" y="67" width="45" height="20" rx="4"/><rect x="98" y="67" width="45" height="20" rx="4"/><path d="M79 28v14m0 0-37 18m37-18 37 18"/><path d="m79 42-7 6 14 0z" fill="currentColor"/></g>'
+ };
+ function svg(body,view){const el=document.createElementNS('http://www.w3.org/2000/svg','svg');
+ el.setAttribute('viewBox',view||'0 0 64 64');el.setAttribute('fill','none');el.setAttribute('stroke','currentColor');
+ el.setAttribute('stroke-width','3');el.setAttribute('stroke-linecap','round');el.setAttribute('stroke-linejoin','round');
+ el.setAttribute('aria-hidden','true');el.innerHTML=body;return el;}
+ for(let i=1;i<=5;i++){
+  const b=document.querySelector('#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="'+i+'"]');
+  if(!b||b.querySelector('.kt134-stage-emblem'))continue;
+  const emblem=svg(strokes[i]);emblem.setAttribute('class','kt134-stage-emblem');
+  const motif=svg(motifs[i],'0 0 150 105');motif.setAttribute('class','kt134-stage-illustration');
+  b.append(motif,emblem);
+ }
+});
+
+
+/* kt134DynamicPanelsCaption — accepted visual-only code copied from approved reference */
+
+(function(){
+ 'use strict';
+ function setup(){
+  const heading=[...document.querySelectorAll('h3,summary,button')].find(el=>(el.textContent||'').includes('Специализирани резултати и инструменти'));
+  if(!heading)return;
+  function normalize(){
+   const before=heading.textContent||'';
+   const after=before.replace(/покажи\s*22\s*[-–—]?\s*те\s*възможности/iu,'покажи възможностите');
+   if(after!==before)heading.textContent=after;
+  }
+  normalize();
+  new MutationObserver(normalize).observe(heading,{childList:true,characterData:true,subtree:true});
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
+})();
+
