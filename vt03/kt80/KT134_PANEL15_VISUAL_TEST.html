@@ -748,7 +748,7 @@ const requirements=c=>{
 };
 let selected=0;
 function render(){const root=document.getElementById("groups");root.replaceChildren();const q=document.getElementById("search").value.toLocaleLowerCase("bg-BG"),f=document.getElementById("family").value;
-for(const [key,label] of Object.entries(categories)){if(f&&f!==key)continue;const items=cards.filter(c=>group(c)===key&&(c.title+" "+c.legal+" "+c.validation).toLocaleLowerCase("bg-BG").includes(q));if(!items.length)continue;
+for(const [key,label] of Object.entries(categories)){if(f&&f!==key)continue;const items=cards.filter(c=>c.id!==13&&c.id!==14&&group(c)===key&&(c.title+" "+c.legal+" "+c.validation).toLocaleLowerCase("bg-BG").includes(q));if(!items.length)continue;
 const sec=create("section","group"),h=create("h3","",label+" · "+items.length);sec.append(h);const grid=create("div","cards");items.forEach(c=>{const card=create("article","card");card.append(create("div","kind","№"+String(c.id).padStart(2,"0")+" · "+(key==="tools"?"Инструмент":key==="acts"?"Проект на акт":"Действие/сезиране")),create("h4","",c.title),create("p","",c.validation));const btn=create("button","","☑ Условия и готовност");btn.onclick=()=>open(c);card.append(btn);grid.append(card)});sec.append(grid);root.append(sec)}}
 function open(c){
  selected=c.id;
@@ -779,7 +779,7 @@ function open(c){
  const o=document.getElementById("overlay");o.classList.add("open");o.setAttribute("aria-hidden","false");window.KT134ShowPanel02Entry?.(c);document.getElementById("close").focus();
 }
 function close(){document.getElementById("overlay").classList.remove("open");document.getElementById("overlay").setAttribute("aria-hidden","true")}
-document.getElementById("close").onclick=close;document.getElementById("overlay").onclick=e=>{if(e.target===e.currentTarget)close()};document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});window.KT80RouteCatalog=cards;window.KT80OpenRoute=open;document.getElementById("search").oninput=render;document.getElementById("family").onchange=render;render();
+document.getElementById("close").onclick=close;document.getElementById("overlay").onclick=e=>{if(e.target===e.currentTarget)close()};document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});window.KT80RouteCatalog=cards.filter(c=>c.id!==13&&c.id!==14);window.KT80OpenRoute=open;document.getElementById("search").oninput=render;document.getElementById("family").onchange=render;render();
 </script><script src="../v26-test/v26-parcel-editor.js"></script><script src="KT80_E01_ARCH_PARCEL_ADAPTER_V594.js?v=594-20261113"></script><script src="KT80_V17_V26_GIS_ENGINE_PATH_ADAPTER.js"></script><script src="../v26-test/v26-approved-gis-zip.js"></script><script src="KT80_E01_APPROVED_FULL_GIS_V20.js"></script><script src="../v26-test/v27-preview/kt77-pi-master-readonly-index.js"></script><script src="KT80_E01_DISPLAY_FORMAT_V595.js?v=595-20261113"></script><script src="KT80_E01_PI_MASTER_BRIDGE_V595.js?v=595-20261113"></script><script src="KT82_A_FREE_GIS_V603.js?v=603-20261114"></script><script src="../v26-test/v27-preview/kt77-04-4c-pdf1-context-labels-only.js"></script><script src="KT80_E01_PDF_RENDERER_V22.js?v=30-20261111"></script><script src="../v26-test/v26-draft-package.js"></script><script src="KT80_V18_V26_OVERLAY_PATH_ADAPTER.js"></script><script src="../../KT134/integration/KT82_A_PDF1_V600_KT134_CANDIDATE.js?v=kt134-isolated-guard"></script><script src="../v26-test/v26-dossier-evidence.js"></script><script src="../v26-test/v26-local-intake.js"></script><script src="vendor/docToText-0bsd.js?v=40-20261111"></script><script src="KT82_E01_SAFE_ZIP_INTAKE_V35.js?v=587-20261113"></script><script src="KT80_E01_VISUAL_NAV_V14.js"></script><script src="KT80_E01_IN_FORM_MATCHER_RESET_V16.js"></script><script src="KT80_E01_EVIDENCE_COVERAGE_V48.js?v=49-diagnostic"></script><script src="KT80_E01_IP_MASTER_EVIDENCE_V15.js?v=kt83-vt02-20261114"></script><script src="KT80_E01_DOSSIER_ORIGINALS_V39.js?v=47-20261111"></script><script src="KT82_DOSSIER_COMPLETENESS_V34.js?v=kt83-vt02-20261114"></script><script src="KT80_E01_CH2_EVIDENCE_PASSPORT_V44.js?v=52-20261111"></script><script src="KT80_E01_CH21_SEMANTIC_READER_V50.js?v=50-20261111"></script><script src="KT80_E01_CH21_PARAMETER_QA_V51.js?v=52-20261111"></script><script src="KT80_E01_KT52_PROJECT_RECONSTRUCTION_V52.js?v=57-bg-20261112"></script><script src="KT80_GLOBAL_ACTIVITY_V569.js?v=569-20261112"></script>
 <script src="KT83_WORKFLOW_CASE_V591.js?v=kt83-vt02-20261114"></script><script src="KT134_PINNED_KT80_E01_IP_MASTER_SUBJECT_V32.js?v=53-20261111"></script><script src="KT83_CASE_BOUNDARY_V01.js?v=kt83-01"></script><script src="KT80_EG_ACCESS_SESSION_V01.js?v=kt83-vt02-20261114"></script>
 <script src="KT83_AI_SUBJECT_V572.js?v=kt83-vt02-20261114"></script><script src="KT83_AI_SCOPE_V572.js?v=vt03-fix-20261115"></script><script src="KT80_E01_RELEVANCE_FILTER_V53_3.js?v=53-3e-20261112"></script>
@@ -1118,6 +1118,97 @@ window.KT134ShowPanel02Entry=function(c){
  overlay.classList.toggle('kt134-flow-mode',Number(c?.id)===2);
  if(Number(c?.id)===2){document.getElementById('kt134Flow02Legal').textContent=(c.legal?'Примерно: '+c.legal:'Определя се според преписката');}
 };
+})();
+</script>
+
+<style id="kt134OtherPanelFlowStyle">
+/* КТ134 — единна схема само на входните екрани. №02 е одобреният неизменен образец. */
+#overlay.kt134-flow-mode #kt134PanelGenericEntry{display:none}
+#overlay.kt134-flow-mode.kt134-flow-other-mode #kt134Panel02Entry{display:none!important}
+#overlay.kt134-flow-mode.kt134-flow-other-mode #kt134PanelGenericEntry{display:block!important}
+#overlay.kt134-flow-other-mode .kt134-flow02-step:nth-child(3) small{font-size:11px;line-height:1.42}
+#overlay.kt134-flow-other-mode .kt134-flow02-result-items span{font-weight:500}
+#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="15"] .kt123-panel-mark,
+#groups article.card .kt123-panel-mark[data-kind="independent"]{display:none!important}
+</style>
+<script id="kt134OtherPanelFlowRuntime">
+(function(){
+'use strict';
+const overlay=document.getElementById('overlay'),dialog=overlay?.querySelector('.dialog');
+const original=window.KT134ShowPanel02Entry;
+if(!overlay||!dialog||typeof original!=='function')return;
+/* Кратък самостоятелен резултат за всеки панел; формулировките са интерфейсни,
+   не автоматична квалификация, нормативна преценка или нов генератор. */
+const catalog={
+ 1:{flow:['ПОСТЪПИЛИ ДАННИ','ПРОСТРАНСТВЕН КОНТЕКСТ','ПРАВНО ОСНОВАНИЕ','ПРЕЦЕНКА ПО ОС','ПРОЕКТ НА ПИСМО'],details:['Документи, предмет и местоположение','Данни за защитени зони и режими',null,'Проверка на приложимата хипотеза','Проект за преглед от експерта'],result:'Проект на писмо по чл. 2, ал. 2 от Наредбата за ОС',parts:['Установени факти и пространствени обстоятелства','Мотиви по относимата нормативна хипотеза','Адресат, заключение и реквизити']},
+ 3:{flow:['ПРЕПИСКА','НУЖДА ОТ СТАНОВИЩЕ','ПРАВНО ОСНОВАНИЕ','ПРОЕКТ НА ИСКАНЕ','ЕКСПЕРТЕН ПРЕГЛЕД'],details:['Потвърдени данни по случая','Конкретен въпрос към компетентен орган',null,'Изготвяне на проект на запитване','Редакция и потвърждение'],result:'Проект на писмо за институционално становище',parts:['Посочване на компетентния адресат','Конкретни въпроси и приложени материали','Мотиви, правно основание и срок при приложимост']},
+ 4:{flow:['УВЕДОМЛЕНИЕ','ПРЕДМЕТ И ОБХВАТ','ПРАВНО ОСНОВАНИЕ','УКАЗАНИЯ ПО ОВОС','ПРЕГЛЕД'],details:['Входни документи по преписката','Потвърден предмет и данни',null,'Действия според приложимия ред','Експертно потвърждение'],result:'Проект на писмо с указания по процедурата за ОВОС',parts:['Установени предпоставки и приложим ред','Необходими следващи действия и документи','Адресат, мотиви и приложими срокове']},
+ 5:{flow:['ДОКУМЕНТИ','ДАННИ ЗА ЗОНИТЕ','ПРАВНО ОСНОВАНИЕ','УКАЗАНИЯ ПО ОС','ПРЕГЛЕД'],details:['Постъпила документация','Доказани пространствени обстоятелства',null,'Процедурни действия по ОС','Експертно потвърждение'],result:'Проект на писмо с указания по процедурата за ОС',parts:['Факти и относимост към защитените зони','Приложим ред и изискуеми действия','Мотиви, адресат и документални изисквания']},
+ 6:{flow:['ДОКУМЕНТАЦИЯ','ОЦЕНКА НА ДАННИТЕ','ПРАВНО ОСНОВАНИЕ','ПРОЕКТ НА РЕШЕНИЕ','ЕКСПЕРТНА ПРЕЦЕНКА'],details:['Материали по преписката','Доказателства за възможни въздействия',null,'Структуриране на проект на акт','Преглед и потвърждение'],result:'Проект на решение за преценяване вероятната степен на отрицателно въздействие',parts:['Констатации и относим анализ','Мотиви и приложими условия','Проект на административен акт за експертно потвърждение']},
+ 7:{flow:['ИСКАНЕ ПО ОВОС','ПРОУЧВАНЕ','ПРАВНО ОСНОВАНИЕ','ПРОЕКТ НА РЕШЕНИЕ','ЕКСПЕРТНА ПРЕЦЕНКА'],details:['Представена информация по преписката','Обстоятелства и приложими критерии',null,'Преценяване на необходимостта от ОВОС','Преглед и потвърждение'],result:'Проект на решение за преценяване необходимостта от ОВОС',parts:['Установени факти и критерии','Мотивирана преценка и условия при приложимост','Проект на акт с необходимите реквизити']},
+ 8:{flow:['ДОКЛАД И МАТЕРИАЛИ','ПРОЦЕДУРНИ ДАННИ','ПРАВНО ОСНОВАНИЕ','ПРОЕКТ НА РЕШЕНИЕ','ЕКСПЕРТНА ПРЕЦЕНКА'],details:['Оценка и относимите приложения','Консултации, обсъждания и доказателства',null,'Изготвяне на проект на акт','Преглед и потвърждение'],result:'Проект на решение по ОВОС',parts:['Резултати от оценката и проведената процедура','Мотиви, мерки и условия при приложимост','Проект на акт за експертно потвърждение']},
+ 9:{flow:['ПРЕПИСКА','ОСНОВАНИЕ ЗА ПРЕКРАТЯВАНЕ','ПРАВНО ОСНОВАНИЕ','ПРОЕКТ НА АКТ','ПРЕГЛЕД'],details:['Хронология и документи','Проверка на конкретната предпоставка',null,'Надлежна форма според правния режим','Експертно потвърждение'],result:'Проект на документ за прекратяване на процедура',parts:['Конкретни фактически основания','Относими правни разпоредби и мотиви','Компетентен орган, адресат и съобщаване']},
+ 10:{flow:['ПЛАН ИЛИ ПРОГРАМА','ОБХВАТ И КОМПЕТЕНТНОСТ','ПРАВНО ОСНОВАНИЕ','УКАЗАНИЯ ПО ЕО','ПРЕГЛЕД'],details:['Входни данни и документи','Потвърдени характеристики',null,'Уточняване на необходимите действия','Експертно потвърждение'],result:'Проект на писмо за необходимите действия по ЕО',parts:['Установени обстоятелства за плана или програмата','Необходими процедурни действия и документи','Адресат, мотиви и приложим ред']},
+ 11:{flow:['ИСКАНЕ ПО ЕО','ДОКУМЕНТАЦИЯ','ПРАВНО ОСНОВАНИЕ','ПРОЕКТ НА РЕШЕНИЕ','ЕКСПЕРТНА ПРЕЦЕНКА'],details:['Постъпила преписка','Обхват и приложими критерии',null,'Преценяване на необходимостта от ЕО','Преглед и потвърждение'],result:'Проект на решение за преценяване необходимостта от ЕО',parts:['Установени обстоятелства и критерии','Мотиви и необходими условия при приложимост','Проект на административен акт']},
+ 12:{flow:['ДОКЛАД ПО ЕО','КОНСУЛТАЦИИ','ПРАВНО ОСНОВАНИЕ','ПРОЕКТ НА СТАНОВИЩЕ','ПРЕГЛЕД'],details:['Представени материали','Резултати от съгласувания и оценки',null,'Формулиране на становище','Експертно потвърждение'],result:'Проект на становище по ЕО',parts:['Анализ и резултати от процедурата','Мотиви, мерки и условия при приложимост','Проект на становище с реквизити']},
+ 16:{flow:['РЕЗУЛТАТИ ПО ПРЕПИСКАТА','СЪБИРАНЕ НА ФАЙЛОВЕ','ОСНОВАНИЕ И ПРАВА','КОМПЛЕКТОВАНЕ','АРХИВЕН ПАКЕТ'],details:['Документи, справки и създадени проекти','Версии и проследимост',null,'Проверка на комплекта','Експертен преглед'],result:'Подготвен архивен пакет по преписката',parts:['Документи и произведени резултати','Версии, идентификатори и проследимост','Разграничение между проекти и потвърдени документи']},
+ 17:{flow:['ПОСТЪПИЛА ЖАЛБА','КВАЛИФИКАЦИЯ','ПРАВНО ОСНОВАНИЕ','ИЗБОР НА ДЕЙСТВИЕ','ПРОЕКТ НА РЕЗУЛТАТ'],details:['Жалба, адресат и предмет','Оспорван акт, срок и компетентност',null,'Действие според конкретния ред','Експертен преглед и потвърждение'],result:'Проект на мотивирано процесуално действие по жалбата',parts:['Квалификация и факти по жалбата','Компетентност, срокове и относим ред','Проект на документ според установения изход']},
+ 18:{flow:['ПОСТЪПИЛ СИГНАЛ','ПРОВЕРКА НА ФАКТИ','ПРАВНО ОСНОВАНИЕ','СЛЕДВАЩО ДЕЙСТВИЕ','ПРОЕКТ НА РЕЗУЛТАТ'],details:['Предмет и съдържание на сигнала','Сведения и необходимост от проверка',null,'Проверка или уведомяване според случая','Експертно потвърждение'],result:'Проект на документ за действие или уведомяване по сигнал',parts:['Факти, констатации и установена компетентност','Приложим ред и необходима проверка','Мотивиран проект на последващо действие']},
+ 19:{flow:['ПОСТЪПИЛО ВЪЗРАЖЕНИЕ','ПРОЦЕДУРЕН ЕТАП','ПРАВНО ОСНОВАНИЕ','РАЗГЛЕЖДАНЕ','ПРОЕКТ НА ОТГОВОР'],details:['Текст и приложени документи','Допустимост и относимост към производството',null,'Анализ на изложените аргументи','Преглед и потвърждение'],result:'Проект на мотивиран отговор или друго относимо действие по възражението',parts:['Изложени искания и доказателства','Мотиви за приемане или неприемане на доводи','Документ според приложимата процедура']},
+ 20:{flow:['ПОСТЪПИЛ ДОКУМЕНТ','КОМПЕТЕНТЕН ОРГАН','ПРАВНО ОСНОВАНИЕ','ПРОЕКТ НА ПРЕПРАЩАНЕ','ПОТВЪРЖДЕНИЕ'],details:['Предмет на сезирането','Проверка на компетентност',null,'Адресиране и комплектоване','Експертен преглед'],result:'Проект на писмо за препращане по компетентност',parts:['Посочване на компетентния орган','Основание за препращане и приложени документи','Уведомяване и срокове според приложимия ред']},
+ 21:{flow:['ПРЕПИСКА И ПОВОД','КОНТРОЛЕН КОНТЕКСТ','ПРАВНО ОСНОВАНИЕ','ПРОЕКТ НА УВЕДОМЛЕНИЕ','ЕКСПЕРТЕН ПРЕГЛЕД'],details:['Основание и налични материали','Предмет и етап на проверката',null,'Уточняване на адресат и съдържание','Преглед и потвърждение'],result:'Проект на уведомление във връзка с проверка',parts:['Предмет, основание и обхват на проверката','Необходими действия и информация за адресата','Проект на документ според правомощията']},
+ 22:{flow:['ПОСТЪПИЛО ПРЕДЛОЖЕНИЕ','ПРОВЕРКА НА СЪДЪРЖАНИЕ','ПРАВНО ОСНОВАНИЕ','РАЗГЛЕЖДАНЕ','ПРОЕКТ НА РЕЗУЛТАТ'],details:['Предложение и приложени данни','Компетентност и изискуем ред',null,'Мотивиране на последващото действие','Експертен преглед и потвърждение'],result:'Проект на решение или уведомяване по предложение',parts:['Съдържание и факти по предложението','Проверка на компетентност и приложим ред','Мотивирано действие и проект на документ']}
+};
+const icons=[
+ '<path d="M3 5h18v15H3zM7 3v4M12 3v4M3 9h18"/>',
+ '<path d="M6 3h9l4 4v14H6zM9 11h7M9 15h7M15 3v4h4"/>',
+ '<path d="M12 3v18M5 6h14M5 6l-3 6h6zM19 6l-3 6h6zM8 21h8"/>',
+ '<path d="M7 3h8l4 4v14H5V3zM15 3v5h5M8 12h8M8 16h7"/>',
+ '<path d="M5 12l4 4L19 6M12 2a10 10 0 1 1-10 10A10 10 0 0 1 12 2z"/>'
+];
+const svg=paths=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+paths+'</svg>';
+const section=document.createElement('section');section.className='kt134-flow02';section.id='kt134PanelGenericEntry';
+section.setAttribute('aria-label','Схема на процеса');
+const intro=document.createElement('p');intro.className='kt134-flow02-intro';
+const steps=document.createElement('div');steps.className='kt134-flow02-steps';
+const meta=document.createElement('div');meta.className='kt134-flow02-meta';
+const result=document.createElement('div');result.className='kt134-flow02-result';
+const resultIcon=document.createElement('span');resultIcon.innerHTML=svg('<path d="M5 3h10l4 4v14H5V3zM15 3v4h4M8 12h8M8 16h8"/>');
+const resultBody=document.createElement('div');
+const resultTitle=document.createElement('strong');resultTitle.textContent='КРАЕН РЕЗУЛТАТ';
+const resultText=document.createElement('span');
+const partBox=document.createElement('div');partBox.className='kt134-flow02-result-items';
+const foot=document.createElement('em');foot.textContent='Съдържанието и приложимият ред се проверяват за конкретната преписка. Експертът редактира и потвърждава проекта; няма автоматично изпращане.';
+resultBody.append(resultTitle,resultText,partBox,foot);
+result.append(resultIcon,resultBody);meta.append(result);
+const actions=document.createElement('div');actions.className='kt134-flow02-actions';
+const back=document.createElement('button');back.type='button';back.textContent='← Към панелите';
+const enter=document.createElement('button');enter.type='button';enter.textContent='Отвори работния панел →';
+actions.append(back,enter);section.append(intro,steps,meta,actions);
+const warn=dialog.querySelector('.warn');if(warn)warn.before(section);else dialog.append(section);
+back.addEventListener('click',()=>{overlay.classList.remove('kt134-flow-mode','kt134-flow-other-mode');window.KT80DashboardHome?.();overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true')});
+enter.addEventListener('click',()=>{overlay.classList.remove('kt134-flow-mode','kt134-flow-other-mode');const first=dialog.querySelector('.tabs button');if(first)first.focus();else document.getElementById('close')?.focus()});
+window.KT134ShowPanel02Entry=function(c){
+  original(c);
+  overlay.classList.remove('kt134-flow-other-mode');
+  const id=Number(c?.id),cfg=catalog[id];
+  if(!cfg)return;
+  overlay.classList.add('kt134-flow-mode','kt134-flow-other-mode');
+  intro.textContent='Последователност на работа — '+c.title;
+  steps.replaceChildren();
+  cfg.flow.forEach((title,i)=>{
+    const tile=document.createElement('div');tile.className='kt134-flow02-step';
+    const emblem=document.createElement('div');emblem.className='kt134-flow02-icon';emblem.innerHTML=svg(icons[i]);
+    const heading=document.createElement('strong');heading.textContent=title;
+    const desc=document.createElement('small');
+    desc.textContent=i===2?(c.legal?'Ориентировъчно: '+c.legal:'Прилага се провереното правно основание'):cfg.details[i];
+    tile.append(emblem,heading,desc);steps.append(tile);
+  });
+  resultText.textContent=cfg.result;
+  partBox.replaceChildren();
+  cfg.parts.forEach(value=>{const item=document.createElement('span');item.textContent=value;partBox.append(item)});
+};
+window.KT134FlowCatalogCount=Object.keys(catalog).length;
 })();
 </script>
 </body></html>
