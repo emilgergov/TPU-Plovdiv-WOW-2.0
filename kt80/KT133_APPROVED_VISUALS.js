@@ -304,24 +304,37 @@ function findLegacyIntro(modal){
  });
 }
 function hideOldSteps(modal,entrance,originalAction){
- // Exact original KT133 legacy three-button tab row from #overlay #tabs.
- // The row belongs to the historical entry view, not the accepted five-step
- // entrance. Its buttons stay mounted and retain their click handlers.
+ // The authenticated KT133 route shell renders a THREE-CARD legacy summary
+ // AFTER its original work button (the old static #tabs is a different view).
+ // Identify the actual legacy summary by its structure and DOM order.
  if(!modal||!entrance||!originalAction)return;
- // Original inline page owns #tabs outside the authenticated modal in
- // some routes. Locate its unique document-level element as fallback.
- const tabs=modal.querySelector('#tabs')||document.getElementById('tabs');
- if(!tabs||tabs.children.length!==3||
-    ![...tabs.children].every(el=>el.matches('button')))return;
- tabs.classList.add('kt133-old-entry-tabs-hidden');
- // Restore navigation BEFORE invoking the untouched original work-panel action.
- const launch=entrance.querySelector('.kt133-approved-launch');
- if(launch&&!launch.dataset.kt133TabsRestore){
-  launch.dataset.kt133TabsRestore='1';
-  launch.addEventListener('click',()=>tabs.classList.remove('kt133-old-entry-tabs-hidden'),{capture:true});
+ const follows=(a,b)=>Boolean(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING);
+ const controls='button,input,select,textarea,a,[contenteditable],[role="button"]';
+ const candidates=[...modal.querySelectorAll('div,section,ul')].filter(row=>{
+  if(row===modal||row.contains(entrance)||row.contains(originalAction)||
+    row.closest('.kt133-approved-real-entrance')||
+    !follows(originalAction,row)||
+    row.querySelector(controls))return false;
+  const kids=[...row.children];
+  if(kids.length!==3||kids.some(k=>!k.matches('div,section,article,li')))return false;
+  return kids.every(k=>{
+   const t=(k.textContent||'').trim();
+   return t.length>=5&&t.length<180&&
+     !k.querySelector(controls)&&k.children.length<=4;
+  });
+ });
+ // Prefer the nearest old three-column row after the original button.
+ const rows=candidates.filter(row=>!candidates.some(other=>other!==row&&row.contains(other)));
+ const row=rows.find(el=>el.getBoundingClientRect().width>300)||rows[0];
+ if(row){
+  row.classList.add('kt133-legacy-tile-hidden');
+  const launch=entrance.querySelector('.kt133-approved-launch');
+  if(launch&&!launch.dataset.kt133RestoreCards){
+   launch.dataset.kt133RestoreCards='1';
+   launch.addEventListener('click',()=>row.classList.remove('kt133-legacy-tile-hidden'),{capture:true});
+  }
  }
 }
-
 function enhance(heading){
  const idMatch=(heading.textContent||'').match(/^Панел\s*№\s*0?(\d{1,2})\s*[·:—-]/u);
  if(!idMatch)return;
