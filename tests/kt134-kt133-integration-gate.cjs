@@ -84,7 +84,7 @@ check('legacy entry cleanup is structural and preserves working actions',()=>{
  assert.match(visualCss,/\.kt133-approved-entrance-container \.kt133-legacy-tile-hidden/);
 });
 check('legacy badge on panel 16 is visual-only; Stage5 addressed panel 17 remains',()=>{
- assert.match(visual,/data-kt80-index="16".*\.kt123-panel-mark/);
+ assert.doesNotMatch(visual,/data-kt80-index="16".*\.kt123-panel-mark.*\.remove\(\)/);
  assert.match(visualCss,/data-kt80-index="16".*\.kt123-panel-mark/);
  assert.match(stage5,/addressedPanels=new Set\(\[1,17\]\)/);
  assert.match(visual,/if\(\[13,14,15\]\.includes\(id\)\)return/);
