@@ -315,3 +315,7 @@
 
 /* №16 is an active specialized panel. Suppress only obsolete 'ЗА ПРОВЕРКА' badge. */
 #kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="16"] .kt123-panel-mark{display:none!important}
+
+/* KT133: suppress exactly the old three-tab entrance row while the approved
+   five-step entrance is shown. JS restores it before original work-panel click. */
+.kt133-approved-entrance-container #tabs.kt133-old-entry-tabs-hidden{display:none!important}
