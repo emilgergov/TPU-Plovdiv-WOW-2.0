@@ -77,7 +77,9 @@ check('legacy entry cleanup is structural and preserves working actions',()=>{
  const section=visual.slice(visual.indexOf('function hideOldSteps('),visual.indexOf('function enhance(heading)'));
  assert.match(section,/cards\.length!==3/);
  assert.match(section,/row\.contains\(originalAction\)/);
- assert.match(section,/!before\(row,originalAction\)/);
+ assert.doesNotMatch(section,/before\(row,originalAction\)/);
+ assert.match(section,/row\.contains\(originalAction\)/);
+ assert.match(section,/row\.closest\('form,\[data-case-id\],\[data-dossier-id\]'\)/);
  assert.doesNotMatch(section,/Постъпила документация|Проверка за липси|Искане за допълнителна информация/);
  assert.match(visual,/originalAction\.click\(\)/);
  assert.doesNotMatch(visual,/originalAction\.remove\(\)/);
