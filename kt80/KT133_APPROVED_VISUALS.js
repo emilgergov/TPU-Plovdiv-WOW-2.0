@@ -303,25 +303,27 @@ function findLegacyIntro(modal){
    t.length<320 && !el.querySelector('button,a,[role="button"]');
  });
 }
-function hideOldSteps(modal){
- // Retire ONLY the three descriptive legacy tiles. Keep all working containers.
- const labels=['Постъпила документация','Проверка за липси','Искане за допълнителна информация'];
- const candidates=[...modal.querySelectorAll('div,span,li,article,section')];
- for(const label of labels){
-  const matches=candidates.filter(el=>{
-   if(el.closest('.kt133-approved-real-entrance'))return false;
-   const t=(el.textContent||'').trim();
-   return t===label && !el.querySelector('button,a,input,[role="button"]');
-  }).sort((a,b)=>a.querySelectorAll('*').length-b.querySelectorAll('*').length);
-  const el=matches[0];
-  if(!el)continue;
-  // Prefer the original standalone card; never hide any shared parent or action.
-  const card=el.parentElement;
-  if(card && card!==modal && card.querySelectorAll('button,a,input,[role="button"]').length===0 &&
-     (card.textContent||'').trim().length<180 && !labels.some(other=>other!==label&&(card.textContent||'').includes(other))){
-    card.classList.add('kt133-legacy-tile-hidden');
-  }else el.classList.add('kt133-legacy-tile-hidden');
- }
+function hideOldSteps(modal,entrance,originalAction){
+ // A visual-only structural check: the old introduction consists of exactly
+ // three compact, noninteractive cards before its original action. Do not
+ // depend on the wording of their captions (which varies across panels).
+ if(!entrance||!originalAction)return;
+ const before=(a,b)=>Boolean(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING);
+ const rows=[...modal.querySelectorAll('div,section,ul')].filter(row=>{
+  if(row===modal||row.contains(entrance)||row.contains(originalAction)||
+    row.closest('.kt133-approved-real-entrance')||!before(entrance,row)||
+    !before(row,originalAction))return false;
+  if(row.querySelector('button,a,input,textarea,select,[role="button"],[contenteditable]'))return false;
+  const cards=[...row.children];
+  if(cards.length!==3||cards.some(card=>!card.matches('div,span,li,article,section')))return false;
+  const labels=cards.map(card=>(card.textContent||'').trim());
+  return labels.every(label=>label.length>=4&&label.length<=160) &&
+    labels.join(' ').length<=450 && cards.every(card=>
+     !card.querySelector('button,a,input,textarea,select,[role="button"],[contenteditable]'));
+ });
+ // If the structure is ambiguous, preserve it rather than conceal a work area.
+ const leaves=rows.filter(row=>!rows.some(other=>other!==row&&row.contains(other)));
+ if(leaves.length===1)leaves[0].classList.add('kt133-legacy-tile-hidden');
 }
 function enhance(heading){
  const idMatch=(heading.textContent||'').match(/^Панел\s*№\s*0?(\d{1,2})\s*[·:—-]/u);
@@ -357,11 +359,11 @@ function enhance(heading){
   const btn=[...modal.querySelectorAll('button')].find(b=>(b.textContent||'').includes('Отвори работния панел'));
   if(btn)btn.parentElement.before(section);else modal.append(section);
  }
- hideOldSteps(modal);
  // Functional safety: never leave the original action hidden by presentation-only styles.
  const originalAction=[...modal.querySelectorAll('button')].find(b=>
   (b.textContent||'').includes('Отвори работния панел'));
  if(originalAction){
+  hideOldSteps(modal,section,originalAction);
   for(let p=originalAction;p&&p!==modal;p=p.parentElement)
    p.classList.remove('kt133-legacy-intro-hidden');
   originalAction.hidden=false;
@@ -402,6 +404,13 @@ function reconcile(){
    }
   }
   document.querySelectorAll('#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="13"],#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="14"]').forEach(el=>el.remove());
+  // №16 is an active panel, not a provisional candidate. Remove only its
+  // outdated presentation badge, never the catalog item or case state.
+  document.querySelectorAll('#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="16"] .kt123-panel-mark').forEach(el=>el.remove());
+  document.querySelectorAll('#groups article.card').forEach(card=>{
+   if(/№\s*0?16\b/u.test(card.querySelector('.kind')?.textContent||''))
+    card.querySelectorAll('.kt123-panel-mark').forEach(el=>el.remove());
+  });
   document.querySelectorAll('h1,h2,h3,h4').forEach(enhance);
  }finally{running=false}
 }
