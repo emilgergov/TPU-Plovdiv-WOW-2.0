@@ -88,7 +88,8 @@ check('panel 01 and 07 old three-button tabs identified by original DOM ID',()=>
  assert.ok(enhance.indexOf("add(actions,'button','kt133-approved-launch'")<
     enhance.lastIndexOf('hideOldSteps(modal,section,originalAction)'),'Launch must exist before tab restoration listener');
 
- assert.match(visualCss,/#tabs\.kt133-old-entry-tabs-hidden\{display:none!important\}/);
+ assert.match(visualCss,/#overlay \\.dialog #tabs\\.kt133-old-entry-tabs-hidden/);
+ assert.match(shell,/#overlay \\.dialog \\.tabs\\{display:grid!important/);
  assert.match(section,/tabs\.classList\.add\('kt133-old-entry-tabs-hidden'\)/);
  assert.match(section,/tabs\.classList\.remove\('kt133-old-entry-tabs-hidden'\)/);
 });
