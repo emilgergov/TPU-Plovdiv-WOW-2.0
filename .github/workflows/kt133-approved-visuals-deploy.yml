@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/kt133-approved-visuals-deploy.yml'
   workflow_dispatch:
-# KT133 global approved cleanup: structural legacy cards, panel16 badge CSS, preserve Stage5 panel17 and worker actions.
+# KT133 repair: panel07 legacy triplet follows launch button; safe structural cleanup and case-form guard.
 permissions:
   contents: read
 concurrency:
