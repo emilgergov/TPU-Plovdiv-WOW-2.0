@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/kt133-approved-visuals-deploy.yml'
   workflow_dispatch:
-# KT133: CSS specificity fix against KT123 important grid for old three-tab entrance; preserve original work action.
+# KT133: validated CSS specificity regression guard; hide only tagged legacy tabs, preserve work controls.
 permissions:
   contents: read
 concurrency:
