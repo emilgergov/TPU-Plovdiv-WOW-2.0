@@ -78,7 +78,7 @@ check('panel 01 and 07 old three-button tabs identified by original DOM ID',()=>
  assert.match(baseline,/tabs\.replaceChildren\(\)/);
  assert.match(baseline,/requirements\(c\)\.forEach/);
  const section=visual.slice(visual.indexOf('function hideOldSteps('),visual.indexOf('function enhance(heading)'));
- assert.match(section,/modal\.querySelector\('#tabs'\)/);
+ assert.match(section,/modal\.querySelector\('#tabs'\)\|\|document\.getElementById\('tabs'\)/);
  assert.match(section,/tabs\.children\.length!==3/);
  assert.match(section,/\.every\(el=>el\.matches\('button'\)\)/);
  assert.match(section,/kt133-old-entry-tabs-hidden/);
@@ -89,6 +89,8 @@ check('panel 01 and 07 old three-button tabs identified by original DOM ID',()=>
     enhance.lastIndexOf('hideOldSteps(modal,section,originalAction)'),'Launch must exist before tab restoration listener');
 
  assert.match(visualCss,/#tabs\.kt133-old-entry-tabs-hidden\{display:none!important\}/);
+ assert.match(section,/tabs\.classList\.add\('kt133-old-entry-tabs-hidden'\)/);
+ assert.match(section,/tabs\.classList\.remove\('kt133-old-entry-tabs-hidden'\)/);
 });
 check('work-panel actions and dossier handling preserved in source',()=>{
  assert.match(visual,/originalAction\.click\(\)/);
