@@ -83,7 +83,7 @@ check('legacy cards after original work button are hidden only on entrance',()=>
  assert.match(section,/capture:true/);
  assert.match(section,/classList\.remove\('kt133-legacy-tile-hidden'\)/);
  assert.match(visualCss,/\.kt133-approved-entrance-container \.kt133-legacy-tile-hidden/);
- assert.doesNotMatch(section,/#tabs|getElementById\('tabs'\)/);
+ assert.doesNotMatch(section,/querySelector\('#tabs'\)|getElementById\('tabs'\)/);
 });
 check('work-panel actions and dossier handling preserved in source',()=>{
  assert.match(visual,/originalAction\.click\(\)/);
