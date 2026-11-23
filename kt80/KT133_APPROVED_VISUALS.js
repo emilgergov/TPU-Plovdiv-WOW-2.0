@@ -303,38 +303,41 @@ function findLegacyIntro(modal){
    t.length<320 && !el.querySelector('button,a,[role="button"]');
  });
 }
-function hideOldSteps(modal,entrance,originalAction){
- // The authenticated KT133 route shell renders a THREE-CARD legacy summary
- // AFTER its original work button (the old static #tabs is a different view).
- // Identify the actual legacy summary by its structure and DOM order.
- if(!modal||!entrance||!originalAction)return;
- const follows=(a,b)=>Boolean(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING);
- const controls='button,input,select,textarea,a,[contenteditable],[role="button"]';
- const candidates=[...modal.querySelectorAll('div,section,ul')].filter(row=>{
-  if(row===modal||row.contains(entrance)||row.contains(originalAction)||
-    row.closest('.kt133-approved-real-entrance')||
-    !follows(originalAction,row)||
-    row.querySelector(controls))return false;
-  const kids=[...row.children];
-  if(kids.length!==3||kids.some(k=>!k.matches('div,section,article,li')))return false;
-  return kids.every(k=>{
-   const t=(k.textContent||'').trim();
-   return t.length>=5&&t.length<180&&
-     !k.querySelector(controls)&&k.children.length<=4;
-  });
- });
- // Prefer the nearest old three-column row after the original button.
- const rows=candidates.filter(row=>!candidates.some(other=>other!==row&&row.contains(other)));
- const row=rows.find(el=>el.getBoundingClientRect().width>300)||rows[0];
- if(row){
-  row.classList.add('kt133-legacy-tile-hidden');
-  const launch=entrance.querySelector('.kt133-approved-launch');
-  if(launch&&!launch.dataset.kt133RestoreCards){
-   launch.dataset.kt133RestoreCards='1';
-   launch.addEventListener('click',()=>row.classList.remove('kt133-legacy-tile-hidden'),{capture:true});
+function hideOldSteps(modal,entrance,originalAction,heading){
+ // Approved entry mode: retain the heading, the back control, the complete
+ // accepted entrance and the original action (for delegation). Hide the
+ // historic entrance presentation AS A WHOLE, not by label or tile structure.
+ // Work containers and their controls remain mounted; restore everything
+ // synchronously before triggering the original application action.
+ if(!modal||!entrance||!originalAction||!heading)return;
+ const keep=[entrance,heading,originalAction];
+ for(const b of modal.querySelectorAll('button,a,[role="button"]')){
+  if(/Към панелите/u.test(b.textContent||''))keep.push(b);
+ }
+ const hidden=[];
+ function walk(parent){
+  for(const child of [...parent.children]){
+   if(child===entrance||child===heading||child===originalAction||
+      keep.includes(child))continue;
+   const needed=keep.some(node=>child.contains(node));
+   if(needed)walk(child);
+   else if(!child.classList.contains('kt133-approved-real-entrance')){
+    child.classList.add('kt133-legacy-entry-suppressed');
+    hidden.push(child);
+   }
   }
  }
+ walk(modal);
+ const launch=entrance.querySelector('.kt133-approved-launch');
+ if(launch&&!launch.dataset.kt133LegacyRestore){
+  launch.dataset.kt133LegacyRestore='1';
+  launch.addEventListener('click',()=>{
+   hidden.forEach(node=>node.classList.remove('kt133-legacy-entry-suppressed'));
+   modal.classList.remove('kt133-approved-entrance-container');
+  },{capture:true});
+ }
 }
+
 function enhance(heading){
  const idMatch=(heading.textContent||'').match(/^Панел\s*№\s*0?(\d{1,2})\s*[·:—-]/u);
  if(!idMatch)return;
@@ -393,7 +396,7 @@ function enhance(heading){
    });
   }
   // The approved launch button must exist before wiring tab restoration.
-  hideOldSteps(modal,section,originalAction);
+  hideOldSteps(modal,section,originalAction,heading);
  }
  modal.classList.add('kt133-approved-entrance-container');
 }
@@ -415,6 +418,20 @@ function reconcile(){
    }
   }
   document.querySelectorAll('#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="13"],#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="14"]').forEach(el=>el.remove());
+  // Canonical approved administrative names, display only. Preserve the
+  // underlying stage IDs, navigation and case data untouched.
+  const approvedStages=[
+   'Внасяне и анализ на преписката',
+   'Предмет и обхват на ИП',
+   'Имоти и пространствен анализ на ИП',
+   'Нормативна и процедурна преценка на ИП',
+   'Определяне на процедурата по ИП'
+  ];
+  for(let i=1;i<=5;i++){
+   const tile=document.querySelector('#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="'+i+'"]');
+   const name=tile?.querySelector('.kt80-dashboard-tile-text');
+   if(name&&name.textContent!==approvedStages[i-1])name.textContent=approvedStages[i-1];
+  }
   // №16 review badge is hidden by CSS only to avoid competing observers.
   document.querySelectorAll('h1,h2,h3,h4').forEach(enhance);
  }finally{running=false}
