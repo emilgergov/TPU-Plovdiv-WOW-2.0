@@ -304,28 +304,22 @@ function findLegacyIntro(modal){
  });
 }
 function hideOldSteps(modal,entrance,originalAction){
- // The legacy three-card summary may occur BEFORE OR AFTER the original
- // launcher (panel 07 places it after). Match the structure, never card text.
- // Never match the approved flow, launcher wrapper, or a working form.
- if(!entrance||!originalAction)return;
- const rows=[...modal.querySelectorAll('div,section,ul')].filter(row=>{
-  if(row===modal||row.contains(entrance)||row.contains(originalAction)||
-    row.closest('.kt133-approved-real-entrance')||
-    row.closest('form,[data-case-id],[data-dossier-id]'))return false;
-  if(row.querySelector('button,a,input,textarea,select,[role="button"],[contenteditable]'))return false;
-  // Keep interactive case screens completely outside visual-only cleanup.
-  if(row.closest('[data-kt80-view="work"],[data-view="work"],.kt133-work-container'))return false;
-  const cards=[...row.children];
-  if(cards.length!==3||cards.some(card=>!card.matches('div,span,li,article,section')))return false;
-  const labels=cards.map(card=>(card.textContent||'').trim());
-  return labels.every(label=>label.length>=4&&label.length<=160) &&
-    labels.join(' ').length<=450 && cards.every(card=>
-     !card.querySelector('button,a,input,textarea,select,[role="button"],[contenteditable]'));
- });
- // If the structure is ambiguous, preserve it rather than conceal a work area.
- const leaves=rows.filter(row=>!rows.some(other=>other!==row&&row.contains(other)));
- if(leaves.length===1)leaves[0].classList.add('kt133-legacy-tile-hidden');
+ // Exact original KT133 legacy three-button tab row from #overlay #tabs.
+ // The row belongs to the historical entry view, not the accepted five-step
+ // entrance. Its buttons stay mounted and retain their click handlers.
+ if(!modal||!entrance||!originalAction)return;
+ const tabs=modal.querySelector('#tabs');
+ if(!tabs||tabs.children.length!==3||
+    ![...tabs.children].every(el=>el.matches('button')))return;
+ tabs.classList.add('kt133-old-entry-tabs-hidden');
+ // Restore navigation BEFORE invoking the untouched original work-panel action.
+ const launch=entrance.querySelector('.kt133-approved-launch');
+ if(launch&&!launch.dataset.kt133TabsRestore){
+  launch.dataset.kt133TabsRestore='1';
+  launch.addEventListener('click',()=>tabs.classList.remove('kt133-old-entry-tabs-hidden'),{capture:true});
+ }
 }
+
 function enhance(heading){
  const idMatch=(heading.textContent||'').match(/^Панел\s*№\s*0?(\d{1,2})\s*[·:—-]/u);
  if(!idMatch)return;
