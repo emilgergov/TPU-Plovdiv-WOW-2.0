@@ -312,3 +312,6 @@
 /* KT133 accepted visual cleanup: duplicates only; original actions stay mounted. */
 .kt133-approved-entrance-container .kt133-legacy-tile-hidden,
 .kt133-approved-entrance-container .kt133-legacy-action-duplicate{display:none!important}
+
+/* №16 is an active specialized panel. Suppress only obsolete 'ЗА ПРОВЕРКА' badge. */
+#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="16"] .kt123-panel-mark{display:none!important}
