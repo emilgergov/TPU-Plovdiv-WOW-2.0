@@ -322,3 +322,39 @@
    Only the tagged old entrance navigation is hidden; never the work view. */
 #overlay .dialog #tabs.kt133-old-entry-tabs-hidden,
 .kt133-approved-entrance-container #tabs.kt133-old-entry-tabs-hidden{display:none!important}
+
+/* KT133 accepted clean entrance: only old presentation is temporarily hidden.
+   Original controls stay mounted and are restored on the working-panel action. */
+.kt133-approved-entrance-container .kt133-legacy-entry-suppressed{display:none!important}
+
+/* Canonical administrative stage typography: reserve a separate right-hand
+   column for each gold icon to prevent icon/title collisions at desktop widths. */
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt80-dashboard-tile-text{
+  box-sizing:border-box!important;
+  width:calc(100% - 65px)!important;
+  max-width:calc(100% - 65px)!important;
+  padding:9px 0 0!important;
+  margin:0!important;
+  font:750 clamp(14px,1vw,17px)/1.38 Verdana,Arial,sans-serif!important;
+  overflow-wrap:break-word!important;
+  hyphens:none!important;
+  align-self:flex-start!important;
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt80-dashboard-tile-number{
+  width:calc(100% - 65px)!important;
+  font:800 13px/1.35 Verdana,Arial,sans-serif!important;
+}
+#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt134-stage-emblem{
+  top:12px!important;right:12px!important;
+  width:48px!important;height:48px!important;
+  pointer-events:none!important;
+}
+@media(max-width:850px){
+  #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt80-dashboard-tile-text{
+    width:calc(100% - 54px)!important;max-width:calc(100% - 54px)!important;
+    font-size:14px!important;
+  }
+  #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"] .kt134-stage-emblem{
+    width:40px!important;height:40px!important;
+  }
+}
