@@ -404,13 +404,7 @@ function reconcile(){
    }
   }
   document.querySelectorAll('#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="13"],#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="14"]').forEach(el=>el.remove());
-  // №16 is an active panel, not a provisional candidate. Remove only its
-  // outdated presentation badge, never the catalog item or case state.
-  document.querySelectorAll('#kt80DashboardRoutes .kt80-dashboard-tile[data-kt80-index="16"] .kt123-panel-mark').forEach(el=>el.remove());
-  document.querySelectorAll('#groups article.card').forEach(card=>{
-   if(/№\s*0?16\b/u.test(card.querySelector('.kind')?.textContent||''))
-    card.querySelectorAll('.kt123-panel-mark').forEach(el=>el.remove());
-  });
+  // №16 review badge is hidden by CSS only to avoid competing observers.
   document.querySelectorAll('h1,h2,h3,h4').forEach(enhance);
  }finally{running=false}
 }
