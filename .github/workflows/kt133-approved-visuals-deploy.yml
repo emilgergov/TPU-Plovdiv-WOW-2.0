@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/kt133-approved-visuals-deploy.yml'
   workflow_dispatch:
-# KT133: validated CSS specificity regression guard; hide only tagged legacy tabs, preserve work controls.
+# KT133: target legacy three-card row AFTER original action; retain original case screen and all handlers.
 permissions:
   contents: read
 concurrency:
