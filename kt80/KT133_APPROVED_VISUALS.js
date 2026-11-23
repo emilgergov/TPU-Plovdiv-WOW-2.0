@@ -358,7 +358,6 @@ function enhance(heading){
  const originalAction=[...modal.querySelectorAll('button')].find(b=>
   (b.textContent||'').includes('Отвори работния панел'));
  if(originalAction){
-  hideOldSteps(modal,section,originalAction);
   for(let p=originalAction;p&&p!==modal;p=p.parentElement)
    p.classList.remove('kt133-legacy-intro-hidden');
   originalAction.hidden=false;
@@ -378,6 +377,8 @@ function enhance(heading){
     if(originalAction.isConnected && !originalAction.disabled)originalAction.click();
    });
   }
+  // The approved launch button must exist before wiring tab restoration.
+  hideOldSteps(modal,section,originalAction);
  }
  modal.classList.add('kt133-approved-entrance-container');
 }
