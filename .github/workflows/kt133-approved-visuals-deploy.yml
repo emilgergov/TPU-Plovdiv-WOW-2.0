@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/kt133-approved-visuals-deploy.yml'
   workflow_dispatch:
-# KT133: retest three-card row after launcher with corrected test assertion; retain protected case actions.
+# KT133: accepted entrance-only presentation isolation and canonical five-stage titles; preserve protected work actions.
 permissions:
   contents: read
 concurrency:
