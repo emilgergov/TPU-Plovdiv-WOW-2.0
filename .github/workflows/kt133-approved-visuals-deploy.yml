@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/kt133-approved-visuals-deploy.yml'
   workflow_dispatch:
-# KT133: target legacy three-card row AFTER original action; retain original case screen and all handlers.
+# KT133: retest three-card row after launcher with corrected test assertion; retain protected case actions.
 permissions:
   contents: read
 concurrency:
