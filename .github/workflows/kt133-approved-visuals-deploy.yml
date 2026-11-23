@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/kt133-approved-visuals-deploy.yml'
   workflow_dispatch:
-# KT133 repair: panel07 legacy triplet follows launch button; safe structural cleanup and case-form guard.
+# KT133 exact-source fix: hide original three-button #tabs only in approved entrance; restore before original work action.
 permissions:
   contents: read
 concurrency:
