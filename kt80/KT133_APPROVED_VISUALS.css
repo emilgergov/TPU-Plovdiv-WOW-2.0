@@ -318,4 +318,4 @@
 
 /* KT133: suppress exactly the old three-tab entrance row while the approved
    five-step entrance is shown. JS restores it before original work-panel click. */
-.kt133-approved-entrance-container #tabs.kt133-old-entry-tabs-hidden{display:none!important}
+#tabs.kt133-old-entry-tabs-hidden{display:none!important}
