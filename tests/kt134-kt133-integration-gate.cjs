@@ -73,25 +73,17 @@ check('all 19 active non-GIS panel entrances use accepted five-step flow',()=>{
  const expected=Array.from({length:22},(_,i)=>i+1).filter(id=>![13,14,15].includes(id));
  assert.deepEqual(ids,expected);
 });
-check('panel 01 and 07 old three-button tabs identified by original DOM ID',()=>{
- assert.match(baseline,/class="tabs" id="tabs"/);
- assert.match(baseline,/tabs\.replaceChildren\(\)/);
- assert.match(baseline,/requirements\(c\)\.forEach/);
+check('legacy cards after original work button are hidden only on entrance',()=>{
  const section=visual.slice(visual.indexOf('function hideOldSteps('),visual.indexOf('function enhance(heading)'));
- assert.match(section,/modal\.querySelector\('#tabs'\)\|\|document\.getElementById\('tabs'\)/);
- assert.match(section,/tabs\.children\.length!==3/);
- assert.match(section,/\.every\(el=>el\.matches\('button'\)\)/);
- assert.match(section,/kt133-old-entry-tabs-hidden/);
- assert.match(section,/tabs\.classList\.remove\('kt133-old-entry-tabs-hidden'\)/);
+ assert.match(section,/follows\(originalAction,row\)/);
+ assert.match(section,/kids\.length!==3/);
+ assert.match(section,/row\.contains\(originalAction\)/);
+ assert.match(section,/row\.querySelector\(controls\)/);
+ assert.match(section,/kt133-legacy-tile-hidden/);
  assert.match(section,/capture:true/);
- const enhance=visual.slice(visual.indexOf('function enhance(heading)'),visual.indexOf('let running=false'));
- assert.ok(enhance.indexOf("add(actions,'button','kt133-approved-launch'")<
-    enhance.lastIndexOf('hideOldSteps(modal,section,originalAction)'),'Launch must exist before tab restoration listener');
-
- assert.match(visualCss,/#overlay \.dialog #tabs\.kt133-old-entry-tabs-hidden/);
- assert.match(shell,/#overlay \.dialog \.tabs\{display:grid!important/);
- assert.match(section,/tabs\.classList\.add\('kt133-old-entry-tabs-hidden'\)/);
- assert.match(section,/tabs\.classList\.remove\('kt133-old-entry-tabs-hidden'\)/);
+ assert.match(section,/classList\.remove\('kt133-legacy-tile-hidden'\)/);
+ assert.match(visualCss,/\.kt133-approved-entrance-container \.kt133-legacy-tile-hidden/);
+ assert.doesNotMatch(section,/#tabs|getElementById\('tabs'\)/);
 });
 check('work-panel actions and dossier handling preserved in source',()=>{
  assert.match(visual,/originalAction\.click\(\)/);
