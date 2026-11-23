@@ -63,5 +63,31 @@ check('presentation overlay does not replace authenticated case registry',()=>{
  assert.doesNotMatch(candidate,/Преписки в панела/);
  assert.match(stage5,/kt132AddressedPanel/);
 });
+// KT133 current published visual overlay — structural regression guards.
+const visual=read('kt80/KT133_APPROVED_VISUALS.js');
+const visualCss=read('kt80/KT133_APPROVED_VISUALS.css');
+check('all 19 active non-GIS panel entrances use accepted five-step flow',()=>{
+ const section=visual.slice(visual.indexOf('const catalog='),visual.indexOf('window.KT133ApprovedFlowCatalog=catalog'));
+ const ids=[...section.matchAll(/\n\s*(\d{1,2}):\{flow:/g)].map(m=>Number(m[1]));
+ ids.push(2);ids.sort((a,b)=>a-b);
+ const expected=Array.from({length:22},(_,i)=>i+1).filter(id=>![13,14,15].includes(id));
+ assert.deepEqual(ids,expected);
+});
+check('legacy entry cleanup is structural and preserves working actions',()=>{
+ const section=visual.slice(visual.indexOf('function hideOldSteps('),visual.indexOf('function enhance(heading)'));
+ assert.match(section,/cards\.length!==3/);
+ assert.match(section,/!row\.contains\(originalAction\)/);
+ assert.match(section,/!before\(row,originalAction\)/);
+ assert.doesNotMatch(section,/Постъпила документация|Проверка за липси|Искане за допълнителна информация/);
+ assert.match(visual,/originalAction\.click\(\)/);
+ assert.doesNotMatch(visual,/originalAction\.remove\(\)/);
+ assert.match(visualCss,/\.kt133-approved-entrance-container \.kt133-legacy-tile-hidden/);
+});
+check('legacy badge on panel 16 is visual-only; Stage5 addressed panel 17 remains',()=>{
+ assert.match(visual,/data-kt80-index="16".*\.kt123-panel-mark/);
+ assert.match(visualCss,/data-kt80-index="16".*\.kt123-panel-mark/);
+ assert.match(stage5,/addressedPanels=new Set\(\[1,17\]\)/);
+ assert.match(visual,/if\(\[13,14,15\]\.includes\(id\)\)return/);
+});
 console.log('KT134/KT133 code-based regression gate:',pass+'/'+pass);
 console.log('LIMITATION: protected login, case registry, D1 and authenticated E1-E5 -> 17 must be verified on a separate Cloudflare test Worker.');
