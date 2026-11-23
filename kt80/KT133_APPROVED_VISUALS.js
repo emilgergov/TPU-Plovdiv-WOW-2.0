@@ -304,16 +304,17 @@ function findLegacyIntro(modal){
  });
 }
 function hideOldSteps(modal,entrance,originalAction){
- // A visual-only structural check: the old introduction consists of exactly
- // three compact, noninteractive cards before its original action. Do not
- // depend on the wording of their captions (which varies across panels).
+ // The legacy three-card summary may occur BEFORE OR AFTER the original
+ // launcher (panel 07 places it after). Match the structure, never card text.
+ // Never match the approved flow, launcher wrapper, or a working form.
  if(!entrance||!originalAction)return;
- const before=(a,b)=>Boolean(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING);
  const rows=[...modal.querySelectorAll('div,section,ul')].filter(row=>{
   if(row===modal||row.contains(entrance)||row.contains(originalAction)||
-    row.closest('.kt133-approved-real-entrance')||!before(entrance,row)||
-    !before(row,originalAction))return false;
+    row.closest('.kt133-approved-real-entrance')||
+    row.closest('form,[data-case-id],[data-dossier-id]'))return false;
   if(row.querySelector('button,a,input,textarea,select,[role="button"],[contenteditable]'))return false;
+  // Keep interactive case screens completely outside visual-only cleanup.
+  if(row.closest('[data-kt80-view="work"],[data-view="work"],.kt133-work-container'))return false;
   const cards=[...row.children];
   if(cards.length!==3||cards.some(card=>!card.matches('div,span,li,article,section')))return false;
   const labels=cards.map(card=>(card.textContent||'').trim());
