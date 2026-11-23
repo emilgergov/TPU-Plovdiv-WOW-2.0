@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/kt133-approved-visuals-deploy.yml'
   workflow_dispatch:
-# KT133 restore work-panel action via delegate into original protected button; regression checks + rollback.
+# KT133 accepted cleanup: hide only legacy entrance duplicates; keep panel 17, Stage5 handoff and all case operations.
 permissions:
   contents: read
 concurrency:
