@@ -318,4 +318,7 @@
 
 /* KT133: suppress exactly the old three-tab entrance row while the approved
    five-step entrance is shown. JS restores it before original work-panel click. */
-#tabs.kt133-old-entry-tabs-hidden{display:none!important}
+/* Higher specificity than KT123: #overlay .dialog .tabs{display:grid!important}.
+   Only the tagged old entrance navigation is hidden; never the work view. */
+#overlay .dialog #tabs.kt133-old-entry-tabs-hidden,
+.kt133-approved-entrance-container #tabs.kt133-old-entry-tabs-hidden{display:none!important}
