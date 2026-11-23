@@ -422,10 +422,10 @@ function reconcile(){
   // underlying stage IDs, navigation and case data untouched.
   const approvedStages=[
    'Внасяне и анализ на преписката',
-   'Предмет и обхват на ИП',
-   'Имоти и пространствен анализ на ИП',
-   'Нормативна и процедурна преценка на ИП',
-   'Определяне на процедурата по ИП'
+   'Предмет и обхват',
+   'Имоти и пространствен анализ',
+   'Нормативна и процедурна преценка',
+   'Определяне на процедурата'
   ];
   for(let i=1;i<=5;i++){
    const tile=document.querySelector('#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="'+i+'"]');
