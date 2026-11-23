@@ -73,17 +73,24 @@ check('all 19 active non-GIS panel entrances use accepted five-step flow',()=>{
  const expected=Array.from({length:22},(_,i)=>i+1).filter(id=>![13,14,15].includes(id));
  assert.deepEqual(ids,expected);
 });
-check('legacy cards after original work button are hidden only on entrance',()=>{
+check('approved input hides complete legacy presentation and restores it on work action',()=>{
  const section=visual.slice(visual.indexOf('function hideOldSteps('),visual.indexOf('function enhance(heading)'));
- assert.match(section,/follows\(originalAction,row\)/);
- assert.match(section,/kids\.length!==3/);
- assert.match(section,/row\.contains\(originalAction\)/);
- assert.match(section,/row\.querySelector\(controls\)/);
- assert.match(section,/kt133-legacy-tile-hidden/);
+ assert.match(section,/const keep=\[entrance,heading,originalAction\]/);
+ assert.match(section,/Към панелите/);
+ assert.match(section,/function walk\(parent\)/);
+ assert.match(section,/child\.classList\.add\('kt133-legacy-entry-suppressed'\)/);
+ assert.match(section,/hidden\.forEach\(node=>node\.classList\.remove\('kt133-legacy-entry-suppressed'\)\)/);
+ assert.match(section,/modal\.classList\.remove\('kt133-approved-entrance-container'\)/);
  assert.match(section,/capture:true/);
- assert.match(section,/classList\.remove\('kt133-legacy-tile-hidden'\)/);
- assert.match(visualCss,/\.kt133-approved-entrance-container \.kt133-legacy-tile-hidden/);
- assert.doesNotMatch(section,/querySelector\('#tabs'\)|getElementById\('tabs'\)/);
+ assert.match(visualCss,/\.kt133-approved-entrance-container \.kt133-legacy-entry-suppressed\{display:none!important\}/);
+ assert.doesNotMatch(section,/textContent\.includes\('Проверка за липси'\)/);
+});
+check('five accepted administrative stage labels and visual clearance remain stable',()=>{
+ for(const name of ['Внасяне и анализ на преписката','Предмет и обхват на ИП',
+  'Имоти и пространствен анализ на ИП','Нормативна и процедурна преценка на ИП',
+  'Определяне на процедурата по ИП'])assert.ok(visual.includes(name),'Missing approved stage name '+name);
+ assert.match(visualCss,/width:calc\(100% - 65px\)!important/);
+ assert.match(visualCss,/\.kt134-stage-emblem\{/);
 });
 check('work-panel actions and dossier handling preserved in source',()=>{
  assert.match(visual,/originalAction\.click\(\)/);
