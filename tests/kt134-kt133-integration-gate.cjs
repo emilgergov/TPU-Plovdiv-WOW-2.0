@@ -84,6 +84,10 @@ check('panel 01 and 07 old three-button tabs identified by original DOM ID',()=>
  assert.match(section,/kt133-old-entry-tabs-hidden/);
  assert.match(section,/tabs\.classList\.remove\('kt133-old-entry-tabs-hidden'\)/);
  assert.match(section,/capture:true/);
+ const enhance=visual.slice(visual.indexOf('function enhance(heading)'),visual.indexOf('let running=false'));
+ assert.ok(enhance.indexOf("add(actions,'button','kt133-approved-launch'")<
+    enhance.lastIndexOf('hideOldSteps(modal,section,originalAction)'),'Launch must exist before tab restoration listener');
+
  assert.match(visualCss,/#tabs\.kt133-old-entry-tabs-hidden\{display:none!important\}/);
 });
 check('work-panel actions and dossier handling preserved in source',()=>{
