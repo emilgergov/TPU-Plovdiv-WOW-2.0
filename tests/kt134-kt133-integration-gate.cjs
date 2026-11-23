@@ -85,11 +85,16 @@ check('approved input hides complete legacy presentation and restores it on work
  assert.match(visualCss,/\.kt133-approved-entrance-container \.kt133-legacy-entry-suppressed\{display:none!important\}/);
  assert.doesNotMatch(section,/textContent\.includes\('Проверка за липси'\)/);
 });
-check('five accepted administrative stage labels and visual clearance remain stable',()=>{
- for(const name of ['Внасяне и анализ на преписката','Предмет и обхват на ИП',
-  'Имоти и пространствен анализ на ИП','Нормативна и процедурна преценка на ИП',
-  'Определяне на процедурата по ИП'])assert.ok(visual.includes(name),'Missing approved stage name '+name);
- assert.match(visualCss,/width:calc\(100% - 65px\)!important/);
+check('approved five concise titles and larger separate typography',()=>{
+ const expected=['Внасяне и анализ на преписката','Предмет и обхват',
+  'Имоти и пространствен анализ','Нормативна и процедурна преценка',
+  'Определяне на процедурата'];
+ const match=visual.match(/const approvedStages=\[([\s\S]*?)\];/);
+ assert.ok(match);
+ const actual=[...match[1].matchAll(/'([^']+)'/g)].map(m=>m[1]);
+ assert.deepEqual(actual,expected);
+ assert.match(visualCss,/font:750 clamp\(18px,1\.35vw,21px\)/);
+ assert.match(visualCss,/padding:43px 0 0!important/);
  assert.match(visualCss,/\.kt134-stage-emblem\{/);
 });
 check('work-panel actions and dossier handling preserved in source',()=>{
