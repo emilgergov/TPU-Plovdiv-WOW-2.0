@@ -308,7 +308,9 @@ function hideOldSteps(modal,entrance,originalAction){
  // The row belongs to the historical entry view, not the accepted five-step
  // entrance. Its buttons stay mounted and retain their click handlers.
  if(!modal||!entrance||!originalAction)return;
- const tabs=modal.querySelector('#tabs');
+ // Original inline page owns #tabs outside the authenticated modal in
+ // some routes. Locate its unique document-level element as fallback.
+ const tabs=modal.querySelector('#tabs')||document.getElementById('tabs');
  if(!tabs||tabs.children.length!==3||
     ![...tabs.children].every(el=>el.matches('button')))return;
  tabs.classList.add('kt133-old-entry-tabs-hidden');
