@@ -304,14 +304,24 @@ function findLegacyIntro(modal){
  });
 }
 function hideOldSteps(modal){
- const blocks=[...modal.querySelectorAll('div,section,ul')].filter(el=>{
-  const t=el.textContent||'';
-  return t.length<900 && t.includes('Постъпила документация') &&
-   t.includes('Проверка за липси') && t.includes('Искане за допълнителна информация') &&
-   !t.includes('Отвори работния панел') &&
-   !el.querySelector('button,a,[role="button"]');
- });
- if(blocks.length)blocks.sort((a,b)=>a.textContent.length-b.textContent.length)[0].classList.add('kt133-legacy-intro-hidden');
+ // Retire ONLY the three descriptive legacy tiles. Keep all working containers.
+ const labels=['Постъпила документация','Проверка за липси','Искане за допълнителна информация'];
+ const candidates=[...modal.querySelectorAll('div,span,li,article,section')];
+ for(const label of labels){
+  const matches=candidates.filter(el=>{
+   if(el.closest('.kt133-approved-real-entrance'))return false;
+   const t=(el.textContent||'').trim();
+   return t===label && !el.querySelector('button,a,input,[role="button"]');
+  }).sort((a,b)=>a.querySelectorAll('*').length-b.querySelectorAll('*').length);
+  const el=matches[0];
+  if(!el)continue;
+  // Prefer the original standalone card; never hide any shared parent or action.
+  const card=el.parentElement;
+  if(card && card!==modal && card.querySelectorAll('button,a,input,[role="button"]').length===0 &&
+     (card.textContent||'').trim().length<180 && !labels.some(other=>other!==label&&(card.textContent||'').includes(other))){
+    card.classList.add('kt133-legacy-tile-hidden');
+  }else el.classList.add('kt133-legacy-tile-hidden');
+ }
 }
 function enhance(heading){
  const idMatch=(heading.textContent||'').match(/^Панел\s*№\s*0?(\d{1,2})\s*[·:—-]/u);
@@ -356,6 +366,9 @@ function enhance(heading){
    p.classList.remove('kt133-legacy-intro-hidden');
   originalAction.hidden=false;
   originalAction.removeAttribute('aria-hidden');
+  // Preserve the original action in the DOM for the approved delegate.
+  // Hide its duplicate presentation only while this entrance is displayed.
+  originalAction.classList.add('kt133-legacy-action-duplicate');
   // The accepted visual entrance is taller than the legacy dialog. Supply an
   // always-visible delegate without moving or replacing the original action,
   // preserving listeners attached to its original parent and authorization.
