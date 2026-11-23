@@ -73,17 +73,24 @@ check('all 19 active non-GIS panel entrances use accepted five-step flow',()=>{
  const expected=Array.from({length:22},(_,i)=>i+1).filter(id=>![13,14,15].includes(id));
  assert.deepEqual(ids,expected);
 });
-check('legacy entry cleanup is structural and preserves working actions',()=>{
+check('panel 01 and 07 old three-button tabs identified by original DOM ID',()=>{
+ assert.match(baseline,/class="tabs" id="tabs"/);
+ assert.match(baseline,/tabs\.replaceChildren\(\)/);
+ assert.match(baseline,/requirements\(c\)\.forEach/);
  const section=visual.slice(visual.indexOf('function hideOldSteps('),visual.indexOf('function enhance(heading)'));
- assert.match(section,/cards\.length!==3/);
- assert.match(section,/row\.contains\(originalAction\)/);
- assert.doesNotMatch(section,/before\(row,originalAction\)/);
- assert.match(section,/row\.contains\(originalAction\)/);
- assert.match(section,/row\.closest\('form,\[data-case-id\],\[data-dossier-id\]'\)/);
- assert.doesNotMatch(section,/Постъпила документация|Проверка за липси|Искане за допълнителна информация/);
+ assert.match(section,/modal\.querySelector\('#tabs'\)/);
+ assert.match(section,/tabs\.children\.length!==3/);
+ assert.match(section,/\.every\(el=>el\.matches\('button'\)\)/);
+ assert.match(section,/kt133-old-entry-tabs-hidden/);
+ assert.match(section,/tabs\.classList\.remove\('kt133-old-entry-tabs-hidden'\)/);
+ assert.match(section,/capture:true/);
+ assert.match(visualCss,/#tabs\.kt133-old-entry-tabs-hidden\{display:none!important\}/);
+});
+check('work-panel actions and dossier handling preserved in source',()=>{
  assert.match(visual,/originalAction\.click\(\)/);
  assert.doesNotMatch(visual,/originalAction\.remove\(\)/);
- assert.match(visualCss,/\.kt133-approved-entrance-container \.kt133-legacy-tile-hidden/);
+ assert.match(stage5,/addressedPanels=new Set\(\[1,17\]\)/);
+ assert.match(visual,/if\(\[13,14,15\]\.includes\(id\)\)return/);
 });
 check('legacy badge on panel 16 is visual-only; Stage5 addressed panel 17 remains',()=>{
  assert.doesNotMatch(visual,/data-kt80-index="16".*\.kt123-panel-mark.*\.remove\(\)/);
