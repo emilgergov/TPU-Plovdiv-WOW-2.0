@@ -1,3 +1,4 @@
+import {groupKT134DocumentVariants} from './kt134-document-variants.mjs';
 /**
  * KT134 ↔ KT125 local-auth compatibility port (isolated only).
  * The historic KT125 worker stores case_id as UUID; internal_number is a
@@ -54,9 +55,10 @@ export function createKT125LocalPorts({identity,caseContext,readState,unpackStat
    return closed({fileId,kind:str(d.kind)||'unknown',sourceText:str(d.text),
     evidenceRefs:closed([]),verification:'source_unverified'});
   });
+  const grouped=groupKT134DocumentVariants(documents);
   return closed({caseId,internalNumber:ctx.internalNumber,
    incomingNumber:str(ctx.externalNumber),version:String(ctx.revision),
-   revision:ctx.revision,documents:closed(documents)});
+   revision:ctx.revision,documents:grouped});
  }
  return closed({authenticateRequest,authorizeCase,readDossier});
 }
