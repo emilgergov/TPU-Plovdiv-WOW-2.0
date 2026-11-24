@@ -41,10 +41,12 @@ export function createAutoProcessor({registry, gateway, word, audit}) {
     procedure:txt(analysis.procedure), justification:txt(analysis.justification),
     documentDraft:txt(analysis.documentDraft), documentTitle:txt(analysis.documentTitle),
     proposedPanel:Number.isInteger(panelId)&&panelId>=1&&panelId<=22?panelId:null,
+    reviewerStatus:['internally_validated','reviewed_with_suggestions','proposal_with_concerns'].includes(analysis.reviewerStatus)?analysis.reviewerStatus:'not_completed',
     reviewNotes:frozen(Array.isArray(analysis.reviewNotes)?analysis.reviewNotes.map(txt):[]),
     uncertainties:frozen([
      ...(Array.isArray(analysis.uncertainties)?analysis.uncertainties.map(txt):[]),
-     ...(!Array.isArray(analysis.evidence)||analysis.evidence.length===0?['Няма приложени проверими доказателствени препратки']:[])]),
+     ...(!Array.isArray(analysis.evidence)||analysis.evidence.length===0?['Няма приложени проверими доказателствени препратки']:[]),
+     ...(!['internally_validated','reviewed_with_suggestions','proposal_with_concerns'].includes(analysis.reviewerStatus)?['Рецензентският контрол не е приключил']:[])]),
     evidence:frozen(Array.isArray(analysis.evidence)?analysis.evidence:[]),
     status:'awaiting_final_expert_approval',expertConfirmed:false
    });
