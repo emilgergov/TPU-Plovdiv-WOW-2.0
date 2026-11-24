@@ -66,9 +66,43 @@ jobs:
           console.log('Gateway binding types only:',JSON.stringify(count));
           NODE
           fi
-          if [ "$token_status" != 200 ] || [ "$settings_status" != 200 ]; then
-             echo "::error::Cloudflare GitHub secret cannot verify both required GET endpoints"
+          # Some restricted Cloudflare tokens can read a Worker without permission
+          # to call /user/tokens/verify. Do not mistake 401 here for invalidity.
+          if [ "$settings_status" != 200 ]; then
+             echo "::error::Cannot read protected Worker settings; current scope insufficient"
              exit 1
+          fi
+          if [ "$token_status" != 200 ]; then
+             echo "::notice::Token verification endpoint is unavailable; protected Worker settings GET succeeded"
+          fi
+          # Follow the proven single service binding and inspect ONLY safe
+          # binding TYPES on the backend. Never print the target service name,
+          # source, secret values, database ids, case records or raw API body.
+          node - "$RUNNER_TEMP/kt134-gateway.json" "$RUNNER_TEMP/kt134-service-target" <<'NODE'
+          const fs=require('node:fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          const services=(d.result?.bindings||[]).filter(x=>x.type==='service');
+          if(services.length!==1||typeof services[0].service!=='string'||
+             !/^[a-z0-9_-]{3,100}$/i.test(services[0].service))
+            throw Error('Expected one valid protected service binding');
+          fs.writeFileSync(process.argv[3],services[0].service,{mode:0o600});
+          console.log('One protected KT125 backend service discovered (name withheld)');
+          NODE
+          service="$(cat "$RUNNER_TEMP/kt134-service-target")"
+          backend_status=$(curl --silent --show-error --max-time 25 -o "$RUNNER_TEMP/kt134-backend-settings.json" -w '%{http_code}' \
+            -H "Authorization: Bearer $CF_TOKEN" \
+            -H 'Accept: application/json' \
+            "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/$service/settings")
+          echo "Protected backend settings GET HTTP: $backend_status"
+          if [ "$backend_status" = 200 ]; then
+            node - "$RUNNER_TEMP/kt134-backend-settings.json" <<'NODE'
+          const fs=require('node:fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          if(d.success!==true||!Array.isArray(d.result?.bindings))throw Error('Invalid protected backend response');
+          const summary={};
+          for(const b of d.result.bindings)summary[b.type]=(summary[b.type]||0)+1;
+          console.log('Protected backend binding TYPES only:',JSON.stringify(summary));
+          NODE
+          else
+            echo "::notice::Backend metadata not readable with current token; no protected data accessed"
           fi
           if [ -n "$CF_TEST_WORKER" ]; then
             if ! [[ "$CF_TEST_WORKER" =~ ^[a-zA-Z0-9_-]+$ ]] || [[ "$CF_TEST_WORKER" == "$CF_KT125_GATEWAY" ]] || [[ "$CF_TEST_WORKER" == "tpu-plovdiv-ai-author-v27" ]]; then
