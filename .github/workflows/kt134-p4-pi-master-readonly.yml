@@ -1,0 +1,45 @@
+name: KT134 P4 verified PI MASTER snapshot lookup (read-only)
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths:
+      - '.github/workflows/kt134-p4-pi-master-readonly.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  no-live-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify historical PI MASTER shard SHA and check P4 parcel without logging its ID
+        env:
+          # SHA256 of the cadastral ID, never the original dossier or identifier.
+          PARCEL_SHA256: 5da57f0fc2eaa803c4b7102f2f3fa9045dd2833c63d6ac75dd94a60ba8c4d18b
+        run: |
+          python3 - <<'PY'
+          import gzip,hashlib,json,pathlib
+          root=pathlib.Path('kt125-vt01/v26-test/gis-data/pi-master/browser-index')
+          manifest=json.loads((root/'manifest.json').read_text())
+          assert manifest['schema']=='kt77-pi-master-browser-v1'
+          assert manifest['status']=='VERIFIED'
+          assert manifest['total_unique_parcels']==917417
+          part=next(p for p in manifest['parts'] if p['file']=='pi-master-56.json.gz')
+          data=(root/part['file']).read_bytes()
+          assert hashlib.sha256(data).hexdigest()==part['sha256'],'PI MASTER SHA mismatch'
+          rows=json.loads(gzip.decompress(data))
+          assert len(rows)==part['records'],'PI MASTER shard record count mismatch'
+          found=[r for r in rows if hashlib.sha256(r['cadnum'].encode()).hexdigest()==__import__('os').environ['PARCEL_SHA256']]
+          assert len(found)==1,'Parcel not found uniquely in verified historical snapshot'
+          row=found[0]
+          assert row['cadnum'].startswith('56')
+          print('P4 PI MASTER historical snapshot:',json.dumps({
+            'status':'FOUND','snapshot_admin_as_of':manifest.get('admin_as_of'),
+            'manifest_verified':True,'shard_sha256_matches':True,
+            'area_m2':row.get('area_m2'),
+            'settlement':row.get('settlement'),'municipality':row.get('municipality'),
+            'province':row.get('province'),
+            'zz':row.get('zz'),'zt':row.get('zt'),
+            'important':'Historical PI MASTER lookup, NOT new live GIS intersection, not legal conclusion'
+          },ensure_ascii=False))
+          PY
