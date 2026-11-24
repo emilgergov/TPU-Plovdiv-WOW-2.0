@@ -17,7 +17,7 @@ function fixture({inactive=false,canConfirm=true,rev=4,atomicRows=1,
  const ports=createKT125LocalPorts({
   identity:async req=>{
    assert.equal(req,request);authCalls++;
-   if(inactive||(invalidateSessionBeforeCommit&&authCalls>7))return {verified:false};
+   if(inactive||(invalidateSessionBeforeCommit&&authCalls>=6))return {verified:false};
    return {verified:true,userId:'expert123',role:'expert'};
   },
   caseContext:async x=>{
@@ -80,4 +80,10 @@ test('wrong browser Word preview is rejected before atomic commit',async()=>{
 });
 test('cannot compose without authentic KT125 identity ports and private vault',()=>{
  assert.throws(()=>createKT134KT125SessionBoundApproval({request}),/сървърен порт/);
+});
+
+test('KT125 session expires before atomic commit: no administrative approval',async()=>{
+ const f=fixture({invalidateSessionBeforeCommit:true});
+ await assert.rejects(f.bridge.confirm(input),/локална KT125 сесия/);
+ assert.equal(f.steps.includes('atomic'),false);
 });
