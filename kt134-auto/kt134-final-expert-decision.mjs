@@ -6,7 +6,7 @@ export function createAutoExpertDecisions({verifySession,authorizeCase,loadPropo
  for(const [name,fn] of Object.entries({verifySession,authorizeCase,loadProposal,saveDecision,audit})){
   ensure(typeof fn==='function','Липсва защитена функция: '+name);
  }
- async function decide({session,caseId,proposalVersion,action,editedText}){
+ async function decide({session,caseId,proposalVersion,action,editedText,previewBindingSha256}){
   ensure(session?.active===true&&str(session.userId),'Липсва активна сесия');
   ensure(str(caseId)&&str(proposalVersion),'Липсва версия на предложението');
   ensure(['confirm','edit','manual_from_stage1'].includes(action),'Непознато експертно действие');
@@ -32,11 +32,19 @@ export function createAutoExpertDecisions({verifySession,authorizeCase,loadPropo
    // Final click confirms EXACT authoritative proposal version. It cannot be
    // silently updated by an AI response after user action.
    ensure(current.wordReady===true,'Липсва изготвен Word проект по одобрената бланка');
+   // If this proposal was created through the verified final-screen service,
+   // the expert's click must refer to that EXACT rendered DOCX/proposal binding.
+   if(current.bindingSha256){
+    ensure(/^[0-9a-f]{64}$/u.test(current.bindingSha256),'Невалидна проверка на документа');
+    ensure(previewBindingSha256===current.bindingSha256,
+     'Прегледът на документа е остарял или различен от Word проекта');
+   }
    ensure(current.documentText&&current.procedure&&current.documentTitle,
     'Липсва готово административно предложение');
    record={caseId,proposalVersion,userId:verified.userId,action,
     finalDocumentText:current.documentText,procedure:current.procedure,
     documentTitle:current.documentTitle,proposedPanel:current.proposedPanel,
+    bindingSha256:current.bindingSha256||null,
     status:'expert_approved',expertConfirmed:true};
   }
   // Host must atomically compare proposalVersion and persist the expert action.
