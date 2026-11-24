@@ -1,0 +1,25 @@
+name: KT134 isolated automatic-mode unit tests
+on:
+  push:
+    branches:
+      - kt134-auto-mode-isolated
+    paths:
+      - 'kt134-auto/**'
+      - '.github/workflows/kt134-auto-unit-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  no-production-side-effects:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Parse isolated modules
+        run: |
+          node --check kt134-auto/kt134-auto-contract.mjs
+          node --check kt134-auto/kt134-auto-processor.mjs
+      - name: Unit tests with synthetic dossiers only
+        run: node --test kt134-auto/*.test.mjs
