@@ -185,6 +185,61 @@ jobs:
           else
             echo "::notice::KT134_TEST_WORKER_NAME not configured; no test Worker access proven"
           fi
+      - name: Check isolated staging admission (READ ONLY, no deployment)
+        shell: bash
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+          KT134_WORKER: ${{ vars.KT134_TEST_WORKER_NAME }}
+          KT134_D1: ${{ vars.KT134_TEST_D1_ID }}
+          KT134_R2: ${{ vars.KT134_TEST_R2_BUCKET }}
+          KT134_R2_ATTESTED: ${{ vars.KT134_TEST_R2_ISOLATED }}
+        run: |
+          set -euo pipefail
+          gateway="kt133-tpu-plovdiv-kt125-local-auth"
+          test -n "$CF_TOKEN" || { echo "::error::Cloudflare read access unavailable"; exit 1; }
+          get_http() {
+            curl --silent --show-error --max-time 20 -o "$RUNNER_TEMP/kt134-availability.json" -w '%{http_code}' \
+              -H "Authorization: Bearer $CF_TOKEN" -H 'Accept: application/json' \
+              "https://api.cloudflare.com/client/v4/$1" || echo 000
+          }
+          wh=0; dh=0; rh=0
+          if [[ "$KT134_WORKER" =~ ^[a-zA-Z0-9_-]{3,100}$ ]]; then
+            wh=$(get_http "accounts/$CF_ACCOUNT/workers/scripts/$KT134_WORKER/settings")
+          fi
+          if [[ "$KT134_D1" =~ ^[0-9a-fA-F-]{36}$ ]]; then
+            dh=$(get_http "accounts/$CF_ACCOUNT/d1/database/$KT134_D1")
+          fi
+          if [[ "$KT134_R2" =~ ^[a-zA-Z0-9_-]{3,100}$ ]]; then
+            rh=$(get_http "accounts/$CF_ACCOUNT/r2/buckets/$KT134_R2")
+          fi
+          export KT134_WH="$wh" KT134_DH="$dh" KT134_RH="$rh"
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {assessKT134Staging} from './kt134-auto/kt134-staging-admission.mjs';
+          const gateway=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/kt134-gateway.json','utf8'));
+          const service=gateway.result?.bindings?.find(x=>x.type==='service')?.service||'';
+          const backend=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/kt134-backend-settings.json','utf8'));
+          const prodD1=backend.result?.bindings?.find(x=>x.type==='d1')?.id||'';
+          const result=assessKT134Staging({
+            testWorker:process.env.KT134_WORKER||'',
+            testD1:process.env.KT134_D1||'',
+            testR2:process.env.KT134_R2||'',
+            gatewayWorker:'kt133-tpu-plovdiv-kt125-local-auth',
+            backendWorker:service,backendD1:prodD1,
+            workerHttp:Number(process.env.KT134_WH),
+            d1Http:Number(process.env.KT134_DH),
+            r2Http:Number(process.env.KT134_RH),
+            r2IsolationAttested:process.env.KT134_R2_ATTESTED==='true'
+          });
+          console.log('KT134 isolated staging admission:',result.ready?'ELIGIBLE FOR SEPARATE SECURITY REVIEW':'BLOCKED');
+          for(const x of result.checks)
+            console.log((x.ok?'PASS':'BLOCK')+' '+x.id+' — '+x.note);
+          if(!result.ready)
+            console.log('No staging deployment: no production resources have been modified.');
+          else
+            console.log('Metadata-only gate passed; STILL NO deployment authorization.');
+          NODE
       - name: Safety checkpoint
         run: |
           echo 'Read-only check completed; no deployment or D1/R2 operations were performed.'
