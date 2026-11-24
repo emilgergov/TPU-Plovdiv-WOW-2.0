@@ -21,7 +21,7 @@ export function createKT134DraftVault({db,r2,authorizeCase,subtle=globalThis.cry
   need(await authorizeCase({userId,caseId,action}), 'Липсва разрешен достъп до преписката');
  }
  const computeHash=async bytes=>hex(new Uint8Array(await subtle.digest('SHA-256',bytes)));
- return Object.freeze({
+ const api={
   async saveDraft({userId,caseId,caseRevision,proposalVersion,proposal,wordBytes,presentation}={}){
    await authorized({userId,caseId,action:'case.edit'});
    need(Number.isSafeInteger(caseRevision)&&caseRevision>=0,'Невалидна ревизия');
@@ -54,6 +54,16 @@ export function createKT134DraftVault({db,r2,authorizeCase,subtle=globalThis.cry
    return Object.freeze({ok:true,caseId,caseRevision,proposalVersion,
     bindingSha256:presentation.bindingSha256,wordSha256:presentation.wordSha256});
   },
+  async loadCurrentDraft({userId,caseId,includeWord=false}={}){
+   await authorized({userId,caseId,action:includeWord?'document.generate':'case.edit'});
+   const row=await db.prepare(
+    "SELECT d.proposal_version FROM kt134_auto_drafts d " +
+    "JOIN kt126_registry r ON r.case_id=d.case_id AND r.revision=d.case_revision " +
+    "WHERE d.case_id=? AND d.status='awaiting_expert'"
+   ).bind(caseId).first();
+   need(row?.proposal_version,'Няма актуален неодобрен проект за преписката');
+   return api.loadDraft({userId,caseId,proposalVersion:row.proposal_version,includeWord});
+  },
   async loadDraft({userId,caseId,proposalVersion,includeWord=false}={}){
    await authorized({userId,caseId,action:includeWord?'document.generate':'case.edit'});
    need(txt(proposalVersion),'Липсва версия');
@@ -77,5 +87,6 @@ export function createKT134DraftVault({db,r2,authorizeCase,subtle=globalThis.cry
    need((await computeHash(bytes))===row.word_sha256,'Архивираният Word е повреден');
    return Object.freeze({...meta,wordBytes:bytes});
   }
- });
+ };
+ return Object.freeze(api);
 }
