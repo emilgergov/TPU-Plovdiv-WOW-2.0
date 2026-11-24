@@ -37,3 +37,11 @@ test('unconfigured test environment remains blocked',()=>{
  assert.equal(assessKT134Staging({...base,testD1:''}).ready,false);
  assert.equal(assessKT134Staging({...base,testR2:''}).ready,false);
 });
+
+test('cannot certify isolation if actual protected backend identity is unknown',()=>{
+ assert.equal(assessKT134Staging({...base,backendWorker:''}).ready,false);
+ assert.equal(assessKT134Staging({...base,backendD1:''}).ready,false);
+});
+test('malformed D1 identifiers never bypass production protection',()=>{
+ assert.equal(assessKT134Staging({...base,testD1:'test-database'}).ready,false);
+});
