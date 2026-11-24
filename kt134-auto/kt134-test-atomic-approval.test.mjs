@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createKT134TestAtomicApproval,TEST_ATOMIC_APPROVAL_SQL} from './kt134-test-atomic-approval.mjs';
 const caseId='11111111-1111-4111-8111-111111111111';
-const params={caseId,proposalVersion:'v1',caseRevision:4,bindingSha256:'a'.repeat(64),userId:'expert123'};
+const params={caseId,proposalVersion:'v1',caseRevision:4,bindingSha256:'a'.repeat(64),wordSha256:'b'.repeat(64),userId:'expert123'};
 function fixture(changes=1){
  let captured=null;
  const db={prepare(sql){return {bind(...args){captured={sql,args};return {run:async()=>({meta:{changes}})}}}}};
@@ -11,7 +11,8 @@ function fixture(changes=1){
 test('one SQL update includes current revision, exact document and active case rights',async()=>{
  const f=fixture(),r=await f.approval.approve(params);
  assert.equal(r.expertConfirmed,true);
- assert.deepEqual(f.read().args,[1234567890,caseId,'v1',4,'a'.repeat(64),4,'expert123']);
+ assert.deepEqual(f.read().args,[1234567890,caseId,'v1',4,'a'.repeat(64),'b'.repeat(64),4,'expert123']);
+ assert.match(TEST_ATOMIC_APPROVAL_SQL,/word_sha256=\?/);
  assert.match(TEST_ATOMIC_APPROVAL_SQL,/r\.revision=\?/);
  assert.match(TEST_ATOMIC_APPROVAL_SQL,/a\.active=1 AND a\.can_confirm=1/);
  assert.match(TEST_ATOMIC_APPROVAL_SQL,/status='awaiting_expert'/);
@@ -32,4 +33,10 @@ test('invalid revision cannot reach D1',async()=>{
 });
 test('missing D1 fails closed',()=>{
  assert.throws(()=>createKT134TestAtomicApproval(),/Липсва D1/);
+});
+
+test('missing or replaced DOCX SHA is rejected before D1 mutation',async()=>{
+ const f=fixture();
+ await assert.rejects(f.approval.approve({...params,wordSha256:''}),/Невалидни/);
+ assert.equal(f.read(),null);
 });
