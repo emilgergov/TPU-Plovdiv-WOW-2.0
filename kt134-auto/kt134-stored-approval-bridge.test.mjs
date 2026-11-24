@@ -5,7 +5,7 @@ const caseId='11111111-1111-4111-8111-111111111111',binding='a'.repeat(64);
 function setup(opts={}){
  const log=[];
  const draft={caseId,proposalVersion:'v1',caseRevision:4,status:'awaiting_expert',
-  bindingSha256:binding,wordBytes:new Uint8Array([80,75,3,4,1,2]),
+  bindingSha256:binding,wordSha256:'b'.repeat(64),wordBytes:new Uint8Array([80,75,3,4,1,2]),
   proposal:{caseId,expertConfirmed:false,documentDraft:'Относно: Жалба\nМотиви',
    procedure:'Отговор на жалба',documentTitle:'Писмо'},...opts.draft};
  const bridge=createKT134StoredApprovalBridge({
@@ -66,4 +66,24 @@ test('client cannot provide fabricated session or private Word',async()=>{
  const {bridge,log}=setup({session:{active:false,userId:'expert123'}});
  await assert.rejects(bridge.confirm({...args,session:{active:true,userId:'attacker'},wordBytes:new Uint8Array([80,75,0,0])}),/активна/);
  assert.deepEqual(log,[]);
+});
+
+test('stored Word fingerprint is required for any expert confirmation',async()=>{
+ const {bridge,log}=setup({draft:{wordSha256:null}});
+ await assert.rejects(bridge.confirm(args),/отпечатък на архивирания Word/);
+ assert.equal(log.some(x=>x[0]==='decide'),false);
+});
+test('decision receives exact stored revision and Word SHA, not browser versions',async()=>{
+ const trace=[];
+ const draft={caseId,proposalVersion:'v1',caseRevision:4,status:'awaiting_expert',bindingSha256:binding,
+  wordSha256:'b'.repeat(64),wordBytes:new Uint8Array([80,75,3,4,1,2]),
+  proposal:{caseId,expertConfirmed:false,documentDraft:'Относно: жалба\\nМотиви',procedure:'Отговор',documentTitle:'Писмо'}};
+ const bridge=createKT134StoredApprovalBridge({
+  verifySession:async()=>({active:true,userId:'expert123'}),authorizeCase:async()=>true,
+  loadCaseRevision:async()=>4,vault:{loadDraft:async()=>draft},
+  decisions:{decide:async x=>{trace.push(x);return {caseId,expertConfirmed:true,version:'approved-v1'}}},audit:async()=>{}
+ });
+ await bridge.confirm(args);
+ assert.equal(trace[0].expectedCaseRevision,4);
+ assert.equal(trace[0].expectedWordSha256,'b'.repeat(64));
 });
