@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>КТ134 — изолиран визуален тест</title>
+<style>
+:root{color-scheme:dark;font-family:Verdana,Arial,sans-serif;background:#071f18;color:#f0e7d2}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 30% 0%,#194b37,#071f18 65%)}
+main{max-width:1050px;margin:auto;padding:22px 22px 60px}h1{font-size:21px;line-height:1.35;margin:4px 0 13px;font-weight:600}h2{font-size:14px;margin:0 0 12px;color:#f3db9b}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#d5c9ac;font-size:12px}
+.demo{color:#f6d18c;background:#654a25;border:1px solid #c9a05d;border-radius:18px;padding:5px 11px;font-weight:700}
+.bar{border:1px solid #537961;background:#103226;border-radius:13px;padding:15px 17px;margin-top:14px}
+.case{display:flex;gap:20px;flex-wrap:wrap;font-size:12px;color:#e6ddc4}.case strong{color:#f3c46d}
+.stages{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-top:15px}
+.stage{background:#174332;border:1px solid #668466;border-radius:11px;padding:13px 10px;min-height:94px}
+.stage span{display:block;font-size:17px;color:#dbb96d;margin-bottom:5px}
+.stage div{font-size:11px;line-height:1.5}
+.stage.done{border-color:#87bd8d;background:#24573a}.stage.done span{color:#b6e4b7}
+.stage.active{border-color:#e7c165;background:#5a4b25}
+.auto{margin-top:16px;background:linear-gradient(115deg,#113b2a,#1d4c34);border:1px solid #c2a45b;border-radius:12px;padding:14px}
+.autohead{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px;margin-bottom:11px}
+.autohead strong{color:#f4d896} .route{display:grid;grid-template-columns:64px repeat(5,minmax(0,1fr)) 64px;gap:7px;align-items:center}
+.gate{border:1px solid #bc9c5c;border-radius:18px 18px 7px 7px;text-align:center;padding:10px 2px;background:#255037;font-size:11px;color:#ffdb8d}
+.node{border:1px solid #587662;background:#1c3e2d;text-align:center;border-radius:25px;height:30px;display:flex;align-items:center;justify-content:center;color:#dadfca;font-size:12px}
+.node.done{background:#318150;border-color:#b5d29b;color:white}.node.active{background:#786127;border-color:#edc66b}
+.subrow{border-top:1px solid #497454;margin-top:10px;padding-top:9px;display:flex;gap:13px;align-items:center;font-size:11px;color:#e3d7b1}
+.track{width:135px;background:#294f3c;height:4px;border-radius:9px;overflow:hidden;flex-shrink:0}
+.fill{height:100%;background:#ddb863;width:0;transition:width .25s}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}
+button{font:12px Verdana,Arial,sans-serif;font-weight:600;color:#f9efdc;background:#235239;border:1px solid #8eb47c;padding:11px 15px;border-radius:9px;cursor:pointer}
+button.primary{background:#856829;border-color:#e2bc5d}button:disabled{opacity:.5;cursor:not-allowed}
+button:hover:not(:disabled){filter:brightness(1.14)}
+.output{margin-top:17px;display:none} .output.visible{display:block}
+.split{display:grid;grid-template-columns:1fr 1.3fr;gap:15px}
+.detail{background:#0c2d21;border:1px solid #436b53;border-radius:11px;padding:16px;line-height:1.75;font-size:12px}
+.detail p{margin:7px 0 13px}.muted{color:#b9c7b8}
+.paper{background:#fffaf2;color:#27352c;border-radius:8px;padding:22px 24px;min-height:290px;font:12px/1.65 Verdana,Arial}
+.paper .header{text-align:center;font-size:10px;border-bottom:1px solid #aebbae;padding-bottom:10px;color:#344e3c}
+.paper h3{text-align:center;font-size:13px;color:#263b2c;margin:23px 0}
+.paper p{text-align:justify;text-indent:1cm;margin-bottom:8px}.paper .foot{margin-top:28px;text-align:right;color:#607065;font-size:10px}
+textarea{width:100%;min-height:180px;background:#fcf9ef;color:#293b2e;border:1px solid #b1ac8e;border-radius:6px;padding:12px;font:12px/1.65 Verdana,Arial}
+.note{font-size:11px;color:#ead6a7;margin-top:12px}
+@media(max-width:730px){main{padding:14px}.split{grid-template-columns:1fr}.stages{gap:4px}.stage{padding:9px 5px;min-height:110px}.stage div{font-size:9px}.route{grid-template-columns:41px repeat(5,minmax(0,1fr)) 41px;gap:3px}.gate{font-size:9px}.track{width:52px}}
+</style></head><body><main>
+<div class="topline"><div>WOW · Експертен модул · КТ134</div><div class="demo">ИЗОЛИРАНА ДЕМОНСТРАЦИЯ — НЕ Е РЕАЛЕН АНАЛИЗ</div></div>
+<h1>Автоматичен анализ на преписка</h1>
+<section class="bar"><div class="case"><div>Активен експерт: <strong>Демонстрационен потребител</strong></div><div>Вътрешен №: <strong>EG-2026-000015</strong></div><div>Деловоден №: <strong>ТЕСТ-0001</strong></div></div>
+<div class="stages" id="stages"></div>
+<div class="auto"><div class="autohead"><strong>Автоматична обработка</strong><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
+<div class="subrow"><div class="track"><div class="fill" id="fill"></div></div><span id="subtitle" aria-live="polite">Готовност за автоматичен анализ</span></div></div>
+<div class="actions" id="entry"><button class="primary" id="start">Активирай автоматичен анализ (демо)</button></div>
+<p class="note">Това е визуален тест със синтетична преписка. Няма въпроси, пароли или междинни потвърждения. Демонстрацията не подава заявки към Cloudflare, EG Автор или реален регистър.</p></section>
+<section class="output" id="output"><div class="split"><div class="detail">
+<h2>Крайно предложение за експерта</h2>
+<p><b>Водещ документ:</b> Възражение.pdf (синтетичен пример)</p>
+<p><b>Предложена процедура:</b> Разглеждане на възражение</p>
+<p><b>Следващ панел:</b> №17 — Жалби / възражения</p>
+<p><b>Мотиви:</b> В тестовия сценарий последващото възражение е актуалният предмет на преписката, а предходното уведомление е част от хронологията.</p>
+<p><b>Рецензент:</b> Предложение със забележки — да се провери приложимото правно основание.</p>
+<p><b>Статус:</b> <span id="status" style="color:#f1ce88">Неодобрен проект</span></p>
+</div><div class="detail"><h2>Word проект по бланката на РИОСВ – Пловдив · визуален преглед</h2>
+<div class="paper" id="paper"><div class="header">Р Е П У Б Л И К А  Б Ъ Л Г А Р И Я<br>Министерство на околната среда и водите<br><b>Регионална инспекция по околната среда и водите – Пловдив</b></div><h3>ПРОЕКТ НА ОТГОВОР ПО ЖАЛБА</h3><p><b><i>Относно:</i> „Възражение по административна преписка“</b></p><p>В тестовия пример е постъпило възражение срещу предходно административно писмо. Предлага се мотивиран отговор въз основа на доказаните обстоятелства.</p><p>Преди окончателно произнасяне се проверяват приложимите законови предпоставки и наличните доказателства.</p><div class="foot">Два електронни подписа · демонстрационна бланка</div></div>
+<div id="editor" hidden><textarea id="edited" aria-label="Редакция на проекта"></textarea></div></div></div>
+<div class="actions"><button class="primary" id="confirm">Потвърди</button><button id="edit">Редактирай</button><button id="classic">Премини към класическия режим</button></div>
+<p class="note" id="decisionHelp">В реалната система единствено потвърждението на експерта одобрява документа. В това демо нито едно действие не се записва в регистъра.</p></section>
+</main>
+<script type="module">
+const labels=['Внасяне и анализ на преписката','Предмет и обхват','Имоти и пространствен анализ','Нормативна и процедурна преценка','Определяне на процедурата'];
+const subtitles=['Приети документи и идентичност на преписката','Актуално възражение — предмет и обхват','Контекстен режим: ГИС не се прилага за този сценарий','Изготвена мотивирана правна преценка','Проект на процедура и Word документ'];
+const stages=document.querySelector('#stages'),route=document.querySelector('#route');
+for(let i=0;i<5;i++){const d=document.createElement('div');d.className='stage';d.innerHTML='<span>'+(i+1).toString().padStart(2,'0')+'</span><div>'+labels[i]+'</div>';stages.append(d)}
+const entrance=document.createElement('div');entrance.className='gate';entrance.textContent='Вход';route.append(entrance);
+for(let i=0;i<5;i++){const d=document.createElement('div');d.className='node';d.textContent=i+1;d.title=labels[i];route.append(d)}
+const exit=document.createElement('div');exit.className='gate';exit.textContent='Изход';route.append(exit);
+const tiles=[...stages.children],nodes=[...route.children].slice(1,6);
+const subtitle=document.querySelector('#subtitle'),fill=document.querySelector('#fill'),output=document.querySelector('#output');
+let finished=false,editMode=false;
+function render(n){tiles.forEach((tile,i)=>tile.className='stage '+(i<n?'done':i===n?'active':''));nodes.forEach((node,i)=>node.className='node '+(i<n?'done':i===n?'active':''));fill.style.width=(n*20)+'%';subtitle.textContent=n?subtitles[n-1]:'Готовност за автоматичен анализ'}
+function finish(){finished=true;render(5);document.querySelector('#entry').hidden=true;output.classList.add('visible');subtitle.textContent='Проектът е готов за единственото окончателно експертно решение'}
+document.querySelector('#start').addEventListener('click',()=>{if(finished)return;document.querySelector('#start').disabled=true;subtitle.textContent='Изпълнение на синтетичен сценарий';let step=0;const advance=()=>{if(step>=5){finish();return}render(++step);setTimeout(advance,440)};advance()});
+document.querySelector('#edit').addEventListener('click',()=>{editMode=true;document.querySelector('#editor').hidden=false;document.querySelector('#paper').hidden=true;document.querySelector('#edited').value='Относно: „Възражение по административна преписка“\nВ тестовия пример е постъпило възражение. Предлага се мотивиран отговор.\nСледва правна преценка на приложимите основания.';document.querySelector('#decisionHelp').textContent='Редакцията остава проект. Потвърждението се изисква отделно.';document.querySelector('#status').textContent='Редактиран, неодобрен проект'});
+document.querySelector('#confirm').addEventListener('click',()=>{if(editMode&&!document.querySelector('#edited').value.trim()){document.querySelector('#decisionHelp').textContent='Липсва редактиран текст';return}document.querySelector('#status').textContent='Потвърдено само в демонстрацията';document.querySelector('#confirm').disabled=true;document.querySelector('#edit').disabled=true;document.querySelector('#decisionHelp').textContent='Демонстрационно потвърждение — не е административно действие и не създава реален Word файл'});
+document.querySelector('#classic').addEventListener('click',()=>{document.querySelector('#status').textContent='Класически маршрут · Етап 1 (демо)';document.querySelector('#decisionHelp').textContent='Същата синтетична преписка, без пренесени експертни потвърждения. Няма навигация към реалния модул';output.classList.remove('visible');document.querySelector('#entry').hidden=false;document.querySelector('#start').disabled=false;finished=false;render(0)});
+render(0);
+</script></body></html>
