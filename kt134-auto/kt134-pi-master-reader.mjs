@@ -18,7 +18,12 @@ export function createKT134PIMasterReader({lookup,sourceMetadata,maxParcels=20}=
  return async ({caseId,context}={})=>{
   need(txt(caseId)&&context?.caseId===caseId&&Array.isArray(context.documents),
    'Няма проверена текуща преписка');
-  const claims=unique(context.documents.flatMap(d=>[
+  // An ownership deed may list many collateral parcels. If an explicitly
+  // classified leading notice is available, source only its declared parcel
+  // candidates. Without this provenance, keep a candidate-only scope.
+  const primary=context.documents.filter(d=>['notification','investment_notice'].includes(d?.kind));
+  const scoped=primary.length?primary:context.documents;
+  const claims=unique(scoped.flatMap(d=>[
    ...txt(d.sourceText??d.text).matchAll(cad)
   ].map(m=>m[0])));
   need(claims.length>0,'Не е открит кадастрален идентификатор в документите');
@@ -45,6 +50,8 @@ export function createKT134PIMasterReader({lookup,sourceMetadata,maxParcels=20}=
   }
   return Object.freeze({
    caseId,verified:false,geometryVerified:false,
+   subjectParcelsVerified:false,
+   scopeBasis:primary.length?'classified_notice_only':'all_document_candidates_unconfirmed',
    sourceKind:'kt77_verified_historical_pi_master',
    archiveAdminAsOf:sourceMetadata.admin_as_of,
    parcels:Object.freeze(records),evidence:Object.freeze([]),
