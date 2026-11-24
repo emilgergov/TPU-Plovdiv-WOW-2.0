@@ -29,9 +29,11 @@ jobs:
         run: |
           python3 kt134-auto/test_draft_sqlite_schema.py
           python3 kt134-auto/test_atomic_approval_sqlite.py
-      - name: Package offline KT134 visual demo (never deploy)
+      - name: Build genuine DOCX and offline acceptance package (synthetic only)
+        run: node kt134-auto/kt134-build-acceptance-package.mjs
+      - name: Package KT134 preview and real DOCX for expert review (never deploy)
         uses: actions/upload-artifact@v4
         with:
-          name: KT134-AUTO-VISUAL-DEMO
-          path: kt134-auto/KT134_AUTO_VISUAL_DEMO.html
+          name: KT134-EXPERT-ACCEPTANCE-PACKAGE
+          path: kt134-auto/test-deliverables/
           if-no-files-found: error
