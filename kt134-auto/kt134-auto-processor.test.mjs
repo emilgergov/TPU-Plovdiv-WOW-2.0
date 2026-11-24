@@ -82,3 +82,10 @@ test('unidentified administrative document type cannot produce a Word draft',asy
   procedure:'Отговор по възражение',justification:'Мотиви',documentDraft:'Относно: Отговор\nТекст'})}});
  await assert.rejects(q.run({session,caseId}),/вид на административния документ/);
 });
+
+test('reviewer is advisory: missing review remains visible, but no veto is imposed',async()=>{
+ const result=await setup().run({session,caseId});
+ assert.equal(result.proposal.reviewerStatus,'not_completed');
+ assert.ok(result.proposal.uncertainties.some(x=>x.includes('Рецензентският контрол')));
+ assert.ok(result.wordDraft instanceof Uint8Array);
+});
