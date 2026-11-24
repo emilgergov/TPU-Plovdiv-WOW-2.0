@@ -104,6 +104,38 @@ jobs:
           else
             echo "::notice::Backend metadata not readable with current token; no protected data accessed"
           fi
+          # Read the live backend source solely into private runner temp storage.
+          # Output only a SHA-256, approximate source size and Boolean structural
+          # markers; NEVER print the source or upload a workflow artifact.
+          # Restrict the source request to GET; never activate any version.
+          source_status=$(curl --silent --show-error --max-time 30 -o "$RUNNER_TEMP/kt134-backend-source" -w '%{http_code}' \
+            -H "Authorization: Bearer $CF_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/$service")
+          echo "Protected KT125 source GET HTTP: $source_status"
+          if [ "$source_status" = 200 ]; then
+            node - "$RUNNER_TEMP/kt134-backend-source" <<'NODE'
+          const fs=require('node:fs'),crypto=require('node:crypto');
+          const bytes=fs.readFileSync(process.argv[2]);
+          const text=bytes.toString('utf8');
+          // Only safe counts/booleans. This check is not a security audit.
+          const markers={
+            hasCaseConfirm:text.includes('case.confirm'),
+            hasCaseEdit:text.includes('case.edit'),
+            hasDocumentGenerate:text.includes('document.generate'),
+            hasCaseRegistry:text.includes('kt126_registry'),
+            hasSqlUpdate:text.includes('UPDATE '),
+            hasKt134Auto:text.includes('kt134.auto-dossier-analyze.v1'),
+            hasLocalLogin:text.includes('/auth/login'),
+            hasDurableObject:text.includes('DurableObject')||text.includes('durable_object')
+          };
+          console.log('Protected KT125 source SHA256:',crypto.createHash('sha256').update(bytes).digest('hex'));
+          console.log('Protected KT125 source bytes:',bytes.length);
+          console.log('Protected KT125 structural presence flags:',JSON.stringify(markers));
+          console.log('Source retained only within private temporary runner storage and never printed or uploaded.');
+          NODE
+          else
+            echo "::notice::Cannot inspect live source with current token; binding metadata remains verified"
+          fi
           if [ -n "$CF_TEST_WORKER" ]; then
             if ! [[ "$CF_TEST_WORKER" =~ ^[a-zA-Z0-9_-]+$ ]] || [[ "$CF_TEST_WORKER" == "$CF_KT125_GATEWAY" ]] || [[ "$CF_TEST_WORKER" == "tpu-plovdiv-ai-author-v27" ]]; then
               echo "::error::Test Worker name invalid or matches production"; exit 1
