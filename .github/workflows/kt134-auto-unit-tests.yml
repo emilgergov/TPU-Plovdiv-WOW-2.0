@@ -26,7 +26,9 @@ jobs:
       - name: Unit and actual ZIP/DOCX tests with synthetic dossiers only
         run: node --test kt134-auto/*.test.mjs
       - name: Verify isolated D1 schema against real SQLite constraints
-        run: python3 kt134-auto/test_draft_sqlite_schema.py
+        run: |
+          python3 kt134-auto/test_draft_sqlite_schema.py
+          python3 kt134-auto/test_atomic_approval_sqlite.py
       - name: Package offline KT134 visual demo (never deploy)
         uses: actions/upload-artifact@v4
         with:
