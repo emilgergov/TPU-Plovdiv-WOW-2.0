@@ -9,7 +9,7 @@ function setup(overrides={}){
  const registry={getCase:async()=>({caseId,incomingNumber:'ОВОС-2159-4/23.10.2026 г.',version:'v1',
   documents:[{fileId:'original',kind:'notification'},{fileId:'objection',kind:'objection'}]})};
  const gateway={run:async()=>({caseId,leadingDocumentId:'objection',procedure:'Отговор по възражение',
-  justification:'Фактическа и правна обосновка',documentDraft:'Относно: Възражение\nПроект',panelId:17,
+  justification:'Фактическа и правна обосновка',documentDraft:'Относно: Възражение\nПроект',documentTitle:'Отговор по жалба',panelId:17,
   reviewNotes:[],uncertainties:[],expertConfirmed:false})};
  const word={buildDraft:async()=>new Uint8Array([80,75,3,4])};
  const audit={record:async x=>{calls.push(x)}};
@@ -36,7 +36,7 @@ test('mismatched case identity refuses cross-dossier analysis',async()=>{
 });
 test('AI cannot assert expert approval',async()=>{
  const q=setup({gateway:{run:async()=>({caseId,expertConfirmed:true,leadingDocumentId:'objection',
-  procedure:'Отговор',justification:'Обосновано',documentDraft:'Проект'})}});
+  procedure:'Отговор',justification:'Обосновано',documentDraft:'Проект',documentTitle:'Отговор по жалба'})}});
  await assert.rejects(q.run({session,caseId}),/фиктивно/);
 });
 test('missing Word does not become a fabricated finished DOCX',async()=>{
@@ -49,7 +49,7 @@ test('missing Word does not become a fabricated finished DOCX',async()=>{
 test('protected gateway receives no password, token, or user-supplied endpoint',async()=>{
  let seen;
  const q=setup({gateway:{run:async x=>{seen=x;return {caseId,leadingDocumentId:'objection',
-  procedure:'Отговор',justification:'Мотиви',documentDraft:'Относно: Отговор'}}}});
+  procedure:'Отговор',justification:'Мотиви',documentDraft:'Относно: Отговор',documentTitle:'Отговор по жалба'}}}});
  await q.run({session,caseId});
  assert.deepEqual(Object.keys(seen).sort(),['request','session']);
  assert.ok(!JSON.stringify(seen.request).includes('password'));
@@ -69,10 +69,16 @@ test('classic fallback refuses mismatch',async()=>{
 
 test('lead document must belong to the same dossier',async()=>{
  const q=setup({gateway:{run:async()=>({caseId,leadingDocumentId:'foreign-document',
-  procedure:'Отговор',justification:'Мотиви',documentDraft:'Относно: Отговор'})}});
+  procedure:'Отговор',justification:'Мотиви',documentDraft:'Относно: Отговор',documentTitle:'Отговор по жалба'})}});
  await assert.rejects(q.run({session,caseId}),/Неизвестен водещ документ/);
 });
 test('evidence gaps are shown explicitly, not presented as proven',async()=>{
  const q=await setup().run({session,caseId});
  assert.ok(q.proposal.uncertainties.some(x=>x.includes('доказателствени')));
+});
+
+test('unidentified administrative document type cannot produce a Word draft',async()=>{
+ const q=setup({gateway:{run:async()=>({caseId,leadingDocumentId:'objection',
+  procedure:'Отговор по възражение',justification:'Мотиви',documentDraft:'Относно: Отговор\nТекст'})}});
+ await assert.rejects(q.run({session,caseId}),/вид на административния документ/);
 });
