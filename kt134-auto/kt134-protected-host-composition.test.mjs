@@ -7,7 +7,7 @@ const requestId='22222222-2222-4222-8222-222222222222';
 const origin='https://isolated.example';
 const V11='8d3851affd72fb44b4d663920196e00ec317c8e45d36fc16c6ad6b0ce965226c';
 const docText='Уведомление за инвестиционно предложение за складове и офисна част в ПИ 56784.13.102.';
-function build({active=true,revision=4,authorReady=true}={}){
+function build({active=true,revision=4,authorReady=true,includePI=false}={}){
  const calls=[],audit=[],journal=[];
  const host=createKT134ProtectedHost({
   origin,
@@ -18,6 +18,11 @@ function build({active=true,revision=4,authorReady=true}={}){
    document_texts:[{source:'Uvedomlenie.pdf',kind:'notification',text:docText}]}}}),
   unpackState:async x=>x,
   listSources:async()=>[{filename:'P4.zip',complete:1}],
+  ...(includePI?{
+   lookupParcel:async cadnum=>{calls.push('pi-master');return {status:'FOUND',profile:{cadnum,area_m2:3434.7131219906,
+    settlement:'гр. Пловдив',municipality:'Пловдив',province:'Пловдив',zz:[],zt:[]}}},
+   piMasterMetadata:{schema:'kt77-pi-master-browser-v1',status:'VERIFIED',total_unique_parcels:917417,admin_as_of:'2026-05-15'}
+  }:{}),
   readSpatial:async p=>{calls.push('gis');return {caseId:p.caseId,verified:false,
    archivalOnly:true,area_m2:3434.7131219906,zz:[],zt:[],evidence:[]};},
   getLegalContext:async p=>{calls.push('legal');assert.equal(p.archiveSHA256,V11);
@@ -26,7 +31,7 @@ function build({active=true,revision=4,authorReady=true}={}){
    originalSourceSHA256:'b'.repeat(64),fullLegalText:'Архивен текст, без преценка за приложимост.',applicabilityVerified:false}]};},
   author:async p=>{calls.push('author');
    assert.equal(p.findings.normative.provisions[0].act,'ЗООС');
-   assert.equal(p.findings.spatial.area_m2,3434.7131219906);
+   assert.equal(includePI?p.findings.spatial.historicalPIMaster.parcels[0].area_m2:p.findings.spatial.area_m2,3434.7131219906);
    assert.equal(p.context.documents.length,1);
    return {caseId:p.caseId,leadingDocumentId:'Uvedomlenie.pdf',currentRequest:'Складове и офиси',
     leadRationale:'Водещо уведомление',procedure:'Проект: необходима е преценка',
@@ -95,4 +100,14 @@ test('client dossier injection is ignored in favor of authorized KT125 stored so
 });
 test('missing server-side mandatory KT125 operation journal fails at wiring time',()=>{
  assert.throws(()=>createKT134ProtectedHost({}),/Липсва защитена връзка/);
+});
+
+test('P4: one protected KT125 route feeds distinct original GIS and PI MASTER historical evidence to EG author and reviewer',async()=>{
+ const t=build({includePI:true});
+ const res=await t.host.handle(t.make());
+ assert.equal(res.status,200);
+ const out=await res.json();
+ assert.equal(out.proceduralConclusionVerified,false);
+ assert.ok(t.calls.includes('pi-master'));
+ assert.ok(t.calls.includes('author')&&t.calls.includes('reviewer'));
 });
