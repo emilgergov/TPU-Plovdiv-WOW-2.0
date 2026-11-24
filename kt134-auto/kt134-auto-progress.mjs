@@ -27,7 +27,7 @@ export function createAutoProgress({caseId,onChange=()=>{}}={}){
   if(action==='complete'&&(!verified||!clean(eventId)||!clean(source)))
    throw Error('Завършен етап изисква реално потвърдено събитие и произход');
   const prev=states[n-1];
-  if(prev.status==='completed'&&action==='start')throw Error('Завършен етап не се връща автоматично');
+  if(['completed','not_applicable'].includes(prev.status)&&action!=='complete')throw Error('Потвърден етап не се променя автоматично');
   if(action==='complete'){
    for(let i=0;i<n-1;i++)if(!['completed','not_applicable'].includes(states[i].status))
     throw Error('Предходните етапи нямат потвърден резултат');
