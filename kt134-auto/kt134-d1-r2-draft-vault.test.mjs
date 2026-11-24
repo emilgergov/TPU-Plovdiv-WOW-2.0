@@ -84,3 +84,19 @@ test('no metadata record never produces a fake Word project',async()=>{
  const f=await fixture({notFound:true});
  await assert.rejects(f.vault.loadDraft({userId,caseId,proposalVersion:version}),/Няма актуален/);
 });
+
+test('only authorized current D1 draft is offered to final expert proposal loader',async()=>{
+ const f=await fixture();
+ const item=await f.vault.loadCurrentDraft({userId,caseId,includeWord:true});
+ assert.equal(item.proposalVersion,version);
+ assert.deepEqual([...item.wordBytes],[...bytes]);
+ const selects=f.recorded.filter(x=>x.kind==='select');
+ assert.equal(selects.length,2);
+ assert.match(selects[0].sql,/d.status='awaiting_expert'/);
+ assert.match(selects[0].sql,/r.revision=d.case_revision/);
+});
+test('revoked rights prevent current-draft lookup and R2 access',async()=>{
+ const f=await fixture({denied:true});
+ await assert.rejects(f.vault.loadCurrentDraft({userId,caseId,includeWord:true}),/разрешен достъп/);
+ assert.deepEqual(f.recorded,[]);
+});
