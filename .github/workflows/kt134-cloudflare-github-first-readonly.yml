@@ -1,6 +1,9 @@
 name: KT134 — GitHub-first Cloudflare capability audit (read only)
 # Manual execution only; no deployment, migrations, or production mutations.
 on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-cloudflare-github-first-readonly.yml']
   workflow_dispatch:
 permissions:
   contents: read
