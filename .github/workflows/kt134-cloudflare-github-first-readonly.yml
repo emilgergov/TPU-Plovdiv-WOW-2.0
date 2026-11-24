@@ -40,34 +40,49 @@ jobs:
             echo "Read-only endpoint HTTP status: $status"
             if [ "$status" != 200 ]; then echo "::error::Cloudflare metadata read failed"; return 1; fi
           }
-          call "user/tokens/verify" "$RUNNER_TEMP/kt134-token.json"
-          node - "$RUNNER_TEMP/kt134-token.json" <<'NODE'
+          # Probe both independent GET endpoints even if token verification returns
+          # HTTP 401. This distinguishes account authorization from token status.
+          token_status=$(curl --silent --show-error --max-time 25 -o "$RUNNER_TEMP/kt134-token.json" -w '%{http_code}' \
+             -H "Authorization: Bearer $CF_TOKEN" \
+             -H 'Accept: application/json' \
+             "https://api.cloudflare.com/client/v4/user/tokens/verify")
+          settings_status=$(curl --silent --show-error --max-time 25 -o "$RUNNER_TEMP/kt134-gateway.json" -w '%{http_code}' \
+             -H "Authorization: Bearer $CF_TOKEN" \
+             -H 'Accept: application/json' \
+             "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/$CF_KT125_GATEWAY/settings")
+          echo "Token verify GET HTTP: $token_status"
+          echo "Protected gateway settings GET HTTP: $settings_status"
+          if [ "$token_status" = 200 ]; then
+            node - "$RUNNER_TEMP/kt134-token.json" <<'NODE'
           const fs=require('node:fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
-          if(d.success!==true||d.result?.status!=='active')throw Error('Cloudflare token is not active');
-          console.log('Cloudflare token active (scope not inferred)');
+          console.log('Cloudflare token verification succeeded:',d.success===true&&d.result?.status==='active');
           NODE
-          call "accounts/$CF_ACCOUNT/workers/scripts/$CF_KT125_GATEWAY/settings" "$RUNNER_TEMP/kt134-gateway.json"
-          node - "$RUNNER_TEMP/kt134-gateway.json" <<'NODE'
+          fi
+          if [ "$settings_status" = 200 ]; then
+            node - "$RUNNER_TEMP/kt134-gateway.json" <<'NODE'
           const fs=require('node:fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
-          if(!d.success||!Array.isArray(d.result?.bindings))throw Error('KT125 gateway settings unavailable');
-          const counts={};
-          for(const b of d.result.bindings)counts[b.type]=(counts[b.type]||0)+1;
-          console.log('Existing gateway binding TYPES only:',JSON.stringify(counts));
-          console.log('No secrets, source, identifiers, cookies or private case records are printed');
+          if(!d.success||!Array.isArray(d.result?.bindings))throw Error('Gateway settings invalid');
+          const count={};for(const x of d.result.bindings)count[x.type]=(count[x.type]||0)+1;
+          console.log('Gateway binding types only:',JSON.stringify(count));
           NODE
+          fi
+          if [ "$token_status" != 200 ] || [ "$settings_status" != 200 ]; then
+             echo "::error::Cloudflare GitHub secret cannot verify both required GET endpoints"
+             exit 1
+          fi
           if [ -n "$CF_TEST_WORKER" ]; then
             if ! [[ "$CF_TEST_WORKER" =~ ^[a-zA-Z0-9_-]+$ ]] || [[ "$CF_TEST_WORKER" == "$CF_KT125_GATEWAY" ]] || [[ "$CF_TEST_WORKER" == "tpu-plovdiv-ai-author-v27" ]]; then
-              echo "::error::Test Worker name invalid or matches a production resource"; exit 1
+              echo "::error::Test Worker name invalid or matches production"; exit 1
             fi
             call "accounts/$CF_ACCOUNT/workers/scripts/$CF_TEST_WORKER/settings" "$RUNNER_TEMP/kt134-test.json"
             node - "$RUNNER_TEMP/kt134-test.json" <<'NODE'
-            const fs=require('node:fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
-            if(!d.success||!Array.isArray(d.result?.bindings))throw Error('Test Worker resource not accessible');
-            const types=[...new Set(d.result.bindings.map(x=>x.type))].sort();
-            console.log('Test Worker accessible, binding TYPES:',types.join(', ')||'(none)');
-            NODE
+          const fs=require('node:fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          if(!d.success||!Array.isArray(d.result?.bindings))throw Error('Test Worker resource not accessible');
+          const types=[...new Set(d.result.bindings.map(x=>x.type))].sort();
+          console.log('Test Worker binding types only:',types.join(', ')||'(none)');
+          NODE
           else
-            echo "::notice::KT134_TEST_WORKER_NAME not configured; no test Worker capability has been proven"
+            echo "::notice::KT134_TEST_WORKER_NAME not configured; no test Worker access proven"
           fi
       - name: Safety checkpoint
         run: |
