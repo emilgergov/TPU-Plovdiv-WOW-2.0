@@ -12,7 +12,9 @@ export function createAutoExpertDecisions({verifySession,authorizeCase,loadPropo
   ensure(['confirm','edit','manual_from_stage1'].includes(action),'Непознато експертно действие');
   const verified=await verifySession();
   ensure(verified?.active===true&&str(verified.userId)===str(session.userId),'Неуспешно удостоверяване');
-  ensure(await authorizeCase({userId:verified.userId,caseId}), 'Няма права върху преписката');
+  const requiredAction=action==='confirm'?'case.confirm':'case.edit';
+  ensure(await authorizeCase({userId:verified.userId,caseId,action:requiredAction}),
+   'Няма права върху преписката');
   // Load authoritative, case-bound proposal from protected storage, not browser state.
   const current=await loadProposal({caseId,userId:verified.userId});
   ensure(current?.caseId===caseId&&current?.version===proposalVersion,'Преписката или предложението са променени');
