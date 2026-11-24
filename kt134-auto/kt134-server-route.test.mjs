@@ -1,15 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createAutoServerRoute} from './kt134-server-route.mjs';
-const caseId='EG-2026-000015';
+const caseId='11111111-1111-4111-8111-111111111111';
 const good=()=>({operation:'kt134.auto-dossier-analyze.v1',caseId,
- mode:'automatic_proposal',requireExpertApproval:true,dossierVersion:'v4'});
+ mode:'automatic_proposal',requireExpertApproval:true,dossierVersion:'4'});
 function fixture(changes={}){
  const seen={calls:[],audit:[]};
  const fn=createAutoServerRoute({
   authenticateRequest:async()=>({verified:true,userId:'expert123'}),
   authorizeCase:async x=>{seen.calls.push(['auth',x.caseId]);return true;},
-  readDossier:async x=>{seen.calls.push(['read',x.caseId]);return {caseId,version:'v4',
+  readDossier:async x=>{seen.calls.push(['read',x.caseId]);return {caseId,version:'4',revision:4,
    incomingNumber:'ОВОС-2159-4/23.10.2026 г.',
    documents:[{fileId:'notice',text:'Уведомление'},{fileId:'objection',text:'Възражение'}]};},
   analyze:async x=>{seen.calls.push(['analyze',x.caseId]);return {caseId,leadingDocumentId:'objection',
