@@ -126,3 +126,20 @@ test('mismatch between vault DOCX hash and current proposal is rejected',async()
   expectedCaseRevision:4,expectedWordSha256:'b'.repeat(64)})),/Отпечатъкът/);
  assert.equal(history.length,0);
 });
+
+test('final approval requires distinct KT125 case.confirm authority',async()=>{
+ const checked=[];
+ const {api}=fixture({authorizeCase:async x=>{
+  checked.push(x.action);
+  return x.action!=='case.confirm';
+ }});
+ await assert.rejects(api.decide(args('confirm')),/права/);
+ assert.deepEqual(checked,['case.confirm']);
+});
+test('editing and switching to classic route require case.edit, not case.confirm',async()=>{
+ const checked=[];
+ const {api}=fixture({authorizeCase:async x=>{checked.push(x.action);return x.action==='case.edit';}});
+ await api.decide(args('edit',{editedText:'Поправен текст'}));
+ await api.decide(args('manual_from_stage1'));
+ assert.deepEqual(checked,['case.edit','case.edit']);
+});
