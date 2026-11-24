@@ -1,0 +1,72 @@
+name: KT134 — GitHub-first Cloudflare capability audit (read only)
+# Manual execution only; no deployment, migrations, or production mutations.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: github.ref_name == 'kt134-auto-mode-isolated'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check isolated source and test contracts
+        uses: actions/checkout@v4
+      - name: Validate isolated module syntax
+        run: |
+          set -euo pipefail
+          for file in kt134-auto/*.mjs; do node --check "$file"; done
+      - name: Confirm Cloudflare token and protected KT125 resource capability (READ ONLY)
+        shell: bash
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+          CF_KT125_GATEWAY: kt133-tpu-plovdiv-kt125-local-auth
+          CF_TEST_WORKER: ${{ vars.KT134_TEST_WORKER_NAME }}
+        run: |
+          set -euo pipefail
+          test -n "$CF_TOKEN" || { echo "::error::GitHub secret CLOUDFLARE_API_TOKEN missing"; exit 1; }
+          echo "::add-mask::$CF_TOKEN"
+          # All Cloudflare operations below are GET only. Never print source, credentials, or binding names/values.
+          call() {
+            local path="$1" out="$2" status
+            status=$(curl --silent --show-error --max-time 25 -o "$out" -w '%{http_code}' \
+              -H "Authorization: Bearer $CF_TOKEN" \
+              -H 'Accept: application/json' \
+              "https://api.cloudflare.com/client/v4/$path")
+            echo "Read-only endpoint status: $status"
+            if [ "$status" != 200 ]; then echo "::error::Cloudflare metadata read failed"; return 1; fi
+          }
+          call "user/tokens/verify" "$RUNNER_TEMP/kt134-token.json"
+          node - "$RUNNER_TEMP/kt134-token.json" <<'NODE'
+          const fs=require('node:fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          if(d.success!==true||d.result?.status!=='active')throw Error('Cloudflare token is not active');
+          console.log('Cloudflare token active (scope not inferred)');
+          NODE
+          call "accounts/$CF_ACCOUNT/workers/scripts/$CF_KT125_GATEWAY/settings" "$RUNNER_TEMP/kt134-gateway.json"
+          node - "$RUNNER_TEMP/kt134-gateway.json" <<'NODE'
+          const fs=require('node:fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          if(!d.success||!Array.isArray(d.result?.bindings))throw Error('KT125 gateway settings unavailable');
+          const counts={};
+          for(const b of d.result.bindings)counts[b.type]=(counts[b.type]||0)+1;
+          console.log('Existing gateway binding TYPES only:',JSON.stringify(counts));
+          console.log('No secrets, source, identifiers, cookies or private case records are printed');
+          NODE
+          if [ -n "$CF_TEST_WORKER" ]; then
+            if ! [[ "$CF_TEST_WORKER" =~ ^[a-zA-Z0-9_-]+$ ]] || [[ "$CF_TEST_WORKER" == "$CF_KT125_GATEWAY" ]] || [[ "$CF_TEST_WORKER" == "tpu-plovdiv-ai-author-v27" ]]; then
+              echo "::error::Test Worker name invalid or matches a production resource"; exit 1
+            fi
+            call "accounts/$CF_ACCOUNT/workers/scripts/$CF_TEST_WORKER/settings" "$RUNNER_TEMP/kt134-test.json"
+            node - "$RUNNER_TEMP/kt134-test.json" <<'NODE'
+            const fs=require('node:fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+            if(!d.success||!Array.isArray(d.result?.bindings))throw Error('Test Worker resource not accessible');
+            const types=[...new Set(d.result.bindings.map(x=>x.type))].sort();
+            console.log('Test Worker accessible, binding TYPES:',types.join(', ')||'(none)');
+            NODE
+          else
+            echo "::notice::KT134_TEST_WORKER_NAME not configured; no test Worker capability has been proven"
+          fi
+      - name: Safety checkpoint
+        run: |
+          echo 'Read-only check completed; no deployment or D1/R2 operations were performed.'
+          echo 'KT133 and the active KT125 Worker have not been modified by this workflow.'
