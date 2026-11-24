@@ -10,11 +10,14 @@ import {createAutoAnalysisEngine} from './kt134-auto-analysis-engine.mjs';
 import {createKT134V11NormativeReader} from './kt134-v11-normative-reader.mjs';
 import {createAutoServerRoute} from './kt134-server-route.mjs';
 import {createKT125AutoProxyGuard} from './kt134-kt125-auto-proxy-guard.mjs';
+import {createKT134PIMasterReader} from './kt134-pi-master-reader.mjs';
+import {createKT134SpatialContext} from './kt134-spatial-context.mjs';
 
 const requireFn=(name,value)=>{if(typeof value!=='function')throw Error('Липсва защитена връзка към КТ125: '+name);return value};
 export function createKT134ProtectedHost({
  origin,identity,caseContext,readState,unpackState,listSources,
  readSpatial,author,reviewer,recordAudit,
+ lookupParcel,piMasterMetadata,
  reserveOperation,completeOperation,getRevision,
  // Dependency injection is for isolated tests only; the protected host uses V11.
  getLegalContext
@@ -26,7 +29,12 @@ export function createKT134ProtectedHost({
  const ports=createKT125LocalPorts({identity,caseContext,readState,unpackState,listSources});
  const legalOptions=getLegalContext===undefined?{}:{getContext:requireFn('getLegalContext',getLegalContext)};
  const readNormative=createKT134V11NormativeReader(legalOptions);
- const analyze=createAutoAnalysisEngine({author,reviewer,readSpatial,readNormative,recordAudit});
+ const enrichedSpatial=lookupParcel===undefined?readSpatial:createKT134SpatialContext({
+  readSpatial,readParcelIndex:createKT134PIMasterReader({
+   lookup:requireFn('lookupParcel',lookupParcel),sourceMetadata:piMasterMetadata
+  })
+ });
+ const analyze=createAutoAnalysisEngine({author,reviewer,readSpatial:enrichedSpatial,readNormative,recordAudit});
  const route=createAutoServerRoute({
   authenticateRequest:ports.authenticateRequest,
   authorizeCase:ports.authorizeCase,
