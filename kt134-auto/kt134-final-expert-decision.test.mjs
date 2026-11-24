@@ -86,3 +86,43 @@ test('bound final approval requires exact checked DOCX preview fingerprint',asyn
  assert.equal(result.expertConfirmed,true);
  assert.equal(history[0].record.bindingSha256,binding);
 });
+
+test('stored revision and DOCX fingerprint are forwarded to atomic saver',async()=>{
+ const binding='a'.repeat(64),word='b'.repeat(64);
+ const protectedProposal={caseId,version:proposalVersion,caseRevision:4,wordSha256:word,
+  bindingSha256:binding,status:'awaiting_final_expert_approval',
+  expertConfirmed:false,wordReady:true,documentText:'Относно: тест',
+  procedure:'Писмо',documentTitle:'Отговор'};
+ const {api,history}=fixture({loadProposal:async()=>protectedProposal});
+ const r=await api.decide(args('confirm',{previewBindingSha256:binding,
+  expectedCaseRevision:4,expectedWordSha256:word}));
+ assert.equal(r.expertConfirmed,true);
+ assert.equal(history[0].expectedCaseRevision,4);
+ assert.equal(history[0].expectedWordSha256,word);
+ assert.equal(history[0].expectedBindingSha256,binding);
+ assert.equal(history[0].record.wordSha256,word);
+});
+test('mismatch between vault and current proposal revision is rejected',async()=>{
+ const binding='a'.repeat(64),word='b'.repeat(64);
+ const {api,history}=fixture({loadProposal:async()=>({
+  caseId,version:proposalVersion,caseRevision:5,wordSha256:word,
+  bindingSha256:binding,status:'awaiting_final_expert_approval',
+  expertConfirmed:false,wordReady:true,documentText:'Относно: тест',
+  procedure:'Писмо',documentTitle:'Отговор'
+ })});
+ await assert.rejects(api.decide(args('confirm',{previewBindingSha256:binding,
+  expectedCaseRevision:4,expectedWordSha256:word})),/Ревизията/);
+ assert.equal(history.length,0);
+});
+test('mismatch between vault DOCX hash and current proposal is rejected',async()=>{
+ const binding='a'.repeat(64);
+ const {api,history}=fixture({loadProposal:async()=>({
+  caseId,version:proposalVersion,caseRevision:4,wordSha256:'c'.repeat(64),
+  bindingSha256:binding,status:'awaiting_final_expert_approval',
+  expertConfirmed:false,wordReady:true,documentText:'Относно: тест',
+  procedure:'Писмо',documentTitle:'Отговор'
+ })});
+ await assert.rejects(api.decide(args('confirm',{previewBindingSha256:binding,
+  expectedCaseRevision:4,expectedWordSha256:'b'.repeat(64)})),/Отпечатъкът/);
+ assert.equal(history.length,0);
+});
