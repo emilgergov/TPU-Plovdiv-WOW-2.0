@@ -10,17 +10,17 @@ CREATE TABLE IF NOT EXISTS kt134_test_approval_acl (
 );
 -- In one SQLite UPDATE: status + revision + exact document hash + active ACL.
 -- ?1 now_ms, ?2 case_id, ?3 version, ?4 case_revision,
--- ?5 binding_sha256, ?6 actor_id
+-- ?5 binding_sha256, ?6 word_sha256, ?7 actor_id
 UPDATE kt134_auto_drafts
 SET status='approved',approved_at_ms=?1
 WHERE case_id=?2 AND proposal_version=?3 AND case_revision=?4
-AND binding_sha256=?5 AND status='awaiting_expert'
+AND binding_sha256=?5 AND word_sha256=?6 AND status='awaiting_expert'
 AND EXISTS (
  SELECT 1 FROM kt126_registry r
  WHERE r.case_id=kt134_auto_drafts.case_id AND r.revision=?4
 )
 AND EXISTS (
  SELECT 1 FROM kt134_test_approval_acl a
- WHERE a.case_id=?2 AND a.user_id=?6
+ WHERE a.case_id=?2 AND a.user_id=?7
  AND a.active=1 AND a.can_confirm=1
 );
