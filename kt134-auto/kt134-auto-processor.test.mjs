@@ -66,3 +66,13 @@ test('classic fallback refuses mismatch',async()=>{
  const q=setup();
  await assert.rejects(q.manualFromStage1({session,caseId,proposal:{caseId:'EG-2026-000014',expertConfirmed:false}}),/чужда/);
 });
+
+test('lead document must belong to the same dossier',async()=>{
+ const q=setup({gateway:{run:async()=>({caseId,leadingDocumentId:'foreign-document',
+  procedure:'Отговор',justification:'Мотиви',documentDraft:'Относно: Отговор'})}});
+ await assert.rejects(q.run({session,caseId}),/Неизвестен водещ документ/);
+});
+test('evidence gaps are shown explicitly, not presented as proven',async()=>{
+ const q=await setup().run({session,caseId});
+ assert.ok(q.proposal.uncertainties.some(x=>x.includes('доказателствени')));
+});
