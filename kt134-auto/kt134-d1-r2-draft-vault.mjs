@@ -67,6 +67,7 @@ export function createKT134DraftVault({db,r2,authorizeCase,subtle=globalThis.cry
    need(row,'Няма актуален проект за преписката');
    const meta={caseId,caseRevision:row.case_revision,proposalVersion,
     status:row.status,bindingSha256:row.binding_sha256,
+    wordSha256:row.word_sha256,
     proposal:JSON.parse(row.proposal_json),
     previewParagraphs:Object.freeze(JSON.parse(row.preview_json))};
    if(!includeWord)return Object.freeze(meta);
