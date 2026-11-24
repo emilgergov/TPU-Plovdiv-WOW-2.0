@@ -35,6 +35,7 @@ export function createKT134StoredApprovalBridge({
     'Липсва ревизия на архивирания проект');
    ensure(stored.wordBytes instanceof Uint8Array&&stored.wordBytes.length>4,
     'Липсва действителният архивиран Word');
+   ensure(hash.test(stored.wordSha256||''),'Липсва отпечатък на архивирания Word');
    ensure(hash.test(stored.bindingSha256||'')&&
     stored.bindingSha256===previewBindingSha256,
     'Показаният Word преглед не съответства на архивирания документ');
@@ -49,7 +50,8 @@ export function createKT134StoredApprovalBridge({
    // This is an adapter only. The host's decisions.saveDecision MUST atomically
    // compare case revision, proposal version, active status and binding hash.
    const decision=await decisions.decide({
-    session,caseId,proposalVersion,action:'confirm',previewBindingSha256
+    session,caseId,proposalVersion,action:'confirm',previewBindingSha256,
+    expectedCaseRevision:stored.caseRevision,expectedWordSha256:stored.wordSha256
    });
    ensure(decision?.expertConfirmed===true&&decision.caseId===caseId,
     'Няма потвърдено експертно решение');
