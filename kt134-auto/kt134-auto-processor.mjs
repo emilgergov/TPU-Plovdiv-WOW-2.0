@@ -31,6 +31,7 @@ export function createAutoProcessor({registry, gateway, word, audit}) {
     'Неизвестен водещ документ извън текущата преписка');
    ensure(txt(analysis?.procedure) && txt(analysis?.justification), 'Липсва мотивирана процедура');
    ensure(txt(analysis?.documentDraft), 'Липсва проект на документ');
+   ensure(txt(analysis?.documentTitle), 'Липсва обоснован вид на административния документ');
    ensure(analysis?.expertConfirmed !== true, 'Недопустимо фиктивно експертно потвърждение');
    const panelId = Number(analysis.panelId);
    const output = frozen({
@@ -38,7 +39,7 @@ export function createAutoProcessor({registry, gateway, word, audit}) {
     dossierVersion:txt(dossier.version),
     leadingDocumentId:txt(analysis.leadingDocumentId),
     procedure:txt(analysis.procedure), justification:txt(analysis.justification),
-    documentDraft:txt(analysis.documentDraft),
+    documentDraft:txt(analysis.documentDraft), documentTitle:txt(analysis.documentTitle),
     proposedPanel:Number.isInteger(panelId)&&panelId>=1&&panelId<=22?panelId:null,
     reviewNotes:frozen(Array.isArray(analysis.reviewNotes)?analysis.reviewNotes.map(txt):[]),
     uncertainties:frozen([
@@ -51,7 +52,7 @@ export function createAutoProcessor({registry, gateway, word, audit}) {
    let wordDraft=null,wordError=null;
    try {
     const built=await word.buildDraft({session,caseId,content:output.documentDraft,
-      procedure:output.procedure,panelId:output.proposedPanel,template:'riosv-plovdiv-approved',status:'draft'});
+      procedure:output.procedure,documentTitle:output.documentTitle,panelId:output.proposedPanel,template:'riosv-plovdiv-approved',status:'draft'});
     ensure(built instanceof Uint8Array && built.length>0, 'Word генераторът не върна DOCX');
     wordDraft=built;
    } catch(error) { wordError=txt(error?.message||error); }
