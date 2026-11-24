@@ -71,3 +71,18 @@ test('invalid or blank edit is rejected',async()=>{
  const {api}=fixture();
  await assert.rejects(api.decide(args('edit',{editedText:'   '})),/редактиран текст/);
 });
+
+test('bound final approval requires exact checked DOCX preview fingerprint',async()=>{
+ const binding='a'.repeat(64);
+ const verified={caseId,version:proposalVersion,
+  status:'awaiting_final_expert_approval',expertConfirmed:false,wordReady:true,
+  documentText:'Относно: Същият проект',procedure:'Отговор',documentTitle:'Писмо',
+  proposedPanel:17,bindingSha256:binding};
+ const {api,history}=fixture({loadProposal:async()=>verified});
+ await assert.rejects(api.decide(args('confirm')),/Прегледът/);
+ await assert.rejects(api.decide(args('confirm',{previewBindingSha256:'b'.repeat(64)})),/Прегледът/);
+ assert.equal(history.length,0);
+ const result=await api.decide(args('confirm',{previewBindingSha256:binding}));
+ assert.equal(result.expertConfirmed,true);
+ assert.equal(history[0].record.bindingSha256,binding);
+});
