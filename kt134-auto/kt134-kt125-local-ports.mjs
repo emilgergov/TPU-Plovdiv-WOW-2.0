@@ -36,6 +36,7 @@ export function createKT125LocalPorts({identity,caseContext,readState,unpackStat
   const persisted=await readState({who:user,caseId});
   check(persisted?.record?.case_id===caseId,'Несъответствие с регистъра');
   check(persisted.record.revision===ctx.revision,'Преписката е променена');
+  check(persisted.evidenceChanged!==true,'Източниците са променени след последния прочит на документите');
   const unpacked=await unpackState(persisted.state);
   const intake=unpacked?.intake||unpacked?.state?.intake;
   const texts=Array.isArray(intake?.document_texts)?intake.document_texts:[];
