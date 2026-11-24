@@ -35,7 +35,7 @@ export function createAutoProcessor({registry, gateway, word, audit}) {
    ensure(analysis?.expertConfirmed !== true, 'Недопустимо фиктивно експертно потвърждение');
    const panelId = Number(analysis.panelId);
    const output = frozen({
-    caseId, incomingNumber:txt(dossier.incomingNumber),
+    caseId, internalNumber:txt(dossier.internalNumber), incomingNumber:txt(dossier.incomingNumber),
     dossierVersion:txt(dossier.version),
     leadingDocumentId:txt(analysis.leadingDocumentId),
     procedure:txt(analysis.procedure), justification:txt(analysis.justification),
