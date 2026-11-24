@@ -9,7 +9,8 @@ const draft={caseId,proposalVersion:'v1',caseRevision:4,status:'awaiting_expert'
   procedure:'Мотивиран отговор',documentTitle:'Писмо',panelId:17}};
 function fixture(patch={}){
  const calls=[];
- const vault={async loadCurrentDraft(x){calls.push(x);return {...draft,...patch}}};
+ const vault={async loadDraft(){throw Error('В този тест се ползва само актуалният проект')},
+  async loadCurrentDraft(x){calls.push(x);return {...draft,...patch}}};
  return {loader:createKT134VaultProposalLoader({vault}),calls};
 }
 test('current protected DOCX becomes the sole authoritative expert proposal',async()=>{
