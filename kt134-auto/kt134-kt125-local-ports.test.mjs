@@ -63,3 +63,10 @@ test('no public password, bearer, or API token is part of local KT125 adapter',a
  assert.ok(!JSON.stringify(r).includes('Bearer'));
  assert.ok(!JSON.stringify(r).includes('password'));
 });
+
+test('modified original evidence invalidates stale extracted text despite unchanged case revision',async()=>{
+ const {ports}=setup({readState:async()=>({record:{case_id:caseId,revision:4},evidenceChanged:true,state:{intake:{
+  document_texts:[{source:'obsolete.pdf',text:'Стар текст'}]}}})});
+ await assert.rejects(ports.readDossier({user:{verified:true,userId,role:'expert'},caseId}),
+  /Източниците са променени/);
+});
