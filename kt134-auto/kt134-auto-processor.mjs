@@ -27,6 +27,8 @@ export function createAutoProcessor({registry, gateway, word, audit}) {
    const analysis = await gateway.run({session,request});
    ensure(same(analysis?.caseId,caseId), 'Анализът се отнася за друга преписка');
    ensure(txt(analysis?.leadingDocumentId), 'Няма водещ документ и мотивирано предложение');
+   ensure(dossier.documents.some(d => txt(d.fileId||d.file||d.name)===txt(analysis.leadingDocumentId)),
+    'Неизвестен водещ документ извън текущата преписка');
    ensure(txt(analysis?.procedure) && txt(analysis?.justification), 'Липсва мотивирана процедура');
    ensure(txt(analysis?.documentDraft), 'Липсва проект на документ');
    ensure(analysis?.expertConfirmed !== true, 'Недопустимо фиктивно експертно потвърждение');
@@ -39,7 +41,9 @@ export function createAutoProcessor({registry, gateway, word, audit}) {
     documentDraft:txt(analysis.documentDraft),
     proposedPanel:Number.isInteger(panelId)&&panelId>=1&&panelId<=22?panelId:null,
     reviewNotes:frozen(Array.isArray(analysis.reviewNotes)?analysis.reviewNotes.map(txt):[]),
-    uncertainties:frozen(Array.isArray(analysis.uncertainties)?analysis.uncertainties.map(txt):[]),
+    uncertainties:frozen([
+     ...(Array.isArray(analysis.uncertainties)?analysis.uncertainties.map(txt):[]),
+     ...(!Array.isArray(analysis.evidence)||analysis.evidence.length===0?['Няма приложени проверими доказателствени препратки']:[])]),
     evidence:frozen(Array.isArray(analysis.evidence)?analysis.evidence:[]),
     status:'awaiting_final_expert_approval',expertConfirmed:false
    });
