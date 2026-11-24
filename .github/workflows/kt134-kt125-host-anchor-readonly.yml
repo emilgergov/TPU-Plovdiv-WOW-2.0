@@ -61,4 +61,5 @@ jobs:
           console.log('Only Boolean presence was emitted; no private source, file body, names, sessions, or token values');
           NODE
       - name: No mutation attestation
-        run: echo 'READ ONLY: no Worker publish, secret changes, D1 SQL, R2 write, or real dossier submitted.'
+        run: |
+          echo 'READ ONLY: no Worker publish, secret changes, D1 SQL, R2 write, or real dossier submitted.'
