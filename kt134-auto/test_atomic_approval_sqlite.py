@@ -10,6 +10,7 @@ DDL, UPDATE = EXTRA.split("-- In one SQLite UPDATE:",1)
 UPDATE = UPDATE[UPDATE.index("UPDATE kt134_auto_drafts"):]
 CASE="11111111-1111-4111-8111-111111111111"
 BINDING="c"*64
+WORD="a"*64
 
 class AtomicApprovalTests(unittest.TestCase):
  def setUp(self):
@@ -27,8 +28,8 @@ class AtomicApprovalTests(unittest.TestCase):
     "a"*64,"b"*64,BINDING,"{}","[]",1234567890))
   self.db.commit()
  def tearDown(self):self.db.close()
- def approve(self,rev=4,binding=BINDING,user="expert123",version="v1"):
-  cur=self.db.execute(UPDATE,(1234567891,CASE,version,rev,binding,user))
+ def approve(self,rev=4,binding=BINDING,word=WORD,user="expert123",version="v1"):
+  cur=self.db.execute(UPDATE,(1234567891,CASE,version,rev,binding,word,user))
   self.db.commit()
   return cur.rowcount
  def status(self):
@@ -39,6 +40,9 @@ class AtomicApprovalTests(unittest.TestCase):
   self.assertEqual(self.approve(),0)
  def test_wrong_document_fails(self):
   self.assertEqual(self.approve(binding="d"*64),0)
+  self.assertEqual(self.status(),"awaiting_expert")
+ def test_wrong_word_bytes_hash_fails(self):
+  self.assertEqual(self.approve(word="f"*64),0)
   self.assertEqual(self.status(),"awaiting_expert")
  def test_wrong_version_fails(self):
   self.assertEqual(self.approve(version="v2"),0)
