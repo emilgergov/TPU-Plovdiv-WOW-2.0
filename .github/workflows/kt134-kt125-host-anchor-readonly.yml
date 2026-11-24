@@ -1,0 +1,64 @@
+name: KT134 protected KT125 host anchor audit (READ ONLY)
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths:
+      - .github/workflows/kt134-kt125-host-anchor-readonly.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  anchor-audit:
+    if: github.ref_name == 'kt134-auto-mode-isolated'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect existing KT125 protected source for required anchor families (no source output)
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+          CF_GATEWAY: "kt133-tpu-plovdiv-kt125-local-auth"
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CF_TOKEN"
+          echo "::add-mask::$CF_TOKEN"
+          code=$(curl --silent --show-error --max-time 30 -o "$RUNNER_TEMP/kt125-gateway.json" -w '%{http_code}'             -H "Authorization: Bearer $CF_TOKEN"             "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/$CF_GATEWAY/settings")
+          test "$code" = "200"
+          node - "$RUNNER_TEMP/kt125-gateway.json" "$RUNNER_TEMP/backend-name" <<'NODE'
+          const fs=require('node:fs');
+          const d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          const services=d.result?.bindings?.filter(x=>x.type==='service')||[];
+          if(services.length!==1||!/^[\w-]+$/.test(services[0].service))throw Error('Cannot identify exact existing KT125 service');
+          fs.writeFileSync(process.argv[3],services[0].service,{mode:0o600});
+          console.log('Gateway service binding: valid, name withheld');
+          NODE
+          service=$(cat "$RUNNER_TEMP/backend-name")
+          code=$(curl --silent --show-error --max-time 30 -o "$RUNNER_TEMP/backend-private-source" -w '%{http_code}'             -H "Authorization: Bearer $CF_TOKEN"             "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/$service")
+          test "$code" = "200"
+          node - "$RUNNER_TEMP/backend-private-source" <<'NODE'
+          const fs=require('node:fs'),crypto=require('node:crypto');
+          const b=fs.readFileSync(process.argv[2]);const src=b.toString('utf8');
+          const anchors={
+           'local_auth_login':[/\/auth\/login/i],
+           'session_state':[/session/i,/cookie/i],
+           'case_acl':[/case\.edit/i,/case\.confirm/i],
+           'case_registry':[/kt126_registry/i],
+           'case_version':[/revision/i],
+           'dossier_unpack':[/document_texts/i,/unpack/i,/decompress/i],
+           'protected_author_proxy':[/author.proxy/i,/ai.author/i,/author\/request/i],
+           'EG_review':[/reviewer/i,/рецензент/i],
+           'word_document':[/document\.generate/i,/docx/i],
+           'operation_journal':[/idempoten/i,/request.id/i,/operation/i],
+           'gis_or_pi':[/pi.master/i,/spatial/i,/gis/i],
+           'kt134_route_present':[/kt134\.auto-dossier-analyze\.v1/i]
+          };
+          for(const [name,patterns] of Object.entries(anchors)){
+            console.log('KT125 source anchor '+name+': '+(patterns.some(p=>p.test(src))?'FOUND':'NOT_FOUND'));
+          }
+          console.log('Backend source SHA256:',crypto.createHash('sha256').update(b).digest('hex'));
+          console.log('Only Boolean presence was emitted; no private source, file body, names, sessions, or token values');
+          NODE
+      - name: No mutation attestation
+        run: echo 'READ ONLY: no Worker publish, secret changes, D1 SQL, R2 write, or real dossier submitted.'
