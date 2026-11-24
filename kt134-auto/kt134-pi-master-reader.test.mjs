@@ -48,3 +48,16 @@ test('missing cadastral identifier never produces zero-overlap finding',async()=
  const reader=createKT134PIMasterReader({lookup,sourceMetadata});
  await assert.rejects(reader({caseId,context:d('Уведомление за складове и офиси')}),/кадастрален/);
 });
+
+test('P4: parcel numbers appearing only in multi-property deed are not treated as subject when notification is classified',async()=>{
+ const seen=[];
+ const reader=createKT134PIMasterReader({lookup:async id=>{seen.push(id);return lookup(id)},sourceMetadata});
+ const context={caseId,documents:[
+  {fileId:'Uvedomlenie.pdf',kind:'notification',sourceText:'ИП за ПИ 56784.13.102'},
+  {fileId:'Not_Akt.pdf',kind:'ownership_deed',sourceText:'Имот 56784.13.102 и 56784.13.103'}
+ ]};
+ const out=await reader({caseId,context});
+ assert.deepEqual(seen,['56784.13.102']);
+ assert.equal(out.scopeBasis,'classified_notice_only');
+ assert.equal(out.subjectParcelsVerified,false);
+});
