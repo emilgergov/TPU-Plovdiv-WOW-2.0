@@ -15,7 +15,7 @@ test('dry run identifies aged orphans but deletes nothing',async()=>{
  const r=await vault.reconcile();assert.equal(r.candidates,1);assert.equal(r.deleted,0);assert.deepEqual(deleted,[]);
 });
 test('referenced blobs are never removed',async()=>{
- const k=key('a'),{vault,deleted}=setup([{key:k,uploaded:new Date(now()-2*day)}],new Set([k]));
+ const k=key('a'),{vault,deleted}=setup([{key:k,uploaded:new Date(now()-2*day)}],new Set([k]),true);
  const r=await vault.reconcile({dryRun:false});assert.equal(r.protected,1);assert.deepEqual(deleted,[]);
 });
 test('young and malformed objects are protected',async()=>{
@@ -23,7 +23,7 @@ test('young and malformed objects are protected',async()=>{
  const r=await vault.reconcile({dryRun:false});assert.equal(r.young,1);assert.equal(r.protected,1);assert.deepEqual(deleted,[]);
 });
 test('aged unreferenced object can be deleted after second reference check',async()=>{
- const k=key('a'),{vault,deleted}=setup([{key:k,uploaded:new Date(now()-2*day)}]);
+ const k=key('a'),{vault,deleted}=setup([{key:k,uploaded:new Date(now()-2*day)}],new Set(),true);
  const r=await vault.reconcile({dryRun:false});assert.equal(r.deleted,1);assert.deepEqual(deleted,[k]);
 });
 test('failure to check D1 references stops deletion',async()=>{
