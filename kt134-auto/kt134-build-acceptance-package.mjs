@@ -15,7 +15,10 @@ const root=dirname(fileURLToPath(import.meta.url));
 const dest=join(root,'test-deliverables');
 await fs.mkdir(dest,{recursive:true});
 const fflate={zipSync,unzipSync};
-const word=createDraftWordAdapter({fflate,templateWindow:{fflate}});
+// The existing KT120 template expects window.fflate in the legacy host.
+// Provide this only in the isolated Node acceptance generator.
+globalThis.window={fflate};
+const word=createDraftWordAdapter({fflate,templateWindow:globalThis.window});
 const documentTitle='Проект на отговор по възражение';
 const content=[
  'Относно: „Възражение по административна преписка“ — синтетичен тестов казус',
