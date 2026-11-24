@@ -7,7 +7,7 @@ const clean=x=>String(x??'').trim();
 const json=(body,status=200)=>new Response(JSON.stringify(body),{
  status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store',
  'x-content-type-options':'nosniff'}});
-function validId(x){return typeof x==='string'&&/^EG-\d{4}-\d{6}$/.test(x)}
+function validId(x){return typeof x==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(x)}
 function safeJson(x){
  if(!x||typeof x!=='object'||Array.isArray(x))throw Object.assign(new Error('Некоректна заявка'),{status:400});
  return x;
@@ -42,7 +42,8 @@ export function createAutoServerRoute({authenticateRequest,authorizeCase,readDos
    if(dossier?.caseId!==caseId || !Array.isArray(dossier.documents) ||
     !dossier.documents.length || dossier.documents.length>maxDocumentCount)
     return json({error:'Невалидно съдържание на преписката'},422);
-   if(clean(input.dossierVersion)!==clean(dossier.version))
+   if(!Number.isSafeInteger(dossier.revision)||dossier.revision<0||
+    clean(input.dossierVersion)!==String(dossier.revision))
     return json({error:'Преписката е променена — необходим е нов анализ'},409);
    const out=await analyze({caseId,verifiedUserId:user.userId,dossier,
     mode:'automatic_proposal',requireExpertApproval:true});
