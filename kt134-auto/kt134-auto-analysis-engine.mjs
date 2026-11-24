@@ -1,3 +1,4 @@
+import {assessKT134EvidenceReadiness} from './kt134-evidence-readiness.mjs';
 /**
  * KT134: standalone server-side author/reviewer coordinator.
  * It is NOT the live EG service; the protected host must provide real author,
@@ -68,9 +69,8 @@ export function createAutoAnalysisEngine({author,reviewer,readSpatial,readNormat
    spatial:spatial.status==='fulfilled'?spatial.value:null,
    normative:normative.status==='fulfilled'?normative.value:null
   });
-  const gaps=[];
-  if(spatial.status!=='fulfilled')gaps.push('Пространствената справка не е потвърдена');
-  if(normative.status!=='fulfilled')gaps.push('Нормативната справка не е потвърдена');
+  const readiness=assessKT134EvidenceReadiness({caseId,spatial:findings.spatial,normative:findings.normative});
+  const gaps=[...readiness.missing];
   // Author and reviewer each process ONE case; no prior case output is injected.
   const original=normalizeAuthor(await author({caseId,verifiedUserId,context,findings,
    instruction:'Create one reasoned proposal; do not invent facts; no expert confirmation'}),caseId,validFiles);
@@ -108,6 +108,7 @@ export function createAutoAnalysisEngine({author,reviewer,readSpatial,readNormat
    verifiedEvidenceCount:evidence.filter(x=>x.verification==='verified').length,
    unresolvedCount:uncertainties.length});
   return Object.freeze({...proposal,caseId,evidence,uncertainties,
+   evidenceReadiness:readiness,proceduralConclusionVerified:readiness.proceduralConclusionVerified,
    reviewerStatus,reviewNotes,expertConfirmed:false,
    status:'automatic_proposal',sourceVersion:str(dossier.version)});
  }
