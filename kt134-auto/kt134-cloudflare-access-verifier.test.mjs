@@ -4,7 +4,7 @@ import {webcrypto} from 'node:crypto';
 import {createCloudflareAccessVerifier} from './kt134-cloudflare-access-verifier.mjs';
 const subtle=webcrypto.subtle,issuer='https://unit-test.cloudflareaccess.com',audience='test-audience';
 const seconds=2000000000;
-const b64=x=>Buffer.from(typeof x==='string'?x:JSON.stringify(x)).toString('base64url');
+const b64=x=>Buffer.from(x instanceof Uint8Array?x:typeof x==='string'?x:JSON.stringify(x)).toString('base64url');
 async function fixture(){
  const keys=await subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
  const publicKey=await subtle.exportKey('jwk',keys.publicKey);
