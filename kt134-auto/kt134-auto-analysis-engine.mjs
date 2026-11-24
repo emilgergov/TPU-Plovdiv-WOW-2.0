@@ -75,11 +75,11 @@ export function createAutoAnalysisEngine({author,reviewer,readSpatial,readNormat
   if(normative.status!=='fulfilled')gaps.push('Нормативната справка не е потвърдена');
   // Author and reviewer each process ONE case; no prior case output is injected.
   const original=normalizeAuthor(await author({caseId,verifiedUserId,context,findings,
-   instruction:'Create one reasoned proposal; do not invent facts; no expert confirmation'}),caseId,validFiles);
+   instruction:'Извърши самостоятелна комплексна преценка на цялата преписка и на относимите данни от ГИС, ПИ MASTER и нормативния MASTER. Сам избери относимите доказателства и правни основания; не се прилага предварителна йерархия на хипотези. Обоснови изводите с проверими източници, посочи съществените неизвестни, изготви едно мотивирано предложение и проект на документ. Не измисляй факти и не симулирай окончателно одобрение от експерта.'}),caseId,validFiles);
   let proposal=original,reviewerStatus='not_completed',reviewNotes=[];
   try {
    const review=await reviewer({caseId,verifiedUserId,context,findings,
-    proposal:clone(original),instruction:'Review constructively; never veto or approve as expert'});
+    proposal:clone(original),instruction:'Извърши независима преценка от същите първични документи, ГИС, ПИ MASTER и нормативния MASTER; не приемай избора или изводите на EG Автор за задължителни. Самостоятелно избери относимите доказателства и провери фактите, приложимите правни основания и пропуските. Предложи корекции или различно мотивирано заключение без право да блокираш предложението или да одобряваш вместо експерта.'});
    need(review?.caseId===caseId,'Рецензентът върна чужда преписка');
    reviewerStatus=review.agrees===true?'internally_validated':
      'proposal_with_concerns';
