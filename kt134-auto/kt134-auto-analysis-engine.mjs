@@ -71,6 +71,8 @@ export function createAutoAnalysisEngine({author,reviewer,readSpatial,readNormat
   });
   const readiness=assessKT134EvidenceReadiness({caseId,spatial:findings.spatial,normative:findings.normative});
   const gaps=[...readiness.missing];
+  if(spatial.status!=='fulfilled')gaps.push('Пространствената справка не е потвърдена');
+  if(normative.status!=='fulfilled')gaps.push('Нормативната справка не е потвърдена');
   // Author and reviewer each process ONE case; no prior case output is injected.
   const original=normalizeAuthor(await author({caseId,verifiedUserId,context,findings,
    instruction:'Create one reasoned proposal; do not invent facts; no expert confirmation'}),caseId,validFiles);
