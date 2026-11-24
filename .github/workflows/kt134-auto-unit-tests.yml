@@ -29,6 +29,8 @@ jobs:
         run: |
           python3 kt134-auto/test_draft_sqlite_schema.py
           python3 kt134-auto/test_atomic_approval_sqlite.py
+      - name: Inspect authentic immutable normative MASTER for P4 screening (no verdict)
+        run: node kt134-auto/kt134-p4-legal-archive-readonly.mjs
       - name: Build genuine DOCX and offline acceptance package (synthetic only)
         run: node kt134-auto/kt134-build-acceptance-package.mjs
       - name: Package KT134 preview and real DOCX for expert review (never deploy)
