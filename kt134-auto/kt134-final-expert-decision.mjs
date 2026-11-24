@@ -6,7 +6,7 @@ export function createAutoExpertDecisions({verifySession,authorizeCase,loadPropo
  for(const [name,fn] of Object.entries({verifySession,authorizeCase,loadProposal,saveDecision,audit})){
   ensure(typeof fn==='function','Липсва защитена функция: '+name);
  }
- async function decide({session,caseId,proposalVersion,action,editedText,previewBindingSha256}){
+ async function decide({session,caseId,proposalVersion,action,editedText,previewBindingSha256,expectedCaseRevision,expectedWordSha256}){
   ensure(session?.active===true&&str(session.userId),'Липсва активна сесия');
   ensure(str(caseId)&&str(proposalVersion),'Липсва версия на предложението');
   ensure(['confirm','edit','manual_from_stage1'].includes(action),'Непознато експертно действие');
@@ -34,6 +34,14 @@ export function createAutoExpertDecisions({verifySession,authorizeCase,loadPropo
    ensure(current.wordReady===true,'Липсва изготвен Word проект по одобрената бланка');
    // If this proposal was created through the verified final-screen service,
    // the expert's click must refer to that EXACT rendered DOCX/proposal binding.
+   if(expectedCaseRevision!==undefined){
+    ensure(Number.isSafeInteger(expectedCaseRevision)&&expectedCaseRevision>=0&&
+     current.caseRevision===expectedCaseRevision,'Ревизията на архивирания проект се различава');
+   }
+   if(expectedWordSha256!==undefined){
+    ensure(/^[0-9a-f]{64}$/u.test(expectedWordSha256)&&
+     current.wordSha256===expectedWordSha256,'Отпечатъкът на архивирания Word се различава');
+   }
    if(current.bindingSha256){
     ensure(/^[0-9a-f]{64}$/u.test(current.bindingSha256),'Невалидна проверка на документа');
     ensure(previewBindingSha256===current.bindingSha256,
@@ -45,10 +53,16 @@ export function createAutoExpertDecisions({verifySession,authorizeCase,loadPropo
     finalDocumentText:current.documentText,procedure:current.procedure,
     documentTitle:current.documentTitle,proposedPanel:current.proposedPanel,
     bindingSha256:current.bindingSha256||null,
+    ...(expectedCaseRevision!==undefined?{caseRevision:expectedCaseRevision}:{}),
+    ...(expectedWordSha256!==undefined?{wordSha256:expectedWordSha256}:{}),
     status:'expert_approved',expertConfirmed:true};
   }
   // Host must atomically compare proposalVersion and persist the expert action.
-  const saved=await saveDecision({caseId,expectedVersion:proposalVersion,record});
+  const saved=await saveDecision({caseId,expectedVersion:proposalVersion,
+   ...(action==='confirm'&&expectedCaseRevision!==undefined?{expectedCaseRevision}:{}),
+   ...(action==='confirm'&&expectedWordSha256!==undefined?{expectedWordSha256}:{}),
+   ...(action==='confirm'&&current.bindingSha256?{expectedBindingSha256:current.bindingSha256}:{}),
+   record});
   ensure(saved?.ok===true&&saved.caseId===caseId&&saved.previousVersion===proposalVersion,
    'Окончателното експертно действие не е записано');
   await audit({userId:verified.userId,caseId,action,proposalVersion,
