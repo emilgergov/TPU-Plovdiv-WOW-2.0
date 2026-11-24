@@ -34,6 +34,11 @@ export function createAutoExpertDecisions({verifySession,authorizeCase,loadPropo
    ensure(current.wordReady===true,'Липсва изготвен Word проект по одобрената бланка');
    // If this proposal was created through the verified final-screen service,
    // the expert's click must refer to that EXACT rendered DOCX/proposal binding.
+   if(expectedCaseRevision!==undefined||expectedWordSha256!==undefined){
+    ensure(/^[0-9a-f]{64}$/u.test(current.bindingSha256||'')&&
+     current.bindingSha256===previewBindingSha256,
+     'Защитеният проект няма идентичен Word преглед');
+   }
    if(expectedCaseRevision!==undefined){
     ensure(Number.isSafeInteger(expectedCaseRevision)&&expectedCaseRevision>=0&&
      current.caseRevision===expectedCaseRevision,'Ревизията на архивирания проект се различава');
