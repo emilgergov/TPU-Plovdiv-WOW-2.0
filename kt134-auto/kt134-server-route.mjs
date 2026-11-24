@@ -59,6 +59,8 @@ export function createAutoServerRoute({authenticateRequest,authorizeCase,readDos
     reviewNotes:Array.isArray(out.reviewNotes)?out.reviewNotes:[],
     evidence:Array.isArray(out.evidence)?out.evidence:[],
     uncertainties:Array.isArray(out.uncertainties)?out.uncertainties:[],
+    proceduralConclusionVerified:out.evidenceReadiness?.proceduralConclusionVerified===true && out.proceduralConclusionVerified===true,
+    evidenceReadiness:out.evidenceReadiness||null,
     expertConfirmed:false,status:'automatic_proposal'};
    await recordAudit({userId:user.userId,caseId,event:'auto_proposal',
     dossierVersion:clean(dossier.version),reviewerStatus:safe.reviewerStatus});
