@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-const base=new URL('../../../',import.meta.url);
+const base=new URL('../../',import.meta.url);
 const read=path=>fs.readFileSync(new URL(path,base),'utf8');
 const e4=read('vt03/kt80/integration/KT134_PINNED_kt96-eg-ai-stage4-author.mjs');
 const handoff=read('vt03/kt80/integration/KT134_PINNED_kt116-expert-approval-handoff.mjs');
