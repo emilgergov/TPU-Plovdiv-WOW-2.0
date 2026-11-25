@@ -1,0 +1,1755 @@
+{
+  "metadataOnly": true,
+  "rows": [
+    {
+      "parent": "$",
+      "key": "decision",
+      "type": "text"
+    },
+    {
+      "parent": "$",
+      "key": "evidence",
+      "type": "object"
+    },
+    {
+      "parent": "$",
+      "key": "format",
+      "type": "text"
+    },
+    {
+      "parent": "$",
+      "key": "globals",
+      "type": "object"
+    },
+    {
+      "parent": "$",
+      "key": "navigation",
+      "type": "object"
+    },
+    {
+      "parent": "$",
+      "key": "number",
+      "type": "text"
+    },
+    {
+      "parent": "$",
+      "key": "number",
+      "type": "null"
+    },
+    {
+      "parent": "$",
+      "key": "panelWork",
+      "type": "null"
+    },
+    {
+      "parent": "$",
+      "key": "stage4",
+      "type": "null"
+    },
+    {
+      "parent": "$",
+      "key": "stage4",
+      "type": "object"
+    },
+    {
+      "parent": "$",
+      "key": "stage5",
+      "type": "null"
+    },
+    {
+      "parent": "$",
+      "key": "stage5",
+      "type": "object"
+    },
+    {
+      "parent": "$",
+      "key": "state",
+      "type": "object"
+    },
+    {
+      "parent": "$",
+      "key": "values",
+      "type": "object"
+    },
+    {
+      "parent": "$.evidence",
+      "key": "area",
+      "type": "text"
+    },
+    {
+      "parent": "$.evidence",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.evidence",
+      "key": "method",
+      "type": "text"
+    },
+    {
+      "parent": "$.evidence",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals",
+      "key": "KT80CH21Draft",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals",
+      "key": "KT80CH2Passport",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals",
+      "key": "KT80DossierAudit",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals",
+      "key": "KT80FreeGISResults",
+      "type": "null"
+    },
+    {
+      "parent": "$.globals",
+      "key": "KT80FreeGISResults",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals",
+      "key": "KT80IPMasterDraft",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals",
+      "key": "KT80KT51Draft",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals",
+      "key": "KT80KT52Draft",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals",
+      "key": "KT81ContextResult",
+      "type": "null"
+    },
+    {
+      "parent": "$.globals",
+      "key": "KT81ContextResult",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals",
+      "key": "KT82Location",
+      "type": "null"
+    },
+    {
+      "parent": "$.globals",
+      "key": "KT82Location",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft",
+      "key": "canDetermineProcedure",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft",
+      "key": "caseName",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft",
+      "key": "documentsWithPageText",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft",
+      "key": "findings",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft",
+      "key": "flaggedFiles",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft",
+      "key": "ignoredFormInstructions",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft",
+      "key": "limitation",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft",
+      "key": "pagesAnalyzed",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft",
+      "key": "parameters",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft",
+      "key": "schema",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft",
+      "key": "status",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft",
+      "key": "topicCounts",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings",
+      "key": "1",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings",
+      "key": "2",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings",
+      "key": "3",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings",
+      "key": "4",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings",
+      "key": "5",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings",
+      "key": "6",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings",
+      "key": "7",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings",
+      "key": "8",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings",
+      "key": "9",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings",
+      "key": "10",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings",
+      "key": "11",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings",
+      "key": "12",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings",
+      "key": "13",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[0]",
+      "key": "classification",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[0]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[0]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[0]",
+      "key": "lineIndex",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[0]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[0]",
+      "key": "parameters",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[0]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[0]",
+      "key": "requiresExpertReview",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[0]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[0]",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[0]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[0].topics",
+      "key": "0",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[0].topics",
+      "key": "1",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[10]",
+      "key": "classification",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[10]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[10]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[10]",
+      "key": "lineIndex",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[10]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[10]",
+      "key": "parameters",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[10]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[10]",
+      "key": "requiresExpertReview",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[10]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[10]",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[10]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[10].topics",
+      "key": "0",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[11]",
+      "key": "classification",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[11]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[11]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[11]",
+      "key": "lineIndex",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[11]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[11]",
+      "key": "parameters",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[11]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[11]",
+      "key": "requiresExpertReview",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[11]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[11]",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[11]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[11].topics",
+      "key": "0",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[12]",
+      "key": "classification",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[12]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[12]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[12]",
+      "key": "lineIndex",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[12]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[12]",
+      "key": "parameters",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[12]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[12]",
+      "key": "requiresExpertReview",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[12]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[12]",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[12]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[12].topics",
+      "key": "0",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[13]",
+      "key": "classification",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[13]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[13]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[13]",
+      "key": "lineIndex",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[13]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[13]",
+      "key": "parameters",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[13]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[13]",
+      "key": "requiresExpertReview",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[13]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[13]",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[13]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[13].topics",
+      "key": "0",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[1]",
+      "key": "classification",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[1]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[1]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[1]",
+      "key": "lineIndex",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[1]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[1]",
+      "key": "parameters",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[1]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[1]",
+      "key": "requiresExpertReview",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[1]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[1]",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[1]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[1].topics",
+      "key": "0",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[1].topics",
+      "key": "1",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2]",
+      "key": "classification",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2]",
+      "key": "lineIndex",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2]",
+      "key": "parameters",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2]",
+      "key": "requiresExpertReview",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2]",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2].parameters",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2].parameters",
+      "key": "1",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2].parameters[0]",
+      "key": "original",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2].parameters[0]",
+      "key": "unit",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2].parameters[0]",
+      "key": "value",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2].parameters[1]",
+      "key": "original",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2].parameters[1]",
+      "key": "unit",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2].parameters[1]",
+      "key": "value",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2].topics",
+      "key": "0",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[2].topics",
+      "key": "1",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3]",
+      "key": "classification",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3]",
+      "key": "lineIndex",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3]",
+      "key": "parameters",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3]",
+      "key": "requiresExpertReview",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3]",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3].parameters",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3].parameters[0]",
+      "key": "original",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3].parameters[0]",
+      "key": "unit",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3].parameters[0]",
+      "key": "value",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3].topics",
+      "key": "0",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[3].topics",
+      "key": "1",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4]",
+      "key": "classification",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4]",
+      "key": "lineIndex",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4]",
+      "key": "parameters",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4]",
+      "key": "requiresExpertReview",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4]",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4].parameters",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4].parameters",
+      "key": "1",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4].parameters[0]",
+      "key": "original",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4].parameters[0]",
+      "key": "unit",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4].parameters[0]",
+      "key": "value",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4].parameters[1]",
+      "key": "original",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4].parameters[1]",
+      "key": "unit",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4].parameters[1]",
+      "key": "value",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[4].topics",
+      "key": "0",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5]",
+      "key": "classification",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5]",
+      "key": "lineIndex",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5]",
+      "key": "parameters",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5]",
+      "key": "requiresExpertReview",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5]",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5].parameters",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5].parameters[0]",
+      "key": "original",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5].parameters[0]",
+      "key": "unit",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5].parameters[0]",
+      "key": "value",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5].topics",
+      "key": "0",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[5].topics",
+      "key": "1",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6]",
+      "key": "classification",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6]",
+      "key": "lineIndex",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6]",
+      "key": "parameters",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6]",
+      "key": "requiresExpertReview",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6]",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6].parameters",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6].parameters[0]",
+      "key": "original",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6].parameters[0]",
+      "key": "unit",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6].parameters[0]",
+      "key": "value",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[6].topics",
+      "key": "0",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[7]",
+      "key": "classification",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[7]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[7]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[7]",
+      "key": "lineIndex",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[7]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[7]",
+      "key": "parameters",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[7]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[7]",
+      "key": "requiresExpertReview",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[7]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[7]",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[7]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[7].topics",
+      "key": "0",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[7].topics",
+      "key": "1",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8]",
+      "key": "classification",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8]",
+      "key": "lineIndex",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8]",
+      "key": "parameters",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8]",
+      "key": "requiresExpertReview",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8]",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8].parameters",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8].parameters",
+      "key": "1",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8].parameters[0]",
+      "key": "original",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8].parameters[0]",
+      "key": "unit",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8].parameters[0]",
+      "key": "value",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8].parameters[1]",
+      "key": "original",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8].parameters[1]",
+      "key": "unit",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8].parameters[1]",
+      "key": "value",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8].topics",
+      "key": "0",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8].topics",
+      "key": "1",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[8].topics",
+      "key": "2",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[9]",
+      "key": "classification",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[9]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[9]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[9]",
+      "key": "lineIndex",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[9]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[9]",
+      "key": "parameters",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[9]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[9]",
+      "key": "requiresExpertReview",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[9]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[9]",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[9]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[9].topics",
+      "key": "0",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.findings[9].topics",
+      "key": "1",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.flaggedFiles",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.flaggedFiles",
+      "key": "1",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.flaggedFiles",
+      "key": "2",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.flaggedFiles",
+      "key": "3",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.flaggedFiles[0]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.flaggedFiles[0]",
+      "key": "state",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.flaggedFiles[1]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.flaggedFiles[1]",
+      "key": "state",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.flaggedFiles[2]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.flaggedFiles[2]",
+      "key": "state",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.flaggedFiles[3]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.flaggedFiles[3]",
+      "key": "state",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters",
+      "key": "1",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters",
+      "key": "2",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[0]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[0]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[0]",
+      "key": "original",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[0]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[0]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[0]",
+      "key": "unit",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[0]",
+      "key": "value",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[0]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[1]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[1]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[1]",
+      "key": "original",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[1]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[1]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[1]",
+      "key": "unit",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[1]",
+      "key": "value",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[1]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[2]",
+      "key": "excerpt",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[2]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[2]",
+      "key": "original",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[2]",
+      "key": "page",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[2]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[2]",
+      "key": "unit",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[2]",
+      "key": "value",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.parameters[2]",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.topicCounts",
+      "key": "access",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.topicCounts",
+      "key": "activity",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.topicCounts",
+      "key": "area",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.topicCounts",
+      "key": "capacity",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.topicCounts",
+      "key": "electricity",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.topicCounts",
+      "key": "emissions",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.topicCounts",
+      "key": "waste",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.topicCounts",
+      "key": "wastewater",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH21Draft.topicCounts",
+      "key": "water_supply",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "acceptedForAutomaticProcedure",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "caseName",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "fileInventory",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "filesCount",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "generatedFrom",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "limitations",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "missingTopics",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "ocrReviewCount",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "requiredStatement",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "reviewFlags",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "schema",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "status",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "uniqueExcerpts",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "unreadCount",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "withEvidence",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory",
+      "key": "1",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory",
+      "key": "2",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory",
+      "key": "3",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory",
+      "key": "4",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory[0]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory[0]",
+      "key": "reason",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory[0]",
+      "key": "state",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory[1]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory[1]",
+      "key": "reason",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory[1]",
+      "key": "state",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory[2]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory[2]",
+      "key": "reason",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory[2]",
+      "key": "state",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory[3]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory[3]",
+      "key": "reason",
+      "type": "text"
+    }
+  ]
+}
