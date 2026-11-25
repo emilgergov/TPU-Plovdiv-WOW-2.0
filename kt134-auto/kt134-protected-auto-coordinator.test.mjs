@@ -8,16 +8,17 @@ function fixture(){
  caseRecord:{id,revision:'2',subject:'Тестова преписка',registryNumber:'PD-004',registryConfirmed:true,status:'active',ownerUserId:'expert',gisMode:'required'},
  evidence:{dossier:rec('dossier'),normativeMaster:rec('normative_master'),piMaster:rec('pi_master'),gisPdf1:rec('gis_pdf1')},
  policy:{source:'KT125_SERVER',liveAutomaticEnabled:true}};
- const calls={author:0,reviewer:0,word:0,load:0};
+ const calls={author:0,reviewer:0,stage5:0,word:0,load:0,order:[]};
  const refs=['dossier','normative_master','pi_master','gis_pdf1'].map(t=>t+':'+digest);
  const adapters={
  async loadProtectedContext(){calls.load++;return ctx;},
  async loadEvidenceBundle(){return {caseId:id,revision:ctx.caseRecord.revision,
   serverVerified:true,caseIsolated:true,receiptRefs:refs,documents:['synthetic']};},
- async invokeAuthor(){calls.author++;return {caseId:id,revision:'2',status:'draft',expertApproved:false,
+ async invokeAuthor(){calls.author++;calls.order.push('author');return {caseId:id,revision:'2',status:'draft',expertApproved:false,
   panelId:17,reasoning:'Мотивирано предложение',content:'Относно: „Тест“\nПроектен текст.',documentTitle:'Проект на писмо'};},
- async invokeReviewer(){calls.reviewer++;return {caseId:id,revision:'2',verdict:'disagree',reasoning:'Различно мнение',suggestions:['Проверете нормата']};},
- async buildDraftWord(){calls.word++;return new Uint8Array(150);}
+ async invokeReviewer(){calls.reviewer++;calls.order.push('reviewer');return {caseId:id,revision:'2',verdict:'disagree',reasoning:'Различно мнение',suggestions:['Проверете нормата'],intermediateDecision:{confirmed:true,panelId:17,reasoning:'Приемам направление 17 след независимо разглеждане'}};},
+ async generateStage5Draft({reviewerDecision}){calls.stage5++;calls.order.push('stage5');return {caseId:id,revision:'2',status:'draft',expertApproved:false,panelId:reviewerDecision.panelId,content:'Относно: „Тест“\nТекст от автоматичен Етап 5.',documentTitle:'Отговор по жалба'};},
+ async buildDraftWord({content}){calls.word++;calls.order.push('word');assert.match(content,/автоматичен Етап 5/);return new Uint8Array(150);}
  };
  return {ctx,calls,adapters,refs};
 }
@@ -26,11 +27,12 @@ test('independent disagreement is visible and Word stays a draft',async()=>{
  const f=fixture(),r=await run(f);
  assert.equal(r.author.panelId,17);assert.equal(r.reviewer.verdict,'disagree');
  assert.equal(r.expertApproved,false);assert.equal(r.finalDecision,null);
- assert.equal(r.requiresExpertConfirmation,true);assert.deepEqual([f.calls.author,f.calls.reviewer,f.calls.word],[1,1,1]);
+ assert.equal(r.requiresExpertConfirmation,true);assert.deepEqual(f.calls.order,['author','reviewer','stage5','word']);
+ assert.equal(r.intermediateDecision.actor,'EG_REVIEWER');assert.equal(r.stage5.documentTitle,'Отговор по жалба');
 });
 test('unavailable reviewer never blocks creating proposal',async()=>{
  const f=fixture();f.adapters.invokeReviewer=async()=>{throw Error('timeout')};
- const r=await run(f);assert.equal(r.reviewer.status,'unavailable');assert.equal(f.calls.word,1);
+ const r=await run(f);assert.equal(r.reviewer.status,'unavailable');assert.equal(r.status,'intermediate_review_unavailable');assert.equal(f.calls.word,0);
 });
 test('no author proposal means no invented administrative document',async()=>{
  const f=fixture();f.adapters.invokeAuthor=async()=>({});await assert.rejects(()=>run(f),/INVALID_AUTHOR_PROPOSAL/);assert.equal(f.calls.word,0);
@@ -68,5 +70,27 @@ test('silent change of subject blocks Word even if revision stays constant',asyn
  const f=fixture(),original=f.adapters.invokeReviewer;
  f.adapters.invokeReviewer=async x=>{f.ctx.caseRecord.subject='Променен предмет';return original(x);};
  await assert.rejects(()=>run(f),/CASE_SNAPSHOT_CHANGED/);
+ assert.equal(f.calls.word,0);
+});
+
+test('reviewer changes the route, Stage5 follows its confirmed panel',async()=>{
+ const f=fixture();
+ f.adapters.invokeReviewer=async()=>({caseId:id,revision:'2',verdict:'disagree',reasoning:'Нов мотив',
+ intermediateDecision:{confirmed:true,panelId:19,reasoning:'Независим избор',correctedProposal:'Коригирана преценка'}});
+ const r=await run(f);
+ assert.equal(r.author.panelId,17);assert.equal(r.stage5.panelId,19);
+ assert.equal(r.intermediateDecision.sourceText,'Коригирана преценка');
+ assert.equal(r.expertApproved,false);assert.equal(f.calls.word,1);
+});
+test('reviewer cannot silently change route without corrected proposal',async()=>{
+ const f=fixture();f.adapters.invokeReviewer=async()=>({caseId:id,revision:'2',verdict:'disagree',reasoning:'Мотив',
+ intermediateDecision:{confirmed:true,panelId:19,reasoning:'Друго направление'}});
+ await assert.rejects(()=>run(f),/REVIEWER_CORRECTION_REQUIRED/);
+ assert.equal(f.calls.stage5,0);
+});
+test('Stage5 cannot silently change reviewer-confirmed panel',async()=>{
+ const f=fixture();f.adapters.generateStage5Draft=async()=>({caseId:id,revision:'2',status:'draft',
+ expertApproved:false,panelId:2,content:'Проект',documentTitle:'Писмо'});
+ await assert.rejects(()=>run(f),/INVALID_STAGE5_AUTOMATIC_DRAFT/);
  assert.equal(f.calls.word,0);
 });
