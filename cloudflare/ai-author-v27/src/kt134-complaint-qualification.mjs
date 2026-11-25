@@ -68,3 +68,35 @@ export function complaintDraftIssues(draft,q){
   issues.push("COMPLAINT_EXPERT_REVIEW_SECTION_MISSING");
  return issues;
 }
+
+
+// Editorial only: never invent a route or a factual/legal premise.
+// A title-only route may be canonicalized ONLY when it exactly names the
+// independently qualified panel. An alternative title remains visible and
+// fails the complaintDraftIssues gate.
+export function normalizeComplaintDraft(draft,q){
+ if(q?.kind!=="complaint_procedure"||typeof draft!=="string")return draft;
+ let value=draft;
+ const route=KT109_ROUTE_BY_ID.get(Number(q.selectedPanel));
+ if(route){
+  const re=/ИЗБРАН\s+ПАНЕЛ\s*:\s*([^\n]+)/iu,hit=value.match(re);
+  if(hit&&!/^0?\d{1,2}\b/u.test(hit[1].trim())){
+   const raw=hit[1].replace(/^[—–\s-]+/u,"").trim().replace(/[.\s]+$/u,"");
+   if(raw.toLocaleLowerCase("bg")===route.title.toLocaleLowerCase("bg"))
+    value=value.replace(re,"ИЗБРАН ПАНЕЛ: "+
+     String(route.id).padStart(2,"0")+" — "+route.title);
+  }
+ }
+ // Rename only existing, recognizable section headings; add no case facts.
+ value=value.replace(/(^|\n)\s*(?:[IVX]+\.\s*)?Нормативна рамка\s*(?=\n|$)/gimu,
+  "$1Нормативни предпоставки и граници на проверката");
+ value=value.replace(/(^|\n)\s*(?:[IVX]+\.\s*)?Правна преценка\s*(?=\n|$)/gimu,
+  "$1Нормативни предпоставки и граници на проверката");
+ value=value.replace(/(^|\n)\s*(?:[IVX]+\.\s*)?Експертна проверка\s*(?=\n|$)/gimu,
+  "$1Данни за експертна проверка");
+ if(!/Данни за експертна проверка/iu.test(value)){
+  value=value.trimEnd()+"\n\nДанни за експертна проверка\n"+
+   "Окончателното експертно одобрение не е извършено. Проектът подлежи на проверка за компетентност, фактически основания и приложим нормативен ред.";
+ }
+ return value;
+}
