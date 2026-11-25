@@ -58,7 +58,7 @@ const payload={
     unexamined:[],unreadableDocuments:[],sourceAnchoredClaims}
  }
 };
-const stage4=await post('/stage4-proposal',payload,145000);
+const stage4=await post('/stage4-proposal',payload,210000);
 report.stage4={http:stage4.http,modelReturnedDraft:typeof stage4.data.draft==='string'&&stage4.data.draft.length>=120,
  draftChars:stage4.data.draft?.length||0,reviewed:stage4.data.normativeAudit?.reviewed===true,
  selectedPanel:stage4.data.normativeAudit?.selectedPanelId??null,
@@ -67,7 +67,7 @@ report.stage4={http:stage4.http,modelReturnedDraft:typeof stage4.data.draft==='s
  qualityIssues:stage4.data.qualityIssues||stage4.data.normativeAudit?.findings||[],
  provisionalDraftChars:stage4.data.unverifiedDraft?.length||0,
  reviewerVerdict:stage4.data.reviewVerdict||null,reviewerFindings:(stage4.data.reviewFindings||[]).slice(0,12),
- qualityStage:stage4.data.qualityStage||null,
+ qualityStage:stage4.data.qualityStage||null,failurePhase:stage4.data.phase||null,failureType:stage4.data.failureType||null,
  provisionalExcerpt:(stage4.data.unverifiedDraft||'').slice(0,1200),
  error:stage4.data.error||null};
 console.log('LIVE EG Author/Reviewer:',JSON.stringify(report.stage4));
