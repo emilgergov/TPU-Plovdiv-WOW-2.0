@@ -676,7 +676,11 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     draft=candidate;issues=remaining;
    }
   }
-  if(issues.length)return expertPreview("Проектът изисква експертен преглед на нормативните несъответствия.",issues,"author_repair",draft,{authorRepairs});
+  if(issues.length&&payload.kt134AutomaticInterim!==true)
+   return expertPreview("Проектът изисква експертен преглед на нормативните несъответствия.",issues,"author_repair",draft,{authorRepairs});
+  // KT134: do not interrupt automatic processing before the independent
+  // reviewer has tried to correct the identified author inconsistencies.
+  // The reviewer still cannot confirm an invalid resulting draft.
   // KT105-C: independent second model run with a distinct reviewer role.
   // It does not confer statutory validity; full normative source text remains unavailable.
   const reviewSystem=[
