@@ -5,6 +5,7 @@
  * the complete preassembled case/source payload, never a public page.
  */
 import {buildKt134CompleteStage4Request} from './kt134-complete-dossier-stage4.mjs';
+import {composeKt134CaseAwareStage5Draft} from './kt134-case-aware-word-body.mjs';
 const invalid=(code)=>{const e=new Error(code);e.code=code;throw e;};
 const value=x=>typeof x==='string'?x.trim():'';
 const chosen=text=>value(text).match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\s*[—–-]?\s*([^\n]*)/iu);
@@ -102,7 +103,9 @@ export function createKt134EgStage45Bridge({workerBase,accessToken,fetchImpl,
        invalid('EG_STAGE5_RESULT_MISMATCH');
     return {caseId,revision,status:'draft',expertApproved:false,
        panelId:reviewerDecision.panelId,documentTitle:stage5Request.documentTitle,
-       content:result.draft};
+       content:stage4.completeCaseEvidence?.evidenceProvenance==='CASE_SPECIFIC_NO_SYNTHETIC_SOURCE'
+        ?composeKt134CaseAwareStage5Draft({stage5Text:result.draft,stage4Request:stage4})
+        :result.draft};
   }
  });
 }
