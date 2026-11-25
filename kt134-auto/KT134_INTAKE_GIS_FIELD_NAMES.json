@@ -1,0 +1,1105 @@
+{
+  "metadataOnly": true,
+  "rows": [
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory",
+      "key": "1",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory",
+      "key": "2",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory",
+      "key": "3",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport.fileInventory",
+      "key": "4",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit.records",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit.records",
+      "key": "1",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit.records",
+      "key": "2",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit.records",
+      "key": "3",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit.records",
+      "key": "4",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit.records[0]",
+      "key": "extracted",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit.records[0]",
+      "key": "extracted",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit.records[0]",
+      "key": "file",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit.records[0]",
+      "key": "fileType",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit.records[0]",
+      "key": "index",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit.records[0]",
+      "key": "note",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit.records[0]",
+      "key": "readerStatus",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit.records[0]",
+      "key": "state",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results",
+      "key": "1",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results",
+      "key": "2",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results",
+      "key": "3",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results",
+      "key": "4",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0]",
+      "key": "archived_overlay_records",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0]",
+      "key": "area_m2_source",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0]",
+      "key": "cadnum",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0]",
+      "key": "geojson",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0]",
+      "key": "input",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0]",
+      "key": "intersection_verified_outside",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0]",
+      "key": "intersection_verified_outside",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0]",
+      "key": "locality",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0]",
+      "key": "overlap_geojson",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0]",
+      "key": "settlement",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0]",
+      "key": "spatial_check_basis",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0]",
+      "key": "status",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0]",
+      "key": "verified_zone_intersections",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"archived_overlay_records\"",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"archived_overlay_records\"[0]",
+      "key": "area_ha_source",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"archived_overlay_records\"[0]",
+      "key": "dv",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"archived_overlay_records\"[0]",
+      "key": "name_bg",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"archived_overlay_records\"[0]",
+      "key": "order_no",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"archived_overlay_records\"[0]",
+      "key": "sitecode",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\"",
+      "key": "features",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\"",
+      "key": "type",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0]",
+      "key": "geometry",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0]",
+      "key": "properties",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0]",
+      "key": "type",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry",
+      "key": "coordinates",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry",
+      "key": "type",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates",
+      "key": "0",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0]",
+      "key": "0",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0]",
+      "key": "0",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0]",
+      "key": "1",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0]",
+      "key": "2",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0]",
+      "key": "3",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0]",
+      "key": "4",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0][0]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0][0]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0][0]",
+      "key": "2",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0][1]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0][1]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0][1]",
+      "key": "2",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0][2]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0][2]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0][2]",
+      "key": "2",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0][3]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0][3]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0][3]",
+      "key": "2",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0][4]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0][4]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].geometry.coordinates[0][0][4]",
+      "key": "2",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].properties",
+      "key": "cadnum",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].properties",
+      "key": "part",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"overlap_geojson\".features[0].properties",
+      "key": "sitecode",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"verified_zone_intersections\"",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"verified_zone_intersections\"[0]",
+      "key": "area_m2",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"verified_zone_intersections\"[0]",
+      "key": "name_bg",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"verified_zone_intersections\"[0]",
+      "key": "sitecode",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].\"verified_zone_intersections\"[0]",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson",
+      "key": "features",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson",
+      "key": "type",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features",
+      "key": "0",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0]",
+      "key": "geometry",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0]",
+      "key": "properties",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0]",
+      "key": "type",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry",
+      "key": "coordinates",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry",
+      "key": "type",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates",
+      "key": "0",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0]",
+      "key": "0",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0]",
+      "key": "1",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "0",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "1",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "2",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "3",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "4",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "5",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "6",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "7",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "8",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "9",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "10",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "11",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "12",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "13",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "14",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "15",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "16",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "17",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "18",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "19",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "20",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "21",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "22",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "23",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "24",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "25",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "26",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "27",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "28",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "29",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "30",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "31",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "32",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "33",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "34",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "35",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "36",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "37",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "38",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "39",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "40",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "41",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "42",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "43",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "44",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "45",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "46",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "47",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "48",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "49",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "50",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "51",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0]",
+      "key": "52",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][0]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][0]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][10]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][10]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][11]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][11]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][12]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][12]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][13]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][13]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][14]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][14]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][15]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][15]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][16]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][16]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][17]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][17]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][18]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][18]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][19]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][19]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][1]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][1]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][20]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][20]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][21]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][21]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][22]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][22]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][23]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][23]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][24]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][24]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][25]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][25]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][26]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][26]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][27]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][27]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][28]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][28]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][29]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][29]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][2]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][2]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][30]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][30]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][31]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][31]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][32]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][32]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][33]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][33]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][34]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][34]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][35]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][35]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][36]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][36]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][37]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][37]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][38]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][38]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][39]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][39]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][3]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][3]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][40]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][40]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][41]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][41]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][42]",
+      "key": "0",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][42]",
+      "key": "1",
+      "type": "real"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults.results[0].geojson.features[0].geometry.coordinates[0][0][43]",
+      "key": "0",
+      "type": "real"
+    }
+  ]
+}
