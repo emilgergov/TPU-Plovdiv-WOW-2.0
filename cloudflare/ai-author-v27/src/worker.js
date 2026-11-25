@@ -376,7 +376,7 @@ async function handleStage4Proposal(request,env){
   Array.isArray(dossierCoverage.unexamined)&&dossierCoverage.unexamined.length===0&&
   Array.isArray(dossierCoverage.unreadableDocuments)&&dossierCoverage.unreadableDocuments.length===0;
  const dossierAnchors=dossierCoverageComplete&&Array.isArray(dossierCoverage.sourceAnchoredClaims)?
-  dossierCoverage.sourceAnchoredClaims.slice(0,180).map(x=>({
+  dossierCoverage.sourceAnchoredClaims.map(x=>({
    documentIndex:Number(x?.documentIndex),source:text(x?.source,180),
    start:Number(x?.start),end:Number(x?.end),
    quote:text(x?.quote,500),summary:text(x?.summary,600),
