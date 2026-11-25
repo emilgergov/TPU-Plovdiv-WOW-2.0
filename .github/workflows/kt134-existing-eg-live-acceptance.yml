@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   live-existing-eg:
-    if: true # KT134 one bounded live test of independently signed complaint route; disable after completion
+    if: false # One bounded live test finished; disable repeated paid AI requests after HTTP 504
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
