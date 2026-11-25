@@ -99,7 +99,7 @@ export const QUALIFICATION_SYSTEM=[
  "Не избирай предварително панел 01,02,04 или 05. Не възлагай правната категоризация на възложителя.",
  "Не измисляй цитати, източници и факти. Изходът не е административен акт, а проектна квалификация."
 ].join(" ");
-export function buildQualificationSources({subject,scope,confirmed=[],documents=[],legalProvisions=[]}){
+export function buildQualificationSources({subject,scope,confirmed=[],documents=[],anchoredClaims=[],legalProvisions=[]}){
  const facts=[
   {id:"subject",text:String(subject||""),established:true,kind:"expert-confirmed"},
   {id:"scope",text:String(scope||""),established:true,kind:"expert-confirmed"}
@@ -111,6 +111,21 @@ export function buildQualificationSources({subject,scope,confirmed=[],documents=
  documents.slice(0,24).forEach((d,i)=>facts.push({
   id:"doc:"+i,text:String(d.text||""),established:false,kind:"unverified-document-extract",title:String(d.source||"")
  }));
+ // KT134: source-anchored quotations from every examined document span.
+ // They are eligible as cited evidence but NEVER as an expert-confirmed fact.
+ // Source id is tied to the exact document index and character offset.
+ const seen=new Set();
+ for(const claim of Array.isArray(anchoredClaims)?anchoredClaims:[]){
+  const doc=Number(claim?.documentIndex),start=Number(claim?.start);
+  const quote=String(claim?.quote||"").trim(),title=String(claim?.source||"").trim();
+  if(!Number.isSafeInteger(doc)||doc<0||!Number.isSafeInteger(start)||start<0||
+     quote.length<12||quote.length>500||!title)continue;
+  const id="span:"+doc+":"+start;
+  if(seen.has(id))continue;
+  seen.add(id);
+  facts.push({id,text:quote,established:false,kind:"unverified-document-span",title,
+   documentIndex:doc,sourceOffset:start});
+ }
  const laws=legalProvisions.map((law,i)=>({
   id:"law:"+i,reference:String(law.reference||""),act:String(law.act||""),
   text:String(law.fullLegalText||""),verified:law.quotationFromArchive===true
