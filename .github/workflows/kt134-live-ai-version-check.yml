@@ -20,8 +20,11 @@ jobs:
       - name: Limit charged live test to ONE explicit commit
         id: gate
         shell: bash
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          if git log -1 --format=%s HEAD^2 | grep -Fq 'KT134-LIVE-ONE-SHOT'; then
+          git fetch --no-tags --depth=1 origin "$PR_HEAD_SHA"
+          if git show -s --format=%s "$PR_HEAD_SHA" | grep -Fq 'KT134-LIVE-ONE-SHOT'; then
             echo 'run=true' >> "$GITHUB_OUTPUT"
             echo 'One-shot protected source-span live test enabled.'
           else
