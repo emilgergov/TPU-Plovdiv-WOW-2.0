@@ -46,7 +46,9 @@ test("not enough qualification sources never silently fabricates a physical gap 
  const txt=composeKt134GroundedReviewerAlternative({subject:"Възражение",scope:"Случай по преписка",disposition:d});
  assert.equal(d.proposedPanel,5);
  assert.equal(d.physicalGap,null);
- assert.ok(txt.includes("№5"));
+ assert.ok(txt.includes("Мотивирано предложение"));
+ assert.ok(!txt.includes("Рецензентският избор на направление"));
+ assert.ok(!txt.includes("№5"));
  assert.ok(!txt.includes("Технологичен капацитет"));
 });
 
@@ -68,4 +70,13 @@ test("actual live draft saying 'no grounds' and issuing art.2(2) notice is not e
  const errors=kt134DispositionTextIssues(text,disposition);
  assert.ok(errors.includes("UNPROVEN_NEGATIVE_PROCEDURAL_CONCLUSION"));
  assert.ok(errors.includes("UNPROVEN_ART2_2_NOTIFICATION"));
+});
+
+test("fallback aligns with selected expert-reference panel 13, not a procedural letter",()=>{
+ const d=deriveKt134LegalDisposition({qualification:null,qualificationValidated:false,reviewerPanelId:13});
+ const txt=composeKt134GroundedReviewerAlternative({subject:"ИП",scope:"Преустройство",disposition:d,
+   caseContext:{documents:[{source:"Техническо описание",text:"Липсват потвърдени данни за капацитет."}]}});
+ assert.match(txt,/изготвяне на експертна справка/u);
+ assert.equal(kt134DispositionTextIssues(txt,d).length,0);
+ assert.ok(!txt.includes("Рецензентът"));
 });
