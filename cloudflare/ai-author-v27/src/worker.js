@@ -967,10 +967,10 @@ async function handleStage5Document(request,env){
  // KT134: the reviewer may leave unresolved legal objections but cannot
  // return the case to the user for an INTERMEDIATE confirmation. Stage 5 still
  // produces a transparent, non-issued working proposal, not a definitive act.
- if(automaticReviewerConfirmed&&input.reviewerIntermediate?.unresolvedIssues?.length){
+ if(automaticReviewerConfirmed){
    const d=input.reviewerIntermediate;
    const clean=x=>String(x||"").trim();
-   const issues=d.unresolvedIssues.map(clean).filter(Boolean);
+   const issues=(Array.isArray(d.unresolvedIssues)?d.unresolvedIssues:[]).map(clean).filter(Boolean);
    const reasons=(Array.isArray(d.reviewerReasons)?d.reviewerReasons:[]).map(clean).filter(Boolean);
    const proposedPanel=clean(input.selectedPanelLine);
    const subject=clean(input.subject).replace(/[„“]/gu,"");
@@ -991,6 +991,10 @@ async function handleStage5Document(request,env){
           "Не измисляй местоположение, ГИС пресичания, технологични параметри, доказани категории, нормативни членове или заповеди. Не превръщай липсващи данни в доказана отрицателна приложимост.",
           "Площ на поземлен имот НЕ Е площ на сграда или РЗП. Използвай конкретните етикети за площ от caseContext; ако площ на сградата не е доказана, не ѝ приписвай стойност.",
           "Когато не е доказана категория по приложение №1 или №2 към ЗООС, НЕ твърди, че преценка по чл. 93 ЗООС е задължителна, нито че решение по чл. 93, ал. 6 ЗООС се издава като отказ от процедура. Не избирай правен изход само защото ГИС не пресича ЗЗ/ЗТ.",
+          "НЕ прави категорично отрицателно заключение за приложимостта на ОВОС или ОС само защото не е описан технологичен процес, липсва информация за капацитет или ГИС резултатът сочи непресичане. Сравни конкретните законови критерии с наличните положителни факти. Правната неопределеност НЕ Е неприложимост.",
+          "Ако не е доказана законова категория, обособи точно недоказаното условие и предложи допустим следващ административен ход. Не предлагай писмо за окончателно неприложими ОВОС/ОС, когато подлежащите предпоставки не са действително проверени.",
+          "За всеки извод посочи документ, факт и приложима норма само ако нормата е налична във verifiedLegalContext. Не представяй само заглавие на закон или числов праг като проверена разпоредба.",
+          "Напиши единен административен проект с конкретно предложение за следващо действие, а не указание експертът сам да извърши вместо теб цялата преценка.",
           "Не използвай изрази Предложението е окончателно, следва задължително, утвърждава се или актът се издава, когато предпоставките остават неопределени. Резултатът е само проект на предложение за човешко решение.",
           "Ако предложената процедура/панел не следва логично от установените факти, посочи я като непотвърдена хипотеза и формулирай собствено конкретно допустимо административно предложение с точно посочените липсващи предпоставки.",
           "Без акт, без подпис, без категорична окончателна правна квалификация при непълни доказателства. Използвай официален административен стил; не изреждай вътрешни кодове.",
@@ -998,7 +1002,10 @@ async function handleStage5Document(request,env){
          ].join("\n")},
          {role:"user",content:JSON.stringify({
            caseId:input.caseId,subject:input.subject,scope:input.scope,
-           parcels:input.parcelIds,caseContext:input.caseContext||null,proposedDirection:proposedPanel,
+           parcels:input.parcelIds,caseContext:input.caseContext||null,
+           verifiedLegalContext:input.qualificationRecord||null,
+           legalEvidenceWarnings:issues.slice(0,12),
+           proposedDirection:proposedPanel,
            reviewedProposal:clean(d.reviewedText).slice(0,12000),
            reviewerArgumentNotes:reasons.slice(0,8),
            unresolvedQualityFlagsCount:issues.length,
