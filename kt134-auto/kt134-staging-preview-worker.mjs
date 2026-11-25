@@ -4,6 +4,7 @@
  * Visible Bulgarian disclaimer and synthetic UI only.
  */
 import preview from './KT134_AUTO_VISUAL_DEMO.html';
+import syntheticDocx from './test-deliverables/KT134_TEST_PROEKT_OTGOVOR_VAZRAZHENIE.docx';
 const safeEqual=(a,b)=>{
  if(typeof a!=='string'||typeof b!=='string'||a.length!==b.length||a.length<32)return false;
  let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);
@@ -43,6 +44,14 @@ export default {
    }
   }
   if(request.method!=='GET'&&request.method!=='HEAD')return respond('Методът не е разрешен',405,{'allow':'GET, HEAD','content-type':'text/plain; charset=utf-8'});
+  if(url.pathname==='/kt134/demo.docx'){
+   // This immutable synthetic acceptance document is produced from the original
+   // institutional KT120 template during CI. No dossiers and no D1/R2 reads.
+   return respond(syntheticDocx,200,{
+    'content-type':'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'content-disposition':'attachment; filename="KT134_SYNTHETIC_WORD_TEST.docx"'
+   });
+  }
   if(url.pathname==='/kt134/health'){
    const ok=!!env.DB?.prepare&&!!env.BUCKET?.get&&!!env.BUCKET?.put;
    return respond(JSON.stringify({
