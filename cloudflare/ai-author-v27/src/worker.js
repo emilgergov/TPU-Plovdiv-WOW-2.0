@@ -746,7 +746,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   // KT134: the independent reviewer, not the user, performs one targeted
   // intermediate revision using the actual defects in its first proposal.
   // This is an authoring action, not an authorization bypass.
-  if(payload.kt134AutomaticInterim===true&&(reviewedIssues.length||verdict==="reject")){
+  if(payload.kt134AutomaticInterim===true&&(reviewedIssues.length||verdict==="reject"||!KT109_ROUTE_BY_ID.has(Number(finalDraft.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0)))){
    const secondSystem=[
     reviewSystem,
     "АВТОМАТИЧЕН РЕЖИМ: Ти самостоятелно довършваш междинната преценка вместо да спираш за човешко потвърждение.",
@@ -754,7 +754,8 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     "Предложи един действително мотивиран панел от 22-те, ако правните и фактическите данни го позволяват. Не измисляй правен факт, категория, площ или кадастрален номер.",
     "Четирите реда за ЗООС и Наредбата за ОС трябва да предхождат избора на панел. Изведи всички четири заглавия: Фактическа основа; Нормативни предпоставки и граници на проверката; Мотивирано предложение; Данни за експертна проверка.",
     "Ако решаващ физически факт реално липсва, посочи кой точно, в кой документ, за кой нормативен критерий и избери административно действие, което не предполага доказана приложимост. Не заявявай неподкрепено правно заключение.",
-    "В revisedDraft върни ПЪЛНИЯ коригиран документ. В grounds и issues опиши реалните доказателствени ограничения. Никакво окончателно административно одобрение."
+    "В revisedDraft върни ПЪЛНИЯ коригиран документ. В grounds и issues опиши реалните доказателствени ограничения. Никакво окончателно административно одобрение.",
+    "ЗАДЪЛЖИТЕЛНО изведи ЕДИН ред в точния формат ИЗБРАН ПАНЕЛ: NN — Име от каталога, където NN е действително избраният от теб номер. Не пропускай реда дори при правна несигурност. Винаги дай мотивирано предложение и конкретно следващо административно действие."
    ].join("\n");
    const secondResponse=await fetch("https://api.openai.com/v1/responses",{
     method:"POST",signal:controller.signal,
