@@ -63,10 +63,11 @@ export function composeKt134CaseAwareStage5Draft({stage5Text,stage4Request}={}){
    str(dossier.pdf2Ref)?'Приложение: нормативна справка (PDF2) — '+printable(dossier.pdf2Ref)+'.':''
  ]);
  const lines=original.split(/\r?\n/u);
- let heading=lines[0].trim();
- // Repair the inherited Stage 5 unmatched Bulgarian subject quotation.
- if(heading.startsWith('Относно:')&&heading.includes('„')&&!heading.includes('“'))
-   heading=heading.replace(/\s*[.!?]*$/u,'').trimEnd()+'“';
+ // Institutional subject comes from the confirmed Stage 2 subject, not an
+ // uncontrolled model-generated quotation; avoids mismatched or duplicate quotes.
+ const title=printable(stage4Request.subject).replace(/[„“"]/gu,'').replace(/[.!?]+$/u,'').trim();
+ if(!title)throw Error('KT134_VERIFIED_SUBJECT_MISSING');
+ const heading='Относно: „'+title+'“';
  const body=lines.slice(1).filter(line=>!line.trimStart().startsWith('Относно:')).join('\n').trim();
  return [heading,'ФАКТИЧЕСКИ ДАННИ ОТ ПРЕПИСКАТА',...paras,
    'МОТИВИРАНО ПРЕДЛОЖЕНИЕ ОТ ЕТАП 5',body].filter(x=>str(x)).join('\n');
