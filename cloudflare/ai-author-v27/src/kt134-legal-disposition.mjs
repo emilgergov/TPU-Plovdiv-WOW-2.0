@@ -103,6 +103,17 @@ export function kt134DispositionTextIssues(text,disposition){
    if(/(?:пълна|детайлна|изчерпателна)\s+техническа\s+документация/iu.test(proposal))
      errors.push("UNJUSTIFIED_FULL_TECHNICAL_DOSSIER");
  }
+ // Legal text must use the actual name of the OS ordinance, and must not
+ // turn an unspecified investment proposition into a compulsory EIA/SEA
+ // procedure or invent a specific statutory mandate.
+ if(/Наредба\s+за\s+опазване\s+на\s+околната\s+среда\s*\(\s*Наредба\s+за\s+ОС\s*\)/iu.test(body))
+   errors.push("INCORRECT_OS_ORDINANCE_TITLE");
+ if(/(?:задължителн(?:а|ата)\s+преценк(?:а|ата)[^.!?\n]{0,100}(?:ОВОС|чл\.?\s*93)|(?:задължителн(?:а|ата)\s+)?преценка\s+за\s+необходимостта\s+от\s+екологична\s+оценка)[^.!?\n]{0,120}/iu.test(body)&&!disposition.annexPositive)
+   errors.push("UNPROVEN_COMPULSORY_EIA_OR_CONFUSED_SEA");
+ if(disposition.proposedPanel===2&&/(?:детайлна|пълна|всеобхватна)\s+техническа\s+информация[^.!?\n]{0,200}(?:други\s+релевантни\s+данни|и\s+други\s+данни)/iu.test(body))
+   errors.push("NON_SPECIFIC_INFORMATION_REQUEST");
+ if(!disposition.qualificationValidated&&/(?:съгласно|по\s+реда\s+на)[^.!?\n]{0,80}чл\.?\s*2\s*,?\s*ал\.?\s*4\s+от\s+Наредбата\s+за\s+ОС/iu.test(body))
+   errors.push("UNVERIFIED_OS_SPECIFIC_LEGAL_CLAIM");
  if(/(?:изготвил\s*:\s*(?:независим\s+)?рецензент|дата\s*:\s*\[по\s+решение\s+на\s+експерта\]|ЕГ\s+автор\s*\/\s*рецензент)/iu.test(body))
    errors.push("INTERNAL_REVIEW_PROCESS_IN_DOCUMENT");
  if(/(?:\bMISSING_[A-Z_]+\b|\bPANEL_\d\d_[A-Z_]+\b|\bUNSUPPORTED_[A-Z_]+\b)/u.test(body))
