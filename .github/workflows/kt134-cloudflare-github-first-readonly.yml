@@ -235,8 +235,11 @@ jobs:
           console.log('KT134 isolated staging admission:',result.ready?'ELIGIBLE FOR SEPARATE SECURITY REVIEW':'BLOCKED');
           for(const x of result.checks)
             console.log((x.ok?'PASS':'BLOCK')+' '+x.id+' — '+x.note);
-          if(!result.ready)
+          if(!result.ready){
+            const missing=result.checks.filter(x=>!x.ok).map(x=>x.id);
+            console.log('KT134 outstanding staging prerequisites ('+missing.length+'/'+result.checks.length+'): '+missing.join(', '));
             console.log('No staging deployment: no production resources have been modified.');
+          }
           else
             console.log('Metadata-only gate passed; STILL NO deployment authorization.');
           NODE
