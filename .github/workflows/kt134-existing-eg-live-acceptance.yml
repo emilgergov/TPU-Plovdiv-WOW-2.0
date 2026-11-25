@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   live-existing-eg:
-    if: false # Fix rollout identity verification before controlled test retry
+    if: true # User-authorized bounded retry after exact-version rollout verification fix; disable after result
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
