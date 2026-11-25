@@ -403,7 +403,7 @@ async function handleStage4Proposal(request,env){
   requiredLegalSourceIds:qualificationLegalIds,
   evidenceRule:"Use the IDs in requiredLegalSourceIds for each corresponding test; these IDs identify legal texts only, not a predetermined legal status. Case excerpts are attributed sources, not independently confirmed legal truth."
  };
- const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),115000);
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),payload.kt134AutomaticInterim===true?225000:115000);
  try{
   if(env.KT123_TEST_LEGACY_MODE!=="true"){
    const callQualification=async(issues=[])=>{
@@ -734,16 +734,69 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   let independentReview;
   try{independentReview=JSON.parse(auditText.replace(/^\x60\x60\x60(?:json)?\s*|\s*\x60\x60\x60$/giu,""))}
   catch{return expertPreview("Независимият нормативен преглед не върна четим резултат.",["REVIEW_UNREADABLE"],"independent_review",draft)}
-  const reviewerFindings=[
+  let reviewerFindings=[
    ...(Array.isArray(independentReview?.grounds)?independentReview.grounds:[]),
    ...(Array.isArray(independentReview?.issues)?independentReview.issues:[])
   ].filter(x=>typeof x==="string"&&x.trim()).slice(0,10);
-  const verdict=independentReview?.verdict;
+  let verdict=independentReview?.verdict;
   if(!["pass","revise","reject"].includes(verdict))return expertPreview("Независимият преглед е невалиден.",["INVALID_REVIEW"],"independent_review",draft);
-  const finalDraft=verdict==="pass"?draft:(text(independentReview.revisedDraft,12000)||draft);
-  const reviewedIssues=[...qualityIssues(finalDraft),...(lockedQualification?compareDraftWithQualification(finalDraft,lockedQualification):[]),...qualificationIssues];
-  // Reviewer disagreement is not a veto when the reviewer supplied a
-  // complete, independently revalidated correction.
+  let finalDraft=verdict==="pass"?draft:(text(independentReview.revisedDraft,12000)||draft);
+  const reviewedQuality=v=>[...qualityIssues(v),...(lockedQualification?compareDraftWithQualification(v,lockedQualification):[]),...qualificationIssues];
+  let reviewedIssues=reviewedQuality(finalDraft);
+  // KT134: the independent reviewer, not the user, performs one targeted
+  // intermediate revision using the actual defects in its first proposal.
+  // This is an authoring action, not an authorization bypass.
+  if(payload.kt134AutomaticInterim===true&&(reviewedIssues.length||verdict==="reject")){
+   const secondSystem=[
+    reviewSystem,
+    "АВТОМАТИЧЕН РЕЖИМ: Ти самостоятелно довършваш междинната преценка вместо да спираш за човешко потвърждение.",
+    "Поправи посочените конкретни дефекти в твоя предишен текст. Не повтаряй неподкрепен панел 01.",
+    "Предложи един действително мотивиран панел от 22-те, ако правните и фактическите данни го позволяват. Не измисляй правен факт, категория, площ или кадастрален номер.",
+    "Четирите реда за ЗООС и Наредбата за ОС трябва да предхождат избора на панел. Изведи всички четири заглавия: Фактическа основа; Нормативни предпоставки и граници на проверката; Мотивирано предложение; Данни за експертна проверка.",
+    "Ако решаващ физически факт реално липсва, посочи кой точно, в кой документ, за кой нормативен критерий и избери административно действие, което не предполага доказана приложимост. Не заявявай неподкрепено правно заключение.",
+    "В revisedDraft върни ПЪЛНИЯ коригиран документ. В grounds и issues опиши реалните доказателствени ограничения. Никакво окончателно административно одобрение."
+   ].join("\n");
+   const secondResponse=await fetch("https://api.openai.com/v1/responses",{
+    method:"POST",signal:controller.signal,
+    headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:6500,
+     text:{format:{type:"json_schema",name:"kt134_intermediate_reviewer_revision",strict:true,
+      schema:{type:"object",additionalProperties:false,properties:{
+       verdict:{type:"string",enum:["pass","revise","reject"]},
+       issues:{type:"array",items:{type:"string"}},
+       grounds:{type:"array",items:{type:"string"}},
+       revisedDraft:{type:"string"}
+      },required:["verdict","issues","grounds","revisedDraft"]}}},
+     input:[{role:"system",content:secondSystem},
+      {role:"user",content:JSON.stringify({subject:payload.subject,scope:payload.scope,
+       legalTextsExact:verifiedLegalCorpus.legalProvisions,
+       confirmedFacts:confirmed,unresolvedFacts:unresolved,
+       sourceTexts:sourceTexts.slice(0,12).map(x=>({source:x.source,text:x.text.slice(0,3000)})),
+       originalAuthorDraft:draft,firstReviewerDraft:finalDraft,
+       firstReviewerVerdict:verdict,firstReviewerFindings:reviewerFindings,
+       concreteDefects:reviewedIssues,routeCatalog:KT109_ROUTE_CATALOG,
+       instruction:"Самостоятелна РЕЦЕНЗЕНТСКА поправка; един мотивиран, условен когато е необходимо, проект. Без фалшива правна сигурност."})}]})
+   });
+   if(secondResponse.ok){
+    const secondData=await secondResponse.json();
+    const secondRaw=(secondData.output||[]).flatMap(x=>x.content||[])
+       .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
+    try {
+     const second=JSON.parse(secondRaw);
+     const candidate=text(second?.revisedDraft,12000);
+     if(candidate.length>=120){
+      finalDraft=candidate;
+      reviewedIssues=reviewedQuality(candidate);
+      verdict=second.verdict==="reject"?"reject":"revise";
+      reviewerFindings=[...reviewerFindings,
+        ...(Array.isArray(second.grounds)?second.grounds:[]),
+        ...(Array.isArray(second.issues)?second.issues:[])
+      ].filter(x=>typeof x==="string"&&x.trim()).slice(0,15);
+     }
+    }catch{}
+   }
+  }
+  // Reviewer correction is a draft and cannot issue an administrative act.
   const correctedByReviewer=finalDraft!==draft&&reviewedIssues.length===0;
   const reviewDisposition=verdict==="reject"&&correctedByReviewer?"revise":verdict;
   if(reviewedIssues.length||(verdict==="reject"&&!correctedByReviewer))
