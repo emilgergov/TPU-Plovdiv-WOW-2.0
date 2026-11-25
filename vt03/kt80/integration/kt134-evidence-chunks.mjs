@@ -1,0 +1,43 @@
+// KT134: enumerate EVERY readable document span, never silently truncate.
+const str=x=>String(x??"");
+export function buildEvidenceChunks(documents,maxChars=5000){
+ if(!Array.isArray(documents))return {chunks:[],unreadable:[],totalDocuments:0};
+ const chunks=[],unreadable=[];
+ for(let i=0;i<documents.length;i++){
+  const d=documents[i]||{},name=str(d.source||d.name||d.file||"").trim();
+  const content=str(d.text).replace(/\r\n/g,"\n");
+  const sourceId=name||"Документ "+(i+1);
+  if(!content.trim()){unreadable.push({documentIndex:i,source:sourceId,reason:"NO_EXTRACTED_TEXT"});continue}
+  for(let start=0;start<content.length;start+=maxChars){
+   const end=Math.min(content.length,start+maxChars);
+   chunks.push({documentIndex:i,source:sourceId,start,end,totalChars:content.length,
+    text:content.slice(start,end),untrustedDocumentText:true});
+  }
+ }
+ return {chunks,unreadable,totalDocuments:documents.length};
+}
+export function verifyEvidenceDigest(chunk,reply){
+ const claims=[];
+ for(const raw of Array.isArray(reply?.claims)?reply.claims.slice(0,12):[]){
+  const quote=str(raw?.quote).trim(),summary=str(raw?.summary).trim();
+  if(quote.length<12||quote.length>500||summary.length<12||summary.length>600)continue;
+  const at=chunk.text.indexOf(quote);
+  if(at<0)continue; // no paraphrase can masquerade as a quotation
+  claims.push({source:chunk.source,documentIndex:chunk.documentIndex,
+   start:chunk.start+at,end:chunk.start+at+quote.length,quote,summary,
+   verifiedQuoteMatch:true,expertConfirmed:false});
+ }
+ return {chunk:{documentIndex:chunk.documentIndex,source:chunk.source,
+  start:chunk.start,end:chunk.end,totalChars:chunk.totalChars},
+  claims,examined:reply?.examined===true,notes:str(reply?.notes).slice(0,450)};
+}
+export function evidenceCoverage(expected,receipts){
+ const byKey=x=>[x.documentIndex,x.start,x.end,x.totalChars].join(":");
+ const ack=new Map((receipts||[]).filter(x=>x?.examined===true).map(x=>[byKey(x.chunk),x]));
+ const unexamined=expected.chunks.filter(x=>!ack.has(byKey(x))).map(x=>({
+  source:x.source,start:x.start,end:x.end,documentIndex:x.documentIndex}));
+ return {complete:unexamined.length===0&&expected.unreadable.length===0,
+  expectedChunks:expected.chunks.length,examinedChunks:expected.chunks.length-unexamined.length,
+  unreadableDocuments:expected.unreadable,unexamined,
+  claims:(receipts||[]).flatMap(x=>Array.isArray(x?.claims)?x.claims:[])};
+}
