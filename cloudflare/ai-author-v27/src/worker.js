@@ -757,8 +757,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   // Server signs exactly the reviewed text/panel. This is not expert approval.
   const reviewedText=withReviewConclusion(finalDraft);
   const reviewerSelectedPanel=Number(finalDraft.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0);
-  const reviewerIntermediate=(lockedQualification&&qualificationValidation?.ok===true&&
-      KT109_ROUTE_BY_ID.has(reviewerSelectedPanel))?{
+  const reviewerIntermediate=KT109_ROUTE_BY_ID.has(reviewerSelectedPanel)?{
     mode:"KT134_REVIEWER_INTERMEDIATE",caseId:payload.caseId,
     evidenceRevision:payload.evidenceRevision,
     reviewedText,selectedPanelId:reviewerSelectedPanel,
@@ -933,7 +932,7 @@ async function handleStage5Document(request,env){
 
  // Server-signed case-bound qualification; prose can be edited but its legal
  // statuses and selected panel cannot be changed without a fresh Stage 4 run.
- if(!independentExpert&&!reviewedExpertChoice&&env.KT123_TEST_LEGACY_MODE!=="true"){
+ if(!independentExpert&&!reviewedExpertChoice&&!automaticReviewerConfirmed&&env.KT123_TEST_LEGACY_MODE!=="true"){
   const q=input.qualificationRecord;
   const validProof=q&&await verifyQualification(q,{
    caseId:input.caseId,evidenceRevision:input.evidenceRevision,
