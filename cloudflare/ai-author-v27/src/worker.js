@@ -739,7 +739,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   if(!["pass","revise","reject"].includes(verdict))return expertPreview("Независимият преглед е невалиден.",["INVALID_REVIEW"],"independent_review",draft);
   let finalDraft=verdict==="pass"?draft:(text(independentReview.revisedDraft,12000)||draft);
   // KT134: one non-blocking reviewer self-correction, independent of expert approval.
-  const toRepair=new Set(["TEST_METADATA_IN_ADMINISTRATIVE_TEXT","SHORT_UNREASONED_DRAFT","MISSING_ACTIONABLE_PROPOSAL","NO_SELECTED_PANEL"]);
+  const toRepair=new Set(["TEST_METADATA_IN_ADMINISTRATIVE_TEXT","SHORT_UNREASONED_DRAFT","MISSING_ACTIONABLE_PROPOSAL","NO_SELECTED_PANEL","GENERIC_LEGAL_UNCERTAINTY","UNPROVEN_PHYSICAL_GAP"]);
   const diagnosticInput={stage:4,sourceTexts,gis:detail.gis||null,legalTexts:verifiedLegalCorpus.legalProvisions,reviewFindings:reviewerFindings};
   const repairProblems=kt134DraftDiagnostics(withReviewConclusion(finalDraft),diagnosticInput).findings.filter(x=>toRepair.has(x.code));
   let kt134ReviewerCorrectionAttempted=false,kt134ReviewerCorrectionApplied=false;
@@ -1051,7 +1051,7 @@ async function handleStage5Document(request,env){
  // KT134: one bounded Stage 5 content repair before existing direction checks.
  let kt134Stage5RepairAttempted=false,kt134Stage5RepairApplied=false;
  const firstFlags=kt134DraftDiagnostics(draft,{stage:5}).findings.filter(x=>
-  ["SHORT_UNREASONED_DRAFT","TEST_METADATA_IN_ADMINISTRATIVE_TEXT"].includes(x.code));
+  ["SHORT_UNREASONED_DRAFT","TEST_METADATA_IN_ADMINISTRATIVE_TEXT","MISSING_ACTIONABLE_PROPOSAL","GENERIC_LEGAL_UNCERTAINTY","UNPROVEN_PHYSICAL_GAP"].includes(x.code));
  if(firstFlags.length){
   kt134Stage5RepairAttempted=true;
   try{
@@ -1060,7 +1060,7 @@ async function handleStage5Document(request,env){
     headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
     body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:3700,
      input:[{role:"system",content:expertRule+directionRules+classicPanel01EditorialStyle+instructions+
-      " КТ134: Преработи ПЪЛНИЯ документ, отстрани тестови/вътрешни означения, обогати само с потвърдените конкретни факти и мотиви. Не променяй избрания панел и не добавяй правни основания, географски факти или реквизити."},
+      " КТ134: Преработи ПЪЛНИЯ документ, отстрани тестови/вътрешни означения, обогати само с потвърдените конкретни факти и мотиви. Ако се иска допълнителна информация, посочи точно липсващия физически факт, документалното доказателство за липсата и законовата му значимост. Правната квалификация се прави от органа, не се изисква от възложителя. Не променяй избрания панел и не добавяй правни основания, географски факти или реквизити."},
       {role:"user",content:JSON.stringify({input:JSON.parse(facts),initialDraft:draft,correctionIssues:firstFlags})}]})
    });
    if(correction.ok){
@@ -1068,7 +1068,7 @@ async function handleStage5Document(request,env){
     const candidate=(repaired.output||[]).flatMap(x=>x.content||[])
       .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
     const remaining=kt134DraftDiagnostics(candidate,{stage:5}).findings.filter(x=>
-     ["SHORT_UNREASONED_DRAFT","TEST_METADATA_IN_ADMINISTRATIVE_TEXT"].includes(x.code));
+     ["SHORT_UNREASONED_DRAFT","TEST_METADATA_IN_ADMINISTRATIVE_TEXT","MISSING_ACTIONABLE_PROPOSAL","GENERIC_LEGAL_UNCERTAINTY","UNPROVEN_PHYSICAL_GAP"].includes(x.code));
     if(candidate.length>=120&&candidate.length<=14000&&remaining.length<firstFlags.length){
      draft=candidate;kt134Stage5RepairApplied=true;
     }
