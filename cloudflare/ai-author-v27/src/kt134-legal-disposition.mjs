@@ -58,8 +58,15 @@ export function kt134DispositionTextIssues(text,disposition){
  if(claimsFormal93&&!disposition.formalDecisionReady)errors.push("UNSUPPORTED_FORMAL_DECISION_93");
  const claimsEIAExcluded=/(?:не\s+се\s+(?:изисква|налага|прилага|провежда)[^.!?\n]{0,75}(?:ОВОС|преценка)|(?:ОВОС|преценка\s+за\s+ОВОС)[^.!?\n]{0,55}не\s+се\s+(?:изисква|налага)|процедур(?:ите|а)[^.!?\n]{0,55}по\s+ЗООС[^.!?\n]{0,60}(?:неприложими|не\s+са\s+приложими))/iu.test(body);
  if(claimsEIAExcluded&&!disposition.annexNegative)errors.push("UNSUPPORTED_EIA_EXCLUSION");
- const claimsOSExcluded=/(?:не\s+се\s+(?:изисква|налага|прилага|провежда)[^.!?\n]{0,60}(?:ОС|оценка\s+за\s+съвместимост)|(?:процедура|оценка)\s+по\s+Наредбата\s+за\s+ОС[^.!?\n]{0,75}(?:неприложима|не\s+се\s+налага))/iu.test(body);
- if(claimsOSExcluded&&!disposition.qualificationValidated)errors.push("UNSUPPORTED_OS_EXCLUSION");
+ const osExclusionClaim=/(?:не\s+се\s+(?:изисква|налага|прилага|провежда)[^.!?\n]{0,75}(?:ОС|оценка\s+за\s+съвместимост)|(?:процедура|оценка)\s+по\s+Наредбата\s+за\s+ОС[^.!?\n]{0,90}(?:неприложима|не\s+се\s+налага)|не\s+подлежи\s+на\s+(?:процедура|оценка)[^.!?\n]{0,55}съвместимост|няма\s+основания[^.!?\n]{0,105}(?:ОВОС|ОС)|не\s+подлежи[^.!?\n]{0,65}(?:ОВОС|ОС))/iu.test(body);
+ const statusOS2=disposition.rows?.OS2?.status;
+ const panel01Proven=disposition.qualificationValidated&&disposition.annexNegative&&
+  disposition.rows?.OS1?.status==="ОТРИЦАТЕЛНА"&&statusOS2==="ПОЛОЖИТЕЛНА";
+ const definiteLetterArt2=/(?:да\s+се\s+издаде|предлага\s+се\s+издаване|следва\s+издаване|следва\s+да\s+се\s+приложи)[^.!?\n]{0,120}(?:писмо|чл\.?\s*2\s*,?\s*ал\.?\s*2)|(?:писмо\s+по\s+чл\.?\s*2\s*,?\s*ал\.?\s*2)[^.!?\n]{0,100}(?:да\s+се\s+издаде|да\s+уведоми|не\s+подлежи)/iu.test(body);
+ if(osExclusionClaim&&!panel01Proven)errors.push("UNSUPPORTED_OS_EXCLUSION");
+ if(definiteLetterArt2&&!panel01Proven)errors.push("UNSUPPORTED_OS_ART2_2_LETTER");
+ const screeningMandatory=/(?:следва\s+да\s+се\s+(?:проведе|стартира|инициира)|(?:необходима|задължителна)\s+е)[^.!?\n]{0,125}(?:преценка\s+(?:за|на)\s+необходимостта\s+от\s+ОВОС|процедура\s+по\s+чл\.?\s*93)|(?:преценка\s+по\s+чл\.?\s*93)[^.!?\n]{0,100}(?:е\s+задължителна|следва\s+да\s+се\s+проведе)/iu.test(body);
+ if(screeningMandatory&&!disposition.annexPositive)errors.push("UNSUPPORTED_MANDATORY_EIA_SCREENING");
  if(/(?:\bMISSING_[A-Z_]+\b|\bPANEL_\d\d_[A-Z_]+\b|\bUNSUPPORTED_[A-Z_]+\b)/u.test(body))
   errors.push("TECHNICAL_CODE_IN_DOCUMENT");
  return errors;
