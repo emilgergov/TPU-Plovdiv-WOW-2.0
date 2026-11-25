@@ -62,6 +62,23 @@ export function createProtectedAutomaticCoordinator(adapters) {
    if(fresh?.caseRecord?.id!==caseId)error('CASE_CONTEXT_MISMATCH');
    prepareProtectedAutomaticCase(fresh);
    assertSameCaseRevision(preflight,fresh.caseRecord);
+   // Version equality alone does not prove a stable snapshot: some archives
+   // and case metadata may change without incrementing the dossier revision.
+   // Reject the draft unless the renewed trusted server manifest matches.
+   const currentEvidence=[
+     fresh.evidence?.dossier,
+     fresh.evidence?.normativeMaster,
+     fresh.evidence?.piMaster,
+     ...(fresh.caseRecord.gisMode==='required'?[fresh.evidence?.gisPdf1]:[])
+   ];
+   const baseline=preflight.evidence.map(x=>x.type+':'+x.sourceId+':'+x.digest).sort();
+   const latest=currentEvidence.map(x=>x?.type+':'+x?.sourceId+':'+String(x?.digest||'').toLowerCase()).sort();
+   if(JSON.stringify(baseline)!==JSON.stringify(latest)||
+      fresh.caseRecord.subject!==preflight.subject||
+      fresh.caseRecord.registryNumber!==preflight.case.registryNumber||
+      fresh.principal.userId!==preflight.principalId||
+      fresh.caseRecord.gisMode!==preflight.gis.mode)
+     error('CASE_SNAPSHOT_CHANGED');
    const draft=assertDraftNotApproval({
      status:'draft',expertApproved:false,caseId,revision:preflight.case.revision,
      panelId:author.panelId,documentTitle:author.documentTitle,content:author.content
