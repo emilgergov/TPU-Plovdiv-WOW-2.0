@@ -16,6 +16,7 @@ jobs:
       SCRIPT: tpu-plovdiv-kt134-eg-test
     steps:
       - uses: actions/checkout@v4
+      # Acceptance run 2: preserve the exact reviewer grounds for the synthetic case.
       - name: Build KT134 Candidate for EXISTING EG test Worker
         run: |
           set -euo pipefail
