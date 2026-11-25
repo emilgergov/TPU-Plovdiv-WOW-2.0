@@ -1,0 +1,52 @@
+name: KT134 inspect dossier storage schema
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-dossier-storage-schema.yml']
+permissions:
+  contents: write
+jobs:
+  schema:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Read table definitions only, no user rows
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const root='https://api.cloudflare.com/client/v4/accounts/'+process.env.ACCOUNT;
+          const headers={Authorization:'Bearer '+process.env.CF_TOKEN,'Content-Type':'application/json'};
+          const sr=await fetch(root+'/workers/scripts/tpu-plovdiv-kt125-local-auth/settings',{headers});
+          const sj=await sr.json();
+          const db=sj.result?.bindings?.find(x=>x.name==='KT125_DB')?.id;
+          if(!db)throw Error('DB_UNAVAILABLE');
+          const query=async(sql)=>{
+            const r=await fetch(root+'/d1/database/'+db+'/query',{method:'POST',headers,body:JSON.stringify({sql})});
+            const j=await r.json();
+            if(!j.success)throw Error('D1_SCHEMA_READ_FAILED');
+            return j.result?.[0]?.results||[];
+          };
+          const tables=(await query("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"))
+            .map(x=>String(x.name)).filter(x=>/^[A-Za-z_][A-Za-z0-9_]*$/.test(x));
+          const all=[];
+          for(const name of tables){
+            const cols=await query('PRAGMA table_info("'+name+'")');
+            all.push({name,columns:cols.map(x=>x.name)});
+          }
+          writeFileSync('kt134-auto/KT134_ALL_STORAGE_TABLES.json',JSON.stringify({readOnly:true,tables:all},null,2)+'\n');
+          console.log('Inspected '+all.length+' table schemas');
+          NODE
+      - name: Save structure report
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_ALL_STORAGE_TABLES.json
+          git commit -m 'KT134: map all D1 storage tables without retrieving records' || exit 0
+          git push origin HEAD:kt134-auto-mode-isolated
