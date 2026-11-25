@@ -1,5 +1,6 @@
 import {getLegalContext} from "./legal-v11-loader.mjs";
 import {kt134DraftDiagnostics} from "./kt134-content-diagnostics.mjs";
+import {detectKT134CasePurpose} from "./kt134-case-purpose.mjs";
 import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 import {evaluateDraft} from "./kt123-decision-model.mjs";
 import {substantiveDraftIssues} from "./kt123-substance-guard.mjs";
@@ -357,6 +358,10 @@ async function handleStage4Proposal(request,env){
   truncated:d?.truncated===true,verified:false
  })).filter(d=>d.source&&d.text):[];
  const documentRecords=Array.isArray(detail.documentRecords)?detail.documentRecords.slice(0,35):[];
+ const casePurpose=detectKT134CasePurpose({subject:payload.subject,scope:payload.scope,
+  sourceTexts,documents:documentRecords});
+ const subjectInstruction=casePurpose.complaintReview?
+  " КТ134 — ТЕКУЩИЯТ ВОДЕЩ ДОКУМЕНТ е възражение/жалба срещу предходно писмо; това не е ново уведомление за ИП. Не квалифицирай отново исторически описаното ИП, ако текущото искане е редакция/възражение по писмо. Разграничи вида и допустимостта на жалбата/възражението, възможностите за корекция на писмо и оспорване на административен акт, компетентния орган и относимия административен ред. Съпостави панели 17, 19, 20 и 21, без да предпочиташ автоматично който и да било. Панел 03 изисква отделно доказана нужда от становище на конкретна институция, не просто правна несигурност. Четирите теста ЗООС/ОС се отнасят само доколкото са релевантни към оспорените мотиви на предходното писмо, а не като изискване за нови данни от възложителя. Не измисляй липсващ капацитет, площ, ново строителство, ГИС позиция или нормативен реквизит. ВИНАГИ предложи конкретно мотивирано действие и коригирай грешните правни постановки; не удостоверявай недоказан извод." : "";
  // KT105-A: server-side original, unabridged text of the selected V11 provisions.
  // No dossier bytes, API key or archive ZIP are included in public GitHub Pages.
  let verifiedLegalCorpus;
@@ -382,7 +387,7 @@ async function handleStage4Proposal(request,env){
    quote:text(x?.quote,500),summary:text(x?.summary,600),
    evidenceStatus:"ИЗВЛЕЧЕНО ТВЪРДЕНИЕ, НЕ ЕКСПЕРТНО ПОТВЪРДЕН ФАКТ"
   })).filter(x=>x.source&&x.quote&&x.summary):[];
- const context={subject:payload.subject,scope:payload.scope,parcelIds,
+ const context={subject:payload.subject,scope:payload.scope,casePurpose,parcelIds,
   dossierCoverage:{complete:dossierCoverageComplete,expectedChunks:Number(dossierCoverage?.expectedChunks)||0,examinedChunks:Number(dossierCoverage?.examinedChunks)||0,unreadableDocuments:Array.isArray(dossierCoverage?.unreadableDocuments)?dossierCoverage.unreadableDocuments.slice(0,40):[],unexaminedChunks:Array.isArray(dossierCoverage?.unexamined)?dossierCoverage.unexamined.slice(0,40):[],sourceAnchoredClaims:dossierAnchors},
   establishedFacts:confirmed,uncertainFacts:unresolved,
   sourceHints,archiveTextProvided:true,archiveName:text(payload.archive.name,100),
@@ -414,7 +419,7 @@ async function handleStage4Proposal(request,env){
  const qualificationInput={
   caseSources:exactSnippets.facts.map(x=>({id:x.id,text:x.text.slice(0,16000),excerpts:x.excerpts,established:x.established,kind:x.kind,title:x.title||""})),
   legalSources:exactSnippets.laws.map(x=>({id:x.id,reference:x.reference,act:x.act,text:x.text,excerpts:x.excerpts,verified:x.verified})),
-  routeCatalog:KT109_ROUTE_CATALOG,
+  routeCatalog:KT109_ROUTE_CATALOG,casePurpose,
   requiredLegalSourceIds:qualificationLegalIds,
   evidenceRule:"Use the IDs in requiredLegalSourceIds for each corresponding test; these IDs identify legal texts only, not a predetermined legal status. Case excerpts are attributed sources, not independently confirmed legal truth."
  };
@@ -427,7 +432,7 @@ async function handleStage4Proposal(request,env){
      headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
      body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:3900,
       text:{format:{type:"json_schema",name:"kt123_source_qualification",strict:true,schema:QUALIFICATION_SCHEMA}},
-      input:[{role:"system",content:QUALIFICATION_SYSTEM},
+      input:[{role:"system",content:QUALIFICATION_SYSTEM+subjectInstruction},
        {role:"user",content:JSON.stringify({...qualificationInput,correctionIssues:issues})}]})
     });
     if(!response.ok)return null;
@@ -469,7 +474,7 @@ async function handleStage4Proposal(request,env){
    method:"POST",signal:controller.signal,
    headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
    body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:4200,
-    input:[{role:"system",content:system+(lockedQualification?" ЗАДЪЛЖИТЕЛНО: Отделната нормативна квалификация е вече изградена. Не променяй четирите статуса, не избирай нов панел; само мотивирай и редактирай.":"")},
+    input:[{role:"system",content:system+subjectInstruction+(lockedQualification?" ЗАДЪЛЖИТЕЛНО: Отделната нормативна квалификация е вече изградена. Не променяй четирите статуса, не избирай нов панел; само мотивирай и редактирай.":"")},
      {role:"user",content:JSON.stringify({...context,lockedQualification:lockedQualification?{...lockedQualification,panelTitle:KT109_ROUTE_BY_ID.get(lockedQualification.selectedPanel)?.title}:null})}]})
   });
   if(!upstream.ok)return reply({error:"AI provider request failed",providerStatus:upstream.status},502);
@@ -559,9 +564,12 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
         /(?:уведомлени|описани|схема|проект|преписка|документ|скица|заявлени)/iu.test(reason)&&
         /(?:приложени|чл\.|т\.|праг|категори|правна\s+предпоставка|законов)/iu.test(reason)&&
         !/(?:липса\s+на\s+категоризаци|не\s+(?:може|позволява)\s+категорично\s+определян|недостатъчн\w*\s+техническ\w*\s+информаци\w*\s+за\s+категори)/iu.test(reason);
-      if(unknownRows.some(x=>!hasDecisiveGap(x.match[2])))
+      const complaintContextRows=casePurpose.complaintReview&&
+       unknownRows.length>0&&unknownRows.every(x=>
+        /(?:възражени|жалб|предходн(?:ото|о)\s+писмо|историческ|не\s+е\s+предмет\s+на\s+настоящ)/iu.test(x.match[2]));
+      if(unknownRows.some(x=>!hasDecisiveGap(x.match[2]))&&!complaintContextRows)
         issues.push("UNDETERMINED_WITHOUT_DECISIVE_FACT");
-      if(unknownRows.length===4)
+      if(unknownRows.length===4&&!complaintContextRows)
         issues.push("ALL_APPLICABILITY_TESTS_UNDETERMINED");
       if(/\|\s*(?:Ред|Статус)\s*\|/iu.test(gateText))
         issues.push("UNRENDERED_MARKDOWN_LEGAL_MATRIX");
@@ -672,7 +680,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     method:"POST",signal:controller.signal,
     headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
     body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:4600,
-     input:[{role:"system",content:repairInstructions},
+     input:[{role:"system",content:repairInstructions+subjectInstruction},
       {role:"user",content:JSON.stringify({draft,qualityIssues:issues,
        establishedFacts:confirmed,unresolvedFacts:unresolved,
        caseDocumentRecords:documentRecords.slice(0,20),dossierCoverage:context.dossierCoverage,gisEvidence:detail.gis||null,
@@ -719,7 +727,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
    "За всички изходи, включително pass, попълни grounds с 2–5 кратки самостоятелни рецензентски аргумента: точна проверена норма, установен факт/конкретен източник, какво е установено и какво остава непроверено. При reject или revise отделно посочи конкретните възражения в issues. Не измисляй липсващ правен факт и не наричай прегледа гаранция за законосъобразност.",
    'Изведи САМО JSON: {"verdict":"pass|revise|reject","grounds":["независими конкретни мотиви и доказателствени ограничения"],"issues":["конкретна констатация"],"revisedDraft":"пълният коригиран текст само при revise"}.'
   ].join(" ");
-  const auditInput={draft,lockedQualification,routeCatalog:KT109_ROUTE_CATALOG,subject:payload.subject,scope:payload.scope,parcelIds,
+  const auditInput={draft,lockedQualification,routeCatalog:KT109_ROUTE_CATALOG,subject:payload.subject,scope:payload.scope,casePurpose,parcelIds,
    establishedFacts:confirmed,uncertainFacts:unresolved,
    caseDocumentExcerpts:sourceTexts.slice(0,20).map(x=>({source:x.source,text:x.text.slice(0,2500),truncated:x.truncated||x.text.length>2500})),
    caseDocumentRecords:documentRecords.slice(0,20),dossierCoverage:context.dossierCoverage,gisEvidence:detail.gis||null,
@@ -738,7 +746,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
       grounds:{type:"array",items:{type:"string"}},
       revisedDraft:{type:"string"}
      },required:["verdict","issues","grounds","revisedDraft"]}}},
-    input:[{role:"system",content:reviewSystem},{role:"user",content:JSON.stringify(auditInput)}]})
+    input:[{role:"system",content:reviewSystem+subjectInstruction},{role:"user",content:JSON.stringify(auditInput)}]})
   });
   if(!auditProvider.ok)return expertPreview("Независимият нормативен преглед не е достъпен.",["REVIEW_UNAVAILABLE"],"independent_review",draft);
   const auditData=await auditProvider.json();
@@ -772,7 +780,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
         issues:{type:"array",items:{type:"string"}},
         revisedDraft:{type:"string"}
        },required:["verdict","grounds","issues","revisedDraft"]}}},
-      input:[{role:"system",content:reviewSystem+" Коригирай ПЪЛНИЯ документ самостоятелно. Върни пълен revisedDraft дори при несъгласие, без да блокираш или да удостоверяваш правния резултат. Не допускай тестови означения в административен текст."},
+      input:[{role:"system",content:reviewSystem+subjectInstruction+" Коригирай ПЪЛНИЯ документ самостоятелно. Върни пълен revisedDraft дори при несъгласие, без да блокираш или да удостоверяваш правния резултат. Не допускай тестови означения в административен текст."},
        {role:"user",content:JSON.stringify({...auditInput,draft:finalDraft,firstReview:independentReview,correctionProblems:repairProblems})}]})
     });
     if(correction.ok){
