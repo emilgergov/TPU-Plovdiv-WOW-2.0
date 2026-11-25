@@ -18,7 +18,13 @@ export function kt134ReviewerRouteIssues({panelId,qualification=null,
   errors.push("KT134_PANEL_01_LACKS_QUALIFIED_OS_ART2_FACTS");
  if(id===2){
   const gap=qualification?.missingFact;
-  if(!proven||!gap?.fact||!gap?.source||!gap?.legalCriterion)
+  const documentedGap=Array.isArray(caseDocuments)&&caseDocuments.some(d=>{
+    const body=String(d?.text||"");
+    return /(?:липсват\s+(?:данни|потвърдени\s+данни)|няма\s+(?:проектни|представени)\s+данни|не\s+е\s+уточнен)/iu.test(body)&&
+      /(?:капацитет|оборудван|технологич|производствен|застроен\s+площ)/iu.test(body)&&
+      (d.source||d.sourceId);
+  });
+  if(!(proven&&gap?.fact&&gap?.source&&gap?.legalCriterion)&&!documentedGap)
    errors.push("KT134_PANEL_02_NEEDS_CONCRETE_SOURCED_PHYSICAL_FACT");
  }
  if(id===4&&!(proven&&(tests.A1==="ПОЛОЖИТЕЛНА"||tests.A2==="ПОЛОЖИТЕЛНА")))
