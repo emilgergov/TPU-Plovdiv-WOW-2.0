@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   live-existing-eg:
-    if: false # One bounded live test finished; disable repeated paid AI requests after HTTP 504
+    if: true # KT134 one final bounded live replay after TDZ repair, deactivate immediately
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
