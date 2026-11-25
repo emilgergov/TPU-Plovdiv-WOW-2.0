@@ -1,0 +1,42 @@
+name: KT134 map confirmed E1-E3 fields
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-confirmed-stage-fields.yml']
+permissions:
+  contents: write
+jobs:
+  fields:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Read only stage field names (no case content)
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const root='https://api.cloudflare.com/client/v4/accounts/'+process.env.ACCOUNT;
+          const h={Authorization:'Bearer '+process.env.CF_TOKEN,'Content-Type':'application/json'};
+          const s=await(await fetch(root+'/workers/scripts/tpu-plovdiv-kt125-local-auth/settings',{headers:h})).json();
+          const db=s.result?.bindings?.find(x=>x.name==='KT125_DB')?.id;
+          if(!db)throw Error('KT125_DB_NOT_BOUND');
+          const paths=['$.state','$.values','$.stage4','$.stage5','$.globals.KT80IPMasterDraft','$.globals.KT80FreeGISResults','$.globals.KT80DossierAudit','$.globals.KT82Location','$.globals.KT80CH2Passport'];
+          const sql="SELECT DISTINCT t.path AS parent_path, t.key AS field, t.type AS value_type FROM kt126_versions AS v, json_tree(v.content_json) AS t WHERE json_valid(v.content_json) AND t.path IN ("+paths.map(x=>"'"+x+"'").join(',')+") AND t.key IS NOT NULL ORDER BY parent_path,field LIMIT 250";
+          const r=await fetch(root+'/d1/database/'+db+'/query',{method:'POST',headers:h,body:JSON.stringify({sql})});
+          const j=await r.json();if(!j.success)throw Error('JSON_SCHEMA_QUERY_FAILED');
+          const rows=(j.result?.[0]?.results||[]).map(x=>({parent:x.parent_path,key:String(x.field),type:x.value_type}));
+          writeFileSync('kt134-auto/KT134_CONFIRMED_STAGE_FIELDS.json',JSON.stringify({metadataOnly:true,rows},null,2)+'\n');
+          console.log('Mapped '+rows.length+' stage fields');
+          NODE
+      - name: Save source-field names
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_CONFIRMED_STAGE_FIELDS.json
+          git commit -m 'KT134: map actual stored stage field structure' || exit 0
+          git pull --rebase origin kt134-auto-mode-isolated
+          git push origin HEAD:kt134-auto-mode-isolated
