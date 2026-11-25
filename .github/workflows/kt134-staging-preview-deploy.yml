@@ -45,6 +45,22 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN"
           echo "::add-mask::$CLOUDFLARE_API_TOKEN"
           node kt134-auto/kt134-existing-staging-audit.mjs
+      - name: Generate genuine synthetic DOCX using approved Word template
+        run: |
+          set -euo pipefail
+          npm install --no-save --ignore-scripts --no-audit --no-fund fflate@0.8.2
+          node kt134-auto/kt134-build-acceptance-package.mjs
+          python3 - <<'PY'
+          import zipfile
+          p='kt134-auto/test-deliverables/KT134_TEST_PROEKT_OTGOVOR_VAZRAZHENIE.docx'
+          with zipfile.ZipFile(p) as z:
+              assert 'word/document.xml' in z.namelist()
+              assert 'word/media/crest.png' in z.namelist()
+              assert 'word/footer1.xml' in z.namelist()
+              data=z.read('word/document.xml').decode('utf-8')
+              assert 'синтетичен' in data.lower()
+          print('Genuine synthetic DOCX generated and verified')
+          PY
       - name: Build and validate staging Worker without deployment
         working-directory: kt134-auto
         run: npx --yes wrangler@4 deploy --config wrangler.staging.toml --dry-run --outdir ../kt134-staging-built
@@ -94,6 +110,16 @@ jobs:
           curl --fail --silent --show-error --retry 5 --retry-delay 2 "$BASE/kt134/preview" -o /tmp/kt134-preview.html
           grep -Fq 'ИЗОЛИРАНА ДЕМОНСТРАЦИЯ' /tmp/kt134-preview.html
           echo 'Visual synthetic demo endpoint PASS'
+          curl --fail --silent --show-error "$BASE/kt134/demo.docx" -o /tmp/kt134-demo.docx
+          python3 - <<'PY'
+          import zipfile
+          with zipfile.ZipFile('/tmp/kt134-demo.docx') as z:
+              assert 'word/document.xml' in z.namelist()
+              assert 'word/header1.xml' in z.namelist()
+              assert 'word/media/crest.png' in z.namelist()
+              assert 'синтетичен' in z.read('word/document.xml').decode('utf-8').lower()
+          print('Published authentic synthetic DOCX download PASS')
+          PY
           echo "STAGING DEMO ONLY: $BASE/kt134/preview"
       - name: Production non-interference attestation
         if: always()
