@@ -564,9 +564,14 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
         /(?:уведомлени|описани|схема|проект|преписка|документ|скица|заявлени)/iu.test(reason)&&
         /(?:приложени|чл\.|т\.|праг|категори|правна\s+предпоставка|законов)/iu.test(reason)&&
         !/(?:липса\s+на\s+категоризаци|не\s+(?:може|позволява)\s+категорично\s+определян|недостатъчн\w*\s+техническ\w*\s+информаци\w*\s+за\s+категори)/iu.test(reason);
+      // An evidenced objection to prior correspondence does not itself launch
+      // a fresh investment screening. Preserve uncertain historical predicates
+      // as UNKNOWN, never claim they have been classified or issued.
+      const selectedForContext=Number(gateText.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0);
       const complaintContextRows=casePurpose.complaintReview&&
-       unknownRows.length>0&&unknownRows.every(x=>
-        /(?:възражени|жалб|предходн(?:ото|о)\s+писмо|историческ|не\s+е\s+предмет\s+на\s+настоящ)/iu.test(x.match[2]));
+       selectedForContext>=17&&selectedForContext<=22&&unknownRows.length>0&&
+       /(?:възражени|жалб|предходн|корекци)/iu.test(gateText)&&
+       /(?:ново\s+(?:инвестиционно|уведомлени)|не\s+е\s+налице\s+ново|не\s+е\s+представено\s+ново)/iu.test(gateText);
       if(unknownRows.some(x=>!hasDecisiveGap(x.match[2]))&&!complaintContextRows)
         issues.push("UNDETERMINED_WITHOUT_DECISIVE_FACT");
       if(unknownRows.length===4&&!complaintContextRows)
@@ -636,6 +641,14 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   }
   // KT124-R2: every reviewer output ends with a concrete proposed catalog
   // direction; this is a proposal, never an automatically issued act.
+  // Catalog title is metadata, not a legal conclusion. Keep the panel ID
+  // independently chosen by the models, but never label #17 as another title.
+  const canonicalizePanelLabel=value=>String(value||"").replace(
+   /ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b[^\n]*/iu,
+   (whole,number)=>{
+    const entry=KT109_ROUTE_BY_ID.get(Number(number));
+    return entry?"ИЗБРАН ПАНЕЛ: "+String(entry.id).padStart(2,"0")+" — "+entry.title:whole;
+   });
   const withReviewConclusion=value=>{
    const t=String(value||"").trim();
    if(env.KT123_TEST_LEGACY_MODE==="true")return t;
@@ -760,11 +773,14 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   ].filter(x=>typeof x==="string"&&x.trim()).slice(0,10);
   const verdict=independentReview?.verdict;
   if(!["pass","revise","reject"].includes(verdict))return expertPreview("Независимият преглед е невалиден.",["INVALID_REVIEW"],"independent_review",draft);
-  let finalDraft=verdict==="pass"?draft:(text(independentReview.revisedDraft,12000)||draft);
+  let finalDraft=canonicalizePanelLabel(verdict==="pass"?draft:(text(independentReview.revisedDraft,12000)||draft));
   // KT134: one non-blocking reviewer self-correction, independent of expert approval.
-  const toRepair=new Set(["TEST_METADATA_IN_ADMINISTRATIVE_TEXT","SHORT_UNREASONED_DRAFT","MISSING_ACTIONABLE_PROPOSAL","NO_SELECTED_PANEL","GENERIC_LEGAL_UNCERTAINTY","UNPROVEN_PHYSICAL_GAP"]);
+  const toRepair=new Set(["TEST_METADATA_IN_ADMINISTRATIVE_TEXT","SHORT_UNREASONED_DRAFT","MISSING_ACTIONABLE_PROPOSAL","NO_SELECTED_PANEL","GENERIC_LEGAL_UNCERTAINTY","UNPROVEN_PHYSICAL_GAP","MISSING_OR_UNORDERED_SECTIONS","ADMIN_PANEL_02_LABEL_MISMATCH","UNDETERMINED_WITHOUT_DECISIVE_FACT","ALL_APPLICABILITY_TESTS_UNDETERMINED"]);
   const diagnosticInput={stage:4,sourceTexts,gis:detail.gis||null,legalTexts:verifiedLegalCorpus.legalProvisions,reviewFindings:reviewerFindings};
-  const repairProblems=kt134DraftDiagnostics(withReviewConclusion(finalDraft),diagnosticInput).findings.filter(x=>toRepair.has(x.code));
+  const repairProblems=[
+   ...kt134DraftDiagnostics(withReviewConclusion(finalDraft),diagnosticInput).findings.filter(x=>toRepair.has(x.code)),
+   ...qualityIssues(finalDraft).filter(code=>toRepair.has(code)).map(code=>({code,reason:"Възстанови точния нормативен или композиционен реквизит без да измисляш ново ИП или факти."}))
+  ];
   let kt134ReviewerCorrectionAttempted=false,kt134ReviewerCorrectionApplied=false;
   if(repairProblems.length){
    kt134ReviewerCorrectionAttempted=true;
@@ -787,9 +803,12 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
      const data=await correction.json();
      const raw=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
      const parsed=JSON.parse(raw);
-     const candidate=text(parsed.revisedDraft,12000);
+     const candidate=canonicalizePanelLabel(text(parsed.revisedDraft,12000));
      const substantive=[...qualityIssues(candidate),...(lockedQualification?compareDraftWithQualification(candidate,lockedQualification):[])];
-     const remaining=kt134DraftDiagnostics(withReviewConclusion(candidate),diagnosticInput).findings.filter(x=>toRepair.has(x.code));
+     const remaining=[
+      ...kt134DraftDiagnostics(withReviewConclusion(candidate),diagnosticInput).findings.filter(x=>toRepair.has(x.code)),
+      ...qualityIssues(candidate).filter(code=>toRepair.has(code)).map(code=>({code}))
+     ];
      if(candidate.length>=120&&candidate.length<=12000&&candidate!==finalDraft&&substantive.length===0&&remaining.length<repairProblems.length){
       finalDraft=candidate;kt134ReviewerCorrectionApplied=true;
       for(const ground of (Array.isArray(parsed.grounds)?parsed.grounds:[]))
