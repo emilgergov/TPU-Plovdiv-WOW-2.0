@@ -1,0 +1,270 @@
+{
+  "readOnly": true,
+  "tables": [
+    {
+      "table": "kt125_cases",
+      "columns": [
+        {
+          "name": "case_id",
+          "type": "TEXT",
+          "pk": 1
+        },
+        {
+          "name": "organization_id",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "owner_id",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "status",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "created_at_ms",
+          "type": "INTEGER",
+          "pk": 0
+        },
+        {
+          "name": "updated_at_ms",
+          "type": "INTEGER",
+          "pk": 0
+        }
+      ]
+    },
+    {
+      "table": "kt125_local_sessions",
+      "columns": [
+        {
+          "name": "token_hash",
+          "type": "TEXT",
+          "pk": 1
+        },
+        {
+          "name": "account_id",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "credential_version",
+          "type": "INTEGER",
+          "pk": 0
+        },
+        {
+          "name": "user_updated_at_ms",
+          "type": "INTEGER",
+          "pk": 0
+        },
+        {
+          "name": "created_at_ms",
+          "type": "INTEGER",
+          "pk": 0
+        },
+        {
+          "name": "expires_at_ms",
+          "type": "INTEGER",
+          "pk": 0
+        }
+      ]
+    },
+    {
+      "table": "kt125_staff_profiles",
+      "columns": [
+        {
+          "name": "user_id",
+          "type": "TEXT",
+          "pk": 1
+        },
+        {
+          "name": "organization_id",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "identity_provider",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "email",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "display_name",
+          "type": "TEXT",
+          "pk": 0
+        }
+      ]
+    },
+    {
+      "table": "kt125_users",
+      "columns": [
+        {
+          "name": "user_id",
+          "type": "TEXT",
+          "pk": 1
+        },
+        {
+          "name": "organization_id",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "identity_provider",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "provider_subject",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "role",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "active",
+          "type": "INTEGER",
+          "pk": 0
+        },
+        {
+          "name": "created_at_ms",
+          "type": "INTEGER",
+          "pk": 0
+        },
+        {
+          "name": "updated_at_ms",
+          "type": "INTEGER",
+          "pk": 0
+        },
+        {
+          "name": "activation_pending",
+          "type": "INTEGER",
+          "pk": 0
+        }
+      ]
+    },
+    {
+      "table": "kt126_files",
+      "columns": [
+        {
+          "name": "case_id",
+          "type": "TEXT",
+          "pk": 1
+        },
+        {
+          "name": "source_id",
+          "type": "TEXT",
+          "pk": 2
+        },
+        {
+          "name": "filename",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "size",
+          "type": "INTEGER",
+          "pk": 0
+        },
+        {
+          "name": "sha256",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "parts",
+          "type": "INTEGER",
+          "pk": 0
+        },
+        {
+          "name": "complete",
+          "type": "INTEGER",
+          "pk": 0
+        }
+      ]
+    },
+    {
+      "table": "kt126_registry",
+      "columns": [
+        {
+          "name": "case_id",
+          "type": "TEXT",
+          "pk": 1
+        },
+        {
+          "name": "organization_id",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "year",
+          "type": "INTEGER",
+          "pk": 0
+        },
+        {
+          "name": "sequence",
+          "type": "INTEGER",
+          "pk": 0
+        },
+        {
+          "name": "internal_number",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "source_name",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "source_hash",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "revision",
+          "type": "INTEGER",
+          "pk": 0
+        },
+        {
+          "name": "external_number",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "external_status",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "external_by",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "external_at_ms",
+          "type": "INTEGER",
+          "pk": 0
+        },
+        {
+          "name": "external_evidence_json",
+          "type": "TEXT",
+          "pk": 0
+        },
+        {
+          "name": "created_at_ms",
+          "type": "INTEGER",
+          "pk": 0
+        }
+      ]
+    }
+  ]
+}
