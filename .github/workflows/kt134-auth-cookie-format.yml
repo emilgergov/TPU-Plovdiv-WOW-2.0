@@ -1,0 +1,47 @@
+name: KT134 identify cookie format (nonsecret)
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-auth-cookie-format.yml']
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Extract cookie-name and hash-algorithm indicators only
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+process.env.ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth',
+            {headers:{Authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('NATIVE_UNAVAILABLE');
+          const source=await r.text();
+          const terms=['function getCookie','getCookie =','const getCookie','token_hash =','token_hash=?','token_hash = ?','function lookupSession','function validateSession','async function verifyLocal'];
+          const entries=terms.map(term=>{
+            const i=source.indexOf(term);
+            if(i<0)return {term,found:false};
+            const before=source.slice(Math.max(0,i-500),i);
+            const after=source.slice(i,i+900);
+            const literals=[...after.matchAll(/(["'`])([^"'`]{1,55})\1/g)].map(m=>m[2]).filter(v=>/cookie|kt125|session|sha|auth|token|secure|http|same|path|hash/i.test(v)).slice(0,12);
+            const identifiers=[...new Set([...after.matchAll(/\b(?:sha256|SHA-256|HMAC|digest|cookie|sessionToken|account_id|expires_at_ms|credential_version|token_hash|user_id|active|readCookie|parseCookie|getCookie|createSession|validateSession|lookupSession|localSession|KT125_LOCAL_\w+)\b/g)].map(x=>x[0]))];
+            const lineCount=before.split('\n').length;
+            return {term,found:true,indicators:identifiers,literals,lineCount};
+          });
+          writeFileSync('kt134-auto/KT134_AUTH_COOKIE_FORMAT.json',JSON.stringify({readOnly:true,entries},null,2)+'\n');
+          console.log('Read-only cookie auth indicator lookup complete');
+          NODE
+      - name: Save indicators
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_AUTH_COOKIE_FORMAT.json
+          git commit -m 'KT134: identify cookie verifier indicator contract' || exit 0
+          git pull --rebase origin kt134-auto-mode-isolated
+          git push origin HEAD:kt134-auto-mode-isolated
