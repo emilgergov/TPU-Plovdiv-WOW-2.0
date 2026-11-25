@@ -430,10 +430,12 @@ async function handleStage4Proposal(request,env){
   requiredLegalSourceIds:qualificationLegalIds,
   evidenceRule:"Use the IDs in requiredLegalSourceIds for each corresponding test; these IDs identify legal texts only, not a predetermined legal status. Case excerpts are attributed sources, not independently confirmed legal truth."
  };
- const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),115000);
+ let stage4Phase="qualification";
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),165000);
  try{
   if(env.KT123_TEST_LEGACY_MODE!=="true"){
    const callQualification=async(issues=[])=>{
+    stage4Phase=issues.length?"qualification_repair":"qualification";
     const response=await fetch("https://api.openai.com/v1/responses",{
      method:"POST",signal:controller.signal,
      headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
@@ -483,7 +485,8 @@ async function handleStage4Proposal(request,env){
     lockedQualification=q;qualificationValidation=v;
    }
   }
-  const upstream=await fetch("https://api.openai.com/v1/responses",{
+  stage4Phase="author";
+   const upstream=await fetch("https://api.openai.com/v1/responses",{
    method:"POST",signal:controller.signal,
    headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
    body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:4200,
@@ -779,6 +782,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
    exactApplicableLawTexts:verifiedLegalCorpus.legalProvisions,
    verifiedArchiveArticleHashes:context.archiveCheckedArticleHashes,
    authorValidationIssues:issues,fullArticleTextsAvailable:true,allArchiveDocumentsProvidedToModel:false};
+  stage4Phase="independent_reviewer";
   const auditProvider=await fetch("https://api.openai.com/v1/responses",{
    method:"POST",signal:controller.signal,
    headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
@@ -816,6 +820,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   if(repairProblems.length){
    kt134ReviewerCorrectionAttempted=true;
    try{
+    stage4Phase="reviewer_revision";
     const correction=await fetch("https://api.openai.com/v1/responses",{
      method:"POST",signal:controller.signal,
      headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
@@ -879,7 +884,8 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     documentTextTruncated:context.caseDocuments.sourceTextTruncated,
     caseFactsReceived:evidence.length,gisContextReceived:Boolean(detail.gis),
     archiveArticleTextsReceived:verifiedLegalCorpus.legalProvisions.length,archiveCorpusDocumentsAvailable:verifiedLegalCorpus.indexedDocuments,archiveVerifiedExcerptsReceived:context.verifiedOfflineLegalExcerpts.length,archiveIndexRecordsReceived:sourceHints.length}});
- }catch{return reply({error:"Stage 4 AI request failed or timed out"},504)}
+ }catch(e){return reply({error:"Stage 4 AI request failed or timed out",phase:stage4Phase,
+   failureType:e?.name==="AbortError"?"TIMEOUT":"INTERNAL_EXCEPTION"},504)}
  finally{clearTimeout(timer)}
 }
 
