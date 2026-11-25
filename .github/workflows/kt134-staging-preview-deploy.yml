@@ -69,8 +69,19 @@ jobs:
           echo "::add-mask::$token"
           printf '%s' "$token" | npx --yes wrangler@4 secret put KT134_SMOKE_TOKEN --config wrangler.staging.toml
           BASE='https://tpu-plovdiv-kt134-test.emilgergov.workers.dev'
-          curl --fail --silent --show-error --retry 5 --retry-delay 2 \
-            -H "X-KT134-Smoke-Token: $token" "$BASE/kt134/internal-storage-smoke" -o /tmp/kt134-storage.json
+          # Secret deployment propagates independently from Worker code; permit
+          # transient 403 until the newly activated version reaches edge.
+          result=000
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            result="$(curl --silent --show-error --max-time 10 -o /tmp/kt134-storage.json -w '%{http_code}' \\
+              -H "X-KT134-Smoke-Token: $token" "$BASE/kt134/internal-storage-smoke")"
+            if [ "$result" = 200 ]; then break; fi
+            sleep 3
+          done
+          if [ "$result" != 200 ]; then
+            echo "::error::Authenticated isolated storage probe rejected with HTTP $result"
+            exit 1
+          fi
           node -e 'const x=require("/tmp/kt134-storage.json");if(x.mode!=="isolated_storage_readonly"||x.d1Query!=="verified"||x.r2Head!=="verified_not_found"||x.productionTouched!==false||x.dossierRead!==false||x.realEG!==false)throw Error("KT134 storage smoke failed");console.log("D1 real SELECT 1 PASS, R2 real HEAD PASS; no objects read or written.");'
           denied="$(curl --silent --show-error -o /dev/null -w '%{http_code}' "$BASE/kt134/internal-storage-smoke")"
           test "$denied" = 403
