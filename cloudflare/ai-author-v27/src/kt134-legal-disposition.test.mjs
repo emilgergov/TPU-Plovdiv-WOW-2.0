@@ -91,3 +91,12 @@ test("express exclusion of premature art.93 act is not mistaken for a positive p
  const d=deriveKt134LegalDisposition({qualification:null,qualificationValidated:false,reviewerPanelId:13});
  assert.equal(kt134DispositionTextIssues("Не се предлага издаване на решение по чл. 93 ЗООС без доказани предпоставки.",d).length,0);
 });
+
+test("actual synthetic panel02 letter asks a precise physical question, not applicant legal categorization",()=>{
+ const d=deriveKt134LegalDisposition({qualification:null,qualificationValidated:false,reviewerPanelId:2});
+ const txt=composeKt134GroundedReviewerAlternative({subject:"Преустройство",scope:"Вътрешни работи",disposition:d,
+  caseContext:{documents:[{source:"Техническо описание",text:"Липсват потвърдени данни за капацитет и технологично оборудване."}]}});
+ assert.match(txt,/дали наред с описаното вътрешно преустройство се предвижда въвеждане на нова дейност/iu);
+ assert.match(txt,/само при положителен отговор/iu);
+ assert.equal(kt134DispositionTextIssues(txt,d).length,0);
+});
