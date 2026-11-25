@@ -7,6 +7,7 @@ const str=x=>typeof x==='string'?x.trim():'';
 const list=x=>Array.isArray(x)?x:[];
 const printable=x=>str(x).replace(/[\r\n]+/gu,' ').replace(/\s+/gu,' ');
 const num=x=>typeof x==='number'&&Number.isFinite(x)?String(x):'';
+const finish=x=>/[.!?]$/u.test(x)?x:x+'.';
 export function composeKt134CaseAwareStage5Draft({stage5Text,stage4Request}={}){
  const original=str(stage5Text);
  if(!original.startsWith('Относно:')||!stage4Request?.completeCaseEvidence)
@@ -24,8 +25,8 @@ export function composeKt134CaseAwareStage5Draft({stage5Text,stage4Request}={}){
      (str(d.date)?' от '+printable(d.date):'')+'. Източник: '+printable(d.source)+'.'):'';
  }));
  section('ПРЕДМЕТ И ОБХВАТ НА ИНВЕСТИЦИОННОТО ПРЕДЛОЖЕНИЕ',[
-   str(stage4Request.subject)?'Предмет: '+printable(stage4Request.subject)+'.':'',
-   str(stage4Request.scope)?'Обхват: '+printable(stage4Request.scope)+'.':''
+   str(stage4Request.subject)?finish('Предмет: '+printable(stage4Request.subject)):'',
+   str(stage4Request.scope)?finish('Обхват: '+printable(stage4Request.scope)):''
  ]);
  section('МЕСТОПОЛОЖЕНИЕ И ДАННИ ЗА ИМОТИТЕ',list(dossier.parcels).map(p=>{
    const id=printable(p.identifier);if(!id)return '';
@@ -62,8 +63,11 @@ export function composeKt134CaseAwareStage5Draft({stage5Text,stage4Request}={}){
    str(dossier.pdf2Ref)?'Приложение: нормативна справка (PDF2) — '+printable(dossier.pdf2Ref)+'.':''
  ]);
  const lines=original.split(/\r?\n/u);
- const heading=lines[0].trim();
- const body=lines.slice(1).join('\n').trim();
+ let heading=lines[0].trim();
+ // Repair the inherited Stage 5 unmatched Bulgarian subject quotation.
+ if(heading.startsWith('Относно:')&&heading.includes('„')&&!heading.includes('“'))
+   heading=heading.replace(/\s*[.!?]*$/u,'').trimEnd()+'“';
+ const body=lines.slice(1).filter(line=>!line.trimStart().startsWith('Относно:')).join('\n').trim();
  return [heading,'ФАКТИЧЕСКИ ДАННИ ОТ ПРЕПИСКАТА',...paras,
    'МОТИВИРАНО ПРЕДЛОЖЕНИЕ ОТ ЕТАП 5',body].filter(x=>str(x)).join('\n');
 }
