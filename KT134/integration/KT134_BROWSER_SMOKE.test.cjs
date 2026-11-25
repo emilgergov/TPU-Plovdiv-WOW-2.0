@@ -40,6 +40,11 @@ const srv=http.createServer((req,res)=>{
   // These objects appear after the existing delayed DOM bootstrap.
   await page.waitForFunction(()=>typeof window.KT96EGStage4?.refresh==='function'&&
     typeof window.KT117Document?.refresh==='function',undefined,{timeout:12000});
+  await page.waitForFunction(()=>typeof window.KT134AutoMode?.active==='function',undefined,{timeout:12000});
+  assert.equal(await page.evaluate(()=>window.KT134AutoMode.active()),false,
+    'Automated route must NEVER activate without explicit selection');
+  assert.equal(await page.locator('#kt134AutoPipeline button').count(),2,
+    'Automatic route must provide a single opt-in plus final approval button');
   assert.equal(await page.locator('script[src*="KT134_SPATIAL_GATE_CONSISTENCY.js"]').count(),1);
   assert.equal(await page.locator('script[src*="KT82_A_PDF1_V600_KT134_CANDIDATE.js"]').count(),1);
   assert.equal(await page.locator('link[href*="KT134_PANEL15_REAL_GIS.css"]').count(),1);
