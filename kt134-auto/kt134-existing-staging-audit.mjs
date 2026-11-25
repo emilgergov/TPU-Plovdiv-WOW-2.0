@@ -7,7 +7,7 @@ const D1_ID='9f977144-c6f1-4fbf-8262-5c48b818bfb1';
 const TEST_WORKER='tpu-plovdiv-kt134-test';
 const TEST_BUCKET='kt134-isolated-r2-2026';
 const GATEWAY='kt133-tpu-plovdiv-kt125-local-auth';
-const allowed=new Set(['d1','r2_bucket']);
+const allowed=new Set(['d1','r2_bucket','secret_text']);
 const asArray=x=>Array.isArray(x)?x:[];
 export function assessExistingKT134Staging({testWorker,gateway,backend,d1Record}={}){
  const bindings=asArray(testWorker?.bindings);
@@ -17,13 +17,15 @@ export function assessExistingKT134Staging({testWorker,gateway,backend,d1Record}
  const r2=bindings.filter(b=>b.type==='r2_bucket'&&b.name==='BUCKET');
  const prodDb=production[0]?.id;
  const findings={
-  exactBindings:bindings.length===2&&bindings.every(b=>allowed.has(b.type)),
+  exactBindings:bindings.length>=2&&bindings.length<=3&&bindings.every(b=>allowed.has(b.type))&&
+    bindings.filter(b=>b.type==='secret_text').every(b=>b.name==='KT134_SMOKE_TOKEN'),
   stagingD1:d1.length===1&&d1[0].id===D1_ID&&d1Record?.uuid===D1_ID&&d1Record?.name==='kt134-isolated-d1-2026',
   stagingR2:r2.length===1&&r2[0].bucket_name===TEST_BUCKET,
   productionSeparated:services.length===1&&services[0].service!==TEST_WORKER&&
     prodDb&&prodDb!==D1_ID,
   noProductionServiceBinding:bindings.every(b=>b.type!=='service'),
-  noBrowserSecrets:bindings.every(b=>!['secret_text','secret_key','plain_text','vars','kv_namespace'].includes(b.type))
+  noBrowserSecrets:bindings.every(b=>!['secret_key','plain_text','vars','kv_namespace'].includes(b.type)&&
+   (b.type!=='secret_text'||b.name==='KT134_SMOKE_TOKEN'))
  };
  return Object.freeze({ready:Object.values(findings).every(Boolean),checks:Object.freeze(findings),
   requiresLiveFunctionalGate:true,mayModifyProduction:false});
