@@ -1,11 +1,11 @@
 {
   "workflow": "kt134-eg-live-staging",
-  "runId": "45567332428",
-  "sourceCommit": "6f58d4b08fdbce198a1655758983750940635314",
-  "outcome": "success",
+  "runId": "45567869388",
+  "sourceCommit": "e1780604d31bfc8009e09b044edd5671f561099d",
+  "outcome": "failure",
   "credentialsStep": "success",
   "deployStep": "success",
-  "liveStage45WordStep": "success",
+  "liveStage45WordStep": "failure",
   "realDossierProcessed": false,
   "productionWorkerChanged": false
 }
