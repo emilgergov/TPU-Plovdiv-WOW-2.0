@@ -369,7 +369,21 @@ async function handleStage4Proposal(request,env){
  }catch{
   return reply({error:"Verified V11 legal text retrieval unavailable",qualityIssues:["ARCHIVE_FULL_TEXT_UNAVAILABLE"]},503);
  }
+ const dossierCoverage=detail.kt134DossierCoverage&&typeof detail.kt134DossierCoverage==="object"?detail.kt134DossierCoverage:null;
+ const dossierCoverageComplete=!!dossierCoverage&&dossierCoverage.complete===true&&
+  dossierCoverage.allClaimEvidenceIncluded===true&&Number(dossierCoverage.expectedChunks)>0&&
+  Number(dossierCoverage.examinedChunks)===Number(dossierCoverage.expectedChunks)&&
+  Array.isArray(dossierCoverage.unexamined)&&dossierCoverage.unexamined.length===0&&
+  Array.isArray(dossierCoverage.unreadableDocuments)&&dossierCoverage.unreadableDocuments.length===0;
+ const dossierAnchors=dossierCoverageComplete&&Array.isArray(dossierCoverage.sourceAnchoredClaims)?
+  dossierCoverage.sourceAnchoredClaims.slice(0,180).map(x=>({
+   documentIndex:Number(x?.documentIndex),source:text(x?.source,180),
+   start:Number(x?.start),end:Number(x?.end),
+   quote:text(x?.quote,500),summary:text(x?.summary,600),
+   evidenceStatus:"ИЗВЛЕЧЕНО ТВЪРДЕНИЕ, НЕ ЕКСПЕРТНО ПОТВЪРДЕН ФАКТ"
+  })).filter(x=>x.source&&x.quote&&x.summary):[];
  const context={subject:payload.subject,scope:payload.scope,parcelIds,
+  dossierCoverage:{complete:dossierCoverageComplete,expectedChunks:Number(dossierCoverage?.expectedChunks)||0,examinedChunks:Number(dossierCoverage?.examinedChunks)||0,sourceAnchoredClaims:dossierAnchors},
   establishedFacts:confirmed,uncertainFacts:unresolved,
   sourceHints,archiveTextProvided:true,archiveName:text(payload.archive.name,100),
   legalTextsExact:verifiedLegalCorpus.legalProvisions,
@@ -661,7 +675,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
      input:[{role:"system",content:repairInstructions},
       {role:"user",content:JSON.stringify({draft,qualityIssues:issues,
        establishedFacts:confirmed,unresolvedFacts:unresolved,
-       caseDocumentRecords:documentRecords.slice(0,20),gisEvidence:detail.gis||null,
+       caseDocumentRecords:documentRecords.slice(0,20),dossierCoverage:context.dossierCoverage,gisEvidence:detail.gis||null,
        sourceTexts:sourceTexts.slice(0,12).map(x=>({source:x.source,text:x.text.slice(0,2500),truncated:x.truncated||x.text.length>2500})),
        originalLegalMatrix:draft.split("\n").filter(x=>/^(?:ПРИЛОЖЕНИЕ\s*№\s*[12]\s*КЪМ\s*ЗООС|ЧЛ\.\s*2\s*,?\s*АЛ\.\s*[12]\s*НАРЕДБА\s*ЗА\s*ОС)\s*:/iu.test(x.trim())).slice(0,4),
        legalTextsExact:verifiedLegalCorpus.legalProvisions,routeCatalog:KT109_ROUTE_CATALOG,subject:payload.subject,scope:payload.scope,lockedQualification})}]})
@@ -802,7 +816,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     normativeAudit:{reviewed:true,reviewVerdict:reviewDisposition,originalReviewVerdict:verdict,reviewerUnresolved,authorRepairs,kt134ReviewerCorrectionAttempted,kt134ReviewerCorrectionApplied,
      deterministicModel:evaluateDraft(finalDraft).decision,
      legalApplicabilityAutomaticallyCertified:false,selectedPanelId:Number(finalDraft.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0)||null,fullArticlesVerified:true,allArchiveSourcesExamined:false,verifiedLegalProvisionCount:verifiedLegalCorpus.legalProvisions.length,findings:reviewerFindings},
-   evidenceReceipt:{documentTextsReceived:sourceTexts.length,
+   evidenceReceipt:{dossierAllSourceSpansExamined:dossierCoverageComplete,sourceSpansExpected:Number(dossierCoverage?.expectedChunks)||0,sourceSpansExamined:Number(dossierCoverage?.examinedChunks)||0,documentTextsReceived:sourceTexts.length,
     documentTextsAvailable:context.caseDocuments.sourceTextCount,
     documentTextTruncated:context.caseDocuments.sourceTextTruncated,
     caseFactsReceived:evidence.length,gisContextReceived:Boolean(detail.gis),
@@ -1222,7 +1236,7 @@ export default {
    if(origin!==ALLOWED_ORIGIN) return new Response(null,{status:403});
    return new Response(null,{status:204,headers:{"Access-Control-Allow-Origin":ALLOWED_ORIGIN,"Access-Control-Allow-Methods":"POST","Access-Control-Allow-Headers":"Authorization, Content-Type","Access-Control-Max-Age":"600","Vary":"Origin"}});
   }
-  if(origin===ALLOWED_ORIGIN && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||(url.pathname==="/stage4-proposal"||url.pathname==="/stage5-document"||url.pathname==="/stage4-expert-decision")) && request.method==="POST") {
+  if(origin===ALLOWED_ORIGIN && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||(url.pathname==="/stage4-proposal"||url.pathname==="/stage5-document"||url.pathname==="/stage4-expert-decision"||url.pathname==="/kt134-evidence-span")) && request.method==="POST") {
    // Return the same authenticated response with exact-origin CORS, never wildcard.
    const response=url.pathname==="/kt134-evidence-span"?await handleKT134EvidenceSpan(request,env):url.pathname==="/stage4-expert-decision"?await handleExpertDecision(request,env):url.pathname==="/stage5-document"?await handleStage5Document(request,env):(url.pathname==="/stage4-proposal")?await handleStage4Proposal(request,env):url.pathname==="/scope-improve"?await handleScopeImprove(request,env):url.pathname==="/subject-improve"?await handleSubjectImprove(request,env):await handleAuthor(request,env);
    const h=new Headers(response.headers);h.set("Access-Control-Allow-Origin",ALLOWED_ORIGIN);h.set("Vary","Origin");
