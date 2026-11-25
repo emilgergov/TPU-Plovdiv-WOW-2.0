@@ -753,9 +753,26 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   const qualificationProof=lockedQualification?await signQualification(
    lockedQualification,{caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
     subject:payload.subject,scope:payload.scope},env.KT123_HANDOFF_SIGNING_KEY||env.OPENAI_API_KEY):null;
+  // KT134: reviewer verifies every INTERMEDIATE gate in automatic mode.
+  // Server signs exactly the reviewed text/panel. This is not expert approval.
+  const reviewedText=withReviewConclusion(finalDraft);
+  const reviewerSelectedPanel=Number(finalDraft.match(/ИЗБРАН\\s+ПАНЕЛ\\s*:\\s*0?(\\d{1,2})\\b/iu)?.[1]||0);
+  const reviewerIntermediate=(lockedQualification&&qualificationValidation?.ok===true&&
+      KT109_ROUTE_BY_ID.has(reviewerSelectedPanel))?{
+    mode:"KT134_REVIEWER_INTERMEDIATE",caseId:payload.caseId,
+    evidenceRevision:payload.evidenceRevision,
+    reviewedText,selectedPanelId:reviewerSelectedPanel,
+    reviewerVerdict:reviewDisposition,intermediateConfirmed:true,
+    expertApproved:false
+  }:null;
+  const reviewerIntermediateProof=reviewerIntermediate?await signQualification(
+    reviewerIntermediate,{caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
+      subject:payload.subject,scope:payload.scope},
+    env.KT123_HANDOFF_SIGNING_KEY||env.OPENAI_API_KEY):null;
   return reply({caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
    requestId:payload.requestId,projectOnly:true,expertReviewRequired:true,
-   archiveEvidenceVerified:true,draft:withReviewConclusion(finalDraft),authorDraft:draft,
+   archiveEvidenceVerified:true,draft:reviewedText,authorDraft:draft,
+   reviewerIntermediate,reviewerIntermediateProof,
    qualificationRecord:lockedQualification,qualificationProof,qualificationGate:{sourceAnchorsMatched:qualificationValidation?.ok===true,legalApplicabilityCertified:false,expertConfirmationRequired:true},
     normativeAudit:{reviewed:true,reviewVerdict:reviewDisposition,originalReviewVerdict:verdict,authorRepairs,
      deterministicModel:evaluateDraft(finalDraft).decision,
@@ -854,9 +871,28 @@ async function handleStage5Document(request,env){
  try{const raw=await request.text();if(new TextEncoder().encode(raw).length>42000)return reply({error:"Payload too large"},413);input=JSON.parse(raw)}
  catch{return reply({error:"Invalid request"},400)}
  const ok=x=>typeof x==="string"&&x.length>0;
+ // KT134: reviewer-authorized interim handoff is an alternative to intermediate
+ // human confirmation ONLY for project generation; never an issued act.
+ let automaticReviewerConfirmed=false;
+ if(input?.automaticReviewerIntermediate===true){
+   const d=input.reviewerIntermediate;
+   const valid=Boolean(d&&d.mode==="KT134_REVIEWER_INTERMEDIATE"&&
+     d.intermediateConfirmed===true&&d.expertApproved===false&&
+     input.expertConfirmed===false&&input.projectOnly===true&&
+     d.caseId===input.caseId&&d.evidenceRevision===input.evidenceRevision&&
+     d.reviewedText===input.confirmedStage4Text&&
+     Number(d.selectedPanelId)===Number(input.selectedPanelId)&&
+     await verifyQualification(d,{
+       caseId:input.caseId,evidenceRevision:input.evidenceRevision,
+       subject:input.subject,scope:input.scope
+     },env.KT123_HANDOFF_SIGNING_KEY||env.OPENAI_API_KEY,input.reviewerIntermediateProof));
+   if(!valid)return reply({error:"KT134_REVIEWER_INTERMEDIATE_INVALID",
+      projectOnly:true,expertReviewRequired:true},422);
+   automaticReviewerConfirmed=true;
+ }
  if(input?.task!=="draft_stage5_document"||!ok(input.caseId)||input.caseId.length>200||
  !ok(input.requestId)||input.requestId.length>100||!Number.isInteger(input.stage4Version)||input.stage4Version<1||
- !ok(input.confirmedStage4Text)||input.confirmedStage4Text.length>18000||input.expertConfirmed!==true||
+ !ok(input.confirmedStage4Text)||input.confirmedStage4Text.length>18000||(!automaticReviewerConfirmed&&input.expertConfirmed!==true)||
  input.projectOnly!==true||!ok(input.subject)||!ok(input.scope)||
  !(typeof input.evidenceRevision==="string"||typeof input.evidenceRevision==="number"))
  return reply({error:"Invalid expert-confirmed handoff"},400);
@@ -1073,7 +1109,8 @@ async function handleStage5Document(request,env){
  if(draft.length<120||draft.length>18000)return reply({error:"Draft incomplete"},422);
  return reply({caseId:input.caseId,evidenceRevision:input.evidenceRevision,
  stage4Version:input.stage4Version,requestId:input.requestId,selectedPanelLine:match[0],documentTitle:title,incomingReference:safeReference,
- draft,editorialFlags,projectOnly:true,expertReviewRequired:true,documentIssued:false,wordTemplateApplied:false});
+ draft,editorialFlags,projectOnly:true,expertReviewRequired:true,documentIssued:false,wordTemplateApplied:false,
+ automaticReviewerIntermediate:automaticReviewerConfirmed,expertApproved:false});
  }catch{return reply({error:"Document drafting failed"},504)}
  finally{clearTimeout(timer)}
 }
