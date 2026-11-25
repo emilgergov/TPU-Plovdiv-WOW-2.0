@@ -29,7 +29,7 @@ function fixture(overrides={}){
      if(sql.includes('FROM kt126_files'))return {results:overrides.files??rows.kt126_files};
      throw Error('UNEXPECTED_SQL '+sql);
    }
- }}}};
+  }}};
  return createKt134NativeDossierAdapters({db,
   resolvePrincipal:async()=>overrides.principal??{authenticated:true,userId:'u1',organizationId:'riosv'},
   getNormativeMaster:async()=>({name:'НОРМАТИВЕН MASTER',sha256:'a'.repeat(64),verifiedReferences:[{id:'zbr'}]})
