@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   live-existing-eg:
-    if: true # User-authorized one bounded real E4 to E5 automatic acceptance test; disable after result
+    if: false # Fix rollout identity verification before controlled test retry
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
@@ -115,17 +115,26 @@ jobs:
             if(!names.has(req))throw Error('Test binding missing after exact activation: '+req);
           console.log('Original OpenAI/access bindings and ephemeral smoke binding all intact.');
           NODE
-          for attempt in 1 2 3 4 5 6; do
+          ready=0
+          for attempt in $(seq 1 30); do
             code="$(curl -sS --max-time 15 -o "$dir/health.json" -w '%{http_code}' "$base/kt134-candidate-health" || true)"
-            if [[ "$code" == "200" ]]; then break; fi
-            sleep 2
-          done
-          node - "$dir/health.json" <<'NODE'
+            if [[ "$code" == "200" ]] && node - "$dir/health.json" <<'NODE'
           const fs=require('fs');let d;try{d=JSON.parse(fs.readFileSync(process.argv[2]))}catch{}
           if(d?.contract!=='KT134_EVIDENCE_SPAN_V1'||d?.build!=='KT134_EXISTING_EG_LIVE_V2'||d?.aiConfigured!==true||d.candidateOnly!==true)
-            throw Error('EG TEST Worker lacks correct KT134 candidate contract');
-          console.log('EXISTING EG TEST Worker health verified with protected AI bindings.');
+            process.exit(1);
           NODE
+            then
+              ready=1
+              break
+            fi
+            echo "Existing EG TEST Worker rollout not yet serving exact candidate (attempt $attempt, HTTP $code)."
+            sleep 2
+          done
+          if [[ "$ready" != "1" ]]; then
+            echo "::error::Exact candidate version not reachable after bounded rollout checks; restore previous test deployment."
+            exit 1
+          fi
+          echo 'EXISTING EG TEST Worker health verified with protected AI bindings and exact contract.'
           status="0"
           for attempt in 1 2 3 4 5 6 7 8 9 10; do
             status="$(curl -sS --max-time 15 -o "$dir/protected-get.json" -w '%{http_code}' "$base/kt134-evidence-span" || true)"
