@@ -80,3 +80,14 @@ test("fallback aligns with selected expert-reference panel 13, not a procedural 
  assert.equal(kt134DispositionTextIssues(txt,d).length,0);
  assert.ok(!txt.includes("Рецензентът"));
 });
+
+test("actual full Word bullets proposing motivated art.93 decision are flagged when procedure is not ready",()=>{
+ const d=deriveKt134LegalDisposition({qualification:null,qualificationValidated:false,reviewerPanelId:7});
+ const doc="Мотивирано предложение:\nПредвид непълните данни следва да се издаде мотивирано решение за преценяване на необходимостта от ОВОС по чл. 93, ал. 1 ЗООС.\n- Издаване на мотивирано решение по чл. 93 ЗООС за преценка необходимостта от ОВОС.";
+ const problems=kt134DispositionTextIssues(doc,d);
+ assert.ok(problems.includes("UNPROVEN_FORMAL_ACT_OR_PROCEDURE_93"));
+});
+test("express exclusion of premature art.93 act is not mistaken for a positive proposal",()=>{
+ const d=deriveKt134LegalDisposition({qualification:null,qualificationValidated:false,reviewerPanelId:13});
+ assert.equal(kt134DispositionTextIssues("Не се предлага издаване на решение по чл. 93 ЗООС без доказани предпоставки.",d).length,0);
+});
