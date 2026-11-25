@@ -35,3 +35,10 @@ test('wrong bucket name or missing D1 ID fails closed',()=>{
  const y=fixture();y.d1Record.uuid='';
  assert.equal(assessExistingKT134Staging(y).ready,false);
 });
+
+test('staging diagnostic secret is allowed only by its exact KT134 name',()=>{
+ const good=fixture();good.testWorker.bindings.push({type:'secret_text',name:'KT134_SMOKE_TOKEN'});
+ assert.equal(assessExistingKT134Staging(good).ready,true);
+ const bad=fixture();bad.testWorker.bindings.push({type:'secret_text',name:'OPENAI_API_KEY'});
+ assert.equal(assessExistingKT134Staging(bad).ready,false);
+});
