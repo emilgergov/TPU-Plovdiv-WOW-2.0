@@ -3,9 +3,9 @@
   "runId": "45528947913",
   "sourceCommit": "a3572c255b932f9020e1a6e57ac01e4f1908461b",
   "outcome": "failure",
-  "credentialsStep": "failure",
-  "deployStep": "skipped",
-  "liveStage45WordStep": "skipped",
+  "credentialsStep": "success",
+  "deployStep": "success",
+  "liveStage45WordStep": "failure",
   "realDossierProcessed": false,
   "productionWorkerChanged": false
 }
