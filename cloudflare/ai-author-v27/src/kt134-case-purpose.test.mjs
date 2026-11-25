@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {detectKT134CasePurpose} from './kt134-case-purpose.mjs';
+import {detectKT134CasePurpose,checkKT134ComplaintRoute} from './kt134-case-purpose.mjs';
 const subject='Възражение относно съдържанието на писмо на РИОСВ – Пловдив';
 const scope='Административно разглеждане на възражение за редакция на предходно писмо без нов инвестиционен предмет';
 const sourceTexts=[{source:'Синтетично възражение.txt',
@@ -13,4 +13,11 @@ assert.equal(detectKT134CasePurpose({subject,scope,sourceTexts:[{source:'Док�
 assert.equal(detectKT134CasePurpose({subject:'Ново инвестиционно предложение и жалба срещу писмо',scope,sourceTexts}).complaintReview,false);
 assert.equal(detectKT134CasePurpose({subject,scope,sourceTexts:[]}).complaintReview,false);
 assert.equal(detectKT134CasePurpose({subject,scope,sourceTexts:[{source:'Жалба',text:'Жалба за недопустима промяна в предходно писмо, подадена по текущата преписка.'}]}).complaintReview,true);
-console.log('KT134 purpose: seven independent assertions passed; no preset panel');
+for(const panel of [1,4,5,6,7,8,9,10,11,12])
+ assert.equal(checkKT134ComplaintRoute(matched,panel).ok,false,'No new-IP route without a new filing: '+panel);
+for(const panel of [14,17,18,19,20,21,22])
+ assert.equal(checkKT134ComplaintRoute(matched,panel).ok,true,'Must leave complaint panel selection open: '+panel);
+assert.equal(checkKT134ComplaintRoute(matched,3,'Изискване на конкретно становище от компетентна институция').ok,true);
+assert.equal(checkKT134ComplaintRoute(matched,3,'Обща правна неяснота').ok,false);
+assert.equal(checkKT134ComplaintRoute({complaintReview:false},1).ok,true,'No regression for new IP');
+console.log('KT134 purpose: complaint evidence and routing guard passed; no single panel preset');
