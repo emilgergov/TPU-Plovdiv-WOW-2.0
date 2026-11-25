@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   live-existing-eg:
-    if: true # KT134 one final bounded live replay after TDZ repair, deactivate immediately
+    if: false # Bounded live replay completed, manual re-enable only after new approved milestone
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
