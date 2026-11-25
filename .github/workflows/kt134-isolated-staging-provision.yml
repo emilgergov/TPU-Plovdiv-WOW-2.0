@@ -41,18 +41,18 @@ jobs:
           test "$GITHUB_REF_NAME" = "kt134-auto-mode-isolated"
           test -f kt134-auto/kt134-isolated-cloudflare-provision.mjs
           node --check kt134-auto/kt134-isolated-cloudflare-provision.mjs
-      # Recheck Cloudflare R2 after account token policy update, 2026-11-25.
+      # KT134 has its OWN secret. Never reuse or rotate production CLOUDFLARE_API_TOKEN.
       - name: Cloudflare isolated plan or manually approved creation
         shell: bash
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          KT134_CLOUDFLARE_API_TOKEN: ${{ secrets.KT134_CLOUDFLARE_API_TOKEN }}
           KT134_CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
           KT134_PROVISION_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.action || 'plan' }}
           KT134_CONFIRMATION: ${{ github.event_name == 'workflow_dispatch' && inputs.confirmation || '' }}
         run: |
           set -euo pipefail
-          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Missing Cloudflare secret"; exit 1; }
-          echo "::add-mask::$CLOUDFLARE_API_TOKEN"
+          test -n "$KT134_CLOUDFLARE_API_TOKEN" || { echo "::notice::KT134_CLOUDFLARE_API_TOKEN is not configured; no Cloudflare requests or mutations performed"; exit 0; }
+          echo "::add-mask::$KT134_CLOUDFLARE_API_TOKEN"
           node kt134-auto/kt134-isolated-cloudflare-provision.mjs
       - name: Source protection declaration
         if: always()
