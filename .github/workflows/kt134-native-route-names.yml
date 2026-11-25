@@ -1,0 +1,36 @@
+name: KT134 native route names
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-native-route-names.yml']
+permissions:
+  contents: write
+jobs:
+  list-routes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Identify route names without exposing Worker source
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer $TOKEN" "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT/workers/scripts/tpu-plovdiv-kt125-local-auth" > /tmp/native
+          node - <<'NODE'
+          const fs=require('fs');
+          const source=fs.readFileSync('/tmp/native','utf8');
+          const candidates=[...source.matchAll(/['"`](\/[a-z][a-z0-9_\/.-]{2,85})['"`]/gi)].map(x=>x[1]);
+          const paths=[...new Set(candidates)].filter(x=>/(auth|session|user|case|file|dossier|stage|module|register|login|api|access|evidence|registry)/i.test(x)).sort().slice(0,100);
+          fs.writeFileSync('kt134-auto/KT134_NATIVE_ROUTE_NAMES.json',JSON.stringify({paths},null,2));
+          console.log('Extracted '+paths.length+' non-secret route names');
+          NODE
+      - name: Save route names
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_NATIVE_ROUTE_NAMES.json
+          git commit -m 'KT134: list native KT125 route names' || exit 0
+          git push origin HEAD:kt134-auto-mode-isolated
