@@ -5,6 +5,7 @@
  * evidenceRevision, requestId and draft. No response identity -> no accepted draft.
  * Distinct experts' credentials never travel inside the case evidence payload. */
 import {collectStageEvidence,verifyStageEvidence} from './kt95-stage-evidence-handoff.mjs';
+import {buildEvidenceChunks,verifyEvidenceDigest,evidenceCoverage} from './kt134-evidence-chunks.mjs';
 import {VERIFIED_ARTICLES,LOCKED_ARCHIVE,LOCKED_ARCHIVE_SHA256} from './v11-trusted-source-registry.mjs';
 
 const ENDPOINT='https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/stage4-proposal';
@@ -230,6 +231,43 @@ function boot(){
   };
   const activityTicket=window.KT80Busy?.start?.('ЕГ Автор → независим рецензент · Изготвяне и проверка на предложението…');
   try{
+   // KT134: examine every readable source span before drafting. Failure is visible.
+   const batch=buildEvidenceChunks(Array.isArray(w.intake?.document_texts)?w.intake.document_texts:[],5000);
+   const receipts=[];
+   let allResponses=true;
+   for(let i=0;i<batch.chunks.length;i++){
+    if(ticket!==serial||pendingSignature!==caseIdentity().signature){allResponses=false;break}
+    const chunk=batch.chunks[i];
+    status.textContent='Прочит на преписката: '+(i+1)+' от '+batch.chunks.length+' части · '+chunk.source;
+    let result=null;
+    try{
+     const resp=await window.KT80EGSession.request(
+      ENDPOINT.replace('/stage4-proposal','/kt134-evidence-span'),
+      JSON.stringify({task:'read_case_evidence_span',caseId:request.caseId,
+       evidenceRevision:request.evidenceRevision,requestId:crypto.randomUUID(),chunk}),
+      firstPassword);
+     if(resp.ok)result=await resp.json();
+    }catch{}
+    if(!result||result.caseId!==request.caseId||
+       String(result.evidenceRevision)!==String(request.evidenceRevision)||
+       result.chunk?.source!==chunk.source||result.chunk?.start!==chunk.start||
+       result.chunk?.end!==chunk.end){allResponses=false;continue}
+    receipts.push(verifyEvidenceDigest(chunk,result));
+   }
+   const coverage=evidenceCoverage(batch,receipts);
+   const claims=coverage.claims.map(x=>({source:x.source,documentIndex:x.documentIndex,
+     start:x.start,end:x.end,quote:x.quote,summary:x.summary,expertConfirmed:false}));
+   const ledgerFits=new TextEncoder().encode(JSON.stringify(claims)).length<=26000;
+   request.completeCaseEvidence.kt134DossierCoverage={
+    complete:coverage.complete&&allResponses&&ledgerFits,
+    expectedChunks:coverage.expectedChunks,examinedChunks:coverage.examinedChunks,
+    unreadableDocuments:coverage.unreadableDocuments,unexamined:coverage.unexamined,
+    sourceAnchoredClaims:ledgerFits?claims:[],allClaimEvidenceIncluded:ledgerFits,
+    digestOverflow:!ledgerFits,generatedOnlyForCurrentCase:true};
+   if(!coverage.complete||!allResponses||!ledgerFits){
+    status.textContent='Преписката не е прочетена изцяло. Непълен анализ няма да се представя за завършен.';
+    return;
+   }
    const prepared=fitStage4Request(request);
    if(!prepared.payload){
     status.textContent='Доказателственият пакет е твърде голям и не може да бъде изпратен безопасно. Размер: '+prepared.bytes+' байта.';
