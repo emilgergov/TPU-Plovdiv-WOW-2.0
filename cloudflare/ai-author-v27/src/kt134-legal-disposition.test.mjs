@@ -61,3 +61,11 @@ test("uncertain annex evidence does not justify mandatory screening under art. 9
  const d=deriveKt134LegalDisposition({qualification:q(),qualificationValidated:true,reviewerPanelId:4});
  assert.ok(kt134DispositionTextIssues("Следва да се проведе преценка на необходимостта от ОВОС по чл. 93.",d).includes("UNSUPPORTED_MANDATORY_EIA_SCREENING"));
 });
+
+test("actual live draft saying 'no grounds' and issuing art.2(2) notice is not evidence-grounded",()=>{
+ const disposition=deriveKt134LegalDisposition({qualification:null,qualificationValidated:false,reviewerPanelId:1});
+ const text="Поради вътрешно преустройство и липса на ново строителство не са налице условия за стартиране на процедура по оценка за съвместимост. Предлага се издаване на уведомително писмо съгласно чл. 2, ал. 2 от Наредбата за ОС, че не е необходимо провеждане на процедура.";
+ const errors=kt134DispositionTextIssues(text,disposition);
+ assert.ok(errors.includes("UNPROVEN_NEGATIVE_PROCEDURAL_CONCLUSION"));
+ assert.ok(errors.includes("UNPROVEN_ART2_2_NOTIFICATION"));
+});
