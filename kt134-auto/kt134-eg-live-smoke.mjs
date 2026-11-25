@@ -10,7 +10,7 @@ const id='KT134-SYNTHETIC-ACCEPTANCE',revision='SYNTHETIC-1';
 const subject='Синтетично инвестиционно предложение за вътрешно преустройство на съществуващо складово помещение';
 const scope='Предвижда се вътрешна промяна на разпределението в съществуваща складова сграда, без данни за ново строителство или промяна на площта на поземления имот. Материалът е измислен и предназначен само за проверка на автоматичния маршрут.';
 const stage4={
- task:'draft_normative_proposal',documentType:'PROJECT_NOT_ACT',
+ task:'draft_normative_proposal',documentType:'PROJECT_NOT_ACT',kt134AutomaticInterim:true,
  caseId:id,requestId:'kt134-live-synthetic-001',evidenceRevision:revision,
  subject,scope,parcelIds:['00000.1.1'],
  evidence:[
@@ -30,7 +30,7 @@ async function post(route,data){
   headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
   body:JSON.stringify(data),signal:AbortSignal.timeout(180000)});
  const payload=await response.json().catch(()=>({}));
- if(!response.ok)throw Error(route+' HTTP '+response.status+' '+String(payload.error||payload.message||'unknown'));
+ if(!response.ok){ console.log('KT134 live analysis findings:',JSON.stringify({qualityStage:payload.qualityStage,qualityIssues:payload.qualityIssues,reviewed:payload.normativeAudit?.reviewed,reviewVerdict:payload.normativeAudit?.reviewVerdict}).slice(0,1600));throw Error(route+' HTTP '+response.status+' '+String(payload.error||payload.message||'unknown'));}
  return payload;
 }
 console.log('KT134: live synthetic Stage 4 author and reviewer request');
