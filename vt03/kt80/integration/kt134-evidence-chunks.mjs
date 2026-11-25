@@ -8,6 +8,10 @@ export function buildEvidenceChunks(documents,maxChars=5000){
   const content=str(d.text).replace(/\r\n/g,"\n");
   const sourceId=name||"Документ "+(i+1);
   if(!content.trim()){unreadable.push({documentIndex:i,source:sourceId,reason:"NO_EXTRACTED_TEXT"});continue}
+  if(d.truncated===true||(Number.isFinite(Number(d.totalChars))&&Number(d.totalChars)>content.length))
+   unreadable.push({documentIndex:i,source:sourceId,reason:"EXTRACTED_TEXT_TRUNCATED",suppliedChars:content.length,totalChars:Number(d.totalChars)||null});
+  if(/НЕПРОЧЕТЕН|ПРОВЕРКА:|OCR на приложението е отложен/iu.test(str(d.readStatus)))
+   unreadable.push({documentIndex:i,source:sourceId,reason:"EXTRACTION_REQUIRES_REVIEW",status:str(d.readStatus).slice(0,300)});
   for(let start=0;start<content.length;){
    const hardEnd=Math.min(content.length,start+maxChars);
    let end=hardEnd;
