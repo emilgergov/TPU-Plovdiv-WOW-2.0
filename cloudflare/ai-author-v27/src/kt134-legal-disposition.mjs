@@ -59,9 +59,15 @@ export function kt134DispositionTextIssues(text,disposition){
  const claimsEIAExcluded=/(?:не\s+се\s+(?:изисква|налага|прилага|провежда)[^.!?\n]{0,75}(?:ОВОС|преценка)|(?:ОВОС|преценка\s+за\s+ОВОС)[^.!?\n]{0,55}не\s+се\s+(?:изисква|налага)|процедур(?:ите|а)[^.!?\n]{0,55}по\s+ЗООС[^.!?\n]{0,60}(?:неприложими|не\s+са\s+приложими))/iu.test(body);
  if(claimsEIAExcluded&&!disposition.annexNegative)errors.push("UNSUPPORTED_EIA_EXCLUSION");
  const osExclusionClaim=/(?:не\s+се\s+(?:изисква|налага|прилага|провежда)[^.!?\n]{0,75}(?:ОС|оценка\s+за\s+съвместимост)|(?:процедура|оценка)\s+по\s+Наредбата\s+за\s+ОС[^.!?\n]{0,90}(?:неприложима|не\s+се\s+налага)|не\s+подлежи\s+на\s+(?:процедура|оценка)[^.!?\n]{0,55}съвместимост|няма\s+основания[^.!?\n]{0,105}(?:ОВОС|ОС)|не\s+подлежи[^.!?\n]{0,65}(?:ОВОС|ОС))/iu.test(body);
+ const negativeProceduralConclusions=/(?:не\s+са\s+налице\s+(?:условия|основания)[^.!?\n]{0,135}(?:ОВОС|ОС|съвместимост|процедура)|не\s+е\s+необходимо[^.!?\n]{0,105}(?:провеждане|образуване|стартиране)[^.!?\n]{0,105}(?:ОВОС|ОС|съвместимост|процедура)|липса\s+на\s+предпоставки[^.!?\n]{0,100}(?:приложени[ея]|ОВОС|ОС)|не\s+подлежи[^.!?\n]{0,85}(?:процедура|оценка\s+за\s+съвместимост))/iu.test(body);
+ if(negativeProceduralConclusions&&!disposition.qualificationValidated)
+  errors.push("UNPROVEN_NEGATIVE_PROCEDURAL_CONCLUSION");
  const statusOS2=disposition.rows?.OS2?.status;
  const panel01Proven=disposition.qualificationValidated&&disposition.annexNegative&&
   disposition.rows?.OS1?.status==="ОТРИЦАТЕЛНА"&&statusOS2==="ПОЛОЖИТЕЛНА";
+ const explicitArt2Letter=/(?:писм(?:ено|о)\s+(?:уведомително\s+)?писмо|уведомител(?:но|ен)\s+писмо)[^.!?\n]{0,135}(?:чл\.?\s*2\s*,?\s*ал\.?\s*2|не\s+подлежи\s+на\s+оценка\s+за\s+съвместимост)|(?:чл\.?\s*2\s*,?\s*ал\.?\s*2)[^.!?\n]{0,120}(?:писмо|уведомяване|издаване)/iu.test(body);
+ if(explicitArt2Letter&&!disposition.qualificationValidated)
+  errors.push("UNPROVEN_ART2_2_NOTIFICATION");
  const definiteLetterArt2=/(?:да\s+се\s+издаде|предлага\s+се\s+издаване|следва\s+издаване|следва\s+да\s+се\s+приложи)[^.!?\n]{0,120}(?:писмо|чл\.?\s*2\s*,?\s*ал\.?\s*2)|(?:писмо\s+по\s+чл\.?\s*2\s*,?\s*ал\.?\s*2)[^.!?\n]{0,100}(?:да\s+се\s+издаде|да\s+уведоми|не\s+подлежи)/iu.test(body);
  if(osExclusionClaim&&!panel01Proven)errors.push("UNSUPPORTED_OS_EXCLUSION");
  if(definiteLetterArt2&&!panel01Proven)errors.push("UNSUPPORTED_OS_ART2_2_LETTER");
