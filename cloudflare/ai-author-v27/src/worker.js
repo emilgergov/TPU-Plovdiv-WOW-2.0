@@ -1,7 +1,7 @@
 import {getLegalContext} from "./legal-v11-loader.mjs";
 import {kt134DraftDiagnostics} from "./kt134-content-diagnostics.mjs";
 import {detectKT134CasePurpose,checkKT134ComplaintRoute} from "./kt134-case-purpose.mjs";
-import {COMPLAINT_QUALIFICATION_SCHEMA,COMPLAINT_QUALIFICATION_SYSTEM,validateComplaintQualification,complaintDraftIssues} from "./kt134-complaint-qualification.mjs";
+import {COMPLAINT_QUALIFICATION_SCHEMA,COMPLAINT_QUALIFICATION_SYSTEM,validateComplaintQualification,complaintDraftIssues,normalizeComplaintDraft} from "./kt134-complaint-qualification.mjs";
 import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 import {evaluateDraft} from "./kt123-decision-model.mjs";
 import {substantiveDraftIssues} from "./kt123-substance-guard.mjs";
@@ -505,6 +505,7 @@ async function handleStage4Proposal(request,env){
   const data=await upstream.json();
   let draft=(data.output||[]).flatMap(x=>x.content||[])
    .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
+  if(isComplaint&&lockedQualification)draft=normalizeComplaintDraft(draft,lockedQualification);
   if(!draft||draft.length<120||draft.length>12000)
    return reply({error:"Stage 4 draft is empty or too verbose",qualityIssues:["EMPTY_OR_EXCESSIVE_DRAFT"]},422);
   const sectionNames=["Фактическа основа","Нормативни предпоставки и граници на проверката",
@@ -809,6 +810,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   const verdict=independentReview?.verdict;
   if(!["pass","revise","reject"].includes(verdict))return expertPreview("Независимият преглед е невалиден.",["INVALID_REVIEW"],"independent_review",draft);
   let finalDraft=canonicalizePanelLabel(verdict==="pass"?draft:(text(independentReview.revisedDraft,12000)||draft));
+  if(isComplaint&&lockedQualification)finalDraft=normalizeComplaintDraft(finalDraft,lockedQualification);
   // KT134: one non-blocking reviewer self-correction, independent of expert approval.
   const toRepair=new Set(["TEST_METADATA_IN_ADMINISTRATIVE_TEXT","SHORT_UNREASONED_DRAFT","MISSING_ACTIONABLE_PROPOSAL","NO_SELECTED_PANEL","GENERIC_LEGAL_UNCERTAINTY","UNPROVEN_PHYSICAL_GAP","MISSING_OR_UNORDERED_SECTIONS","ADMIN_PANEL_02_LABEL_MISMATCH","UNDETERMINED_WITHOUT_DECISIVE_FACT","ALL_APPLICABILITY_TESTS_UNDETERMINED"]);
   const diagnosticInput={stage:4,sourceTexts,gis:detail.gis||null,legalTexts:verifiedLegalCorpus.legalProvisions,reviewFindings:reviewerFindings};
@@ -839,7 +841,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
      const data=await correction.json();
      const raw=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
      const parsed=JSON.parse(raw);
-     const candidate=canonicalizePanelLabel(text(parsed.revisedDraft,12000));
+     const candidate=isComplaint&&lockedQualification?normalizeComplaintDraft(canonicalizePanelLabel(text(parsed.revisedDraft,12000)),lockedQualification):canonicalizePanelLabel(text(parsed.revisedDraft,12000));
      const substantive=[...qualityIssues(candidate),...(lockedQualification?compareSelectedQualification(candidate,lockedQualification):[])];
      const remaining=[
       ...kt134DraftDiagnostics(withReviewConclusion(candidate),diagnosticInput).findings.filter(x=>toRepair.has(x.code)),
