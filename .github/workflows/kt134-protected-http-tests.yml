@@ -1,0 +1,24 @@
+name: KT134 protected interface-to-EG integration checks
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths:
+      - 'kt134-auto/kt134-protected-http-integration.mjs'
+      - 'kt134-auto/kt134-protected-http-integration.test.mjs'
+      - '.github/workflows/kt134-protected-http-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-protected-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and authentication boundary
+        run: |
+          node --check kt134-auto/kt134-protected-http-integration.mjs
+          node --test kt134-auto/kt134-protected-http-integration.test.mjs
+          node --test kt134-auto/kt134-eg-stage45-live-bridge.test.mjs
