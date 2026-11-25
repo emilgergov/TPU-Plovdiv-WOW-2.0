@@ -487,7 +487,7 @@ async function handleStage4Proposal(request,env){
    method:"POST",signal:controller.signal,
    headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
    body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:4200,
-    input:[{role:"system",content:system+subjectInstruction+(lockedQualification?" ЗАДЪЛЖИТЕЛНО: Отделната нормативна квалификация е вече изградена. Не променяй четирите статуса, не избирай нов панел; само мотивирай и редактирай.":"")},
+    input:[{role:"system",content:(isComplaint?complaintAuthorSystem:system+subjectInstruction)+(lockedQualification?(isComplaint?" Запази удостоверената правна квалификация на възражението и избрания панел.":" ЗАДЪЛЖИТЕЛНО: Отделната нормативна квалификация е вече изградена. Не променяй четирите статуса, не избирай нов панел; само мотивирай и редактирай."):"")},
      {role:"user",content:JSON.stringify({...context,lockedQualification:lockedQualification?{...lockedQualification,panelTitle:KT109_ROUTE_BY_ID.get(lockedQualification.selectedPanel)?.title}:null})}]})
   });
   if(!upstream.ok)return reply({error:"AI provider request failed",providerStatus:upstream.status},502);
@@ -496,6 +496,14 @@ async function handleStage4Proposal(request,env){
    .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
   if(!draft||draft.length<120||draft.length>12000)
    return reply({error:"Stage 4 draft is empty or too verbose",qualityIssues:["EMPTY_OR_EXCESSIVE_DRAFT"]},422);
+  const complaintAuthorSystem=[
+   "ЕГ Автор: състави ПРОЕКТ за административно действие по възражение или жалба срещу предходно писмо. Текущият предмет НЕ е ново уведомление за ИП.",
+   "Запази заключената квалификация lockedQualification, конкретния избран панел, компетентността и точните правни и фактически цитати. Без фиктивни реквизити или параметри на ново ИП.",
+   "Задължителни раздели в ред: Фактическа основа; Нормативни предпоставки и граници на проверката; Мотивирано предложение; Данни за експертна проверка.",
+   "Постави самостоятелен ред ИЗБРАН ПАНЕЛ: NN — точно заглавие от каталога. Предложи конкретно действие с мотиви и обсъди алтернативите.",
+   "Не налагай четирите матрични статуса за приложенията на ЗООС и чл. 2 от Наредбата за ОС при възражение срещу писмо. Историческите правни въпроси могат да се обсъждат само ако са относими.",
+   "Това е проект до окончателното одобрение от експерта; не представлява административен акт."
+  ].join(" ");
   const sectionNames=["Фактическа основа","Нормативни предпоставки и граници на проверката",
    "Мотивирано предложение","Данни за експертна проверка"];
   // KT106: check-first, one bounded author repair, then recheck. Never show a known-invalid proposal.
@@ -547,7 +555,7 @@ async function handleStage4Proposal(request,env){
    
 const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   const routeSelected=/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\b/iu.test(gateText);
-  if(routeSelected){
+  if(routeSelected&&!isComplaint){
     const defs=[
       ['A1',/ПРИЛОЖЕНИЕ\s*№\s*1\s*КЪМ\s*ЗООС\s*:\s*(ПОЛОЖИТЕЛНА|ОТРИЦАТЕЛНА|НЕОПРЕДЕЛЕНА)\s*[—–-]\s*([^\n]+)/iu],
       ['A2',/ПРИЛОЖЕНИЕ\s*№\s*2\s*КЪМ\s*ЗООС\s*:\s*(ПОЛОЖИТЕЛНА|ОТРИЦАТЕЛНА|НЕОПРЕДЕЛЕНА)\s*[—–-]\s*([^\n]+)/iu],
@@ -597,7 +605,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     }
   }
   // KT123: independent finite-state compatibility control, not AI narrative.
-   if(/ИЗБРАН\s+ПАНЕЛ\s*:/iu.test(value)){
+   if(/ИЗБРАН\s+ПАНЕЛ\s*:/iu.test(value)&&!isComplaint){
      const decision=evaluateDraft(value);
      const blocking=new Set(["OS_ART2_MUTUALLY_EXCLUSIVE","OS_ART2_PREMATURE_EXCLUSION",
       "PANEL_01_CONTRADICTS_LEGAL_FACTS","UNKNOWN_OR_UNSELECTED_ROUTE",
@@ -684,13 +692,13 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
    unverifiedDraft:typeof proposal==="string"?withReviewConclusion(proposal).slice(0,12000):"",
    qualityIssues:codes,qualityStage:stage,...extra
   },422);
-  let issues=[...qualityIssues(draft),...(lockedQualification?compareDraftWithQualification(draft,lockedQualification):[]),...qualificationIssues];
+  let issues=[...qualityIssues(draft),...(lockedQualification?compareSelectedQualification(draft,lockedQualification):[]),...qualificationIssues];
   // KT124-R2: one author proposal, then one independent reviewer; no
   // author-reviewer loop. The reviewer receives unresolved validation issues.
   let authorRepairs=0;
   if(env.KT123_TEST_LEGACY_MODE==="true"&&issues.length){
    const repairInstructions=[
-    lockedQualification?"Запази точно четирите нормативни статуса и избрания панел от lockedQualification; преработвай само текстовите мотиви.":"",
+    lockedQualification?(isComplaint?"Запази заключената квалификация на възражението, цитатите и избрания панел.":"Запази точно четирите нормативни статуса и избрания панел от lockedQualification; преработвай само текстовите мотиви."):"",
     "Ти си същият EG Автор. Преработи ПЪЛНИЯ проект според констатираните точни дефекти, като съхраниш верните факти и нормативните източници.",
     "Задължително: ВОДЕЩО ПРЕДЛОЖЕНИЕ, Фактическа основа, Нормативни предпоставки и граници на проверката, Мотивирано предложение, Данни за експертна проверка.",
     "Забранено е да се заменя конкретно правно предложение с общо искане за допълнителна информация или измислена процедура.",
@@ -724,7 +732,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
    const candidate=(revisionData.output||[]).flatMap(x=>x.content||[])
     .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
    if(candidate.length>=120&&candidate.length<=12000){
-    const remaining=[...qualityIssues(candidate),...(lockedQualification?compareDraftWithQualification(candidate,lockedQualification):[])];
+    const remaining=[...qualityIssues(candidate),...(lockedQualification?compareSelectedQualification(candidate,lockedQualification):[])];
     // Preserve the revised reasoning for inspection even if it is not approved.
     draft=candidate;issues=remaining;
    }
@@ -757,6 +765,12 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
    "За всички изходи, включително pass, попълни grounds с 2–5 кратки самостоятелни рецензентски аргумента: точна проверена норма, установен факт/конкретен източник, какво е установено и какво остава непроверено. При reject или revise отделно посочи конкретните възражения в issues. Не измисляй липсващ правен факт и не наричай прегледа гаранция за законосъобразност.",
    'Изведи САМО JSON: {"verdict":"pass|revise|reject","grounds":["независими конкретни мотиви и доказателствени ограничения"],"issues":["конкретна констатация"],"revisedDraft":"пълният коригиран текст само при revise"}.'
   ].join(" ");
+  const complaintReviewSystem=[
+   "Независим EG рецензент за възражение по предходно писмо, а НЕ ново уведомление за ИП. Коригирай и винаги предлагай конкретно действие. Не блокирай.",
+   "Проверявай точния предмет, компетентността, процесуалния ред, удостоверените факти и правните източници. Не изисквай четири статуса за ново ИП.",
+   "При нужда върни ПЪЛЕН коригиран revisedDraft с четирите задължителни раздела, точен ИЗБРАН ПАНЕЛ и мотивирани алтернативи. Не предрешавай окончателния експертен избор.",
+   "Върни само JSON verdict, grounds, issues, revisedDraft с независими мотиви."
+  ].join(" ");
   const auditInput={draft,lockedQualification,routeCatalog:KT109_ROUTE_CATALOG,subject:payload.subject,scope:payload.scope,casePurpose,parcelIds,
    establishedFacts:confirmed,uncertainFacts:unresolved,
    caseDocumentExcerpts:sourceTexts.slice(0,20).map(x=>({source:x.source,text:x.text.slice(0,2500),truncated:x.truncated||x.text.length>2500})),
@@ -776,7 +790,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
       grounds:{type:"array",items:{type:"string"}},
       revisedDraft:{type:"string"}
      },required:["verdict","issues","grounds","revisedDraft"]}}},
-    input:[{role:"system",content:reviewSystem+subjectInstruction},{role:"user",content:JSON.stringify(auditInput)}]})
+    input:[{role:"system",content:isComplaint?complaintReviewSystem:reviewSystem+subjectInstruction},{role:"user",content:JSON.stringify(auditInput)}]})
   });
   if(!auditProvider.ok)return expertPreview("Независимият нормативен преглед не е достъпен.",["REVIEW_UNAVAILABLE"],"independent_review",draft);
   const auditData=await auditProvider.json();
@@ -813,7 +827,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
         issues:{type:"array",items:{type:"string"}},
         revisedDraft:{type:"string"}
        },required:["verdict","grounds","issues","revisedDraft"]}}},
-      input:[{role:"system",content:reviewSystem+subjectInstruction+" Коригирай ПЪЛНИЯ документ самостоятелно. Върни пълен revisedDraft дори при несъгласие, без да блокираш или да удостоверяваш правния резултат. Не допускай тестови означения в административен текст."},
+      input:[{role:"system",content:(isComplaint?complaintReviewSystem:reviewSystem+subjectInstruction)+" Коригирай ПЪЛНИЯ документ самостоятелно. Върни пълен revisedDraft дори при несъгласие, без да блокираш или да удостоверяваш правния резултат. Не допускай тестови означения в административен текст."},
        {role:"user",content:JSON.stringify({...auditInput,draft:finalDraft,firstReview:independentReview,correctionProblems:repairProblems})}]})
     });
     if(correction.ok){
@@ -821,7 +835,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
      const raw=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
      const parsed=JSON.parse(raw);
      const candidate=canonicalizePanelLabel(text(parsed.revisedDraft,12000));
-     const substantive=[...qualityIssues(candidate),...(lockedQualification?compareDraftWithQualification(candidate,lockedQualification):[])];
+     const substantive=[...qualityIssues(candidate),...(lockedQualification?compareSelectedQualification(candidate,lockedQualification):[])];
      const remaining=[
       ...kt134DraftDiagnostics(withReviewConclusion(candidate),diagnosticInput).findings.filter(x=>toRepair.has(x.code)),
       ...qualityIssues(candidate).filter(code=>toRepair.has(code)).map(code=>({code}))
@@ -834,7 +848,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     }
    }catch{/* Keep the original reviewed draft; correction failure is not a veto. */}
   }
-  const reviewedIssues=[...qualityIssues(finalDraft),...(lockedQualification?compareDraftWithQualification(finalDraft,lockedQualification):[]),...qualificationIssues];
+  const reviewedIssues=[...qualityIssues(finalDraft),...(lockedQualification?compareSelectedQualification(finalDraft,lockedQualification):[]),...qualificationIssues];
   // Reviewer disagreement is not a veto when the reviewer supplied a
   // complete, independently revalidated correction.
   const correctedByReviewer=finalDraft!==draft&&reviewedIssues.length===0;
@@ -848,7 +862,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   if(finalDraft.length<120||!sectionNames.every(x=>finalDraft.toLocaleLowerCase("bg").includes(x.toLocaleLowerCase("bg")))||
      /преценяван(?:е|ето)\s+на\s+необходимостта\s+от\s+ОС[^.\n]{0,90}чл\.?\s*2\s*,?\s*ал\.?\s*2/iu.test(finalDraft)||
      /(?:наредба\s+за\s+)?оценка\s+за?\s*съвместимост(?:та)?\s+(?:с|на)\s+околната\s+среда/iu.test(finalDraft))
-   return expertPreview("Преработеният проект не премина нормативната проверка.",["REVIEW_REVISION_INVALID",...qualityIssues(finalDraft),...(lockedQualification?compareDraftWithQualification(finalDraft,lockedQualification):[])],"independent_review",finalDraft);
+   return expertPreview("Преработеният проект не премина нормативната проверка.",["REVIEW_REVISION_INVALID",...qualityIssues(finalDraft),...(lockedQualification?compareSelectedQualification(finalDraft,lockedQualification):[])],"independent_review",finalDraft);
   const qualificationProof=lockedQualification?await signQualification(
    lockedQualification,{caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
     subject:payload.subject,scope:payload.scope},env.KT123_HANDOFF_SIGNING_KEY||env.OPENAI_API_KEY):null;
@@ -858,7 +872,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
    archiveEvidenceVerified:true,draft:withReviewConclusion(finalDraft),authorDraft:draft,
    qualificationRecord:lockedQualification,qualificationProof,qualificationGate:{sourceAnchorsMatched:qualificationValidation?.ok===true,legalApplicabilityCertified:false,expertConfirmationRequired:true},
     normativeAudit:{reviewed:true,reviewVerdict:reviewDisposition,originalReviewVerdict:verdict,reviewerUnresolved,authorRepairs,kt134ReviewerCorrectionAttempted,kt134ReviewerCorrectionApplied,
-     deterministicModel:evaluateDraft(finalDraft).decision,
+     deterministicModel:isComplaint?{modelScope:"KT134_COMPLAINT_PROCEDURE",selectedPanel:lockedQualification?.selectedPanel||null,expertApprovalRequired:true,legalApplicabilityAutomaticallyCertified:false}:evaluateDraft(finalDraft).decision,
      legalApplicabilityAutomaticallyCertified:false,selectedPanelId:Number(finalDraft.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0)||null,fullArticlesVerified:true,allArchiveSourcesExamined:false,verifiedLegalProvisionCount:verifiedLegalCorpus.legalProvisions.length,findings:reviewerFindings},
    evidenceReceipt:{dossierAllSourceSpansExamined:dossierCoverageComplete,sourceSpansExpected:Number(dossierCoverage?.expectedChunks)||0,sourceSpansExamined:Number(dossierCoverage?.examinedChunks)||0,documentTextsReceived:sourceTexts.length,
     documentTextsAvailable:context.caseDocuments.sourceTextCount,
