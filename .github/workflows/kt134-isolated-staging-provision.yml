@@ -41,6 +41,7 @@ jobs:
           test "$GITHUB_REF_NAME" = "kt134-auto-mode-isolated"
           test -f kt134-auto/kt134-isolated-cloudflare-provision.mjs
           node --check kt134-auto/kt134-isolated-cloudflare-provision.mjs
+      # Recheck Cloudflare R2 after account token policy update, 2026-11-25.
       - name: Cloudflare isolated plan or manually approved creation
         shell: bash
         env:
