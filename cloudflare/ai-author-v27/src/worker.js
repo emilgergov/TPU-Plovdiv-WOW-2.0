@@ -37,7 +37,7 @@ async function handleAuthor(request,env) {
   if(url.pathname!=="/author") return reply({error:"Not found"},404);
   if(request.method!=="POST") return reply({error:"Method not allowed"},405);
   // No paid calls until a separate access token is configured and supplied.
-  const accessTokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN].filter(v=>typeof v==="string" && v.length>0);
+  const accessTokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN,env.KT134_SMOKE_TOKEN].filter(v=>typeof v==="string" && v.length>0);
   if(!env.OPENAI_API_KEY || !accessTokens.length) return reply({error:"Authoring not enabled: access control is not configured"},503);
   const auth=request.headers.get("Authorization")||"";
   if(!accessTokens.some(token=>auth===`Bearer ${token}`)) return reply({error:"Unauthorized"},401);
@@ -142,7 +142,7 @@ function inventsFacilityPurposeFromSubject(subject){
 
 async function handleSubjectImprove(request,env){
  if(request.method!=="POST")return reply({error:"Method not allowed"},405);
- const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN].filter(x=>typeof x==="string"&&x.length>0);
+ const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN,env.KT134_SMOKE_TOKEN].filter(x=>typeof x==="string"&&x.length>0);
  if(!env.OPENAI_API_KEY||!tokens.length)return reply({error:"AI service is not configured"},503);
  const auth=request.headers.get("Authorization")||"";
  if(!tokens.some(x=>auth==="Bearer "+x))return reply({error:"Unauthorized"},401);
@@ -176,7 +176,7 @@ async function handleSubjectImprove(request,env){
  */
 async function handleScopeImprove(request,env){
  if(request.method!=="POST")return reply({error:"Method not allowed"},405);
- const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN].filter(x=>typeof x==="string"&&x.length>0);
+ const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN,env.KT134_SMOKE_TOKEN].filter(x=>typeof x==="string"&&x.length>0);
  if(!env.OPENAI_API_KEY||!tokens.length)return reply({error:"EG service not configured"},503);
  if(!tokens.some(x=>(request.headers.get("Authorization")||"")==="Bearer "+x))return reply({error:"Unauthorized"},401);
  if(Number(request.headers.get("content-length")||0)>6500)return reply({error:"Payload too large"},413);
@@ -260,7 +260,7 @@ const KT100_VERIFIED_PROVISIONS=Object.freeze([
 
 async function handleStage4Proposal(request,env){
  if(request.method!=="POST")return reply({error:"Method not allowed"},405);
- const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN]
+ const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN,env.KT134_SMOKE_TOKEN]
   .filter(x=>typeof x==="string"&&x.length>0);
  if(!env.OPENAI_API_KEY||!tokens.length)return reply({error:"AI service is not configured"},503);
  if(!tokens.some(t=>(request.headers.get("Authorization")||"")==="Bearer "+t))
@@ -830,7 +830,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
 // of dossier identity, authentication, or the preserved Stage 5 document gate.
 async function handleExpertDecision(request,env){
  if(request.method!=="POST")return reply({error:"Method not allowed"},405);
- const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN].filter(x=>typeof x==="string"&&x.length>0);
+ const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN,env.KT134_SMOKE_TOKEN].filter(x=>typeof x==="string"&&x.length>0);
  if(!tokens.some(t=>request.headers.get("Authorization")==="Bearer "+t))return reply({error:"Unauthorized"},401);
  let input;
  try{const raw=await request.text();if(new TextEncoder().encode(raw).length>42000)return reply({error:"Payload too large"},413);input=JSON.parse(raw)}
@@ -903,7 +903,7 @@ async function handleExpertDecision(request,env){
 
 async function handleStage5Document(request,env){
  if(request.method!=="POST")return reply({error:"Method not allowed"},405);
- const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN].filter(x=>typeof x==="string"&&x.length);
+ const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN,env.KT134_SMOKE_TOKEN].filter(x=>typeof x==="string"&&x.length);
  if(!env.OPENAI_API_KEY||!tokens.length)return reply({error:"Service unavailable"},503);
  if(!tokens.some(t=>request.headers.get("Authorization")==="Bearer "+t))return reply({error:"Unauthorized"},401);
  let input;
@@ -1208,7 +1208,7 @@ async function handleStage5Document(request,env){
 // KT134 isolated: source-span processing; no storage and no automatic legal conclusions.
 async function handleKT134EvidenceSpan(request,env){
  if(request.method!=="POST")return reply({error:"Method not allowed"},405);
- const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN].filter(x=>typeof x==="string"&&x.length);
+ const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN,env.KT134_SMOKE_TOKEN].filter(x=>typeof x==="string"&&x.length);
  if(!env.OPENAI_API_KEY||!tokens.length)return reply({error:"Service unavailable"},503);
  if(!tokens.some(t=>request.headers.get("Authorization")==="Bearer "+t))return reply({error:"Unauthorized"},401);
  let input;
