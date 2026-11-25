@@ -822,6 +822,11 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     reviewerVerdict:reviewDisposition,intermediateConfirmed:true,
     proposalOnly:true,unresolvedIssues:[...new Set(reviewedIssues)].slice(0,20),
     reviewerReasons:reviewerFindings.slice(0,15),
+    // Server-read normative MASTER excerpts accompany the signed reviewer
+    // intermediate handoff so Stage5 evaluates the SAME legal source set.
+    // These excerpts establish text/provenance, never legal applicability.
+    verifiedLegalExcerpts:verifiedLegalCorpus.legalProvisions.slice(0,10)
+      .map(x=>JSON.stringify(x).slice(0,3200)),
     expertApproved:false
   }:null;
   const reviewerIntermediateProof=reviewerIntermediate?await signQualification(
@@ -1005,7 +1010,10 @@ async function handleStage5Document(request,env){
          {role:"user",content:JSON.stringify({
            caseId:input.caseId,subject:input.subject,scope:input.scope,
            parcels:input.parcelIds,caseContext:input.caseContext||null,
-           verifiedLegalContext:input.qualificationRecord||null,
+           verifiedLegalContext:{
+             archiveExcerpts:Array.isArray(d.verifiedLegalExcerpts)?d.verifiedLegalExcerpts:[],
+             qualificationRecord:input.qualificationRecord||null
+           },
            legalEvidenceWarnings:issues.slice(0,12),
            proposedDirection:proposedPanel,
            reviewedProposal:clean(d.reviewedText).slice(0,12000),
@@ -1045,7 +1053,8 @@ async function handleStage5Document(request,env){
                 {role:"user",content:JSON.stringify({
                   subject:input.subject,scope:input.scope,caseContext:input.caseContext||null,
                   reviewedDraft:candidate,reviewerSelectedPanel:proposedPanel,
-                  unresolvedLegalFindings:issues,qualificationRecord:input.qualificationRecord||null
+                  unresolvedLegalFindings:issues,qualificationRecord:input.qualificationRecord||null,
+                  officialNormativeExcerpts:Array.isArray(d.verifiedLegalExcerpts)?d.verifiedLegalExcerpts:[]
                 })}
                ]})
            });
