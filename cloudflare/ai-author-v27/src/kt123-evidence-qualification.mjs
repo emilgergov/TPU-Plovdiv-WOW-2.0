@@ -96,6 +96,7 @@ export const QUALIFICATION_SYSTEM=[
  "ГИС непресичане не е само по себе си доказателство за всички правни хипотези на ОС.",
  "Чл. 2, ал. 2 ОС изисква самостоятелно положително основание и не следва автоматично от отрицателна ал. 1.",
  "Панел 02 само при доказан конкретен липсващ фактически параметър: missingFact.fact, source (точно ID), legalCriterion. Иначе остави празни низове.",
+ "missingFact.fact съдържа ЕДИН определен физически въпрос, например вид и капацитет на конкретно технологично оборудване. Не смесвай капацитет, площ, суровини, емисии, води и отпадъци в общо искане. missingFact.legalCriterion трябва да е един конкретен относим законов критерий, не общо изброяване на всички приложения към ЗООС и Наредбата за ОС.",
  "Липсващо експертно становище, правна квалификация, категоризация от възложителя или документ за законово попадане НЕ е липсващ ФИЗИЧЕСКИ факт. missingFact.fact описва точно предмет, технология, вид дейност, капацитет, площ или друга действителна характеристика, ако тя липсва от материалите.",
  "При НЕОПРЕДЕЛЕНА приложимост не допускай мотиви или criterion, които категорично твърдят не попада, не се налага, няма основания или не подлежи. Изведи коя конкретна предпоставка не е установена, без да превръщаш липсата на доказателство в отрицателен извод.",
  "Не избирай предварително панел 01,02,04 или 05. Не възлагай правната категоризация на възложителя.",
@@ -167,6 +168,28 @@ export function validateQualification(q,sources){
  const physicalGapValid=physicalGapCandidate&&!nonPhysicalGap.test(String(missing.fact))&&
    physicalTerms.test(String(missing.fact));
  if(physicalGapCandidate&&!physicalGapValid)errors.push("MISSING_FACT_NOT_PHYSICAL");
+ if(physicalGapCandidate){
+   const body=String(missing.fact).toLocaleLowerCase("bg");
+   // A request for every possible environmental parameter is not a
+   // case-specific physical gap. Related equipment type/capacity count as one
+   // technical issue; unrelated land area, waste and emissions do not.
+   const groups=[
+    /капацитет|мощност/iu,
+    /технолог|оборудван|производствен/iu,
+    /площ|застрояван|рзп/iu,
+    /емиси|замърсител|въздух/iu,
+    /отпадъц/iu,
+    /водоползван|отпадъчн.{0,10}вод/iu,
+    /опасн.{0,12}веществ/iu,
+    /материал|суровин/iu,
+    /разположени|координат|местоположение/iu
+   ];
+   if(groups.filter(re=>re.test(body)).length>2)errors.push("MISSING_FACT_TOO_BROAD");
+   const criterion=String(missing.legalCriterion||"");
+   if(/(?:приложени[ея]\s*№\s*1\s*(?:и|\/)\s*(?:приложени[ея]\s*№\s*)?2)[^.!?\n]{0,90}(?:чл\.?\s*2|наредба\s+за\s+ОС)/iu.test(criterion))
+    errors.push("MISSING_FACT_NO_SPECIFIC_CRITERION");
+ }
+
  const physicalGap=physicalGapValid?
   {established:true,factId:missing.fact,sourceId:missing.source,legalCriterion:missing.legalCriterion}:null;
  const decision=evaluateDecision({rows:byKey,selectedPanel:route,physicalGap,
