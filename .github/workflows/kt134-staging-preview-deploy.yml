@@ -1,0 +1,72 @@
+name: KT134 — isolated staging preview smoke deployment
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths:
+      - 'kt134-auto/kt134-staging-preview-worker.mjs'
+      - 'kt134-auto/KT134_AUTO_VISUAL_DEMO.html'
+      - 'kt134-auto/wrangler.staging.toml'
+      - '.github/workflows/kt134-staging-preview-deploy.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: kt134-staging-test-worker-preview
+  cancel-in-progress: false
+jobs:
+  deploy-staging-preview:
+    if: github.ref_name == 'kt134-auto-mode-isolated'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate staged demo is synthetic only and target is the existing test Worker
+        run: |
+          set -euo pipefail
+          node --check kt134-auto/kt134-staging-preview-worker.mjs
+          node --test kt134-auto/kt134-existing-staging-audit.test.mjs
+          grep -Fq 'ИЗОЛИРАНА ДЕМОНСТРАЦИЯ — НЕ Е РЕАЛЕН АНАЛИЗ' kt134-auto/KT134_AUTO_VISUAL_DEMO.html
+          grep -Fxq 'name = "tpu-plovdiv-kt134-test"' kt134-auto/wrangler.staging.toml
+          grep -Fxq 'binding = "DB"' kt134-auto/wrangler.staging.toml
+          grep -Fxq 'binding = "BUCKET"' kt134-auto/wrangler.staging.toml
+          ! grep -Eiq 'kt125-access|kt133-tpu|openai_api_key' kt134-auto/wrangler.staging.toml
+          echo 'Isolated demo and target verified'
+      - name: Verify existing KT134 isolated resources (GET only, before any deploy)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          KT134_CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          echo "::add-mask::$CLOUDFLARE_API_TOKEN"
+          node kt134-auto/kt134-existing-staging-audit.mjs
+      - name: Build and validate staging Worker without deployment
+        working-directory: kt134-auto
+        run: npx --yes wrangler@4 deploy --config wrangler.staging.toml --dry-run --outdir ../kt134-staging-built
+      - name: Publish synthetic-only UI to the existing isolated KT134 Worker
+        working-directory: kt134-auto
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: "90df5489417e4b53179a852c446aeed1"
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          echo "::add-mask::$CLOUDFLARE_API_TOKEN"
+          npx --yes wrangler@4 deploy --config wrangler.staging.toml --keep-vars
+      - name: Smoke test public synthetic preview and disabled live agents
+        run: |
+          set -euo pipefail
+          BASE='https://tpu-plovdiv-kt134-test.emilgergov.workers.dev'
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 "$BASE/kt134/health" > /tmp/kt134-health.json
+          node -e 'const x=require("/tmp/kt134-health.json");if(x.mode!=="synthetic_preview_only"||x.bindings.DB!==true||x.bindings.BUCKET!==true||x.liveEG||x.liveGIS||x.liveDOCX||x.expertConfirmed||x.ready!==true)throw Error("Unexpected KT134 health");console.log("KT134 preview Worker + DB + BUCKET smoke PASS; live analysis explicitly disabled.")'
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 "$BASE/kt134/preview" | grep -q 'ИЗОЛИРАНА ДЕМОНСТРАЦИЯ'
+          echo 'Visual synthetic demo endpoint PASS'
+          echo "STAGING DEMO ONLY: $BASE/kt134/preview"
+      - name: Production non-interference attestation
+        if: always()
+        run: echo 'This workflow targets only tpu-plovdiv-kt134-test. Never deploy KT133/KT125 or use actual protected dossiers.'
