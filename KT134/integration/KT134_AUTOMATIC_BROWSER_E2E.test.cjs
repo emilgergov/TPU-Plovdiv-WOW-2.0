@@ -38,9 +38,19 @@ const srv=http.createServer((req,res)=>{
       expertConfirmed:true,scopeConfirmed:true},
     intake:{archive_name:'Симулация.zip',files:[],document_texts:[]}};
    window.__kt134AcceptanceCalls={preliminary:0,final:0,adoption:0,word:0};
+   window.KT134CandidateWorkerBase='https://kt134-test-candidate.example.workers.dev';
+   const nativeFetch=window.fetch.bind(window);
+   window.fetch=async(input,opts)=>{
+    if(String(input).endsWith('/kt134-candidate-health'))
+     return {ok:true,json:async()=>({status:'ready',contract:'KT134_EVIDENCE_SPAN_V1',
+      candidateOnly:true,aiConfigured:true})};
+    return nativeFetch(input,opts);
+   };
    window.KT80EGSession={
     hasAccess:()=>true,
     request:async(url,payload)=>{
+     if(!url.startsWith('https://kt134-test-candidate.example.workers.dev/'))
+      throw Error('Auto route MUST NOT use production Worker');
      if(!url.endsWith('/stage5-document'))throw Error('Unexpected live request '+url);
      const data=JSON.parse(payload);
      if(data.task!=='draft_stage5_candidate'||data.expertConfirmed!==false)
