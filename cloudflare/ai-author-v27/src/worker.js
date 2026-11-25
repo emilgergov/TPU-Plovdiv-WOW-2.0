@@ -1,5 +1,5 @@
 import {getLegalContext} from "./legal-v11-loader.mjs";
-import {kt134ReviewerRouteIssues,kt134ReviewerActionMatch} from "./kt134-reviewer-route-alignment.mjs";
+import {kt134ReviewerRouteIssues,kt134ReviewerActionMatch,kt134ComposeAlignedReviewerDraft} from "./kt134-reviewer-route-alignment.mjs";
 import {deriveKt134LegalDisposition,kt134DispositionTextIssues,composeKt134GroundedReviewerAlternative} from "./kt134-legal-disposition.mjs";
 import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 import {evaluateDraft} from "./kt123-decision-model.mjs";
@@ -842,19 +842,19 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
         "Панел №02 е възможен само при реален и конкретен физически факт от наличния документ, необходим за един правен критерий. Липсващо становище на експерт или юридическа категория не е физически факт.",
         "Панел №13 също не е универсален изход: ако има доказано основание за конкретно писмо или друго действие, предпочети неговия правилен панел.",
         "Списъкът candidateRoutes включва само структурно допустимите за настоящата преписка административни действия. Избери ЕДИН панел само от този списък; избери го въз основа на собствените си мотиви, а не чрез предварително предпочитание.",
-        "Пиши на български. Дай finalDraft като ПЪЛЕН нов проект с всички досегашни 4 раздела и един ред ИЗБРАН ПАНЕЛ: NN — точното заглавие от каталога. В action изведи едно ясно мотивирано реално действие, което СЪОТВЕТСТВА на selectedPanel.",
+        "Пиши на български. ВЪРНИ САМО три полета: selectedPanel (един от candidateRoutes), action (едно конкретно допустимо административно действие, съответстващо на панела) и reason (мотив, базиран на точен факт, законова предпоставка и източник). Не преразказвай целия документ; новото ти решение ще бъде вложено в същия проект.",
         "В reason обясни с конкретен факт и нормативна предпоставка защо това действие е допустимо. Не твърди недоказана отрицателна приложимост или издаване на административен акт."
       ].join("\n");
       try{
         const fix=await fetch("https://api.openai.com/v1/responses",{
           method:"POST",signal:controller.signal,
           headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
-          body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:5700,
+          body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:1600,
             text:{format:{type:"json_schema",name:"kt134_reviewer_route_alignment",strict:true,
               schema:{type:"object",additionalProperties:false,properties:{
                 selectedPanel:{type:"integer",enum:candidateIds},
-                action:{type:"string"},reason:{type:"string"},finalDraft:{type:"string"}
-              },required:["selectedPanel","action","reason","finalDraft"]}}},
+                action:{type:"string"},reason:{type:"string"}
+              },required:["selectedPanel","action","reason"]}}},
             input:[{role:"system",content:system},{role:"user",content:JSON.stringify({
               subject:payload.subject,scope:payload.scope,
               currentDraft:finalDraft.slice(0,11500),
@@ -864,7 +864,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
               caseFacts:confirmed.slice(0,30),unconfirmedFacts:unresolved.slice(0,15),
               sourceDocuments:sourceTexts.slice(0,12).map(x=>({source:x.source,text:x.text.slice(0,1800)})),
               procedureEvidence,candidateRoutes,
-              instruction:"Избери и мотивирай ЕДНО допустимо административно действие. Ако първоначалният панел не е защитим, коригирай го сам и пиши целия коригиран проект."
+              instruction:"Избери ЕДНО допустимо действие и мотив. Изведи само selectedPanel, action, reason, без нов пълен документ."
             })}]})
         });
         if(fix.ok){
@@ -872,29 +872,30 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
           const raw=(data.output||[]).flatMap(x=>x.content||[])
             .filter(x=>x.type==="output_text").map(x=>x.text).join("\n");
           const resolved=JSON.parse(raw);
-          const candidate=text(resolved.finalDraft,12000);
           const routeId=Number(resolved.selectedPanel);
           const catalogTitle=KT109_ROUTE_BY_ID.get(routeId)?.title;
-          const candidateMatch=candidate.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\s*[—–-]?\s*([^\n]*)/iu);
           const candidateIssues=kt134ReviewerRouteIssues({
             panelId:routeId,qualification:lockedQualification,
             qualificationValidated:qualificationValidation?.ok===true,
             procedureEvidence,caseDocuments:sourceTexts
           });
-          if(candidate.length>=120&&catalogTitle&&candidateIds.includes(routeId)&&
-             Number(candidateMatch?.[1])===routeId&&
+          if(catalogTitle&&candidateIds.includes(routeId)&&
              typeof resolved.reason==="string"&&resolved.reason.trim().length>=25&&
              kt134ReviewerActionMatch({
                panelId:routeId,documentTitle:catalogTitle,
                action:resolved.action,legalReadiness:candidateIssues
              })&&candidateIssues.length===0){
-            // Preserve the reviewer's chosen number and full text; normalize
-            // only the catalog label so the signed Stage5 title is canonical.
-            finalDraft=candidate.replace(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\s*[—–-]?\s*[^\n]*/iu,
-              "ИЗБРАН ПАНЕЛ: "+routeId+" — "+catalogTitle);
+            // The reviewer chooses selectedPanel, action and reason. Only
+            // the old contradictory action section is replaced; neither
+            // the server nor a test fixture chooses the new panel.
+            const corrected=kt134ComposeAlignedReviewerDraft({
+              previousDraft:finalDraft,selectedPanel:routeId,
+              action:resolved.action,reason:resolved.reason
+            });
+            finalDraft=corrected;
             reviewerAction=resolved.action.trim();
-            reviewerFindings.push("Рецензентът независимо преразгледа първоначално неподкрепения панел въз основа на фактите и нормативните предпоставки.");
-            reviewedIssues=reviewedQuality(candidate)
+            reviewerFindings.push("Рецензентът сам коригира избора на панел и мотивира конкретното допустимо действие.");
+            reviewedIssues=reviewedQuality(corrected)
               .filter(x=>x!=="AUTHOR_CHANGED_PANEL");
             routeIssues=[];
             reviewerRouteCorrections.push({from:assessedPanel,to:routeId});
