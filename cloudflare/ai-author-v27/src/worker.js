@@ -1286,7 +1286,7 @@ export default {
    }catch{return reply({service:"TPU Plovdiv V11 legal corpus",status:"unavailable"},503)}
   }
   if(request.method==="GET" && (url.pathname==="/" || url.pathname==="/health")) {
-   return reply({service:"TPU Plovdiv AI Author V27",status:"online",stage4Contract:"KT115_EXPERT_PREVIEW_V1",stage5Contract:"KT117_DOCUMENT_DRAFT_V1",apiKeyConfigured:Boolean(env.OPENAI_API_KEY),aiGenerationEnabled:Boolean(env.OPENAI_API_KEY && (env.AI_AUTHOR_PASSWORD_V27 || env.AI_AUTHOR_ACCESS_TOKEN))});
+   return reply({service:"TPU Plovdiv AI Author V27",status:"online",stage4Contract:"KT115_EXPERT_PREVIEW_V1",stage5Contract:"KT117_DOCUMENT_DRAFT_V1",kt134CandidateContract:"KT134_EVIDENCE_SPAN_V1",apiKeyConfigured:Boolean(env.OPENAI_API_KEY),aiGenerationEnabled:Boolean(env.OPENAI_API_KEY && (env.AI_AUTHOR_PASSWORD_V27 || env.AI_AUTHOR_ACCESS_TOKEN))});
   }
   return url.pathname==="/kt134-evidence-span"?handleKT134EvidenceSpan(request,env):url.pathname==="/stage4-expert-decision"?handleExpertDecision(request,env):url.pathname==="/stage5-document"?handleStage5Document(request,env):url.pathname==="/stage4-proposal"?handleStage4Proposal(request,env):url.pathname==="/scope-improve"?handleScopeImprove(request,env):url.pathname==="/subject-improve"?handleSubjectImprove(request,env):handleAuthor(request,env);
  }
