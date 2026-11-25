@@ -72,8 +72,8 @@ export function composeKt134CaseAwareStage5Draft({stage5Text,stage4Request}={}){
  // identified documents, PI MASTER and GIS. Do not repeat model retellings.
  // Preserve the reviewed legal basis, proposal and next action unchanged.
  const bodyLines=lines.slice(1).filter(line=>!line.trimStart().startsWith('Относно:'));
- const factStart=bodyLines.findIndex(line=>/^\\s*Фактически констатации\\s*$/iu.test(line));
- const lawStart=bodyLines.findIndex((line,i)=>i>factStart&&/^\\s*Правни предпоставки\\s*$/iu.test(line));
+ const factStart=bodyLines.findIndex(line=>/^\s*Фактически констатации\s*:?\s*$/iu.test(line));
+ const lawStart=bodyLines.findIndex((line,i)=>i>factStart&&/^\s*Правни предпоставки\s*:?\s*$/iu.test(line));
  const substantive=(factStart>=0&&lawStart>factStart)
    ?bodyLines.filter((_,i)=>i<factStart||i>=lawStart)
    :bodyLines;
