@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {assessKT134EvidenceReadiness} from './kt134-evidence-readiness.mjs';
 const id='11111111-1111-4111-8111-111111111111';
-const good=type=>({caseId:id,verified:true,evidence:[{sourceType:type,
+const good=type=>({caseId:id,verified:true,geometryVerified:type==='gis',evidence:[{sourceType:type,
   sourceId:'MASTER-CURRENT',sourceLocation:'Номер на карта / раздел',verification:'verified'}]});
 test('P4 remains provisional when GIS and normative master have not run',()=>{
  const r=assessKT134EvidenceReadiness({caseId:id,spatial:null,normative:null});
@@ -29,5 +29,15 @@ test('unverified or source-free legal allegation cannot count as normative confi
 });
 test('GIS evidence cannot masquerade as normative verification',()=>{
  const r=assessKT134EvidenceReadiness({caseId:id,spatial:good('gis'),normative:good('gis')});
+ assert.equal(r.proceduralConclusionVerified,false);
+});
+
+test('GIS with source citation but WITHOUT actual geometry check cannot be marked spatially verified',()=>{
+ const r=assessKT134EvidenceReadiness({
+  caseId:id,
+  spatial:{...good('gis'),geometryVerified:false},
+  normative:good('legal')
+ });
+ assert.equal(r.spatialVerified,false);
  assert.equal(r.proceduralConclusionVerified,false);
 });
