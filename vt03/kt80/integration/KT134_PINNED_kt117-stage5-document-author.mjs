@@ -369,10 +369,41 @@ function initialize(){
  document.addEventListener('kt116:stage4-confirmed',()=>{source=null;sync()});
  document.addEventListener('kt116:stage5-open',()=>sync());
  ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'].forEach(x=>document.addEventListener(x,()=>{source=null;sync()}));
+ // KT134 candidate: the expert's single final approval fixes both the selected
+ // panel and the exact document text already displayed in the preview.
+ // Never silently rewrite the approved preview after this point.
+ function acceptAutomatedDocument({caseId,selectedPanelId,draft}={}){
+  if(!window.KT134AutoMode?.active?.())return {ok:false,reason:'Автоматичният маршрут не е избран.'};
+  sync();
+  const a=live(),text=clean(draft),h=collectStageEvidence(window);
+  if(!a?.expertApproved||a.caseId!==caseId||a.evidenceRevision!==h.evidenceRevision||
+     !source||source.caseId!==a.caseId||source.version!==a.version)
+   return {ok:false,reason:'Окончателното експертно решение не съответства на преписката.'};
+  const chosen=Number(a.panelId??a.expertDecision?.panelId);
+  if(chosen!==Number(selectedPanelId)||!text||text.length<120||text.length>18000)
+   return {ok:false,reason:'Процедурата или текстът се различават от разгледания проект.'};
+  const normalized=formatDraftSubject(text);
+  if(normalized.warning||isPanel01Request(a.text,text))
+   return {ok:false,reason:normalized.warning||'Диспозитивът на документа не съответства на панел №01.'};
+  const handoff=panelHandoff(window,a);
+  if(handoff&&['pending','unverified'].includes(handoff.gisStatus))
+   return {ok:false,reason:'ГИС статусът не е потвърден или не е мотивирано неприложим.'};
+  versions.push({version:versions.length+1,text:normalized.text,kind:'окончателно одобрен автоматичен проект'});
+  const version=versions.at(-1);
+  confirmed=Object.freeze({...version,caseId:a.caseId,stage4Version:a.version,
+   stage5Output:handoff?{...handoff,documentVersion:version.version}:null,
+   expert:a.expert,confirmedAt:new Date().toISOString()});
+  document.dispatchEvent(new CustomEvent('kt123:stage5-confirmed',{detail:{
+   caseId:a.caseId,stage4Version:a.version,finalAutomatedApproval:true
+  }}));
+  render();
+  note.textContent='Одобрен е точният текст, показан преди окончателното решение. Word се изготвя по приетата бланка.';
+  return {ok:true,confirmed};
+ }
  window.KT117Document=Object.freeze({
   panelHandoff:()=>live()?confirmedPanelOutput():null,
   snapshot:()=>confirmed&&live()?.version===confirmed.stage4Version?confirmed:null,
-  refresh:sync
+  refresh:sync,acceptAutomatedDocument
  });
  sync();
 }
