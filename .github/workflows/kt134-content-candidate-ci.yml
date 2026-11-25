@@ -16,6 +16,9 @@ on:
       - 'vt03/kt80/integration/kt134-evidence-chunks.test.mjs'
       - 'vt03/kt80/KT82_E01_SAFE_ZIP_INTAKE_V35.js'
       - '.github/workflows/kt134-content-candidate-ci.yml'
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 permissions:
   contents: read
