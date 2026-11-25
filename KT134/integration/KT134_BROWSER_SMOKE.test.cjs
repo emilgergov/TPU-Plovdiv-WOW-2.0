@@ -36,6 +36,10 @@ const srv=http.createServer((req,res)=>{
   const response=await page.goto('http://127.0.0.1:'+port+html,{waitUntil:'domcontentloaded',timeout:30000});
   assert.equal(response.status(),200);
   await page.waitForTimeout(1800);
+  // KT134: client-side Stage4 and Stage5 modules must actually initialize.
+  // These objects appear after the existing delayed DOM bootstrap.
+  await page.waitForFunction(()=>typeof window.KT96EGStage4?.refresh==='function'&&
+    typeof window.KT117Document?.refresh==='function',undefined,{timeout:12000});
   assert.equal(await page.locator('script[src*="KT134_SPATIAL_GATE_CONSISTENCY.js"]').count(),1);
   assert.equal(await page.locator('script[src*="KT82_A_PDF1_V600_KT134_CANDIDATE.js"]').count(),1);
   assert.equal(await page.locator('link[href*="KT134_PANEL15_REAL_GIS.css"]').count(),1);
@@ -48,7 +52,7 @@ const srv=http.createServer((req,res)=>{
   }));
   assert.equal(check.spatialGate,'function','Stage3 GIS gate not initialized');
   assert.equal(check.pdfBridge,'function','PDF1 generator bridge not initialized');
-  console.log('KT134 browser smoke PASS: loaded HTML and live JS entry points');
+  console.log('KT134 browser smoke PASS: loaded HTML, Stage3 GIS, Stage4 EG author and Stage5 document modules');
   // Page errors are reported but cannot all be treated as regressions: production
   // services may be absent in local isolated mode. Do not claim E1–E5 end-to-end.
   if(crashes.length)console.log('Local-only page errors requiring classification:',JSON.stringify(crashes.slice(0,20)));
