@@ -1,0 +1,37 @@
+name: KT134 native public route probe
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-native-route-probe.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Probe unauthenticated nonprivate routes (no credentials)
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const base='https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev';
+          const paths=['/user','/kt125/local-auth','/kt125/cases/KT134-PROBE-NO-REAL-CASE','/kt126/registry','/auth/login'];
+          const rows=[];
+          for(const path of paths){
+            try{
+              const r=await fetch(base+path,{redirect:'manual',headers:{accept:'application/json'}});
+              rows.push({path,status:r.status,contentType:(r.headers.get('content-type')||'').split(';')[0],redirect:r.status>=300&&r.status<400});
+            }catch(e){rows.push({path,error:'unreachable'});}
+          }
+          writeFileSync('kt134-auto/KT134_PUBLIC_ROUTE_PROBE.json',JSON.stringify({unauthenticated:true,rows},null,2));
+          console.log('KT134 probe:',rows.map(x=>x.path+':'+x.status).join(' '));
+          NODE
+      - name: Save response status and content type
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_PUBLIC_ROUTE_PROBE.json
+          git commit -m 'KT134: record unauthenticated route behavior' || exit 0
+          git push origin HEAD:kt134-auto-mode-isolated
