@@ -1,0 +1,47 @@
+{
+  "inspectedAt": "2026-11-25T21:27:59.284Z",
+  "readOnly": true,
+  "entries": [
+    {
+      "name": "kt133-tpu-plovdiv-kt125-local-auth",
+      "contentType": "multipart/form-data",
+      "sourceBytes": 2501,
+      "sourceSha256": "515c3ce640ab69203ad60ab1ad3e001fee9fd66075121fe0c7a21f9e7a5c03a8",
+      "routeLiterals": [],
+      "signals": {
+        "hasSession": false,
+        "hasCookie": false,
+        "hasD1": false,
+        "hasKV": true,
+        "hasDossier": false,
+        "hasCaseId": false,
+        "hasStage4": false,
+        "hasProtectedAuto": false,
+        "multipart": true
+      }
+    },
+    {
+      "name": "tpu-plovdiv-kt134-test",
+      "contentType": "multipart/form-data",
+      "sourceBytes": 29938,
+      "sourceSha256": "c9fbc9e73c689d30f1b432d4ef2d217167f0b23ad6989b8c211c1af8fc60572b",
+      "routeLiterals": [
+        "/kt134/demo.docx",
+        "/kt134/health",
+        "/kt134/internal-storage-smoke",
+        "/kt134/preview"
+      ],
+      "signals": {
+        "hasSession": false,
+        "hasCookie": false,
+        "hasD1": true,
+        "hasKV": true,
+        "hasDossier": true,
+        "hasCaseId": false,
+        "hasStage4": false,
+        "hasProtectedAuto": false,
+        "multipart": true
+      }
+    }
+  ]
+}
