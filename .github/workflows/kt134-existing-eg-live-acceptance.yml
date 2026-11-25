@@ -80,33 +80,20 @@ jobs:
           }),{mode:0o600});
           NODE
           code="$(curl --silent --show-error --max-time 90 -o "$dir/upload.json" -w '%{http_code}' \
-             -X PUT "$api" -H "Authorization: Bearer $CF_TOKEN" \
+             -X POST "$api/versions" -H "Authorization: Bearer $CF_TOKEN" \
              -F "metadata=@$dir/metadata.json;type=application/json" \
              -F "worker.js=@/tmp/kt134-existing-eg-worker.mjs;filename=worker.js;type=application/javascript+module")"
           echo "Existing EG TEST Worker upload HTTP $code"
-          node - "$dir/upload.json" <<'NODE'
+          node - "$dir/upload.json" "$dir/activate.json" <<'NODE'
           const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2]));
-          if(!d.success){for(const e of d.errors||[])console.error('Upload error:',e.code,e.message);process.exit(1)}
-          NODE
-          curl --fail --silent --show-error --max-time 30 -H "Authorization: Bearer $CF_TOKEN" "$api/settings" > "$dir/settings-after.json"
-          node - "$dir/settings-after.json" <<'NODE'
-          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2]));
-          if(!d.success)throw Error('Cannot inspect uploaded test bindings');
-          const names=new Set((d.result?.bindings||[]).filter(x=>x.type==='secret_text').map(x=>x.name));
-          for(const req of ['OPENAI_API_KEY','AI_AUTHOR_ACCESS_TOKEN','KT134_SMOKE_TOKEN'])
-            if(!names.has(req))throw Error('Binding not preserved in test Worker: '+req);
-          console.log('Existing OpenAI and access secrets retained; ephemeral synthetic test token added.');
-          NODE
-          curl --fail --silent --show-error --max-time 30 -H "Authorization: Bearer $CF_TOKEN" "$api/versions?per_page=5" > "$dir/versions.json"
-          node - "$dir/versions.json" "$dir/activate.json" <<'NODE'
-          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2]));
-          if(!d.success)throw Error('Cannot inspect test versions');
-          const items=Array.isArray(d.result)?d.result:d.result?.items||[];
-          const id=items[0]?.id||items[0]?.version_id;
-          if(!id)throw Error('No uploaded test version to activate');
+          if(!d.success||!d.result?.id){
+            for(const e of d.errors||[])console.error('Version upload error:',e.code,e.message);
+            throw Error('New version not created; old Worker unchanged');
+          }
+          const exactId=d.result.id;
           fs.writeFileSync(process.argv[3],JSON.stringify({strategy:'percentage',
-           versions:[{version_id:id,percentage:100}]}));
-          console.log('Ready to activate new EG TEST version; unrelated production script unchanged.');
+            versions:[{version_id:exactId,percentage:100}]}));
+          console.log('Using EXACT uploaded EG TEST version ID:',exactId);
           NODE
           code="$(curl --silent --show-error --max-time 30 -o "$dir/activated.json" -w '%{http_code}' \
             -X POST "$api/deployments" -H "Authorization: Bearer $CF_TOKEN" \
@@ -117,6 +104,15 @@ jobs:
           if(!d.success){for(const e of d.errors||[])console.error('Activation error:',e.code,e.message);process.exit(1)}
           NODE
           deployed=1
+          curl --fail --silent --show-error --max-time 30 -H "Authorization: Bearer $CF_TOKEN" "$api/settings" > "$dir/settings-after.json"
+          node - "$dir/settings-after.json" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2]));
+          if(!d.success)throw Error('Cannot inspect active test bindings');
+          const names=new Set((d.result?.bindings||[]).filter(x=>x.type==='secret_text').map(x=>x.name));
+          for(const req of ['OPENAI_API_KEY','AI_AUTHOR_ACCESS_TOKEN','KT134_SMOKE_TOKEN'])
+            if(!names.has(req))throw Error('Test binding missing after exact activation: '+req);
+          console.log('Original OpenAI/access bindings and ephemeral smoke binding all intact.');
+          NODE
           for attempt in 1 2 3 4 5 6; do
             code="$(curl -sS --max-time 15 -o "$dir/health.json" -w '%{http_code}' "$base/kt134-candidate-health" || true)"
             if [[ "$code" == "200" ]]; then break; fi
@@ -128,6 +124,9 @@ jobs:
             throw Error('EG TEST Worker lacks correct KT134 candidate contract');
           console.log('EXISTING EG TEST Worker health verified with protected AI bindings.');
           NODE
+          status="$(curl -sS --max-time 15 -o "$dir/protected-get.json" -w '%{http_code}' "$base/kt134-evidence-span")"
+          test "$status" = 405 || { echo "::error::Exact activated version lacks the KT134 evidence-span route (HTTP $status)"; exit 1; }
+          echo "KT134 active evidence reader route confirmed (GET=405)."
           KT134_SMOKE_BEARER="$(cat "$dir/smoke-key.txt")" \
            KT134_REPORT_PATH="$dir/kt134-live-result.json" \
            node KT134/integration/KT134_LIVE_EXISTING_EG_WORKER.test.mjs
