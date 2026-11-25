@@ -5,10 +5,11 @@
  * Any missing binding fails at creation; never downgrade to synthetic mode.
  */
 import {createKt134NativeDossierAdapters} from './kt134-native-dossier-adapter.mjs';
+import {createKt134Kt125SessionVerifier} from './kt134-kt125-session-verifier.mjs';
 import {createKt134ProtectedHttpHandler} from './kt134-protected-http-integration.mjs';
 const error=name=>{throw Error('KT134_HOST_MISSING_'+name)};
 export function createKt134IsolatedProtectedHost({
-  db,resolveKt125Session,resolvePrincipal,getNormativeMaster,buildDraftWord,
+  db,cookieName,resolveKt125Session,resolvePrincipal,getNormativeMaster,buildDraftWord,
   egWorkerBase,egAccessToken,fetchImpl=fetch
 }={}){
  for(const [name,impl] of Object.entries({
