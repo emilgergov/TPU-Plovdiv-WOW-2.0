@@ -64,7 +64,8 @@ jobs:
           BASE='https://tpu-plovdiv-kt134-test.emilgergov.workers.dev'
           curl --fail --silent --show-error --retry 5 --retry-delay 2 "$BASE/kt134/health" > /tmp/kt134-health.json
           node -e 'const x=require("/tmp/kt134-health.json");if(x.mode!=="synthetic_preview_only"||x.bindings.DB!==true||x.bindings.BUCKET!==true||x.liveEG||x.liveGIS||x.liveDOCX||x.expertConfirmed||x.ready!==true)throw Error("Unexpected KT134 health");console.log("KT134 preview Worker + DB + BUCKET smoke PASS; live analysis explicitly disabled.")'
-          curl --fail --silent --show-error --retry 5 --retry-delay 2 "$BASE/kt134/preview" | grep -q 'ИЗОЛИРАНА ДЕМОНСТРАЦИЯ'
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 "$BASE/kt134/preview" -o /tmp/kt134-preview.html
+          grep -Fq 'ИЗОЛИРАНА ДЕМОНСТРАЦИЯ' /tmp/kt134-preview.html
           echo 'Visual synthetic demo endpoint PASS'
           echo "STAGING DEMO ONLY: $BASE/kt134/preview"
       - name: Production non-interference attestation
