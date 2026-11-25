@@ -1,4 +1,5 @@
 import {getLegalContext} from "./legal-v11-loader.mjs";
+import {kt134ReviewerRouteIssues,kt134ReviewerActionMatch} from "./kt134-reviewer-route-alignment.mjs";
 import {deriveKt134LegalDisposition,kt134DispositionTextIssues,composeKt134GroundedReviewerAlternative} from "./kt134-legal-disposition.mjs";
 import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 import {evaluateDraft} from "./kt123-decision-model.mjs";
@@ -810,6 +811,90 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     }catch{}
    }
   }
+  // KT134 final independent reviewer reconciliation: before the case/panel
+  // handoff is signed, the reviewer itself aligns the route and proposed
+  // administrative ACTION. The code only detects missing prerequisites;
+  // it must never silently assign a convenient panel.
+  let reviewerAction="",reviewerRouteCorrections=[];
+  if(payload.kt134AutomaticInterim===true){
+    const getPanel=x=>Number(String(x||"").match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0);
+    const assessedPanel=getPanel(finalDraft);
+    const procedureEvidence=Array.isArray(detail?.procedureEvidence)?detail.procedureEvidence:[];
+    let routeIssues=kt134ReviewerRouteIssues({
+      panelId:assessedPanel,qualification:lockedQualification,
+      qualificationValidated:qualificationValidation?.ok===true,
+      procedureEvidence,caseDocuments:sourceTexts
+    });
+    if(routeIssues.length){
+      const system=[
+        "Ти си независимият рецензент в последния междинен цикъл. Не връщаш преписката и не искаш експертно междинно потвърждение.",
+        "Изборът на панел в предишния ти проект НЕ е подкрепен от наличните правни и процесуални факти. САМ избери друг обоснован панел от реалния каталог, без да променяш доказателствата и четирите нормативни статуса.",
+        "Не избирай панел №09 без доказателства едновременно за образувана текуща процедура и конкретно правно основание за прекратяване. Не избирай панел за формално решение без проведени законово изискуеми предходни действия.",
+        "Панел №02 е възможен само при реален и конкретен физически факт от наличния документ, необходим за един правен критерий. Липсващо становище на експерт или юридическа категория не е физически факт.",
+        "Панел №13 също не е универсален изход: ако има доказано основание за конкретно писмо или друго действие, предпочети неговия правилен панел.",
+        "Пиши на български. Дай finalDraft като ПЪЛЕН нов проект с всички досегашни 4 раздела и един ред ИЗБРАН ПАНЕЛ: NN — точното заглавие от каталога. В action изведи едно ясно мотивирано реално действие, което СЪОТВЕТСТВА на selectedPanel.",
+        "В reason обясни с конкретен факт и нормативна предпоставка защо това действие е допустимо. Не твърди недоказана отрицателна приложимост или издаване на административен акт."
+      ].join("\n");
+      try{
+        const fix=await fetch("https://api.openai.com/v1/responses",{
+          method:"POST",signal:controller.signal,
+          headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
+          body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:5700,
+            text:{format:{type:"json_schema",name:"kt134_reviewer_route_alignment",strict:true,
+              schema:{type:"object",additionalProperties:false,properties:{
+                selectedPanel:{type:"integer",minimum:1,maximum:22},
+                action:{type:"string"},reason:{type:"string"},finalDraft:{type:"string"}
+              },required:["selectedPanel","action","reason","finalDraft"]}}},
+            input:[{role:"system",content:system},{role:"user",content:JSON.stringify({
+              subject:payload.subject,scope:payload.scope,
+              currentDraft:finalDraft.slice(0,11500),
+              selectedPanel:assessedPanel,routeIssues,
+              qualification:lockedQualification,
+              qualificationValidated:qualificationValidation?.ok===true,
+              caseFacts:confirmed.slice(0,30),unconfirmedFacts:unresolved.slice(0,15),
+              sourceDocuments:sourceTexts.slice(0,12).map(x=>({source:x.source,text:x.text.slice(0,1800)})),
+              procedureEvidence,routeCatalog:KT109_ROUTE_CATALOG,
+              instruction:"Избери и мотивирай ЕДНО допустимо административно действие. Ако първоначалният панел не е защитим, коригирай го сам и пиши целия коригиран проект."
+            })}]})
+        });
+        if(fix.ok){
+          const data=await fix.json();
+          const raw=(data.output||[]).flatMap(x=>x.content||[])
+            .filter(x=>x.type==="output_text").map(x=>x.text).join("\n");
+          const resolved=JSON.parse(raw);
+          const candidate=text(resolved.finalDraft,12000);
+          const routeId=Number(resolved.selectedPanel);
+          const catalogTitle=KT109_ROUTE_BY_ID.get(routeId)?.title;
+          const candidateMatch=candidate.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\s*[—–-]?\s*([^\n]*)/iu);
+          const candidateIssues=kt134ReviewerRouteIssues({
+            panelId:routeId,qualification:lockedQualification,
+            qualificationValidated:qualificationValidation?.ok===true,
+            procedureEvidence,caseDocuments:sourceTexts
+          });
+          if(candidate.length>=120&&catalogTitle&&Number(candidateMatch?.[1])===routeId&&
+             candidateMatch?.[2]?.trim()===catalogTitle&&
+             typeof resolved.reason==="string"&&resolved.reason.trim().length>=60&&
+             kt134ReviewerActionMatch({
+               panelId:routeId,documentTitle:catalogTitle,
+               action:resolved.action,legalReadiness:candidateIssues
+             })&&candidateIssues.length===0){
+            finalDraft=candidate;
+            reviewerAction=resolved.action.trim();
+            reviewerFindings.push("Рецензентът независимо преразгледа първоначално неподкрепения панел въз основа на фактите и нормативните предпоставки.");
+            reviewedIssues=reviewedQuality(candidate);
+            routeIssues=[];
+            reviewerRouteCorrections.push({from:assessedPanel,to:routeId});
+            verdict="revise";
+          }
+        }
+      }catch{}
+    }
+    if(routeIssues.length){
+      reviewerRouteCorrections.push({from:assessedPanel,to:assessedPanel,
+        unresolved:routeIssues});
+      reviewedIssues=[...new Set([...reviewedIssues,...routeIssues])];
+    }
+  }
   // Reviewer correction is a draft and cannot issue an administrative act.
   const correctedByReviewer=finalDraft!==draft&&reviewedIssues.length===0;
   const reviewDisposition=verdict==="reject"&&correctedByReviewer?"revise":verdict;
@@ -833,6 +918,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     evidenceRevision:payload.evidenceRevision,
     reviewedText,selectedPanelId:reviewerSelectedPanel,
     reviewerVerdict:reviewDisposition,intermediateConfirmed:true,
+    reviewerAction,reviewerRouteCorrections,
     proposalOnly:true,unresolvedIssues:[...new Set(reviewedIssues)].slice(0,20),
     reviewerReasons:reviewerFindings.slice(0,15),
     // Server-read normative MASTER excerpts accompany the signed reviewer
@@ -855,7 +941,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
    archiveEvidenceVerified:true,draft:reviewedText,authorDraft:draft,
    reviewerIntermediate,reviewerIntermediateProof,
    qualificationRecord:lockedQualification,qualificationProof,qualificationGate:{sourceAnchorsMatched:qualificationValidation?.ok===true,legalApplicabilityCertified:false,expertConfirmationRequired:true,diagnosticCodes:qualificationIssues.slice(0,15)},
-    normativeAudit:{reviewed:true,reviewVerdict:reviewDisposition,originalReviewVerdict:verdict,authorRepairs,
+    normativeAudit:{reviewed:true,reviewVerdict:reviewDisposition,originalReviewVerdict:verdict,authorRepairs,reviewerRouteCorrections,
      deterministicModel:evaluateDraft(finalDraft).decision,
      legalApplicabilityAutomaticallyCertified:false,selectedPanelId:Number(finalDraft.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0)||null,fullArticlesVerified:true,allArchiveSourcesExamined:false,verifiedLegalProvisionCount:verifiedLegalCorpus.legalProvisions.length,findings:reviewerFindings},
    evidenceReceipt:{documentTextsReceived:sourceTexts.length,
