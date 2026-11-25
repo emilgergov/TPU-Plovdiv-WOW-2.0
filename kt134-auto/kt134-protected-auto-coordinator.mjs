@@ -21,7 +21,7 @@ function receiptRefsMatch(preflight,ids) {
    error('EVIDENCE_MANIFEST_MISMATCH');
 }
 export function createProtectedAutomaticCoordinator(adapters) {
- for(const name of ['loadProtectedContext','loadEvidenceBundle','invokeAuthor','invokeReviewer','buildDraftWord'])
+ for(const name of ['loadProtectedContext','loadEvidenceBundle','invokeAuthor','invokeReviewer','generateStage5Draft','buildDraftWord'])
    requireAction(adapters,name);
  return Object.freeze({
   async prepareDraft({authenticatedSession,caseId}={}) {
@@ -41,22 +41,61 @@ export function createProtectedAutomaticCoordinator(adapters) {
    }),'INVALID_AUTHOR_PROPOSAL');
    if(author.caseId!==caseId||author.revision!==preflight.case.revision)
       error('AUTHOR_CASE_MISMATCH');
-   // Reviewer's opinion is recorded, not used to silently rewrite the author.
-   let review;
+   // KT134: reviewer is the intermediate expert for the automatic path.
+   // Its decision authorizes Stage 5 preparation, NOT a final administrative act.
+   // The author proposal is retained independently for comparison.
+   let review,intermediate;
    try {
      const value=await adapters.invokeReviewer({
        caseId,revision:preflight.case.revision,subject:preflight.subject,
-       evidence:bundle,authorProposal:author,mode:'advisory_only'
+       evidence:bundle,authorProposal:author,mode:'intermediate_confirmation'
      });
      if(value?.caseId!==caseId||value?.revision!==preflight.case.revision||
-        !has(value.reasoning)||!['agree','disagree','qualified'].includes(value.verdict))
-          throw new Error('REVIEWER_INVALID');
-     review=Object.freeze({status:'available',verdict:value.verdict,reasoning:value.reasoning,
+       !has(value.reasoning)||!['agree','disagree','qualified'].includes(value.verdict))
+       throw new Error('REVIEWER_INVALID');
+     const decision=value.intermediateDecision;
+     if(decision?.confirmed!==true||!Number.isInteger(decision.panelId)||
+       decision.panelId<1||decision.panelId>22||!has(decision.reasoning))
+       throw new Error('REVIEWER_INTERMEDIATE_INCOMPLETE');
+     if(decision.panelId!==author.panelId&&
+       (!has(decision.correctedProposal)||!has(decision.reasoning)))
+       throw new Error('REVIEWER_CORRECTION_REQUIRED');
+     intermediate=Object.freeze({
+       actor:'EG_REVIEWER',confirmed:true,caseId,revision:preflight.case.revision,
+       panelId:decision.panelId,reasoning:decision.reasoning,
+       sourceText:has(decision.correctedProposal)?decision.correctedProposal:author.content,
+       finalExpertApproval:false
+     });
+     review=Object.freeze({status:'confirmed_intermediate',verdict:value.verdict,
+       reasoning:value.reasoning,
        suggestions:Array.isArray(value.suggestions)?value.suggestions.filter(has):[]});
-   } catch {
-     review=Object.freeze({status:'unavailable',verdict:'not_checked',
-       reasoning:'Няма проверено становище на рецензента.',suggestions:[]});
+   } catch(e) {
+     // Never silently impersonate the reviewer or request an intermediate user click.
+     // Keep the author proposal available, with explicit unfinished status.
+     if(e?.message==='REVIEWER_INTERMEDIATE_INCOMPLETE'||
+        e?.message==='REVIEWER_CORRECTION_REQUIRED')
+       error(e.message);
+     return Object.freeze({
+       status:'intermediate_review_unavailable',caseId,
+       author:Object.freeze({panelId:author.panelId,reasoning:author.reasoning,
+         content:author.content,documentTitle:author.documentTitle}),
+       reviewer:Object.freeze({status:'unavailable',reason:'Рецензентът не приключи междинната преценка.'}),
+       docx:null,expertApproved:false,requiresExpertConfirmation:true
+     });
    }
+   // Automatic Stage 5 text is generated AFTER reviewer intermediate confirmation.
+   // Existing manually approved KT133 workflow remains unchanged.
+   const stage5=await adapters.generateStage5Draft({
+     caseId,revision:preflight.case.revision,subject:preflight.subject,
+     registryNumber:preflight.case.registryNumber,evidence:bundle,
+     authorProposal:author,reviewerDecision:intermediate,mode:'automatic_draft_only'
+   });
+   if(stage5?.caseId!==caseId||stage5?.revision!==preflight.case.revision||
+      stage5?.status!=='draft'||stage5?.expertApproved!==false||
+      stage5?.panelId!==intermediate.panelId||
+      !has(stage5.content)||!has(stage5.documentTitle)||
+      own(stage5,'finalDecision'))
+      error('INVALID_STAGE5_AUTOMATIC_DRAFT');
    // Optimistic revision control and live authorization immediately before Word.
    const fresh=await adapters.loadProtectedContext({authenticatedSession,caseId});
    if(fresh?.caseRecord?.id!==caseId)error('CASE_CONTEXT_MISMATCH');
@@ -81,7 +120,7 @@ export function createProtectedAutomaticCoordinator(adapters) {
      error('CASE_SNAPSHOT_CHANGED');
    const draft=assertDraftNotApproval({
      status:'draft',expertApproved:false,caseId,revision:preflight.case.revision,
-     panelId:author.panelId,documentTitle:author.documentTitle,content:author.content
+     panelId:stage5.panelId,documentTitle:stage5.documentTitle,content:stage5.content
    });
    const word=await adapters.buildDraftWord(draft);
    if(!(word instanceof Uint8Array)||word.length<100)error('INVALID_DRAFT_WORD');
@@ -89,7 +128,9 @@ export function createProtectedAutomaticCoordinator(adapters) {
      registryNumber:preflight.case.registryNumber,subject:preflight.subject,
      author:Object.freeze({panelId:author.panelId,reasoning:author.reasoning,
        content:author.content,documentTitle:author.documentTitle}),
-     reviewer:review,docx:word,expertApproved:false,
+     reviewer:review,intermediateDecision:intermediate,
+     stage5:Object.freeze({panelId:stage5.panelId,documentTitle:stage5.documentTitle,
+       content:stage5.content}),docx:word,expertApproved:false,
      requiresExpertConfirmation:true,finalDecision:null});
   }
  });
