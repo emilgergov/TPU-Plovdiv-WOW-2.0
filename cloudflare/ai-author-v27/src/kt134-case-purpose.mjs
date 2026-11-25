@@ -1,7 +1,7 @@
 // KT134: identify the CURRENT administrative question, not the historical
 // investment proposal mentioned in an objection. No automatic panel choice.
 const tidy=x=>String(x||"").normalize("NFC").toLocaleLowerCase("bg").trim();
-const complaint=/\b(?:възражени(?:е|ето|я)|жалб(?:а|ата|и))\b/iu;
+const complaint=/(?:възражени(?:е|ето|я)|жалб(?:а|ата|и))/iu;
 const priorLetter=/(?:писм(?:о|ото|а)|предходн(?:о|ото)|корекци(?:я|ята)|редакци(?:я|ята)|оспорван|преразглеждан)/iu;
 const newNotice=/(?:ново\s+уведомление\s+за\s+ип|ново\s+инвестиционно\s+предложение)/iu;
 export function detectKT134CasePurpose({subject,scope,sourceTexts=[],documents=[]}={}){
