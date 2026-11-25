@@ -40,3 +40,13 @@ test("reviewer is offered multiple evidenced routes without preselecting one, ex
  for(const denied of [1,4,5,6,7,8,9,11,12])assert.ok(!available.includes(denied),"improper formal or legal route "+denied);
  assert.ok(available.length>=3,"reviewer retains independent choice");
 });
+
+test("panel03 cannot propose a random institution without two sourced procedural facts",()=>{
+ const noTarget=kt134ReviewerRouteIssues({panelId:3,procedureEvidence:[]});
+ assert.ok(noTarget.includes("KT134_PANEL_03_NO_IDENTIFIED_COMPETENT_INSTITUTION_OR_CONSULTATION_BASIS"));
+ const withGroundedTarget=kt134ReviewerRouteIssues({panelId:3,procedureEvidence:[
+  {kind:"institution_target",sourceId:"dossier-1",verified:true,institution:"Надлежна институция"},
+  {kind:"consultation_legal_basis",sourceId:"master-law-1",verified:true}
+ ]});
+ assert.deepEqual(withGroundedTarget,[]);
+});
