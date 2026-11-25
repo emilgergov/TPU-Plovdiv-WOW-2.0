@@ -50,7 +50,7 @@ export function kt134ReviewerRouteIssues({panelId,qualification=null,
   errors.push("KT134_PANEL_12_SEA_PROCEDURE_NOT_COMPLETED");
  // Case types are not interchangeable. A routine investment notification
  // does not establish a complaint, signal, SEA plan or competence transfer.
- if(id===10&&!/\b(?:план|програма)\b/iu.test(caseText))
+ if(id===10&&!/(?:^|[^а-я])(?:план|програма)(?:$|[^а-я])/iu.test(caseText))
   errors.push("KT134_PANEL_10_NOT_A_PLAN_OR_PROGRAM");
  if(id===16&&!/архивиране|архивна\s+справка|архив\s+на\s+преписка/iu.test(caseText))
   errors.push("KT134_PANEL_16_NO_ARCHIVE_REQUEST");
