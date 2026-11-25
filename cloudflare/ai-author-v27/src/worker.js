@@ -1272,7 +1272,7 @@ export default {
    const allowed=origin===ALLOWED_ORIGIN;
    const h={"Content-Type":"application/json; charset=utf-8","Cache-Control":"no-store"};
    if(allowed){h["Access-Control-Allow-Origin"]=ALLOWED_ORIGIN;h["Vary"]="Origin"}
-   return new Response(JSON.stringify({status:"ready",contract:"KT134_EVIDENCE_SPAN_V1",
+   return new Response(JSON.stringify({status:"ready",build:"KT134_EXISTING_EG_LIVE_V2",contract:"KT134_EVIDENCE_SPAN_V1",
     candidateOnly:true,aiConfigured:Boolean(env.OPENAI_API_KEY&&
      (env.AI_AUTHOR_ACCESS_TOKEN||env.AI_AUTHOR_PASSWORD_V27))}),{status:200,headers:h});
   }
