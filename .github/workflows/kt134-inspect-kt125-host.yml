@@ -1,0 +1,63 @@
+name: KT134 inspect existing KT125 host routes read-only
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-inspect-kt125-host.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CF_ACCOUNT_ID: "90df5489417e4b53179a852c446aeed1"
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: kt134-auto-mode-isolated
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect worker source metadata and route literals without exporting source code
+        run: |
+          set -euo pipefail
+          test -n "$CF_TOKEN"
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const names=['kt133-tpu-plovdiv-kt125-local-auth','tpu-plovdiv-kt134-test'];
+          const entries=[];
+          for(const name of names){
+            const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT_ID+'/workers/scripts/'+name,
+              {headers:{Authorization:'Bearer '+process.env.CF_TOKEN}});
+            if(!r.ok)throw Error('WORKER_SCRIPT_UNAVAILABLE_'+name+'_'+r.status);
+            const source=await r.text(),ctype=r.headers.get('content-type')||'';
+            // Only static, non-secret path-shaped literals. Never expose or commit source code.
+            const literals=[...source.matchAll(/['"`](\/(?:api\/)?(?:auth|login|logout|session|user|users|cases?|dossier|registry|evidence|gis|stage[1-5]|kt12[345]|kt134)[-\w\/?=&.]{0,90})['"`]/gi)]
+              .map(x=>x[1]);
+            const paths=[...new Set(literals)].sort().slice(0,90);
+            entries.push({name,contentType:ctype.split(';')[0],sourceBytes:source.length,
+              sourceSha256:createHash('sha256').update(source).digest('hex'),
+              routeLiterals:paths,signals:{
+                hasSession:/session/i.test(source),hasCookie:/cookie/i.test(source),
+                hasD1:/\.prepare\(/i.test(source),hasKV:/\.get\(/i.test(source),
+                hasDossier:/dossier/i.test(source),hasCaseId:/caseId/i.test(source),
+                hasStage4:/stage4-proposal/i.test(source),hasProtectedAuto:/kt134\/automatic\/draft/i.test(source),
+                multipart:ctype.includes('multipart')
+              }});
+          }
+          const report={inspectedAt:new Date().toISOString(),readOnly:true,entries};
+          writeFileSync('kt134-auto/KT134_KT125_HOST_ROUTE_DISCOVERY.json',JSON.stringify(report,null,2)+'\n');
+          console.log('KT134 protected host route metadata checked: '+entries.map(e=>e.name).join(', '));
+          NODE
+      - name: Record route names only on isolated branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_KT125_HOST_ROUTE_DISCOVERY.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'KT134: record sanitized KT125 routes for isolated integration'
+            git push origin HEAD:kt134-auto-mode-isolated
+          fi
