@@ -26,12 +26,25 @@ const stage4={
  }
 };
 async function post(route,data){
- const response=await fetch(base+route,{method:'POST',
-  headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
-  body:JSON.stringify(data),signal:AbortSignal.timeout(180000)});
- const payload=await response.json().catch(()=>({}));
- if(!response.ok){ console.log('KT134 live analysis findings:',JSON.stringify({qualityStage:payload.qualityStage,qualityIssues:payload.qualityIssues,reviewed:payload.normativeAudit?.reviewed,reviewVerdict:payload.normativeAudit?.reviewVerdict}).slice(0,1600));throw Error(route+' HTTP '+response.status+' '+String(payload.error||payload.message||'unknown'));}
- return payload;
+ // Cloudflare publishes secret changes to edge instances asynchronously.
+ // A 401 immediately after secret put means the token is not yet active.
+ for(let attempt=1;attempt<=18;attempt++){
+  const response=await fetch(base+route,{method:'POST',
+   headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+   body:JSON.stringify(data),signal:AbortSignal.timeout(180000)});
+  const payload=await response.json().catch(()=>({}));
+  if(response.ok)return payload;
+  if(response.status===401&&attempt<18){
+   console.log('KT134: test token propagation pending (retry '+attempt+'/18)');
+   await new Promise(resolve=>setTimeout(resolve,3000));
+   continue;
+  }
+  console.log('KT134 live analysis findings:',JSON.stringify({
+   qualityStage:payload.qualityStage,qualityIssues:payload.qualityIssues,
+   reviewed:payload.normativeAudit?.reviewed,reviewVerdict:payload.normativeAudit?.reviewVerdict
+  }).slice(0,1600));
+  throw Error(route+' HTTP '+response.status+' '+String(payload.error||payload.message||'unknown'));
+ }
 }
 console.log('KT134: live synthetic Stage 4 author and reviewer request');
 const a=await post('/stage4-proposal',stage4);
