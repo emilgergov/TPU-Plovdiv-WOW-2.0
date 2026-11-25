@@ -102,15 +102,15 @@ export function composeKt134GroundedReviewerAlternative({
   keys.map(k=>{
    const row=disposition.rows[k];
    return labels[k]+": "+row.status+
-    (row.criterion?" — критерий: "+row.criterion:"")+
-    (row.legalReference?"; нормативен източник "+row.legalReference:"")+
-    (row.caseSource?"; фактически източник "+row.caseSource:"")+".";
+    (row.criterion?" — правнорелевантен критерий: "+row.criterion:"")+
+    (row.reason?" Мотиви: "+row.reason:"")+
+    ". Нормативна основа: местният MASTER V11.";
   }):[
    "По представените материали не е установена достатъчно обоснована съпоставка на дейността с приложения № 1 и № 2 към ЗООС и с отделните хипотези на чл. 2, ал. 1 и 2 от Наредбата за ОС.",
    "Нито непресичането със защитени зони, нито липсата на описание на отделни технически параметри доказват сами по себе си приложимост или неприложимост на процедура."
   ];
  const exactGap=gap?[
-   "Непотвърден физически факт: "+gap.fact+". Източник: "+gap.source+".",
+   "Непотвърден физически факт по материалите на преписката: "+gap.fact+".",
    "Значение за изследвания нормативен критерий: "+gap.legalCriterion+"."
   ]:[];
  const action=gap?
