@@ -96,6 +96,8 @@ export const QUALIFICATION_SYSTEM=[
  "ГИС непресичане не е само по себе си доказателство за всички правни хипотези на ОС.",
  "Чл. 2, ал. 2 ОС изисква самостоятелно положително основание и не следва автоматично от отрицателна ал. 1.",
  "Панел 02 само при доказан конкретен липсващ фактически параметър: missingFact.fact, source (точно ID), legalCriterion. Иначе остави празни низове.",
+ "Липсващо експертно становище, правна квалификация, категоризация от възложителя или документ за законово попадане НЕ е липсващ ФИЗИЧЕСКИ факт. missingFact.fact описва точно предмет, технология, вид дейност, капацитет, площ или друга действителна характеристика, ако тя липсва от материалите.",
+ "При НЕОПРЕДЕЛЕНА приложимост не допускай мотиви или criterion, които категорично твърдят не попада, не се налага, няма основания или не подлежи. Изведи коя конкретна предпоставка не е установена, без да превръщаш липсата на доказателство в отрицателен извод.",
  "Не избирай предварително панел 01,02,04 или 05. Не възлагай правната категоризация на възложителя.",
  "Не измисляй цитати, източници и факти. Изходът не е административен акт, а проектна квалификация."
 ].join(" ");
@@ -136,6 +138,14 @@ export function validateQualification(q,sources){
    errors.push("MISSING_LEGAL_CRITERION:"+k);
   if(tidy(row.reason).length<70)
    errors.push("INSUFFICIENT_REASON:"+k);
+  // KT134: An UNDETERMINED status cannot be justified by a categorical
+  // negative legal conclusion. This is a semantic contradiction, not a style issue.
+  const assertiveNegative=/(?:не\s+попада|не\s+се\s+(?:изисква|налага|прилага)|няма\s+основания|изключва\s+приложимост|не\s+подлежи)/iu;
+  const metaNegation=/(?:не\s+може\s+да\s+се\s+(?:твърди|приеме|изключи)|не\s+е\s+доказано|не\s+е\s+изяснено|не\s+може\s+да\s+се\s+определи)/iu;
+  if(row.status==="НЕОПРЕДЕЛЕНА"&&
+     assertiveNegative.test(tidy(row.criterion)+" "+tidy(row.reason))&&
+     !metaNegation.test(tidy(row.criterion)+" "+tidy(row.reason)))
+   errors.push("UNDETERMINED_STATUS_ASSERTS_EXCLUSION:"+k);
   if((k==="A1"||k==="A2")&&row.status==="ОТРИЦАТЕЛНА"&&
     (!Array.isArray(row.comparedCategories)||!row.comparedCategories.length))
    errors.push("NEGATIVE_ANNEX_WITHOUT_CATEGORY_REVIEW:"+k);
@@ -151,7 +161,13 @@ export function validateQualification(q,sources){
  }
  if(seen.size!==4)errors.push("MISSING_QUALIFICATION_TEST");
  const missing=q?.missingFact||{};
- const physicalGap=missing.fact&&missing.source&&missing.legalCriterion&&facts.has(missing.source)?
+ const physicalGapCandidate=Boolean(missing.fact&&missing.source&&missing.legalCriterion&&facts.has(missing.source));
+ const nonPhysicalGap=/(?:експертно\s+становище|правна\s+квалификац|категори(?:я|зац)|доказателства\s+за\s+попадан|липсващ\s+документ|разрешително|административен\s+акт|справка\s+от\s+експерт)/iu;
+ const physicalTerms=/(?:капацитет|технологич|оборудван|производствен|вид\s+на\s+дейност|мощност|емиси|количество|площ|строителн|размер|място|разположен|отпадъчн|водоползван|характеристик)/iu;
+ const physicalGapValid=physicalGapCandidate&&!nonPhysicalGap.test(String(missing.fact))&&
+   physicalTerms.test(String(missing.fact));
+ if(physicalGapCandidate&&!physicalGapValid)errors.push("MISSING_FACT_NOT_PHYSICAL");
+ const physicalGap=physicalGapValid?
   {established:true,factId:missing.fact,sourceId:missing.source,legalCriterion:missing.legalCriterion}:null;
  const decision=evaluateDecision({rows:byKey,selectedPanel:route,physicalGap,
   legalSourceVerified:errors.filter(x=>x.startsWith("UNVERIFIED_LEGAL_QUOTE")).length===0,
