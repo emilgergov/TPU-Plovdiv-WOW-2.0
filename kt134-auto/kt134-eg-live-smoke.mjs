@@ -91,6 +91,10 @@ if(b.caseId!==id||b.projectOnly!==true||b.documentIssued!==false||
  b.automaticReviewerIntermediate!==true||!b.draft?.startsWith('Относно:'))
  throw Error('Stage5 not a reviewer-authorized draft');
 const enriched=composeKt134CaseAwareStage5Draft({stage5Text:b.draft,stage4Request:stage4});
+if(/\\b(?:MISSING_[A-Z_]+|PANEL_\\d\\d_[A-Z_]+|UNSUPPORTED_[A-Z_]+)\\b/u.test(enriched))
+ throw Error('Technical reviewer codes leaked into institutional Word');
+if((enriched.match(/Относно:/gu)||[]).length!==1||!enriched.split('\\n')[0].includes('“'))
+ throw Error('Unmatched or duplicate subject quotation in Word draft');
 const required=['99999.999.999','Тестово село','Тестова община','1500 кв. м',
  'Синтетична ЗЗ — зона А','1250 м','Синтетична ЗТ — територия Б','840 м',
  'TEST-PDF1-NONREAL','TEST-PDF2-LEGAL-CONTEXT'];
@@ -99,7 +103,7 @@ if(missing.length)throw Error('Factual sections absent from final draft: '+missi
 globalThis.window=globalThis;globalThis.fflate=fflate;
 const adapter=createDraftWordAdapter({fflate,templateWindow:globalThis});
 const doc=await adapter.buildDraft({status:'draft',panelId:d.selectedPanelId,
- documentTitle,content:enriched});
+ documentTitle:b.reviewerProposalOnly===true?b.documentTitle:documentTitle,content:enriched});
 if(doc.length<1000)throw Error('DOCX missing');
 await writeFile(dir+'/KT134_FULL_SYNTHETIC_GIS_WORD.docx',doc);
 const rawIssues=Array.isArray(d.unresolvedIssues)?d.unresolvedIssues:[];
@@ -114,6 +118,7 @@ const audit={
  allSpecifiedDossierFactsPresentInWord:true,
  legalConclusionAccepted:false,
  reviewerReportedUnresolvedLegalIssues:rawIssues.length,
+ reviewerProposalOnly:b.reviewerProposalOnly===true,
  reviewerProposedPanel:d.selectedPanelId,
  note:'Technical acceptance only; neither the fabricated spatial values nor the legal conclusion have been independently certified.'
 };
