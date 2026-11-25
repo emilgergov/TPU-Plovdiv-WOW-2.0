@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {buildEvidenceChunks,verifyEvidenceDigest,evidenceCoverage} from './kt134-evidence-chunks.mjs';
+import {buildEvidenceChunks,verifyEvidenceDigest,evidenceCoverage,packAnchoredClaims} from './kt134-evidence-chunks.mjs';
 const docs=[
  {source:'Уведомление.pdf',text:'Задължителен предмет на инвестиционното предложение. '.repeat(151)},
  {source:'Техническо описание.pdf',text:'Конкретни фактически параметри на сградата. '.repeat(120)},
@@ -36,3 +36,16 @@ assert.equal(evidenceCoverage(truncated,truncated.chunks.map(chunk=>verifyEviden
 const ocrGap=buildEvidenceChunks([{source:'Сканиран документ.pdf',text:'Наличен извлечен текст от PDF, но с непрочетени страници.',
  readStatus:'ПРОВЕРКА: стр. 3 — недостатъчно разчетен текст'}]);
 assert.ok(ocrGap.unreadable.some(x=>x.reason==='EXTRACTION_REQUIRES_REVIEW'));
+
+const many=[];
+for(let d=0;d<4;d++)for(let i=0;i<60;i++)many.push({
+ documentIndex:d,source:'Документ-'+d+'.pdf',start:i*20,end:i*20+20,
+ quote:'Факт от документа '+d+' по номер '+i,summary:'Конкретно доказателствено твърдение за този документ.'});
+const packed=packAnchoredClaims(many,4300);
+assert.ok(packed.selected>0);
+assert.ok(packed.selected<many.length);
+assert.equal(packed.omitted+packed.selected,many.length);
+for(let d=0;d<4;d++)assert.ok(packed.claims.some(x=>x.documentIndex===d),
+ 'Every document must retain some anchored excerpts when budget permits');
+assert.equal(packed.complete,false);
+assert.equal(packAnchoredClaims(many,200000).complete,true);
