@@ -64,3 +64,19 @@ test('unconfirmed external registry number fails closed',async()=>{
  await assert.rejects(()=>fixture({registry:{...rows.kt126_registry[0],external_status:'proposed'}})
   .loadProtectedContext({authenticatedSession:'protected-server-session',caseId:id}),/KT126_EXTERNAL_NUMBER_NOT_CONFIRMED/);
 });
+
+test('actual KT126 nested state and values snapshots feed Stage2 context',async()=>{
+ const versions=[{revision:9,kind:'state',content_json:JSON.stringify({
+   state:{intake:{files:[{sourceId:'doc1',text:'Обжалва се текст на административно писмо.',filename:'vazrazhenie.pdf'}]},
+     subjectConfirmed:{text:'Възражение срещу предходно писмо'},gisSkipConfirmed:true,
+     gisSkipReason:'Разглеждане на възражение без ново инвестиционно предложение'},
+   values:{kt80ScopeText:'Редакция на съдържание на административно писмо'},
+   globals:{KT80IPMasterDraft:{proposedSubject:'Предходно уведомление'}}
+ })}];
+ const a=fixture({versions});
+ const c=await a.loadProtectedContext({authenticatedSession:'session-nested',caseId:id});
+ assert.equal(c.caseRecord.subject,'Възражение срещу предходно писмо');
+ const b=await a.loadEvidenceBundle({preflight:{case:{caseId:id}},authenticatedSession:'session-nested'});
+ assert.equal(b.scope,'Редакция на съдържание на административно писмо');
+ assert.equal(b.documents[0].sourceId,'doc1');
+});
