@@ -1,8 +1,8 @@
 name: KT134 one-time live AI check - uploaded version only
 on:
-  push:
+  pull_request:
     branches:
-      - kt134-content-integration-candidate
+      - main
     paths:
       - '.github/workflows/kt134-live-ai-version-check.yml'
 permissions:
@@ -17,12 +17,25 @@ jobs:
       CF_WORKER: "tpu-plovdiv-ai-author-v27"
     steps:
       - uses: actions/checkout@v4
+      - name: Limit charged live test to ONE explicit commit
+        id: gate
+        shell: bash
+        run: |
+          if git log -1 --format=%s | grep -Fq 'KT134-LIVE-ONE-SHOT'; then
+            echo 'run=true' >> "$GITHUB_OUTPUT"
+            echo 'One-shot protected source-span live test enabled.'
+          else
+            echo 'run=false' >> "$GITHUB_OUTPUT"
+            echo 'No additional live AI calls on subsequent commits.'
+          fi
       - name: Bundle KT134 Worker without changing production
+        if: steps.gate.outputs.run == 'true'
         run: |
           set -euo pipefail
           npx --yes esbuild@0.25.12 cloudflare/ai-author-v27/src/worker.js --bundle --platform=browser --format=esm --target=es2022 --outfile=/tmp/kt134-live-candidate.mjs
           node --check /tmp/kt134-live-candidate.mjs
       - name: Upload non-deployed Worker version and perform ONE live AI dossier-span test
+        if: steps.gate.outputs.run == 'true'
         shell: bash
         run: |
           set -euo pipefail
