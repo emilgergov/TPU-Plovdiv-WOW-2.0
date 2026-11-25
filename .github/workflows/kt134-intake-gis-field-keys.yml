@@ -1,0 +1,41 @@
+name: KT134 map authoritative intake and GIS nested fields
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-intake-gis-field-keys.yml']
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Identify stored intake document and GIS fields (no values)
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const root='https://api.cloudflare.com/client/v4/accounts/'+process.env.ACCOUNT,h={Authorization:'Bearer '+process.env.CF_TOKEN,'Content-Type':'application/json'};
+          const s=await(await fetch(root+'/workers/scripts/tpu-plovdiv-kt125-local-auth/settings',{headers:h})).json();
+          const db=s.result?.bindings?.find(x=>x.name==='KT125_DB')?.id;
+          if(!db)throw Error('NO_DB');
+          const parents=['$.state.intake','$.state.intake.files','$.state.subjectConfirmed','$.state.parcelsConfirmed','$.state.leadingDocument','$.globals.KT80FreeGISResults.results','$.globals.KT80DossierAudit.records','$.globals.KT80CH2Passport.fileInventory','$.globals.KT80IPMasterDraft.fields'];
+          const sql="SELECT DISTINCT t.path AS parent,t.key AS field,t.type AS type FROM kt126_versions v,json_tree(v.content_json) t WHERE json_valid(v.content_json) AND (t.path IN ("+parents.map(x=>"'"+x+"'").join(',')+") OR t.path GLOB '$.state.intake.files[[]0]*' OR t.path GLOB '$.globals.KT80DossierAudit.records[[]0]*' OR t.path GLOB '$.globals.KT80FreeGISResults.results[[]0]*') AND t.key IS NOT NULL ORDER BY parent,field LIMIT 220";
+          const r=await fetch(root+'/d1/database/'+db+'/query',{method:'POST',headers:h,body:JSON.stringify({sql})});
+          const j=await r.json();if(!j.success)throw Error('SCHEMA_QUERY_FAILED');
+          const rows=(j.result?.[0]?.results||[]).map(x=>({parent:x.parent,key:String(x.field),type:x.type}));
+          writeFileSync('kt134-auto/KT134_INTAKE_GIS_FIELD_NAMES.json',JSON.stringify({metadataOnly:true,rows},null,2)+'\n');
+          console.log('Located '+rows.length+' nested intake/GIS field names');
+          NODE
+      - name: Save only field metadata
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_INTAKE_GIS_FIELD_NAMES.json
+          git commit -m 'KT134: map nested original dossier field names' || exit 0
+          git pull --rebase origin kt134-auto-mode-isolated
+          git push origin HEAD:kt134-auto-mode-isolated
