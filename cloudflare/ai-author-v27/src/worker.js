@@ -1,4 +1,5 @@
 import {getLegalContext} from "./legal-v11-loader.mjs";
+import {deriveKt134LegalDisposition,kt134DispositionTextIssues,composeKt134GroundedReviewerAlternative} from "./kt134-legal-disposition.mjs";
 import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 import {evaluateDraft} from "./kt123-decision-model.mjs";
 import {substantiveDraftIssues} from "./kt123-substance-guard.mjs";
@@ -827,6 +828,10 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     // These excerpts establish text/provenance, never legal applicability.
     verifiedLegalExcerpts:verifiedLegalCorpus.legalProvisions.slice(0,10)
       .map(x=>JSON.stringify(x).slice(0,3200)),
+    legalDisposition:deriveKt134LegalDisposition({
+      qualification:lockedQualification,qualificationValidated:qualificationValidation?.ok===true,
+      reviewerPanelId:reviewerSelectedPanel,procedureCompleted:false
+    }),
     expertApproved:false
   }:null;
   const reviewerIntermediateProof=reviewerIntermediate?await signQualification(
@@ -977,6 +982,10 @@ async function handleStage5Document(request,env){
    const clean=x=>String(x||"").trim();
    const issues=(Array.isArray(d.unresolvedIssues)?d.unresolvedIssues:[]).map(clean).filter(Boolean);
    const reasons=(Array.isArray(d.reviewerReasons)?d.reviewerReasons:[]).map(clean).filter(Boolean);
+   const disposition=d.legalDisposition||deriveKt134LegalDisposition({
+      reviewerPanelId:d.selectedPanelId,procedureCompleted:false
+   });
+   const evaluationRule=disposition.recommendedNextStep;
    const proposedPanel=clean(input.selectedPanelLine);
    const subject=clean(input.subject).replace(/[„“]/gu,"");
    // KT134: one coherent working draft, not a raw dump of reviewer findings.
@@ -1003,6 +1012,8 @@ async function handleStage5Document(request,env){
           "За всеки извод посочи документ, факт и приложима норма само ако нормата е налична във verifiedLegalContext. Не представяй само заглавие на закон или числов праг като проверена разпоредба.",
           "Напиши единен административен проект с конкретно предложение за следващо действие, а не указание експертът сам да извърши вместо теб цялата преценка.",
           "Не използвай изрази Предложението е окончателно, следва задължително, утвърждава се или актът се издава, когато предпоставките остават неопределени. Резултатът е само проект на предложение за човешко решение.",
+          "Предложеният панел не удостоверява сам по себе си наличието на процесуални условия. Полето formalDecisionReady от подписаната четирикомпонентна квалификация определя дали изобщо може да се формулира предложение за издаване на формално решение. При false предложи конкретен предходен административен ход, а не издаване на решение.",
+          "Когато qualificationValidated=false, четирите изхода не са доказани дори ако рецензентският текст ги излага категорично. Не ги повишавай до фактически проверени изводи.",
           "Ако предложената процедура/панел не следва логично от установените факти, посочи я като непотвърдена хипотеза и формулирай собствено конкретно допустимо административно предложение с точно посочените липсващи предпоставки.",
           "Без акт, без подпис, без категорична окончателна правна квалификация при непълни доказателства. Използвай официален административен стил; не изреждай вътрешни кодове.",
           "Рецензентът не връща преписката и не иска междинно потвърждение от потребителя; предлага резултат за окончателната човешка преценка."
@@ -1015,6 +1026,10 @@ async function handleStage5Document(request,env){
              qualificationRecord:input.qualificationRecord||null
            },
            legalEvidenceWarnings:issues.slice(0,12),
+           fourPartQualification:disposition.rows,
+           legalPredicateDisposition:evaluationRule,
+           formalDecisionReady:disposition.formalDecisionReady,
+           physicalGap:disposition.physicalGap,
            proposedDirection:proposedPanel,
            reviewedProposal:clean(d.reviewedText).slice(0,12000),
            reviewerArgumentNotes:reasons.slice(0,8),
@@ -1090,6 +1105,18 @@ async function handleStage5Document(request,env){
        "Компетентният експерт следва да се произнесе по представеното мотивирано предложение, като отчете конкретните недоказани предпоставки; този текст не е административен акт."
      ].join("\n");
    }
+   // Content quality is decided against actual qualified legal predicates,
+   // not solely the model's narrative. Reviewer never blocks the workflow:
+   // it returns one case-specific administrative alternative where necessary.
+   const contentIssues=kt134DispositionTextIssues(body,disposition);
+   let reviewerAlternativeUsed=false;
+   if(contentIssues.length){
+     body=composeKt134GroundedReviewerAlternative({
+       subject:input.subject,scope:input.scope,disposition,
+       reviewedText:d.reviewedText,caseContext:input.caseContext||{}
+     });
+     reviewerAlternativeUsed=true;
+   }
    return reply({caseId:input.caseId,evidenceRevision:input.evidenceRevision,
      requestId:input.requestId,stage4Version:input.stage4Version,
      selectedPanelLine:input.selectedPanelLine,
@@ -1098,7 +1125,11 @@ async function handleStage5Document(request,env){
      editorialFlags:issues,projectOnly:true,expertReviewRequired:true,
      documentIssued:false,wordTemplateApplied:false,
      automaticReviewerIntermediate:true,expertApproved:false,
-     reviewerProposalOnly:true,unresolvedLegalIssues:issues});
+     reviewerProposalOnly:true,unresolvedLegalIssues:issues,
+     normativeDisposition:{qualified:disposition.qualificationValidated,
+       proposedPanel:disposition.proposedPanel,
+       formalDecisionReady:disposition.formalDecisionReady,
+       reviewerAlternativeUsed,qualityIssueCodes:contentIssues}});
  }
  const confirmedPanelId=Number(match[1]);
  let independentExpert=null,reviewedExpertChoice=null;
