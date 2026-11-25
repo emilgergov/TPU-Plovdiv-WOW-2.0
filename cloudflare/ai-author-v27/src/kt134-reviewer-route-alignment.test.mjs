@@ -37,7 +37,7 @@ test("reviewer is offered multiple evidenced routes without preselecting one, ex
  assert.ok(available.includes(2),"documented factual gap permits panel02");
  assert.ok(available.includes(13),"expert reference remains an option");
  assert.ok(available.includes(14),"case review remains an option");
- for(const denied of [1,4,5,6,7,8,9,11,12])assert.ok(!available.includes(denied),"improper formal or legal route "+denied);
+ for(const denied of [1,3,4,5,6,7,8,9,10,11,12,16,17,18,19,20,21,22])assert.ok(!available.includes(denied),"improper formal or legal route "+denied);
  assert.ok(available.length>=3,"reviewer retains independent choice");
 });
 
@@ -49,4 +49,11 @@ test("panel03 cannot propose a random institution without two sourced procedural
   {kind:"consultation_legal_basis",sourceId:"master-law-1",verified:true}
  ]});
  assert.deepEqual(withGroundedTarget,[]);
+});
+
+test("a real complaint permits complaint panel17, but an investment notification does not",()=>{
+ const notice=[{source:"notification",text:"Уведомление за вътрешно преустройство на съществуващо складово помещение."}];
+ const complaint=[{source:"appeal",text:"Постъпила жалба срещу предходно административно писмо."}];
+ assert.ok(kt134ReviewerRouteIssues({panelId:17,caseDocuments:notice}).length);
+ assert.deepEqual(kt134ReviewerRouteIssues({panelId:17,caseDocuments:complaint}),[]);
 });
