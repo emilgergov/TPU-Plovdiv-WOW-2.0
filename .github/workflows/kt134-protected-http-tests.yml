@@ -10,7 +10,7 @@ on:
       - '.github/workflows/kt134-protected-http-tests.yml'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   verify-protected-integration:
     runs-on: ubuntu-latest
@@ -25,3 +25,11 @@ jobs:
           node --test kt134-auto/kt134-protected-http-integration.test.mjs
           node --test kt134-auto/kt134-native-dossier-adapter.test.mjs
           node --test kt134-auto/kt134-eg-stage45-live-bridge.test.mjs
+      - name: Record real test result on isolated branch
+        run: |
+          node -e 'const fs=require("fs");fs.writeFileSync("kt134-auto/KT134_PROTECTED_INTEGRATION_TEST_RESULT.json",JSON.stringify({runId:process.env.GITHUB_RUN_ID,sha:process.env.GITHUB_SHA,passed:true,kind:"synthetic_contract_tests_only",realDossierProcessed:false,publicIntegrationDeployed:false,productionChanged:false},null,2)+"\\n")'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_PROTECTED_INTEGRATION_TEST_RESULT.json
+          git commit -m 'KT134: verified isolated secure dossier unit tests' || exit 0
+          git push origin HEAD:kt134-auto-mode-isolated
