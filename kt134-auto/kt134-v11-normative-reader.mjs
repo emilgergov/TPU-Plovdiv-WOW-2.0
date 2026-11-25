@@ -3,11 +3,16 @@
  * Returns verified archive TEXT and provenance, never legal applicability.
  * No personal dossier leaves the server; no direct network request.
  */
-import {getLegalContext} from '../cloudflare/ai-author-v27/src/legal-v11-loader.mjs';
+import {getLegalContext,getFullV11Document,V11_CORPUS_FILES} from '../cloudflare/ai-author-v27/src/legal-v11-loader.mjs';
 const V11='8d3851affd72fb44b4d663920196e00ec317c8e45d36fc16c6ad6b0ce965226c';
 const text=x=>String(x??'').trim();
-export function createKT134V11NormativeReader({getContext=getLegalContext}={}){
- if(typeof getContext!=='function')throw Error('Липсва нормативен MASTER');
+export function createKT134V11NormativeReader({
+ getContext=getLegalContext,getFullDocument=getFullV11Document,
+ availableActs=V11_CORPUS_FILES
+}={}){
+ if(typeof getContext!=='function'||typeof getFullDocument!=='function')throw Error('Липсва нормативен MASTER');
+ if(!Array.isArray(availableActs)||availableActs.length===0||new Set(availableActs).size!==availableActs.length)
+  throw Error('Непълен нормативен каталог');
  return async function readNormative({caseId,context}={}){
   if(!text(caseId)||context?.caseId!==caseId||!Array.isArray(context.documents)||
      context.documents.length===0)throw Error('Невалидна преписка за нормативно извличане');
@@ -31,8 +36,20 @@ export function createKT134V11NormativeReader({getContext=getLegalContext}={}){
     applicabilityVerified:false
    });
   });
+  const catalog=Object.freeze([...availableActs]);
+  const getAct=async ({forCaseId,id}={})=>{
+   if(forCaseId!==caseId||!catalog.includes(id))throw Error('Неразрешен нормативен източник или чужда преписка');
+   const act=await getFullDocument(id);
+   if(act?.id!==id||!text(act.text)||!text(act.archivePath)||
+      !/^[0-9a-f]{64}$/u.test(text(act.contentSHA256)))
+    throw Error('Непълен или недоказан нормативен документ');
+   return Object.freeze({caseId,id,title:text(act.title),sourcePath:act.archivePath,
+    contentSHA256:act.contentSHA256,originalSourceSHA256:act.originalSHA256,
+    fullLegalText:act.text,applicabilityVerified:false});
+  };
   return Object.freeze({
    caseId,archiveSHA256:V11,sourceKind:'local_normative_master_v11',
+   availableActs:catalog,getAct,
    archiveTextIntegrityChecked:true,verified:false,
    legalApplicabilityVerified:false,
    provisions:Object.freeze(sources),
