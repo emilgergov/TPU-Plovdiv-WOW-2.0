@@ -842,7 +842,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
    requestId:payload.requestId,projectOnly:true,expertReviewRequired:true,
    archiveEvidenceVerified:true,draft:reviewedText,authorDraft:draft,
    reviewerIntermediate,reviewerIntermediateProof,
-   qualificationRecord:lockedQualification,qualificationProof,qualificationGate:{sourceAnchorsMatched:qualificationValidation?.ok===true,legalApplicabilityCertified:false,expertConfirmationRequired:true},
+   qualificationRecord:lockedQualification,qualificationProof,qualificationGate:{sourceAnchorsMatched:qualificationValidation?.ok===true,legalApplicabilityCertified:false,expertConfirmationRequired:true,diagnosticCodes:qualificationIssues.slice(0,15)},
     normativeAudit:{reviewed:true,reviewVerdict:reviewDisposition,originalReviewVerdict:verdict,authorRepairs,
      deterministicModel:evaluateDraft(finalDraft).decision,
      legalApplicabilityAutomaticallyCertified:false,selectedPanelId:Number(finalDraft.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0)||null,fullArticlesVerified:true,allArchiveSourcesExamined:false,verifiedLegalProvisionCount:verifiedLegalCorpus.legalProvisions.length,findings:reviewerFindings},
