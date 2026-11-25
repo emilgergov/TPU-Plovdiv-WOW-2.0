@@ -11,6 +11,8 @@ export function kt134ReviewerRouteIssues({panelId,qualification=null,
   Object.fromEntries(qualification.tests.map(x=>[x.key,x.status])):{};
  const proven=qualificationValidated===true;
  const records=Array.isArray(procedureEvidence)?procedureEvidence:[];
+ const caseText=Array.isArray(caseDocuments)?caseDocuments.map(d=>
+  String(d?.text||"")).join(" ").toLocaleLowerCase("bg").slice(0,70000):"";
  const verified=name=>records.some(x=>x?.verified===true&&x?.kind===name&&x?.sourceId);
  if(!KT109_ROUTE_BY_ID.has(id))return ["KT134_UNKNOWN_REVIEWER_PANEL"];
  if(id===1&&!(proven&&tests.A1==="ОТРИЦАТЕЛНА"&&tests.A2==="ОТРИЦАТЕЛНА"&&
@@ -46,7 +48,24 @@ export function kt134ReviewerRouteIssues({panelId,qualification=null,
   errors.push("KT134_PANEL_11_SEA_SCREENING_NOT_COMPLETED");
  if(id===12&&!verified("sea_full_procedure_complete"))
   errors.push("KT134_PANEL_12_SEA_PROCEDURE_NOT_COMPLETED");
- if(id===17&&!Array.isArray(caseDocuments))errors.push("KT134_PANEL_17_CASE_DOCUMENTS_UNKNOWN");
+ // Case types are not interchangeable. A routine investment notification
+ // does not establish a complaint, signal, SEA plan or competence transfer.
+ if(id===10&&!/\b(?:план|програма)\b/iu.test(caseText))
+  errors.push("KT134_PANEL_10_NOT_A_PLAN_OR_PROGRAM");
+ if(id===16&&!/архивиране|архивна\s+справка|архив\s+на\s+преписка/iu.test(caseText))
+  errors.push("KT134_PANEL_16_NO_ARCHIVE_REQUEST");
+ if(id===17&&!/жалба|обжалване/iu.test(caseText))
+  errors.push("KT134_PANEL_17_NO_COMPLAINT");
+ if(id===18&&!/сигнал\s+(?:за|от)|постъпил\s+сигнал/iu.test(caseText))
+  errors.push("KT134_PANEL_18_NO_SIGNAL");
+ if(id===19&&!/възражение|оспорване/iu.test(caseText))
+  errors.push("KT134_PANEL_19_NO_OBJECTION");
+ if(id===20&&!(verified("competence_transfer_basis")&&verified("competent_target")))
+  errors.push("KT134_PANEL_20_NO_COMPETENCE_TRANSFER_BASIS");
+ if(id===21&&!verified("completed_inspection_protocol"))
+  errors.push("KT134_PANEL_21_NO_COMPLETED_INSPECTION");
+ if(id===22&&!/предложение\s+за\s+(?:усъвършенстване|подобряване)\s+на\s+административната/iu.test(caseText))
+  errors.push("KT134_PANEL_22_NO_PUBLIC_ADMINISTRATIVE_PROPOSAL");
  return errors;
 }
 export function kt134ReviewerActionMatch({panelId,documentTitle,action,legalReadiness}={}){
