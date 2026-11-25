@@ -1,6 +1,7 @@
 import {getLegalContext} from "./legal-v11-loader.mjs";
 import {kt134DraftDiagnostics} from "./kt134-content-diagnostics.mjs";
 import {detectKT134CasePurpose,checkKT134ComplaintRoute} from "./kt134-case-purpose.mjs";
+import {COMPLAINT_QUALIFICATION_SCHEMA,COMPLAINT_QUALIFICATION_SYSTEM,validateComplaintQualification,complaintDraftIssues} from "./kt134-complaint-qualification.mjs";
 import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 import {evaluateDraft} from "./kt123-decision-model.mjs";
 import {substantiveDraftIssues} from "./kt123-substance-guard.mjs";
@@ -408,6 +409,12 @@ async function handleStage4Proposal(request,env){
  let lockedQualification=null,qualificationValidation=null,qualificationIssues=[];
  const qualificationSources=buildQualificationSources({subject:payload.subject,scope:payload.scope,confirmed,documents:sourceTexts,anchoredClaims:dossierAnchors,legalProvisions:verifiedLegalCorpus.legalProvisions});
  const exactSnippets=qualificationEvidenceOptions(qualificationSources);
+ const isComplaint=casePurpose.complaintReview;
+ const validateSelectedQualification=q=>isComplaint?
+  validateComplaintQualification(q,exactSnippets,casePurpose):
+  validateQualification(q,qualificationSources,{casePurpose});
+ const compareSelectedQualification=(value,q)=>q?.kind==="complaint_procedure"?
+  complaintDraftIssues(value,q):compareDraftWithQualification(value,q);
  // KT124-R1: Explicit, archive-derived legal source IDs for each legal test.
  // This does NOT assign applicability/status or override validation.
  const qualificationLegalIds=Object.fromEntries([
@@ -431,8 +438,8 @@ async function handleStage4Proposal(request,env){
      method:"POST",signal:controller.signal,
      headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
      body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:3900,
-      text:{format:{type:"json_schema",name:"kt123_source_qualification",strict:true,schema:QUALIFICATION_SCHEMA}},
-      input:[{role:"system",content:QUALIFICATION_SYSTEM+subjectInstruction},
+      text:{format:{type:"json_schema",name:isComplaint?"kt134_complaint_procedure":"kt123_source_qualification",strict:true,schema:isComplaint?COMPLAINT_QUALIFICATION_SCHEMA:QUALIFICATION_SCHEMA}},
+      input:[{role:"system",content:isComplaint?COMPLAINT_QUALIFICATION_SYSTEM:QUALIFICATION_SYSTEM+subjectInstruction},
        {role:"user",content:JSON.stringify({...qualificationInput,correctionIssues:issues})}]})
     });
     if(!response.ok)return null;
@@ -441,12 +448,16 @@ async function handleStage4Proposal(request,env){
      .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
     try{return JSON.parse(raw)}catch{return null}
    };
-   let q=await callQualification(),v=validateQualification(q,qualificationSources,{casePurpose});
+   let q=await callQualification(),v=validateSelectedQualification(q);
    if(!v.ok){
     const candidate=await callQualification(v.errors.map(code=>({
      error:code,
      instruction:code.startsWith("UNVERIFIED_LEGAL_QUOTE")||code.startsWith("UNVERIFIED_CASE_QUOTE")?
        "Използвай точен excerpts[].id от същия източник. Не създавай свободен текст на цитат.":
+       code.startsWith("COMPLAINT_CASE_SOURCE_UNVERIFIED")||code.startsWith("COMPLAINT_LEGAL_SOURCE_UNVERIFIED")?
+        "Цитирай само точните excerpts[].id от съответния caseSource и legalSource; използвай относимите реално предоставени разпоредби на АПК.":
+       code.startsWith("COMPLAINT_ROUTE_REASON_INSUFFICIENT")||code.startsWith("COMPLAINT_COMPETENCE_UNREASONED")?
+        "Обоснови допустимост, компетентност, предмет и действие с конкретния законов текст, без предположения.":
        code.startsWith("COMPLAINT_NEW_IP_ROUTE_WITHOUT_NEW_FILING")?
        "Водещото възражение срещу предходно писмо не е ново уведомление за ИП. Не избирай панел за нова инвестиционна процедура (01, 04, 05 и формалните решения). Избери доказано административно действие по предмета на възражението, като сравниш панелите 17–22 и други относими панели. НЕ предрешавай №17; мотивирай компетентност и допустимост.":
        code.startsWith("WRONG_ANNEX_REFERENCE")?
@@ -460,7 +471,7 @@ async function handleStage4Proposal(request,env){
        code.startsWith("POSITIVE_ANNEX_CATEGORY_FACT_MISMATCH")?
        "Съпоставената правна категория няма доказана конкретна връзка с потвърдения факт от caseSource. Провери специфичния предмет, технология или прагови параметри. Не използвай общи думи за сграда/инвестиция; без доказана връзка не твърди положителна приложимост.":
        "Свери основанията и не въвеждай недоказано предположение."
-    }))),checked=validateQualification(candidate,qualificationSources,{casePurpose});
+    }))),checked=validateSelectedQualification(candidate);
     if(checked.ok){q=candidate;v=checked}
    }
    if(!v.ok){
