@@ -5,7 +5,7 @@
  * evidenceRevision, requestId and draft. No response identity -> no accepted draft.
  * Distinct experts' credentials never travel inside the case evidence payload. */
 import {collectStageEvidence,verifyStageEvidence} from './kt95-stage-evidence-handoff.mjs';
-import {buildEvidenceChunks,verifyEvidenceDigest,evidenceCoverage} from './kt134-evidence-chunks.mjs';
+import {buildEvidenceChunks,verifyEvidenceDigest,evidenceCoverage,packAnchoredClaims} from './kt134-evidence-chunks.mjs';
 import {VERIFIED_ARTICLES,LOCKED_ARCHIVE,LOCKED_ARCHIVE_SHA256} from './v11-trusted-source-registry.mjs';
 
 const ENDPOINT='https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/stage4-proposal';
@@ -266,13 +266,14 @@ function boot(){
    const coverage=evidenceCoverage(batch,receipts);
    const claims=coverage.claims.map(x=>({source:x.source,documentIndex:x.documentIndex,
      start:x.start,end:x.end,quote:x.quote,summary:x.summary,expertConfirmed:false}));
-   const ledgerFits=new TextEncoder().encode(JSON.stringify(claims)).length<=26000;
+   const packed=packAnchoredClaims(claims,26000);
+   const ledgerFits=packed.complete;
    request.completeCaseEvidence.kt134DossierCoverage={
     complete:coverage.complete&&allResponses&&ledgerFits&&batch.totalDocuments>0&&batch.totalDocuments>=declaredCount,
     declaredDocuments:declaredCount,readableDocuments:batch.totalDocuments,
     expectedChunks:coverage.expectedChunks,examinedChunks:coverage.examinedChunks,
     unreadableDocuments:coverage.unreadableDocuments,unexamined:coverage.unexamined,
-    sourceAnchoredClaims:ledgerFits?claims:[],allClaimEvidenceIncluded:ledgerFits,
+    sourceAnchoredClaims:packed.claims,totalSourceAnchoredClaims:packed.total,transmittedSourceAnchoredClaims:packed.selected,allClaimEvidenceIncluded:ledgerFits,
     digestOverflow:!ledgerFits,generatedOnlyForCurrentCase:true};
    if(!coverage.complete||!allResponses||!ledgerFits||batch.totalDocuments===0||batch.totalDocuments<declaredCount){
     status.textContent='Не всички документи са прочетени. EG Авторът и рецензентът ще предложат мотивирано следващо действие с ясно посочени доказателствени ограничения.';
