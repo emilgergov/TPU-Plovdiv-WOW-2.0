@@ -16,3 +16,8 @@ bucket_name = "kt134-isolated-r2-2026"
 type = "Text"
 globs = ["**/*.html"]
 fallthrough = false
+
+[[rules]]
+type = "Data"
+globs = ["**/*.docx"]
+fallthrough = false
