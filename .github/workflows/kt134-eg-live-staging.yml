@@ -82,13 +82,20 @@ jobs:
           node kt134-auto/kt134-eg-live-smoke.mjs
           python3 - <<'PY'
           import zipfile
-          p='kt134-auto/live-test-deliverables/KT134_REAL_EG_SYNTHETIC_DRAFT.docx'
+          p='kt134-auto/live-test-deliverables/KT134_FULL_SYNTHETIC_GIS_WORD.docx'
+          import xml.etree.ElementTree as ET
           with zipfile.ZipFile(p) as z:
               assert 'word/document.xml' in z.namelist()
               assert 'word/media/crest.png' in z.namelist()
               assert 'word/header1.xml' in z.namelist()
               assert 'word/footer1.xml' in z.namelist()
-          print('Live EG DOCX content and institutional template verified')
+              root=ET.fromstring(z.read('word/document.xml'))
+              text=''.join(n.text or '' for n in root.iter() if n.tag.endswith('}t'))
+              for token in ('99999.999.999','Тестово село','Тестова община','1500 кв. м',
+                  'Синтетична ЗЗ','1250 м','Синтетична ЗТ','840 м',
+                  'TEST-PDF1-NONREAL','TEST-PDF2-LEGAL-CONTEXT'):
+                  assert token in text, f'Missing document evidence: {token}'
+          print('KT134: LIVE EG WORD includes case subject, parcel, location and both ZZ/ZT synthetic GIS findings')
           PY
       - name: Export real EG test results for acceptance
         if: always()
