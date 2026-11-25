@@ -20,7 +20,7 @@ function decodeVersion(value){
  try{return JSON.parse(value||'{}')}catch{fail('KT126_VERSION_INVALID_JSON')}
 }
 const sourceDocuments=x=>{
- const a=list(x?.documents?.length?x.documents:x?.sourceTexts);
+ const a=list(x?.documents?.length?x.documents:x?.sourceTexts?.length?x.sourceTexts:x?.files);
  return a.filter(v=>obj(v)&&str(v.text)&&str(v.sourceId||v.source))
   .map(v=>({sourceId:str(v.sourceId||v.source),text:str(v.text),
      fileName:str(v.fileName||v.filename||v.name),
