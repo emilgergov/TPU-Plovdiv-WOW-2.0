@@ -1,0 +1,38 @@
+name: KT134 case API contract check
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-case-contract.yml']
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Read route contract names only
+        run: |
+          curl -fsS -H "Authorization: Bearer $TOKEN" "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT/workers/scripts/tpu-plovdiv-kt125-local-auth" > /tmp/native
+          node - <<'NODE'
+          const fs=require('fs'),s=fs.readFileSync('/tmp/native','utf8');
+          const paths=['/kt125/cases/','/kt125/local-auth','/auth/login','/kt126/registry','/stage4-proposal','/stage5-document'];
+          const report=paths.map(path=>{
+            const position=s.indexOf(path),surrounding=position<0?'':s.slice(Math.max(0,position-220),position+1250);
+            const tokens=[...new Set((surrounding.match(/\b(?:GET|POST|PUT|PATCH|DELETE|caseId|userId|sessionId|authorization|cookie|json|status|request|response|dossier|registry|file|document|evidence|route|error|auth|user|case)\b/gi)||[]).map(x=>x.toLowerCase()))];
+            const fieldNames=[...new Set([...surrounding.matchAll(/\b(?:caseId|dossier|registryNumber|subject|scope|revision|ownerUserId|files|documents|principal|session|role|identity|userId|text|evidence|gisMode)\b/g)].map(m=>m[0]))];
+            return {path,present:position>=0,nearbyMethodTokens:tokens,nearbyFieldNames:fieldNames};
+          });
+          fs.writeFileSync('kt134-auto/KT134_CASE_API_CONTRACT.json',JSON.stringify({routes:report},null,2));
+          NODE
+      - name: Save contract field names
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_CASE_API_CONTRACT.json
+          git commit -m 'KT134: map native case API field names' || exit 0
+          git push origin HEAD:kt134-auto-mode-isolated
