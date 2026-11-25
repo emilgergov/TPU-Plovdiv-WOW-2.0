@@ -1,0 +1,60 @@
+name: KT134 — isolated Cloudflare staging plan and approved provisioning
+# On push: read-only plan. Manual dispatch is mandatory for provisioning.
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths:
+      - .github/workflows/kt134-isolated-staging-provision.yml
+      - kt134-auto/kt134-isolated-cloudflare-provision.mjs
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'plan = read-only; create = isolated D1/R2/Worker only'
+        type: choice
+        required: true
+        default: plan
+        options: [plan, create]
+      confirmation:
+        description: 'For create only, enter CREATE_KT134_ISOLATED_ONLY'
+        type: string
+        required: false
+        default: ''
+permissions:
+  contents: read
+concurrency:
+  group: kt134-isolated-cloudflare-staging-resources
+  cancel-in-progress: false
+jobs:
+  staging:
+    if: github.ref_name == 'kt134-auto-mode-isolated'
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Checkout isolated branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify no accidental production modifications
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "kt134-auto-mode-isolated"
+          test -f kt134-auto/kt134-isolated-cloudflare-provision.mjs
+          node --check kt134-auto/kt134-isolated-cloudflare-provision.mjs
+      - name: Cloudflare isolated plan or manually approved creation
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          KT134_CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+          KT134_PROVISION_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.action || 'plan' }}
+          KT134_CONFIRMATION: ${{ github.event_name == 'workflow_dispatch' && inputs.confirmation || '' }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Missing Cloudflare secret"; exit 1; }
+          echo "::add-mask::$CLOUDFLARE_API_TOKEN"
+          node kt134-auto/kt134-isolated-cloudflare-provision.mjs
+      - name: Source protection declaration
+        if: always()
+        run: |
+          echo "KT134 production gateway and backend remain read-only under this workflow."
+          echo "Never migrate, change or overwrite KT133/KT125 production resources."
