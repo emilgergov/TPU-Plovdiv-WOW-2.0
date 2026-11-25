@@ -737,7 +737,44 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   ].filter(x=>typeof x==="string"&&x.trim()).slice(0,10);
   const verdict=independentReview?.verdict;
   if(!["pass","revise","reject"].includes(verdict))return expertPreview("Независимият преглед е невалиден.",["INVALID_REVIEW"],"independent_review",draft);
-  const finalDraft=verdict==="pass"?draft:(text(independentReview.revisedDraft,12000)||draft);
+  let finalDraft=verdict==="pass"?draft:(text(independentReview.revisedDraft,12000)||draft);
+  // KT134: one non-blocking reviewer self-correction, independent of expert approval.
+  const toRepair=new Set(["TEST_METADATA_IN_ADMINISTRATIVE_TEXT","SHORT_UNREASONED_DRAFT","MISSING_ACTIONABLE_PROPOSAL","NO_SELECTED_PANEL"]);
+  const diagnosticInput={stage:4,sourceTexts,gis:detail.gis||null,legalTexts:verifiedLegalCorpus.legalProvisions,reviewFindings:reviewerFindings};
+  const repairProblems=kt134DraftDiagnostics(withReviewConclusion(finalDraft),diagnosticInput).findings.filter(x=>toRepair.has(x.code));
+  let kt134ReviewerCorrectionAttempted=false,kt134ReviewerCorrectionApplied=false;
+  if(repairProblems.length){
+   kt134ReviewerCorrectionAttempted=true;
+   try{
+    const correction=await fetch("https://api.openai.com/v1/responses",{
+     method:"POST",signal:controller.signal,
+     headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
+     body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:6000,
+      text:{format:{type:"json_schema",name:"kt134_reviewer_correction",strict:true,
+       schema:{type:"object",additionalProperties:false,properties:{
+        verdict:{type:"string",enum:["pass","revise","reject"]},
+        grounds:{type:"array",items:{type:"string"}},
+        issues:{type:"array",items:{type:"string"}},
+        revisedDraft:{type:"string"}
+       },required:["verdict","grounds","issues","revisedDraft"]}}},
+      input:[{role:"system",content:reviewSystem+" Коригирай ПЪЛНИЯ документ самостоятелно. Върни пълен revisedDraft дори при несъгласие, без да блокираш или да удостоверяваш правния резултат. Не допускай тестови означения в административен текст."},
+       {role:"user",content:JSON.stringify({...auditInput,draft:finalDraft,firstReview:independentReview,correctionProblems:repairProblems})}]})
+    });
+    if(correction.ok){
+     const data=await correction.json();
+     const raw=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
+     const parsed=JSON.parse(raw);
+     const candidate=text(parsed.revisedDraft,12000);
+     const substantive=[...qualityIssues(candidate),...(lockedQualification?compareDraftWithQualification(candidate,lockedQualification):[])];
+     const remaining=kt134DraftDiagnostics(withReviewConclusion(candidate),diagnosticInput).findings.filter(x=>toRepair.has(x.code));
+     if(candidate.length>=120&&candidate.length<=12000&&candidate!==finalDraft&&substantive.length===0&&remaining.length<repairProblems.length){
+      finalDraft=candidate;kt134ReviewerCorrectionApplied=true;
+      for(const ground of (Array.isArray(parsed.grounds)?parsed.grounds:[]))
+       if(typeof ground==="string"&&ground.trim()&&reviewerFindings.length<10)reviewerFindings.push(ground);
+     }
+    }
+   }catch{/* Keep the original reviewed draft; correction failure is not a veto. */}
+  }
   const reviewedIssues=[...qualityIssues(finalDraft),...(lockedQualification?compareDraftWithQualification(finalDraft,lockedQualification):[]),...qualificationIssues];
   // Reviewer disagreement is not a veto when the reviewer supplied a
   // complete, independently revalidated correction.
@@ -759,7 +796,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
    kt134Content,requestId:payload.requestId,projectOnly:true,expertReviewRequired:true,
    archiveEvidenceVerified:true,draft:withReviewConclusion(finalDraft),authorDraft:draft,
    qualificationRecord:lockedQualification,qualificationProof,qualificationGate:{sourceAnchorsMatched:qualificationValidation?.ok===true,legalApplicabilityCertified:false,expertConfirmationRequired:true},
-    normativeAudit:{reviewed:true,reviewVerdict:reviewDisposition,originalReviewVerdict:verdict,authorRepairs,
+    normativeAudit:{reviewed:true,reviewVerdict:reviewDisposition,originalReviewVerdict:verdict,authorRepairs,kt134ReviewerCorrectionAttempted,kt134ReviewerCorrectionApplied,
      deterministicModel:evaluateDraft(finalDraft).decision,
      legalApplicabilityAutomaticallyCertified:false,selectedPanelId:Number(finalDraft.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0)||null,fullArticlesVerified:true,allArchiveSourcesExamined:false,verifiedLegalProvisionCount:verifiedLegalCorpus.legalProvisions.length,findings:reviewerFindings},
    evidenceReceipt:{documentTextsReceived:sourceTexts.length,
