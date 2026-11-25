@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {COMPLAINT_QUALIFICATION_SCHEMA,validateComplaintQualification,complaintDraftIssues} from './kt134-complaint-qualification.mjs';
 const purpose={complaintReview:true,kind:'review_of_prior_correspondence'};
 const caseQuote='Възражение относно съдържанието на предходно писмо на компетентния орган, с искане за проверка и корекция на формулировката.';
@@ -25,4 +26,10 @@ const draft=['Фактическа основа',caseQuote,
 assert.deepEqual(complaintDraftIssues(draft,q),[]);
 assert.ok(complaintDraftIssues(draft.replace('ИЗБРАН ПАНЕЛ: 17','ИЗБРАН ПАНЕЛ: 01'),q).includes('COMPLAINT_DRAFT_PANEL_MISMATCH'));
 assert.ok(complaintDraftIssues('ИЗБРАН ПАНЕЛ: 17 — Отговор по жалба',q).includes('COMPLAINT_FACTUAL_SECTION_MISSING'));
+const worker=readFileSync(new URL('./worker.js',import.meta.url),'utf8');
+assert.ok(worker.indexOf('const complaintAuthorSystem=[')>0);
+assert.ok(worker.indexOf('const complaintAuthorSystem=[')<worker.indexOf('isComplaint?complaintAuthorSystem:system'),
+ 'Never use complaint Author prompt before its declaration (real 504 regression)');
+assert.ok(worker.includes('const stage5Decision=isComplaintQualification?null:evaluateDraft('),
+ 'Stage5 must not reimpose new-IP four-test matrix on objection');
 console.log('KT134 COMPLAINT PROCEDURE: exact case/legal anchors, no new-IP route, four administrative sections, no hardcoded panel — PASS');
