@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   live-existing-eg:
-    if: false # Explicitly disabled after bounded live tests; no repeated uploads on PR updates
+    if: true # KT134 one-time user-requested live replay; disable immediately after result
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
