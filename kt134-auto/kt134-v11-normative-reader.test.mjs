@@ -28,3 +28,21 @@ test('missing extracted document text prevents implying corpus used the actual d
  const read=createKT134V11NormativeReader();
  await assert.rejects(read({caseId,context:{caseId,documents:[{fileId:'a.pdf',sourceText:''}]}}),/Няма документален текст/);
 });
+
+test('both EG agents can request any complete V11 act on demand, not only the initially selected extracts',async()=>{
+ const read=createKT134V11NormativeReader();
+ const library=await read({caseId,context});
+ assert.ok(library.availableActs.length>library.provisions.length);
+ assert.ok(library.availableActs.includes('apk'));
+ const full=await library.getAct({forCaseId:caseId,id:'apk'});
+ assert.equal(full.id,'apk');
+ assert.ok(full.fullLegalText.length>100);
+ assert.equal(full.contentSHA256.length,64);
+ assert.equal(full.applicabilityVerified,false);
+});
+test('on-demand legal library is bound to the current dossier and refuses other case IDs',async()=>{
+ const read=createKT134V11NormativeReader();
+ const library=await read({caseId,context});
+ await assert.rejects(library.getAct({forCaseId:'another-case',id:'apk'}),/чужда преписка/);
+ await assert.rejects(library.getAct({forCaseId:caseId,id:'unknown-legal-act'}),/Неразрешен/);
+});
