@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   live-existing-eg:
-    if: true # KT134 one-time user-requested live replay; disable immediately after result
+    if: false # One-time live replay concluded; disabled to prevent repeated AI calls
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
