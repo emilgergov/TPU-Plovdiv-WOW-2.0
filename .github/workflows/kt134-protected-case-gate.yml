@@ -1,0 +1,25 @@
+name: KT134 protected case gate (isolated tests only)
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths:
+      - 'kt134-auto/kt134-protected-case-gate.mjs'
+      - 'kt134-auto/kt134-protected-case-gate.test.mjs'
+      - '.github/workflows/kt134-protected-case-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify syntax
+        run: |
+          node --check kt134-auto/kt134-protected-case-gate.mjs
+          node --check kt134-auto/kt134-protected-case-gate.test.mjs
+      - name: Protected case, evidence and draft regressions (no deployment)
+        run: node --test kt134-auto/kt134-protected-case-gate.test.mjs
