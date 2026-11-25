@@ -1,0 +1,500 @@
+{
+  "metadataOnly": true,
+  "rows": [
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "acceptedForAutomaticProcedure",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "caseName",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "fileInventory",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "filesCount",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "generatedFrom",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "limitations",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "missingTopics",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "ocrReviewCount",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "requiredStatement",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "reviewFlags",
+      "type": "object"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "schema",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "status",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "topics",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "uniqueExcerpts",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "unreadCount",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80CH2Passport",
+      "key": "withEvidence",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "candidateCount",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "claim",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "filesEnumerated",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "filesExpected",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "filesExtracted",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "filesNeedReview",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "filesVerifiedWithoutReview",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "fullPageTraceAvailable",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "interpretation",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "issues",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "leadingParcelCandidates",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "missingInventory",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "records",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "requiresExpertReview",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "schema",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80DossierAudit",
+      "key": "status",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults",
+      "key": "ids",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults",
+      "key": "procedureId",
+      "type": "null"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults",
+      "key": "results",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80FreeGISResults",
+      "key": "verified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80IPMasterDraft",
+      "key": "caseFile",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80IPMasterDraft",
+      "key": "competentAuthority",
+      "type": "null"
+    },
+    {
+      "parent": "$.globals.KT80IPMasterDraft",
+      "key": "fields",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT80IPMasterDraft",
+      "key": "legalProcedure",
+      "type": "null"
+    },
+    {
+      "parent": "$.globals.KT80IPMasterDraft",
+      "key": "missingFieldCount",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80IPMasterDraft",
+      "key": "proposedSubject",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80IPMasterDraft",
+      "key": "schema",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80IPMasterDraft",
+      "key": "spatialValidation",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80IPMasterDraft",
+      "key": "subjectConfirmed",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT80IPMasterDraft",
+      "key": "subjectSource",
+      "type": "null"
+    },
+    {
+      "parent": "$.globals.KT80IPMasterDraft",
+      "key": "subjectSource",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT80IPMasterDraft",
+      "key": "unverifiedFieldCount",
+      "type": "integer"
+    },
+    {
+      "parent": "$.globals.KT80IPMasterDraft",
+      "key": "warning",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT82Location",
+      "key": "ekatte",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT82Location",
+      "key": "evidenceRoles",
+      "type": "array"
+    },
+    {
+      "parent": "$.globals.KT82Location",
+      "key": "expertReviewed",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT82Location",
+      "key": "expertReviewed",
+      "type": "true"
+    },
+    {
+      "parent": "$.globals.KT82Location",
+      "key": "geometryVerified",
+      "type": "false"
+    },
+    {
+      "parent": "$.globals.KT82Location",
+      "key": "municipality",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT82Location",
+      "key": "selection",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT82Location",
+      "key": "settlement",
+      "type": "text"
+    },
+    {
+      "parent": "$.globals.KT82Location",
+      "key": "source",
+      "type": "text"
+    },
+    {
+      "parent": "$.stage4",
+      "key": "approved",
+      "type": "null"
+    },
+    {
+      "parent": "$.stage4",
+      "key": "approved",
+      "type": "object"
+    },
+    {
+      "parent": "$.stage4",
+      "key": "binding",
+      "type": "object"
+    },
+    {
+      "parent": "$.stage4",
+      "key": "history",
+      "type": "array"
+    },
+    {
+      "parent": "$.stage4",
+      "key": "proposal",
+      "type": "object"
+    },
+    {
+      "parent": "$.stage5",
+      "key": "confirmed",
+      "type": "null"
+    },
+    {
+      "parent": "$.stage5",
+      "key": "confirmed",
+      "type": "object"
+    },
+    {
+      "parent": "$.stage5",
+      "key": "editorialIssues",
+      "type": "array"
+    },
+    {
+      "parent": "$.stage5",
+      "key": "external",
+      "type": "text"
+    },
+    {
+      "parent": "$.stage5",
+      "key": "source",
+      "type": "object"
+    },
+    {
+      "parent": "$.stage5",
+      "key": "versions",
+      "type": "array"
+    },
+    {
+      "parent": "$.state",
+      "key": "activeRoute",
+      "type": "null"
+    },
+    {
+      "parent": "$.state",
+      "key": "fileName",
+      "type": "text"
+    },
+    {
+      "parent": "$.state",
+      "key": "highest",
+      "type": "integer"
+    },
+    {
+      "parent": "$.state",
+      "key": "intake",
+      "type": "null"
+    },
+    {
+      "parent": "$.state",
+      "key": "intake",
+      "type": "object"
+    },
+    {
+      "parent": "$.state",
+      "key": "lawConfirmed",
+      "type": "null"
+    },
+    {
+      "parent": "$.state",
+      "key": "leadingDocument",
+      "type": "object"
+    },
+    {
+      "parent": "$.state",
+      "key": "normativeGate",
+      "type": "object"
+    },
+    {
+      "parent": "$.state",
+      "key": "normativeGate",
+      "type": "null"
+    },
+    {
+      "parent": "$.state",
+      "key": "parcelsConfirmed",
+      "type": "null"
+    },
+    {
+      "parent": "$.state",
+      "key": "parcelsConfirmed",
+      "type": "object"
+    },
+    {
+      "parent": "$.state",
+      "key": "routeConfirmed",
+      "type": "null"
+    },
+    {
+      "parent": "$.state",
+      "key": "step",
+      "type": "integer"
+    },
+    {
+      "parent": "$.state",
+      "key": "subjectConfirmed",
+      "type": "null"
+    },
+    {
+      "parent": "$.state",
+      "key": "subjectConfirmed",
+      "type": "object"
+    },
+    {
+      "parent": "$.values",
+      "key": "kt80Authority",
+      "type": "text"
+    },
+    {
+      "parent": "$.values",
+      "key": "kt80LawConfirmed",
+      "type": "false"
+    },
+    {
+      "parent": "$.values",
+      "key": "kt80LegalNotes",
+      "type": "text"
+    },
+    {
+      "parent": "$.values",
+      "key": "kt80ParcelInput",
+      "type": "text"
+    },
+    {
+      "parent": "$.values",
+      "key": "kt80ParcelsConfirmation",
+      "type": "false"
+    },
+    {
+      "parent": "$.values",
+      "key": "kt80ParcelsConfirmation",
+      "type": "true"
+    },
+    {
+      "parent": "$.values",
+      "key": "kt80ProcedureSelect",
+      "type": "text"
+    },
+    {
+      "parent": "$.values",
+      "key": "kt80RouteConfirmation",
+      "type": "false"
+    },
+    {
+      "parent": "$.values",
+      "key": "kt80ScopeConfirmation",
+      "type": "false"
+    },
+    {
+      "parent": "$.values",
+      "key": "kt80ScopeConfirmation",
+      "type": "true"
+    },
+    {
+      "parent": "$.values",
+      "key": "kt80ScopeText",
+      "type": "text"
+    },
+    {
+      "parent": "$.values",
+      "key": "kt80SubjectConfirmation",
+      "type": "false"
+    },
+    {
+      "parent": "$.values",
+      "key": "kt80SubjectConfirmation",
+      "type": "true"
+    },
+    {
+      "parent": "$.values",
+      "key": "kt80SubjectText",
+      "type": "text"
+    }
+  ]
+}
