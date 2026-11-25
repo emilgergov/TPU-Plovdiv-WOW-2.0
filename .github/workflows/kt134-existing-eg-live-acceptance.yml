@@ -1,3 +1,4 @@
+# KT134 E4 subject-purpose live acceptance replay 2026-11-25; existing test Worker only
 name: KT134 live acceptance - existing EG test Worker
 on:
   pull_request:
