@@ -799,13 +799,13 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   // Reviewer correction is a draft and cannot issue an administrative act.
   const correctedByReviewer=finalDraft!==draft&&reviewedIssues.length===0;
   const reviewDisposition=verdict==="reject"&&correctedByReviewer?"revise":verdict;
-  if(reviewedIssues.length||(verdict==="reject"&&!correctedByReviewer))
+  if(payload.kt134AutomaticInterim!==true&&(reviewedIssues.length||(verdict==="reject"&&!correctedByReviewer)))
    return expertPreview("Рецензирано предложение за експертен преглед; нормативните несъответствия остават видими.",
     [...new Set([...issues,...reviewedIssues,...(verdict==="reject"&&!correctedByReviewer?["INDEPENDENT_REJECTION"]:[])])],
     "independent_review",finalDraft,{reviewFindings:reviewerFindings,reviewVerdict:verdict,reviewed:true});
-  if(finalDraft.length<120||!sectionNames.every(x=>finalDraft.toLocaleLowerCase("bg").includes(x.toLocaleLowerCase("bg")))||
+  if(payload.kt134AutomaticInterim!==true&&(finalDraft.length<120||!sectionNames.every(x=>finalDraft.toLocaleLowerCase("bg").includes(x.toLocaleLowerCase("bg")))||
      /преценяван(?:е|ето)\s+на\s+необходимостта\s+от\s+ОС[^.\n]{0,90}чл\.?\s*2\s*,?\s*ал\.?\s*2/iu.test(finalDraft)||
-     /(?:наредба\s+за\s+)?оценка\s+за?\s*съвместимост(?:та)?\s+(?:с|на)\s+околната\s+среда/iu.test(finalDraft))
+     /(?:наредба\s+за\s+)?оценка\s+за?\s*съвместимост(?:та)?\s+(?:с|на)\s+околната\s+среда/iu.test(finalDraft)))
    return expertPreview("Преработеният проект не премина нормативната проверка.",["REVIEW_REVISION_INVALID",...qualityIssues(finalDraft),...(lockedQualification?compareDraftWithQualification(finalDraft,lockedQualification):[])],"independent_review",finalDraft);
   const qualificationProof=lockedQualification?await signQualification(
    lockedQualification,{caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
@@ -819,6 +819,8 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     evidenceRevision:payload.evidenceRevision,
     reviewedText,selectedPanelId:reviewerSelectedPanel,
     reviewerVerdict:reviewDisposition,intermediateConfirmed:true,
+    proposalOnly:true,unresolvedIssues:[...new Set(reviewedIssues)].slice(0,20),
+    reviewerReasons:reviewerFindings.slice(0,15),
     expertApproved:false
   }:null;
   const reviewerIntermediateProof=reviewerIntermediate?await signQualification(
@@ -961,6 +963,37 @@ async function handleStage5Document(request,env){
  const placeholder="ОВОС-ХХХХ/ХХ.ХХ.ХХХХ г.";
  const safeReference=/^ОВОС[-– ]?\d+[-–]\d+\s*\/\s*\d{1,2}\.\d{1,2}\.\d{4}(\s*г\.?)?$/iu.test(incoming)?incoming:placeholder;
  if(title!==expectedTitle)return reply({error:"Document title does not match the expert-confirmed direction"},409);
+ // KT134: the reviewer may leave unresolved legal objections but cannot
+ // return the case to the user for an INTERMEDIATE confirmation. Stage 5 still
+ // produces a transparent, non-issued working proposal, not a definitive act.
+ if(automaticReviewerConfirmed&&input.reviewerIntermediate?.unresolvedIssues?.length){
+   const d=input.reviewerIntermediate;
+   const clean=x=>String(x||"").trim();
+   const issues=d.unresolvedIssues.map(clean).filter(Boolean);
+   const reasons=(Array.isArray(d.reviewerReasons)?d.reviewerReasons:[]).map(clean).filter(Boolean);
+   const body=[
+     "Относно: „"+clean(input.subject).replace(/[„“]/gu,"")+".",
+     "ПРОЕКТ ЗА ЕКСПЕРТНО ПРОИЗНАСЯНЕ — РЕЦЕНЗЕНТСКО ПРЕДЛОЖЕНИЕ",
+     "Междинната преценка е извършена автоматично от независимия рецензент. Проектът не е административен акт и не удостоверява окончателна приложимост на правния режим.",
+     "ПРЕДЛОЖЕНО НАПРАВЛЕНИЕ: "+clean(input.selectedPanelLine)+". Направлението е предложение с изрично посочени нерешени основания, а не окончателна процедура.",
+     "МОТИВИ НА РЕЦЕНЗЕНТА:",
+     ...clean(d.reviewedText).split("\n").filter(Boolean).slice(0,65),
+     "НЕРАЗРЕШЕНИ НОРМАТИВНИ ВЪПРОСИ:",
+     ...issues.map((x,i)=>(i+1)+". "+x),
+     "ДОПЪЛНИТЕЛНИ МОТИВИ И ДОКАЗАТЕЛСТВЕНИ ГРАНИЦИ:",
+     ...reasons.map((x,i)=>(i+1)+". "+x),
+     "СЛЕДВАЩО ДЕЙСТВИЕ: Предложението и посочените възражения се представят едновременно за окончателна преценка от експерта; правните несъответствия не се представят като разрешени."
+   ].join("\n");
+   return reply({caseId:input.caseId,evidenceRevision:input.evidenceRevision,
+     requestId:input.requestId,stage4Version:input.stage4Version,
+     selectedPanelLine:input.selectedPanelLine,
+     documentTitle:"Проект за експертно произнасяне",
+     incomingReference:safeReference,draft:body,
+     editorialFlags:issues,projectOnly:true,expertReviewRequired:true,
+     documentIssued:false,wordTemplateApplied:false,
+     automaticReviewerIntermediate:true,expertApproved:false,
+     reviewerProposalOnly:true,unresolvedLegalIssues:issues});
+ }
  const confirmedPanelId=Number(match[1]);
  let independentExpert=null,reviewedExpertChoice=null;
  if(input.expertDecision?.mode==="reviewed_expert_choice"){
