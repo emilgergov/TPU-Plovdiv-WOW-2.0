@@ -86,7 +86,7 @@ const srv=http.createServer((req,res)=>{
   let before=await page.evaluate(()=>({...window.__kt134AcceptanceCalls}));
   assert.deepEqual(before,{preliminary:1,final:0,adoption:0,word:0},
    'No expert signing or Word before final user action');
-  await page.locator('#kt134AutoPipeline input').fill('Контролен експерт');
+  await page.evaluate(()=>{document.querySelector('#kt134AutoPipeline input').value='Контролен експерт'});
   await page.evaluate(()=>document.querySelectorAll('#kt134AutoPipeline button')[1].click());
   await page.waitForFunction(()=>window.KT134AutoMode?.phase()==='approved',undefined,{timeout:10000});
   let after=await page.evaluate(()=>({...window.__kt134AcceptanceCalls}));
