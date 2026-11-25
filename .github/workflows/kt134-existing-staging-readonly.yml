@@ -1,0 +1,38 @@
+name: KT134 permanent staging binding verification (READ ONLY)
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths:
+      - 'kt134-auto/kt134-existing-staging-audit.mjs'
+      - 'kt134-auto/kt134-existing-staging-audit.test.mjs'
+      - '.github/workflows/kt134-existing-staging-readonly.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-existing-environment:
+    if: github.ref_name == 'kt134-auto-mode-isolated'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify no unsafe resource assumptions (synthetic tests)
+        run: |
+          node --test kt134-auto/kt134-existing-staging-audit.test.mjs
+          node --check kt134-auto/kt134-existing-staging-audit.mjs
+      - name: Read only Cloudflare Worker binding metadata and exact D1 identity
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          KT134_CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Existing read-only token not configured"; exit 1; }
+          echo "::add-mask::$CLOUDFLARE_API_TOKEN"
+          node kt134-auto/kt134-existing-staging-audit.mjs
+      - name: Strict no mutation guarantee
+        if: always()
+        run: |
+          echo "GET-only check of currently present isolated KT134 Worker, D1 and R2 bindings."
+          echo "No Cloudflare PUT/POST/DELETE, no source download, no dossier, no D1 SQL, no R2 object access."
