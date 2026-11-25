@@ -6,6 +6,8 @@ on:
       - 'cloudflare/ai-author-v27/src/worker.js'
       - 'kt134-auto/wrangler.eg-staging.toml'
       - 'kt134-auto/kt134-eg-live-smoke.mjs'
+      - 'kt134-auto/kt134-complete-dossier-stage4.mjs'
+      - 'kt134-auto/kt134-case-aware-word-body.mjs'
       - '.github/workflows/kt134-eg-live-staging.yml'
   workflow_dispatch:
 permissions:
