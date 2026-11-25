@@ -401,7 +401,7 @@ async function handleStage4Proposal(request,env){
   gisAnalysis:detail.gis||null,
   provenanceRule:"All document excerpts, semantic candidates and GIS previews require explicit individual verification. Do not promote them to established fact."};
  let lockedQualification=null,qualificationValidation=null,qualificationIssues=[];
- const qualificationSources=buildQualificationSources({subject:payload.subject,scope:payload.scope,confirmed,documents:sourceTexts,legalProvisions:verifiedLegalCorpus.legalProvisions});
+ const qualificationSources=buildQualificationSources({subject:payload.subject,scope:payload.scope,confirmed,documents:sourceTexts,anchoredClaims:dossierAnchors,legalProvisions:verifiedLegalCorpus.legalProvisions});
  const exactSnippets=qualificationEvidenceOptions(qualificationSources);
  // KT124-R1: Explicit, archive-derived legal source IDs for each legal test.
  // This does NOT assign applicability/status or override validation.
@@ -722,7 +722,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   const auditInput={draft,lockedQualification,routeCatalog:KT109_ROUTE_CATALOG,subject:payload.subject,scope:payload.scope,parcelIds,
    establishedFacts:confirmed,uncertainFacts:unresolved,
    caseDocumentExcerpts:sourceTexts.slice(0,20).map(x=>({source:x.source,text:x.text.slice(0,2500),truncated:x.truncated||x.text.length>2500})),
-   caseDocumentRecords:documentRecords.slice(0,20),gisEvidence:detail.gis||null,
+   caseDocumentRecords:documentRecords.slice(0,20),dossierCoverage:context.dossierCoverage,gisEvidence:detail.gis||null,
    availableLegalSummaries:context.verifiedOfflineLegalExcerpts,
    exactApplicableLawTexts:verifiedLegalCorpus.legalProvisions,
    verifiedArchiveArticleHashes:context.archiveCheckedArticleHashes,
