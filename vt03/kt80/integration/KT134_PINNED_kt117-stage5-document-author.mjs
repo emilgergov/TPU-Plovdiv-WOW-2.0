@@ -217,8 +217,18 @@ function initialize(){
      const documents=(Array.isArray(state.intake?.files)?state.intake.files:[]).slice(0,25)
       .map(x=>({name:clean(typeof x==='string'?x:x?.name||x?.filename).slice(0,180)}))
       .filter(x=>x.name);
-     return {caseId:ev.caseId,evidenceRevision:ev.evidenceRevision,documents,
-      gis:{pdf1Available:g.pdfOK===true,spatialClass:allowed.includes(spatialClass)?spatialClass:'UNKNOWN'},
+     let textBudget=9500;
+     const sourceTexts=(Array.isArray(state.intake?.document_texts)?state.intake.document_texts:[])
+      .slice(0,12).map(x=>{
+       const raw=clean(x?.text),len=Math.min(2200,raw.length,textBudget);
+       textBudget-=len;
+       return {source:clean(x?.source).slice(0,180),text:raw.slice(0,len),
+        truncated:len<raw.length,totalChars:raw.length};
+      }).filter(x=>x.source&&x.text);
+     let gisDetail='';
+     try{gisDetail=JSON.stringify(g).slice(0,3500)}catch{}
+     return {caseId:ev.caseId,evidenceRevision:ev.evidenceRevision,documents,sourceTexts,
+      gis:{pdf1Available:g.pdfOK===true,spatialClass:allowed.includes(spatialClass)?spatialClass:'UNKNOWN',detail:gisDetail},
       observations:ev.observations.slice(0,25).map(x=>({factId:clean(x.factId).slice(0,80),
        value:clean(x.value).slice(0,220),status:clean(x.status).slice(0,24),
        sourceId:clean(x.sourceId).slice(0,100)}))};
@@ -226,6 +236,13 @@ function initialize(){
     qualificationRecord:source.qualificationRecord||null,qualificationProof:source.qualificationProof||null,qualificationGate:source.qualificationGate||null,
      expertDecision:source.expertDecision||null,expertDecisionProof:source.expertDecisionProof||null,
    documentTitle:documentLabel(line),incomingReference:incomingReference()};
+  // Keep the approved Stage 4 text intact; remove optional excerpts first.
+  const payloadBytes=()=>new TextEncoder().encode(JSON.stringify(payload)).length;
+  while(payloadBytes()>39000&&payload.stage5Evidence.sourceTexts.length)
+   payload.stage5Evidence.sourceTexts.pop();
+  if(payloadBytes()>39000)payload.stage5Evidence.gis.detail='';
+  if(payloadBytes()>39000)payload.stage5Evidence.documents=[];
+  if(payloadBytes()>41000){note.textContent='Потвърденият текст надхвърля допустимия размер на заявката. Не е съкратен.';return;}
   busy=true;generate.disabled=true;note.textContent='EG Авторът изготвя проект на административния текст.';
   const activityTicket=window.KT80Busy?.start?.('EG Автор · Изготвя проекта на административния документ…');
   try{
