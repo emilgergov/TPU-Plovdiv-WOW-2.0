@@ -9,7 +9,7 @@ assert.equal(matched.complaintReview,true);
 assert.equal(matched.kind,'review_of_prior_correspondence');
 assert.equal(matched.recommendedRoute,null,'No automatic panel selection');
 assert.equal(detectKT134CasePurpose({subject:'Уведомление за инвестиционно предложение',scope:'Нова сграда',sourceTexts}).complaintReview,false);
-assert.equal(detectKT134CasePurpose({subject,scope,sourceTexts:[{source:'Документ',text:'Обикновено инвестиционно предложение без възражение за писмо'}]}).complaintReview,false);
+assert.equal(detectKT134CasePurpose({subject,scope,sourceTexts:[{source:'Документ',text:'Техническо описание на нова складова сграда и площадка'}]}).complaintReview,false);
 assert.equal(detectKT134CasePurpose({subject:'Ново инвестиционно предложение и жалба срещу писмо',scope,sourceTexts}).complaintReview,false);
 assert.equal(detectKT134CasePurpose({subject,scope,sourceTexts:[]}).complaintReview,false);
 assert.equal(detectKT134CasePurpose({subject,scope,sourceTexts:[{source:'Жалба',text:'Жалба за недопустима промяна в предходно писмо, подадена по текущата преписка.'}]}).complaintReview,true);
