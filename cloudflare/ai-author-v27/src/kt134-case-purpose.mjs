@@ -23,3 +23,17 @@ export function detectKT134CasePurpose({subject,scope,sourceTexts=[],documents=[
   recommendedRoute:null
  });
 }
+
+
+// This guard does not choose a panel and does not certify legal applicability.
+// It refuses to turn a verified objection to old correspondence into an
+// environmental screening or letter for a newly invented investment proposal.
+export function checkKT134ComplaintRoute(purpose,panelId,routeReason=""){
+ if(purpose?.complaintReview!==true)return Object.freeze({ok:true,code:null});
+ const id=Number(panelId);
+ if([1,4,5,6,7,8,9,10,11,12].includes(id))
+  return Object.freeze({ok:false,code:"COMPLAINT_NEW_IP_ROUTE_WITHOUT_NEW_FILING"});
+ if(id===3&&!/(?:становищ|съгласуван)/iu.test(String(routeReason||"")))
+  return Object.freeze({ok:false,code:"COMPLAINT_INSTITUTION_REQUEST_UNJUSTIFIED"});
+ return Object.freeze({ok:true,code:null});
+}
