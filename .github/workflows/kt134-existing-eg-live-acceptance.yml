@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   live-existing-eg:
-    if: false # One bounded live test concluded; manual re-enable only for next accepted test
+    if: true # User-authorized one bounded real E4 to E5 automatic acceptance test; disable after result
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
