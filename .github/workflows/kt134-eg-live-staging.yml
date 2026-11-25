@@ -6,6 +6,8 @@ on:
       - 'cloudflare/ai-author-v27/src/worker.js'
       - 'cloudflare/ai-author-v27/src/kt134-legal-disposition.mjs'
       - 'cloudflare/ai-author-v27/src/kt134-legal-disposition.test.mjs'
+      - 'cloudflare/ai-author-v27/src/kt123-evidence-qualification.mjs'
+      - 'cloudflare/ai-author-v27/src/kt134-qualification-semantic.test.mjs'
       - 'kt134-auto/wrangler.eg-staging.toml'
       - 'kt134-auto/kt134-eg-live-smoke.mjs'
       - 'kt134-auto/kt134-complete-dossier-stage4.mjs'
@@ -41,6 +43,7 @@ jobs:
           node --check kt134-auto/kt134-eg-stage45-live-bridge.mjs
           node --check cloudflare/ai-author-v27/src/kt134-legal-disposition.mjs
           node --test cloudflare/ai-author-v27/src/kt134-legal-disposition.test.mjs
+          node --test cloudflare/ai-author-v27/src/kt134-qualification-semantic.test.mjs
           node --check kt134-auto/kt134-eg-live-smoke.mjs
           node --test kt134-auto/kt134-eg-stage45-live-bridge.test.mjs
       - name: Verify CI credentials for actual live EG integration
