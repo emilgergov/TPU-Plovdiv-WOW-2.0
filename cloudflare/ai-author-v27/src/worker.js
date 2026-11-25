@@ -1083,8 +1083,11 @@ async function handleStage5Document(request,env){
    })).filter(x=>x.source&&x.quote&&x.summary):[]
  }:null;
  const facts=JSON.stringify({selectedDirection:match[0],documentTitle:title,incomingReference:safeReference,subject:input.subject,scope:input.scope,
- expertConfirmedProposal:input.confirmedStage4Text,
- expertConfirmedQualification:independentExpert||reviewedExpertChoice?null:(input.qualificationRecord||null),
+ expertConfirmedProposal:kt134PreFinal?null:input.confirmedStage4Text,
+ reviewedStage4Candidate:kt134PreFinal?input.confirmedStage4Text:null,
+ expertConfirmedQualification:kt134PreFinal?null:(independentExpert||reviewedExpertChoice?null:(input.qualificationRecord||null)),
+ reviewedStage4Qualification:kt134PreFinal?(input.qualificationRecord||null):null,
+ caseStatus:kt134PreFinal?"ПРОЕКТ БЕЗ ЕКСПЕРТНО ПОТВЪРЖДЕНИЕ":"ПРОЕКТ С ЕКСПЕРТНО ПОТВЪРДЕНА ПРОЦЕДУРА",
  independentExpertDecision:independentExpert,
  expertConfirmedReviewedChoice:reviewedExpertChoice||null,
  parcelIds:Array.isArray(input.parcelIds)?input.parcelIds.slice(0,80):[],
@@ -1094,7 +1097,7 @@ async function handleStage5Document(request,env){
  const response=await fetch("https://api.openai.com/v1/responses",{method:"POST",signal:controller.signal,
  headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
  body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:3700,
- input:[{role:"system",content:expertRule+directionRules+classicPanel01EditorialStyle+instructions},{role:"user",content:facts}]})});
+ input:[{role:"system",content:expertRule+(kt134PreFinal?directionRules.replace(/експертът е избрал/giu,"предложен е").replace(/потвърденото административно направление/giu,"рецензираното предложено направление"):directionRules)+classicPanel01EditorialStyle+instructions},{role:"user",content:facts}]})});
  if(!response.ok)return reply({error:"Author provider unavailable",providerStatus:response.status},502);
  const data=await response.json();
  let draft=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
