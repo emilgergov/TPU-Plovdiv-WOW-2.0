@@ -51,7 +51,14 @@ jobs:
           KT134_CONFIRMATION: ${{ github.event_name == 'workflow_dispatch' && inputs.confirmation || '' }}
         run: |
           set -euo pipefail
-          test -n "$KT134_CLOUDFLARE_API_TOKEN" || { echo "::notice::KT134_CLOUDFLARE_API_TOKEN is not configured; no Cloudflare requests or mutations performed"; exit 0; }
+          if [ -z "$KT134_CLOUDFLARE_API_TOKEN" ]; then
+            if [ "$KT134_PROVISION_MODE" = "create" ]; then
+              echo "::error::Missing dedicated KT134 token; creation refused"
+              exit 1
+            fi
+            echo "::notice::Dedicated KT134 token is not configured; read-only plan skipped without any Cloudflare requests"
+            exit 0
+          fi
           echo "::add-mask::$KT134_CLOUDFLARE_API_TOKEN"
           node kt134-auto/kt134-isolated-cloudflare-provision.mjs
       - name: Source protection declaration
