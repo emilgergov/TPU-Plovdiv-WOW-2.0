@@ -94,7 +94,13 @@ export function createKt134EgStage45Bridge({workerBase,accessToken,fetchImpl,
       automaticReviewerIntermediate:true,expertConfirmed:false,
       projectOnly:true,qualificationRecord:x.response.qualificationRecord,
       qualificationProof:x.response.qualificationProof,
-      qualificationGate:x.response.qualificationGate
+      qualificationGate:x.response.qualificationGate,
+      caseContext:{
+       parcels:stage4.completeCaseEvidence?.parcels||[],
+       gis:stage4.completeCaseEvidence?.gis||null,
+       pdf1Ref:stage4.completeCaseEvidence?.pdf1Ref||null,
+       pdf2Ref:stage4.completeCaseEvidence?.pdf2Ref||null
+      }
     };
     if(!stage5Request.documentTitle)invalid('EG_STAGE5_NO_DOCUMENT_TITLE');
     const result=await post('/stage5-document',stage5Request);
