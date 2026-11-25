@@ -1,0 +1,84 @@
+{
+  "bindings": [
+    {
+      "name": "KT125_AUTH_SECRET",
+      "type": "secret_text",
+      "service": null
+    },
+    {
+      "name": "KT125_DB",
+      "type": "d1",
+      "service": null
+    },
+    {
+      "name": "KT125_LOCAL_AUTH",
+      "type": "service",
+      "service": "tpu-plovdiv-kt125-local-auth"
+    },
+    {
+      "name": "KT125_LOCAL_ENABLED",
+      "type": "plain_text",
+      "service": null
+    },
+    {
+      "name": "KT125_LOCAL_ORIGIN",
+      "type": "plain_text",
+      "service": null
+    },
+    {
+      "name": "KT125_PASSWORDS",
+      "type": "durable_object_namespace",
+      "service": null
+    },
+    {
+      "name": "KT125_REQUEST_ORGANIZATION",
+      "type": "plain_text",
+      "service": null
+    },
+    {
+      "name": "KT125_SMTP_FROM",
+      "type": "plain_text",
+      "service": null
+    },
+    {
+      "name": "KT125_SMTP_HOST",
+      "type": "plain_text",
+      "service": null
+    },
+    {
+      "name": "KT125_SMTP_PASSWORD",
+      "type": "secret_text",
+      "service": null
+    },
+    {
+      "name": "KT125_SMTP_PORT",
+      "type": "plain_text",
+      "service": null
+    },
+    {
+      "name": "KT125_SMTP_USER",
+      "type": "plain_text",
+      "service": null
+    },
+    {
+      "name": "KT126_REGISTRY_ENABLED",
+      "type": "plain_text",
+      "service": null
+    },
+    {
+      "name": "KT128_AUTHOR",
+      "type": "service",
+      "service": "tpu-plovdiv-ai-author-v27"
+    },
+    {
+      "name": "KT131_AUTHOR_VERSION",
+      "type": "plain_text",
+      "service": null
+    },
+    {
+      "name": "KT133_EVIDENCE_KEY",
+      "type": "secret_text",
+      "service": null
+    }
+  ]
+}
