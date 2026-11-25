@@ -64,7 +64,11 @@ report.stage4={http:stage4.http,modelReturnedDraft:typeof stage4.data.draft==='s
  selectedPanel:stage4.data.normativeAudit?.selectedPanelId??null,
  qualificationProof:!!stage4.data.qualificationProof,
  sourceAnchorsMatched:stage4.data.qualificationGate?.sourceAnchorsMatched===true,
- qualityIssues:(stage4.data.qualityIssues||stage4.data.normativeAudit?.findings||[]).length,
+ qualityIssues:stage4.data.qualityIssues||stage4.data.normativeAudit?.findings||[],
+ provisionalDraftChars:stage4.data.unverifiedDraft?.length||0,
+ reviewerVerdict:stage4.data.reviewVerdict||null,reviewerFindings:(stage4.data.reviewFindings||[]).slice(0,12),
+ qualityStage:stage4.data.qualityStage||null,
+ provisionalExcerpt:(stage4.data.unverifiedDraft||'').slice(0,1200),
  error:stage4.data.error||null};
 console.log('LIVE EG Author/Reviewer:',JSON.stringify(report.stage4));
 if(stage4.http===200&&report.stage4.modelReturnedDraft&&report.stage4.qualificationProof&&report.stage4.sourceAnchorsMatched){
