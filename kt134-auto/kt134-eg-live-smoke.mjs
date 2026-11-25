@@ -88,7 +88,9 @@ const stage5Request={
   parcels:stage4.completeCaseEvidence.parcels,
   gis:stage4.completeCaseEvidence.gis,
   pdf1Ref:stage4.completeCaseEvidence.pdf1Ref,
-  pdf2Ref:stage4.completeCaseEvidence.pdf2Ref
+  pdf2Ref:stage4.completeCaseEvidence.pdf2Ref,
+  documents:stage4.completeCaseEvidence.sourceTexts.slice(0,20).map(x=>({source:x.source,text:String(x.text||'').slice(0,2800)})),
+  confirmedFacts:stage4.evidence.filter(x=>x.status==='established').slice(0,40)
  }
 };
 console.log('KT134 FULL SYNTHETIC: live Stage5 reviewer proposal, panel',d.selectedPanelId);
