@@ -1,4 +1,5 @@
 import {getLegalContext} from "./legal-v11-loader.mjs";
+import {kt134DraftDiagnostics} from "./kt134-content-diagnostics.mjs";
 import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 import {evaluateDraft} from "./kt123-decision-model.mjs";
 import {substantiveDraftIssues} from "./kt123-substance-guard.mjs";
@@ -753,8 +754,9 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   const qualificationProof=lockedQualification?await signQualification(
    lockedQualification,{caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
     subject:payload.subject,scope:payload.scope},env.KT123_HANDOFF_SIGNING_KEY||env.OPENAI_API_KEY):null;
+  const kt134Content=kt134DraftDiagnostics(withReviewConclusion(finalDraft),{stage:4,sourceTexts,gis:detail.gis||null,legalTexts:verifiedLegalCorpus.legalProvisions,reviewFindings:reviewerFindings});
   return reply({caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
-   requestId:payload.requestId,projectOnly:true,expertReviewRequired:true,
+   kt134Content,requestId:payload.requestId,projectOnly:true,expertReviewRequired:true,
    archiveEvidenceVerified:true,draft:withReviewConclusion(finalDraft),authorDraft:draft,
    qualificationRecord:lockedQualification,qualificationProof,qualificationGate:{sourceAnchorsMatched:qualificationValidation?.ok===true,legalApplicabilityCertified:false,expertConfirmationRequired:true},
     normativeAudit:{reviewed:true,reviewVerdict:reviewDisposition,originalReviewVerdict:verdict,authorRepairs,
@@ -1071,9 +1073,10 @@ async function handleStage5Document(request,env){
  if(/прекратяван(?:е|ето)\s+на\s+процедур|процедур(?:ата|ите)\s+следва\s+да\s+се\s+прекрат/iu.test(draft))
    editorialFlags.push("Твърдение за прекратяване на процедура — проверете основанията.");
  if(draft.length<120||draft.length>18000)return reply({error:"Draft incomplete"},422);
+ const kt134Content=kt134DraftDiagnostics(draft,{stage:5});
  return reply({caseId:input.caseId,evidenceRevision:input.evidenceRevision,
  stage4Version:input.stage4Version,requestId:input.requestId,selectedPanelLine:match[0],documentTitle:title,incomingReference:safeReference,
- draft,editorialFlags,projectOnly:true,expertReviewRequired:true,documentIssued:false,wordTemplateApplied:false});
+ draft,editorialFlags,kt134Content,projectOnly:true,expertReviewRequired:true,documentIssued:false,wordTemplateApplied:false});
  }catch{return reply({error:"Document drafting failed"},504)}
  finally{clearTimeout(timer)}
 }
