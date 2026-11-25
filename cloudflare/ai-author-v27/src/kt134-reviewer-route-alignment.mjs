@@ -87,3 +87,28 @@ export function kt134ReviewerActionMatch({panelId,documentTitle,action,legalRead
  if(legalReadiness?.length&&[1,4,5,6,7,8,9,11,12].includes(id))return false;
  return true;
 }
+
+/**
+ * Preserve the reviewer's 4-part factual/legal reasoning but replace an
+ * unsupported action section with the SAME reviewer's signed structured
+ * choice and justification. No deterministic panel selection happens here.
+ */
+export function kt134ComposeAlignedReviewerDraft({previousDraft,selectedPanel,action,reason}={}){
+ const id=Number(selectedPanel);
+ const catalog=KT109_ROUTE_BY_ID.get(id);
+ const original=String(previousDraft||"");
+ const act=String(action||"").trim(),why=String(reason||"").trim();
+ if(!catalog||!act||why.length<25)throw Error("KT134_REVIEWER_DECISION_INCOMPLETE");
+ const noOldLines=original.split(/\r?\n/u)
+  .filter(line=>!/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}/iu.test(line))
+  .join("\n");
+ const heading="Мотивирано предложение";
+ const next="Данни за експертна проверка";
+ const begin=noOldLines.indexOf(heading),end=noOldLines.indexOf(next,begin+heading.length);
+ if(begin<0||end<0||end<=begin)throw Error("KT134_REVIEWER_DRAFT_SECTIONS_MISSING");
+ const updated=noOldLines.slice(0,begin)+
+  heading+"\n"+act+"\nМотиви: "+why+"\n"+
+  noOldLines.slice(end).trimEnd()+
+  "\nИЗБРАН ПАНЕЛ: "+id+" — "+catalog.title;
+ return updated;
+}
