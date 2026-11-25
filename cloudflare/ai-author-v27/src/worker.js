@@ -1,6 +1,6 @@
 import {getLegalContext} from "./legal-v11-loader.mjs";
 import {kt134DraftDiagnostics} from "./kt134-content-diagnostics.mjs";
-import {detectKT134CasePurpose} from "./kt134-case-purpose.mjs";
+import {detectKT134CasePurpose,checkKT134ComplaintRoute} from "./kt134-case-purpose.mjs";
 import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 import {evaluateDraft} from "./kt123-decision-model.mjs";
 import {substantiveDraftIssues} from "./kt123-substance-guard.mjs";
@@ -441,12 +441,14 @@ async function handleStage4Proposal(request,env){
      .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
     try{return JSON.parse(raw)}catch{return null}
    };
-   let q=await callQualification(),v=validateQualification(q,qualificationSources);
+   let q=await callQualification(),v=validateQualification(q,qualificationSources,{casePurpose});
    if(!v.ok){
     const candidate=await callQualification(v.errors.map(code=>({
      error:code,
      instruction:code.startsWith("UNVERIFIED_LEGAL_QUOTE")||code.startsWith("UNVERIFIED_CASE_QUOTE")?
        "Използвай точен excerpts[].id от същия източник. Не създавай свободен текст на цитат.":
+       code.startsWith("COMPLAINT_NEW_IP_ROUTE_WITHOUT_NEW_FILING")?
+       "Водещото възражение срещу предходно писмо не е ново уведомление за ИП. Не избирай панел за нова инвестиционна процедура (01, 04, 05 и формалните решения). Избери доказано административно действие по предмета на възражението, като сравниш панелите 17–22 и други относими панели. НЕ предрешавай №17; мотивирай компетентност и допустимост.":
        code.startsWith("WRONG_ANNEX_REFERENCE")?
        "Допустими идентификатори за този тест от проверения архив: "+(qualificationLegalIds[code.split(":")[1]]||[]).join(", ")+". Избери точния ID, без да променяш правния извод само за да преминеш проверката.":
        code.startsWith("WRONG_OS_ARTICLE")?
@@ -458,7 +460,7 @@ async function handleStage4Proposal(request,env){
        code.startsWith("POSITIVE_ANNEX_CATEGORY_FACT_MISMATCH")?
        "Съпоставената правна категория няма доказана конкретна връзка с потвърдения факт от caseSource. Провери специфичния предмет, технология или прагови параметри. Не използвай общи думи за сграда/инвестиция; без доказана връзка не твърди положителна приложимост.":
        "Свери основанията и не въвеждай недоказано предположение."
-    }))),checked=validateQualification(candidate,qualificationSources);
+    }))),checked=validateQualification(candidate,qualificationSources,{casePurpose});
     if(checked.ok){q=candidate;v=checked}
    }
    if(!v.ok){
@@ -597,6 +599,10 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   if(panelMatch&&!KT109_ROUTE_BY_ID.has(Number(panelMatch[1])))
     issues.push("UNKNOWN_ADMINISTRATIVE_PANEL");
   const declared=panelMatch?KT109_ROUTE_BY_ID.get(Number(panelMatch[1])):null;
+  if(panelMatch){
+   const routeCheck=checkKT134ComplaintRoute(casePurpose,Number(panelMatch[1]),value);
+   if(!routeCheck.ok)issues.push(routeCheck.code);
+  }
   // KT114-R4: match the selected panel's actual title, not mentions of alternatives.
   const selectedLine=gateText.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\b[^\n]*/iu)?.[0]||"";
   if(declared){
