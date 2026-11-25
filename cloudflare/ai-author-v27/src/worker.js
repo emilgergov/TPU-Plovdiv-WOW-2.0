@@ -1018,9 +1018,44 @@ async function handleStage5Document(request,env){
        const candidate=(data.output||[]).flatMap(x=>x.content||[])
          .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
        if(candidate.startsWith("Относно:")&&candidate.length>=280&&
-          !/(?:\bMISSING_[A-Z_]+\b|\bPANEL_\d\d_[A-Z_]+\b|\bUNSUPPORTED_[A-Z_]+\b)/u.test(candidate)&&
-          !/(?:предложението\s+е\s+окончателно|задължителна\s+процедура\s+по\s+чл\.?\s*93|задължително\s+(?:провеждане|проведе)\s+на\s+(?:преценка|процедура))/iu.test(candidate))
+          !/(?:\bMISSING_[A-Z_]+\b|\bPANEL_\d\d_[A-Z_]+\b|\bUNSUPPORTED_[A-Z_]+\b)/u.test(candidate)){
          body=candidate;
+         // KT134: legal redaction remains the reviewer's job. A draft must
+         // not turn missing physical evidence into an EIA/OS exclusion, or
+         // preselect an outcome under art. 93. Request ONE corrective rewrite,
+         // preserving the same case and without human intermediate clicks.
+         const unsupported=/(?:не\s+се\s+достигат\s+законови\s+предпоставки|изключва\s+необходимостта|липсата\s+на\s+ново\s+строителство[^.!?]*изключва|няма\s+основания\s+за\s+ОС|отрицателен\s+изход|не\s+се\s+налагат\s+(?:други|допълнителни)\s+процедури|да\s+се\s+издаде\s+решение\s+по\s+чл\.?\s*93[^.!?]*не\s+се\s+налага|решение\s+по\s+чл\.?\s*93[^.!?]*липса\s+на\s+необходимост)/iu;
+         if(unsupported.test(candidate)&&issues.length){
+           const repair=await fetch("https://api.openai.com/v1/responses",{
+             method:"POST",signal:AbortSignal.timeout(45000),
+             headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
+             body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:2500,
+               input:[
+                {role:"system",content:[
+                  "Ти си същият независим рецензент. Коригирай САМО доказателствената и правната обоснованост в пълния проект. Върни ЕДИН завършен проект на български, започващ с Относно:.",
+                  "ЗАДЪЛЖИТЕЛНА ПОПРАВКА: Няма доказан правен критерий, който позволява от липсата на ново строителство, непълните данни или ГИС непресичането да заключиш категорична неприложимост на ОВОС/ОС или предварително отрицателен резултат по чл. 93 ЗООС.",
+                  "Изясни конкретните липсващи ФИЗИЧЕСКИ факти от реално представените документи и съпостави точно приложимите законови категории, без да прехвърляш правната квалификация на възложителя.",
+                  "Не искай нов ГИС анализ, ако caseContext.gis вече съдържа PDF1 и пространствени констатации. Не искай факти, които документите вече доказват.",
+                  "Формулирай точно ЕДНО мотивирано административно предложение, като отбелязваш условния характер на непотвърдено направление. Без категорична квалификация, без технически кодове, без общи препоръки експертът сам да извърши анализа.",
+                  "Не променяй фиксираната идентичност на преписката. Човекът експерт единствено одобрява окончателно."
+                ].join("\n")},
+                {role:"user",content:JSON.stringify({
+                  subject:input.subject,scope:input.scope,caseContext:input.caseContext||null,
+                  reviewedDraft:candidate,reviewerSelectedPanel:proposedPanel,
+                  unresolvedLegalFindings:issues,qualificationRecord:input.qualificationRecord||null
+                })}
+               ]})
+           });
+           if(repair.ok){
+             const rd=await repair.json();
+             const revised=(rd.output||[]).flatMap(x=>x.content||[])
+               .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
+             if(revised.startsWith("Относно:")&&revised.length>=280&&!unsupported.test(revised)&&
+                !/(?:\bMISSING_[A-Z_]+\b|\bPANEL_\d\d_[A-Z_]+\b)/u.test(revised))
+               body=revised;
+           }
+         }
+       }
      }
    }catch{}
    if(!body){
