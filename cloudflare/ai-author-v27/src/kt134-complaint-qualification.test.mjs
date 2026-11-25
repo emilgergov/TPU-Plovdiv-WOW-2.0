@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {COMPLAINT_QUALIFICATION_SCHEMA,validateComplaintQualification,complaintDraftIssues} from './kt134-complaint-qualification.mjs';
+import {COMPLAINT_QUALIFICATION_SCHEMA,validateComplaintQualification,complaintDraftIssues,normalizeComplaintDraft} from './kt134-complaint-qualification.mjs';
 const purpose={complaintReview:true,kind:'review_of_prior_correspondence'};
 const caseQuote='Възражение относно съдържанието на предходно писмо на компетентния орган, с искане за проверка и корекция на формулировката.';
 const lawQuote='Чл. 34. Административният орган осигурява на страните възможност да изразят становище по събраните доказателства.';
@@ -32,4 +32,16 @@ assert.ok(worker.indexOf('const complaintAuthorSystem=[')<worker.indexOf('isComp
  'Never use complaint Author prompt before its declaration (real 504 regression)');
 assert.ok(worker.includes('const stage5Decision=isComplaintQualification?null:evaluateDraft('),
  'Stage5 must not reimpose new-IP four-test matrix on objection');
+const titleOnly=[
+ 'Фактическа основа',caseQuote,'II. Нормативна рамка',lawQuote,
+ 'Мотивирано предложение','ИЗБРАН ПАНЕЛ: Отговор по жалба',q.routeReason
+].join('\n');
+const normalized=normalizeComplaintDraft(titleOnly,q);
+assert.match(normalized,/ИЗБРАН ПАНЕЛ: 17 — Отговор по жалба/u);
+assert.match(normalized,/Нормативни предпоставки и граници на проверката/u);
+assert.match(normalized,/Данни за експертна проверка/u);
+assert.deepEqual(complaintDraftIssues(normalized,q),[]);
+const conflicting=normalizeComplaintDraft(titleOnly.replace('Отговор по жалба','Произнасяне по възражение'),q);
+assert.ok(!/ИЗБРАН ПАНЕЛ: 17/u.test(conflicting),'Never silently change a contradictory model panel');
+assert.ok(complaintDraftIssues(conflicting,q).includes('COMPLAINT_DRAFT_PANEL_MISMATCH'));
 console.log('KT134 COMPLAINT PROCEDURE: exact case/legal anchors, no new-IP route, four administrative sections, no hardcoded panel — PASS');
