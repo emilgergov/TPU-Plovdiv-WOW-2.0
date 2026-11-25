@@ -83,7 +83,13 @@ const stage5Request={
  reviewerIntermediate:d,reviewerIntermediateProof:a.reviewerIntermediateProof,
  automaticReviewerIntermediate:true,expertConfirmed:false,projectOnly:true,
  qualificationRecord:a.qualificationRecord,qualificationProof:a.qualificationProof,
- qualificationGate:a.qualificationGate
+ qualificationGate:a.qualificationGate,
+ caseContext:{
+  parcels:stage4.completeCaseEvidence.parcels,
+  gis:stage4.completeCaseEvidence.gis,
+  pdf1Ref:stage4.completeCaseEvidence.pdf1Ref,
+  pdf2Ref:stage4.completeCaseEvidence.pdf2Ref
+ }
 };
 console.log('KT134 FULL SYNTHETIC: live Stage5 reviewer proposal, panel',d.selectedPanelId);
 const b=await post('/stage5-document',stage5Request);
