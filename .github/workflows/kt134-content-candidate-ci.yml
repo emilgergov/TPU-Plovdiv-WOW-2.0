@@ -6,6 +6,8 @@ on:
     paths:
       - 'cloudflare/ai-author-v27/src/kt134-content-diagnostics.mjs'
       - 'cloudflare/ai-author-v27/src/kt134-case-purpose.mjs'
+      - 'cloudflare/ai-author-v27/src/kt134-complaint-qualification.mjs'
+      - 'cloudflare/ai-author-v27/src/kt134-complaint-qualification.test.mjs'
       - 'cloudflare/ai-author-v27/src/kt134-case-purpose.test.mjs'
       - 'cloudflare/ai-author-v27/src/kt134-content-diagnostics.test.mjs'
       - 'cloudflare/ai-author-v27/src/kt123-evidence-qualification.mjs'
@@ -43,6 +45,7 @@ jobs:
         run: |
           node --check cloudflare/ai-author-v27/src/kt134-content-diagnostics.mjs
           node --check cloudflare/ai-author-v27/src/kt134-case-purpose.mjs
+          node --check cloudflare/ai-author-v27/src/kt134-complaint-qualification.mjs
           node --check cloudflare/ai-author-v27/src/kt123-evidence-qualification.mjs
           node --check cloudflare/ai-author-v27/src/worker.js
           node --check vt03/kt80/integration/KT134_PINNED_kt117-stage5-document-author.mjs
@@ -55,6 +58,7 @@ jobs:
         run: |
           node cloudflare/ai-author-v27/src/kt134-content-diagnostics.test.mjs
           node cloudflare/ai-author-v27/src/kt134-case-purpose.test.mjs
+          node cloudflare/ai-author-v27/src/kt134-complaint-qualification.test.mjs
           node cloudflare/ai-author-v27/src/kt134-qualification-span.test.mjs
           node cloudflare/ai-author-v27/src/kt134-stage5-handoff-contract.test.mjs
           node vt03/kt80/integration/kt134-evidence-chunks.test.mjs
