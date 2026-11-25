@@ -208,6 +208,21 @@ function initialize(){
    caseId:source.caseId,evidenceRevision:source.evidenceRevision,stage4Version:source.version,requestId,
    confirmedStage4Text:source.text,selectedPanelLine:line,subject:clean(p.text),scope:clean(p.scope),
    parcelIds:[...ev.parcelIds],warnings:source.warnings||[],
+    // KT134: context from the same active case. These observations are leads,
+    // not verified law or a substitute for the confirmed Stage 4 decision.
+    stage5Evidence:(()=>{
+     const state=window.KT80WorkflowState||{},g=window.KT83NormativeBridge?.getEvidence?.()||{};
+     const allowed=['INSIDE','OUTSIDE','INTERSECTS','MIXED'];
+     const spatialClass=clean(g.spatialClass).toUpperCase();
+     const documents=(Array.isArray(state.intake?.files)?state.intake.files:[]).slice(0,25)
+      .map(x=>({name:clean(typeof x==='string'?x:x?.name||x?.filename).slice(0,180)}))
+      .filter(x=>x.name);
+     return {caseId:ev.caseId,evidenceRevision:ev.evidenceRevision,documents,
+      gis:{pdf1Available:g.pdfOK===true,spatialClass:allowed.includes(spatialClass)?spatialClass:'UNKNOWN'},
+      observations:ev.observations.slice(0,25).map(x=>({factId:clean(x.factId).slice(0,80),
+       value:clean(x.value).slice(0,220),status:clean(x.status).slice(0,24),
+       sourceId:clean(x.sourceId).slice(0,100)}))};
+    })(),
     qualificationRecord:source.qualificationRecord||null,qualificationProof:source.qualificationProof||null,qualificationGate:source.qualificationGate||null,
      expertDecision:source.expertDecision||null,expertDecisionProof:source.expertDecisionProof||null,
    documentTitle:documentLabel(line),incomingReference:incomingReference()};
