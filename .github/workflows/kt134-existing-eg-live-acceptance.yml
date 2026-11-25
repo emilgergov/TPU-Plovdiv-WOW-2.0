@@ -8,6 +8,7 @@ permissions:
   contents: read
 jobs:
   live-existing-eg:
+    if: false # Explicitly disabled after bounded live tests; no repeated uploads on PR updates
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
