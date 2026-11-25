@@ -772,7 +772,9 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   const complaintReviewSystem=[
    "Независим EG рецензент за възражение по предходно писмо, а НЕ ново уведомление за ИП. Коригирай и винаги предлагай конкретно действие. Не блокирай.",
    "Проверявай точния предмет, компетентността, процесуалния ред, удостоверените факти и правните източници. Не изисквай четири статуса за ново ИП.",
-   "При нужда върни ПЪЛЕН коригиран revisedDraft с четирите задължителни раздела, точен ИЗБРАН ПАНЕЛ и мотивирани алтернативи. Не предрешавай окончателния експертен избор.",
+   "При нужда върни ПЪЛЕН коригиран revisedDraft със заглавия в точния ред: Фактическа основа; Нормативни предпоставки и граници на проверката; Мотивирано предложение; Данни за експертна проверка. Включи ИЗБРАН ПАНЕЛ: NN — име от каталога, конкретно административно действие и мотивирани алтернативи. Не предрешавай окончателния експертен избор.",
+   "Чл. 2, ал. 2 от Наредбата за ОС не е общ ред за жалби и възражения. Не наричай всяко предходно писмо обжалваем административен акт без проверка на действителния му характер.",
+   "Не искай нови ГИС данни, геопространствени документи или допълнителна експертна оценка, ако не посочиш точно проверена решаваща липса на факт, конкретната норма и доказателството за тази липса.",
    "Върни само JSON verdict, grounds, issues, revisedDraft с независими мотиви."
   ].join(" ");
   const auditInput={draft,lockedQualification,routeCatalog:KT109_ROUTE_CATALOG,subject:payload.subject,scope:payload.scope,casePurpose,parcelIds,
@@ -812,11 +814,13 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   let finalDraft=canonicalizePanelLabel(verdict==="pass"?draft:(text(independentReview.revisedDraft,12000)||draft));
   if(isComplaint&&lockedQualification)finalDraft=normalizeComplaintDraft(finalDraft,lockedQualification);
   // KT134: one non-blocking reviewer self-correction, independent of expert approval.
-  const toRepair=new Set(["TEST_METADATA_IN_ADMINISTRATIVE_TEXT","SHORT_UNREASONED_DRAFT","MISSING_ACTIONABLE_PROPOSAL","NO_SELECTED_PANEL","GENERIC_LEGAL_UNCERTAINTY","UNPROVEN_PHYSICAL_GAP","MISSING_OR_UNORDERED_SECTIONS","ADMIN_PANEL_02_LABEL_MISMATCH","UNDETERMINED_WITHOUT_DECISIVE_FACT","ALL_APPLICABILITY_TESTS_UNDETERMINED"]);
+  const toRepair=new Set(["TEST_METADATA_IN_ADMINISTRATIVE_TEXT","SHORT_UNREASONED_DRAFT","MISSING_ACTIONABLE_PROPOSAL","NO_SELECTED_PANEL","GENERIC_LEGAL_UNCERTAINTY","UNPROVEN_PHYSICAL_GAP","MISSING_OR_UNORDERED_SECTIONS","ADMIN_PANEL_02_LABEL_MISMATCH","UNDETERMINED_WITHOUT_DECISIVE_FACT","ALL_APPLICABILITY_TESTS_UNDETERMINED","COMPLAINT_DRAFT_PANEL_MISMATCH","COMPLAINT_DRAFT_TITLE_MISMATCH","COMPLAINT_FACTUAL_SECTION_MISSING","COMPLAINT_LEGAL_SECTION_MISSING","COMPLAINT_ACTION_SECTION_MISSING","COMPLAINT_EXPERT_REVIEW_SECTION_MISSING","COMPLAINT_UNPROVEN_GIS_REQUEST","COMPLAINT_MISATTRIBUTED_OS_ART2_REMEDY"]);
   const diagnosticInput={stage:4,sourceTexts,gis:detail.gis||null,legalTexts:verifiedLegalCorpus.legalProvisions,reviewFindings:reviewerFindings};
   const repairProblems=[
    ...kt134DraftDiagnostics(withReviewConclusion(finalDraft),diagnosticInput).findings.filter(x=>toRepair.has(x.code)),
-   ...qualityIssues(finalDraft).filter(code=>toRepair.has(code)).map(code=>({code,reason:"Възстанови точния нормативен или композиционен реквизит без да измисляш ново ИП или факти."}))
+   ...qualityIssues(finalDraft).filter(code=>toRepair.has(code)).map(code=>({code,reason:"Възстанови точния нормативен или композиционен реквизит без да измисляш ново ИП или факти."})),
+   ...(isComplaint&&lockedQualification?complaintDraftIssues(finalDraft,lockedQualification):[])
+    .filter(code=>toRepair.has(code)).map(code=>({code,reason:"Коригирай конкретния предмет на възражението, мотивите и действието според проверените нормативни и фактически източници, без необосновани искания за нови ГИС материали."}))
   ];
   let kt134ReviewerCorrectionAttempted=false,kt134ReviewerCorrectionApplied=false;
   if(repairProblems.length){
@@ -845,7 +849,9 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
      const substantive=[...qualityIssues(candidate),...(lockedQualification?compareSelectedQualification(candidate,lockedQualification):[])];
      const remaining=[
       ...kt134DraftDiagnostics(withReviewConclusion(candidate),diagnosticInput).findings.filter(x=>toRepair.has(x.code)),
-      ...qualityIssues(candidate).filter(code=>toRepair.has(code)).map(code=>({code}))
+      ...qualityIssues(candidate).filter(code=>toRepair.has(code)).map(code=>({code})),
+       ...(isComplaint&&lockedQualification?complaintDraftIssues(candidate,lockedQualification):[])
+        .filter(code=>toRepair.has(code)).map(code=>({code}))
      ];
      if(candidate.length>=120&&candidate.length<=12000&&candidate!==finalDraft&&substantive.length===0&&remaining.length<repairProblems.length){
       finalDraft=candidate;kt134ReviewerCorrectionApplied=true;
