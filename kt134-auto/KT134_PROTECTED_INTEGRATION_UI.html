@@ -1,0 +1,113 @@
+<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>КТ134 · реален автоматичен маршрут</title>
+<style>
+:root{color-scheme:dark;font-family:Verdana,Arial,sans-serif;background:#071f18;color:#f0e7d2}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 30% 0%,#194b37,#071f18 65%)}
+main{max-width:1050px;margin:auto;padding:22px 22px 60px}h1{font-size:21px;line-height:1.35;margin:4px 0 13px;font-weight:600}h2{font-size:14px;margin:0 0 12px;color:#f3db9b}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#d5c9ac;font-size:12px}
+.demo{color:#f6d18c;background:#654a25;border:1px solid #c9a05d;border-radius:18px;padding:5px 11px;font-weight:700}
+.bar{border:1px solid #537961;background:#103226;border-radius:13px;padding:15px 17px;margin-top:14px}
+.case{display:flex;gap:20px;flex-wrap:wrap;font-size:12px;color:#e6ddc4}.case strong{color:#f3c46d}
+.stages{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-top:15px}
+.stage{background:#174332;border:1px solid #668466;border-radius:11px;padding:13px 10px;min-height:94px}
+.stage span{display:block;font-size:17px;color:#dbb96d;margin-bottom:5px}
+.stage div{font-size:11px;line-height:1.5}
+.stage.done{border-color:#87bd8d;background:#24573a}.stage.done span{color:#b6e4b7}
+.stage.active{border-color:#e7c165;background:#5a4b25}
+.auto{margin-top:16px;background:linear-gradient(115deg,#113b2a,#1d4c34);border:1px solid #c2a45b;border-radius:12px;padding:14px}
+.autohead{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px;margin-bottom:11px}
+.autohead strong{color:#f4d896} .route{display:grid;grid-template-columns:64px repeat(5,minmax(0,1fr)) 64px;gap:7px;align-items:center}
+.gate{border:1px solid #bc9c5c;border-radius:18px 18px 7px 7px;text-align:center;padding:10px 2px;background:#255037;font-size:11px;color:#ffdb8d}
+.node{border:1px solid #587662;background:#1c3e2d;text-align:center;border-radius:25px;height:30px;display:flex;align-items:center;justify-content:center;color:#dadfca;font-size:12px}
+.node.done{background:#318150;border-color:#b5d29b;color:white}.node.active{background:#786127;border-color:#edc66b}
+.subrow{border-top:1px solid #497454;margin-top:10px;padding-top:9px;display:flex;gap:13px;align-items:center;font-size:11px;color:#e3d7b1}
+.track{width:135px;background:#294f3c;height:4px;border-radius:9px;overflow:hidden;flex-shrink:0}
+.fill{height:100%;background:#ddb863;width:0;transition:width .25s}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}
+button{font:12px Verdana,Arial,sans-serif;font-weight:600;color:#f9efdc;background:#235239;border:1px solid #8eb47c;padding:11px 15px;border-radius:9px;cursor:pointer}
+button.primary{background:#856829;border-color:#e2bc5d}button:disabled{opacity:.5;cursor:not-allowed}
+button:hover:not(:disabled){filter:brightness(1.14)}
+.output{margin-top:17px;display:none} .output.visible{display:block}
+.split{display:grid;grid-template-columns:1fr 1.3fr;gap:15px}
+.detail{background:#0c2d21;border:1px solid #436b53;border-radius:11px;padding:16px;line-height:1.75;font-size:12px}
+.detail p{margin:7px 0 13px}.muted{color:#b9c7b8}
+.paper{background:#fffaf2;color:#27352c;border-radius:8px;padding:22px 24px;min-height:290px;font:12px/1.65 Verdana,Arial}
+.paper .header{text-align:center;font-size:10px;border-bottom:1px solid #aebbae;padding-bottom:10px;color:#344e3c}
+.paper h3{text-align:center;font-size:13px;color:#263b2c;margin:23px 0}
+.paper p{text-align:justify;text-indent:1cm;margin-bottom:8px}.paper .foot{margin-top:28px;text-align:right;color:#607065;font-size:10px}
+textarea{width:100%;min-height:180px;background:#fcf9ef;color:#293b2e;border:1px solid #b1ac8e;border-radius:6px;padding:12px;font:12px/1.65 Verdana,Arial}
+.note{font-size:11px;color:#ead6a7;margin-top:12px}
+@media(max-width:730px){main{padding:14px}.split{grid-template-columns:1fr}.stages{gap:4px}.stage{padding:9px 5px;min-height:110px}.stage div{font-size:9px}.route{grid-template-columns:41px repeat(5,minmax(0,1fr)) 41px;gap:3px}.gate{font-size:9px}.track{width:52px}}
+
+.error{margin-top:12px;padding:12px;border:1px solid #ce775e;border-radius:9px;color:#ffdbce;background:#482b24;font-size:12px}
+pre{white-space:pre-wrap;font:12px/1.6 Verdana,Arial;overflow-wrap:anywhere}
+#finalactions{display:none}.confirmnote{font-size:12px;color:#ffe1a6}
+</style></head><body><main>
+<div class="topline"><div>WOW · Експертен модул · КТ134</div><div class="demo">ИЗОЛИРАН ИНТЕГРАЦИОНЕН ТЕСТ · БЕЗ СИНТЕТИЧНИ ОТГОВОРИ</div></div>
+<h1>Автоматичен анализ на преписка</h1>
+<section class="bar"><div class="case">
+<div>Активен експерт: <strong id="expert">—</strong></div>
+<div>Вътрешен №: <strong id="caseid">—</strong></div>
+<div>Деловоден №: <strong id="registry">—</strong></div></div>
+<div class="stages" id="stages"></div><div class="auto"><div class="autohead"><strong>Автоматична обработка</strong><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
+<div class="subrow"><div class="track"><div class="fill" id="fill"></div></div><span id="subtitle" aria-live="polite">Очаква се защитен контекст от КТ125</span></div></div>
+<div class="actions"><button class="primary" id="start" disabled>Изготви проект по тази преписка</button></div>
+<div id="error" role="alert" class="error" hidden></div>
+<p class="note">Само реални данни от потвърдената преписка и защитената КТ125 сесия. Рецензентът извършва междинната преценка. Крайно административно решение не се издава автоматично.</p>
+</section>
+<section class="output" id="output"><div class="split">
+<div class="detail"><h2>Мотивирано предложение · Етап 4</h2>
+<p><b>Панел:</b> <span id="panel">—</span></p>
+<pre id="proposal"></pre><h2>Независим рецензент</h2><pre id="review"></pre>
+</div><div class="detail"><h2>Проект на документ · Етап 5</h2>
+<div class="paper"><b id="doc-title"></b><pre id="draft"></pre></div>
+<p class="confirmnote">Неодобрен проект. Окончателното потвърждение се извършва единствено в защитения експертен модул.</p>
+</div></div><div class="actions"><button class="primary" id="download" disabled>Изтегли реалния Word проект</button></div>
+</section></main>
+<script type="module">
+const labels=['Внасяне и анализ на преписката','Предмет и обхват на ИП','Имоти и пространствен анализ на ИП','Нормативна и процедурна преценка на ИП','Определяне на процедурата по ИП'];
+const stages=document.querySelector('#stages'),route=document.querySelector('#route');
+for(let i=0;i<5;i++){const e=document.createElement('div');e.className='stage';const n=document.createElement('span');n.textContent=String(i+1).padStart(2,'0');const t=document.createElement('div');t.textContent=labels[i];e.append(n,t);stages.append(e)}
+const gate=(text,cls)=>{const e=document.createElement('div');e.className=cls;e.textContent=text;route.append(e)};
+gate('Вход','gate');for(let i=1;i<=5;i++)gate(String(i),'node');gate('Изход','gate');
+const tiles=[...stages.children],nodes=[...route.children].slice(1,6);
+const el=id=>document.getElementById(id);
+function render(n){tiles.forEach((x,i)=>x.className='stage '+(i<n?'done':i===n?'active':''));nodes.forEach((x,i)=>x.className='node '+(i<n?'done':i===n?'active':''));el('fill').style.width=(n*20)+'%'}
+function problem(msg){el('error').hidden=false;el('error').textContent=msg;el('subtitle').textContent='Автоматичната обработка не е завършила'}
+const context=window.__KT134_PROTECTED_CONTEXT__;
+const ok=context&&typeof context.caseId==='string'&&context.caseId.length>=4&&context.kt125Authenticated===true;
+if(ok){el('expert').textContent=context.expertName||'Активен експерт';el('caseid').textContent=context.caseId;el('registry').textContent=context.registryNumber||'—';el('start').disabled=false;el('subtitle').textContent='Готовност за анализ на потвърдената преписка';render(0)}
+else problem('Няма потвърдена КТ125 сесия и идентичност на преписката. Не се изпълнява демонстрационен анализ.');
+let word=null;
+el('start').addEventListener('click',async()=>{
+ if(!ok)return;el('start').disabled=true;el('error').hidden=true;render(0);
+ el('subtitle').textContent='Подаване към защитения автоматичен маршрут';
+ try{
+  const r=await fetch('/kt134/automatic/draft',{method:'POST',credentials:'same-origin',
+   headers:{'Content-Type':'application/json'},body:JSON.stringify({caseId:context.caseId})});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok||data.status!=='draft_ready'||!data.stage5||!data.docxBase64)
+    throw Error('Защитеният маршрут не върна завършен проект ('+(data.error||data.status||r.status)+').');
+  if(data.caseId!==context.caseId||data.expertApproved!==false||data.finalDecision!==null)
+    throw Error('Връщане на несъвместима преписка или неразрешено одобрение.');
+  word=data.docxBase64;
+  el('registry').textContent=data.registryNumber||context.registryNumber||'—';
+  el('panel').textContent='№'+data.stage5.panelId;
+  el('proposal').textContent=data.author?.content||'—';
+  el('review').textContent=data.intermediateDecision?.reasoning||'—';
+  el('doc-title').textContent=data.stage5.documentTitle||'Проект';
+  el('draft').textContent=data.stage5.content||'—';
+  render(5);el('subtitle').textContent='Готов проект · очаква единственото окончателно решение на експерта';
+  el('output').classList.add('visible');el('download').disabled=false;
+ }catch(e){render(0);problem(e.message||'Неуспешно изпълнение');el('start').disabled=false}
+});
+el('download').addEventListener('click',()=>{
+ if(!word||!ok)return;
+ try{
+  const bin=atob(word),bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  const url=URL.createObjectURL(new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}));
+  const a=document.createElement('a');a.href=url;a.download='KT134_'+context.caseId+'_PROEKT.docx';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+ }catch{problem('Word файлът не може да бъде изтеглен.')}
+});
+</script></body></html>
