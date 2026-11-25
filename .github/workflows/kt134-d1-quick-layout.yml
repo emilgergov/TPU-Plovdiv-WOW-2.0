@@ -1,0 +1,42 @@
+name: KT134 quick D1 table layout
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-d1-quick-layout.yml']
+permissions:
+  contents: write
+jobs:
+  layout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: List only schema table names and CREATE TABLE statements
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const root='https://api.cloudflare.com/client/v4/accounts/'+process.env.ACCOUNT;
+          const h={Authorization:'Bearer '+process.env.CF_TOKEN,'Content-Type':'application/json'};
+          const sr=await(await fetch(root+'/workers/scripts/tpu-plovdiv-kt125-local-auth/settings',{headers:h})).json();
+          const db=sr.result?.bindings?.find(x=>x.name==='KT125_DB')?.id;
+          if(!db)throw Error('MISSING_DB');
+          const r=await fetch(root+'/d1/database/'+db+'/query',{method:'POST',headers:h,
+            body:JSON.stringify({sql:"SELECT name,sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"})});
+          const j=await r.json();
+          if(!j.success)throw Error('SCHEMA_QUERY_FAILED');
+          const t=j.result?.[0]?.results||[];
+          const rows=t.map(x=>({name:x.name,columns:[...String(x.sql||'').matchAll(/(?:^|,)\s*"?([a-z][a-z0-9_]*)"?\s+(?:TEXT|INTEGER|BLOB|REAL)/gi)].map(m=>m[1])}));
+          writeFileSync('kt134-auto/KT134_QUICK_D1_LAYOUT.json',JSON.stringify({readOnly:true,rows},null,2)+'\n');
+          console.log('KT134 D1 table metadata '+rows.length);
+          NODE
+      - name: Save table layout only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_QUICK_D1_LAYOUT.json
+          git commit -m 'KT134: map D1 dossier storage layout' || exit 0
+          git push origin HEAD:kt134-auto-mode-isolated
