@@ -347,7 +347,54 @@ if(host&&five){
 
  function clear(){proposal=null;history=[];approved=null;header.textContent='Предложение за експертна преценка';ui.hidden=true;render5();}
  ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'].forEach(n=>document.addEventListener(n,clear));
- window.KT116ExpertHandoff=Object.freeze({snapshot:()=>approved&&current()?approved:null,history:()=>current()?history.map(x=>({version:x.version,kind:x.kind,createdAt:x.createdAt})):[]});
+ // KT134 candidate: one explicit final expert action after Author + Reviewer
+ // and preliminary document drafting. No intermediate expert confirmation.
+ async function approveAutomatedFinal({caseId,evidenceRevision,stage4Draft,expert}={}){
+  if(!window.KT134AutoMode?.active?.()||!current()||
+     proposal.caseId!==caseId||String(proposal.revision)!==String(evidenceRevision)||
+     history.at(-1)?.text!==stage4Draft||approved)
+   return {ok:false,reason:'Преписката, редакцията или предложението вече не съответстват.'};
+  const name=val(expert);
+  if(name.length<2)return {ok:false,reason:'Нужно е име на експерта за окончателното одобрение.'};
+  if(!window.KT80EGSession?.hasAccess?.())return {ok:false,reason:'Няма активна защитена сесия.'};
+  const selected=Number(stage4Draft.match(/ИЗБРАН\\s+ПАНЕЛ\\s*:\\s*0?(\\d{1,2})\\b/iu)?.[1]||0);
+  if(!routeTitles[selected-1]||selected===15)return {ok:false,reason:'Не е определена допустима административна процедура.'};
+  const requestId=crypto.randomUUID(),h=evidence(),p=window.KT80WorkflowState?.subjectConfirmed||{};
+  const payload={task:'confirm_reviewed_panel',projectOnly:true,caseId:proposal.caseId,
+   evidenceRevision:proposal.revision,requestId,subject:val(p.text),scope:val(p.scope),
+   parcelIds:[...h.parcelIds],expert:name,panelId:selected,reviewedText:stage4Draft,
+   reviewerVerdict:proposal.serverReviewed?'reviewed':'not_completed',
+   expertExplicitConfirm:true,validationWarnings:proposal.warnings,
+   qualificationRecord:proposal.qualificationRecord,qualificationProof:proposal.qualificationProof,
+   qualificationGate:proposal.qualificationGate};
+  let response,data;
+  try{
+   response=await window.KT80EGSession.request(
+    'https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/stage4-expert-decision',
+    JSON.stringify(payload));
+   data=await response.json().catch(()=>({}));
+  }catch{return {ok:false,reason:'Няма достъп до сървъра за регистриране на експертното решение.'}}
+  if(!current()||!response.ok||!data.expertDecisionProof||!data.draft||
+     data.caseId!==caseId||data.requestId!==requestId||
+     String(data.evidenceRevision)!==String(evidenceRevision))
+   return {ok:false,reason:'Експертното решение не е валидирано: '+(data?.error||response.status)};
+  history.push({version:history.length+1,text:data.draft,kind:'окончателно експертно решение — автоматичен маршрут',
+   createdAt:new Date().toISOString()});
+  approved=Object.freeze({caseId:proposal.caseId,requestId,evidenceRevision:proposal.revision,
+   version:history.at(-1).version,panelId:selected,text:data.draft,original:proposal.original,
+   warnings:[...proposal.warnings],qualificationRecord:proposal.qualificationRecord,
+   qualificationProof:proposal.qualificationProof,qualificationGate:proposal.qualificationGate,
+   expertDecision:data.expertDecision,expertDecisionProof:data.expertDecisionProof,
+   expert:name,approvedAt:new Date().toLocaleString('bg-BG'),expertApproved:true});
+  display();render5();
+  document.dispatchEvent(new CustomEvent('kt116:stage4-confirmed',{detail:{
+   caseId:approved.caseId,evidenceRevision:approved.evidenceRevision,version:approved.version,
+   finalAutomatedApproval:true
+  }}));
+  next.click();
+  return {ok:true,approved};
+ }
+ window.KT116ExpertHandoff=Object.freeze({snapshot:()=>approved&&current()?approved:null,history:()=>current()?history.map(x=>({version:x.version,kind:x.kind,createdAt:x.createdAt})):[],approveAutomatedFinal});
  render5();
 }
 }
