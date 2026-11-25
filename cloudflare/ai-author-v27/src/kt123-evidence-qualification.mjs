@@ -1,5 +1,6 @@
 import {evaluateDecision,TEST_KEYS,STATUSES} from "./kt123-decision-model.mjs";
 import {KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
+import {checkKT134ComplaintRoute} from "./kt134-case-purpose.mjs";
 // All facts and exact legal texts below are passed by reference only. Neither
 // string matching nor AI qualification constitutes final legal verification.
 const tidy=s=>String(s||"").normalize("NFC").replace(/\s+/gu," ").trim();
@@ -132,7 +133,7 @@ export function buildQualificationSources({subject,scope,confirmed=[],documents=
  }));
  return {facts,laws};
 }
-export function validateQualification(q,sources){
+export function validateQualification(q,sources,{casePurpose=null}={}){
  const errors=[],tests=q?.tests,route=Number(q?.selectedPanel);
  if(!Array.isArray(tests)||tests.length!==4)return {ok:false,errors:["QUALIFICATION_REQUIRES_FOUR_TESTS"]};
  const laws=new Map((sources?.laws||[]).map(x=>[x.id,x])),facts=new Map((sources?.facts||[]).map(x=>[x.id,x]));
@@ -172,6 +173,8 @@ export function validateQualification(q,sources){
   legalSourceVerified:errors.filter(x=>x.startsWith("UNVERIFIED_LEGAL_QUOTE")).length===0,
   authoritativeEvidence:null});
  if(!KT109_ROUTE_BY_ID.has(route))errors.push("UNKNOWN_QUALIFICATION_ROUTE");
+ const routeCheck=checkKT134ComplaintRoute(casePurpose,route,q?.routeReason);
+ if(!routeCheck.ok)errors.push(routeCheck.code);
  if(tidy(q?.routeReason).length<70)errors.push("MISSING_ROUTE_REASON");
  for(const e of decision.errors)errors.push(e.code);
  return {ok:errors.length===0,errors:[...new Set(errors)],decision,
