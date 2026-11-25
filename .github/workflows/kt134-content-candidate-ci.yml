@@ -1,0 +1,27 @@
+name: KT134 content candidate checks
+on:
+  push:
+    branches:
+      - kt134-content-integration-candidate
+    paths:
+      - 'cloudflare/ai-author-v27/src/kt134-content-diagnostics.mjs'
+      - 'cloudflare/ai-author-v27/src/kt134-content-diagnostics.test.mjs'
+      - 'cloudflare/ai-author-v27/src/worker.js'
+      - '.github/workflows/kt134-content-candidate-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  content-candidate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify JavaScript syntax
+        run: |
+          node --check cloudflare/ai-author-v27/src/kt134-content-diagnostics.mjs
+          node --check cloudflare/ai-author-v27/src/worker.js
+      - name: Run content diagnostic regression suite
+        run: node cloudflare/ai-author-v27/src/kt134-content-diagnostics.test.mjs
