@@ -6,6 +6,7 @@
  * Distinct experts' credentials never travel inside the case evidence payload. */
 import {collectStageEvidence,verifyStageEvidence} from './kt95-stage-evidence-handoff.mjs';
 import {buildEvidenceChunks,verifyEvidenceDigest,evidenceCoverage,packAnchoredClaims} from './kt134-evidence-chunks.mjs';
+import './kt134-auto-pipeline.mjs';
 import {VERIFIED_ARTICLES,LOCKED_ARCHIVE,LOCKED_ARCHIVE_SHA256} from './v11-trusted-source-registry.mjs';
 
 const ENDPOINT='https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/stage4-proposal';
