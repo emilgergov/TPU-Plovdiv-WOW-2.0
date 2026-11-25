@@ -34,7 +34,7 @@ export function composeKt134CaseAwareStage5Draft({stage5Text,stage4Request}={}){
      (str(p.municipality)?', община '+printable(p.municipality):'')+
      (num(p.landAreaSqm)?', площ '+num(p.landAreaSqm)+' кв. м':'')+
      (str(p.landUse)?', НТП '+printable(p.landUse):'')+
-     (str(p.sourceId)?'. Източник: '+printable(p.sourceId):'.':'.');
+     (str(p.sourceId)?'. Източник: '+printable(p.sourceId)+'.':'.');
  }));
  const gis=dossier.gis;
  if(gis?.analysisMode==='contextual_skip'){
