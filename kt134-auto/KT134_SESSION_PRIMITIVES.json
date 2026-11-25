@@ -1,0 +1,99 @@
+{
+  "readOnly": true,
+  "methods": [
+    {
+      "name": "function getCookie(",
+      "found": true,
+      "literalStrings": [
+        "Cookie",
+        ").split(",
+        ").map((s) => s.trim()).filter((s) => s.startsWith(SESSION_COOKIE + ",
+        "true",
+        "https:",
+        "string",
+        "/kt125/local-auth",
+        "raw",
+        "HMAC",
+        "SHA-256",
+        "sign"
+      ],
+      "regexes": [
+        "/kt125/"
+      ],
+      "cryptoFlags": [
+        "SHA-256",
+        "HMAC"
+      ]
+    },
+    {
+      "name": "async function sessionUser(",
+      "found": false
+    },
+    {
+      "name": "function sessionUser(",
+      "found": false
+    },
+    {
+      "name": "async function digest(",
+      "found": true,
+      "literalStrings": [
+        "SHA-256",
+        "0",
+        ");\n}\nfunction getCookie(request) {\n  const values = (request.headers.get(",
+        ") || ",
+        ").split(",
+        ").map((s) => s.trim()).filter((s) => s.startsWith(SESSION_COOKIE + ",
+        "true",
+        "https:",
+        "string",
+        "/kt125/local-auth",
+        "raw"
+      ],
+      "regexes": [
+        "/kt125/"
+      ],
+      "cryptoFlags": [
+        "SHA-256",
+        "subtle.digest",
+        "TextEncoder"
+      ]
+    },
+    {
+      "name": "function digest(",
+      "found": true,
+      "literalStrings": [
+        "SHA-256",
+        "0",
+        ");\n}\nfunction getCookie(request) {\n  const values = (request.headers.get(",
+        ") || ",
+        ").split(",
+        ").map((s) => s.trim()).filter((s) => s.startsWith(SESSION_COOKIE + ",
+        "true",
+        "https:",
+        "string",
+        "/kt125/local-auth",
+        "raw"
+      ],
+      "regexes": [
+        "/kt125/"
+      ],
+      "cryptoFlags": [
+        "SHA-256",
+        "subtle.digest",
+        "TextEncoder"
+      ]
+    },
+    {
+      "name": "function digest2(",
+      "found": false
+    },
+    {
+      "name": "async function digest2(",
+      "found": false
+    },
+    {
+      "name": "function token(",
+      "found": false
+    }
+  ]
+}
