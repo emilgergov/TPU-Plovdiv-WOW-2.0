@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {kt134DraftDiagnostics} from './kt134-content-diagnostics.mjs';
+const codes = r => r.findings.map(x=>x.code);
+const bad = kt134DraftDiagnostics('Предмет: преустройство. TEST-PDF1-NONREAL. Категоричен процедурен извод не се предлага.', {stage:5});
+assert(codes(bad).includes('TEST_METADATA_IN_ADMINISTRATIVE_TEXT'));
+assert(codes(bad).includes('SHORT_UNREASONED_DRAFT'));
+assert(codes(bad).includes('MISSING_ACTIONABLE_PROPOSAL'));
+assert.equal(bad.advisoryOnly,true);
+const bad4=kt134DraftDiagnostics('Неопределена процедура.',{stage:4});
+for(const code of ['NO_SELECTED_PANEL','NO_DOSSIER_TEXT','NO_GIS_CONTEXT','NO_EXACT_LAW_TEXT','NO_REVIEW_GROUNDS'])assert(codes(bad4).includes(code));
+const good=kt134DraftDiagnostics('Относно: Проект. На основание на проверените факти Ви уведомявам за конкретните обстоятелства по инвестиционното предложение. '+ 'Подробни фактически мотиви. '.repeat(25),{stage:5});
+assert.deepEqual(codes(good),[]);
+console.log('KT134 candidate diagnostics: 3 scenarios passed');
