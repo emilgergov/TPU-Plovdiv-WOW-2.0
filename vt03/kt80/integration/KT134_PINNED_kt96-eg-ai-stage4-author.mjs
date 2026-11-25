@@ -448,7 +448,7 @@ function boot(){
     providerArchiveEvidenceVerified:data.archiveEvidenceVerified===true
    });
    window.KT134EvidenceLedger=Object.freeze({
-    caseId:identity.caseId,evidenceRevision:h.evidenceRevision,
+    caseId:identity.caseId,localCycleId:h.caseId,evidenceRevision:h.evidenceRevision,
     coverageComplete:data.evidenceReceipt?.dossierAllSourceSpansExamined===true,
     expectedChunks:Number(data.evidenceReceipt?.sourceSpansExpected)||0,
     examinedChunks:Number(data.evidenceReceipt?.sourceSpansExamined)||0,
