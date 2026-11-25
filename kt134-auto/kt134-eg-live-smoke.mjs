@@ -136,6 +136,7 @@ const audit={
  reviewerReportedUnresolvedLegalIssues:rawIssues.length,
  reviewerProposalOnly:b.reviewerProposalOnly===true,
  qualificationValidated:disposition.qualificationValidated,
+ qualificationFailureCodes:Array.isArray(a.qualificationGate?.diagnosticCodes)?a.qualificationGate.diagnosticCodes:[],
  reviewerFormalDecisionReady:disposition.formalDecisionReady,
  reviewerAlternativeUsed:b.normativeDisposition?.reviewerAlternativeUsed===true,
  legalPredicateIssuesAfterReview:contentQualityIssues,
