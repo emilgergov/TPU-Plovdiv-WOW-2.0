@@ -1,0 +1,50 @@
+{
+  "readOnly": true,
+  "overview": [
+    {
+      "cases": 15,
+      "versions": 336,
+      "files": 17
+    }
+  ],
+  "versionKinds": [
+    {
+      "kind": "external"
+    },
+    {
+      "kind": "state"
+    }
+  ],
+  "topLevelJsonKeys": [
+    {
+      "field": "decision"
+    },
+    {
+      "field": "evidence"
+    },
+    {
+      "field": "format"
+    },
+    {
+      "field": "globals"
+    },
+    {
+      "field": "navigation"
+    },
+    {
+      "field": "number"
+    },
+    {
+      "field": "stage4"
+    },
+    {
+      "field": "stage5"
+    },
+    {
+      "field": "state"
+    },
+    {
+      "field": "values"
+    }
+  ]
+}
