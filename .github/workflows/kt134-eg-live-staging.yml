@@ -9,7 +9,7 @@ on:
       - '.github/workflows/kt134-eg-live-staging.yml'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: kt134-eg-live-staging
   cancel-in-progress: false
@@ -39,6 +39,7 @@ jobs:
           node --check kt134-auto/kt134-eg-live-smoke.mjs
           node --test kt134-auto/kt134-eg-stage45-live-bridge.test.mjs
       - name: Verify CI credentials for actual live EG integration
+        id: credentials
         run: |
           set -euo pipefail
           if [ -z "$CLOUDFLARE_API_TOKEN" ]; then echo "::error::Existing Cloudflare GitHub secret is unavailable"; exit 1; fi
@@ -46,6 +47,7 @@ jobs:
           if [ -z "$LIVE_EG_TOKEN" ]; then echo "::error::AI_AUTHOR_ACCESS_TOKEN is not available to this isolated CI job; no live EG deployment attempted"; exit 1; fi
           echo 'Live EG staging credentials are present (values withheld)'
       - name: Deploy ONLY new kt134-eg-test Worker
+        id: deploy
         run: |
           set -euo pipefail
           npx --yes wrangler@4 deploy --config kt134-auto/wrangler.eg-staging.toml --keep-vars
@@ -70,6 +72,7 @@ jobs:
           test "$code" = 401
           echo 'Isolated live EG Worker online and protected; next acceptance needs real case-bound test request'
       - name: Execute genuine EG Author → Reviewer → Stage5 → DOCX with synthetic case
+        id: live
         env:
           KT134_EG_BASE: https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev
         run: |
@@ -94,3 +97,38 @@ jobs:
           path: kt134-auto/live-test-deliverables/*
           if-no-files-found: ignore
           retention-days: 7
+      - name: Write observable test result back to isolated branch (no secrets)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KT134_OUTCOME: ${{ job.status }}
+          KT134_DEPLOY: ${{ steps.deploy.outcome }}
+          KT134_LIVE: ${{ steps.live.outcome }}
+          KT134_CREDENTIALS: ${{ steps.credentials.outcome }}
+          KT134_RUN_ID: ${{ github.run_id }}
+          KT134_COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          node --input-type=module -e '
+            import fs from "node:fs";
+            fs.writeFileSync("/tmp/kt134-result.json",JSON.stringify({
+              workflow:"kt134-eg-live-staging",
+              runId:process.env.KT134_RUN_ID,
+              sourceCommit:process.env.KT134_COMMIT,
+              outcome:process.env.KT134_OUTCOME,
+              credentialsStep:process.env.KT134_CREDENTIALS,
+              deployStep:process.env.KT134_DEPLOY,
+              liveStage45WordStep:process.env.KT134_LIVE,
+              realDossierProcessed:false,
+              productionWorkerChanged:false
+            },null,2)+"\n");
+          '
+          encoded="$(base64 -w0 /tmp/kt134-result.json)"
+          path='kt134-auto/KT134_LIVE_TEST_STATUS.json'
+          existing="$(gh api "repos/$GITHUB_REPOSITORY/contents/$path?ref=kt134-auto-mode-isolated" --jq '.sha' 2>/dev/null || true)"
+          if [ -n "$existing" ]; then
+            gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$path" -f message='KT134 staging: record live integration test outcome' -f branch='kt134-auto-mode-isolated' -f content="$encoded" -f sha="$existing" >/dev/null
+          else
+            gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$path" -f message='KT134 staging: record live integration test outcome' -f branch='kt134-auto-mode-isolated' -f content="$encoded" >/dev/null
+          fi
+          echo "Test status published as $path"
