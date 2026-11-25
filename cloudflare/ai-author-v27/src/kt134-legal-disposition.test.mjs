@@ -100,3 +100,18 @@ test("actual synthetic panel02 letter asks a precise physical question, not appl
  assert.match(txt,/само при положителен отговор/iu);
  assert.equal(kt134DispositionTextIssues(txt,d).length,0);
 });
+
+test("real panel02 Word does not ask for every environmental parameter without a predicate",()=>{
+ const q=()=>({tests:["A1","A2","OS1","OS2"].map(key=>({key,status:"НЕОПРЕДЕЛЕНА"})),
+ missingFact:{fact:"Вид и капацитет на евентуално ново оборудване",source:"Техническо описание",legalCriterion:"Конкретна категория"}}); 
+ const d=deriveKt134LegalDisposition({qualification:q(),qualificationValidated:true,reviewerPanelId:2});
+ const text="Мотивирано предложение:\nПоради липсата на технически данни следва да се изиска от възложителя представяне на детайлна техническа документация:\n- Капацитет и мощност на технологичното оборудване;\n- Данни за емисии и водоползване;\n- Количество отпадъци, материали и опасни вещества.\nЗаключение и следващо действие:\nПредлага се писмо.";
+ const issues=kt134DispositionTextIssues(text,d);
+ assert.ok(issues.includes("UNJUSTIFIED_BROAD_INFORMATION_REQUEST"),issues.join(","));
+ assert.ok(issues.includes("UNJUSTIFIED_FULL_TECHNICAL_DOSSIER"),issues.join(","));
+});
+test("no internal reviewer author signature or placeholder in office Word",()=>{
+ const d=deriveKt134LegalDisposition({reviewerPanelId:2});
+ assert.ok(kt134DispositionTextIssues("Предлага се проект. Изготвил: независим рецензент\nДата: [по решение на експерта]",d)
+ .includes("INTERNAL_REVIEW_PROCESS_IN_DOCUMENT"));
+});
