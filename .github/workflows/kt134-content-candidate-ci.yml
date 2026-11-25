@@ -6,6 +6,8 @@ on:
     paths:
       - 'cloudflare/ai-author-v27/src/kt134-content-diagnostics.mjs'
       - 'cloudflare/ai-author-v27/src/kt134-content-diagnostics.test.mjs'
+      - 'cloudflare/ai-author-v27/src/kt123-evidence-qualification.mjs'
+      - 'cloudflare/ai-author-v27/src/kt134-qualification-span.test.mjs'
       - 'cloudflare/ai-author-v27/src/worker.js'
       - 'cloudflare/ai-author-v27/src/kt134-stage5-handoff-contract.test.mjs'
       - 'vt03/kt80/integration/KT134_PINNED_kt117-stage5-document-author.mjs'
@@ -28,6 +30,7 @@ jobs:
       - name: Verify JavaScript syntax
         run: |
           node --check cloudflare/ai-author-v27/src/kt134-content-diagnostics.mjs
+          node --check cloudflare/ai-author-v27/src/kt123-evidence-qualification.mjs
           node --check cloudflare/ai-author-v27/src/worker.js
           node --check vt03/kt80/integration/KT134_PINNED_kt117-stage5-document-author.mjs
           node --check vt03/kt80/integration/KT134_PINNED_kt96-eg-ai-stage4-author.mjs
@@ -36,5 +39,6 @@ jobs:
       - name: Run content diagnostic regression suite
         run: |
           node cloudflare/ai-author-v27/src/kt134-content-diagnostics.test.mjs
+          node cloudflare/ai-author-v27/src/kt134-qualification-span.test.mjs
           node cloudflare/ai-author-v27/src/kt134-stage5-handoff-contract.test.mjs
           node vt03/kt80/integration/kt134-evidence-chunks.test.mjs
