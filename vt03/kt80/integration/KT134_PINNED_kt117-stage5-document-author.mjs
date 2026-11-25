@@ -229,7 +229,8 @@ function initialize(){
      try{gisDetail=JSON.stringify(g).slice(0,3500)}catch{}
      const ledger=window.KT134EvidenceLedger||null;
      const ledgerBound=!!ledger&&ledger.caseId===ev.caseId&&
-      String(ledger.evidenceRevision)===String(ev.evidenceRevision)&&ledger.coverageComplete===true;
+      String(ledger.evidenceRevision)===String(ev.evidenceRevision);
+     const fullCoverage=ledgerBound&&ledger.coverageComplete===true;
      const ledgerClaims=ledgerBound&&Array.isArray(ledger.sourceAnchoredClaims)?ledger.sourceAnchoredClaims:[];
      const anchoredEvidence=[],maxLedgerBytes=12000;
      for(const item of ledgerClaims){
@@ -240,7 +241,7 @@ function initialize(){
       anchoredEvidence.push(next);
      }
      return {caseId:ev.caseId,evidenceRevision:ev.evidenceRevision,documents,sourceTexts,
-      evidenceLedger:{allSpansExamined:ledgerBound,expectedChunks:ledgerBound?ledger.expectedChunks:0,
+      evidenceLedger:{allSpansExamined:fullCoverage,expectedChunks:ledgerBound?ledger.expectedChunks:0,
        examinedChunks:ledgerBound?ledger.examinedChunks:0,claimsTotal:ledgerClaims.length,
        claimsIncluded:anchoredEvidence.length,anchoredEvidence},
       gis:{pdf1Available:g.pdfOK===true,spatialClass:allowed.includes(spatialClass)?spatialClass:'UNKNOWN',detail:gisDetail},
@@ -261,6 +262,8 @@ function initialize(){
    payload.stage5Evidence.evidenceLedger.anchoredEvidence.pop();
    payload.stage5Evidence.evidenceLedger.claimsIncluded--;
   }
+  payload.stage5Evidence.evidenceLedger.claimsIncluded=
+   payload.stage5Evidence.evidenceLedger.anchoredEvidence.length;
   if(payloadBytes()>41000){note.textContent='Потвърденият текст надхвърля допустимия размер на заявката. Не е съкратен.';return;}
   busy=true;generate.disabled=true;note.textContent='EG Авторът изготвя проект на административния текст.';
   const activityTicket=window.KT80Busy?.start?.('EG Автор · Изготвя проекта на административния документ…');
