@@ -228,8 +228,10 @@ function initialize(){
      let gisDetail='';
      try{gisDetail=JSON.stringify(g).slice(0,3500)}catch{}
      const ledger=window.KT134EvidenceLedger||null;
-     const ledgerBound=!!ledger&&ledger.caseId===ev.caseId&&
-      String(ledger.evidenceRevision)===String(ev.evidenceRevision);
+     const ledgerBound=!!ledger&&ledger.caseId===source.caseId&&
+      ledger.localCycleId===ev.caseId&&
+      String(ledger.evidenceRevision)===String(ev.evidenceRevision)&&
+      String(source.evidenceRevision)===String(ev.evidenceRevision);
      const fullCoverage=ledgerBound&&ledger.coverageComplete===true;
      const ledgerClaims=ledgerBound&&Array.isArray(ledger.sourceAnchoredClaims)?ledger.sourceAnchoredClaims:[];
      const anchoredEvidence=[],maxLedgerBytes=12000;
@@ -240,7 +242,7 @@ function initialize(){
       if(new TextEncoder().encode(JSON.stringify([...anchoredEvidence,next])).length>maxLedgerBytes)break;
       anchoredEvidence.push(next);
      }
-     return {caseId:ev.caseId,evidenceRevision:ev.evidenceRevision,documents,sourceTexts,
+     return {caseId:source.caseId,localCycleId:ev.caseId,evidenceRevision:ev.evidenceRevision,documents,sourceTexts,
       evidenceLedger:{allSpansExamined:fullCoverage,expectedChunks:ledgerBound?ledger.expectedChunks:0,
        examinedChunks:ledgerBound?ledger.examinedChunks:0,claimsTotal:ledgerClaims.length,
        claimsIncluded:anchoredEvidence.length,anchoredEvidence},
