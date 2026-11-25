@@ -375,7 +375,7 @@ async function handleStage4Proposal(request,env){
   Number(dossierCoverage.examinedChunks)===Number(dossierCoverage.expectedChunks)&&
   Array.isArray(dossierCoverage.unexamined)&&dossierCoverage.unexamined.length===0&&
   Array.isArray(dossierCoverage.unreadableDocuments)&&dossierCoverage.unreadableDocuments.length===0;
- const dossierAnchors=dossierCoverageComplete&&Array.isArray(dossierCoverage.sourceAnchoredClaims)?
+ const dossierAnchors=dossierCoverage&&Array.isArray(dossierCoverage.sourceAnchoredClaims)?
   dossierCoverage.sourceAnchoredClaims.map(x=>({
    documentIndex:Number(x?.documentIndex),source:text(x?.source,180),
    start:Number(x?.start),end:Number(x?.end),
@@ -383,7 +383,7 @@ async function handleStage4Proposal(request,env){
    evidenceStatus:"ИЗВЛЕЧЕНО ТВЪРДЕНИЕ, НЕ ЕКСПЕРТНО ПОТВЪРДЕН ФАКТ"
   })).filter(x=>x.source&&x.quote&&x.summary):[];
  const context={subject:payload.subject,scope:payload.scope,parcelIds,
-  dossierCoverage:{complete:dossierCoverageComplete,expectedChunks:Number(dossierCoverage?.expectedChunks)||0,examinedChunks:Number(dossierCoverage?.examinedChunks)||0,sourceAnchoredClaims:dossierAnchors},
+  dossierCoverage:{complete:dossierCoverageComplete,expectedChunks:Number(dossierCoverage?.expectedChunks)||0,examinedChunks:Number(dossierCoverage?.examinedChunks)||0,unreadableDocuments:Array.isArray(dossierCoverage?.unreadableDocuments)?dossierCoverage.unreadableDocuments.slice(0,40):[],unexaminedChunks:Array.isArray(dossierCoverage?.unexamined)?dossierCoverage.unexamined.slice(0,40):[],sourceAnchoredClaims:dossierAnchors},
   establishedFacts:confirmed,uncertainFacts:unresolved,
   sourceHints,archiveTextProvided:true,archiveName:text(payload.archive.name,100),
   legalTextsExact:verifiedLegalCorpus.legalProvisions,
