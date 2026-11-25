@@ -235,9 +235,12 @@ function boot(){
    // KT134: examine every readable source span before drafting. Failure is visible.
    const intakeNow=w.intake||{};
    const readableDocs=Array.isArray(intakeNow.document_texts)?intakeNow.document_texts:[];
-   const declaredCount=Math.max(readableDocs.length,
-    Array.isArray(intakeNow.files)?intakeNow.files.length:0,
-    Array.isArray(intakeNow.dossier_documents)?intakeNow.dossier_documents.length:0);
+   const documentFormat=/\.(txt|csv|json|md|pdf|docx?|jpe?g|png|webp|bmp|tiff?)$/i;
+   const registeredSources=[
+    ...(Array.isArray(intakeNow.files)?intakeNow.files:[]).map(x=>str(x?.filename||x?.name||x?.file||x?.source)),
+    ...(Array.isArray(intakeNow.dossier_documents)?intakeNow.dossier_documents:[]).map(x=>str(x?.file||x?.source))
+   ].filter(name=>documentFormat.test(name));
+   const declaredCount=Math.max(readableDocs.length,new Set(registeredSources).size);
    const batch=buildEvidenceChunks(readableDocs,5000);
    const receipts=[];
    let allResponses=true;
