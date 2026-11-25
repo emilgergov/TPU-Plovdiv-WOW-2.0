@@ -54,7 +54,7 @@ const liveReplay=[
  '3. Процесуални действия и предложение за решение',
  'Да се изискат допълнителни геопространствени данни и нова експертна оценка, без уточнена правна норма.',
  '4. Експертна проверка'
-].join('\\n');
+].join('\n');
 const repaired=normalizeComplaintDraft(liveReplay,q);
 assert.ok(repaired.includes('Нормативни предпоставки и граници на проверката'));
 assert.ok(repaired.includes('Мотивирано предложение'));
@@ -62,7 +62,7 @@ assert.ok(repaired.includes('Данни за експертна проверка
 assert.ok(!complaintDraftIssues(repaired,q).includes('COMPLAINT_ACTION_SECTION_MISSING'));
 assert.ok(complaintDraftIssues(repaired,q).includes('COMPLAINT_UNPROVEN_GIS_REQUEST'),
  'Editing the headings MUST NOT hide the ungrounded GIS request');
-assert.ok(complaintDraftIssues(draft+'\\nЧл. 2, ал. 2 регламентира ред за възражение по административно писмо.',q)
+assert.ok(complaintDraftIssues(draft+'\nЧл. 2, ал. 2 регламентира ред за възражение по административно писмо.',q)
  .includes('COMPLAINT_MISATTRIBUTED_OS_ART2_REMEDY'));
 assert.ok(worker.includes('complaintDraftIssues(finalDraft,lockedQualification)'),
  'Complaint-specific reviewer errors must reach the corrective loop');
