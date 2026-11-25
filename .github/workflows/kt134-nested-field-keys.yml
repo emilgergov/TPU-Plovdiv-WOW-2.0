@@ -1,0 +1,41 @@
+name: KT134 inspect nested E1-E3 JSON field keys
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-nested-field-keys.yml']
+permissions:
+  contents: write
+jobs:
+  fields:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Discover nested key names, never JSON values
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const root='https://api.cloudflare.com/client/v4/accounts/'+process.env.ACCOUNT;
+          const headers={Authorization:'Bearer '+process.env.CF_TOKEN,'Content-Type':'application/json'};
+          const s=await(await fetch(root+'/workers/scripts/tpu-plovdiv-kt125-local-auth/settings',{headers})).json();
+          const db=s.result?.bindings?.find(x=>x.name==='KT125_DB')?.id;
+          if(!db)throw Error('KT125_DB_NOT_BOUND');
+          const sql="SELECT DISTINCT t.path AS parent_path, t.key AS field, t.type AS value_type FROM kt126_versions AS v, json_tree(v.content_json) AS t WHERE json_valid(v.content_json) AND t.key IS NOT NULL AND length(t.path)<100 AND length(CAST(t.key AS TEXT))<85 AND t.type IN ('object','array','text','integer','real','true','false','null') ORDER BY parent_path,field LIMIT 350";
+          const r=await fetch(root+'/d1/database/'+db+'/query',{method:'POST',headers,body:JSON.stringify({sql})});
+          const j=await r.json();if(!j.success)throw Error('D1_JSON_KEY_QUERY_FAILED');
+          const rows=(j.result?.[0]?.results||[]).map(x=>({parent:x.parent_path,key:String(x.field),type:x.value_type}));
+          writeFileSync('kt134-auto/KT134_VERSION_NESTED_KEYS.json',JSON.stringify({metadataOnly:true,rows},null,2)+'\n');
+          console.log('Found '+rows.length+' JSON field key descriptors');
+          NODE
+      - name: Save field names only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_VERSION_NESTED_KEYS.json
+          git commit -m 'KT134: map nested case JSON keys without sensitive values' || exit 0
+          git pull --rebase origin kt134-auto-mode-isolated
+          git push origin HEAD:kt134-auto-mode-isolated
