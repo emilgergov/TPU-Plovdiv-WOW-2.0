@@ -4,13 +4,14 @@
  * isolated EG Worker branch. KT125 server supplies the credential and
  * the complete preassembled case/source payload, never a public page.
  */
+import {buildKt134CompleteStage4Request} from './kt134-complete-dossier-stage4.mjs';
 const invalid=(code)=>{const e=new Error(code);e.code=code;throw e;};
 const value=x=>typeof x==='string'?x.trim():'';
 const chosen=text=>value(text).match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\s*[—–-]?\s*([^\n]*)/iu);
 export function createKt134EgStage45Bridge({workerBase,accessToken,fetchImpl,
   stage4RequestFactory}={}){
  if(!/^https:\/\//u.test(workerBase||'')||!value(accessToken)||
-    typeof fetchImpl!=='function'||typeof stage4RequestFactory!=='function')
+    typeof fetchImpl!=='function'||(stage4RequestFactory!==undefined&&typeof stage4RequestFactory!=='function'))
    invalid('EG_BRIDGE_NOT_CONFIGURED');
  const base=workerBase.replace(/\/$/u,'');
  let active=null;
@@ -25,7 +26,9 @@ export function createKt134EgStage45Bridge({workerBase,accessToken,fetchImpl,
  };
  return Object.freeze({
   async invokeAuthor({caseId,revision,subject,evidence}){
-    const stage4=await stage4RequestFactory({caseId,revision,subject,evidence});
+    const stage4=stage4RequestFactory
+      ?await stage4RequestFactory({caseId,revision,subject,evidence})
+      :buildKt134CompleteStage4Request({caseId,revision,bundle:evidence});
     if(stage4?.task!=='draft_normative_proposal'||stage4?.caseId!==caseId||
        !value(stage4.subject)||!value(stage4.scope)||!Array.isArray(stage4.parcelIds)||
        !value(stage4.requestId))invalid('EG_STAGE4_PAYLOAD_MISSING');
