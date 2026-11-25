@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   live-existing-eg:
-    if: true # User-authorized bounded retry after exact-version rollout verification fix; disable after result
+    if: false # KT134 live E4→E5 acceptance PASS run 45697551806; prevent repeat charges and test worker modification
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
