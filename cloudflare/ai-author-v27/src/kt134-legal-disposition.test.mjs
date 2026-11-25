@@ -49,3 +49,15 @@ test("not enough qualification sources never silently fabricates a physical gap 
  assert.ok(txt.includes("№5"));
  assert.ok(!txt.includes("Технологичен капацитет"));
 });
+
+test("art.2(2) OS letter cannot follow from spatial non-intersection and absent legal categories",()=>{
+ const d=deriveKt134LegalDisposition({qualification:null,qualificationValidated:false,reviewerPanelId:1});
+ const doc="Следва да се приложи чл. 2, ал. 2 от Наредбата за ОС и да се издаде писмо, с което да се уведоми, че ИП не подлежи на оценка за съвместимост.";
+ const issues=kt134DispositionTextIssues(doc,d);
+ assert.ok(issues.includes("UNSUPPORTED_OS_EXCLUSION"));
+ assert.ok(issues.includes("UNSUPPORTED_OS_ART2_2_LETTER"));
+});
+test("uncertain annex evidence does not justify mandatory screening under art. 93 ZOOS",()=>{
+ const d=deriveKt134LegalDisposition({qualification:q(),qualificationValidated:true,reviewerPanelId:4});
+ assert.ok(kt134DispositionTextIssues("Следва да се проведе преценка на необходимостта от ОВОС по чл. 93.",d).includes("UNSUPPORTED_MANDATORY_EIA_SCREENING"));
+});
