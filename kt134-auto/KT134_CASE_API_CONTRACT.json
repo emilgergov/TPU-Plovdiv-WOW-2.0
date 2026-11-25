@@ -1,0 +1,84 @@
+{
+  "routes": [
+    {
+      "path": "/kt125/cases/",
+      "present": true,
+      "nearbyMethodTokens": [
+        "auth"
+      ],
+      "nearbyFieldNames": []
+    },
+    {
+      "path": "/kt125/local-auth",
+      "present": true,
+      "nearbyMethodTokens": [
+        "auth",
+        "case"
+      ],
+      "nearbyFieldNames": []
+    },
+    {
+      "path": "/auth/login",
+      "present": true,
+      "nearbyMethodTokens": [
+        "auth"
+      ],
+      "nearbyFieldNames": []
+    },
+    {
+      "path": "/kt126/registry",
+      "present": true,
+      "nearbyMethodTokens": [
+        "auth",
+        "registry",
+        "userid",
+        "status",
+        "case"
+      ],
+      "nearbyFieldNames": [
+        "userId",
+        "role"
+      ]
+    },
+    {
+      "path": "/stage4-proposal",
+      "present": true,
+      "nearbyMethodTokens": [
+        "document",
+        "request",
+        "post",
+        "error",
+        "get",
+        "json",
+        "caseid",
+        "case"
+      ],
+      "nearbyFieldNames": [
+        "subject",
+        "scope",
+        "caseId",
+        "revision"
+      ]
+    },
+    {
+      "path": "/stage5-document",
+      "present": true,
+      "nearbyMethodTokens": [
+        "document",
+        "request",
+        "post",
+        "error",
+        "get",
+        "json",
+        "caseid",
+        "case"
+      ],
+      "nearbyFieldNames": [
+        "subject",
+        "scope",
+        "caseId",
+        "revision"
+      ]
+    }
+  ]
+}
