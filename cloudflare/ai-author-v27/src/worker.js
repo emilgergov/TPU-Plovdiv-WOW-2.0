@@ -826,12 +826,22 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
       procedureEvidence,caseDocuments:sourceTexts
     });
     if(routeIssues.length){
+      // Only structurally available routes appear in the reviewer's selection
+      // schema. This never chooses a route on behalf of the reviewer.
+      const candidateRoutes=KT109_ROUTE_CATALOG.filter(route=>
+        kt134ReviewerRouteIssues({
+          panelId:route.id,qualification:lockedQualification,
+          qualificationValidated:qualificationValidation?.ok===true,
+          procedureEvidence,caseDocuments:sourceTexts
+        }).length===0);
+      const candidateIds=candidateRoutes.map(route=>route.id);
       const system=[
         "Ти си независимият рецензент в последния междинен цикъл. Не връщаш преписката и не искаш експертно междинно потвърждение.",
         "Изборът на панел в предишния ти проект НЕ е подкрепен от наличните правни и процесуални факти. САМ избери друг обоснован панел от реалния каталог, без да променяш доказателствата и четирите нормативни статуса.",
         "Не избирай панел №09 без доказателства едновременно за образувана текуща процедура и конкретно правно основание за прекратяване. Не избирай панел за формално решение без проведени законово изискуеми предходни действия.",
         "Панел №02 е възможен само при реален и конкретен физически факт от наличния документ, необходим за един правен критерий. Липсващо становище на експерт или юридическа категория не е физически факт.",
         "Панел №13 също не е универсален изход: ако има доказано основание за конкретно писмо или друго действие, предпочети неговия правилен панел.",
+        "Списъкът candidateRoutes включва само структурно допустимите за настоящата преписка административни действия. Избери ЕДИН панел само от този списък; избери го въз основа на собствените си мотиви, а не чрез предварително предпочитание.",
         "Пиши на български. Дай finalDraft като ПЪЛЕН нов проект с всички досегашни 4 раздела и един ред ИЗБРАН ПАНЕЛ: NN — точното заглавие от каталога. В action изведи едно ясно мотивирано реално действие, което СЪОТВЕТСТВА на selectedPanel.",
         "В reason обясни с конкретен факт и нормативна предпоставка защо това действие е допустимо. Не твърди недоказана отрицателна приложимост или издаване на административен акт."
       ].join("\n");
@@ -842,7 +852,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
           body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:5700,
             text:{format:{type:"json_schema",name:"kt134_reviewer_route_alignment",strict:true,
               schema:{type:"object",additionalProperties:false,properties:{
-                selectedPanel:{type:"integer",minimum:1,maximum:22},
+                selectedPanel:{type:"integer",enum:candidateIds},
                 action:{type:"string"},reason:{type:"string"},finalDraft:{type:"string"}
               },required:["selectedPanel","action","reason","finalDraft"]}}},
             input:[{role:"system",content:system},{role:"user",content:JSON.stringify({
@@ -853,7 +863,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
               qualificationValidated:qualificationValidation?.ok===true,
               caseFacts:confirmed.slice(0,30),unconfirmedFacts:unresolved.slice(0,15),
               sourceDocuments:sourceTexts.slice(0,12).map(x=>({source:x.source,text:x.text.slice(0,1800)})),
-              procedureEvidence,routeCatalog:KT109_ROUTE_CATALOG,
+              procedureEvidence,candidateRoutes,
               instruction:"Избери и мотивирай ЕДНО допустимо административно действие. Ако първоначалният панел не е защитим, коригирай го сам и пиши целия коригиран проект."
             })}]})
         });
@@ -871,14 +881,17 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
             qualificationValidated:qualificationValidation?.ok===true,
             procedureEvidence,caseDocuments:sourceTexts
           });
-          if(candidate.length>=120&&catalogTitle&&Number(candidateMatch?.[1])===routeId&&
-             candidateMatch?.[2]?.trim()===catalogTitle&&
-             typeof resolved.reason==="string"&&resolved.reason.trim().length>=35&&
+          if(candidate.length>=120&&catalogTitle&&candidateIds.includes(routeId)&&
+             Number(candidateMatch?.[1])===routeId&&
+             typeof resolved.reason==="string"&&resolved.reason.trim().length>=25&&
              kt134ReviewerActionMatch({
                panelId:routeId,documentTitle:catalogTitle,
                action:resolved.action,legalReadiness:candidateIssues
              })&&candidateIssues.length===0){
-            finalDraft=candidate;
+            // Preserve the reviewer's chosen number and full text; normalize
+            // only the catalog label so the signed Stage5 title is canonical.
+            finalDraft=candidate.replace(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\s*[—–-]?\s*[^\n]*/iu,
+              "ИЗБРАН ПАНЕЛ: "+routeId+" — "+catalogTitle);
             reviewerAction=resolved.action.trim();
             reviewerFindings.push("Рецензентът независимо преразгледа първоначално неподкрепения панел въз основа на фактите и нормативните предпоставки.");
             reviewedIssues=reviewedQuality(candidate)
