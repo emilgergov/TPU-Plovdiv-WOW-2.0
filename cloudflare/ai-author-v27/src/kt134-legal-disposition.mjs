@@ -56,6 +56,19 @@ export function kt134DispositionTextIssues(text,disposition){
  const errors=[];
  const claimsFormal93=/(?:да\s+се\s+издад[еа]|предлага\s+се\s+издаване|следва\s+издаване)[^.!?\n]{0,120}(?:решение\s+по\s+чл\.?\s*93|решение\s+за\s+преценяване\s+необходимостта\s+от\s+ОВОС)|(?:решение\s+по\s+чл\.?\s*93)[^.!?\n]{0,120}(?:да\s+се\s+издад[еа]|следва\s+да\s+се\s+издаде)/iu.test(body);
  if(claimsFormal93&&!disposition.formalDecisionReady)errors.push("UNSUPPORTED_FORMAL_DECISION_93");
+ // Examine complete administrative clauses; actual documents use variants
+ // "мотивирано решение за преценяване на необходимостта", bullet points and
+ // "да се проведе процедура по чл. 93". These are substantive claims even
+ // when the old regex misses the word order.
+ const clauses=body.split(/[\n;]|(?<=[.!?])\s+(?=[А-Я])/u).map(x=>x.trim()).filter(Boolean);
+ const formal93Clause=clauses.some(clause=>{
+   const references93=/(?:чл\.?\s*93|решение\s+за\s+преценяване\s+на?\s*необходимостта\s+от\s+ОВОС)/iu.test(clause);
+   const proposes=/(?:следва\s+да\s+се|предлага\s+се|издаване|да\s+се\s+издаде|провеждане|да\s+се\s+проведе|стартиране|да\s+се\s+стартира|образуване)/iu.test(clause);
+   const disclaims=/(?:не\s+се\s+предлага|не\s+следва|не\s+е\s+обосновано|без\s+да\s+се\s+издава|не\s+е\s+допустимо)/iu.test(clause);
+   return references93&&proposes&&!disclaims;
+ });
+ if(formal93Clause&&!disposition.formalDecisionReady)errors.push("UNPROVEN_FORMAL_ACT_OR_PROCEDURE_93");
+
  const claimsEIAExcluded=/(?:не\s+се\s+(?:изисква|налага|прилага|провежда)[^.!?\n]{0,75}(?:ОВОС|преценка)|(?:ОВОС|преценка\s+за\s+ОВОС)[^.!?\n]{0,55}не\s+се\s+(?:изисква|налага)|процедур(?:ите|а)[^.!?\n]{0,55}по\s+ЗООС[^.!?\n]{0,60}(?:неприложими|не\s+са\s+приложими))/iu.test(body);
  if(claimsEIAExcluded&&!disposition.annexNegative)errors.push("UNSUPPORTED_EIA_EXCLUSION");
  const osExclusionClaim=/(?:не\s+се\s+(?:изисква|налага|прилага|провежда)[^.!?\n]{0,75}(?:ОС|оценка\s+за\s+съвместимост)|(?:процедура|оценка)\s+по\s+Наредбата\s+за\s+ОС[^.!?\n]{0,90}(?:неприложима|не\s+се\s+налага)|не\s+подлежи\s+на\s+(?:процедура|оценка)[^.!?\n]{0,55}съвместимост|няма\s+основания[^.!?\n]{0,105}(?:ОВОС|ОС)|не\s+подлежи[^.!?\n]{0,65}(?:ОВОС|ОС))/iu.test(body);
