@@ -1,0 +1,299 @@
+{
+  "readOnly": true,
+  "rows": [
+    {
+      "name": "_cf_KV",
+      "columns": [
+        "value"
+      ]
+    },
+    {
+      "name": "kt125_access_requests",
+      "columns": [
+        "organization_id",
+        "identity_provider",
+        "provider_subject",
+        "email",
+        "display_name",
+        "note",
+        "status",
+        "created_at_ms",
+        "updated_at_ms",
+        "decided_by",
+        "invitation_id"
+      ]
+    },
+    {
+      "name": "kt125_audit",
+      "columns": [
+        "organization_id",
+        "case_id",
+        "actor_id",
+        "action",
+        "outcome",
+        "timestamp_ms",
+        "request_id",
+        "details_json"
+      ]
+    },
+    {
+      "name": "kt125_cases",
+      "columns": [
+        "organization_id",
+        "owner_id",
+        "status",
+        "created_at_ms",
+        "updated_at_ms"
+      ]
+    },
+    {
+      "name": "kt125_grants",
+      "columns": [
+        "case_id",
+        "organization_id",
+        "grantor_id",
+        "grantee_id",
+        "actions_json",
+        "not_before_ms",
+        "expires_at_ms",
+        "revoked_at_ms",
+        "created_at_ms"
+      ]
+    },
+    {
+      "name": "kt125_invitation_mail",
+      "columns": [
+        "organization_id",
+        "state",
+        "first_attempt_ms",
+        "attempt_at_ms",
+        "provider_id",
+        "from_email",
+        "activation_origin",
+        "payload_json"
+      ]
+    },
+    {
+      "name": "kt125_local_accounts",
+      "columns": [
+        "organization_id",
+        "request_id",
+        "username",
+        "email",
+        "password_hash",
+        "display_name",
+        "note",
+        "state",
+        "approved_role",
+        "user_id",
+        "existing_user_id",
+        "credential_version",
+        "activation_nonce",
+        "activation_expires_ms",
+        "activated_at_ms",
+        "created_at_ms",
+        "updated_at_ms"
+      ]
+    },
+    {
+      "name": "kt125_local_limits",
+      "columns": [
+        "started_ms",
+        "hits"
+      ]
+    },
+    {
+      "name": "kt125_local_outbox",
+      "columns": [
+        "account_id",
+        "organization_id",
+        "state",
+        "created_at_ms",
+        "attempt_at_ms"
+      ]
+    },
+    {
+      "name": "kt125_local_resets",
+      "columns": [
+        "account_id",
+        "credential_version",
+        "nonce",
+        "expires_at_ms",
+        "used_at_ms",
+        "mail_state",
+        "created_at_ms"
+      ]
+    },
+    {
+      "name": "kt125_local_sessions",
+      "columns": [
+        "account_id",
+        "credential_version",
+        "user_updated_at_ms",
+        "created_at_ms",
+        "expires_at_ms"
+      ]
+    },
+    {
+      "name": "kt125_staff_invitations",
+      "columns": [
+        "organization_id",
+        "identity_provider",
+        "email",
+        "display_name",
+        "role",
+        "status",
+        "invited_by",
+        "created_at_ms",
+        "expires_at_ms",
+        "accepted_user_id",
+        "updated_at_ms"
+      ]
+    },
+    {
+      "name": "kt125_staff_profiles",
+      "columns": [
+        "organization_id",
+        "identity_provider",
+        "email",
+        "display_name"
+      ]
+    },
+    {
+      "name": "kt125_users",
+      "columns": [
+        "organization_id",
+        "identity_provider",
+        "provider_subject",
+        "role",
+        "active",
+        "created_at_ms",
+        "updated_at_ms",
+        "activation_pending"
+      ]
+    },
+    {
+      "name": "kt126_artifacts",
+      "columns": [
+        "case_id",
+        "actor_id",
+        "case_revision",
+        "document_version",
+        "filename",
+        "sha256",
+        "bytes",
+        "created_at_ms"
+      ]
+    },
+    {
+      "name": "kt126_chunks",
+      "columns": [
+        "source_id",
+        "part",
+        "bytes",
+        "sha256",
+        "size"
+      ]
+    },
+    {
+      "name": "kt126_claims",
+      "columns": [
+        "actor_id",
+        "request_key",
+        "case_id",
+        "payload_hash",
+        "year"
+      ]
+    },
+    {
+      "name": "kt126_counters",
+      "columns": [
+        "year",
+        "last_number"
+      ]
+    },
+    {
+      "name": "kt126_files",
+      "columns": [
+        "source_id",
+        "filename",
+        "size",
+        "sha256",
+        "parts",
+        "complete"
+      ]
+    },
+    {
+      "name": "kt126_operations",
+      "columns": [
+        "request_id",
+        "case_revision",
+        "actor_id",
+        "endpoint",
+        "payload_hash",
+        "status",
+        "response_status",
+        "response_json",
+        "created_at_ms"
+      ]
+    },
+    {
+      "name": "kt126_registry",
+      "columns": [
+        "organization_id",
+        "year",
+        "sequence",
+        "internal_number",
+        "source_name",
+        "source_hash",
+        "revision",
+        "external_number",
+        "external_status",
+        "external_by",
+        "external_at_ms",
+        "external_evidence_json",
+        "created_at_ms"
+      ]
+    },
+    {
+      "name": "kt126_versions",
+      "columns": [
+        "revision",
+        "actor_id",
+        "kind",
+        "content_json",
+        "created_at_ms"
+      ]
+    },
+    {
+      "name": "kt127_mail_batches",
+      "columns": [
+        "organization_id",
+        "actor_id",
+        "request_key",
+        "data_json",
+        "created_at_ms"
+      ]
+    },
+    {
+      "name": "kt127_mail_recipients",
+      "columns": [
+        "email",
+        "label",
+        "position",
+        "state",
+        "attempt_at_ms"
+      ]
+    },
+    {
+      "name": "kt127_presentation_drafts",
+      "columns": [
+        "actor_id",
+        "data_json",
+        "recipients_json",
+        "revision",
+        "updated_at_ms"
+      ]
+    }
+  ]
+}
