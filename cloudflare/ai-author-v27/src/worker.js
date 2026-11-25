@@ -972,23 +972,70 @@ async function handleStage5Document(request,env){
    const clean=x=>String(x||"").trim();
    const issues=d.unresolvedIssues.map(clean).filter(Boolean);
    const reasons=(Array.isArray(d.reviewerReasons)?d.reviewerReasons:[]).map(clean).filter(Boolean);
-   const body=[
-     "Относно: „"+clean(input.subject).replace(/[„“]/gu,"")+".",
-     "ПРОЕКТ ЗА ЕКСПЕРТНО ПРОИЗНАСЯНЕ — РЕЦЕНЗЕНТСКО ПРЕДЛОЖЕНИЕ",
-     "Междинната преценка е извършена автоматично от независимия рецензент. Проектът не е административен акт и не удостоверява окончателна приложимост на правния режим.",
-     "ПРЕДЛОЖЕНО НАПРАВЛЕНИЕ: "+clean(input.selectedPanelLine)+". Направлението е предложение с изрично посочени нерешени основания, а не окончателна процедура.",
-     "МОТИВИ НА РЕЦЕНЗЕНТА:",
-     ...clean(d.reviewedText).split("\n").filter(Boolean).slice(0,65),
-     "НЕРАЗРЕШЕНИ НОРМАТИВНИ ВЪПРОСИ:",
-     ...issues.map((x,i)=>(i+1)+". "+x),
-     "ДОПЪЛНИТЕЛНИ МОТИВИ И ДОКАЗАТЕЛСТВЕНИ ГРАНИЦИ:",
-     ...reasons.map((x,i)=>(i+1)+". "+x),
-     "СЛЕДВАЩО ДЕЙСТВИЕ: Предложението и посочените възражения се представят едновременно за окончателна преценка от експерта; правните несъответствия не се представят като разрешени."
-   ].join("\n");
+   const proposedPanel=clean(input.selectedPanelLine);
+   const subject=clean(input.subject).replace(/[„“]/gu,"");
+   // KT134: one coherent working draft, not a raw dump of reviewer findings.
+   // The reviewer still proposes an action; the expert retains final authority.
+   // Technical error codes remain in metadata, NEVER in institutional prose.
+   let body="";
+   try {
+     const composeResponse=await fetch("https://api.openai.com/v1/responses",{
+       method:"POST",signal:AbortSignal.timeout(65000),
+       headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
+       body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:3300,
+        input:[
+         {role:"system",content:[
+          "Ти си независим РЕЦЕНЗЕНТ, който оформя ЕДНО завършено мотивирано административно ПРЕДЛОЖЕНИЕ на български за окончателна преценка от експерта.",
+          "Не копирай целия авторски текст или суровите рецензентски забележки. Не включвай технически кодове, имената на тестови валидатори или вътрешни процеси.",
+          "Задължителни раздели: Относно: „...“; Фактически констатации; Правни предпоставки; Мотивирано предложение; Заключение и следващо действие.",
+          "Не измисляй местоположение, ГИС пресичания, технологични параметри, доказани категории, нормативни членове или заповеди. Не превръщай липсващи данни в доказана отрицателна приложимост.",
+          "Ако предложената процедура/панел не следва логично от установените факти, посочи я като непотвърдена хипотеза и формулирай собствено конкретно допустимо административно предложение с точно посочените липсващи предпоставки.",
+          "Без акт, без подпис, без категорична окончателна правна квалификация при непълни доказателства. Използвай официален административен стил; не изреждай вътрешни кодове.",
+          "Рецензентът не връща преписката и не иска междинно потвърждение от потребителя; предлага резултат за окончателната човешка преценка."
+         ].join("\n")},
+         {role:"user",content:JSON.stringify({
+           caseId:input.caseId,subject:input.subject,scope:input.scope,
+           parcels:input.parcelIds,proposedDirection:proposedPanel,
+           reviewedProposal:clean(d.reviewedText).slice(0,12000),
+           reviewerArgumentNotes:reasons.slice(0,8),
+           unresolvedQualityFlagsCount:issues.length,
+           qualityWarning:"Наличието на неразрешени нормативни несъответствия означава, че предложената процедура НЕ е автоматично доказана."
+         })}
+        ]})
+     });
+     if(composeResponse.ok){
+       const data=await composeResponse.json();
+       const candidate=(data.output||[]).flatMap(x=>x.content||[])
+         .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
+       if(candidate.startsWith("Относно:")&&candidate.length>=280&&
+          !/(?:\bMISSING_[A-Z_]+\b|\bPANEL_\d\d_[A-Z_]+\b|\bUNSUPPORTED_[A-Z_]+\b)/u.test(candidate))
+         body=candidate;
+     }
+   }catch{}
+   if(!body){
+     // Service-independent proposal: no invented statutory determination.
+     const safeIssues=[
+       "Правната квалификация и съответствието на избрания панел с установените предпоставки не са достатъчно обосновани.",
+       "Не се приема за установена отрицателна приложимост само поради липса на технически параметри или пространствено непресичане."
+     ];
+     body=[
+       "Относно: „"+subject+"“",
+       "ПРОЕКТ НА МОТИВИРАНО ПРЕДЛОЖЕНИЕ ЗА ЕКСПЕРТНА ПРЕЦЕНКА",
+       "Фактически констатации",
+       clean(input.scope),
+       "Правни предпоставки",
+       ...safeIssues,
+       "Мотивирано предложение",
+       "Рецензентът предлага да се разгледа направлението "+proposedPanel+
+         " като работна хипотеза, чиято нормативна приложимост не е установена окончателно.",
+       "Заключение и следващо действие",
+       "Компетентният експерт следва да се произнесе по представеното мотивирано предложение, като отчете конкретните недоказани предпоставки; този текст не е административен акт."
+     ].join("\n");
+   }
    return reply({caseId:input.caseId,evidenceRevision:input.evidenceRevision,
      requestId:input.requestId,stage4Version:input.stage4Version,
      selectedPanelLine:input.selectedPanelLine,
-     documentTitle:"Проект за експертно произнасяне",
+     documentTitle:"Проект на мотивирано предложение за експертна преценка",
      incomingReference:safeReference,draft:body,
      editorialFlags:issues,projectOnly:true,expertReviewRequired:true,
      documentIssued:false,wordTemplateApplied:false,
