@@ -781,7 +781,8 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   // complete, independently revalidated correction.
   const correctedByReviewer=finalDraft!==draft&&reviewedIssues.length===0;
   // The reviewer may disagree, but its verdict alone cannot veto a case.
-  const reviewDisposition=verdict==="reject"?"revise":verdict;
+  const reviewerUnresolved=verdict==="reject"&&!correctedByReviewer;
+  const reviewDisposition=reviewerUnresolved?"неразрешено рецензентско несъгласие":verdict==="reject"?"revise":verdict;
   if(reviewedIssues.length)
    return expertPreview("Рецензирано предложение за експертен преглед; нормативните несъответствия остават видими.",
     [...new Set([...issues,...reviewedIssues])],
@@ -795,10 +796,10 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     subject:payload.subject,scope:payload.scope},env.KT123_HANDOFF_SIGNING_KEY||env.OPENAI_API_KEY):null;
   const kt134Content=kt134DraftDiagnostics(withReviewConclusion(finalDraft),{stage:4,sourceTexts,gis:detail.gis||null,legalTexts:verifiedLegalCorpus.legalProvisions,reviewFindings:reviewerFindings});
   return reply({caseId:payload.caseId,evidenceRevision:payload.evidenceRevision,
-   kt134Content,requestId:payload.requestId,projectOnly:true,expertReviewRequired:true,
+   kt134Content,reviewerUnresolved,requestId:payload.requestId,projectOnly:true,expertReviewRequired:true,
    archiveEvidenceVerified:true,draft:withReviewConclusion(finalDraft),authorDraft:draft,
    qualificationRecord:lockedQualification,qualificationProof,qualificationGate:{sourceAnchorsMatched:qualificationValidation?.ok===true,legalApplicabilityCertified:false,expertConfirmationRequired:true},
-    normativeAudit:{reviewed:true,reviewVerdict:reviewDisposition,originalReviewVerdict:verdict,authorRepairs,kt134ReviewerCorrectionAttempted,kt134ReviewerCorrectionApplied,
+    normativeAudit:{reviewed:true,reviewVerdict:reviewDisposition,originalReviewVerdict:verdict,reviewerUnresolved,authorRepairs,kt134ReviewerCorrectionAttempted,kt134ReviewerCorrectionApplied,
      deterministicModel:evaluateDraft(finalDraft).decision,
      legalApplicabilityAutomaticallyCertified:false,selectedPanelId:Number(finalDraft.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0)||null,fullArticlesVerified:true,allArchiveSourcesExamined:false,verifiedLegalProvisionCount:verifiedLegalCorpus.legalProvisions.length,findings:reviewerFindings},
    evidenceReceipt:{documentTextsReceived:sourceTexts.length,
