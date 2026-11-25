@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   live-existing-eg:
-    if: false # Disable costly live runs after E4 reviewer evidence; next test only after distinct complaint route is complete
+    if: true # KT134 one bounded live test of independently signed complaint route; disable after completion
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
