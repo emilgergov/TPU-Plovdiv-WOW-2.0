@@ -873,7 +873,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
           });
           if(candidate.length>=120&&catalogTitle&&Number(candidateMatch?.[1])===routeId&&
              candidateMatch?.[2]?.trim()===catalogTitle&&
-             typeof resolved.reason==="string"&&resolved.reason.trim().length>=60&&
+             typeof resolved.reason==="string"&&resolved.reason.trim().length>=35&&
              kt134ReviewerActionMatch({
                panelId:routeId,documentTitle:catalogTitle,
                action:resolved.action,legalReadiness:candidateIssues
@@ -881,7 +881,8 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
             finalDraft=candidate;
             reviewerAction=resolved.action.trim();
             reviewerFindings.push("Рецензентът независимо преразгледа първоначално неподкрепения панел въз основа на фактите и нормативните предпоставки.");
-            reviewedIssues=reviewedQuality(candidate);
+            reviewedIssues=reviewedQuality(candidate)
+              .filter(x=>x!=="AUTHOR_CHANGED_PANEL");
             routeIssues=[];
             reviewerRouteCorrections.push({from:assessedPanel,to:routeId});
             verdict="revise";
