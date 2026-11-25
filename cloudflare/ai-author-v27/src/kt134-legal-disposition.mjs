@@ -86,6 +86,25 @@ export function kt134DispositionTextIssues(text,disposition){
  if(definiteLetterArt2&&!panel01Proven)errors.push("UNSUPPORTED_OS_ART2_2_LETTER");
  const screeningMandatory=/(?:следва\s+да\s+се\s+(?:проведе|стартира|инициира)|(?:необходима|задължителна)\s+е)[^.!?\n]{0,125}(?:преценка\s+(?:за|на)\s+необходимостта\s+от\s+ОВОС|процедура\s+по\s+чл\.?\s*93)|(?:преценка\s+по\s+чл\.?\s*93)[^.!?\n]{0,100}(?:е\s+задължителна|следва\s+да\s+се\s+проведе)/iu.test(body);
  if(screeningMandatory&&!disposition.annexPositive)errors.push("UNSUPPORTED_MANDATORY_EIA_SCREENING");
+ // An intermediate letter must request ONLY specifically identified
+ // physical facts relevant to a legal category, not a fishing expedition
+ // for broad studies of emissions, wastes, waters and all technologies.
+ if(disposition.proposedPanel===2){
+   const proposal=body.split(/Мотивирано предложение\s*:/iu)[1]?.split(/Заключение и следващо действие/iu)[0]||body;
+   const requested=/(?:следва\s+да\s+се\s+изиска|изисква\s+се|да\s+се\s+представи|представяне\s+на|предоставяне\s+на|да\s+бъде\s+изискана)/iu.test(proposal);
+   const scopes=[
+     /капацитет|мощност/iu,/технолог|оборудван|машин/iu,
+     /площ|рзп|застроен/iu,/емиси|въздух/iu,/отпадъц/iu,
+     /водоползван|води/iu,/опасн.{0,12}веществ/iu,
+     /материал|суровин/iu
+   ];
+   if(requested&&scopes.filter(r=>r.test(proposal)).length>=4)
+     errors.push("UNJUSTIFIED_BROAD_INFORMATION_REQUEST");
+   if(/(?:пълна|детайлна|изчерпателна)\s+техническа\s+документация/iu.test(proposal))
+     errors.push("UNJUSTIFIED_FULL_TECHNICAL_DOSSIER");
+ }
+ if(/(?:изготвил\s*:\s*(?:независим\s+)?рецензент|дата\s*:\s*\[по\s+решение\s+на\s+експерта\]|ЕГ\s+автор\s*\/\s*рецензент)/iu.test(body))
+   errors.push("INTERNAL_REVIEW_PROCESS_IN_DOCUMENT");
  if(/(?:\bMISSING_[A-Z_]+\b|\bPANEL_\d\d_[A-Z_]+\b|\bUNSUPPORTED_[A-Z_]+\b)/u.test(body))
   errors.push("TECHNICAL_CODE_IN_DOCUMENT");
  return errors;
