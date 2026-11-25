@@ -36,7 +36,8 @@ export function createKt134NativeDossierAdapters({db,resolvePrincipal,getNormati
   if(!principal||!str(principal.userId)||principal.authenticated!==true)
     fail('KT125_AUTH_REQUIRED');
   const user=await select(db,'SELECT user_id,organization_id,role,active FROM kt125_users WHERE user_id=?',principal.userId);
-  if(!user||Number(user.active)!==1||user.organization_id!==principal.organizationId)
+  if(!user||Number(user.active)!==1||user.organization_id!==principal.organizationId||
+     !['expert','egmaster','administrator','admin'].includes(String(user.role||'').toLowerCase()))
     fail('KT125_AUTH_REQUIRED');
   const c=await select(db,'SELECT case_id,organization_id,owner_id,status,updated_at_ms FROM kt125_cases WHERE case_id=? AND organization_id=?',caseId,user.organization_id);
   if(!c)fail('CASE_NOT_FOUND');
@@ -76,6 +77,7 @@ export function createKt134NativeDossierAdapters({db,resolvePrincipal,getNormati
   if(!gisMode)fail('KT134_GIS_CONTEXT_UNCONFIRMED');
   const normative=await getNormativeMaster({caseId,principal});
   if(!normative||!str(normative.name)||!Array.isArray(normative.verifiedReferences)||
+     normative.verifiedReferences.length===0||
      !/^[a-f0-9]{64}$/i.test(normative.sha256||''))
     fail('KT134_NORMATIVE_MASTER_MISSING');
   const piMaster=get(['piMaster','parcelMaster']);
