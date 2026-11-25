@@ -1085,6 +1085,7 @@ async function handleStage5Document(request,env){
    });
    const evaluationRule=disposition.recommendedNextStep;
    const proposedPanel=clean(input.selectedPanelLine);
+   const signedReviewerAction=clean(d.reviewerAction);
    const subject=clean(input.subject).replace(/[„“]/gu,"");
    // KT134: one coherent working draft, not a raw dump of reviewer findings.
    // The reviewer still proposes an action; the expert retains final authority.
@@ -1114,7 +1115,8 @@ async function handleStage5Document(request,env){
           "Когато qualificationValidated=false, четирите изхода не са доказани дори ако рецензентският текст ги излага категорично. Не ги повишавай до фактически проверени изводи.",
           "Ако предложената процедура/панел не следва логично от установените факти, посочи я като непотвърдена хипотеза и формулирай собствено конкретно допустимо административно предложение с точно посочените липсващи предпоставки.",
           "Без акт, без подпис, без категорична окончателна правна квалификация при непълни доказателства. Използвай официален административен стил; не изреждай вътрешни кодове.",
-          "Рецензентът не връща преписката и не иска междинно потвърждение от потребителя; предлага резултат за окончателната човешка преценка."
+          "Рецензентът не връща преписката и не иска междинно потвърждение от потребителя; предлага резултат за окончателната човешка преценка.",
+          "Полето signedReviewerAction представлява вече обоснованото и подписано конкретно административно действие на рецензента. Запази неговата правна същност и връзката с избрания панел; не преминавай към друг вид документ или процедура."
          ].join("\n")},
          {role:"user",content:JSON.stringify({
            caseId:input.caseId,subject:input.subject,scope:input.scope,
@@ -1128,7 +1130,7 @@ async function handleStage5Document(request,env){
            legalPredicateDisposition:evaluationRule,
            formalDecisionReady:disposition.formalDecisionReady,
            physicalGap:disposition.physicalGap,
-           proposedDirection:proposedPanel,
+           proposedDirection:proposedPanel,signedReviewerAction,
            reviewedProposal:clean(d.reviewedText).slice(0,12000),
            reviewerArgumentNotes:reasons.slice(0,8),
            unresolvedQualityFlagsCount:issues.length,
