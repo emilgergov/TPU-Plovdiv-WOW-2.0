@@ -1,0 +1,47 @@
+name: KT134 verify stored E1-E3 field shapes
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-version-field-shapes.yml']
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Read only distinct version kinds and JSON key names
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const root='https://api.cloudflare.com/client/v4/accounts/'+process.env.ACCOUNT,h={Authorization:'Bearer '+process.env.CF_TOKEN,'Content-Type':'application/json'};
+          const settings=await(await fetch(root+'/workers/scripts/tpu-plovdiv-kt125-local-auth/settings',{headers:h})).json();
+          const db=settings.result?.bindings?.find(x=>x.name==='KT125_DB')?.id;
+          if(!db)throw Error('KT125_DB_MISSING');
+          const sqls={
+            overview:"SELECT (SELECT COUNT(*) FROM kt125_cases) AS cases, (SELECT COUNT(*) FROM kt126_versions) AS versions, (SELECT COUNT(*) FROM kt126_files) AS files",
+            versionKinds:"SELECT DISTINCT kind FROM kt126_versions ORDER BY kind LIMIT 30",
+            topLevelJsonKeys:"SELECT DISTINCT j.key AS field FROM kt126_versions v, json_each(v.content_json) j WHERE json_valid(v.content_json) AND j.type NOT IN ('null') ORDER BY field LIMIT 90"
+          };
+          const report={readOnly:true};
+          for(const [key,sql] of Object.entries(sqls)){
+            const r=await fetch(root+'/d1/database/'+db+'/query',{method:'POST',headers:h,body:JSON.stringify({sql})});
+            const j=await r.json();if(!j.success)throw Error('KT126_METADATA_UNAVAILABLE_'+key);
+            report[key]=j.result?.[0]?.results||[];
+          }
+          writeFileSync('kt134-auto/KT134_E1_E3_STORAGE_SHAPES.json',JSON.stringify(report,null,2)+'\n');
+          console.log('KT134 version field names inspected');
+          NODE
+      - name: Save metadata report
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_E1_E3_STORAGE_SHAPES.json
+          git commit -m 'KT134: map stored E1-E3 version fields without reading case values' || exit 0
+          git pull --rebase origin kt134-auto-mode-isolated
+          git push origin HEAD:kt134-auto-mode-isolated
