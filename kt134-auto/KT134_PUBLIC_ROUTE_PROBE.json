@@ -1,0 +1,35 @@
+{
+  "unauthenticated": true,
+  "rows": [
+    {
+      "path": "/user",
+      "status": 403,
+      "contentType": "text/html",
+      "redirect": false
+    },
+    {
+      "path": "/kt125/local-auth",
+      "status": 403,
+      "contentType": "text/html",
+      "redirect": false
+    },
+    {
+      "path": "/kt125/cases/KT134-PROBE-NO-REAL-CASE",
+      "status": 403,
+      "contentType": "text/html",
+      "redirect": false
+    },
+    {
+      "path": "/kt126/registry",
+      "status": 403,
+      "contentType": "text/html",
+      "redirect": false
+    },
+    {
+      "path": "/auth/login",
+      "status": 200,
+      "contentType": "text/html",
+      "redirect": false
+    }
+  ]
+}
