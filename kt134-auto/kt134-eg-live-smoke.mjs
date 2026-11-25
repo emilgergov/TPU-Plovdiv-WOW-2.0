@@ -6,6 +6,7 @@ import {createDraftWordAdapter} from './kt134-auto-word-adapter.mjs';
 import {buildKt134CompleteStage4Request} from './kt134-complete-dossier-stage4.mjs';
 import {composeKt134CaseAwareStage5Draft} from './kt134-case-aware-word-body.mjs';
 import {deriveKt134LegalDisposition,kt134DispositionTextIssues} from '../cloudflare/ai-author-v27/src/kt134-legal-disposition.mjs';
+import {kt134ReviewerRouteIssues,kt134ReviewerActionMatch} from '../cloudflare/ai-author-v27/src/kt134-reviewer-route-alignment.mjs';
 const base=process.env.KT134_EG_BASE||'https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev';
 const token=process.env.LIVE_EG_TOKEN||'';
 if(!token)throw Error('KT134 isolated EG token unavailable');
@@ -75,6 +76,16 @@ const line=d.reviewedText.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b[^
 if(!line||Number(line.match(/\d{1,2}/)?.[0])!==d.selectedPanelId)
  throw Error('Reviewer selected panel inconsistent');
 const documentTitle=line.replace(/^ИЗБРАН\s+ПАНЕЛ\s*:\s*0?\d{1,2}\s*[—–-]?\s*/iu,'').trim();
+const selectedRouteProblems=kt134ReviewerRouteIssues({
+ panelId:d.selectedPanelId,qualification:a.qualificationRecord,
+ qualificationValidated:a.qualificationGate?.sourceAnchorsMatched===true,
+ procedureEvidence:[],caseDocuments:stage4.completeCaseEvidence.sourceTexts
+});
+console.log('KT134 REVIEWER ROUTE AUDIT:',JSON.stringify({
+ panel:d.selectedPanelId,issues:selectedRouteProblems,
+ reviewerAction:d.reviewerAction||null,
+ selfCorrections:d.reviewerRouteCorrections||[]
+}).slice(0,1500));
 const stage5Request={
  task:'draft_stage5_document',caseId:id,requestId:'kt134-full-synthetic-stage5',
  evidenceRevision:revision,stage4Version:1,subject:stage4.subject,scope:stage4.scope,
@@ -95,6 +106,11 @@ const stage5Request={
  }
 };
 console.log('KT134 FULL SYNTHETIC: live Stage5 reviewer proposal, panel',d.selectedPanelId);
+// Document quality is evaluated independently of EG transport success.
+if(selectedRouteProblems.length)throw Error('REVIEWER_ROUTE_NOT_GROUNDED: '+selectedRouteProblems.join(','));
+if(d.reviewerAction&&!kt134ReviewerActionMatch({
+ panelId:d.selectedPanelId,documentTitle,action:d.reviewerAction,legalReadiness:selectedRouteProblems
+}))throw Error('REVIEWER_ACTION_WRONG_PANEL');
 const b=await post('/stage5-document',stage5Request);
 if(b.caseId!==id||b.projectOnly!==true||b.documentIssued!==false||
  b.automaticReviewerIntermediate!==true||!b.draft?.startsWith('Относно:'))
@@ -141,6 +157,9 @@ const audit={
  reviewerAlternativeUsed:b.normativeDisposition?.reviewerAlternativeUsed===true,
  legalPredicateIssuesAfterReview:contentQualityIssues,
  reviewerProposedPanel:d.selectedPanelId,
+ reviewerAction:d.reviewerAction||null,
+ reviewerRouteCorrections:d.reviewerRouteCorrections||[],
+ reviewerRouteProblems:selectedRouteProblems,
  note:'Technical acceptance only; neither the fabricated spatial values nor the legal conclusion have been independently certified.'
 };
 await writeFile(dir+'/full-dossier-result.json',JSON.stringify(audit,null,2));
