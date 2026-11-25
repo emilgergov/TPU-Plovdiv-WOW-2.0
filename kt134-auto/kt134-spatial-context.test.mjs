@@ -46,3 +46,16 @@ test('missing PI MASTER is a visible gap but does not veto a genuine GIS result'
  assert.equal(out.historicalPIMaster,null);
  assert.ok(out.gaps.some(s=>s.includes('ПИ MASTER')));
 });
+
+test('claimed successful GIS receipt without a geometry check stays unverified, even with cited evidence',async()=>{
+ const read=createKT134SpatialContext({
+  readSpatial:async()=>({caseId,verified:true,geometryVerified:false,evidence:[
+   {sourceType:'gis',sourceId:'HISTORICAL-PI',sourceLocation:'ПИ MASTER',verification:'verified'}
+  ]}),
+  readParcelIndex:async()=>({caseId,verified:false,parcels:[]})
+ });
+ const out=await read(input);
+ assert.equal(out.verified,false);
+ assert.equal(out.geometryVerified,false);
+ assert.ok(out.gaps.some(s=>s.includes('геометрична')));
+});
