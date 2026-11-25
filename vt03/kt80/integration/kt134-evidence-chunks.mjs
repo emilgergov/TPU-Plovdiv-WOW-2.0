@@ -8,10 +8,20 @@ export function buildEvidenceChunks(documents,maxChars=5000){
   const content=str(d.text).replace(/\r\n/g,"\n");
   const sourceId=name||"Документ "+(i+1);
   if(!content.trim()){unreadable.push({documentIndex:i,source:sourceId,reason:"NO_EXTRACTED_TEXT"});continue}
-  for(let start=0;start<content.length;start+=maxChars){
-   const end=Math.min(content.length,start+maxChars);
+  for(let start=0;start<content.length;){
+   const hardEnd=Math.min(content.length,start+maxChars);
+   let end=hardEnd;
+   if(hardEnd<content.length){
+    const minBreak=start+Math.floor(maxChars*0.65);
+    const paragraph=content.lastIndexOf("\n",hardEnd-1);
+    const sentence=content.lastIndexOf(". ",hardEnd-1);
+    if(paragraph>=minBreak)end=paragraph+1;
+    else if(sentence>=minBreak)end=sentence+2;
+   }
+   if(end<=start)end=hardEnd;
    chunks.push({documentIndex:i,source:sourceId,start,end,totalChars:content.length,
     text:content.slice(start,end),untrustedDocumentText:true});
+   start=end;
   }
  }
  return {chunks,unreadable,totalDocuments:documents.length};
