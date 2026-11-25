@@ -102,7 +102,8 @@ export function createKt134EgStage45Bridge({workerBase,accessToken,fetchImpl,
        result.documentIssued!==false||result.automaticReviewerIntermediate!==true)
        invalid('EG_STAGE5_RESULT_MISMATCH');
     return {caseId,revision,status:'draft',expertApproved:false,
-       panelId:reviewerDecision.panelId,documentTitle:stage5Request.documentTitle,
+       panelId:reviewerDecision.panelId,
+       documentTitle:result.reviewerProposalOnly===true?result.documentTitle:stage5Request.documentTitle,
        content:stage4.completeCaseEvidence?.evidenceProvenance==='CASE_SPECIFIC_NO_SYNTHETIC_SOURCE'
         ?composeKt134CaseAwareStage5Draft({stage5Text:result.draft,stage4Request:stage4})
         :result.draft};
