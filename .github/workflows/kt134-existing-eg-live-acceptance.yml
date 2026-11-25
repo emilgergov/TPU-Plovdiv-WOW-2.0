@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   live-existing-eg:
-    if: false # One-time live replay concluded; disabled to prevent repeated AI calls
+    if: true # One user-requested live verification after E4 reviewer correction; re-disable after result
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
