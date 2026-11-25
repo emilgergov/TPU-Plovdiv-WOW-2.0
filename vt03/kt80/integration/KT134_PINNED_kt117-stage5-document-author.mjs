@@ -251,7 +251,10 @@ function initialize(){
      data.expertReviewRequired!==true||clean(data.draft).length<120){
      note.textContent='Отговорът не съответства на потвърдената преписка.';return;
    }
-   editorialIssues=Array.isArray(data.editorialFlags)?data.editorialFlags.filter(x=>typeof x==='string').slice(0,8):[];
+   const kt134Notes=Array.isArray(data.kt134Content?.findings)?data.kt134Content.findings
+    .filter(x=>typeof x?.reason==='string'&&x.reason.trim())
+    .slice(0,8).map(x=>x.reason):[];
+   editorialIssues=[...(Array.isArray(data.editorialFlags)?data.editorialFlags.filter(x=>typeof x==='string').slice(0,8):[]),...kt134Notes];
    editorialContent.replaceChildren(...editorialIssues.map(x=>make('p',x)));
    editorial.hidden=!editorialIssues.length;
    const normalized=formatDraftSubject(data.draft);
