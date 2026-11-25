@@ -1,0 +1,52 @@
+{
+  "readOnly": true,
+  "functions": [
+    {
+      "function": "getCookie",
+      "calls": [
+        "request",
+        "request",
+        "request"
+      ]
+    },
+    {
+      "function": "createSession",
+      "calls": [
+        "{ db, account, now, sessionToken = token(",
+        "{ db, account, now }"
+      ]
+    },
+    {
+      "function": "readSession",
+      "calls": []
+    },
+    {
+      "function": "findSession",
+      "calls": []
+    },
+    {
+      "function": "getSession",
+      "calls": []
+    },
+    {
+      "function": "digest2",
+      "calls": []
+    },
+    {
+      "function": "purposeToken",
+      "calls": [
+        "env, purpose, account",
+        "env, \"reset\", { ...row, activation_nonce: row.nonce, activation_expires_ms: row.expires_at_ms }",
+        "env, \"activate\", row",
+        "env, \"activate\", account"
+      ]
+    }
+  ],
+  "cookieConstants": [],
+  "sqlMarkers": [
+    "kt125_local_sessions",
+    "token_hash",
+    "expires_at_ms",
+    "credential_version"
+  ]
+}
