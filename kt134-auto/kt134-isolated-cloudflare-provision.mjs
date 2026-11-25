@@ -11,7 +11,7 @@
  */
 import {createHash} from 'node:crypto';
 const account=process.env.KT134_CF_ACCOUNT||'';
-const token=process.env.CLOUDFLARE_API_TOKEN||'';
+const token=process.env.KT134_CLOUDFLARE_API_TOKEN||'';
 const mode=process.env.KT134_PROVISION_MODE||'plan';
 const confirmation=process.env.KT134_CONFIRMATION||'';
 const branch=process.env.GITHUB_REF_NAME||'';
