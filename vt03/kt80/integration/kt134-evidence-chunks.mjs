@@ -55,3 +55,30 @@ export function evidenceCoverage(expected,receipts){
   unreadableDocuments:expected.unreadable,unexamined,
   claims:(receipts||[]).flatMap(x=>Array.isArray(x?.claims)?x.claims:[])};
 }
+
+/** Bound the ONE-request evidence digest without excluding all later documents.
+ * Important: complete=false means further source retrieval may be needed. */
+export function packAnchoredClaims(claims,byteLimit=26000){
+ const input=Array.isArray(claims)?claims:[];
+ const groups=new Map();
+ for(const c of input){
+  const key=String(c?.documentIndex??"")+":"+String(c?.source??"");
+  if(!groups.has(key))groups.set(key,[]);
+  groups.get(key).push(c);
+ }
+ const queues=[...groups.values()].map(items=>items.sort((a,b)=>Number(a?.start)-Number(b?.start)));
+ const packed=[],encoder=new TextEncoder();
+ let more=true;
+ while(more){
+  more=false;
+  for(const queue of queues){
+   if(!queue.length)continue;
+   more=true;
+   const candidate=queue.shift();
+   if(encoder.encode(JSON.stringify([...packed,candidate])).length<=byteLimit)
+    packed.push(candidate);
+  }
+ }
+ return {claims:packed,selected:packed.length,total:input.length,complete:packed.length===input.length,
+  omitted:input.length-packed.length};
+}
