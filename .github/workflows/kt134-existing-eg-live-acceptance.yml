@@ -1,0 +1,137 @@
+name: KT134 live acceptance - existing EG test Worker
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt134-existing-eg-live-acceptance.yml'
+permissions:
+  contents: read
+jobs:
+  live-existing-eg:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+      SCRIPT: tpu-plovdiv-kt134-eg-test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build KT134 Candidate for EXISTING EG test Worker
+        run: |
+          set -euo pipefail
+          npx --yes esbuild@0.25.12 cloudflare/ai-author-v27/src/worker.js --bundle --platform=browser --format=esm --target=es2022 --outfile=/tmp/kt134-existing-eg-worker.mjs
+          node --check /tmp/kt134-existing-eg-worker.mjs
+      - name: Deploy ONLY to existing EG TEST worker and perform live model checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CF_TOKEN" || { echo "::error::Cloudflare GitHub secret unavailable"; exit 1; }
+          dir="$(mktemp -d)"
+          chmod 700 "$dir"
+          api="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/$SCRIPT"
+          base="https://$SCRIPT.emilgergov.workers.dev"
+          deployed=0
+          accepted=0
+          cleanup() {
+            code="$?"
+            if [[ "$deployed" == "1" && "$accepted" != "1" && -s "$dir/rollback.json" ]]; then
+              echo "Test did not pass — restoring previous EG test Worker deployment."
+              curl -sS --max-time 30 -X POST "$api/deployments" \
+               -H "Authorization: Bearer $CF_TOKEN" -H 'Content-Type: application/json' \
+               --data-binary "@$dir/rollback.json" > "$dir/rollback-result.json" || true
+              node - "$dir/rollback-result.json" <<'NODE'
+          const fs=require('fs');let d;try{d=JSON.parse(fs.readFileSync(process.argv[2]))}catch{}
+          console.log('Rollback API success:',d?.success===true);
+          NODE
+            fi
+            rm -rf "$dir"
+            exit "$code"
+          }
+          trap cleanup EXIT
+          curl --fail --silent --show-error --max-time 30 -H "Authorization: Bearer $CF_TOKEN" "$api/deployments" > "$dir/before.json"
+          node - "$dir/before.json" "$dir/rollback.json" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2]));
+          if(!d.success)throw Error('Cannot inspect pre-existing test deployment');
+          const records=Array.isArray(d.result)?d.result:d.result?.deployments||[];
+          const latest=records[0],v=latest?.versions||latest?.deployment?.versions||[];
+          if(!v.length||!v.every(x=>x.version_id&&(x.percentage??0)>=0))
+            throw Error('Cannot construct safe rollback from old test deployment');
+          fs.writeFileSync(process.argv[3],JSON.stringify({strategy:'percentage',
+           versions:v.map(x=>({version_id:x.version_id,percentage:x.percentage}))}));
+          console.log('Existing EG test Worker rollback version recorded; no production Worker involved.');
+          NODE
+          curl --fail --silent --show-error --max-time 30 -H "Authorization: Bearer $CF_TOKEN" "$api/settings" > "$dir/settings-before.json"
+          node - "$dir/settings-before.json" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2]));
+          if(!d.success)throw Error('Cannot inspect EG test bindings');
+          const names=new Set((d.result?.bindings||[]).filter(x=>x.type==='secret_text').map(x=>x.name));
+          for(const req of ['OPENAI_API_KEY','AI_AUTHOR_ACCESS_TOKEN'])
+            if(!names.has(req))throw Error('Existing EG test binding missing: '+req);
+          console.log('Both protected EG test bindings present, values never read or logged.');
+          NODE
+          node - "$dir/metadata.json" "$dir/smoke-key.txt" <<'NODE'
+          const fs=require('fs'),crypto=require('crypto'),key=crypto.randomBytes(32).toString('hex');
+          fs.writeFileSync(process.argv[3],key,{mode:0o600});
+          fs.writeFileSync(process.argv[2],JSON.stringify({
+           main_module:'worker.js',compatibility_date:'2026-10-01',
+           keep_bindings:['secret_text'],
+           bindings:[{name:'KT134_SMOKE_TOKEN',type:'secret_text',text:key}]
+          }),{mode:0o600});
+          NODE
+          code="$(curl --silent --show-error --max-time 90 -o "$dir/upload.json" -w '%{http_code}' \
+             -X PUT "$api" -H "Authorization: Bearer $CF_TOKEN" \
+             -F "metadata=@$dir/metadata.json;type=application/json" \
+             -F "worker.js=@/tmp/kt134-existing-eg-worker.mjs;filename=worker.js;type=application/javascript+module")"
+          echo "Existing EG TEST Worker upload HTTP $code"
+          node - "$dir/upload.json" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2]));
+          if(!d.success){for(const e of d.errors||[])console.error('Upload error:',e.code,e.message);process.exit(1)}
+          NODE
+          curl --fail --silent --show-error --max-time 30 -H "Authorization: Bearer $CF_TOKEN" "$api/settings" > "$dir/settings-after.json"
+          node - "$dir/settings-after.json" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2]));
+          if(!d.success)throw Error('Cannot inspect uploaded test bindings');
+          const names=new Set((d.result?.bindings||[]).filter(x=>x.type==='secret_text').map(x=>x.name));
+          for(const req of ['OPENAI_API_KEY','AI_AUTHOR_ACCESS_TOKEN','KT134_SMOKE_TOKEN'])
+            if(!names.has(req))throw Error('Binding not preserved in test Worker: '+req);
+          console.log('Existing OpenAI and access secrets retained; ephemeral synthetic test token added.');
+          NODE
+          curl --fail --silent --show-error --max-time 30 -H "Authorization: Bearer $CF_TOKEN" "$api/versions?per_page=5" > "$dir/versions.json"
+          node - "$dir/versions.json" "$dir/activate.json" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2]));
+          if(!d.success)throw Error('Cannot inspect test versions');
+          const items=Array.isArray(d.result)?d.result:d.result?.items||[];
+          const id=items[0]?.id||items[0]?.version_id;
+          if(!id)throw Error('No uploaded test version to activate');
+          fs.writeFileSync(process.argv[3],JSON.stringify({strategy:'percentage',
+           versions:[{version_id:id,percentage:100}]}));
+          console.log('Ready to activate new EG TEST version; unrelated production script unchanged.');
+          NODE
+          code="$(curl --silent --show-error --max-time 30 -o "$dir/activated.json" -w '%{http_code}' \
+            -X POST "$api/deployments" -H "Authorization: Bearer $CF_TOKEN" \
+            -H 'Content-Type: application/json' --data-binary "@$dir/activate.json")"
+          echo "Existing EG TEST Worker activation HTTP $code"
+          node - "$dir/activated.json" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2]));
+          if(!d.success){for(const e of d.errors||[])console.error('Activation error:',e.code,e.message);process.exit(1)}
+          NODE
+          deployed=1
+          for attempt in 1 2 3 4 5 6; do
+            code="$(curl -sS --max-time 15 -o "$dir/health.json" -w '%{http_code}' "$base/kt134-candidate-health" || true)"
+            if [[ "$code" == "200" ]]; then break; fi
+            sleep 2
+          done
+          node - "$dir/health.json" <<'NODE'
+          const fs=require('fs');let d;try{d=JSON.parse(fs.readFileSync(process.argv[2]))}catch{}
+          if(d?.contract!=='KT134_EVIDENCE_SPAN_V1'||d?.aiConfigured!==true||d.candidateOnly!==true)
+            throw Error('EG TEST Worker lacks correct KT134 candidate contract');
+          console.log('EXISTING EG TEST Worker health verified with protected AI bindings.');
+          NODE
+          KT134_SMOKE_BEARER="$(cat "$dir/smoke-key.txt")" \
+           KT134_REPORT_PATH="$dir/kt134-live-result.json" \
+           node KT134/integration/KT134_LIVE_EXISTING_EG_WORKER.test.mjs
+          accepted=1
+          echo 'LIVE TEST PASS — existing EG TEST Worker remains active, production unchanged.'
+      - name: Never touch production Worker
+        if: always()
+        run: echo 'This workflow addresses only tpu-plovdiv-kt134-eg-test. Production Worker upload/deploy routes are absent.'
