@@ -1,0 +1,48 @@
+name: KT134 native session cookie primitives
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-session-primitives.yml']
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Identify cookie name and digest primitive without exporting auth source
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+process.env.ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth',
+            {headers:{Authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('NATIVE_UNAVAILABLE');
+          const s=await r.text();
+          const names=['function getCookie(', 'async function sessionUser(', 'function sessionUser(', 'async function digest(', 'function digest(', 'function digest2(', 'async function digest2(', 'function token('];
+          const methods=names.map(name=>{
+            const i=s.indexOf(name);
+            if(i<0)return {name,found:false};
+            const segment=s.slice(i,i+1100);
+            const literalStrings=[...segment.matchAll(/(["'`])([^"'`]{1,75})\1/g)].map(m=>m[2])
+              .filter(x=>!/[A-Za-z0-9_-]{32,}/.test(x)).slice(0,25);
+            const regexes=[...segment.matchAll(/\/(?:[^\/\n\\]|\\.){1,90}\/[gimsy]*/g)].map(x=>x[0])
+              .filter(x=>/cookie|session|token|kt125|auth|^\/\(\?/.test(x)).slice(0,8);
+            const cryptoFlags=['SHA-256','SHA-512','HMAC','subtle.digest','createHash','TextEncoder'].filter(x=>segment.includes(x));
+            return {name,found:true,literalStrings,regexes,cryptoFlags};
+          });
+          writeFileSync('kt134-auto/KT134_SESSION_PRIMITIVES.json',JSON.stringify({readOnly:true,methods},null,2)+'\n');
+          console.log('Native session primitive indicators extracted');
+          NODE
+      - name: Save primitive identifiers
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_SESSION_PRIMITIVES.json
+          git commit -m 'KT134: inspect native session primitive format' || exit 0
+          git pull --rebase origin kt134-auto-mode-isolated
+          git push origin HEAD:kt134-auto-mode-isolated
