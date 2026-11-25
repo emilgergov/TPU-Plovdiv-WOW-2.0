@@ -1,0 +1,47 @@
+name: KT134 identify native session verifier
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-identify-session-verifier.yml']
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Inspect only structural authentication identifiers
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+process.env.ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth',
+            {headers:{Authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('NATIVE_SOURCE_UNAVAILABLE');
+          const source=await r.text();
+          const functions=['getCookie','createSession','readSession','findSession','getSession','digest2','purposeToken'];
+          const result=functions.map(name=>{
+            const calls=[...source.matchAll(new RegExp('(?:\\b'+name+'\\s*\\()([^)]{0,180})\\)','g'))]
+              .map(x=>x[1]).slice(0,14).map(a=>a.replace(/[A-Za-z0-9-_]{32,}/g,'[opaque]'));
+            return {function:name,calls};
+          });
+          const cookieConstants=[...source.matchAll(/(?:const|let|var)\s+(\w*(?:COOKIE|SESSION)\w*)\s*=\s*(["'`])([^"'`]{1,90})\2/gi)]
+            .map(m=>({name:m[1],value:m[3]})).filter(x=>!/secret|password|key/i.test(x.name+' '+x.value)).slice(0,35);
+          const sqlMarkers=['kt125_local_sessions','token_hash','expires_at_ms','credential_version'];
+          writeFileSync('kt134-auto/KT134_AUTH_VERIFIER_SIGNATURES.json',JSON.stringify({
+             readOnly:true,functions:result,cookieConstants,sqlMarkers
+          },null,2)+'\n');
+          console.log('Native verifier structural signatures inspected');
+          NODE
+      - name: Save nonsecret contract signatures
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_AUTH_VERIFIER_SIGNATURES.json
+          git commit -m 'KT134: identify KT125 native verifier call signatures' || exit 0
+          git pull --rebase origin kt134-auto-mode-isolated
+          git push origin HEAD:kt134-auto-mode-isolated
