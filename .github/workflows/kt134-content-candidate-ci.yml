@@ -9,6 +9,9 @@ on:
       - 'cloudflare/ai-author-v27/src/worker.js'
       - 'cloudflare/ai-author-v27/src/kt134-stage5-handoff-contract.test.mjs'
       - 'vt03/kt80/integration/KT134_PINNED_kt117-stage5-document-author.mjs'
+      - 'vt03/kt80/integration/KT134_PINNED_kt96-eg-ai-stage4-author.mjs'
+      - 'vt03/kt80/integration/kt134-evidence-chunks.mjs'
+      - 'vt03/kt80/integration/kt134-evidence-chunks.test.mjs'
       - '.github/workflows/kt134-content-candidate-ci.yml'
   workflow_dispatch:
 permissions:
@@ -26,7 +29,10 @@ jobs:
           node --check cloudflare/ai-author-v27/src/kt134-content-diagnostics.mjs
           node --check cloudflare/ai-author-v27/src/worker.js
           node --check vt03/kt80/integration/KT134_PINNED_kt117-stage5-document-author.mjs
+          node --check vt03/kt80/integration/KT134_PINNED_kt96-eg-ai-stage4-author.mjs
+          node --check vt03/kt80/integration/kt134-evidence-chunks.mjs
       - name: Run content diagnostic regression suite
         run: |
           node cloudflare/ai-author-v27/src/kt134-content-diagnostics.test.mjs
           node cloudflare/ai-author-v27/src/kt134-stage5-handoff-contract.test.mjs
+          node vt03/kt80/integration/kt134-evidence-chunks.test.mjs
