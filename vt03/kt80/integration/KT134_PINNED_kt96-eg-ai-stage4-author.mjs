@@ -183,6 +183,7 @@ function boot(){
  let serial=0,pendingSignature='',finishedSignature='',lastResult=null;
  const clear=()=>{
   serial++;pendingSignature='';finishedSignature='';lastResult=null;password.value='';
+  window.KT134EvidenceLedger=null;
   if(dialog.open)dialog.close();button.disabled=false;output.textContent='';output.style.display='none';
   status.textContent='';status.style.display='none';lead.textContent='';lead.style.display='none';expanded.style.display='none';expanded.open=false;showEstablishedEvidence();
  };
@@ -425,10 +426,18 @@ function boot(){
     requestId,draft:data.draft,projectOnly:true,expertApproved:false,
     providerArchiveEvidenceVerified:data.archiveEvidenceVerified===true
    });
+   window.KT134EvidenceLedger=Object.freeze({
+    caseId:identity.caseId,evidenceRevision:h.evidenceRevision,
+    coverageComplete:data.evidenceReceipt?.dossierAllSourceSpansExamined===true,
+    expectedChunks:Number(data.evidenceReceipt?.sourceSpansExpected)||0,
+    examinedChunks:Number(data.evidenceReceipt?.sourceSpansExamined)||0,
+    sourceAnchoredClaims:Object.freeze([...request.completeCaseEvidence.kt134DossierCoverage.sourceAnchoredClaims])
+   });
    const receipt=data.evidenceReceipt||{};
    const dossierCount=Number(receipt.documentTextsReceived)||0;
+   const coverageText='Прочит на документи: '+(receipt.dossierAllSourceSpansExamined===true?'пълно покритие':'непълно покритие')+' ('+(Number(receipt.sourceSpansExamined)||0)+' / '+(Number(receipt.sourceSpansExpected)||0)+' части). ';
    const availableCount=Number(receipt.documentTextsAvailable)||0;
-   const sourceInfo='Входни данни: '+dossierCount+' от '+availableCount+
+   const sourceInfo=coverageText+'Входни данни: '+dossierCount+' от '+availableCount+
      ' документа с извлечен текст; '+(Number(receipt.caseFactsReceived)||0)+
      ' доказателствени позиции; ГИС: '+(receipt.gisContextReceived?'предаден':'липсва')+
      '; нормативни препратки: '+(Number(receipt.archiveIndexRecordsReceived)||0)+
