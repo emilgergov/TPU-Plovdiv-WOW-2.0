@@ -12,7 +12,7 @@ export function createKT134SpatialContext({readSpatial,readParcelIndex}={}){
    readSpatial(input),readParcelIndex(input)
   ]);
   const verifiedActual=actual.status==='fulfilled'&&actual.value?.caseId===input.caseId
-   &&actual.value.verified===true;
+   &&actual.value.verified===true&&actual.value.geometryVerified===true;
   const gis=actual.status==='fulfilled'&&actual.value?.caseId===input.caseId?
    actual.value:null;
   const pi=archive.status==='fulfilled'&&archive.value?.caseId===input.caseId?
