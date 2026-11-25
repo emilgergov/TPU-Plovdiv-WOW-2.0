@@ -12,7 +12,7 @@ function accepted(result,type,caseId){
    str(e.sourceId)&&str(e.sourceLocation)&&e.sourceType===type);
 }
 export function assessKT134EvidenceReadiness({caseId,spatial,normative}={}){
- const spatialVerified=accepted(spatial,'gis',caseId);
+ const spatialVerified=spatial?.geometryVerified===true&&accepted(spatial,'gis',caseId);
  const normativeVerified=accepted(normative,'legal',caseId);
  const missing=[];
  if(!spatialVerified)missing.push('Липсва независим проверен ГИС резултат за конкретната преписка');
