@@ -26,6 +26,9 @@ if(branch!==expectedBranch)abort('Refused: not on isolated branch');
 if(!/^[a-f0-9]{32}$/i.test(account))abort('Invalid Cloudflare account');
 if(!token)abort('Cloudflare secret missing');
 if(!['plan','create'].includes(mode))abort('Unsupported mode');
+// KT134 staging resources were created and bound on 2026-11-25.
+// Retire the creation path permanently: reuse tpu-plovdiv-kt134-test instead.
+if(mode==='create')abort('KT134 permanent staging exists: new resource creation disabled');
 if(mode==='create'&&confirmation!=='CREATE_KT134_ISOLATED_ONLY')abort('Explicit isolated creation confirmation required');
 if([w,dbName,bucketName].some(x=>!x.startsWith('kt134-isolated-')))abort('Invalid staging resource name');
 const request=async(path,{method='GET',body,headers={}}={})=>{
