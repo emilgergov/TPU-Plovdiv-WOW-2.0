@@ -756,7 +756,7 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   // KT134: reviewer verifies every INTERMEDIATE gate in automatic mode.
   // Server signs exactly the reviewed text/panel. This is not expert approval.
   const reviewedText=withReviewConclusion(finalDraft);
-  const reviewerSelectedPanel=Number(finalDraft.match(/ИЗБРАН\\s+ПАНЕЛ\\s*:\\s*0?(\\d{1,2})\\b/iu)?.[1]||0);
+  const reviewerSelectedPanel=Number(finalDraft.match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\b/iu)?.[1]||0);
   const reviewerIntermediate=(lockedQualification&&qualificationValidation?.ok===true&&
       KT109_ROUTE_BY_ID.has(reviewerSelectedPanel))?{
     mode:"KT134_REVIEWER_INTERMEDIATE",caseId:payload.caseId,
