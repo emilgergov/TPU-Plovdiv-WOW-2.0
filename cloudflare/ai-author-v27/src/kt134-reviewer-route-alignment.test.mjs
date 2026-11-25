@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {test} from "node:test";
+import {KT109_ROUTE_CATALOG} from "./kt109-route-catalog.mjs";
 import {kt134ReviewerRouteIssues,kt134ReviewerActionMatch} from "./kt134-reviewer-route-alignment.mjs";
 test("panel 09 is not a valid termination without active procedure and legal basis",()=>{
  const result=kt134ReviewerRouteIssues({panelId:9,qualificationValidated:false,procedureEvidence:[]});
@@ -26,4 +27,16 @@ test("case-specific expert report panel 13 is not silently substituted for revie
  assert.deepEqual(kt134ReviewerRouteIssues({panelId:13}),[]);
  assert.ok(kt134ReviewerActionMatch({panelId:13,documentTitle:"Експертна справка",action:"Предлага се експертна справка с фактически и нормативни констатации"}));
  assert.equal(kt134ReviewerActionMatch({panelId:13,documentTitle:"Експертна справка",action:"Предлага се писмо по чл. 2, ал. 2"}),false);
+});
+
+test("reviewer is offered multiple evidenced routes without preselecting one, excluding unsupported 05 07 09",()=>{
+ const caseDocuments=[{source:"test-description",text:"Липсват потвърдени данни за капацитет и технологично оборудване."}];
+ const available=KT109_ROUTE_CATALOG.filter(route=>
+  kt134ReviewerRouteIssues({panelId:route.id,qualificationValidated:false,caseDocuments,procedureEvidence:[]}).length===0)
+  .map(route=>route.id);
+ assert.ok(available.includes(2),"documented factual gap permits panel02");
+ assert.ok(available.includes(13),"expert reference remains an option");
+ assert.ok(available.includes(14),"case review remains an option");
+ for(const denied of [1,4,5,6,7,8,9,11,12])assert.ok(!available.includes(denied),"improper formal or legal route "+denied);
+ assert.ok(available.length>=3,"reviewer retains independent choice");
 });
