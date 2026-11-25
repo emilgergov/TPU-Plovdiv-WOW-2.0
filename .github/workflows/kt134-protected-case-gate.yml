@@ -6,6 +6,8 @@ on:
       - 'kt134-auto/kt134-protected-case-gate.mjs'
       - 'kt134-auto/kt134-protected-case-gate.test.mjs'
       - '.github/workflows/kt134-protected-case-gate.yml'
+      - 'kt134-auto/kt134-protected-auto-coordinator.mjs'
+      - 'kt134-auto/kt134-protected-auto-coordinator.test.mjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,5 +23,7 @@ jobs:
         run: |
           node --check kt134-auto/kt134-protected-case-gate.mjs
           node --check kt134-auto/kt134-protected-case-gate.test.mjs
+          node --check kt134-auto/kt134-protected-auto-coordinator.mjs
+          node --check kt134-auto/kt134-protected-auto-coordinator.test.mjs
       - name: Protected case, evidence and draft regressions (no deployment)
-        run: node --test kt134-auto/kt134-protected-case-gate.test.mjs
+        run: node --test kt134-auto/kt134-protected-case-gate.test.mjs kt134-auto/kt134-protected-auto-coordinator.test.mjs
