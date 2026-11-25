@@ -18,6 +18,7 @@ on:
       - 'vt03/kt80/integration/kt134-auto-pipeline.mjs'
       - 'vt03/kt80/integration/KT134_PINNED_kt116-expert-approval-handoff.mjs'
       - 'KT134/integration/KT134_AUTO_PIPELINE_ACCEPTANCE.test.mjs'
+      - 'KT134/integration/KT134_AUTOMATIC_BROWSER_E2E.test.cjs'
       - 'vt03/kt80/KT82_E01_SAFE_ZIP_INTAKE_V35.js'
       - 'vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html'
       - '.github/workflows/kt134-content-candidate-ci.yml'
@@ -60,3 +61,7 @@ jobs:
         env:
           CHROMIUM_PATH: /usr/bin/google-chrome
         run: node KT134/integration/KT134_BROWSER_SMOKE.test.cjs
+      - name: Browser simulation — automatic E4 E5 and only one expert approval
+        env:
+          CHROMIUM_PATH: /usr/bin/google-chrome
+        run: node KT134/integration/KT134_AUTOMATIC_BROWSER_E2E.test.cjs
