@@ -57,13 +57,30 @@ export function createKt134NativeDossierAdapters({db,resolvePrincipal,getNormati
   // Version state is authoritative; never use an unverified in-browser intake as an established fact.
   const versions=await all(db,'SELECT revision,kind,content_json FROM kt126_versions WHERE case_id=? ORDER BY revision DESC',caseId);
   const latest=versions.map(v=>({...v,data:decodeVersion(v.content_json)}));
-  const get=(keys)=>{for(const v of latest){for(const key of keys){if(v.data?.[key]!==undefined&&v.data[key]!==null)return v.data[key]}}return null};
-  const subject=str(get(['confirmedSubject','subjectText','subject'])?.text||get(['confirmedSubject','subjectText','subject']));
-  const scope=str(get(['confirmedScope','scopeText','scope'])?.text||get(['confirmedScope','scopeText','scope']));
+  // KT126 stores E1–E5 snapshots under state, values and globals.
+  // Read only persisted server versions; do not trust browser-provided facts.
+  const get=(keys)=>{
+    for(const v of latest){
+      const roots=[v.data,v.data?.state,v.data?.values,v.data?.globals,
+        v.data?.globals?.KT80IPMasterDraft,v.data?.globals?.KT80FreeGISResults];
+      for(const root of roots)for(const key of keys)
+        if(root&&root[key]!==undefined&&root[key]!==null)return root[key];
+    }
+    return null;
+  };
+  const rawSubject=get(['confirmedSubject','subjectText','subject','subjectConfirmed','kt80SubjectText','proposedSubject']);
+  const rawScope=get(['confirmedScope','scopeText','scope','kt80ScopeText']);
+  const subject=str(rawSubject?.text||rawSubject?.subject||rawSubject);
+  const scope=str(rawScope?.text||rawScope?.scope||rawScope);
   if(!subject||!scope)fail('KT134_SUBJECT_OR_SCOPE_MISSING');
   if(!['confirmed','verified'].includes(registry.external_status))
     fail('KT126_EXTERNAL_NUMBER_NOT_CONFIRMED');
-  const documents=latest.flatMap(v=>sourceDocuments(v.data));
+  const documents=latest.flatMap(v=>[
+    ...sourceDocuments(v.data),
+    ...sourceDocuments(v.data?.state?.intake),
+    ...sourceDocuments(v.data?.globals?.KT80DossierAudit),
+    ...sourceDocuments(v.data?.globals?.KT80CH2Passport)
+  ]);
   const unique=[...new Map(documents.map(x=>[x.sourceId,x])).values()];
   const files=await all(db,'SELECT source_id,filename,sha256,complete FROM kt126_files WHERE case_id=?',caseId);
   if(!files.length||!files.every(f=>Number(f.complete)===1&&/^[a-f0-9]{64}$/i.test(f.sha256||'')))
@@ -71,7 +88,7 @@ export function createKt134NativeDossierAdapters({db,resolvePrincipal,getNormati
   const bySource=new Map(files.map(f=>[f.source_id,f]));
   if(!unique.length||unique.some(x=>!bySource.has(x.sourceId)))
     fail('KT134_VERIFIED_SOURCE_TEXTS_MISSING');
-  const gis=get(['gis','spatialEvidence','gisResult']);
+  const gis=get(['gis','spatialEvidence','gisResult','KT80FreeGISResults']);
   const gisMode=gis?.pdf1Ref&&gis?.sourceId?'required':
    get(['gisSkipConfirmed'])===true?'contextual_skip':null;
   if(!gisMode)fail('KT134_GIS_CONTEXT_UNCONFIRMED');
@@ -80,8 +97,9 @@ export function createKt134NativeDossierAdapters({db,resolvePrincipal,getNormati
      normative.verifiedReferences.length===0||
      !/^[a-f0-9]{64}$/i.test(normative.sha256||''))
     fail('KT134_NORMATIVE_MASTER_MISSING');
-  const piMaster=get(['piMaster','parcelMaster']);
-  const parcels=list(get(['parcels','confirmedParcels']));
+  const piMaster=get(['piMaster','parcelMaster','KT80IPMasterDraft']);
+  const parcelSource=get(['parcels','confirmedParcels','parcelsConfirmed']);
+  const parcels=list(Array.isArray(parcelSource)?parcelSource:parcelSource?.parcels);
   const revision=String(Math.max(Number(registry.revision)||0,...latest.map(v=>Number(v.revision)||0)));
   const receipts={
     dossier:{type:'dossier',caseId,sourceId:'KT126_FILES',digest:await hash(files.map(f=>[f.source_id,f.sha256]).sort()),verifiedAt:'server'},
