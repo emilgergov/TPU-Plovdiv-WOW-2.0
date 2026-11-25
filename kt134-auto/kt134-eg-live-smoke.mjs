@@ -91,9 +91,9 @@ if(b.caseId!==id||b.projectOnly!==true||b.documentIssued!==false||
  b.automaticReviewerIntermediate!==true||!b.draft?.startsWith('Относно:'))
  throw Error('Stage5 not a reviewer-authorized draft');
 const enriched=composeKt134CaseAwareStage5Draft({stage5Text:b.draft,stage4Request:stage4});
-if(/\\b(?:MISSING_[A-Z_]+|PANEL_\\d\\d_[A-Z_]+|UNSUPPORTED_[A-Z_]+)\\b/u.test(enriched))
+if(/\b(?:MISSING_[A-Z_]+|PANEL_\d\d_[A-Z_]+|UNSUPPORTED_[A-Z_]+)\b/u.test(enriched))
  throw Error('Technical reviewer codes leaked into institutional Word');
-if((enriched.match(/Относно:/gu)||[]).length!==1||!enriched.split('\\n')[0].includes('“'))
+if((enriched.match(/Относно:/gu)||[]).length!==1||!enriched.split('\n')[0].includes('“'))
  throw Error('Unmatched or duplicate subject quotation in Word draft');
 const required=['99999.999.999','Тестово село','Тестова община','1500 кв. м',
  'Синтетична ЗЗ — зона А','1250 м','Синтетична ЗТ — територия Б','840 м',
