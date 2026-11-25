@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import {test} from "node:test";
 import {KT109_ROUTE_CATALOG} from "./kt109-route-catalog.mjs";
-import {kt134ReviewerRouteIssues,kt134ReviewerActionMatch} from "./kt134-reviewer-route-alignment.mjs";
+import {kt134ReviewerRouteIssues,kt134ReviewerActionMatch,kt134ComposeAlignedReviewerDraft} from "./kt134-reviewer-route-alignment.mjs";
 test("panel 09 is not a valid termination without active procedure and legal basis",()=>{
  const result=kt134ReviewerRouteIssues({panelId:9,qualificationValidated:false,procedureEvidence:[]});
  assert.ok(result.includes("KT134_PANEL_09_NO_ACTIVE_PROCEDURE_AND_TERMINATION_BASIS"));
@@ -56,4 +56,22 @@ test("a real complaint permits complaint panel17, but an investment notification
  const complaint=[{source:"appeal",text:"Постъпила жалба срещу предходно административно писмо."}];
  assert.ok(kt134ReviewerRouteIssues({panelId:17,caseDocuments:notice}).length);
  assert.deepEqual(kt134ReviewerRouteIssues({panelId:17,caseDocuments:complaint}),[]);
+});
+
+test("independent reviewer structured decision replaces old unsupported action without changing evidence",()=>{
+ const previous="Фактическа основа\nПИ 99999.999.999, складова сграда.\n"+
+  "Нормативни предпоставки и граници на проверката\nЗаконова категория не е доказана.\n"+
+  "Мотивирано предложение\nСледва да се издаде решение по чл. 93 ЗООС.\n"+
+  "Данни за експертна проверка\nЛипсват физически параметри.\n"+
+  "ИЗБРАН ПАНЕЛ: 07 — Решение по чл. 93 ЗООС";
+ const text=kt134ComposeAlignedReviewerDraft({
+  previousDraft:previous,selectedPanel:2,
+  action:"Предлага се писмо за допълнителна информация само за вид и капацитет на евентуално ново оборудване.",
+  reason:"В техническото описание не е установено дали се въвежда оборудване с определен капацитет, а това е релевантен физически факт за нормативната категория."
+ });
+ assert.ok(text.includes("ПИ 99999.999.999"));
+ assert.ok(text.includes("ИЗБРАН ПАНЕЛ: 2 — Писмо за допълнителна информация"));
+ assert.equal((text.match(/ИЗБРАН ПАНЕЛ:/gu)||[]).length,1);
+ assert.ok(!text.includes("Следва да се издаде решение по чл. 93 ЗООС."));
+ assert.ok(text.includes("Мотиви:"));
 });
