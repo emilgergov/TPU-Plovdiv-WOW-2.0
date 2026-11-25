@@ -1048,6 +1048,33 @@ async function handleStage5Document(request,env){
  if(!response.ok)return reply({error:"Author provider unavailable",providerStatus:response.status},502);
  const data=await response.json();
  let draft=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
+ // KT134: one bounded Stage 5 content repair before existing direction checks.
+ let kt134Stage5RepairAttempted=false,kt134Stage5RepairApplied=false;
+ const firstFlags=kt134DraftDiagnostics(draft,{stage:5}).findings.filter(x=>
+  ["SHORT_UNREASONED_DRAFT","TEST_METADATA_IN_ADMINISTRATIVE_TEXT"].includes(x.code));
+ if(firstFlags.length){
+  kt134Stage5RepairAttempted=true;
+  try{
+   const correction=await fetch("https://api.openai.com/v1/responses",{
+    method:"POST",signal:controller.signal,
+    headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:3700,
+     input:[{role:"system",content:expertRule+directionRules+classicPanel01EditorialStyle+instructions+
+      " КТ134: Преработи ПЪЛНИЯ документ, отстрани тестови/вътрешни означения, обогати само с потвърдените конкретни факти и мотиви. Не променяй избрания панел и не добавяй правни основания, географски факти или реквизити."},
+      {role:"user",content:JSON.stringify({input:JSON.parse(facts),initialDraft:draft,correctionIssues:firstFlags})}]})
+   });
+   if(correction.ok){
+    const repaired=await correction.json();
+    const candidate=(repaired.output||[]).flatMap(x=>x.content||[])
+      .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
+    const remaining=kt134DraftDiagnostics(candidate,{stage:5}).findings.filter(x=>
+     ["SHORT_UNREASONED_DRAFT","TEST_METADATA_IN_ADMINISTRATIVE_TEXT"].includes(x.code));
+    if(candidate.length>=120&&candidate.length<=14000&&remaining.length<firstFlags.length){
+     draft=candidate;kt134Stage5RepairApplied=true;
+    }
+   }
+  }catch{/* Preserve original draft for existing controls and expert review. */}
+ }
  // Server-side contract check: a selected direction cannot silently become another administrative act.
  const unauthorizedRequest=confirmedPanelId===1 &&
   /(?:необходимо\s+е\s+да\s+представите|изисквам\s+да\s+представите|указвам\s+(?:ви\s+)?да\s+(?:представите|допълните)|да\s+допълните\s+представената\s+документация|представете\s+допълнителн[а-я]*\s+(?:документ|информац)|допълнителна\s+информация[,\s]+включваща)/iu.test(draft);
@@ -1113,7 +1140,7 @@ async function handleStage5Document(request,env){
  const kt134Content=kt134DraftDiagnostics(draft,{stage:5});
  return reply({caseId:input.caseId,evidenceRevision:input.evidenceRevision,
  stage4Version:input.stage4Version,requestId:input.requestId,selectedPanelLine:match[0],documentTitle:title,incomingReference:safeReference,
- draft,editorialFlags,kt134Content,projectOnly:true,expertReviewRequired:true,documentIssued:false,wordTemplateApplied:false});
+ draft,editorialFlags,kt134Content,kt134Stage5RepairAttempted,kt134Stage5RepairApplied,projectOnly:true,expertReviewRequired:true,documentIssued:false,wordTemplateApplied:false});
  }catch{return reply({error:"Document drafting failed"},504)}
  finally{clearTimeout(timer)}
 }
