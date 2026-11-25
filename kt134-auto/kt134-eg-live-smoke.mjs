@@ -5,6 +5,7 @@ import * as fflate from 'fflate';
 import {createDraftWordAdapter} from './kt134-auto-word-adapter.mjs';
 import {buildKt134CompleteStage4Request} from './kt134-complete-dossier-stage4.mjs';
 import {composeKt134CaseAwareStage5Draft} from './kt134-case-aware-word-body.mjs';
+import {deriveKt134LegalDisposition,kt134DispositionTextIssues} from '../cloudflare/ai-author-v27/src/kt134-legal-disposition.mjs';
 const base=process.env.KT134_EG_BASE||'https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev';
 const token=process.env.LIVE_EG_TOKEN||'';
 if(!token)throw Error('KT134 isolated EG token unavailable');
@@ -98,6 +99,13 @@ const b=await post('/stage5-document',stage5Request);
 if(b.caseId!==id||b.projectOnly!==true||b.documentIssued!==false||
  b.automaticReviewerIntermediate!==true||!b.draft?.startsWith('Относно:'))
  throw Error('Stage5 not a reviewer-authorized draft');
+const disposition=d.legalDisposition||deriveKt134LegalDisposition({
+ reviewerPanelId:d.selectedPanelId,qualificationValidated:false
+});
+const contentQualityIssues=kt134DispositionTextIssues(b.draft,disposition);
+if(contentQualityIssues.length)throw Error('Stage5 contains unsupported normative conclusion: '+contentQualityIssues.join(','));
+if(b.normativeDisposition?.formalDecisionReady===true&&!disposition.formalDecisionReady)
+ throw Error('Stage5 elevated an unsupported reviewer panel to a ready formal act');
 const enriched=composeKt134CaseAwareStage5Draft({stage5Text:b.draft,stage4Request:stage4});
 if(/\b(?:MISSING_[A-Z_]+|PANEL_\d\d_[A-Z_]+|UNSUPPORTED_[A-Z_]+)\b/u.test(enriched))
  throw Error('Technical reviewer codes leaked into institutional Word');
@@ -127,6 +135,10 @@ const audit={
  legalConclusionAccepted:false,
  reviewerReportedUnresolvedLegalIssues:rawIssues.length,
  reviewerProposalOnly:b.reviewerProposalOnly===true,
+ qualificationValidated:disposition.qualificationValidated,
+ reviewerFormalDecisionReady:disposition.formalDecisionReady,
+ reviewerAlternativeUsed:b.normativeDisposition?.reviewerAlternativeUsed===true,
+ legalPredicateIssuesAfterReview:contentQualityIssues,
  reviewerProposedPanel:d.selectedPanelId,
  note:'Technical acceptance only; neither the fabricated spatial values nor the legal conclusion have been independently certified.'
 };
