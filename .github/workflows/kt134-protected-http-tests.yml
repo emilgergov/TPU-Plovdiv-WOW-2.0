@@ -7,6 +7,11 @@ on:
       - 'kt134-auto/kt134-protected-http-integration.test.mjs'
       - 'kt134-auto/kt134-native-dossier-adapter.mjs'
       - 'kt134-auto/kt134-native-dossier-adapter.test.mjs'
+      - 'kt134-auto/kt134-kt125-session-verifier.mjs'
+      - 'kt134-auto/kt134-kt125-session-verifier.test.mjs'
+      - 'kt134-auto/kt134-normative-master-adapter.mjs'
+      - 'kt134-auto/kt134-normative-master-adapter.test.mjs'
+      - 'kt134-auto/kt134-protected-host.mjs'
       - '.github/workflows/kt134-protected-http-tests.yml'
   workflow_dispatch:
 permissions:
@@ -26,6 +31,9 @@ jobs:
           node --check kt134-auto/kt134-protected-http-integration.mjs
           node --test kt134-auto/kt134-protected-http-integration.test.mjs
           node --test kt134-auto/kt134-native-dossier-adapter.test.mjs
+          node --test kt134-auto/kt134-kt125-session-verifier.test.mjs
+          node --test kt134-auto/kt134-normative-master-adapter.test.mjs
+          node --check kt134-auto/kt134-protected-host.mjs
           node --test kt134-auto/kt134-eg-stage45-live-bridge.test.mjs
       - name: Record real test result on isolated branch
         if: always()
@@ -37,5 +45,6 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add kt134-auto/KT134_PROTECTED_INTEGRATION_TEST_RESULT.json
           git commit -m 'KT134: verified isolated secure dossier unit tests' || exit 0
+          git pull --rebase origin kt134-auto-mode-isolated
           git push origin HEAD:kt134-auto-mode-isolated
           test "$CHECKS_OUTCOME" = success
