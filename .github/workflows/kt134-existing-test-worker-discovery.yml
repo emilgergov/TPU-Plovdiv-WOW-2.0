@@ -1,0 +1,61 @@
+name: KT134 locate existing test Workers - read only
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/kt134-existing-test-worker-discovery.yml'
+permissions:
+  contents: read
+jobs:
+  find-existing-test-workers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - name: Inspect existing Cloudflare Worker names and URLs WITHOUT changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CF_TOKEN" || { echo "::error::GitHub Cloudflare secret is unavailable"; exit 1; }
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          api="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts"
+          status="$(curl --silent --show-error --max-time 30 -w '%{http_code}' -o "$tmp/scripts.json" -H "Authorization: Bearer $CF_TOKEN" "$api")"
+          echo "Worker inventory HTTP $status"
+          node - "$tmp/scripts.json" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          if(!d.success) {console.log('Inventory access denied:',d.errors?.map(x=>x.code));process.exit(1)}
+          const items=Array.isArray(d.result)?d.result:(d.result?.items||[]);
+          const names=items.map(x=>x.id||x.name||x.script?.name||'').filter(Boolean);
+          for(const name of names.filter(n=>/kt134|test|eg/i.test(n)))
+            console.log('Existing Worker:',name);
+          for(const name of ['tpu-plovdiv-kt134-test','tpu-plovdiv-kt134-eg-test']){
+            console.log('Expected test worker',name,'listed:',names.includes(name));
+          }
+          NODE
+          for name in tpu-plovdiv-kt134-test tpu-plovdiv-kt134-eg-test; do
+            echo "Inspecting: $name (read-only)"
+            status="$(curl --silent --show-error --max-time 30 -w '%{http_code}' -o "$tmp/settings.json" -H "Authorization: Bearer $CF_TOKEN" "$api/$name/settings")"
+            echo "Settings HTTP $status"
+            node - "$tmp/settings.json" <<'NODE'
+          const fs=require('fs');let d;try{d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'))}catch{process.exit(0)}
+          if(!d.success){console.log('Settings unavailable, status:',d.errors?.map(e=>e.code));process.exit(0)}
+          const r=d.result||{},bindings=r.bindings||[];
+          console.log('Bindings names/types only:',bindings.map(x=>[x.name,x.type].join(':')).join(', '));
+          console.log('Workers.dev enabled:',r.workers_dev??r.workers_dev_enabled??'unknown');
+          NODE
+            url="https://$name.emilgergov.workers.dev"
+            for endpoint in health kt134-candidate-health; do
+              code="$(curl --silent --show-error --max-time 15 -w '%{http_code}' -o "$tmp/response" "$url/$endpoint" || true)"
+              echo "Public URL: $url/$endpoint HTTP $code"
+              node - "$tmp/response" <<'NODE'
+          const fs=require('fs');const raw=fs.readFileSync(process.argv[2],'utf8');let data;
+          try{data=JSON.parse(raw)}catch{console.log('Non-JSON or inaccessible response');process.exit(0)}
+          const fields=['service','status','stage4Contract','stage5Contract','kt134CandidateContract','contract','candidateOnly','aiGenerationEnabled'];
+          console.log('Non-secret health fields:',Object.fromEntries(fields.filter(k=>k in data).map(k=>[k,data[k]])));
+          NODE
+            done
+          done
+          echo "Discovery finished; no upload, no deployment, no settings modified."
