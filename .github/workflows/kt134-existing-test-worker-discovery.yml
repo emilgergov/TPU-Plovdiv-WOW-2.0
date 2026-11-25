@@ -58,4 +58,20 @@ jobs:
           NODE
             done
           done
+          echo "Current EG TEST deployment inspection:"
+          curl --silent --show-error --max-time 30 -H "Authorization: Bearer $CF_TOKEN" \
+            "$api/tpu-plovdiv-kt134-eg-test/deployments" > "$tmp/deployments.json"
+          node - "$tmp/deployments.json" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2]));
+          if(!d.success){console.log('Deployment list unavailable:',d.errors?.map(x=>x.code));process.exit(1)}
+          const entries=Array.isArray(d.result)?d.result:d.result?.deployments||[];
+          console.log('Deployments returned:',entries.length);
+          for(const e of entries.slice(0,3))
+            console.log('Deploy ID:',e.id,'Versions:',(e.versions||[]).map(v=>({id:v.version_id,percentage:v.percentage})));
+          NODE
+          for endpoint in kt134-candidate-health kt134-evidence-span; do
+            code="$(curl --silent --show-error --max-time 12 -o "$tmp/route" -w '%{http_code}' \
+              "https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev/$endpoint")"
+            echo "Current EG TEST route $endpoint GET HTTP $code"
+          done
           echo "Discovery finished; no upload, no deployment, no settings modified."
