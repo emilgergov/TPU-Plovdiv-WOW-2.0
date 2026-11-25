@@ -120,12 +120,22 @@ jobs:
           done
           node - "$dir/health.json" <<'NODE'
           const fs=require('fs');let d;try{d=JSON.parse(fs.readFileSync(process.argv[2]))}catch{}
-          if(d?.contract!=='KT134_EVIDENCE_SPAN_V1'||d?.aiConfigured!==true||d.candidateOnly!==true)
+          if(d?.contract!=='KT134_EVIDENCE_SPAN_V1'||d?.build!=='KT134_EXISTING_EG_LIVE_V2'||d?.aiConfigured!==true||d.candidateOnly!==true)
             throw Error('EG TEST Worker lacks correct KT134 candidate contract');
           console.log('EXISTING EG TEST Worker health verified with protected AI bindings.');
           NODE
-          status="$(curl -sS --max-time 15 -o "$dir/protected-get.json" -w '%{http_code}' "$base/kt134-evidence-span")"
-          test "$status" = 405 || { echo "::error::Exact activated version lacks the KT134 evidence-span route (HTTP $status)"; exit 1; }
+          status="0"
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            status="$(curl -sS --max-time 15 -o "$dir/protected-get.json" -w '%{http_code}' "$base/kt134-evidence-span" || true)"
+            if [[ "$status" = "405" ]]; then break; fi
+            echo "Evidence route not yet ready (attempt $attempt, HTTP $status); checking rollout…"
+            sleep 3
+          done
+          if [[ "$status" != "405" ]]; then
+            echo "::error::Exact active Worker version does not expose KT134 evidence route (HTTP $status)"
+            head -c 220 "$dir/protected-get.json" || true
+            exit 1
+          fi
           echo "KT134 active evidence reader route confirmed (GET=405)."
           KT134_SMOKE_BEARER="$(cat "$dir/smoke-key.txt")" \
            KT134_REPORT_PATH="$dir/kt134-live-result.json" \
