@@ -1,0 +1,36 @@
+name: KT134 CI run status collector
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-ci-run-status.yml']
+permissions:
+  contents: write
+  actions: read
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Summarize KT134 recent runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const r=await fetch('https://api.github.com/repos/'+process.env.GITHUB_REPOSITORY+'/actions/runs?branch=kt134-auto-mode-isolated&per_page=40',{
+            headers:{Authorization:'Bearer '+process.env.GH_TOKEN,Accept:'application/vnd.github+json'}});
+          const x=await r.json();
+          if(!r.ok)throw Error('CI_RUNS_UNAVAILABLE');
+          const runs=(x.workflow_runs||[]).filter(y=>String(y.name||'').includes('KT134'))
+             .map(y=>({id:y.id,name:y.name,status:y.status,conclusion:y.conclusion,head_sha:y.head_sha,url:y.html_url})).slice(0,25);
+          writeFileSync('kt134-auto/KT134_CI_RUNS.json',JSON.stringify({runs},null,2)+'\n');
+          console.log('Collected '+runs.length+' KT134 runs');
+          NODE
+      - name: Save CI status
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_CI_RUNS.json
+          git commit -m 'KT134: record actual CI run statuses' || exit 0
+          git push origin HEAD:kt134-auto-mode-isolated
