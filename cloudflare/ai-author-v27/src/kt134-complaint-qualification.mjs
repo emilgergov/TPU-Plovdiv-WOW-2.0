@@ -66,7 +66,19 @@ export function complaintDraftIssues(draft,q){
   issues.push("COMPLAINT_ACTION_SECTION_MISSING");
  if(!/(?:Данни за експертна проверка|За окончателно експертно одобрение)/iu.test(body))
   issues.push("COMPLAINT_EXPERT_REVIEW_SECTION_MISSING");
- return issues;
+ // Case-specific administrative review, not a request for another IP dossier.
+ // An applicant's claim that a zone is wrongly named is NOT itself proof of
+ // missing GIS, site coordinates or a need for a new expert assessment.
+ const request=/(?:да се изиска|да се изискат|да се представят|да предостави|следва да предостави|допълнителн[иао]*\s+(?:документ|геопространствен|ГИС|експертн))/iu;
+ const extraneous=/(?:геопространствен[иао]*\s+данн|координат|нов\s+ГИС\s+анализ|допълнителн[иао]*\s+експертн[иао]*\s+оценк)/iu;
+ const grounded=/(?:конкретн[иао]*\s+непълнот|недостатъчн[иао]*\s+факт)[^.!?\n]{0,170}(?:доказателств|норм|източник)|(?:доказателств|норм|източник)[^.!?\n]{0,170}(?:липсващ[иао]*|непълнот)/iu;
+ if(request.test(body)&&extraneous.test(body)&&!grounded.test(body))
+  issues.push("COMPLAINT_UNPROVEN_GIS_REQUEST");
+ // These cited provisions must not be rewritten as a general appeal/remedy
+ // procedure without demonstrable support in the legal source.
+ if(/чл\.?\s*2\s*,?\s*ал\.?\s*2[^.!?\n]{0,170}(?:ред(?:ът|а)?\s+за\s+(?:жалб|възражен)|регламентира\s+(?:възражен|жалб)|производств(?:ото|о)\s+(?:е\s+)?възражен)/iu.test(body))
+  issues.push("COMPLAINT_MISATTRIBUTED_OS_ART2_REMEDY");
+ return [...new Set(issues)];
 }
 
 
@@ -88,6 +100,14 @@ export function normalizeComplaintDraft(draft,q){
   }
  }
  // Rename only existing, recognizable section headings; add no case facts.
+ // Translate existing model headings, including Arabic/Roman section numbering.
+ // This preserves paragraph content, order and all legal assertions for audit.
+ value=value.replace(/(^|\n)\s*(?:(?:[IVX]+|\d{1,2})\.\s*)?(?:Нормативни предпоставки и рамка|Нормативна рамка|Нормативен анализ|Правна преценка|Правна рамка)\s*(?=\n|$)/gimu,
+  "$1Нормативни предпоставки и граници на проверката");
+ value=value.replace(/(^|\n)\s*(?:(?:[IVX]+|\d{1,2})\.\s*)?(?:Процесуални действия и предложение за решение|Процесуални действия и предложение|Предложение за решение|Предложение за административно действие|Следващо административно действие)\s*(?=\n|$)/gimu,
+  "$1Мотивирано предложение");
+ value=value.replace(/(^|\n)\s*(?:(?:[IVX]+|\d{1,2})\.\s*)?(?:Експертна проверка|За окончателно експертно одобрение)\s*(?=\n|$)/gimu,
+  "$1Данни за експертна проверка");
  value=value.replace(/(^|\n)\s*(?:[IVX]+\.\s*)?Нормативна рамка\s*(?=\n|$)/gimu,
   "$1Нормативни предпоставки и граници на проверката");
  value=value.replace(/(^|\n)\s*(?:[IVX]+\.\s*)?Правна преценка\s*(?=\n|$)/gimu,
