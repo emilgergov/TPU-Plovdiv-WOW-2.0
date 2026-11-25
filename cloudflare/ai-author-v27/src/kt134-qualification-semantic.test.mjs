@@ -43,3 +43,13 @@ test("genuine missing technological capacity may support an interim request for 
  assert.ok(!r.errors.includes("MISSING_FACT_NOT_PHYSICAL"),r.errors.join(", "));
  assert.ok(!r.errors.includes("PANEL_02_REQUIRES_EVIDENCED_PHYSICAL_GAP"),r.errors.join(", "));
 });
+
+test("broad request for all technical parameters cannot qualify as one missing physical fact",()=>{
+ const q=fixture();q.selectedPanel=2;
+ q.missingFact={
+   fact:"Данни за капацитет, технология, застроена площ, използвани материали, емисии и отпадъци",
+   source:"subject",legalCriterion:"Необходимост от данни по приложения № 1 и 2 към ЗООС и чл. 2 от Наредбата за ОС"};
+ const r=validateQualification(q,sources);
+ assert.ok(r.errors.includes("MISSING_FACT_TOO_BROAD"),r.errors.join(", "));
+ assert.ok(r.errors.includes("MISSING_FACT_NO_SPECIFIC_CRITERION"),r.errors.join(", "));
+});
