@@ -68,7 +68,15 @@ export function composeKt134CaseAwareStage5Draft({stage5Text,stage4Request}={}){
  const title=printable(stage4Request.subject).replace(/[„“"]/gu,'').replace(/[.!?]+$/u,'').trim();
  if(!title)throw Error('KT134_VERIFIED_SUBJECT_MISSING');
  const heading='Относно: „'+title+'“';
- const body=lines.slice(1).filter(line=>!line.trimStart().startsWith('Относно:')).join('\n').trim();
- return [heading,'ФАКТИЧЕСКИ ДАННИ ОТ ПРЕПИСКАТА',...paras,
-   'МОТИВИРАНО ПРЕДЛОЖЕНИЕ ОТ ЕТАП 5',body].filter(x=>str(x)).join('\n');
+ // The factual section has already been assembled directly from the
+ // identified documents, PI MASTER and GIS. Do not repeat model retellings.
+ // Preserve the reviewed legal basis, proposal and next action unchanged.
+ const bodyLines=lines.slice(1).filter(line=>!line.trimStart().startsWith('Относно:'));
+ const factStart=bodyLines.findIndex(line=>/^\\s*Фактически констатации\\s*$/iu.test(line));
+ const lawStart=bodyLines.findIndex((line,i)=>i>factStart&&/^\\s*Правни предпоставки\\s*$/iu.test(line));
+ const substantive=(factStart>=0&&lawStart>factStart)
+   ?bodyLines.filter((_,i)=>i<factStart||i>=lawStart)
+   :bodyLines;
+ const body=substantive.join('\n').trim();
+ return [heading,...paras,body].filter(x=>str(x)).join('\n');
 }
