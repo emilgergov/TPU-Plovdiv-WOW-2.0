@@ -272,8 +272,9 @@ function boot(){
     sourceAnchoredClaims:ledgerFits?claims:[],allClaimEvidenceIncluded:ledgerFits,
     digestOverflow:!ledgerFits,generatedOnlyForCurrentCase:true};
    if(!coverage.complete||!allResponses||!ledgerFits||batch.totalDocuments===0||batch.totalDocuments<declaredCount){
-    status.textContent='Преписката не е прочетена изцяло. Непълен анализ няма да се представя за завършен.';
-    return;
+    status.textContent='Не всички документи са прочетени. EG Авторът и рецензентът ще предложат мотивирано следващо действие с ясно посочени доказателствени ограничения.';
+    request.completeCaseEvidence.kt134DossierCoverage.complete=false;
+    request.completeCaseEvidence.kt134DossierCoverage.coverageWarning='НЕПЪЛЕН ПРОЧИТ — НЕ УДОСТОВЕРЯВАЙ ПЪЛНОТА И НЕ ИЗМИСЛЯЙ ФАКТИ; ВИНАГИ ПРЕДЛОЖИ ДЕЙСТВИЕ.';
    }
    const prepared=fitStage4Request(request);
    if(!prepared.payload){
