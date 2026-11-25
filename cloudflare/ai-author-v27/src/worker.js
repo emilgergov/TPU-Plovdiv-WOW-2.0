@@ -1066,13 +1066,28 @@ async function handleStage5Document(request,env){
   {pdf1Available:e5.gis.pdf1Available===true,spatialClass:
    ["INSIDE","OUTSIDE","INTERSECTS","MIXED"].includes(e5.gis.spatialClass)?e5.gis.spatialClass:"UNKNOWN",
    sourceDetail:text(e5.gis.detail,3500),notExpertVerified:true}:null;
+ const ledgerIn=e5Bound&&e5.evidenceLedger&&typeof e5.evidenceLedger==="object"?e5.evidenceLedger:null;
+ const ledgerContext=ledgerIn?{
+  allSpansExamined:ledgerIn.allSpansExamined===true,
+  expectedChunks:Number(ledgerIn.expectedChunks)||0,
+  examinedChunks:Number(ledgerIn.examinedChunks)||0,
+  claimsTotal:Number(ledgerIn.claimsTotal)||0,
+  claimsIncluded:Number(ledgerIn.claimsIncluded)||0,
+  anchoredEvidence:Array.isArray(ledgerIn.anchoredEvidence)?
+   ledgerIn.anchoredEvidence.slice(0,90).map(x=>({
+    documentIndex:Number(x?.documentIndex),source:text(x?.source,140),
+    start:Number(x?.start),end:Number(x?.end),
+    quote:text(x?.quote,330),summary:text(x?.summary,320),
+    sourceQuoted:true,expertConfirmed:false
+   })).filter(x=>x.source&&x.quote&&x.summary):[]
+ }:null;
  const facts=JSON.stringify({selectedDirection:match[0],documentTitle:title,incomingReference:safeReference,subject:input.subject,scope:input.scope,
  expertConfirmedProposal:input.confirmedStage4Text,
  expertConfirmedQualification:independentExpert||reviewedExpertChoice?null:(input.qualificationRecord||null),
  independentExpertDecision:independentExpert,
  expertConfirmedReviewedChoice:reviewedExpertChoice||null,
  parcelIds:Array.isArray(input.parcelIds)?input.parcelIds.slice(0,80):[],
- stage5EvidenceContext:{documents:e5Docs,documentExcerpts:e5SourceTexts,observations:e5Observations,gis:e5Spatial,sourceBound:e5Bound,notLegalProof:true},
+ stage5EvidenceContext:{documents:e5Docs,documentExcerpts:e5SourceTexts,observations:e5Observations,gis:e5Spatial,ledger:ledgerContext,sourceBound:e5Bound,notLegalProof:true},
  warnings:[...(Array.isArray(input.warnings)?input.warnings.slice(0,12):[]),
   ...(reviewedExpertChoice?.warnings||[])].slice(0,16)});
  const response=await fetch("https://api.openai.com/v1/responses",{method:"POST",signal:controller.signal,
