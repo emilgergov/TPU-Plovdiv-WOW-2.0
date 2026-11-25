@@ -12,10 +12,15 @@ export function createKt134IsolatedProtectedHost({
   db,cookieName,resolveKt125Session,resolvePrincipal,getNormativeMaster,buildDraftWord,
   egWorkerBase,egAccessToken,fetchImpl=fetch
 }={}){
+ if(typeof db?.prepare!=='function')error('KT125_DB');
+ if(!resolveKt125Session&&!resolvePrincipal){
+   const verifier=createKt134Kt125SessionVerifier({db,cookieName});
+   resolveKt125Session=verifier.resolveKt125Session;
+   resolvePrincipal=verifier.resolvePrincipal;
+ }
  for(const [name,impl] of Object.entries({
    resolveKt125Session,resolvePrincipal,getNormativeMaster,buildDraftWord
  }))if(typeof impl!=='function')error(name);
- if(typeof db?.prepare!=='function')error('KT125_DB');
  if(!egWorkerBase||!egAccessToken)error('KT134_EG_CREDENTIALS');
  const caseAdapters=createKt134NativeDossierAdapters({db,resolvePrincipal,getNormativeMaster});
  return createKt134ProtectedHttpHandler({
