@@ -2,7 +2,17 @@
 // Explicit opt-in only. Never auto-approves a legal decision or releases a document.
 const make=(tag,value)=>{const el=document.createElement(tag);if(value!==undefined)el.textContent=value;return el};
 const str=x=>String(x??'').trim();
-const endpoint='https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/stage5-document';
+const candidateContract='KT134_EVIDENCE_SPAN_V1';
+let verifiedBase=null;
+const configuredBase=()=>{
+ try{
+  const url=new URL(String(window.KT134CandidateWorkerBase||''));
+  return url.protocol==='https:'&&url.hostname.endsWith('.workers.dev')&&
+   url.hostname!=='tpu-plovdiv-ai-author-v27.emilgergov.workers.dev'&&(url.pathname==='/'||url.pathname==='')?
+   url.origin:null;
+ }catch{return null}
+};
+const endpoint=()=>verifiedBase?verifiedBase+'/stage5-document':null;
 let ticket=0,active=false,candidate=null,busy=false,phase='idle';
 const current=()=>window.KT80WorkflowState||{};
 function caseStamp(){
@@ -38,9 +48,9 @@ function init(){
  box.append(title,description,begin,status,preview);
  stage.prepend(box);
  const setStatus=(value)=>status.textContent=value;
- const reset=()=>{ticket++;active=false;candidate=null;busy=false;phase='idle';stamp='';preview.hidden=true;final.disabled=true;begin.disabled=false;setStatus('Изчаква избор на маршрут.');};
+ const reset=()=>{ticket++;active=false;verifiedBase=null;candidate=null;busy=false;phase='idle';stamp='';preview.hidden=true;final.disabled=true;begin.disabled=false;setStatus('Изчаква избор на маршрут.');};
  function still(t){return active&&ticket===t&&stamp===caseStamp()}
- begin.onclick=()=>{
+ begin.onclick=async()=>{
   if(busy||active)return;
   if(!current().subjectConfirmed?.expertConfirmed||!current().subjectConfirmed?.scopeConfirmed){
    setStatus('Нужни са потвърдени предмет и обхват от Етап 2.');return;
@@ -51,6 +61,16 @@ function init(){
   if(typeof window.KT96EGStage4?.refresh!=='function'){
    setStatus('ЕГ Авторът в Етап 4 още не е готов.');return;
   }
+  const intendedBase=configuredBase();
+  if(!intendedBase){setStatus('За автоматичния маршрут няма проверен изолиран Worker на КТ134. Продукционният Worker няма да се използва.');return;}
+  busy=true;begin.disabled=true;setStatus('Проверявам идентичността на изолирания Worker на КТ134…');
+  try{
+   const res=await fetch(intendedBase+'/kt134-candidate-health',{cache:'no-store',credentials:'omit'});
+   const data=await res.json();
+   if(!res.ok||data?.contract!==candidateContract||data?.candidateOnly!==true||data?.aiConfigured!==true)
+    throw Error('Worker не удостоверява готовност на КТ134.');
+  }catch{busy=false;begin.disabled=false;setStatus('Изолираният Worker не е достъпен или няма необходимите защитени настройки. Продукционният Worker не е използван.');return}
+  verifiedBase=intendedBase;
   active=true;busy=true;stamp=caseStamp();phase='author';candidate=null;
   const t=++ticket;begin.disabled=true;
   setStatus('Етап 4: започва пълен анализ на преписката от ЕГ Автор и независим рецензент.');
@@ -114,7 +134,7 @@ function init(){
   }
   if(byteCount()>41000){busy=false;phase='too-large';setStatus('Текстът е твърде голям за сървърната заявка. Не е съкратен експертният анализ.');return;}
   try{
-   const response=await window.KT80EGSession.request(endpoint,JSON.stringify(payload));
+   const response=await window.KT80EGSession.request(endpoint(),JSON.stringify(payload));
    const data=await response.json().catch(()=>({}));
    if(!still(t)||phase!=='stage5')return;
    if(!response.ok||data.kt134PreFinal!==true||data.expertConfirmed!==false||
@@ -165,7 +185,7 @@ function init(){
  };
  for(const type of ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'])
   document.addEventListener(type,reset);
- window.KT134AutoMode=Object.freeze({active:()=>active,phase:()=>phase,
+ window.KT134AutoMode=Object.freeze({active:()=>active,workerBase:()=>active?verifiedBase:null,phase:()=>phase,
   snapshot:()=>candidate?{caseId:candidate.caseId,evidenceRevision:candidate.evidenceRevision,
    panelId:candidate.panelId,phase}:null});
 }
