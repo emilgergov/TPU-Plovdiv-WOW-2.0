@@ -233,7 +233,12 @@ function boot(){
   const activityTicket=window.KT80Busy?.start?.('ЕГ Автор → независим рецензент · Изготвяне и проверка на предложението…');
   try{
    // KT134: examine every readable source span before drafting. Failure is visible.
-   const batch=buildEvidenceChunks(Array.isArray(w.intake?.document_texts)?w.intake.document_texts:[],5000);
+   const intakeNow=w.intake||{};
+   const readableDocs=Array.isArray(intakeNow.document_texts)?intakeNow.document_texts:[];
+   const declaredCount=Math.max(readableDocs.length,
+    Array.isArray(intakeNow.files)?intakeNow.files.length:0,
+    Array.isArray(intakeNow.dossier_documents)?intakeNow.dossier_documents.length:0);
+   const batch=buildEvidenceChunks(readableDocs,5000);
    const receipts=[];
    let allResponses=true;
    for(let i=0;i<batch.chunks.length;i++){
@@ -260,12 +265,13 @@ function boot(){
      start:x.start,end:x.end,quote:x.quote,summary:x.summary,expertConfirmed:false}));
    const ledgerFits=new TextEncoder().encode(JSON.stringify(claims)).length<=26000;
    request.completeCaseEvidence.kt134DossierCoverage={
-    complete:coverage.complete&&allResponses&&ledgerFits,
+    complete:coverage.complete&&allResponses&&ledgerFits&&batch.totalDocuments>0&&batch.totalDocuments>=declaredCount,
+    declaredDocuments:declaredCount,readableDocuments:batch.totalDocuments,
     expectedChunks:coverage.expectedChunks,examinedChunks:coverage.examinedChunks,
     unreadableDocuments:coverage.unreadableDocuments,unexamined:coverage.unexamined,
     sourceAnchoredClaims:ledgerFits?claims:[],allClaimEvidenceIncluded:ledgerFits,
     digestOverflow:!ledgerFits,generatedOnlyForCurrentCase:true};
-   if(!coverage.complete||!allResponses||!ledgerFits){
+   if(!coverage.complete||!allResponses||!ledgerFits||batch.totalDocuments===0||batch.totalDocuments<declaredCount){
     status.textContent='Преписката не е прочетена изцяло. Непълен анализ няма да се представя за завършен.';
     return;
    }
