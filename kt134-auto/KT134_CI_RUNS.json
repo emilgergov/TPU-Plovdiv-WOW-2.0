@@ -1,0 +1,204 @@
+{
+  "runs": [
+    {
+      "id": 45707026156,
+      "name": "KT134 CI run status collector",
+      "status": "in_progress",
+      "conclusion": null,
+      "head_sha": "ba05f055586da7bf6caac947461f79d5e3931f7a",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45707026156"
+    },
+    {
+      "id": 45706994564,
+      "name": "KT134 protected interface-to-EG integration checks",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "a60285a6c9328a4fe16368ae5e26605b4db5654e",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45706994564"
+    },
+    {
+      "id": 45706994248,
+      "name": "KT134 isolated automatic-mode unit tests",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "a60285a6c9328a4fe16368ae5e26605b4db5654e",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45706994248"
+    },
+    {
+      "id": 45706800680,
+      "name": "KT134 protected interface-to-EG integration checks",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "ad348a31adc3a6bad1ce107d659b1052698f728d",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45706800680"
+    },
+    {
+      "id": 45706729917,
+      "name": "KT134 inspect KT125 session contract",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "522ed12b57b787c3854b07ba71b604cf449578cd",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45706729917"
+    },
+    {
+      "id": 45706615380,
+      "name": "KT134 protected interface-to-EG integration checks",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "8be085d6985b189360e8d08075a59f7124d41de8",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45706615380"
+    },
+    {
+      "id": 45706594225,
+      "name": "KT134 protected interface-to-EG integration checks",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "f9495c703b5c190c9916a13011a40ecb5f0a6caa",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45706594225"
+    },
+    {
+      "id": 45706576395,
+      "name": "KT134 isolated automatic-mode unit tests",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "a741d9ff90d2a218f3a966a423dd12fc62076cb8",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45706576395"
+    },
+    {
+      "id": 45706476677,
+      "name": "KT134 isolated automatic-mode unit tests",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "8134637ea700f4a4796bba80d26381696bb83d19",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45706476677"
+    },
+    {
+      "id": 45706263868,
+      "name": "KT134 quick D1 table layout",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "1d43425b76f1ce0d513aef3dc511d7ef8634c5d4",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45706263868"
+    },
+    {
+      "id": 45706090245,
+      "name": "KT134 inspect dossier storage schema",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "cd819a0e8375805eebb71d320a43d100f12a8146",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45706090245"
+    },
+    {
+      "id": 45705949182,
+      "name": "KT134 inspect KT125 D1 structure (metadata only)",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "ef4f7ebc614b0e9ed5be90ae1303ac029d91108a",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45705949182"
+    },
+    {
+      "id": 45705452412,
+      "name": "KT134 native public route probe",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "6ee367578c6bc6a534e1da6c0af67d23c3922b04",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45705452412"
+    },
+    {
+      "id": 45705330244,
+      "name": "KT134 case API contract check",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "6b240080a9bf494af23f7b7799dd287415bd4045",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45705330244"
+    },
+    {
+      "id": 45705187490,
+      "name": "KT134 native route names",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "6645c3d4320086071717a017edebd6a6c374b2f8",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45705187490"
+    },
+    {
+      "id": 45705093446,
+      "name": "KT134 native bindings verification",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "bc8adb57945afbd6e4cad1645cd5c180eaf34872",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45705093446"
+    },
+    {
+      "id": 45704685199,
+      "name": "KT134 inspect Cloudflare module boundaries read-only",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "04289f5f2c707f2c2973ce3d513cefb447943a56",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45704685199"
+    },
+    {
+      "id": 45704558274,
+      "name": "KT134 inspect existing KT125 host routes read-only",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "05d9792ceac760126deea09a19aff70befec68c2",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45704558274"
+    },
+    {
+      "id": 45704432938,
+      "name": "KT134 isolated protected integration preflight",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "fad41757bfa6383a122ea5f688244032311107fd",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45704432938"
+    },
+    {
+      "id": 45704361265,
+      "name": "KT134 isolated automatic-mode unit tests",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "ee14a00fbd4e2057d4a7c0fde8ffc3014fa57c31",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45704361265"
+    },
+    {
+      "id": 45703295763,
+      "name": "KT134 protected interface-to-EG integration checks",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "3ba9ec04cf0cbe49809cb35b218b1037fdc3b60b",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45703295763"
+    },
+    {
+      "id": 45703276299,
+      "name": "KT134 isolated automatic-mode unit tests",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "6a346e9efc00524193d875d42a559b1105756844",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45703276299"
+    },
+    {
+      "id": 45703225043,
+      "name": "KT134 isolated automatic-mode unit tests",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "483271de88a670b85f1cdb0a7a6840cbd6fcae08",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45703225043"
+    },
+    {
+      "id": 45588813393,
+      "name": "KT134 isolated automatic-mode unit tests",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "e7cf19640ce64fe9558f37dd3563ab597fa975c4",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45588813393"
+    },
+    {
+      "id": 45588229296,
+      "name": "KT134 — deploy isolated live EG Stage4–Stage5 test",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "ea850bba5425622428e9c8ac8b290d876ebca4b2",
+      "url": "https://github.com/emilgergov/TPU-Plovdiv-WOW-2.0/actions/runs/45588229296"
+    }
+  ]
+}
