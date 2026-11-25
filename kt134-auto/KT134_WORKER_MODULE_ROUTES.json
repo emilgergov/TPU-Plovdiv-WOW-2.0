@@ -1,0 +1,153 @@
+{
+  "readOnly": true,
+  "inspectedAt": "2026-11-25T21:28:54.515Z",
+  "workers": [
+    {
+      "name": "kt133-tpu-plovdiv-kt125-local-auth",
+      "modules": [
+        {
+          "file": "metadata",
+          "bytes": 2302,
+          "endpoints": [],
+          "lines": [
+            {
+              "line": 2,
+              "excerpt": "var router_entry_default = { async fetch(request, env) {"
+            },
+            {
+              "line": 3,
+              "excerpt": "if (new URL(request.url).origin !== \"https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev\") return new Response(\"\\u041D\\u0435\\u0434\\u043E\\u0441\\u0442\\u044A\\u043F\\u0435\\u043D \\u0442\\u0435\\u0441\\u0442\\u043E\\u0432 \\u0430\\u0434\\u0440\\u0435\\u"
+            },
+            {
+              "line": 5,
+              "excerpt": "headers.set(\"Cloudflare-Workers-Version-Overrides\", 'tpu-plovdiv-kt125-local-auth=\"' + env.KT131_NATIVE_VERSION + '\"');"
+            },
+            {
+              "line": 6,
+              "excerpt": "return env.KT131_NATIVE.fetch(new Request(request, { headers }));"
+            },
+            {
+              "line": 12,
+              "excerpt": "async fetch(request,env,ctx) {"
+            },
+            {
+              "line": 13,
+              "excerpt": "const u=new URL(request.url);"
+            },
+            {
+              "line": 18,
+              "excerpt": "if(Object.prototype.hasOwnProperty.call(assets,u.pathname) && request.method==='GET'){"
+            },
+            {
+              "line": 19,
+              "excerpt": "const [target,mime]=assets[u.pathname];"
+            },
+            {
+              "line": 20,
+              "excerpt": "const remote=await fetch(target,{cf:{cacheEverything:true,cacheTtl:300}});"
+            },
+            {
+              "line": 24,
+              "excerpt": "const response=await __kt133Core.fetch(request,env,ctx);"
+            },
+            {
+              "line": 25,
+              "excerpt": "if(request.method!=='GET'||!/^\\/module(?:\\/|$)/.test(u.pathname)||"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tpu-plovdiv-kt134-test",
+      "modules": [
+        {
+          "file": "metadata",
+          "bytes": 11060,
+          "endpoints": [],
+          "lines": []
+        },
+        {
+          "file": "metadata",
+          "bytes": 7256,
+          "endpoints": [],
+          "lines": []
+        },
+        {
+          "file": "metadata",
+          "bytes": 4610,
+          "endpoints": [
+            "/kt134/internal-storage-smoke",
+            "/kt134/health",
+            "/kt134/preview"
+          ],
+          "lines": [
+            {
+              "line": 22,
+              "excerpt": "async fetch(request, env) {"
+            },
+            {
+              "line": 23,
+              "excerpt": "const url = new URL(request.url);"
+            },
+            {
+              "line": 24,
+              "excerpt": "if (url.pathname === \"/kt134/internal-storage-smoke\") {"
+            },
+            {
+              "line": 25,
+              "excerpt": "const expected = env.KT134_SMOKE_TOKEN;"
+            },
+            {
+              "line": 31,
+              "excerpt": "if (!env.DB?.prepare || !env.BUCKET?.head) throw Error(\"Missing isolated storage\");"
+            },
+            {
+              "line": 32,
+              "excerpt": "const row = await env.DB.prepare(\"SELECT 1 AS isolated_d1_ok\").first();"
+            },
+            {
+              "line": 33,
+              "excerpt": "const probe = await env.BUCKET.head(\"kt134-ci-probe/never-created-object\");"
+            },
+            {
+              "line": 56,
+              "excerpt": "if (url.pathname === \"/kt134/demo.docx\") {"
+            },
+            {
+              "line": 62,
+              "excerpt": "if (url.pathname === \"/kt134/health\") {"
+            },
+            {
+              "line": 63,
+              "excerpt": "const ok = !!env.DB?.prepare && !!env.BUCKET?.get && !!env.BUCKET?.put;"
+            },
+            {
+              "line": 67,
+              "excerpt": "bindings: { DB: !!env.DB?.prepare, BUCKET: !!env.BUCKET?.get },"
+            },
+            {
+              "line": 75,
+              "excerpt": "if (url.pathname === \"/\" || url.pathname === \"/kt134/preview\") {"
+            }
+          ]
+        },
+        {
+          "file": "kt134-staging-preview-worker.js.map",
+          "bytes": 6203,
+          "endpoints": [
+            "/kt134/internal-storage-smoke",
+            "/kt134/health",
+            "/kt134/preview"
+          ],
+          "lines": [
+            {
+              "line": 1,
+              "excerpt": "{\"version\":3,\"file\":\"kt134-staging-preview-worker.js\",\"sources\":[\"kt134-staging-preview-worker.mjs\"],\"sourcesContent\":[\"/**\\n * KT134 isolated Cloudflare Worker UI smoke test, NOT the protected KT125 host.\\n * No real dossiers or access to D1/R2 obje"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
