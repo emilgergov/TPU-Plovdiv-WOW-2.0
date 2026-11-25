@@ -1,8 +1,8 @@
 {
-  "runId": "45707152931",
-  "sha": "f7118aa0bd2c5fe0866473c77088a4510c68c8af",
-  "passed": true,
-  "outcome": "success",
+  "runId": "45708342564",
+  "sha": "5c2f2b4423ec11374ed72c29340bf03612630cd0",
+  "passed": false,
+  "outcome": "failure",
   "kind": "synthetic_contract_tests_only",
   "realDossierProcessed": false,
   "publicIntegrationDeployed": false,
