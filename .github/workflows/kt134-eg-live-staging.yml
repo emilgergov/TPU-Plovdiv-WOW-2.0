@@ -5,6 +5,7 @@ on:
     paths:
       - 'cloudflare/ai-author-v27/src/worker.js'
       - 'kt134-auto/wrangler.eg-staging.toml'
+      - 'kt134-auto/kt134-eg-live-smoke.mjs'
       - '.github/workflows/kt134-eg-live-staging.yml'
   workflow_dispatch:
 permissions:
@@ -35,6 +36,7 @@ jobs:
           grep -Fq 'automaticReviewerIntermediate' cloudflare/ai-author-v27/src/worker.js
           node --check cloudflare/ai-author-v27/src/worker.js
           node --check kt134-auto/kt134-eg-stage45-live-bridge.mjs
+          node --check kt134-auto/kt134-eg-live-smoke.mjs
           node --test kt134-auto/kt134-eg-stage45-live-bridge.test.mjs
       - name: Verify CI credentials for actual live EG integration
         run: |
@@ -67,3 +69,28 @@ jobs:
           code="$(curl --silent --show-error -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' "$BASE/stage4-proposal" --data '{}')"
           test "$code" = 401
           echo 'Isolated live EG Worker online and protected; next acceptance needs real case-bound test request'
+      - name: Execute genuine EG Author → Reviewer → Stage5 → DOCX with synthetic case
+        env:
+          KT134_EG_BASE: https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev
+        run: |
+          set -euo pipefail
+          npm install --no-save --ignore-scripts --no-audit --no-fund fflate@0.8.2
+          node kt134-auto/kt134-eg-live-smoke.mjs
+          python3 - <<'PY'
+          import zipfile
+          p='kt134-auto/live-test-deliverables/KT134_REAL_EG_SYNTHETIC_DRAFT.docx'
+          with zipfile.ZipFile(p) as z:
+              assert 'word/document.xml' in z.namelist()
+              assert 'word/media/crest.png' in z.namelist()
+              assert 'word/header1.xml' in z.namelist()
+              assert 'word/footer1.xml' in z.namelist()
+          print('Live EG DOCX content and institutional template verified')
+          PY
+      - name: Export real EG test results for acceptance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: KT134-LIVE-EG-TEST-RESULTS
+          path: kt134-auto/live-test-deliverables/*
+          if-no-files-found: ignore
+          retention-days: 7
