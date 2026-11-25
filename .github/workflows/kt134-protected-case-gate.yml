@@ -12,6 +12,8 @@ on:
       - 'kt134-auto/kt134-eg-stage45-live-bridge.test.mjs'
       - 'kt134-auto/kt134-complete-dossier-stage4.mjs'
       - 'kt134-auto/kt134-complete-dossier-stage4.test.mjs'
+      - 'kt134-auto/kt134-case-aware-word-body.mjs'
+      - 'kt134-auto/kt134-case-aware-word-body.test.mjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -30,8 +32,10 @@ jobs:
           node --check kt134-auto/kt134-protected-auto-coordinator.mjs
           node --check kt134-auto/kt134-protected-auto-coordinator.test.mjs
           node --check kt134-auto/kt134-eg-stage45-live-bridge.mjs
-          node --check kt134-auto/kt134-eg-stage45-live-bridge.test.mjs kt134-auto/kt134-complete-dossier-stage4.test.mjs
+          node --check kt134-auto/kt134-eg-stage45-live-bridge.test.mjs kt134-auto/kt134-complete-dossier-stage4.test.mjs kt134-auto/kt134-case-aware-word-body.test.mjs
           node --check kt134-auto/kt134-complete-dossier-stage4.mjs
           node --check kt134-auto/kt134-complete-dossier-stage4.test.mjs
+          node --check kt134-auto/kt134-case-aware-word-body.mjs
+          node --check kt134-auto/kt134-case-aware-word-body.test.mjs
       - name: Protected case, evidence and draft regressions (no deployment)
         run: node --test kt134-auto/kt134-protected-case-gate.test.mjs kt134-auto/kt134-protected-auto-coordinator.test.mjs kt134-auto/kt134-eg-stage45-live-bridge.test.mjs
