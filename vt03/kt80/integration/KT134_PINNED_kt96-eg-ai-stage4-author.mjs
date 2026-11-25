@@ -174,6 +174,16 @@ function boot(){
     d.gis.spatial=d.gis.spatial.slice(0,Math.floor(d.gis.spatial.length/2));changed=true;
    }else if(d.gis?.stage3?.length>300){
     d.gis.stage3=d.gis.stage3.slice(0,Math.floor(d.gis.stage3.length/2));changed=true;
+   }else if(d.kt134DossierCoverage?.sourceAnchoredClaims?.length>1){
+    // Retain source diversity; mark any omitted anchored fact transparently.
+    const list=d.kt134DossierCoverage.sourceAnchoredClaims;
+    d.kt134DossierCoverage.sourceAnchoredClaims=list.filter((_,i)=>i%2===0);
+    d.kt134DossierCoverage.transmittedSourceAnchoredClaims=d.kt134DossierCoverage.sourceAnchoredClaims.length;
+    d.kt134DossierCoverage.allClaimEvidenceIncluded=false;
+    d.kt134DossierCoverage.complete=false;
+    d.kt134DossierCoverage.digestOverflow=true;
+    d.kt134DossierCoverage.coverageWarning='Част от документалните цитати не са включени в заявката поради технически лимит; не удостоверявай пълна доказателствена основа.';
+    changed=true;
    }
    if(!changed)break;
    bytes=stageBytes(req);
