@@ -28,3 +28,11 @@ assert.equal(evidenceCoverage(readable,complete).complete,true);
 assert.equal(evidenceCoverage(readable,complete.slice(0,-1)).complete,false,'Missing span must be visible');
 assert.equal(evidenceCoverage(readable,[]).examinedChunks,0);
 console.log('KT134 full-span coverage and quote provenance regression passed');
+
+const truncated=buildEvidenceChunks([{source:'Дълъг PDF.pdf',text:'Съществен фактически текст. '.repeat(200),
+ totalChars:150000,truncated:true}],5000);
+assert.ok(truncated.unreadable.some(x=>x.reason==='EXTRACTED_TEXT_TRUNCATED'));
+assert.equal(evidenceCoverage(truncated,truncated.chunks.map(chunk=>verifyEvidenceDigest(chunk,{examined:true,claims:[]}))).complete,false);
+const ocrGap=buildEvidenceChunks([{source:'Сканиран документ.pdf',text:'Наличен извлечен текст от PDF, но с непрочетени страници.',
+ readStatus:'ПРОВЕРКА: стр. 3 — недостатъчно разчетен текст'}]);
+assert.ok(ocrGap.unreadable.some(x=>x.reason==='EXTRACTION_REQUIRES_REVIEW'));
