@@ -27,6 +27,8 @@ export function kt134ReviewerRouteIssues({panelId,qualification=null,
   if(!(proven&&gap?.fact&&gap?.source&&gap?.legalCriterion)&&!documentedGap)
    errors.push("KT134_PANEL_02_NEEDS_CONCRETE_SOURCED_PHYSICAL_FACT");
  }
+ if(id===3&&!(verified("institution_target")&&verified("consultation_legal_basis")))
+  errors.push("KT134_PANEL_03_NO_IDENTIFIED_COMPETENT_INSTITUTION_OR_CONSULTATION_BASIS");
  if(id===4&&!(proven&&(tests.A1==="ПОЛОЖИТЕЛНА"||tests.A2==="ПОЛОЖИТЕЛНА")))
   errors.push("KT134_PANEL_04_EIA_APPLICABILITY_NOT_PROVEN");
  if(id===5&&!(proven&&(tests.OS1==="ПОЛОЖИТЕЛНА"||tests.OS2==="ПОЛОЖИТЕЛНА")))
