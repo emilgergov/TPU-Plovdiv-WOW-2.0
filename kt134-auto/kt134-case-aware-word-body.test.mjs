@@ -27,3 +27,16 @@ test('Word never invents location or GIS result when absent',()=>{
  assert.equal(text.includes('установено пресичане'),false);
  assert.equal(text.includes('Поземлен имот'),false);
 });
+
+test("institutional Word keeps sourced facts once and removes internal Stage5 and repeated model facts",()=>{
+ const req={subject:"Преустройство",scope:"Вътрешни прегради",completeCaseEvidence:{
+  sourceTexts:[{source:"ДОК-1",fileName:"Уведомление.pdf"}],parcels:[{identifier:"99999.999.999",sourceId:"PI"}],
+  gis:{analysisMode:"contextual_skip",reason:"Контекстен режим"}}};
+ const draft="Относно: „Преустройство“\nФактически констатации\nПИ 99999.999.999 е по данни от преписката.\nПравни предпоставки\nНяма потвърден нормативен извод.\nМотивирано предложение\nПредлага се конкретна справка.\nЗаключение и следващо действие\nПодлежи на окончателна експертна преценка.";
+ const result=composeKt134CaseAwareStage5Draft({stage5Text:draft,stage4Request:req});
+ assert.equal((result.match(/99999\.999\.999/gu)||[]).length,1);
+ assert.ok(!result.includes("МОТИВИРАНО ПРЕДЛОЖЕНИЕ ОТ ЕТАП 5"));
+ assert.ok(!result.includes("Фактически констатации"));
+ assert.ok(result.includes("Правни предпоставки"));
+ assert.ok(result.includes("Предлага се конкретна справка."));
+});
