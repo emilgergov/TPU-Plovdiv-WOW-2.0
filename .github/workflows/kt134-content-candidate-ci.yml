@@ -14,6 +14,7 @@ on:
       - 'vt03/kt80/integration/KT134_PINNED_kt96-eg-ai-stage4-author.mjs'
       - 'vt03/kt80/integration/kt134-evidence-chunks.mjs'
       - 'vt03/kt80/integration/kt134-evidence-chunks.test.mjs'
+      - 'vt03/kt80/integration/kt134-dual-identity-acceptance.test.mjs'
       - 'vt03/kt80/KT82_E01_SAFE_ZIP_INTAKE_V35.js'
       - 'vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html'
       - '.github/workflows/kt134-content-candidate-ci.yml'
@@ -46,6 +47,7 @@ jobs:
           node cloudflare/ai-author-v27/src/kt134-qualification-span.test.mjs
           node cloudflare/ai-author-v27/src/kt134-stage5-handoff-contract.test.mjs
           node vt03/kt80/integration/kt134-evidence-chunks.test.mjs
+          node vt03/kt80/integration/kt134-dual-identity-acceptance.test.mjs
       - name: Install isolated browser smoke runtime
         run: npm install --no-save --ignore-scripts playwright-core@1.56.1
       - name: Load full KT134 E1-E5 isolated UI in Chromium
