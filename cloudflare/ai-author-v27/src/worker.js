@@ -932,7 +932,7 @@ async function handleStage5Document(request,env){
  if(!env.OPENAI_API_KEY||!tokens.length)return reply({error:"Service unavailable"},503);
  if(!tokens.some(t=>request.headers.get("Authorization")==="Bearer "+t))return reply({error:"Unauthorized"},401);
  let input;
- try{const raw=await request.text();if(new TextEncoder().encode(raw).length>42000)return reply({error:"Payload too large"},413);input=JSON.parse(raw)}
+ try{const raw=await request.text();if(new TextEncoder().encode(raw).length>100000)return reply({error:"Payload too large"},413);input=JSON.parse(raw)}
  catch{return reply({error:"Invalid request"},400)}
  const ok=x=>typeof x==="string"&&x.length>0;
  // KT134: reviewer-authorized interim handoff is an alternative to intermediate
