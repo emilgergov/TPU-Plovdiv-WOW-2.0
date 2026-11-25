@@ -10,6 +10,8 @@ import './kt134-auto-pipeline.mjs';
 import {VERIFIED_ARTICLES,LOCKED_ARCHIVE,LOCKED_ARCHIVE_SHA256} from './v11-trusted-source-registry.mjs';
 
 const ENDPOINT='https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/stage4-proposal';
+const stage4Endpoint=()=>window.KT134AutoMode?.workerBase?.()?
+ window.KT134AutoMode.workerBase()+'/stage4-proposal':ENDPOINT;
 const $=id=>document.getElementById(id);
 const make=(tag,txt)=>{const n=document.createElement(tag);if(txt!==undefined)n.textContent=txt;return n;};
 const str=x=>String(x??'').trim();
@@ -262,7 +264,7 @@ function boot(){
     let result=null;
     try{
      const resp=await window.KT80EGSession.request(
-      ENDPOINT.replace('/stage4-proposal','/kt134-evidence-span'),
+      stage4Endpoint().replace('/stage4-proposal','/kt134-evidence-span'),
       JSON.stringify({task:'read_case_evidence_span',caseId:request.caseId,
        evidenceRevision:request.evidenceRevision,requestId:crypto.randomUUID(),chunk}),
       firstPassword);
@@ -296,7 +298,7 @@ function boot(){
     status.textContent='Доказателственият пакет е твърде голям и не може да бъде изпратен безопасно. Размер: '+prepared.bytes+' байта.';
     return;
    }
-   const response=await window.KT80EGSession.request(ENDPOINT,prepared.payload,firstPassword);
+   const response=await window.KT80EGSession.request(stage4Endpoint(),prepared.payload,firstPassword);
    const data=await response.json().catch(()=>({}));
    if(ticket!==serial||pendingSignature!==caseIdentity().signature)return;
    if(response.status===401||response.status===403){status.textContent='Достъпът до EG Автора е отказан. Паролата за тази сесия е изчистена.';return;}
