@@ -115,3 +115,11 @@ test("no internal reviewer author signature or placeholder in office Word",()=>{
  assert.ok(kt134DispositionTextIssues("Предлага се проект. Изготвил: независим рецензент\nДата: [по решение на експерта]",d)
  .includes("INTERNAL_REVIEW_PROCESS_IN_DOCUMENT"));
 });
+
+test("live model Word with wrong OS ordinance title and unsupported legal mandate is redrafted",()=>{
+ const d=deriveKt134LegalDisposition({reviewerPanelId:2,qualificationValidated:false});
+ const text="Наредба за опазване на околната среда (Наредба за ОС) предвижда задължителната преценка по чл. 93 ЗООС. Предлага се съгласно чл. 2, ал. 4 от Наредбата за ОС да се изиска детайлна техническа информация за капацитет, технология и други релевантни данни.";
+ const issues=kt134DispositionTextIssues(text,d);
+ for(const expected of ["INCORRECT_OS_ORDINANCE_TITLE","UNPROVEN_COMPULSORY_EIA_OR_CONFUSED_SEA","NON_SPECIFIC_INFORMATION_REQUEST","UNVERIFIED_OS_SPECIFIC_LEGAL_CLAIM"])
+  assert.ok(issues.includes(expected),"Missing "+expected+": "+issues.join(","));
+});
