@@ -5,9 +5,13 @@
  * evidenceRevision, requestId and draft. No response identity -> no accepted draft.
  * Distinct experts' credentials never travel inside the case evidence payload. */
 import {collectStageEvidence,verifyStageEvidence} from './kt95-stage-evidence-handoff.mjs';
+import {buildEvidenceChunks,verifyEvidenceDigest,evidenceCoverage,packAnchoredClaims} from './kt134-evidence-chunks.mjs';
+import './kt134-auto-pipeline.mjs';
 import {VERIFIED_ARTICLES,LOCKED_ARCHIVE,LOCKED_ARCHIVE_SHA256} from './v11-trusted-source-registry.mjs';
 
 const ENDPOINT='https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/stage4-proposal';
+const stage4Endpoint=()=>window.KT134AutoMode?.workerBase?.()?
+ window.KT134AutoMode.workerBase()+'/stage4-proposal':ENDPOINT;
 const $=id=>document.getElementById(id);
 const make=(tag,txt)=>{const n=document.createElement(tag);if(txt!==undefined)n.textContent=txt;return n;};
 const str=x=>String(x??'').trim();
@@ -173,6 +177,16 @@ function boot(){
     d.gis.spatial=d.gis.spatial.slice(0,Math.floor(d.gis.spatial.length/2));changed=true;
    }else if(d.gis?.stage3?.length>300){
     d.gis.stage3=d.gis.stage3.slice(0,Math.floor(d.gis.stage3.length/2));changed=true;
+   }else if(d.kt134DossierCoverage?.sourceAnchoredClaims?.length>1){
+    // Retain source diversity; mark any omitted anchored fact transparently.
+    const list=d.kt134DossierCoverage.sourceAnchoredClaims;
+    d.kt134DossierCoverage.sourceAnchoredClaims=list.filter((_,i)=>i%2===0);
+    d.kt134DossierCoverage.transmittedSourceAnchoredClaims=d.kt134DossierCoverage.sourceAnchoredClaims.length;
+    d.kt134DossierCoverage.allClaimEvidenceIncluded=false;
+    d.kt134DossierCoverage.complete=false;
+    d.kt134DossierCoverage.digestOverflow=true;
+    d.kt134DossierCoverage.coverageWarning='Част от документалните цитати не са включени в заявката поради технически лимит; не удостоверявай пълна доказателствена основа.';
+    changed=true;
    }
    if(!changed)break;
    bytes=stageBytes(req);
@@ -182,6 +196,7 @@ function boot(){
  let serial=0,pendingSignature='',finishedSignature='',lastResult=null;
  const clear=()=>{
   serial++;pendingSignature='';finishedSignature='';lastResult=null;password.value='';
+  window.KT134EvidenceLedger=null;
   if(dialog.open)dialog.close();button.disabled=false;output.textContent='';output.style.display='none';
   status.textContent='';status.style.display='none';lead.textContent='';lead.style.display='none';expanded.style.display='none';expanded.open=false;showEstablishedEvidence();
  };
@@ -230,12 +245,60 @@ function boot(){
   };
   const activityTicket=window.KT80Busy?.start?.('ЕГ Автор → независим рецензент · Изготвяне и проверка на предложението…');
   try{
+   // KT134: examine every readable source span before drafting. Failure is visible.
+   const intakeNow=w.intake||{};
+   const readableDocs=Array.isArray(intakeNow.document_texts)?intakeNow.document_texts:[];
+   const documentFormat=/\.(txt|csv|json|md|pdf|docx?|jpe?g|png|webp|bmp|tiff?)$/i;
+   const registeredSources=[
+    ...(Array.isArray(intakeNow.files)?intakeNow.files:[]).map(x=>str(x?.filename||x?.name||x?.file||x?.source)),
+    ...(Array.isArray(intakeNow.dossier_documents)?intakeNow.dossier_documents:[]).map(x=>str(x?.file||x?.source))
+   ].filter(name=>documentFormat.test(name));
+   const declaredCount=Math.max(readableDocs.length,new Set(registeredSources).size);
+   const batch=buildEvidenceChunks(readableDocs,5000);
+   const receipts=[];
+   let allResponses=true;
+   for(let i=0;i<batch.chunks.length;i++){
+    if(ticket!==serial||pendingSignature!==caseIdentity().signature){allResponses=false;break}
+    const chunk=batch.chunks[i];
+    status.textContent='Прочит на преписката: '+(i+1)+' от '+batch.chunks.length+' части · '+chunk.source;
+    let result=null;
+    try{
+     const resp=await window.KT80EGSession.request(
+      stage4Endpoint().replace('/stage4-proposal','/kt134-evidence-span'),
+      JSON.stringify({task:'read_case_evidence_span',caseId:request.caseId,
+       evidenceRevision:request.evidenceRevision,requestId:crypto.randomUUID(),chunk}),
+      firstPassword);
+     if(resp.ok)result=await resp.json();
+    }catch{}
+    if(!result||result.caseId!==request.caseId||
+       String(result.evidenceRevision)!==String(request.evidenceRevision)||
+       result.chunk?.source!==chunk.source||result.chunk?.start!==chunk.start||
+       result.chunk?.end!==chunk.end){allResponses=false;continue}
+    receipts.push(verifyEvidenceDigest(chunk,result));
+   }
+   const coverage=evidenceCoverage(batch,receipts);
+   const claims=coverage.claims.map(x=>({source:x.source,documentIndex:x.documentIndex,
+     start:x.start,end:x.end,quote:x.quote,summary:x.summary,expertConfirmed:false}));
+   const packed=packAnchoredClaims(claims,26000);
+   const ledgerFits=packed.complete;
+   request.completeCaseEvidence.kt134DossierCoverage={
+    complete:coverage.complete&&allResponses&&ledgerFits&&batch.totalDocuments>0&&batch.totalDocuments>=declaredCount,
+    declaredDocuments:declaredCount,readableDocuments:batch.totalDocuments,
+    expectedChunks:coverage.expectedChunks,examinedChunks:coverage.examinedChunks,
+    unreadableDocuments:coverage.unreadableDocuments,unexamined:coverage.unexamined,
+    sourceAnchoredClaims:packed.claims,totalSourceAnchoredClaims:packed.total,transmittedSourceAnchoredClaims:packed.selected,allClaimEvidenceIncluded:ledgerFits,
+    digestOverflow:!ledgerFits,generatedOnlyForCurrentCase:true};
+   if(!coverage.complete||!allResponses||!ledgerFits||batch.totalDocuments===0||batch.totalDocuments<declaredCount){
+    status.textContent='Не всички документи са прочетени. EG Авторът и рецензентът ще предложат мотивирано следващо действие с ясно посочени доказателствени ограничения.';
+    request.completeCaseEvidence.kt134DossierCoverage.complete=false;
+    request.completeCaseEvidence.kt134DossierCoverage.coverageWarning='НЕПЪЛЕН ПРОЧИТ — НЕ УДОСТОВЕРЯВАЙ ПЪЛНОТА И НЕ ИЗМИСЛЯЙ ФАКТИ; ВИНАГИ ПРЕДЛОЖИ ДЕЙСТВИЕ.';
+   }
    const prepared=fitStage4Request(request);
    if(!prepared.payload){
     status.textContent='Доказателственият пакет е твърде голям и не може да бъде изпратен безопасно. Размер: '+prepared.bytes+' байта.';
     return;
    }
-   const response=await window.KT80EGSession.request(ENDPOINT,prepared.payload,firstPassword);
+   const response=await window.KT80EGSession.request(stage4Endpoint(),prepared.payload,firstPassword);
    const data=await response.json().catch(()=>({}));
    if(ticket!==serial||pendingSignature!==caseIdentity().signature)return;
    if(response.status===401||response.status===403){status.textContent='Достъпът до EG Автора е отказан. Паролата за тази сесия е изчистена.';return;}
@@ -387,10 +450,18 @@ function boot(){
     requestId,draft:data.draft,projectOnly:true,expertApproved:false,
     providerArchiveEvidenceVerified:data.archiveEvidenceVerified===true
    });
+   window.KT134EvidenceLedger=Object.freeze({
+    caseId:identity.caseId,localCycleId:h.caseId,evidenceRevision:h.evidenceRevision,
+    coverageComplete:data.evidenceReceipt?.dossierAllSourceSpansExamined===true,
+    expectedChunks:Number(data.evidenceReceipt?.sourceSpansExpected)||0,
+    examinedChunks:Number(data.evidenceReceipt?.sourceSpansExamined)||0,
+    sourceAnchoredClaims:Object.freeze([...request.completeCaseEvidence.kt134DossierCoverage.sourceAnchoredClaims])
+   });
    const receipt=data.evidenceReceipt||{};
    const dossierCount=Number(receipt.documentTextsReceived)||0;
+   const coverageText='Прочит на документи: '+(receipt.dossierAllSourceSpansExamined===true?'пълно покритие':'непълно покритие')+' ('+(Number(receipt.sourceSpansExamined)||0)+' / '+(Number(receipt.sourceSpansExpected)||0)+' части). ';
    const availableCount=Number(receipt.documentTextsAvailable)||0;
-   const sourceInfo='Входни данни: '+dossierCount+' от '+availableCount+
+   const sourceInfo=coverageText+'Входни данни: '+dossierCount+' от '+availableCount+
      ' документа с извлечен текст; '+(Number(receipt.caseFactsReceived)||0)+
      ' доказателствени позиции; ГИС: '+(receipt.gisContextReceived?'предаден':'липсва')+
      '; нормативни препратки: '+(Number(receipt.archiveIndexRecordsReceived)||0)+

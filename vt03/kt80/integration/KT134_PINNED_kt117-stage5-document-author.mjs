@@ -208,9 +208,65 @@ function initialize(){
    caseId:source.caseId,evidenceRevision:source.evidenceRevision,stage4Version:source.version,requestId,
    confirmedStage4Text:source.text,selectedPanelLine:line,subject:clean(p.text),scope:clean(p.scope),
    parcelIds:[...ev.parcelIds],warnings:source.warnings||[],
+    // KT134: context from the same active case. These observations are leads,
+    // not verified law or a substitute for the confirmed Stage 4 decision.
+    stage5Evidence:(()=>{
+     const state=window.KT80WorkflowState||{},g=window.KT83NormativeBridge?.getEvidence?.()||{};
+     const allowed=['INSIDE','OUTSIDE','INTERSECTS','MIXED'];
+     const spatialClass=clean(g.spatialClass).toUpperCase();
+     const documents=(Array.isArray(state.intake?.files)?state.intake.files:[]).slice(0,25)
+      .map(x=>({name:clean(typeof x==='string'?x:x?.name||x?.filename).slice(0,180)}))
+      .filter(x=>x.name);
+     let textBudget=9500;
+     const sourceTexts=(Array.isArray(state.intake?.document_texts)?state.intake.document_texts:[])
+      .slice(0,12).map(x=>{
+       const raw=clean(x?.text),len=Math.min(2200,raw.length,textBudget);
+       textBudget-=len;
+       return {source:clean(x?.source).slice(0,180),text:raw.slice(0,len),
+        truncated:len<raw.length,totalChars:raw.length};
+      }).filter(x=>x.source&&x.text);
+     let gisDetail='';
+     try{gisDetail=JSON.stringify(g).slice(0,3500)}catch{}
+     const ledger=window.KT134EvidenceLedger||null;
+     const ledgerBound=!!ledger&&ledger.caseId===source.caseId&&
+      ledger.localCycleId===ev.caseId&&
+      String(ledger.evidenceRevision)===String(ev.evidenceRevision)&&
+      String(source.evidenceRevision)===String(ev.evidenceRevision);
+     const fullCoverage=ledgerBound&&ledger.coverageComplete===true;
+     const ledgerClaims=ledgerBound&&Array.isArray(ledger.sourceAnchoredClaims)?ledger.sourceAnchoredClaims:[];
+     const anchoredEvidence=[],maxLedgerBytes=12000;
+     for(const item of ledgerClaims){
+      const next={source:clean(item.source).slice(0,140),documentIndex:item.documentIndex,
+       start:item.start,end:item.end,quote:clean(item.quote).slice(0,330),
+       summary:clean(item.summary).slice(0,320)};
+      if(new TextEncoder().encode(JSON.stringify([...anchoredEvidence,next])).length>maxLedgerBytes)break;
+      anchoredEvidence.push(next);
+     }
+     return {caseId:source.caseId,localCycleId:ev.caseId,evidenceRevision:ev.evidenceRevision,documents,sourceTexts,
+      evidenceLedger:{allSpansExamined:fullCoverage,expectedChunks:ledgerBound?ledger.expectedChunks:0,
+       examinedChunks:ledgerBound?ledger.examinedChunks:0,claimsTotal:ledgerClaims.length,
+       claimsIncluded:anchoredEvidence.length,anchoredEvidence},
+      gis:{pdf1Available:g.pdfOK===true,spatialClass:allowed.includes(spatialClass)?spatialClass:'UNKNOWN',detail:gisDetail},
+      observations:ev.observations.slice(0,25).map(x=>({factId:clean(x.factId).slice(0,80),
+       value:clean(x.value).slice(0,220),status:clean(x.status).slice(0,24),
+       sourceId:clean(x.sourceId).slice(0,100)}))};
+    })(),
     qualificationRecord:source.qualificationRecord||null,qualificationProof:source.qualificationProof||null,qualificationGate:source.qualificationGate||null,
      expertDecision:source.expertDecision||null,expertDecisionProof:source.expertDecisionProof||null,
    documentTitle:documentLabel(line),incomingReference:incomingReference()};
+  // Keep the approved Stage 4 text intact; remove optional excerpts first.
+  const payloadBytes=()=>new TextEncoder().encode(JSON.stringify(payload)).length;
+  while(payloadBytes()>39000&&payload.stage5Evidence.sourceTexts.length)
+   payload.stage5Evidence.sourceTexts.pop();
+  if(payloadBytes()>39000)payload.stage5Evidence.gis.detail='';
+  if(payloadBytes()>39000)payload.stage5Evidence.documents=[];
+  while(payloadBytes()>39000&&payload.stage5Evidence.evidenceLedger.anchoredEvidence.length){
+   payload.stage5Evidence.evidenceLedger.anchoredEvidence.pop();
+   payload.stage5Evidence.evidenceLedger.claimsIncluded--;
+  }
+  payload.stage5Evidence.evidenceLedger.claimsIncluded=
+   payload.stage5Evidence.evidenceLedger.anchoredEvidence.length;
+  if(payloadBytes()>41000){note.textContent='Потвърденият текст надхвърля допустимия размер на заявката. Не е съкратен.';return;}
   busy=true;generate.disabled=true;note.textContent='EG Авторът изготвя проект на административния текст.';
   const activityTicket=window.KT80Busy?.start?.('EG Автор · Изготвя проекта на административния документ…');
   try{
@@ -236,7 +292,10 @@ function initialize(){
      data.expertReviewRequired!==true||clean(data.draft).length<120){
      note.textContent='Отговорът не съответства на потвърдената преписка.';return;
    }
-   editorialIssues=Array.isArray(data.editorialFlags)?data.editorialFlags.filter(x=>typeof x==='string').slice(0,8):[];
+   const kt134Notes=Array.isArray(data.kt134Content?.findings)?data.kt134Content.findings
+    .filter(x=>typeof x?.reason==='string'&&x.reason.trim())
+    .slice(0,8).map(x=>x.reason):[];
+   editorialIssues=[...(Array.isArray(data.editorialFlags)?data.editorialFlags.filter(x=>typeof x==='string').slice(0,8):[]),...kt134Notes];
    editorialContent.replaceChildren(...editorialIssues.map(x=>make('p',x)));
    editorial.hidden=!editorialIssues.length;
    const normalized=formatDraftSubject(data.draft);
@@ -310,10 +369,41 @@ function initialize(){
  document.addEventListener('kt116:stage4-confirmed',()=>{source=null;sync()});
  document.addEventListener('kt116:stage5-open',()=>sync());
  ['kt80:case-reset','kt80:case-change','kt82:evidence-invalidated'].forEach(x=>document.addEventListener(x,()=>{source=null;sync()}));
+ // KT134 candidate: the expert's single final approval fixes both the selected
+ // panel and the exact document text already displayed in the preview.
+ // Never silently rewrite the approved preview after this point.
+ function acceptAutomatedDocument({caseId,selectedPanelId,draft}={}){
+  if(!window.KT134AutoMode?.active?.())return {ok:false,reason:'Автоматичният маршрут не е избран.'};
+  sync();
+  const a=live(),text=clean(draft),h=collectStageEvidence(window);
+  if(!a?.expertApproved||a.caseId!==caseId||a.evidenceRevision!==h.evidenceRevision||
+     !source||source.caseId!==a.caseId||source.version!==a.version)
+   return {ok:false,reason:'Окончателното експертно решение не съответства на преписката.'};
+  const chosen=Number(a.panelId??a.expertDecision?.panelId);
+  if(chosen!==Number(selectedPanelId)||!text||text.length<120||text.length>18000)
+   return {ok:false,reason:'Процедурата или текстът се различават от разгледания проект.'};
+  const normalized=formatDraftSubject(text);
+  if(normalized.warning||isPanel01Request(a.text,text))
+   return {ok:false,reason:normalized.warning||'Диспозитивът на документа не съответства на панел №01.'};
+  const handoff=panelHandoff(window,a);
+  if(handoff&&['pending','unverified'].includes(handoff.gisStatus))
+   return {ok:false,reason:'ГИС статусът не е потвърден или не е мотивирано неприложим.'};
+  versions.push({version:versions.length+1,text:normalized.text,kind:'окончателно одобрен автоматичен проект'});
+  const version=versions.at(-1);
+  confirmed=Object.freeze({...version,caseId:a.caseId,stage4Version:a.version,
+   stage5Output:handoff?{...handoff,documentVersion:version.version}:null,
+   expert:a.expert,confirmedAt:new Date().toISOString()});
+  document.dispatchEvent(new CustomEvent('kt123:stage5-confirmed',{detail:{
+   caseId:a.caseId,stage4Version:a.version,finalAutomatedApproval:true
+  }}));
+  render();
+  note.textContent='Одобрен е точният текст, показан преди окончателното решение. Word се изготвя по приетата бланка.';
+  return {ok:true,confirmed};
+ }
  window.KT117Document=Object.freeze({
   panelHandoff:()=>live()?confirmedPanelOutput():null,
   snapshot:()=>confirmed&&live()?.version===confirmed.stage4Version?confirmed:null,
-  refresh:sync
+  refresh:sync,acceptAutomatedDocument
  });
  sync();
 }

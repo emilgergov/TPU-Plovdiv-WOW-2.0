@@ -1,0 +1,140 @@
+name: KT134 one-time live AI check - uploaded version only
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/kt134-live-ai-version-check.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-version-live-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+      CF_WORKER: "tpu-plovdiv-ai-author-v27"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Limit charged live test to ONE explicit commit
+        id: gate
+        shell: bash
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$PR_HEAD_SHA"
+          if git show -s --format=%s "$PR_HEAD_SHA" | grep -Fq 'KT134-LIVE-ONE-SHOT'; then
+            echo 'run=true' >> "$GITHUB_OUTPUT"
+            echo 'One-shot protected source-span live test enabled.'
+          else
+            echo 'run=false' >> "$GITHUB_OUTPUT"
+            echo 'No additional live AI calls on subsequent commits.'
+          fi
+      - name: Bundle KT134 Worker without changing production
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          set -euo pipefail
+          npx --yes esbuild@0.25.12 cloudflare/ai-author-v27/src/worker.js --bundle --platform=browser --format=esm --target=es2022 --outfile=/tmp/kt134-live-candidate.mjs
+          node --check /tmp/kt134-live-candidate.mjs
+      - name: Upload non-deployed Worker version and perform ONE live AI dossier-span test
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CF_TOKEN" || { echo "::error::CLOUDFLARE_API_TOKEN unavailable; production unchanged."; exit 1; }
+          folder="$(mktemp -d)"
+          chmod 700 "$folder"
+          trap 'rm -rf "$folder"' EXIT
+          api="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/$CF_WORKER"
+          curl --fail --silent --show-error --max-time 30 -H "Authorization: Bearer $CF_TOKEN" "$api/deployments" > "$folder/deploy-before.json"
+          node - "$folder/deploy-before.json" "$folder/deploy-before.fingerprint" <<'NODE'
+          const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[2]));
+          if(d.success!==true)throw Error('Cannot verify current production deployment');
+          const result=d.result?.deployments??d.result;
+          if(!result)throw Error('No deployment snapshot available');
+          fs.writeFileSync(process.argv[3],JSON.stringify(result));
+          console.log('Captured current production deployment; no modification authorized.');
+          NODE
+          node - "$folder/metadata.json" "$folder/test-auth.txt" <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          const credential=crypto.randomBytes(28).toString('hex');
+          fs.writeFileSync(process.argv[3],credential,{mode:0o600});
+          fs.writeFileSync(process.argv[2],JSON.stringify({
+            main_module:'worker.js',compatibility_date:'2026-10-01',
+            keep_bindings:['secret_text'],
+            bindings:[{name:'AI_AUTHOR_ACCESS_TOKEN',type:'secret_text',text:credential}]
+          }),{mode:0o600});
+          console.log('Prepared ephemeral version-only bearer token (not logged).');
+          NODE
+          status="$(curl --silent --show-error --max-time 90 -o "$folder/upload.json" -w '%{http_code}' \
+            -X POST "$api/versions" -H "Authorization: Bearer $CF_TOKEN" \
+            -F "metadata=@$folder/metadata.json;type=application/json" \
+            -F "worker.js=@/tmp/kt134-live-candidate.mjs;filename=worker.js;type=application/javascript+module")"
+          echo "Version-only upload HTTP $status (never POST deployments)."
+          node - "$folder/upload.json" "$folder/version-id.txt" <<'NODE'
+          const fs=require('fs'),r=JSON.parse(fs.readFileSync(process.argv[2]));
+          for(const e of r.errors||[])console.error('Version upload error:',e.code,e.message);
+          if(!r.success||!r.result?.id)process.exit(1);
+          fs.writeFileSync(process.argv[3],r.result.id);
+          console.log('Uploaded non-deployed version',r.result.id);
+          NODE
+          curl --fail --silent --show-error --max-time 30 -H "Authorization: Bearer $CF_TOKEN" "$api/deployments" > "$folder/deploy-after.json"
+          node - "$folder/deploy-after.json" "$folder/deploy-before.fingerprint" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2]));
+          const previous=fs.readFileSync(process.argv[3],'utf8');
+          const current=JSON.stringify(d.result?.deployments??d.result);
+          if(!d.success||current!==previous)throw Error('Production deployment changed; STOP');
+          console.log('PRODUCTION DEPLOYMENT UNCHANGED after version upload.');
+          NODE
+          version="$(cat "$folder/version-id.txt")"
+          prefix="${version:0:8}"
+          url="https://$prefix-$CF_WORKER.emilgergov.workers.dev"
+          echo "Candidate version URL: $url"
+          health_code="$(curl --silent --show-error --retry 4 --retry-delay 2 --max-time 30 \
+            -o "$folder/health.json" -w '%{http_code}' "$url/health")"
+          echo "Candidate health HTTP $health_code"
+          node - "$folder/health.json" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2]));
+          if(d.status!=='online'||d.kt134CandidateContract!=='KT134_EVIDENCE_SPAN_V1')
+            throw Error('Version URL does not serve the KT134 candidate; STOP');
+          if(d.apiKeyConfigured!==true)throw Error('OpenAI secret was not inherited; no live AI request made');
+          console.log('Confirmed KT134 candidate version, inherited AI binding present.');
+          NODE
+          node - "$folder/request.json" <<'NODE'
+          const fs=require('fs'),excerpt='Техническото описание посочва складово помещение с площ 430 кв. м., находящо се в един съществуващ имот. Предлага се преустройство без строителство на нова сграда. Данните са синтетични и служат единствено за проверка на прочита.';
+          fs.writeFileSync(process.argv[2],JSON.stringify({
+            task:'read_case_evidence_span',caseId:'KT134-LIVE-SYNTHETIC',evidenceRevision:'TEST-ONLY-1',
+            requestId:'KT134-LIVE-SOURCE-SPAN-1',
+            chunk:{source:'Синтетично техническо описание.txt',documentIndex:0,start:0,end:excerpt.length,totalChars:excerpt.length,text:excerpt}
+          }),{mode:0o600});
+          NODE
+          # Reject unauthenticated traffic before incurring any AI costs.
+          code="$(curl --silent --show-error --max-time 15 -o "$folder/unauthorized.json" -w '%{http_code}' \
+            -X POST "$url/kt134-evidence-span" -H 'Content-Type: application/json' \
+            --data-binary "@$folder/request.json")"
+          test "$code" = 401 || { echo "::error::Version authentication was not enforced (HTTP $code)"; exit 1; }
+          echo "Candidate authentication boundary: HTTP 401."
+          auth="$(cat "$folder/test-auth.txt")"
+          code="$(curl --silent --show-error --max-time 75 -o "$folder/ai-result.json" -w '%{http_code}' \
+            -X POST "$url/kt134-evidence-span" \
+            -H 'Content-Type: application/json' \
+            -H "Authorization: Bearer $auth" \
+            --data-binary "@$folder/request.json")"
+          echo "Candidate live AI source-span HTTP $code"
+          node - "$folder/ai-result.json" "$code" <<'NODE'
+          const fs=require('fs'),status=Number(process.argv[3]),r=JSON.parse(fs.readFileSync(process.argv[2]));
+          if(status!==200){console.error('AI check failed with',status,'error:',r.error||'unknown');process.exit(1)}
+          if(r.caseId!=='KT134-LIVE-SYNTHETIC'||r.examined!==true||r.sourceTextStored!==false||
+            !Array.isArray(r.claims)||!r.claims.some(x=>x.sourceQuoteMatched===true&&x.expertConfirmed===false))
+            throw Error('Live AI response failed source anchoring or proof contract');
+          console.log('LIVE AI PASS: read synthetic document; exact source-matched quotes:',r.claims.length);
+          console.log('No claims of normative or real dossier acceptance.');
+          NODE
+          curl --fail --silent --show-error --max-time 30 -H "Authorization: Bearer $CF_TOKEN" "$api/deployments" > "$folder/deploy-final.json"
+          node - "$folder/deploy-final.json" "$folder/deploy-before.fingerprint" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2]));
+          if(!d.success||JSON.stringify(d.result?.deployments??d.result)!==fs.readFileSync(process.argv[3],'utf8'))
+            throw Error('Production deployment changed after live check');
+          console.log('FINAL VERIFICATION: Production deployment unchanged.');
+          NODE

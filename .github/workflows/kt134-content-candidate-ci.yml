@@ -1,0 +1,91 @@
+name: KT134 content candidate checks
+on:
+  push:
+    branches:
+      - kt134-content-integration-candidate
+    paths:
+      - 'cloudflare/ai-author-v27/src/kt134-content-diagnostics.mjs'
+      - 'cloudflare/ai-author-v27/src/kt134-case-purpose.mjs'
+      - 'cloudflare/ai-author-v27/src/kt134-complaint-qualification.mjs'
+      - 'cloudflare/ai-author-v27/src/kt134-complaint-qualification.test.mjs'
+      - 'cloudflare/ai-author-v27/src/kt134-case-purpose.test.mjs'
+      - 'cloudflare/ai-author-v27/src/kt134-content-diagnostics.test.mjs'
+      - 'cloudflare/ai-author-v27/src/kt123-evidence-qualification.mjs'
+      - 'cloudflare/ai-author-v27/src/kt134-qualification-span.test.mjs'
+      - 'cloudflare/ai-author-v27/src/worker.js'
+      - 'cloudflare/ai-author-v27/src/kt134-stage5-handoff-contract.test.mjs'
+      - 'vt03/kt80/integration/KT134_PINNED_kt117-stage5-document-author.mjs'
+      - 'vt03/kt80/integration/KT134_PINNED_kt96-eg-ai-stage4-author.mjs'
+      - 'vt03/kt80/integration/kt134-evidence-chunks.mjs'
+      - 'vt03/kt80/integration/kt134-evidence-chunks.test.mjs'
+      - 'vt03/kt80/integration/kt134-dual-identity-acceptance.test.mjs'
+      - 'vt03/kt80/integration/kt134-auto-pipeline.mjs'
+      - 'vt03/kt80/integration/KT134_PINNED_kt116-expert-approval-handoff.mjs'
+      - 'KT134/integration/KT134_AUTO_PIPELINE_ACCEPTANCE.test.mjs'
+      - 'KT134/integration/KT134_AUTOMATIC_BROWSER_E2E.test.cjs'
+      - 'KT134/integration/KT134_WORKER_RUNTIME.test.mjs'
+      - 'vt03/kt80/KT82_E01_SAFE_ZIP_INTAKE_V35.js'
+      - 'vt03/kt80/KT134_PDF1_ISOLATED_REGRESSION_TEST.html'
+      - '.github/workflows/kt134-content-candidate-ci.yml'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  content-candidate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify JavaScript syntax
+        run: |
+          node --check cloudflare/ai-author-v27/src/kt134-content-diagnostics.mjs
+          node --check cloudflare/ai-author-v27/src/kt134-case-purpose.mjs
+          node --check cloudflare/ai-author-v27/src/kt134-complaint-qualification.mjs
+          node --check cloudflare/ai-author-v27/src/kt123-evidence-qualification.mjs
+          node --check cloudflare/ai-author-v27/src/worker.js
+          node --check vt03/kt80/integration/KT134_PINNED_kt117-stage5-document-author.mjs
+          node --check vt03/kt80/integration/KT134_PINNED_kt96-eg-ai-stage4-author.mjs
+          node --check vt03/kt80/integration/KT134_PINNED_kt116-expert-approval-handoff.mjs
+          node --check vt03/kt80/integration/kt134-auto-pipeline.mjs
+          node --check vt03/kt80/integration/kt134-evidence-chunks.mjs
+          node --check vt03/kt80/KT82_E01_SAFE_ZIP_INTAKE_V35.js
+      - name: Run content diagnostic regression suite
+        run: |
+          node cloudflare/ai-author-v27/src/kt134-content-diagnostics.test.mjs
+          node cloudflare/ai-author-v27/src/kt134-case-purpose.test.mjs
+          node cloudflare/ai-author-v27/src/kt134-complaint-qualification.test.mjs
+          node cloudflare/ai-author-v27/src/kt134-qualification-span.test.mjs
+          node cloudflare/ai-author-v27/src/kt134-stage5-handoff-contract.test.mjs
+          node vt03/kt80/integration/kt134-evidence-chunks.test.mjs
+          node vt03/kt80/integration/kt134-dual-identity-acceptance.test.mjs
+          node KT134/integration/KT134_AUTO_PIPELINE_ACCEPTANCE.test.mjs
+      - name: Bundle isolated candidate Worker and run actual runtime routes
+        run: |
+          npx --yes esbuild@0.25.12 cloudflare/ai-author-v27/src/worker.js --bundle --platform=browser --format=esm --target=es2022 --outfile=/tmp/kt134-worker-runtime.mjs
+          node --check /tmp/kt134-worker-runtime.mjs
+          node KT134/integration/KT134_WORKER_RUNTIME.test.mjs /tmp/kt134-worker-runtime.mjs
+      - name: Verify EXISTING public Worker without credentials or AI charges
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev"
+          curl --fail --silent --show-error --max-time 20 --retry 2 --retry-delay 2 "$base/health" | node -e 'let s="";process.stdin.on("data",x=>s+=x);process.stdin.on("end",()=>{const d=JSON.parse(s);if(d.status!=="online"||d.service!=="TPU Plovdiv AI Author V27")process.exit(1);console.log("PUBLIC WORKER ALIVE, not KT134 candidate:",d.stage4Contract,d.stage5Contract)})'
+          curl --fail --silent --show-error --max-time 25 --retry 2 --retry-delay 2 "$base/legal-archive-health" | node -e 'let s="";process.stdin.on("data",x=>s+=x);process.stdin.on("end",()=>{const d=JSON.parse(s);if(d.status!=="ready"||d.exactProvisionsReady<10)process.exit(1);console.log("LIVE V11 LEGAL MASTER:",d.sourceDocuments,d.exactProvisionsReady)})'
+          status="$(curl --silent --show-error --max-time 15 -o /tmp/kt134_live_protected_response.json -w '%{http_code}' -X POST "$base/stage4-proposal" -H 'Content-Type: application/json' --data '{"task":"draft_normative_proposal"}')"
+          test "$status" = 401 -o "$status" = 503 || { echo "::error::Public Worker AI route does not fail closed"; exit 1; }
+          echo "PUBLIC WORKER AUTH BOUNDARY: HTTP $status (no AI charge)"
+      - name: Install isolated browser smoke runtime
+        run: npm install --no-save --ignore-scripts playwright-core@1.56.1
+      - name: Load full KT134 E1-E5 isolated UI in Chromium
+        env:
+          CHROMIUM_PATH: /usr/bin/google-chrome
+        run: node KT134/integration/KT134_BROWSER_SMOKE.test.cjs
+      - name: Browser simulation — automatic E4 E5 and only one expert approval
+        env:
+          CHROMIUM_PATH: /usr/bin/google-chrome
+        run: node KT134/integration/KT134_AUTOMATIC_BROWSER_E2E.test.cjs
