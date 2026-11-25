@@ -858,7 +858,7 @@ async function handleExpertDecision(request,env){
  const tokens=[env.AI_AUTHOR_PASSWORD_V27,env.AI_AUTHOR_ACCESS_TOKEN].filter(x=>typeof x==="string"&&x.length>0);
  if(!tokens.some(t=>request.headers.get("Authorization")==="Bearer "+t))return reply({error:"Unauthorized"},401);
  let input;
- try{const raw=await request.text();if(new TextEncoder().encode(raw).length>42000)return reply({error:"Payload too large"},413);input=JSON.parse(raw)}
+ try{const raw=await request.text();if(new TextEncoder().encode(raw).length>100000)return reply({error:"Payload too large"},413);input=JSON.parse(raw)}
  catch{return reply({error:"Invalid request"},400)}
  // KT124-R2: expert may accept the reviewed proposal or select a different
  // catalog panel without debating the reviewer or rewriting the legal analysis.
