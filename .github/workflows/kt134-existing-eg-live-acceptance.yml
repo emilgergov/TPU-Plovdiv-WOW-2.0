@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   live-existing-eg:
-    if: true # One user-requested live verification after E4 reviewer correction; re-disable after result
+    if: false # Disable costly live runs after E4 reviewer evidence; next test only after distinct complaint route is complete
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
