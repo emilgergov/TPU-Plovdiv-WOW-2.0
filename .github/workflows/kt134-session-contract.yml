@@ -1,0 +1,47 @@
+name: KT134 inspect KT125 session contract
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-session-contract.yml']
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Inspect identifiers and cookie attribute shapes only
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const url='https://api.cloudflare.com/client/v4/accounts/'+process.env.ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth';
+          const r=await fetch(url,{headers:{Authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('SOURCE_UNAVAILABLE');
+          const s=await r.text();
+          const terms=['kt125_session','session_token','sessionId','/user','/kt125/local-auth','token_hash','expires_at_ms','Set-Cookie','Cookie'];
+          const out=terms.map(term=>{
+            const positions=[];let start=0;while(positions.length<8){const i=s.indexOf(term,start);if(i<0)break;positions.push(i);start=i+term.length;}
+            return {term,occurrences:positions.length,contexts:positions.map(i=>{
+              const c=s.slice(Math.max(0,i-280),i+400);
+              return {
+                nearbyIdentifiers:[...new Set([...c.matchAll(/[a-zA-Z_$][a-zA-Z0-9_$]{2,45}/g)].map(m=>m[0]))]
+                  .filter(x=>!/^(const|return|function|async|await|true|false|default|case|var|let|new|if|else|headers|request|response)$/i.test(x)).slice(0,32),
+                nearbyRoutes:[...new Set([...c.matchAll(/\/([a-z][a-z0-9/-]{2,50})/gi)].map(m=>m[0]))].slice(0,10)
+              };
+            })};
+          });
+          writeFileSync('kt134-auto/KT134_SESSION_CONTRACT_METADATA.json',JSON.stringify({readOnly:true,terms:out},null,2)+'\n');
+          console.log('Session contract metadata inspected');
+          NODE
+      - name: Save metadata
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_SESSION_CONTRACT_METADATA.json
+          git commit -m 'KT134: inspect KT125 session contract identifiers' || exit 0
+          git push origin HEAD:kt134-auto-mode-isolated
