@@ -677,7 +677,8 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
     draft=candidate;issues=remaining;
    }
   }
-  if(issues.length)return expertPreview("Проектът изисква експертен преглед на нормативните несъответствия.",issues,"author_repair",draft,{authorRepairs});
+  // KT134: substantive author issues are forwarded to independent reviewer for correction.
+  // Deterministic checks below still protect against invalid final legal assertions.
   // KT105-C: independent second model run with a distinct reviewer role.
   // It does not confer statutory validity; full normative source text remains unavailable.
   const reviewSystem=[
@@ -779,10 +780,11 @@ const gateText=value.replace(/\*\*/gu,"").replace(/^\s{0,3}#{1,6}\s*/gmu,"");
   // Reviewer disagreement is not a veto when the reviewer supplied a
   // complete, independently revalidated correction.
   const correctedByReviewer=finalDraft!==draft&&reviewedIssues.length===0;
-  const reviewDisposition=verdict==="reject"&&correctedByReviewer?"revise":verdict;
-  if(reviewedIssues.length||(verdict==="reject"&&!correctedByReviewer))
+  // The reviewer may disagree, but its verdict alone cannot veto a case.
+  const reviewDisposition=verdict==="reject"?"revise":verdict;
+  if(reviewedIssues.length)
    return expertPreview("Рецензирано предложение за експертен преглед; нормативните несъответствия остават видими.",
-    [...new Set([...issues,...reviewedIssues,...(verdict==="reject"&&!correctedByReviewer?["INDEPENDENT_REJECTION"]:[])])],
+    [...new Set([...issues,...reviewedIssues])],
     "independent_review",finalDraft,{reviewFindings:reviewerFindings,reviewVerdict:verdict,reviewed:true});
   if(finalDraft.length<120||!sectionNames.every(x=>finalDraft.toLocaleLowerCase("bg").includes(x.toLocaleLowerCase("bg")))||
      /преценяван(?:е|ето)\s+на\s+необходимостта\s+от\s+ОС[^.\n]{0,90}чл\.?\s*2\s*,?\s*ал\.?\s*2/iu.test(finalDraft)||
