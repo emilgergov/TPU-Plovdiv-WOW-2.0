@@ -57,3 +57,16 @@ test('wrong case in author output fails closed',async()=>{
  f.adapters.invokeAuthor=async x=>({...await orig(x),caseId:'other'});
  await assert.rejects(()=>run(f),/AUTHOR_CASE_MISMATCH/);assert.equal(f.calls.word,0);
 });
+
+test('silent change of normative archive blocks Word even if revision stays constant',async()=>{
+ const f=fixture(),original=f.adapters.invokeReviewer;
+ f.adapters.invokeReviewer=async x=>{f.ctx.evidence.normativeMaster.digest='b'.repeat(64);return original(x);};
+ await assert.rejects(()=>run(f),/CASE_SNAPSHOT_CHANGED/);
+ assert.equal(f.calls.word,0);
+});
+test('silent change of subject blocks Word even if revision stays constant',async()=>{
+ const f=fixture(),original=f.adapters.invokeReviewer;
+ f.adapters.invokeReviewer=async x=>{f.ctx.caseRecord.subject='Променен предмет';return original(x);};
+ await assert.rejects(()=>run(f),/CASE_SNAPSHOT_CHANGED/);
+ assert.equal(f.calls.word,0);
+});
