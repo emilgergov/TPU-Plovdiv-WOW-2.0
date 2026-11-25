@@ -370,7 +370,7 @@ if(host&&five){
   let response,data;
   try{
    response=await window.KT80EGSession.request(
-    'https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/stage4-expert-decision',
+    window.KT134AutoMode.workerBase()+'/stage4-expert-decision',
     JSON.stringify(payload));
    data=await response.json().catch(()=>({}));
   }catch{return {ok:false,reason:'Няма достъп до сървъра за регистриране на експертното решение.'}}
