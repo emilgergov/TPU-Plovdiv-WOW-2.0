@@ -227,7 +227,22 @@ function initialize(){
       }).filter(x=>x.source&&x.text);
      let gisDetail='';
      try{gisDetail=JSON.stringify(g).slice(0,3500)}catch{}
+     const ledger=window.KT134EvidenceLedger||null;
+     const ledgerBound=!!ledger&&ledger.caseId===ev.caseId&&
+      String(ledger.evidenceRevision)===String(ev.evidenceRevision)&&ledger.coverageComplete===true;
+     const ledgerClaims=ledgerBound&&Array.isArray(ledger.sourceAnchoredClaims)?ledger.sourceAnchoredClaims:[];
+     const anchoredEvidence=[],maxLedgerBytes=12000;
+     for(const item of ledgerClaims){
+      const next={source:clean(item.source).slice(0,140),documentIndex:item.documentIndex,
+       start:item.start,end:item.end,quote:clean(item.quote).slice(0,330),
+       summary:clean(item.summary).slice(0,320)};
+      if(new TextEncoder().encode(JSON.stringify([...anchoredEvidence,next])).length>maxLedgerBytes)break;
+      anchoredEvidence.push(next);
+     }
      return {caseId:ev.caseId,evidenceRevision:ev.evidenceRevision,documents,sourceTexts,
+      evidenceLedger:{allSpansExamined:ledgerBound,expectedChunks:ledgerBound?ledger.expectedChunks:0,
+       examinedChunks:ledgerBound?ledger.examinedChunks:0,claimsTotal:ledgerClaims.length,
+       claimsIncluded:anchoredEvidence.length,anchoredEvidence},
       gis:{pdf1Available:g.pdfOK===true,spatialClass:allowed.includes(spatialClass)?spatialClass:'UNKNOWN',detail:gisDetail},
       observations:ev.observations.slice(0,25).map(x=>({factId:clean(x.factId).slice(0,80),
        value:clean(x.value).slice(0,220),status:clean(x.status).slice(0,24),
@@ -242,6 +257,10 @@ function initialize(){
    payload.stage5Evidence.sourceTexts.pop();
   if(payloadBytes()>39000)payload.stage5Evidence.gis.detail='';
   if(payloadBytes()>39000)payload.stage5Evidence.documents=[];
+  while(payloadBytes()>39000&&payload.stage5Evidence.evidenceLedger.anchoredEvidence.length){
+   payload.stage5Evidence.evidenceLedger.anchoredEvidence.pop();
+   payload.stage5Evidence.evidenceLedger.claimsIncluded--;
+  }
   if(payloadBytes()>41000){note.textContent='Потвърденият текст надхвърля допустимия размер на заявката. Не е съкратен.';return;}
   busy=true;generate.disabled=true;note.textContent='EG Авторът изготвя проект на административния текст.';
   const activityTicket=window.KT80Busy?.start?.('EG Автор · Изготвя проекта на административния документ…');
