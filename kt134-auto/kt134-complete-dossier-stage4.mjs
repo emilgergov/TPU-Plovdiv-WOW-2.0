@@ -84,6 +84,13 @@ export function buildKt134CompleteStage4Request({caseId,revision,bundle,requestI
    documentRecords:documents.map(x=>({sourceId:x.source,fileName:x.fileName,type:x.type,date:x.date})),
    documents:documents.map(x=>({sourceId:x.source,name:x.fileName})),
    parcels,gis:gisDescription,subjectCandidates:[subject],gisContextMode:mode,
+   // Evidence of prior procedural steps is case-specific, never inferred from
+   // a selected panel or generic statutory wording.
+   procedureEvidence:many(bundle.procedureEvidence)
+    .filter(x=>plain(x)&&x.verified===true&&nonempty(x.sourceId)&&nonempty(x.kind))
+    .map(x=>({kind:safeText(x.kind,100),sourceId:safeText(x.sourceId,180),
+      verified:true,description:safeText(x.description,550),
+      institution:safeText(x.institution,200),date:safeText(x.date,50)})).slice(0,40),
    piMaster:plain(bundle.piMaster)?bundle.piMaster:null,
    pdf1Ref:mode==='required'?spatial.pdf1Ref:null,
    pdf2Ref:safeText(bundle.pdf2Ref,250),
