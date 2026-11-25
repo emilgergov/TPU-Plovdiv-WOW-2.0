@@ -1,0 +1,65 @@
+{
+  "readOnly": true,
+  "entries": [
+    {
+      "term": "function getCookie",
+      "found": true,
+      "indicators": [
+        "getCookie",
+        "KT125_LOCAL_ORIGIN",
+        "KT125_LOCAL_ENABLED"
+      ],
+      "literals": [
+        "Cookie",
+        "https:",
+        "/kt125/local-auth"
+      ],
+      "lineCount": 9
+    },
+    {
+      "term": "getCookie =",
+      "found": false
+    },
+    {
+      "term": "const getCookie",
+      "found": false
+    },
+    {
+      "term": "token_hash =",
+      "found": false
+    },
+    {
+      "term": "token_hash=?",
+      "found": true,
+      "indicators": [
+        "token_hash",
+        "credential_version",
+        "expires_at_ms",
+        "active",
+        "digest",
+        "user_id",
+        "getCookie"
+      ],
+      "literals": [
+        "DELETE FROM kt125_local_sessions WHERE token_hash=?"
+      ],
+      "lineCount": 10
+    },
+    {
+      "term": "token_hash = ?",
+      "found": false
+    },
+    {
+      "term": "function lookupSession",
+      "found": false
+    },
+    {
+      "term": "function validateSession",
+      "found": false
+    },
+    {
+      "term": "async function verifyLocal",
+      "found": false
+    }
+  ]
+}
