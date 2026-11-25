@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   live-existing-eg:
-    if: true # User-requested ONE live KT134 E4-E5 check; return to false immediately after observation
+    if: false # One bounded live test concluded; manual re-enable only for next accepted test
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
