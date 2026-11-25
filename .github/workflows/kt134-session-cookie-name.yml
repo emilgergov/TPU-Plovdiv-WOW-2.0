@@ -1,0 +1,38 @@
+name: KT134 identify native session cookie constant
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-session-cookie-name.yml']
+permissions:
+  contents: write
+jobs:
+  name:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Inspect nonsecret cookie configuration name
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+process.env.ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth',{headers:{Authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('AUTH_SOURCE_NOT_AVAILABLE');
+          const s=await r.text();
+          const m=s.match(/\b(?:const|let|var)\s+SESSION_COOKIE\s*=\s*(["'`])([^"'`]{1,90})\1/);
+          if(!m)throw Error('COOKIE_NAME_NOT_FOUND');
+          if(!/^[a-z0-9_.-]{4,90}$/i.test(m[2]))throw Error('COOKIE_NAME_INVALID');
+          writeFileSync('kt134-auto/KT134_KT125_COOKIE_NAME.json',JSON.stringify({cookieName:m[2],algorithm:'SHA-256',note:'Configuration metadata only, not a credential'},null,2)+'\n');
+          console.log('Native cookie name verified');
+          NODE
+      - name: Save cookie metadata
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_KT125_COOKIE_NAME.json
+          git commit -m 'KT134: verify native session cookie format' || exit 0
+          git pull --rebase origin kt134-auto-mode-isolated
+          git push origin HEAD:kt134-auto-mode-isolated
