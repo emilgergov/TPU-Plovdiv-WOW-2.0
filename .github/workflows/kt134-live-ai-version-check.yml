@@ -21,7 +21,7 @@ jobs:
         id: gate
         shell: bash
         run: |
-          if git log -1 --format=%s | grep -Fq 'KT134-LIVE-ONE-SHOT'; then
+          if git log -1 --format=%s HEAD^2 | grep -Fq 'KT134-LIVE-ONE-SHOT'; then
             echo 'run=true' >> "$GITHUB_OUTPUT"
             echo 'One-shot protected source-span live test enabled.'
           else
