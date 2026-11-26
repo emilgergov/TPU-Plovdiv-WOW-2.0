@@ -51,3 +51,16 @@ test('browser GET without Origin is forwarded with the native trusted KT125 Orig
  assert.equal(r.status,200);
  assert.match(await r.text(),/<form/);
 });
+
+test('GET login never forwards stale KT134 browser cookies to native KT125',async()=>{
+ const handle=createKt134NativeAuthProxy({nativeFetch:async upstream=>{
+  assert.equal(upstream.method,'GET');
+  assert.equal(upstream.headers.get('cookie'),null);
+  return new Response('<form action="/auth/login" method="post"></form>',{
+   status:200,headers:{'content-type':'text/html; charset=utf-8'}});
+ }});
+ const r=await handle(new Request(url+'/auth/login',{method:'GET',
+  headers:{cookie:'kt125_session=stale-data; kt134_test=old-value'}}));
+ assert.equal(r.status,200);
+ assert.match(await r.text(),/<form/);
+});
