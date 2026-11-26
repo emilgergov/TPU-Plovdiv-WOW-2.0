@@ -1,0 +1,167 @@
+{
+  "metadataOnly": true,
+  "out": [
+    {
+      "term": "url.pathname===\"/member\"",
+      "hits": []
+    },
+    {
+      "term": "path===\"/member\"",
+      "hits": []
+    },
+    {
+      "term": "/member",
+      "hits": [
+        [
+          "file #wow-session-banner,body.auth-message #wow-session-banner{position:absolute;top:0;left:0}</style>`;",
+          "const label = roleNames[user.role] || \"\\u041F\\u043E\\u0442\\u0440\\u0435\\u0431\\u0438\\u0442\\u0435\\u043B\";",
+          "const bar = `<aside id=\"wow-session-banner\" aria-label=\"\\u0422\\u0435\\u043A\\u0443\\u0449 \\u043F\\u043E\\u0442\\u0440\\u0435\\u0431\\u0438\\u0442\\u0435\\u043B\"><div class=\"wow-session-who\"><span>\\u0420\\u0430\\u0431\\u043E\\u0442\\u0438\\u0442\\u0435 \\u043A\\",
+          "function page({ view = \"login\", message = \"\", account = \"\", activation = \"\", user, adminLogin = false, resetId = \"\", resetToken=[REDACTED], mailReady = false, status = 200 } = {}) {"
+        ],
+        [
+          "const url = new URL(request.url), path3 = url.pathname, db = env.KT125_DB, now = clock();",
+          "const known = /* @__PURE__ */ new Set([\"/\", \"/auth/login\", \"/auth/register\", \"/auth/submitted\", \"/auth/activate\", \"/auth/logout\", \"/auth/forgot\", \"/auth/reset\", \"/auth/reset-sent\", \"/auth/reset-done\", \"/auth/admin\", \"/member\"]);",
+          "if (request.method === \"GET\" && known.has(path3)) {",
+          "if (path3 === \"/\") return redirect(\"/auth/login\");"
+        ],
+        [
+          "if (path3 === \"/auth/logout\") return redirect(\"/auth/login\");",
+          "if (path3 === \"/member\") {",
+          "return who2 ? withSessionBanner(page({ view: \"home\", user: who2 }), who2) : redirect(\"/auth/login\", cookie(\"\", 0));",
+          "if (request.method === \"POST\" && [\"/auth/register\", \"/auth/login\", \"/auth/logout\", \"/auth/forgot\", \"/auth/reset\", \"/auth/admin\"].includes(path3)) {",
+          "const fields = path3 === \"/auth/register\" ? [\"name\", \"username\", \"email\", \"password\", \"password_confirm\", \"note\", \"confirm\"] : [\"/auth/login\", \"/auth/admin\"].includes(path3) ? [\"username\", \"password\", \"account\", \"activation\"] : path3 === \"/"
+        ],
+        [
+          "const session = await createSession({ db, account, now });",
+          "if (session) return redirect(path3 === \"/auth/admin\" ? \"/kt125/admin/panel/overview\" : \"/member\", cookie(session, SESSION_MS / 1e3));",
+          "const current = await db.prepare(\"SELECT active FROM kt125_users WHERE user_id=? AND organization_id=?\").bind(account.user_id, config.org).first();"
+        ],
+        [
+          "const now = Date.now(), request = new Request(config.origin + \"/member\", { headers: { Cookie: cookie2 } });",
+          "const response = await this.env.KT128_AUTHOR.fetch(new Request(\"https://tpu-plovdiv-ai-author-v27.emilgergov.workers.dev/subject-improve\", { method: \"POST\", headers: { Origin: config.origin, \"Content-Type\": \"application/json\", \"X-KT126-Case"
+        ]
+      ]
+    },
+    {
+      "term": "\"/kt125/local-auth\"",
+      "hits": [
+        [
+          "return { origin: u.origin, issuer: u.origin + \"/kt125/local-auth\", org: env.KT125_REQUEST_ORGANIZATION };"
+        ]
+      ]
+    },
+    {
+      "term": "\"/kt125/cases\"",
+      "hits": []
+    },
+    {
+      "term": "registryRoute",
+      "hits": []
+    },
+    {
+      "term": "\"/kt126/registry\"",
+      "hits": [
+        [
+          "if (path3 === \"/kt126/registry\") return registryJson({ items: await listCases(args) });",
+          "if (request.method !== \"POST\") return registryJson({ error: \"\\u041D\\u0435\\u043F\\u043E\\u0434\\u0434\\u044A\\u0440\\u0436\\u0430\\u043D\\u043E \\u0434\\u0435\\u0439\\u0441\\u0442\\u0432\\u0438\\u0435.\" }, 405);"
+        ],
+        [
+          "return record?.case_id === id6;",
+          "const response = await fetch(\"/kt126/registry\" + path3, { method: body === void 0 ? \"GET\" : \"POST\", headers: body === void 0 ? {} : { \"Content-Type\": \"application/json\" }, body: body === void 0 ? void 0 : JSON.stringify(body), credentials: "
+        ],
+        [
+          "const response = await fetch(\"/kt126/registry\" + base2 + \"/part/\" + i, { method: \"POST\", headers: { \"Content-Type\": \"application/octet-stream\" }, body: await file.slice(i * CHUNK2, Math.min(file.size, (i + 1) * CHUNK2)).arrayBuffer(), crede"
+        ]
+      ]
+    },
+    {
+      "term": "getLocalSession",
+      "hits": []
+    },
+    {
+      "term": "session.user",
+      "hits": []
+    },
+    {
+      "term": "session.user_id",
+      "hits": []
+    },
+    {
+      "term": "auth.user",
+      "hits": [
+        [
+          "const supported = this._supportedAuth.find((method) => method !== \"XOAUTH2\" || canUseXOAuth2);",
+          "method: this._authMethod"
+        ],
+        [
+          "const supported = this._supportedAuth.find((method) => method !== \"XOAUTH2\" || canUseXOAuth2);",
+          "method: this._authMethod"
+        ],
+        [
+          "method: this._authMethod"
+        ],
+        [
+          "method: this._authMethod"
+        ],
+        [
+          "return callback(this._formatError('Unknown authentication method \"' + this._authMethod + '\"', \"EAUTH\", false, \"API\"));"
+        ],
+        [
+          "return callback(this._formatError('Unknown authentication method \"' + this._authMethod + '\"', \"EAUTH\", false, \"API\"));"
+        ],
+        [
+          "return callback(this._formatError('Invalid login sequence while waiting for \"235\"', \"EAUTH\", str3, \"AUTH CRAM-MD5\"));",
+          "method: this._authMethod",
+          "return callback(this._formatError('Invalid login sequence while waiting for \"334 UGFzc3dvcmQ6\"', \"EAUTH\", str3, \"AUTH LOGIN\"));"
+        ],
+        [
+          "return callback(this._formatError('Invalid login sequence while waiting for \"235\"', \"EAUTH\", str3, \"AUTH CRAM-MD5\"));",
+          "method: this._authMethod",
+          "return callback(this._formatError('Invalid login sequence while waiting for \"334 UGFzc3dvcmQ6\"', \"EAUTH\", str3, \"AUTH LOGIN\"));"
+        ],
+        [
+          "method: this._authMethod",
+          "return callback(this._formatError(\"Invalid login\", \"EAUTH\", str3, \"AUTH \" + this._authMethod));",
+          "method: this._authMethod"
+        ],
+        [
+          "method: this._authMethod",
+          "return callback(this._formatError(\"Invalid login\", \"EAUTH\", str3, \"AUTH \" + this._authMethod));",
+          "method: this._authMethod"
+        ],
+        [
+          "method: this._authMethod",
+          "return callback(this._formatError(\"Invalid login\", \"EAUTH\", str3, \"AUTH \" + this._authMethod));",
+          "method: this._authMethod"
+        ],
+        [
+          "method: this._authMethod",
+          "return callback(this._formatError(\"Invalid login\", \"EAUTH\", str3, \"AUTH \" + this._authMethod));",
+          "method: this._authMethod"
+        ],
+        [
+          "method: this._authMethod"
+        ],
+        [
+          "method: this._authMethod"
+        ],
+        [
+          "method: \"XOAUTH2\"",
+          "method: (this.options.auth.method || \"\").trim().toUpperCase() || this.options.authMethod || false"
+        ],
+        [
+          "method: \"XOAUTH2\"",
+          "method: (this.options.auth.method || \"\").trim().toUpperCase() || this.options.authMethod || false"
+        ],
+        [
+          "method: \"XOAUTH2\"",
+          "method: (this.options.auth.method || \"\").trim().toUpperCase() || this.options.authMethod || false"
+        ],
+        [
+          "method: \"XOAUTH2\"",
+          "method: (this.options.auth.method || \"\").trim().toUpperCase() || this.options.authMethod || false"
+        ]
+      ]
+    }
+  ]
+}
