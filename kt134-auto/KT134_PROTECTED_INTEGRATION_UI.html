@@ -214,38 +214,33 @@ html.kt134-embedded .kt134-unified .track{background:#3c654b}
 html.kt134-embedded .kt134-unified .fill{background:#d9b66a}
 html.kt134-embedded .note{color:#d1dccb}
 
+
+.kt134-unified{border:2px solid #cdb46a;border-radius:20px;background:linear-gradient(125deg,#064a2e,#0b683a);padding:17px}
+.kt134-intake-choices{display:grid;grid-template-columns:1fr 1fr;gap:17px;margin-bottom:13px}
+.kt134-choice{display:flex;flex-direction:column;gap:9px;min-width:0;padding:15px;background:#164a32;border:2px solid #75a06f;border-radius:14px;cursor:pointer}
+.kt134-choice.active{background:linear-gradient(130deg,#e0c980,#b59043);border-color:#ffe59d;box-shadow:0 0 0 2px #f8d88344}
+.choice-title{font:bold 17px Verdana;color:#ffe7a5;cursor:pointer}.kt134-choice.active .choice-title,.kt134-choice.active .choice-note{color:#143c29}
+.kt134-choice input,.kt134-choice select{width:100%;min-width:0;font:13px Verdana;padding:11px;background:#fffaf0;color:#143c29;border:1px solid #bfae74;border-radius:8px}
+.kt134-choice input::file-selector-button{background:#236342;color:#fff4d4;padding:9px;border:0;border-radius:7px;cursor:pointer}
+.choice-note{font:11px Verdana;color:#e0e8dc;min-height:14px}.choice-tools{display:flex;gap:8px;justify-content:space-between;align-items:center}.choice-tools button{padding:6px 10px;font-size:11px}.choice-tools a{color:#ffe8ad}
+.unified-start{display:flex;justify-content:center;margin:4px 0 15px}.unified-start button{min-width:min(100%,470px);font:bold 16px Verdana;padding:16px 22px;background:linear-gradient(#ffdf8d,#b98b32);border:2px solid #f6d581;color:#173b29}
+.kt134-unified .auto{margin-top:12px}@media(max-width:750px){.kt134-intake-choices{grid-template-columns:1fr}}
 </style><script>
 if(new URLSearchParams(location.search).get('embedded')==='1')
  document.documentElement.classList.add('kt134-embedded');
 </script></head><body><main>
 <header class="portal-head"><div class="brand"><span class="leaf">❧</span><b>WOW · Административен пътеводител</b></div><div class="head-right">Работите като: <b>Експерт</b><a href="/auth/login">Моят профил</a><a href="/auth/logout" class="logout">Изход</a></div></header>
-<div class="portal-intro"><h1>Административен пътеводител · Изберете работен панел</h1><p>Изберете етап за отваряне на съответния работен екран. Връщането не изтрива данните по преписката.</p><small>КТ134 · стабилна функционална версия · съдържанието подлежи на последваща проверка</small></div>
+<div class="portal-intro"><h1>Административен пътеводител · Изберете работен панел</h1><p>Изберете етап за отваряне на съответния работен екран. Връщането не изтрива данните по преписката.</p></div>
 <section class="bar"><div class="case">
 <div>Активен експерт: <strong id="expert">—</strong></div>
 <div>Вътрешен №: <strong id="caseid">—</strong></div>
 <div>Деловоден №: <strong id="registry">—</strong></div></div>
-<div style="margin:13px 0 0;padding:12px;border:1px solid #527d5a;border-radius:10px">
- <label for="kt134-case-select">Преписки, достъпни чрез съществуващия профил КТ125</label>
- <div class="actions" style="margin-top:6px;align-items:center">
-  <select id="kt134-case-select" disabled aria-label="Изберете преписка от регистъра"
-   style="flex:1;min-width:240px;font:13px Verdana;padding:10px;background:#153c2a;color:#f4eddb;border:1px solid #a7b98c;border-radius:8px">
-   <option value="">Зареждане от защитения регистър…</option>
-  </select>
-  <button id="kt134-refresh" type="button">Обнови преписките</button>
-  <a id="kt134-login-link" href="/auth/login" style="align-self:center;color:#e7c776">Вход с действащия КТ125 профил</a>
- </div>
- <p style="font-size:11px;color:#dacfa9" id="kt134-case-help" aria-live="polite">Списъкът се зарежда автоматично само за удостоверения експерт. Не са необходими UUID или нова регистрация.</p>
- </div><div id="kt134-new-intake" style="margin:13px 0 0;padding:12px 15px;border:1px solid #b09a69;border-radius:9px;background:#173d2c">
- <div style="font-weight:700;color:#f1d492;margin-bottom:8px">Нова преписка · общ регистър КТ126</div>
- <div class="actions" style="margin:0;align-items:center">
-  <input id="kt134-new-file" type="file" accept=".zip,.pdf,.docx" aria-label="Изберете ZIP или документ за нова преписка"
-   style="flex:1;min-width:230px;color:#f0ead6;font:13px Segoe UI,Arial,sans-serif">
-  <button id="kt134-new-submit" type="button" disabled>Въведи нова преписка</button>
- </div>
- <p id="kt134-new-status" aria-live="polite" style="margin:8px 0 0;color:#d1dccb;font-size:12px">Използва съществуващия профил КТ125, общия номератор и регистър КТ126.</p>
- </div><div class="kt134-unified" aria-label="Единен автоматичен маршрут: етапи, скала и статус"><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><div class="auto-label"><span>⚙</span><div><strong>Автоматичен ход</strong><small>Скала на изпълнение на етапите</small></div></div><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
-</div><div class="kt134-progress-panel"><div class="subrow"><span class="loading-dots" aria-hidden="true">◌</span><div class="track"><div class="fill" id="fill"></div></div><span id="subtitle" aria-live="polite">Очаква се защитен контекст от КТ125</span></div><span class="kt134-panel-leaf" aria-hidden="true">❧</span></div></div>
-<div class="actions"><button class="primary" id="start" disabled>Изготви проект по тази преписка</button></div>
+<div class="kt134-unified" aria-label="Автоматичен анализ"><div class="kt134-intake-choices">
+<section class="kt134-choice active" id="kt134-new-intake"><label class="choice-title" for="kt134-new-file">✚ Нова преписка</label><input id="kt134-new-file" type="file" accept=".zip,.pdf,.docx" aria-label="Документи за нова преписка"><span id="kt134-new-status" class="choice-note" aria-live="polite">Изберете ZIP, PDF или DOCX до 40 MB</span><button id="kt134-new-submit" type="button" disabled hidden>Регистрирай</button></section>
+<section class="kt134-choice" id="kt134-existing-intake"><label class="choice-title" for="kt134-case-select">▣ Преписка от архива</label><select id="kt134-case-select" disabled aria-label="Изберете преписка от архива"><option value="">Зареждане…</option></select><span id="kt134-case-help" class="choice-note" aria-live="polite">Изберете преписка</span><div class="choice-tools"><button id="kt134-refresh" type="button">Обнови архива</button><a id="kt134-login-link" href="/auth/login">Вход</a></div></section>
+</div><div class="unified-start"><button class="primary" id="start" disabled>Стартирай автоматичния анализ</button></div><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><div class="auto-label"><span>⚙</span><div><strong>Автоматичен ход</strong><small>Скала на изпълнение на етапите</small></div></div><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
+</div><div class="kt134-progress-panel"><div class="subrow"><span class="loading-dots" aria-hidden="true">◌</span><div class="track"><div class="fill" id="fill"></div></div><span id="subtitle" aria-live="polite">Изберете преписка и стартирайте анализа</span></div><span class="kt134-panel-leaf" aria-hidden="true">❧</span></div></div>
+
 <div id="error" role="alert" class="error" hidden></div>
 <p class="note">Само реални данни от потвърдената преписка и защитената КТ125 сесия. Рецензентът извършва междинната преценка. Крайно административно решение не се издава автоматично.</p>
 </section>
@@ -301,7 +296,7 @@ async function verifySelectedCase(caseId){
   if(!r.ok||data.caseId!==caseId||data.authenticatedVia!=='KT125_NATIVE_CASE_ACL')
     throw Error('КТ125 не потвърди достъпа ('+(data.error||r.status)+').');
   context={caseId,registryNumber:c.externalNumber||'—'};
-  el('expert').textContent='Проверена КТ125 сесия';
+  el('expert').textContent='Удостоверен експерт';
   el('caseid').textContent=c.internalNumber||caseId;
   el('registry').textContent=c.externalNumber||'—';
   el('start').disabled=false;
@@ -323,7 +318,7 @@ async function loadAccessibleCases(){
       'Регистърът не е достъпен ('+(data.error||r.status)+').');
   authenticated=true;caseRows=data.items;
   if(newFile.files?.[0] && /\.(zip|pdf|docx)$/i.test(newFile.files[0].name))newSubmit.disabled=false;
-  el('expert').textContent='Удостоверена КТ125 сесия';
+  el('expert').textContent='Удостоверен експерт';
   el('kt134-login-link').hidden=true;
   selector.replaceChildren(textOption('','Изберете преписка от регистъра'));
   caseRows.forEach(c=>selector.append(textOption(c.caseId,rowLabel(c))));
@@ -336,9 +331,9 @@ async function loadAccessibleCases(){
     'Регистърът е проверен, но няма достъпни за този профил преписки.';
   const preferred=new URL(location.href).searchParams.get('caseId');
   if(preferred&&caseRows.some(x=>x.caseId===preferred)){
-    selector.value=preferred;await verifySelectedCase(preferred);
+    selector.value=preferred;setIntakeMode('existing');await verifySelectedCase(preferred);
   }else if(caseRows.length===1){
-    selector.value=caseRows[0].caseId;await verifySelectedCase(caseRows[0].caseId);
+    selector.value=caseRows[0].caseId;setIntakeMode('existing');await verifySelectedCase(caseRows[0].caseId);
   }
  }catch(e){
   authenticated=false;
@@ -349,6 +344,11 @@ async function loadAccessibleCases(){
  }
 }
 
+let intakeMode='new';
+function setIntakeMode(mode){intakeMode=mode;el('kt134-new-intake').classList.toggle('active',mode==='new');el('kt134-existing-intake').classList.toggle('active',mode==='existing');syncStart();}
+function syncStart(){const f=el('kt134-new-file').files?.[0];el('start').disabled=!authenticated||(intakeMode==='new'?!(f&&/\.(zip|pdf|docx)$/i.test(f.name)&&f.size>0&&f.size<=40000000):!context);}
+el('kt134-new-intake').addEventListener('click',()=>setIntakeMode('new'));
+el('kt134-existing-intake').addEventListener('click',()=>setIntakeMode('existing'));
 const newFile=el('kt134-new-file');
 const newSubmit=el('kt134-new-submit');
 const newStatus=el('kt134-new-status');
@@ -375,7 +375,7 @@ newFile.addEventListener('change',()=>{
  const valid=!!file && /\\.(zip|pdf|docx)$/i.test(file.name) &&
    file.size>0 && file.size<=40_000_000;
  newSubmit.disabled=!valid||!authenticated;
- newStatus.textContent=!authenticated?'Няма потвърдена КТ125 сесия. Нов запис не се допуска в този тестов екран.':valid?'Избран файл: '+file.name+' · общ номер от КТ126.':
+ newStatus.textContent=!authenticated?'Необходим е вход в профила.':valid?'Избран файл: '+file.name+'.':
   'Изберете ZIP, PDF или DOCX с размер до 40 MB.';
 });
 async function sendNew(path,body,contentType){
@@ -385,7 +385,7 @@ async function sendNew(path,body,contentType){
  if(!response.ok)throw Error(data.error||'Неуспешен запис в КТ126 ('+response.status+').');
  return data;
 }
-newSubmit.addEventListener('click',async()=>{
+async function registerNewCase(){
  if(!authenticated){newSubmit.disabled=true;newStatus.textContent='Не е потвърден достъп до общия регистър КТ126.';return;}
  const file=newFile.files?.[0];
  if(!file||!(/\\.(zip|pdf|docx)$/i.test(file.name))||file.size<1||
@@ -456,11 +456,13 @@ newSubmit.addEventListener('click',async()=>{
    throw Error('Етап 1 не е потвърден от общия регистър КТ126.');
   newStatus.textContent='Етап 1 завършен · '+newRegistered.internalNumber+
    ' · водещ документ: '+e1.leadingDocument.fileName+
-   '. Записано в общия КТ126. Преписката е достъпна и за класическия маршрут.';
+   '. Преписката е достъпна и за класическия маршрут.';
   newFile.value='';stage1Intake=null;
   await loadAccessibleCases();
   if(caseRows.some(x=>x.caseId===id)){
    selector.value=id;await verifySelectedCase(id);
+   setIntakeMode('existing');
+   return true;
   }else{
    newStatus.textContent+=' Записът ще се появи в списъка след обновяване.';
   }
@@ -471,10 +473,12 @@ newSubmit.addEventListener('click',async()=>{
   // No new number is allocated on retry. Partial registration is
   // retained only for this browser session and only for the selected file.
   newSubmit.disabled=!authenticated;
+  syncStart();
  }
-});
+ return false;
+}
 
-selector.addEventListener('change',()=>verifySelectedCase(selector.value));
+selector.addEventListener('change',()=>{setIntakeMode('existing');verifySelectedCase(selector.value);});
 el('kt134-refresh').addEventListener('click',loadAccessibleCases);
 loadAccessibleCases();
 let word=null;
