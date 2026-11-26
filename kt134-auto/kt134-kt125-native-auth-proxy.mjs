@@ -65,7 +65,10 @@ export function createKt134NativeAuthProxy({nativeFetch,upstreamOrigin=nativeOri
    headers.set('Origin',nativeOrigin);
   }
   const cookie=request.headers.get('cookie');
-  if(cookie&&cookie.length<8000)headers.set('Cookie',cookie);
+  // GET /auth/login is a public login form: do NOT forward stale KT134
+  // browser cookies to the separate native KT125 origin. Only POST and
+  // logout are permitted to carry a user's existing native cookie.
+  if(cookie&&cookie.length<8000&&request.method!=='GET')headers.set('Cookie',cookie);
   const body=request.method==='POST'?await request.arrayBuffer():undefined;
   if(body&&body.byteLength>16000)return json({error:'LOGIN_BODY_TOO_LARGE'},413);
   const target=nativeOrigin+u.pathname;
