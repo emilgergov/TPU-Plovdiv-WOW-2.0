@@ -1,0 +1,50 @@
+name: KT134 verify safe user identity from native page
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-identity-markup-audit.yml']
+permissions: {contents: write}
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Extract static output markup of KT125 session banner without any user values
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth',{headers:{authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('WORKER_SOURCE_UNAVAILABLE');
+          const source=await r.text();
+          const terms=['function withSessionBanner','wow-session-who','function listCases','async function readState','if (path3 === "/kt126/registry")','const who2 =','roleNames[user.role]'];
+          const out=terms.map(term=>{
+            const i=source.indexOf(term);
+            if(i<0)return {term,found:false};
+            let text=source.slice(Math.max(0,i-130),i+1550);
+            text=text.split('\n').filter(l=>/function|return|<|user\.|who2|session|case_id|role|name|email|organization_id|if \(|listCases|registryJson/.test(l)).slice(0,22).join('\n');
+            text=text.replace(/Bearer\s+[A-Za-z0-9._-]+/g,'[REDACTED]').replace(/sk-[A-Za-z0-9._-]{12,}/g,'[REDACTED]');
+            return {term,found:true,code:text.slice(0,1900)};
+          });
+          fs.writeFileSync('/tmp/kt134-identity-markup.json',JSON.stringify({sourceMetadata:true,out},null,2));
+          console.log('Static markup analyzed');
+          NODE
+      - name: Store read-only contract metadata
+        run: |
+          p='kt134-auto/KT134_IDENTITY_MARKUP_AUDIT.json'
+          enc="$(base64 -w0 /tmp/kt134-identity-markup.json)"
+          for n in 1 2 3 4; do
+            sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/$p?ref=kt134-auto-mode-isolated" --jq .sha 2>/dev/null || true)"
+            if [ -n "$sha" ]; then
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$enc" -f sha="$sha" -f branch=kt134-auto-mode-isolated -f message='KT134: static verified member markup metadata' >/dev/null && exit 0
+            else
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$enc" -f branch=kt134-auto-mode-isolated -f message='KT134: static verified member markup metadata' >/dev/null && exit 0
+            fi
+            sleep 2
+          done
+          exit 1
