@@ -93,6 +93,45 @@ test('unconfirmed Stage2 subject must fail before EG',async()=>{
  assert.equal((await r.json()).error,'KT134_E2_CONFIRMATIONS_NOT_AVAILABLE');
  assert.equal(calls.length,0);
 });
+test('new native KT126 case: reviewed E1 feeds automatic E2 without forging classic confirmations or external number',async()=>{
+ const calls=[];
+ const newState={
+  ...nativeData,
+  record:{...nativeData.record,internal_number:'EG-2026-000016',
+   external_number:null,external_status:null},
+  values:{kt80SubjectText:'ИП за нова преписка',
+   kt80ScopeText:'Предмет и обхват от рецензирания Етап 1',
+   kt80SubjectConfirmation:false,kt80ScopeConfirmation:false},
+  globals:{...nativeData.globals,KT134AutomaticStage1:{
+   completed:true,caseId,
+   leadingDocument:{caseId,sourceId:'vazrazhenie.pdf',
+    fileName:'vazrazhenie.pdf',selectedBy:'EG_AUTHOR_AND_REVIEWER'},
+   reviewerStatus:'completed',subject:'Възражение срещу административно писмо',
+   scope:'Искане за корекция на мотивите',expertApproved:false
+  }}
+ };
+ const r=await handler({state:newState,egCalls:calls})(req());
+ assert.equal(r.status,200);
+ const result=await r.json();
+ assert.equal(result.status,'draft_ready');
+ assert.equal(result.registryNumber,'EG-2026-000016');
+ assert.equal(result.expertApproved,false);
+ assert.equal(calls.length,2);
+});
+test('new native case without a completed reviewer must not bypass manual E2',async()=>{
+ const calls=[];
+ const state={...nativeData,record:{...nativeData.record,
+  internal_number:'EG-2026-000016',external_number:null,external_status:null},
+  values:{...nativeData.values,kt80SubjectConfirmation:false,kt80ScopeConfirmation:false},
+  globals:{...nativeData.globals,KT134AutomaticStage1:{
+   completed:true,caseId,leadingDocument:{caseId,selectedBy:'EG_AUTHOR_AND_REVIEWER'},
+   reviewerStatus:'pending',subject:'Предмет',scope:'Обхват'
+  }}};
+ const r=await handler({state,egCalls:calls})(req());
+ assert.equal(r.status,422);
+ assert.equal((await r.json()).error,'KT134_E2_CONFIRMATIONS_NOT_AVAILABLE');
+ assert.equal(calls.length,0);
+});
 test('cross-origin request is rejected even with a cookie',async()=>{
  const calls=[];
  const r=await handler({egCalls:calls})(req({caseId},'https://unknown.example'));
