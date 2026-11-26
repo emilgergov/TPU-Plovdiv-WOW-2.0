@@ -1,8 +1,9 @@
 {
-  "runId": "45787652384",
-  "sourceSha": "6458cfaef770e53ecc14130a4748d6277ddfec64",
+  "runId": "45787698244",
+  "sourceSha": "1c13dc86277bde0ce15f3feda39dfbea57fb3252",
   "bridgeDeployed": true,
   "verifiedNativeKT125Service": true,
+  "realAutomaticRouteDeployed": true,
   "publicTestWorker": "tpu-plovdiv-kt134-test",
   "realDossierProcessed": false,
   "fullStage1To5Live": false,
