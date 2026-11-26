@@ -114,3 +114,28 @@ test('missing manifest source refuses partial dossier instead of drafting',async
   authenticatedSession:'session-incomplete',caseId:id
  }),/KT134_VERIFIED_SOURCE_TEXTS_MISSING/);
 });
+
+test('KT134 rereads D1 and rejects changed evidence before passing to EG',async()=>{
+ const files=rows.kt126_files.map(x=>({...x}));
+ const a=fixture({files});
+ const session='session-evidence-change';
+ const ctx=await a.loadProtectedContext({authenticatedSession:session,caseId:id});
+ const preflight={case:{caseId:id,revision:String(ctx.caseRecord.revision)},
+  principalId:ctx.principal.userId,
+  evidence:Object.values(ctx.evidence)};
+ files[0].sha256='d'.repeat(64);
+ await assert.rejects(()=>a.loadEvidenceBundle({preflight,authenticatedSession:session}),
+  /KT134_CASE_EVIDENCE_CHANGED/);
+});
+test('KT134 rejects wrong case revision at latest D1 read',async()=>{
+ const versions=rows.kt126_versions.map(x=>({...x}));
+ const a=fixture({versions});
+ const session='session-version-change';
+ const ctx=await a.loadProtectedContext({authenticatedSession:session,caseId:id});
+ const preflight={case:{caseId:id,revision:String(ctx.caseRecord.revision)},
+  principalId:ctx.principal.userId,
+  evidence:Object.values(ctx.evidence)};
+ versions[0].revision=15;
+ await assert.rejects(()=>a.loadEvidenceBundle({preflight,authenticatedSession:session}),
+  /KT134_CASE_SNAPSHOT_CHANGED/);
+});
