@@ -1,0 +1,51 @@
+name: KT134 document provenance static audit
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-document-provenance-audit.yml']
+permissions: {contents: write}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Identify KT126 protected document source and persisted state structure
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth',{headers:{authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('WORKER_SOURCE_UNAVAILABLE');
+          const source=await r.text();
+          const keys=['async function readState','async function sourceInfo','async function listSources','async function getSourcePart','async function getSourceFile','function registryClient','async function caseSource','function persist','kt80SubjectText','KT80DossierAudit','document_texts','extractedText','sourceTexts','source/part/','/source/','state:','async function saveState'];
+          const out=keys.map(term=>{
+            let cursor=0,hits=[];
+            for(let n=0;n<16;n++){const i=source.indexOf(term,cursor);if(i<0)break;cursor=i+term.length;
+              const around=source.slice(Math.max(0,i-380),i+1700);
+              const lines=around.split('\n').filter(l=>/function|source|document|state|JSON|caseId|readState|files|parts|filename|content|text|revision|GET|parse|return|globals|values|intake|evidence|file|registry|save|import/i.test(l)).slice(0,20);
+              hits.push(lines.join('\n').slice(0,2200));
+            }
+            return {term,hits};
+          });
+          fs.writeFileSync('/tmp/kt134-evidence-audit.json',JSON.stringify({codeMetadataOnly:true,out},null,2));
+          console.log('Read-only source-state contract inspected');
+          NODE
+      - name: Save code metadata
+        run: |
+          p='kt134-auto/KT134_DOCUMENT_PROVENANCE_AUDIT.json'
+          enc="$(base64 -w0 /tmp/kt134-evidence-audit.json)"
+          for n in 1 2 3 4; do
+            sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/$p?ref=kt134-auto-mode-isolated" --jq .sha 2>/dev/null || true)"
+            if [ -n "$sha" ]; then
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$enc" -f sha="$sha" -f branch=kt134-auto-mode-isolated -f message='KT134: source file and document text metadata' >/dev/null && exit 0
+            else
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$enc" -f branch=kt134-auto-mode-isolated -f message='KT134: source file and document text metadata' >/dev/null && exit 0
+            fi
+            sleep 2
+          done
+          exit 1
