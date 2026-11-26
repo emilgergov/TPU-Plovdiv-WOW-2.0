@@ -1,0 +1,31 @@
+name: KT134 Stage1 live route smoke (no case writes)
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-stage1-live-route-probe.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Check only public safe GET method gates, never create a dossier
+        run: |
+          set -euo pipefail
+          AUTO='https://tpu-plovdiv-kt134-test.emilgergov.workers.dev'
+          EG='https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev'
+          for i in 1 2 3 4 5 6; do
+            code="$(curl -sS -o /tmp/e1-method.txt -w '%{http_code}' --max-time 15 "$EG/kt134/stage1-leading" || true)"
+            [ "$code" = 405 ] && break
+            sleep 3
+          done
+          test "$code" = 405
+          reader="$(curl -sS -o /tmp/kt134-e1-reader.js -w '%{http_code}' --max-time 15 "$AUTO/kt134/e1/approved-reader.js")"
+          test "$reader" = 200
+          grep -Fq 'window.V26LocalIntake={process}' /tmp/kt134-e1-reader.js
+          screen="$(curl -sS -o /tmp/kt134-e1-ui.html -w '%{http_code}' --max-time 15 "$AUTO/kt134/final-test")"
+          test "$screen" = 200
+          grep -Fq 'kt134-new-file' /tmp/kt134-e1-ui.html
+          grep -Fq '/kt134/new-case/complete-stage1' /tmp/kt134-e1-ui.html
+          echo 'KT134 E1 frontend, native handoff route and isolated EG leading analysis route LIVE. No case read or written.'
