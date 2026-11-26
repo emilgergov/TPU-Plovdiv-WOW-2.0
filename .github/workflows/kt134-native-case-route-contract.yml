@@ -1,0 +1,57 @@
+name: KT134 identify live KT125 case read routes read-only
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-native-case-route-contract.yml']
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Find KT125 route dispatch contracts without reading user records
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth',{
+            headers:{Authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('NATIVE_SCRIPT_UNAVAILABLE');
+          const source=await r.text();
+          const terms=['/kt125/cases/','/kt126/registry','kt126_versions','kt126_files','/auth/login','kt125_local_sessions','document_texts'];
+          const safeLiteral=(s)=>s.length<140&&/^\/?[a-zA-Z0-9_/.-]+$/.test(s)&&!/password|secret|credential|bearer|token/i.test(s);
+          const report=terms.map(term=>{
+            let start=0;const matches=[];
+            for(let n=0;n<18;n++){
+              const idx=source.indexOf(term,start);if(idx<0)break;
+              start=idx+term.length;
+              const clip=source.slice(Math.max(0,idx-850),idx+1800);
+              const routes=[...new Set([...clip.matchAll(/["'`](\/[A-Za-z0-9_/?=.&-]{2,125})["'`]/g)]
+                .map(m=>m[1]).filter(safeLiteral))].slice(0,24);
+              const methodChecks=[...new Set([...clip.matchAll(/(?:method\s*===?\s*["'](GET|POST|PUT|DELETE|PATCH)["'])|(?:request\.method\s*===?\s*["'](GET|POST|PUT|DELETE|PATCH)["'])/g)]
+                .map(m=>m[1]||m[2]))];
+              const namedBindings=[...new Set([...clip.matchAll(/\b(?:kt125_[a-z_]+|kt126_[a-z_]+|getCookie|digest2|authenticate|authorize|readState|lookupState|unpackState|loadCase|caseId|source_id|file_id|content_json|revision|organization_id|case_acl|token_hash|user_id|readRegistry|readVersion)\b/gi)].map(m=>m[0]))].slice(0,40);
+              const relevantRegexes=[...clip.matchAll(/new RegExp\(([^)]{1,170})\)/g)].map(m=>m[1])
+               .filter(x=>/cases|registry|file|version/i.test(x)).slice(0,5);
+              matches.push({routes,methods:methodChecks,bindings:namedBindings,routePatterns:relevantRegexes});
+            }
+            return {term,occurrences:matches.length,matches};
+          });
+          writeFileSync('kt134-auto/KT134_NATIVE_CASE_READ_CONTRACT.json',
+            JSON.stringify({readOnly:true,privateSourceNotExported:true,report},null,2)+'\n');
+          console.log('Scanned native KT125 read API without reading actual dossiers');
+          NODE
+      - name: Record nonsecret route metadata
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_NATIVE_CASE_READ_CONTRACT.json
+          git commit -m 'KT134: record native case read API contract metadata' || exit 0
+          git pull --rebase origin kt134-auto-mode-isolated
+          git push origin HEAD:kt134-auto-mode-isolated
