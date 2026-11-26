@@ -212,7 +212,8 @@ export function createKt134NativeAutomaticHandler({
  const getNormative=createKt134NormativeMasterLoader({egWorkerBase,fetchImpl});
  return async function handle(request){
   const url=new URL(request.url);
-  if(url.pathname!=='/kt134/automatic/draft')return null;
+  const streaming=url.pathname==='/kt134/automatic/draft-events';
+  if(!streaming&&url.pathname!=='/kt134/automatic/draft')return null;
   if(request.method!=='POST')return respond({error:'METHOD_NOT_ALLOWED'},405);
   if(request.headers.get('origin')!==url.origin)return respond({error:'ORIGIN_REJECTED'},403);
   if(!(request.headers.get('content-type')||'').startsWith('application/json'))
@@ -231,7 +232,8 @@ export function createKt134NativeAutomaticHandler({
   const caseId=input.caseId;
   const sessionToken=request.headers.get('cookie');
   if(!sessionToken)return respond({error:'KT125_LOGIN_REQUIRED'},401);
-  try{
+  const run=async(onProgress)=>{
+   try{
    const normative=await getNormative();
    const load=async()=>{
     const raw=await read({request,caseId});
@@ -257,7 +259,7 @@ export function createKt134NativeAutomaticHandler({
        err('KT134_CASE_EVIDENCE_CHANGED');
       return fresh.bundle;
     },
-    ...eg,buildDraftWord:wordBuilder
+    ...eg,buildDraftWord:wordBuilder,onProgress
    });
    const output=await coordinator.prepareDraft({authenticatedSession:'NATIVE_KT125_ACL',
     caseId});
@@ -275,5 +277,31 @@ export function createKt134NativeAutomaticHandler({
    return respond({error:/^[A-Z0-9_]{4,85}$/.test(error?.code||'')?
      error.code:'KT134_PROTECTED_DRAFT_UNAVAILABLE'},422);
   }
+  };
+  if(!streaming)return run(()=>{});
+  // NDJSON stream is scoped to the exact same protected native-KT125
+  // request and uses the same coordinator as the legacy atomic endpoint.
+  const encoder=new TextEncoder();
+  const stream=new ReadableStream({
+   start(controller){
+    let closed=false;
+    const send=event=>{
+     if(closed)return;
+     controller.enqueue(encoder.encode(JSON.stringify(event)+'\n'));
+    };
+    run(({stage,percent,label})=>send({type:'progress',stage,percent,label}))
+     .then(async response=>{
+      const data=await response.json();
+      send({type:'result',status:response.status,data});
+     })
+     .catch(()=>send({type:'result',status:422,data:{error:'KT134_PROTECTED_DRAFT_UNAVAILABLE'}}))
+     .finally(()=>{closed=true;controller.close()});
+   }
+  });
+  return new Response(stream,{status:200,headers:{
+   'content-type':'application/x-ndjson; charset=utf-8',
+   'cache-control':'no-store, private',
+   'x-content-type-options':'nosniff','referrer-policy':'no-referrer'
+  }});
  };
 }
