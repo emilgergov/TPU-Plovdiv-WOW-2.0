@@ -22,7 +22,20 @@ export function createKt134EgStage45Bridge({workerBase,accessToken,fetchImpl,
      body:JSON.stringify(body)
    });
    const data=await response.json().catch(()=>({}));
-   if(!response.ok)invalid(path==='/stage4-proposal'?'EG_STAGE4_ERROR':'EG_STAGE5_ERROR');
+   if(!response.ok){
+     // Report the upstream failure class without exposing private dossier text,
+     // authorization headers, or the provider's error message to the browser.
+     const stage=path==='/stage4-proposal'?'STAGE4':'STAGE5';
+     const status=Number(response.status);
+     const cls=status===413?'PAYLOAD_TOO_LARGE':
+       status===400?'INVALID_CONTRACT':
+       status===401||status===403?'CREDENTIAL_REJECTED':
+       status===429?'RATE_LIMITED':
+       status===503?'SERVICE_UNAVAILABLE':
+       status===504?'UPSTREAM_TIMEOUT':
+       status>=500?'UPSTREAM_FAILURE':'REJECTED';
+     invalid('EG_'+stage+'_'+cls);
+   }
    return data;
  };
  return Object.freeze({
