@@ -63,15 +63,30 @@ function requirePrincipal({proof,record}){
 }
 function confirmedSources(d,ctx){
  const {root,body,state,values,globals,record}=d;
- const subject=s(values.kt80SubjectText||o(state.subjectConfirmed).text);
- const scope=s(values.kt80ScopeText||o(state.scopeConfirmed).text);
+ const autoE1=o(globals.KT134AutomaticStage1);
+ const nativeCaseId=s(root.caseId||root.case_id||record.case_id||record.caseId);
+ // The automatic E1 reviewer supplies intermediate evidence, not a manual
+ // KT133 E2 approval. Never forge classic confirmation flags.
+ const automaticE2=autoE1.completed===true &&
+   autoE1.caseId===nativeCaseId &&
+   autoE1.leadingDocument?.caseId===nativeCaseId &&
+   autoE1.leadingDocument?.selectedBy==='EG_AUTHOR_AND_REVIEWER' &&
+   autoE1.reviewerStatus==='completed' &&
+   !!s(autoE1.subject)&&!!s(autoE1.scope);
+ const subject=s(automaticE2?autoE1.subject:
+   values.kt80SubjectText||o(state.subjectConfirmed).text);
+ const scope=s(automaticE2?autoE1.scope:
+   values.kt80ScopeText||o(state.scopeConfirmed).text);
  if(!subject||!scope)err('KT134_CONFIRMED_SUBJECT_SCOPE_NOT_AVAILABLE');
- if(values.kt80SubjectConfirmation!==true||values.kt80ScopeConfirmation!==true)
+ if(!automaticE2&&(values.kt80SubjectConfirmation!==true||
+    values.kt80ScopeConfirmation!==true))
    err('KT134_E2_CONFIRMATIONS_NOT_AVAILABLE');
  const external=s(record.external_number||root.externalNumber||o(root.number).external_number);
  const status=s(record.external_status||root.externalStatus);
- if(!external||!['confirmed','verified'].includes(status))
-   err('KT126_EXTERNAL_NUMBER_UNCONFIRMED');
+ const externalConfirmed=!!external&&['confirmed','verified'].includes(status);
+ const internalNumber=s(record.internal_number);
+ if(!externalConfirmed&&!automaticE2)err('KT126_EXTERNAL_NUMBER_UNCONFIRMED');
+ if(!externalConfirmed&&!internalNumber)err('KT126_NATIVE_INTERNAL_NUMBER_MISSING');
  const docs=completeDocuments(d);
  if(!docs.length)err('KT134_DOCUMENT_TEXTS_NOT_AVAILABLE');
  const audit=o(globals.KT80DossierAudit);
@@ -108,7 +123,8 @@ function confirmedSources(d,ctx){
  const cId=s(root.caseId||root.case_id||record.case_id||record.caseId);
  const revision=String(record.revision??root.revision??'');
  if(!cId||!revision)err('KT134_NATIVE_CASE_REVISION_MISSING');
- return {caseId:cId,revision,subject,scope,external,docs,
+ return {caseId:cId,revision,subject,scope,external,externalConfirmed,
+  internalNumber,automaticE2,docs,
    gisMode:nativeGis.mode,
    gis:spatial,gisSkipReason:nativeGis.mode==='contextual_skip'?nativeGis.reason:'',
    gisReviewReason:gisReason,gisEvidenceIssues:gisIssues,
@@ -136,9 +152,10 @@ async function construct({response,normative,proof}){
  };
  if(c.gisMode==='required')
   evidence.gisPdf1=makeReceipt(c.caseId,'gis_pdf1',c.gis.sourceId,await hash(c.gis));
+ const registryNumber=c.externalConfirmed?c.external:c.internalNumber;
  const caseRecord={
-  id:c.caseId,revision:c.revision,subject:c.subject,registryNumber:c.external,
-  registryConfirmed:true,status:'active',ownerUserId:principal.delegated?
+  id:c.caseId,revision:c.revision,subject:c.subject,registryNumber,
+  registryConfirmed:c.externalConfirmed||!!(c.automaticE2&&c.internalNumber),status:'active',ownerUserId:principal.delegated?
     s(c.record.owner_id||c.record.ownerUserId):principal.userId,
   gisMode:c.gisMode,
   ...(c.gisMode==='contextual_skip'?{gisSkipConfirmed:true,gisSkipReason:c.gisSkipReason}:{}),
@@ -159,7 +176,9 @@ async function construct({response,normative,proof}){
   subject:c.subject,scope:c.scope,documents:c.docs,parcels:c.parcels,
   gis:c.gis,gisMode:c.gisMode,gisSkipReason:c.gisSkipReason,
   gisReviewReason:c.gisReviewReason,gisEvidenceIssues:c.gisEvidenceIssues,
-  piMaster:c.piMaster,normativeArchive:normative,registryNumber:c.external,
+  piMaster:c.piMaster,normativeArchive:normative,registryNumber,
+  externalNumber:c.externalConfirmed?c.external:'',
+  externalNumberStatus:c.externalConfirmed?'confirmed':'not_confirmed',
   pdf2Ref:s(c.body.pdf2Ref||c.state.pdf2Ref),
   // Use the chosen KT126 leading document only if it belongs to the SAME case.
   // Otherwise pass the complete dossier to EG Author/Reviewer for selection.
