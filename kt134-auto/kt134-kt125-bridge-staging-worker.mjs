@@ -110,7 +110,9 @@ export default {
       realCaseDataRead:false,productionWorkerChanged:false});
    }catch(error){
     const kind=typeof error?.name==='string'&&/^[A-Za-z]{2,40}$/.test(error.name)?error.name:'Unknown';
-    return json({ready:false,reason:'KT125_RPC_PROBE_UNAVAILABLE',errorKind:kind},503)
+    const hint=String(error?.message||'').replace(/[^A-Za-z0-9 .:()_\\/-]/g,'').slice(0,130);
+    return json({ready:false,reason:'KT125_RPC_PROBE_UNAVAILABLE',
+      errorKind:kind,errorHint:hint},503)
    }
   }
   if(path==='/kt134/available-cases'){
