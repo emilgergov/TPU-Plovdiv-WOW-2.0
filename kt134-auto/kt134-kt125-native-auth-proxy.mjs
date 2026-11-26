@@ -62,6 +62,7 @@ function redirectTarget(value,visibleOrigin) {
  if(['/auth/login','/auth/logout','/auth/forgot','/auth/reset'].some(
   p=>path===p||path.startsWith(p+'/')))
   return visibleOrigin+path+next.search;
+ // On successful KT125 authentication return to the unified WOW dashboard.
  return visibleOrigin+'/kt134/dashboard';
 }
 export function createKt134NativeAuthProxy({nativeFetch,upstreamOrigin=nativeOrigin}={}){
