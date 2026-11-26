@@ -294,6 +294,24 @@ html.kt134-embedded .kt134-choice select,
 html.kt134-embedded .kt134-unified .kt134-progress-panel{border:1px solid #a98f5c;background:linear-gradient(115deg,#103c2b,#175238 65%,#103a2a)}
 @media(max-width:850px){.kt134-unified .stage{min-height:125px;padding:10px}.kt134-unified .stage>div{font-size:12px}.kt134-unified .route{min-height:90px}.kt134-unified .gate{min-height:86px}}
 @media(max-width:550px){.kt134-unified .kt134-progress-panel{padding:12px}.kt134-progress-heading{font-size:13px}.kt134-progress-foot #subtitle{font-size:11px!important}.kt134-progress-track{height:18px}}
+
+/* Последно правило с приоритет над наследения бял списък */
+html.kt134-embedded .kt134-unified #kt134-case-select,
+html.kt134-embedded #kt134-case-select,
+.kt134-unified #kt134-case-select{
+ appearance:auto!important;color-scheme:dark!important;
+ background-color:#164832!important;background-image:none!important;
+ color:#f6e5b9!important;border:2px solid #c7a75f!important;
+ box-shadow:inset 0 1px 7px #041d1455!important
+}
+html.kt134-embedded #kt134-case-select option,
+#kt134-case-select option{background-color:#173d2d!important;color:#f2e3b9!important}
+html.kt134-embedded .kt134-unified #kt134-new-file,
+.kt134-unified #kt134-new-file{background:#164832!important;color:#f6e5b9!important;border:2px solid #c7a75f!important;color-scheme:dark!important}
+html.kt134-embedded .kt134-unified .kt134-choice input::file-selector-button{
+ background:#876832!important;color:#fbeac3!important;border:1px solid #e1c67c!important
+}
+.kt134-unified .kt134-choice-hint,.kt134-unified .choice-note{font-size:12px;line-height:1.4}
 </style><script>
 if(new URLSearchParams(location.search).get('embedded')==='1')
  document.documentElement.classList.add('kt134-embedded');
@@ -390,14 +408,14 @@ async function loadAccessibleCases(){
    syncStart();
   el('expert').textContent='Удостоверен експерт';
   el('kt134-login-link').hidden=true;
-  selector.replaceChildren(textOption('','Изберете преписка от регистъра'));
+  selector.replaceChildren(textOption('','Изберете преписка от архива'));
   caseRows.forEach(c=>selector.append(textOption(c.caseId,rowLabel(c))));
   selector.disabled=!caseRows.length;
   el('subtitle').textContent=caseRows.length?
     'Заредени '+caseRows.length+' достъпни преписки. Изберете една.':
     'Няма достъпни преписки за този профил.';
   el('kt134-case-help').textContent=caseRows.length?
-    'Няма нужда от ръчен UUID: изберете преписката, след което генерирайте проекта.':
+    'Изберете преписка от архива.':
     'Регистърът е проверен, но няма достъпни за този профил преписки.';
   const preferred=new URL(location.href).searchParams.get('caseId');
   if(preferred&&caseRows.some(x=>x.caseId===preferred)){
