@@ -1,0 +1,29 @@
+# KT134 isolated KT125 bridge admission. The existing D1 and R2 remain isolated.
+# Native service binding is server-only; it never authorizes the caller by itself.
+name = "tpu-plovdiv-kt134-test"
+main = "kt134-kt125-bridge-staging-worker.mjs"
+compatibility_date = "2026-11-25"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "kt134-isolated-d1-2026"
+database_id = "9f977144-c6f1-4fbf-8262-5c48b818bfb1"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "kt134-isolated-r2-2026"
+
+[[services]]
+binding = "KT125_NATIVE"
+service = "tpu-plovdiv-kt125-local-auth"
+
+[[rules]]
+type = "Text"
+globs = ["**/*.html"]
+fallthrough = false
+
+[[rules]]
+type = "Data"
+globs = ["**/*.docx"]
+fallthrough = false
