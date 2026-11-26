@@ -29,13 +29,14 @@ export function createKt134NativeCaseRegistration({nativeFetch}={}){
   const text=await request.text();
   if(text.length>1500)fail('KT134_INTAKE_METADATA_TOO_LARGE');
   try{metadata=JSON.parse(text)}catch{fail('KT134_INTAKE_METADATA_INVALID')}
-  const allowed=['filename','size','sha256'];
+  const allowed=['filename','size','sha256','requestKey'];
   if(!metadata||typeof metadata!=='object'||Array.isArray(metadata)||
      Object.keys(metadata).some(k=>!allowed.includes(k))||
      typeof metadata.filename!=='string'||!metadata.filename.trim()||
      metadata.filename.length>255||/[\\/]/.test(metadata.filename)||
      !/\.(zip|pdf|docx)$/i.test(metadata.filename)||
      !Number.isSafeInteger(metadata.size)||metadata.size<1||metadata.size>40_000_000||
+     !UUID.test(metadata.requestKey||'')||
      !/^[a-f0-9]{64}$/i.test(metadata.sha256||''))
    fail('KT134_INTAKE_METADATA_INVALID');
   const forward=new Request(NATIVE_ORIGIN+'/kt126/registry/create',{
@@ -43,8 +44,10 @@ export function createKt134NativeCaseRegistration({nativeFetch}={}){
     'Accept':'application/json','Content-Type':'application/json',
     'Cookie':cookie,'Origin':NATIVE_ORIGIN,'Referer':NATIVE_ORIGIN+'/'
    },
-   // The native KT126 E1 creates the record and allocates the unique number.
-   body:'{}'
+   // Exact KT126 native contract, verified against deployed createCase.
+   // requestKey is only the idempotency key, NEVER the caseId/number.
+   body:JSON.stringify({requestKey:metadata.requestKey,
+    sourceName:metadata.filename,sourceHash:metadata.sha256})
   });
   let response;
   try{response=await nativeFetch(forward)}
