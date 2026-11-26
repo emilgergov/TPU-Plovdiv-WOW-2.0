@@ -81,6 +81,30 @@ main{max-width:1650px;padding:0 42px 60px}
 @media(max-width:1150px){main{padding:0 16px 35px}.portal-head{margin:0 -16px;padding:8px 16px}.brand{font-size:17px}.head-right{gap:9px;font-size:12px}.stage{padding:14px 10px;min-height:175px}.stage>span:first-child{font-size:19px}.stage>div{font-size:15px}.stage .stage-icon{font-size:55px}.route{grid-template-columns:100px repeat(5,minmax(0,1fr)) 100px}.gate{min-height:92px;font-size:15px}.node{height:48px;width:48px;font-size:19px}}
 @media(max-width:730px){.portal-head{height:auto;flex-wrap:wrap}.portal-intro h1{font-size:23px}.portal-intro p{font-size:14px}.stages{grid-template-columns:repeat(2,minmax(0,1fr))}.stage{min-height:150px}.auto{padding:12px}.autohead>span{display:none}.route{grid-template-columns:48px repeat(5,minmax(0,1fr)) 48px}.gate{margin:0 2px;border-width:3px;min-height:55px;font-size:10px;border-radius:25px 25px 7px 7px}.node{width:31px;height:31px;border-width:2px;font-size:12px}.node.done:after{top:32px;left:10px;font-size:11px}}
 
+
+/* Reference image 1 detail fidelity: stage illustration, gate geometry and lower progress chamber */
+.stage .stage-icon{right:32px;bottom:20px;width:97px;height:97px;filter:drop-shadow(1px 3px 3px #002d1a);color:#e7e1a2}
+.stage .stage-icon svg{display:block;width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.stage.active .stage-icon{color:#d09c22}
+.auto{position:relative;min-height:175px;display:grid;grid-template-columns:290px minmax(0,1fr);column-gap:12px;align-items:center;padding:17px 22px}
+.autohead{margin:0}.auto-label{gap:13px}.auto-label>span{font-size:42px}.auto-label strong{font-size:21px}.auto-label small{line-height:1.5;max-width:200px}
+.autohead>span{position:absolute;top:8px;right:15px;opacity:.8;font-size:10px}
+.route{min-height:138px}
+.kt134-progress-panel{margin:20px 0 0;min-height:128px;border:2px solid #91d05d;border-radius:22px;background:linear-gradient(135deg,#13763e 0%,#064c2d 45%,#0c703c 100%);position:relative;display:flex;justify-content:center;align-items:center;overflow:hidden;box-shadow:inset 0 0 22px #95ed7566}
+.kt134-progress-panel:before{content:"";position:absolute;left:-8%;bottom:-72px;width:115%;height:115px;border-radius:50%;transform:rotate(-4deg);background:linear-gradient(90deg,#ddc86966,#28a95a55)}
+.kt134-progress-panel .subrow{position:relative;z-index:2;width:min(100%,700px);max-width:700px;min-height:68px;margin:0;padding:10px 23px;border:2px solid #ffe48b;box-shadow:0 0 17px #ffe1628c, inset 0 0 10px #d1ce6444;background:#07472c;display:flex;gap:12px}
+.loading-dots{color:#f1cc59;font-size:31px;line-height:1;animation:kt134-rotate 3s linear infinite}
+@keyframes kt134-rotate{to{transform:rotate(360deg)}}
+.kt134-progress-panel .track{width:80px;height:8px;flex:none}
+.kt134-progress-panel #subtitle{font-size:16px;color:#faf4dc}
+.kt134-panel-leaf{position:absolute;right:19px;bottom:-24px;font-size:111px;color:#a8d65e;opacity:.7;transform:rotate(-20deg)}
+.gate{border:9px solid #c99e3e;background:radial-gradient(ellipse at 50% 84%,#ffeb89 0%,#ffc84a 15%,#c8992b 30%,#075534 72%);border-bottom:14px solid #dfb759;box-shadow:inset 0 0 10px 3px #ffe378,0 0 22px #ffe65eaa}
+.gate:first-child::before{content:"⇧";display:block;position:absolute;top:18px;color:#ffeaa7;font-size:31px}
+.gate:last-child::before{content:"▤";display:block;position:absolute;top:18px;color:#ffeaa7;font-size:25px}
+.gate{padding-top:41px}
+@media(max-width:1150px){.auto{grid-template-columns:210px minmax(0,1fr)}.stage .stage-icon{width:60px;height:60px}}
+@media(max-width:730px){.auto{display:block;min-height:0}.autohead{padding-bottom:15px}.stage .stage-icon{width:50px;height:50px}.kt134-progress-panel{min-height:96px}.kt134-progress-panel .subrow{min-height:52px;padding:9px}.kt134-progress-panel #subtitle{font-size:11px}.kt134-progress-panel .track{width:35px}}
+
 .error{margin-top:12px;padding:12px;border:1px solid #ce775e;border-radius:9px;color:#ffdbce;background:#482b24;font-size:12px}
 pre{white-space:pre-wrap;font:12px/1.6 Verdana,Arial;overflow-wrap:anywhere}
 #finalactions{display:none}.confirmnote{font-size:12px;color:#ffe1a6}
@@ -103,7 +127,7 @@ pre{white-space:pre-wrap;font:12px/1.6 Verdana,Arial;overflow-wrap:anywhere}
  </div>
  <p style="font-size:11px;color:#dacfa9" id="kt134-case-help" aria-live="polite">Списъкът се зарежда автоматично само за удостоверения експерт. Не са необходими UUID или нова регистрация.</p>
  </div><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><div class="auto-label"><span>⚙</span><div><strong>Автоматичен ход</strong><small>Скала на изпълнение на етапите</small></div></div><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
-<div class="subrow"><div class="track"><div class="fill" id="fill"></div></div><span id="subtitle" aria-live="polite">Очаква се защитен контекст от КТ125</span></div></div>
+</div></div><div class="kt134-progress-panel"><div class="subrow"><span class="loading-dots" aria-hidden="true">◌</span><div class="track"><div class="fill" id="fill"></div></div><span id="subtitle" aria-live="polite">Очаква се защитен контекст от КТ125</span></div><span class="kt134-panel-leaf" aria-hidden="true">❧</span></div></div>
 <div class="actions"><button class="primary" id="start" disabled>Изготви проект по тази преписка</button></div>
 <div id="error" role="alert" class="error" hidden></div>
 <p class="note">Само реални данни от потвърдената преписка и защитената КТ125 сесия. Рецензентът извършва междинната преценка. Крайно административно решение не се издава автоматично.</p>
@@ -120,7 +144,13 @@ pre{white-space:pre-wrap;font:12px/1.6 Verdana,Arial;overflow-wrap:anywhere}
 <script type="module">
 const labels=['Внасяне и анализ на преписката','Предмет и обхват на ИП','Имоти и пространствен анализ на ИП','Нормативна и процедурна преценка на ИП','Определяне на процедурата по ИП'];
 const stages=document.querySelector('#stages'),route=document.querySelector('#route');
-for(let i=0;i<5;i++){const e=document.createElement('div');e.className='stage';const n=document.createElement('span');n.textContent='Етап '+String(i+1);const t=document.createElement('div');t.textContent=labels[i];const ico=document.createElement('span');ico.className='stage-icon';ico.setAttribute('aria-hidden','true');ico.textContent=['▤','◇','⌖','⚖','▦'][i];e.append(n,t,ico);stages.append(e)}
+for(let i=0;i<5;i++){const e=document.createElement('div');e.className='stage';const n=document.createElement('span');n.textContent='Етап '+String(i+1);const t=document.createElement('div');t.textContent=labels[i];const ico=document.createElement('span');ico.className='stage-icon';ico.setAttribute('aria-hidden','true');ico.innerHTML=[
+'<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M17 20h26l9 10h29v47H17z M23 12h25l8 10h24v8 M29 44h40 M29 56h32 M29 68h27"/><circle cx="72" cy="72" r="13"/><path d="m81 81 9 9"/></svg>',
+'<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M12 32 50 12l38 20-38 20z M12 49l38 21 38-21 M12 64l38 22 38-22 M12 77l38 20 38-20"/></svg>',
+'<svg viewBox="0 0 100 100" aria-hidden="true"><path d="m10 45 27-9 27 9 26-9v48l-26 8-27-8-27 8z M37 36v48 M64 45v39 M50 13c-14 0-23 9-23 21 0 17 23 36 23 36s23-19 23-36c0-12-9-21-23-21z"/><circle cx="50" cy="34" r="7"/></svg>',
+'<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 12v73 M24 85h52 M50 21H18 M50 21h32 M22 21 9 55h26z M78 21 65 55h26z M9 55q13 17 26 0 M65 55q13 17 26 0"/></svg>',
+'<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="42" y="9" width="16" height="17" rx="2"/><path d="M50 26v22 M15 48h70 M15 48v15 M50 48v15 M85 48v15"/><rect x="4" y="63" width="22" height="22" rx="2"/><rect x="39" y="63" width="22" height="22" rx="2"/><rect x="74" y="63" width="22" height="22" rx="2"/></svg>'
+][i];e.append(n,t,ico);stages.append(e)}
 const gate=(text,cls)=>{const e=document.createElement('div');e.className=cls;e.textContent=text;route.append(e)};
 gate('Вход','gate');for(let i=1;i<=5;i++)gate(String(i),'node');gate('Изход','gate');
 const tiles=[...stages.children],nodes=[...route.children].slice(1,6);
