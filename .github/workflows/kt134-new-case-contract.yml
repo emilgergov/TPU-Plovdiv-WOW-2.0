@@ -53,12 +53,12 @@ jobs:
           // Locate route dispatcher and actual create/upload handler names without storing source.
           const at=text.indexOf('/kt126/registry/create');
           const routeRegion=at>=0?text.slice(Math.max(0,at-400),at+1600):'';
-          const handlerNames=[...new Set([...routeRegion.matchAll(/(?:return|await)\\s+(?:await\\s+)?([A-Za-z_$][\\w$]{2,90})\\s*\\(/g)].map(m=>m[1]))];
+          const handlerNames=[...new Set([...routeRegion.matchAll(/(?:return|await)\s+(?:await\s+)?([A-Za-z_$][\w$]{2,90})\s*\(/g)].map(m=>m[1]))];
           const likelyNames=[...new Set([...handlerNames,...['registryCreate','createRegistry','createCase','startSource','finishSource','uploadSource','sourceStart','sourceFinish','sourcePart']])];
           function handlerSummary(name){
-            const rx=new RegExp('(?:async\\\\s+)?function\\\\s+'+name+'\\\\s*\\\\(');
+            const rx=new RegExp('(?:async\\s+)?function\\s+'+name+'\\s*\\(');
             let m=rx.exec(text);
-            if(!m){const re=new RegExp('(?:const|let)\\\\s+'+name+'\\\\s*=\\\\s*(?:async\\\\s*)?\\\\(');m=re.exec(text)}
+            if(!m){const re=new RegExp('(?:const|let)\\s+'+name+'\\s*=\\s*(?:async\\s*)?\\(');m=re.exec(text)}
             if(!m)return null;
             let depth=0,start=text.indexOf('{',m.index),end=start;
             if(start<0)return null;
@@ -67,7 +67,7 @@ jobs:
               if(text[i]==='}'&&--depth===0){end=i+1;break}
             }
             const segment=text.slice(start,end);
-            return {name,fields:safeFields(segment),verbs:[...new Set([...segment.matchAll(/\\b(GET|POST|PUT|PATCH|DELETE)\\b/g)].map(x=>x[1]))],parsing:['request.json()','request.formData()','request.text()','JSON.parse(','new URLSearchParams('].filter(v=>segment.includes(v)),routePatterns:[...new Set([...segment.matchAll(/['"](\\/kt126\\/[a-zA-Z0-9_/:.-]{1,80})['"]/g)].map(m=>m[1]))].slice(0,12),hasStateSave:/kt126_versions|content_json/.test(segment),hasOriginalUpload:/kt126_files|kt126_chunks/.test(segment)};
+            return {name,fields:safeFields(segment),verbs:[...new Set([...segment.matchAll(/\b(GET|POST|PUT|PATCH|DELETE)\b/g)].map(x=>x[1]))],parsing:['request.json()','request.formData()','request.text()','JSON.parse(','new URLSearchParams('].filter(v=>segment.includes(v)),routePatterns:[...new Set([...segment.matchAll(/['"](\/kt126\/[a-zA-Z0-9_/:.-]{1,80})['"]/g)].map(m=>m[1]))].slice(0,12),hasStateSave:/kt126_versions|content_json/.test(segment),hasOriginalUpload:/kt126_files|kt126_chunks/.test(segment)};
           }
           const handlers=likelyNames.map(handlerSummary).filter(Boolean);
           const createRouteCalls=handlerNames.filter(v=>/^[a-zA-Z_$][\\w$]{2,90}$/.test(v));
