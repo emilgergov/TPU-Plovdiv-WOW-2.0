@@ -1,0 +1,63 @@
+name: KT134 native authenticated session and case-route map
+on:
+  push:
+    branches:
+      - kt134-auto-mode-isolated
+    paths:
+      - .github/workflows/kt134-verify-member-case-routes.yml
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: kt134-auto-mode-isolated
+      - name: Identify native authenticated session, member and case routes without sensitive data
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const u='https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth';
+          const r=await fetch(u,{headers:{Authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('NATIVE_SCRIPT_UNAVAILABLE_'+r.status);
+          const s=await r.text();
+          const keys=['/member','/kt125/cases/','/kt125/cases','/kt125/local-auth','/user','SESSION_COOKIE','/module/','kt125_cases'];
+          const out=keys.map(term=>{
+            let cursor=0,occ=[];
+            for(let i=0;i<35;i++){
+              const at=s.indexOf(term,cursor);if(at<0)break;
+              cursor=at+term.length;
+              const around=s.slice(Math.max(at-900,0),at+1200);
+              const paths=[...new Set(Array.from(around.matchAll(/['"`](\/[a-zA-Z0-9._\/-]{2,100})['"`]/g),x=>x[1]))].slice(0,20);
+              const verbs=[...new Set(Array.from(around.matchAll(/\b(GET|POST|DELETE|PUT|PATCH)\b/g),x=>x[1]))];
+              const identifiers=['pathname','method','matches','match','route','caseId','userId','session','getCookie','readCookie','auth','currentUser','listCases','organization_id','token_hash','credential_version','response','json','find','select','principal','member','user','state','fetch'].filter(key=>around.includes(key));
+              const checks=['path===','path.startsWith','pathname===','pathname.startsWith','url.pathname===','/kt125/cases','sessionUser','getLocalSession','requireAuth'].filter(key=>around.includes(key));
+              occ.push({paths,verbs,identifiers,checks});
+            }
+            return {term,matches:occ};
+          });
+          fs.writeFileSync('/tmp/kt134-route-map.json',JSON.stringify({readOnly:true,createdAt:new Date().toISOString(),out},null,2));
+          console.log('Native route metadata mapped');
+          NODE
+      - name: Save diagnostic metadata
+        run: |
+          set -euo pipefail
+          p='kt134-auto/KT134_NATIVE_MEMBER_CASE_ROUTES.json'
+          enc="$(base64 -w0 /tmp/kt134-route-map.json)"
+          for attempt in 1 2 3 4 5; do
+            sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/$p?ref=kt134-auto-mode-isolated" --jq .sha 2>/dev/null || true)"
+            if [ -n "$sha" ]; then
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$enc" -f sha="$sha" -f branch=kt134-auto-mode-isolated -f message='KT134: native member case routes metadata' >/dev/null && exit 0
+            else
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$enc" -f branch=kt134-auto-mode-isolated -f message='KT134: native member case routes metadata' >/dev/null && exit 0
+            fi
+            sleep 2
+          done
+          exit 1
