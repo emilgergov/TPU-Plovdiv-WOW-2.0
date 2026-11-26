@@ -158,3 +158,31 @@ test('native packed KT126 snapshot with no dossier evidence cannot get an invent
  assert.equal((await r.json()).error,'KT134_DOCUMENT_TEXTS_NOT_AVAILABLE');
  assert.equal(calls.length,0);
 });
+
+test('KT134 dossier review flags are passed to independent reviewer, do not block automatic E1–E5',async()=>{
+ const calls=[];
+ const state={...nativeData,globals:{...nativeData.globals,KT80DossierAudit:{
+  filesExpected:1,filesExtracted:1,filesNeedReview:1,requiresExpertReview:true
+ }}};
+ const r=await handler({state,egCalls:calls})(req());
+ assert.equal(r.status,200);
+ const result=await r.json();
+ assert.equal(result.status,'draft_ready');
+ assert.equal(result.expertApproved,false);
+ assert.equal(calls.length,2);
+ const e=calls[0].input;
+ assert.equal(e.completeCaseEvidence.dossierReview.required,true);
+ assert.equal(e.completeCaseEvidence.dossierReview.filesNeedReview,1);
+ assert.equal(e.completeCaseEvidence.dossierReview.requiresExpertReview,true);
+ assert.equal(e.evidence.find(x=>x.factId==='DOSSIER_QUALITY_REVIEW')?.status,'uncertain');
+});
+test('KT134 incomplete dossier remains prohibited even if reviewer mode is automatic',async()=>{
+ const calls=[];
+ const state={...nativeData,globals:{...nativeData.globals,KT80DossierAudit:{
+  filesExpected:3,filesExtracted:2,filesNeedReview:1,requiresExpertReview:true
+ }}};
+ const r=await handler({state,egCalls:calls})(req());
+ assert.equal(r.status,422);
+ assert.equal((await r.json()).error,'KT134_DOSSIER_INCOMPLETE');
+ assert.equal(calls.length,0);
+});
