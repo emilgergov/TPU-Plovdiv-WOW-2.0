@@ -47,7 +47,8 @@ function handler({state=nativeData,nativeStatus=200,egCalls=[],rpcProof=null}={}
    if(url.endsWith('/stage4-proposal')){
     assert.equal(input.subject,'Възражение срещу административно писмо');
     assert.equal(input.completeCaseEvidence.sourceTexts[0].source,'vazrazhenie.pdf');
-    assert.equal(input.completeCaseEvidence.gis.analysisMode,'contextual_skip');
+    assert.ok(['contextual_skip','contextual_unverified',
+      'verified_intersections_pending_pdf1'].includes(input.completeCaseEvidence.gis.analysisMode));
     const proposal='ИЗБРАН ПАНЕЛ: 17 — Проект на отговор\nПредлага се мотивиран отговор.';
     return {ok:true,json:async()=>({caseId,evidenceRevision:input.evidenceRevision,
       authorDraft:proposal,draft:proposal,
@@ -97,12 +98,16 @@ test('cross-origin request is rejected even with a cookie',async()=>{
  const r=await handler({egCalls:calls})(req({caseId},'https://unknown.example'));
  assert.equal(r.status,403);assert.equal(calls.length,0);
 });
-test('unverified GIS skip cannot be fabricated for a complaint',async()=>{
+test('missing E3 confirmation triggers evidence-limited reviewer, never a fabricated GIS skip',async()=>{
  const calls=[];
  const r=await handler({state:{...nativeData,state:{intake:nativeData.state.intake}},
    egCalls:calls})(req());
- assert.equal((await r.json()).error,'KT134_GIS_OR_CONTEXT_CONFIRMED_REQUIRED');
- assert.equal(calls.length,0);
+ assert.equal(r.status,200);
+ assert.equal((await r.json()).status,'draft_ready');
+ assert.equal(calls.length,2);
+ assert.equal(calls[0].input.completeCaseEvidence.gis.analysisMode,'contextual_unverified');
+ assert.equal(calls[0].input.completeCaseEvidence.gis.pdf1Verified,false);
+ assert.equal(calls[0].input.evidence.find(x=>x.factId==='GIS_E3_LIMITATION')?.status,'uncertain');
 });
 test('unverified user identity cannot be inferred from case owner alone',async()=>{
  const calls=[];
@@ -185,4 +190,40 @@ test('KT134 incomplete dossier remains prohibited even if reviewer mode is autom
  assert.equal(r.status,422);
  assert.equal((await r.json()).error,'KT134_DOSSIER_INCOMPLETE');
  assert.equal(calls.length,0);
+});
+
+test('native full GIS per-parcel verified overlay enters Stage4 with uncertain PDF1 and never fakes a PDF receipt',async()=>{
+ const calls=[];
+ const state={...nativeData,state:{...nativeData.state,
+  gisSkipConfirmed:false,gisSkipReason:''},
+  globals:{...nativeData.globals,KT80FreeGISResults:{
+   source:'FULL_GIS_MASTER',verified:false,ids:['56789.22.1'],
+   results:[{input:'56789.22.1',cadnum:'56789.22.1',status:'Намерен',
+    geojson:{features:[{geometry:{type:'Polygon'}}]},
+    verified_zone_intersections:[{name:'BG0000123'}],
+    intersection_verified_outside:false}]
+  }}};
+ const result=await handler({state,egCalls:calls})(req());
+ assert.equal(result.status,200);
+ const response=await result.json();
+ assert.equal(response.status,'draft_ready');
+ assert.equal(calls.length,2);
+ const input=calls[0].input;
+ assert.equal(input.completeCaseEvidence.gis.analysisMode,'verified_intersections_pending_pdf1');
+ assert.equal(input.completeCaseEvidence.gis.pdf1Verified,false);
+ assert.equal(input.completeCaseEvidence.gis.protectedZones[0].name,'BG0000123');
+ assert.equal(input.evidence.find(x=>x.factId==='GIS_E3_LIMITATION').status,'uncertain');
+});
+test('missing protected zone overlay verification never claims spatial intersection',async()=>{
+ const calls=[];
+ const state={...nativeData,state:{...nativeData.state,gisSkipConfirmed:false,
+  gisSkipReason:''},globals:{...nativeData.globals,KT80FreeGISResults:{
+   ids:['56789.22.1'],verified:false,
+   results:[{input:'56789.22.1',status:'Намерен',
+     verified_zone_intersections:undefined,geojson:{features:[{geometry:{type:'Polygon'}}]}}]
+  }}};
+ const response=await handler({state,egCalls:calls})(req());
+ assert.equal(response.status,200);
+ assert.equal(calls[0].input.completeCaseEvidence.gis.analysisMode,'contextual_unverified');
+ assert.deepEqual(calls[0].input.completeCaseEvidence.gis.protectedZones,[]);
 });
