@@ -1,12 +1,12 @@
 {
-  "runId": "45784421976",
-  "sourceSha": "ecd615237e7dea981713336bcb88e69ccf67d524",
-  "bridgeDeployed": true,
-  "verifiedNativeKT125Service": true,
+  "runId": "45785503470",
+  "sourceSha": "890df8965d96d7e201eb038a10685e2807bd391d",
+  "bridgeDeployed": false,
+  "verifiedNativeKT125Service": false,
   "publicTestWorker": "tpu-plovdiv-kt134-test",
   "realDossierProcessed": false,
   "fullStage1To5Live": false,
   "productionWorkerSourceModified": false,
-  "deploymentStep": "success",
-  "probeStep": "success"
+  "deploymentStep": "skipped",
+  "probeStep": "skipped"
 }
