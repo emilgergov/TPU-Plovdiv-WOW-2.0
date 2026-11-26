@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {decodeKt126StoredSnapshot as decode} from './kt134-kt126-snapshot-decoder.mjs';
 const snapshot={state:{intake:{document_texts:[{source:'original-1.pdf',text:'Документ с реални обстоятелства.'}]}},values:{kt80SubjectText:'Предмет'},globals:{KT80DossierAudit:{filesExpected:1}}};
 async function compressed(v){
- const bytes=await new Blob([JSON.stringify(v)]).stream().pipeThrough(new CompressionStream('gzip')).arrayBuffer();
+ const bytes=await new Response(new Blob([JSON.stringify(v)]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer();
  return {format:'KT126-GZIP-1',payload:btoa(String.fromCharCode(...new Uint8Array(bytes)))};
 }
 test('KT126-GZIP-1 packed native snapshot restores authentic intake text and values',async()=>{
