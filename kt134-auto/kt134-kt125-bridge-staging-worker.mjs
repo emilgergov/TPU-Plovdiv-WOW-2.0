@@ -35,9 +35,11 @@ export default {
   if(path==='/kt134/automatic/draft'){
    if(!nativeFetch)return json({error:'KT125_NATIVE_NOT_CONFIGURED'},503);
    if(!env.KT134_EG_ACCESS_TOKEN)return json({error:'KT134_EG_SECRET_NOT_PAIRED'},503);
+   if(!env.KT134_EG_NATIVE?.fetch)return json({error:'KT134_EG_SERVICE_NOT_BOUND'},503);
    const draft=createKt134NativeAutomaticHandler({
     nativeFetch,egWorkerBase:'https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev',
-    egAccessToken:env.KT134_EG_ACCESS_TOKEN
+    egAccessToken:env.KT134_EG_ACCESS_TOKEN,
+    fetchImpl:env.KT134_EG_NATIVE.fetch.bind(env.KT134_EG_NATIVE)
    });
    return draft(request);
   }
@@ -50,9 +52,29 @@ export default {
      'referrer-policy':'no-referrer','x-frame-options':'DENY',
      'content-security-policy':"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"}});
   }
+  // Only service readiness, no legal passages or case data are exposed.
+  if(path==='/kt134/normative-bridge-check'){
+   if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
+   if(!env.KT134_EG_NATIVE?.fetch)return json({ready:false,reason:'EG_SERVICE_MISSING'},503);
+   try{
+    const reply=await env.KT134_EG_NATIVE.fetch(
+      new Request('https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev/legal-archive-health',{
+        method:'GET',headers:{accept:'application/json'},redirect:'manual'}));
+    const data=await reply.json().catch(()=>({}));
+    const ready=reply.ok&&data.status==='ready'&&
+      /^[a-f0-9]{64}$/i.test(data.archiveSHA256||'')&&
+      Number.isInteger(data.exactProvisionsReady)&&data.exactProvisionsReady>=7&&
+      Number.isInteger(data.requiredProvisionsVerified)&&data.requiredProvisionsVerified>=7;
+    return json({ready,transport:'cloudflare_test_worker_service_binding',
+      upstreamStatus:reply.status,legalStatus:data.status||'unknown',
+      exactProvisionsReady:data.exactProvisionsReady??null,
+      requiredProvisionsVerified:data.requiredProvisionsVerified??null,
+      archiveVerified:ready,caseDataRead:false},ready?200:503);
+   }catch{return json({ready:false,reason:'EG_SERVICE_BINDING_UNREACHABLE'},503)}
+  }
   if(path==='/kt134/automatic-health'){
     if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
-    const configured=!!nativeFetch&&typeof env.KT134_EG_ACCESS_TOKEN==='string'&&
+    const configured=!!nativeFetch&&!!env.KT134_EG_NATIVE?.fetch&&typeof env.KT134_EG_ACCESS_TOKEN==='string'&&
       env.KT134_EG_ACCESS_TOKEN.length>=32;
     return json({mode:'isolated_native_kt125_case_to_eg_draft',
       ready:configured,protectedRoute:'/kt134/automatic/draft',
