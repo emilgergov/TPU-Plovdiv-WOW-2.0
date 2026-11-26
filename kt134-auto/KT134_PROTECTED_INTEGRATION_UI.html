@@ -318,6 +318,7 @@ async function loadAccessibleCases(){
       'Регистърът не е достъпен ('+(data.error||r.status)+').');
   authenticated=true;caseRows=data.items;
   if(newFile.files?.[0] && /\.(zip|pdf|docx)$/i.test(newFile.files[0].name))newSubmit.disabled=false;
+   syncStart();
   el('expert').textContent='Удостоверен експерт';
   el('kt134-login-link').hidden=true;
   selector.replaceChildren(textOption('','Изберете преписка от регистъра'));
@@ -338,6 +339,7 @@ async function loadAccessibleCases(){
  }catch(e){
   authenticated=false;
   newSubmit.disabled=true;
+  syncStart();
   selector.replaceChildren(textOption('','Не е потвърдена сесия или регистър'));
   el('kt134-login-link').hidden=false;
   problem(e.message||'Регистърът не е достъпен.');
@@ -372,7 +374,7 @@ async function loadApprovedE1Reader(){
 newFile.addEventListener('change',()=>{
  const file=newFile.files?.[0];
  newRegistered=null;stage1Intake=null;
- const valid=!!file && /\\.(zip|pdf|docx)$/i.test(file.name) &&
+ const valid=!!file && /\.(zip|pdf|docx)$/i.test(file.name) &&
    file.size>0 && file.size<=40_000_000;
  newSubmit.disabled=!valid||!authenticated;
  newStatus.textContent=!authenticated?'Необходим е вход в профила.':valid?'Избран файл: '+file.name+'.':
@@ -388,7 +390,7 @@ async function sendNew(path,body,contentType){
 async function registerNewCase(){
  if(!authenticated){newSubmit.disabled=true;newStatus.textContent='Не е потвърден достъп до общия регистър КТ126.';return;}
  const file=newFile.files?.[0];
- if(!file||!(/\\.(zip|pdf|docx)$/i.test(file.name))||file.size<1||
+ if(!file||!(/\.(zip|pdf|docx)$/i.test(file.name))||file.size<1||
     file.size>40_000_000)return;
  newSubmit.disabled=true;el('error').hidden=true;
  let id=newRegistered?.caseId||null;
@@ -483,7 +485,8 @@ el('kt134-refresh').addEventListener('click',loadAccessibleCases);
 loadAccessibleCases();
 let word=null;
 el('start').addEventListener('click',async()=>{
- if(!context)return;el('start').disabled=true;el('error').hidden=true;render(0);
+ if(intakeMode==='new'){el('start').disabled=true;if(!(await registerNewCase())){syncStart();return;}}
+ if(!context){syncStart();return;}el('start').disabled=true;el('error').hidden=true;render(0);
  el('subtitle').textContent='Подаване към защитения автоматичен маршрут';
  try{
   const r=await fetch('/kt134/automatic/draft',{method:'POST',credentials:'same-origin',
