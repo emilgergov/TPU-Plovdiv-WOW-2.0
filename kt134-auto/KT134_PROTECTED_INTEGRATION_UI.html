@@ -255,6 +255,45 @@ html.kt134-embedded .note{color:#d1dccb}
  .kt134-unified .node{width:29px;height:29px;font-size:12px;border-width:2px}
  .kt134-unified .kt134-progress-panel .subrow{margin:0 3px;padding:7px}
 }
+
+/* Финална експертна визия: без бели полета, ясно отчетлива скала, малко празни пространства */
+html.kt134-embedded .kt134-choice input,
+html.kt134-embedded .kt134-choice select,
+.kt134-choice input,.kt134-choice select{
+ color-scheme:dark!important;background:#174b36!important;color:#f8e8ba!important;
+ border:1px solid #cbae69!important;border-radius:10px!important;box-shadow:inset 0 2px 8px #071b1455
+}
+.kt134-choice input::file-selector-button{background:#8f7035!important;border:1px solid #e4c57c!important;color:#fff4d1!important}
+.kt134-choice select option{background:#143c2b;color:#f5e8c8}
+.kt134-choice.active input,.kt134-choice.active select{background:#1b4b35!important;color:#f7e9c8!important}
+.kt134-unified .stages{margin:10px 0;gap:12px}
+.kt134-unified .stage{min-height:152px;padding:14px 16px}
+.kt134-unified .stage>span:first-child{font-size:21px}
+.kt134-unified .stage>div{font-size:15px;line-height:1.25}
+.kt134-unified .stage .stage-icon{height:58px;width:58px;bottom:13px;right:16px}
+.kt134-unified .auto{margin-top:4px;padding-top:11px}
+.kt134-unified .route{min-height:125px}
+.kt134-unified .gate{min-height:115px}
+.kt134-unified .kt134-progress-panel{
+ display:block;min-height:0;padding:16px 16px 14px;margin:9px 0 0;border:1px solid #a98f5c;
+ border-radius:18px;background:linear-gradient(115deg,#103c2b,#175238 65%,#103a2a);box-shadow:inset 0 0 17px #e8cc7522
+}
+.kt134-unified .kt134-progress-panel::before{display:none}
+.kt134-progress-body{position:relative;z-index:2;width:100%;display:flex;flex-direction:column;gap:10px}
+.kt134-progress-heading,.kt134-progress-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;color:#f2dd9c}
+.kt134-progress-heading{font:bold 15px Verdana,Arial}.kt134-progress-heading #kt134-percent{font:bold 25px Verdana,Arial;color:#ffdc84;font-variant-numeric:tabular-nums}
+.kt134-progress-track{width:100%;height:24px;border:2px solid #d8b66c;border-radius:20px;background:#092c20;box-shadow:inset 0 2px 6px #061c14,0 0 8px #d7b96855;overflow:hidden}
+.kt134-progress-track .fill{width:0;height:100%;background:linear-gradient(90deg,#a47f30,#f8de89 55%,#d4ae57);box-shadow:0 0 12px #f3d27d;transition:width .35s ease}
+.kt134-progress-foot{justify-content:flex-start;font-size:13px;color:#f0e4c8}
+.kt134-progress-dot{color:#e4c277;font-size:18px}
+.kt134-progress-foot #subtitle{flex:1;min-width:0;color:#f0e4c8!important;font-size:13px!important}
+.kt134-elapsed{font-size:12px;color:#e0c680;white-space:nowrap}
+.kt134-unified{padding:14px 17px}
+.kt134-unified .kt134-intake-choices{margin-bottom:9px}
+.kt134-unified .unified-start{margin:8px 0 10px}
+html.kt134-embedded .kt134-unified .kt134-progress-panel{border:1px solid #a98f5c;background:linear-gradient(115deg,#103c2b,#175238 65%,#103a2a)}
+@media(max-width:850px){.kt134-unified .stage{min-height:125px;padding:10px}.kt134-unified .stage>div{font-size:12px}.kt134-unified .route{min-height:90px}.kt134-unified .gate{min-height:86px}}
+@media(max-width:550px){.kt134-unified .kt134-progress-panel{padding:12px}.kt134-progress-heading{font-size:13px}.kt134-progress-foot #subtitle{font-size:11px!important}.kt134-progress-track{height:18px}}
 </style><script>
 if(new URLSearchParams(location.search).get('embedded')==='1')
  document.documentElement.classList.add('kt134-embedded');
@@ -269,7 +308,7 @@ if(new URLSearchParams(location.search).get('embedded')==='1')
 <section class="kt134-choice active" id="kt134-new-intake"><label class="choice-title" for="kt134-new-file">✚ Нова преписка</label><input id="kt134-new-file" type="file" accept=".zip,.pdf,.docx" aria-label="Документи за нова преписка"><span id="kt134-new-status" class="choice-note" aria-live="polite">Изберете ZIP, PDF или DOCX до 40 MB</span><button id="kt134-new-submit" type="button" disabled hidden>Регистрирай</button></section>
 <section class="kt134-choice" id="kt134-existing-intake"><label class="choice-title" for="kt134-case-select">▣ Преписка от архива</label><select id="kt134-case-select" disabled aria-label="Изберете преписка от архива"><option value="">Зареждане…</option></select><span id="kt134-case-help" class="choice-note" aria-live="polite">Изберете преписка</span><div class="choice-tools"><button id="kt134-refresh" type="button">Обнови архива</button><a id="kt134-login-link" href="/auth/login">Вход</a></div></section>
 </div><div class="unified-start"><button class="primary" id="start" disabled>Стартирай автоматичния анализ</button></div><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><div class="auto-label"><span>⚙</span><div><strong>Автоматичен ход</strong><small>Скала на изпълнение на етапите</small></div></div><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
-</div><div class="kt134-progress-panel"><div class="subrow"><span class="loading-dots" aria-hidden="true">◌</span><div class="track"><div class="fill" id="fill"></div></div><span id="subtitle" aria-live="polite">Изберете преписка и стартирайте анализа</span></div><span class="kt134-panel-leaf" aria-hidden="true">❧</span></div></div>
+</div><div class="kt134-progress-panel"><div class="kt134-progress-body"><div class="kt134-progress-heading"><strong>Напредък на анализа</strong><strong id="kt134-percent" aria-live="polite">0%</strong></div><div class="kt134-progress-track" role="progressbar" aria-label="Напредък на анализа" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="fill" id="fill"></div></div><div class="kt134-progress-foot"><span class="kt134-progress-dot" aria-hidden="true">◉</span><span id="subtitle" aria-live="polite">Изберете преписка и стартирайте анализа</span><span id="kt134-elapsed" class="kt134-elapsed">—</span></div></div></div></div>
 
 <div id="error" role="alert" class="error" hidden></div>
 <p class="note">Само реални данни от потвърдената преписка и защитената КТ125 сесия. Рецензентът извършва междинната преценка. Крайно административно решение не се издава автоматично.</p>
@@ -297,8 +336,8 @@ const gate=(text,cls)=>{const e=document.createElement('div');e.className=cls;e.
 gate('Вход','gate');for(let i=1;i<=5;i++)gate(String(i),'node');gate('Изход','gate');
 const tiles=[...stages.children],nodes=[...route.children].slice(1,6);
 const el=id=>document.getElementById(id);
-function render(n){tiles.forEach((x,i)=>x.className='stage '+(i<n?'done':i===n?'active':''));nodes.forEach((x,i)=>x.className='node '+(i<n?'done':i===n?'active':''));el('fill').style.width=(n*20)+'%'}
-function problem(msg){el('error').hidden=false;el('error').textContent=msg;el('subtitle').textContent='Автоматичната обработка не е завършила'}
+function render(n){tiles.forEach((x,i)=>x.className='stage '+(i<n?'done':i===n?'active':''));nodes.forEach((x,i)=>x.className='node '+(i<n?'done':i===n?'active':''));const pct=n*20;el('fill').style.width=pct+'%';el('kt134-percent').textContent=pct+'%';document.querySelector('.kt134-progress-track').setAttribute('aria-valuenow',String(pct));}
+function problem(msg){el('kt134-elapsed').textContent='Прекъснато';el('error').hidden=false;el('error').textContent=msg;el('subtitle').textContent='Автоматичната обработка не е завършила'}
 let context=null;
 let caseRows=[];
 let authenticated=false;
@@ -307,7 +346,7 @@ const selector=el('kt134-case-select');
 const textOption=(value,label)=>{const o=document.createElement('option');o.value=value;o.textContent=label;return o;};
 function clearSelection(){
  context=null;el('start').disabled=true;el('output').classList.remove('visible');
- el('download').disabled=true;render(0);
+ el('download').disabled=true;el('kt134-elapsed').textContent='—';render(0);
 }
 function rowLabel(c){
  return [c.internalNumber||'Преписка',c.externalNumber||'без деловоден №',
@@ -517,7 +556,7 @@ let word=null;
 el('start').addEventListener('click',async()=>{
  if(intakeMode==='new'){el('start').disabled=true;if(!(await registerNewCase())){syncStart();return;}}
  if(!context){syncStart();return;}el('start').disabled=true;el('error').hidden=true;render(0);
- el('subtitle').textContent='Подаване към защитения автоматичен маршрут';
+ el('subtitle').textContent='Анализът се изпълнява · изчаква се потвърден резултат от етапите';el('kt134-elapsed').textContent='Обработва…';
  try{
   const r=await fetch('/kt134/automatic/draft',{method:'POST',credentials:'same-origin',
    headers:{'Content-Type':'application/json'},body:JSON.stringify({caseId:context.caseId})});
@@ -533,7 +572,7 @@ el('start').addEventListener('click',async()=>{
   el('review').textContent=data.intermediateDecision?.reasoning||'—';
   el('doc-title').textContent=data.stage5.documentTitle||'Проект';
   el('draft').textContent=data.stage5.content||'—';
-  render(5);el('subtitle').textContent='Готов проект · очаква единственото окончателно решение на експерта';
+  render(5);el('kt134-elapsed').textContent='Завършено';el('subtitle').textContent='Готов проект · очаква окончателно решение на експерта';
   el('output').classList.add('visible');el('download').disabled=false;
  }catch(e){render(0);problem(e.message||'Неуспешно изпълнение');el('start').disabled=false}
 });
