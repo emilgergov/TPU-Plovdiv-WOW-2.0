@@ -117,6 +117,64 @@ html.kt134-embedded main{max-width:none;width:100%;padding:6px 4px 22px}
 html.kt134-embedded .portal-head,
 html.kt134-embedded .portal-intro{display:none!important}
 html.kt134-embedded .bar{margin-top:0}
+
+/* КТ134 единен визуален блок — намалени ориентирни етапи, водеща непрекъсната
+   скала Вход–1–2–3–4–5–Изход и интегриран статус. Не променя обработката. */
+.kt134-unified{margin-top:14px;padding:15px 17px 13px;border:2px solid #d8cc75;border-radius:22px;background:linear-gradient(145deg,#06432d 0%,#086b3a 56%,#064b2f 100%);box-shadow:inset 0 0 30px #8ced7833,0 7px 18px #001c12;overflow:hidden}
+.kt134-unified .stages{gap:13px;margin:0 0 15px}
+.kt134-unified .stage{min-height:142px;padding:12px 14px;border-width:1.5px;border-radius:13px;box-shadow:0 4px 10px #00231899;transition:box-shadow .2s}
+.kt134-unified .stage>span:first-child{font-size:20px;margin-bottom:1px}
+.kt134-unified .stage>div{font-size:15px;line-height:1.23;margin-top:5px;max-width:96%}
+.kt134-unified .stage .stage-icon{width:54px;height:54px;right:23px;bottom:9px;opacity:.82}
+.kt134-unified .stage::before{height:49px;bottom:-18px}
+.kt134-unified .stage::after{font-size:22px;bottom:6px;right:6px}
+.kt134-unified .auto{border:0;border-top:1px solid #bed77877;border-radius:0;padding:20px 7px 12px;min-height:174px;margin:0;background:transparent;box-shadow:none;grid-template-columns:230px minmax(0,1fr);gap:6px}
+.kt134-unified .auto-label>span{font-size:36px}
+.kt134-unified .auto-label strong{font-size:21px}
+.kt134-unified .auto-label small{font-size:12px}
+.kt134-unified .route{min-height:150px;grid-template-columns:130px repeat(5,minmax(0,1fr)) 130px;gap:0;width:100%}
+.kt134-unified .route::before{height:11px;left:7%;right:7%;background:linear-gradient(90deg,#eabb4c 0%,#fff1a1 11%,#a9f38f 50%,#fff1a1 89%,#eabb4c 100%);box-shadow:0 0 14px 3px #dfff72aa,0 0 3px #fff6ba;top:50%;transform:translateY(-50%)}
+.kt134-unified .gate{min-height:128px;margin:0 2px;border-width:9px;border-bottom-width:13px;box-shadow:inset 0 0 13px #ffe378,0 0 22px #ffd958bb}
+.kt134-unified .node{width:72px;height:72px;border-width:5px;font-size:27px;box-shadow:0 0 17px #a9f69188}
+.kt134-unified .node.active{box-shadow:0 0 0 7px #b7822899,0 0 22px 9px #ffdc6f}
+.kt134-unified .kt134-progress-panel{min-height:78px;margin:7px 0 0;border:0;border-top:1px solid #b9d37e77;border-radius:0;background:transparent;box-shadow:none}
+.kt134-unified .kt134-progress-panel::before{height:65px;bottom:-55px}
+.kt134-unified .kt134-progress-panel .subrow{min-height:51px;max-width:780px;width:min(100%,780px);box-shadow:0 0 12px #e8d46877}
+.kt134-unified .kt134-progress-panel #subtitle{font-size:13px}
+.kt134-unified .kt134-panel-leaf{font-size:75px;bottom:-22px;right:10px}
+@media(max-width:1150px){
+.kt134-unified{padding:12px}
+.kt134-unified .stages{gap:8px}
+.kt134-unified .stage{min-height:125px;padding:9px}
+.kt134-unified .stage>span:first-child{font-size:17px}
+.kt134-unified .stage>div{font-size:12px}
+.kt134-unified .stage .stage-icon{width:39px;height:39px;right:12px;bottom:11px}
+.kt134-unified .auto{grid-template-columns:175px minmax(0,1fr);padding-top:13px}
+.kt134-unified .route{grid-template-columns:92px repeat(5,minmax(0,1fr)) 92px;min-height:115px}
+.kt134-unified .gate{min-height:103px;font-size:15px}
+.kt134-unified .node{width:52px;height:52px;font-size:20px}
+.kt134-unified .node.done::after{top:50px;left:16px}
+}
+@media(max-width:730px){
+.kt134-unified .stages{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.kt134-unified .stage{min-height:108px;padding:6px}
+.kt134-unified .stage>span:first-child{font-size:12px}
+.kt134-unified .stage>div{font-size:10px;line-height:1.23}
+.kt134-unified .stage .stage-icon{width:24px;height:24px;right:6px;bottom:6px}
+.kt134-unified .stage::after{font-size:13px}
+.kt134-unified .auto{display:block}
+.kt134-unified .autohead{padding:0 0 10px}
+.kt134-unified .auto-label strong{font-size:18px}
+.kt134-unified .route{grid-template-columns:45px repeat(5,minmax(0,1fr)) 45px;min-height:64px}
+.kt134-unified .gate{min-height:56px;border-width:3px;border-bottom-width:5px;font-size:10px;margin:0}
+.kt134-unified .gate::before{font-size:13px!important;top:8px!important}
+.kt134-unified .gate{padding-top:14px}
+.kt134-unified .node{height:29px;width:29px;font-size:12px;border-width:2px}
+.kt134-unified .node.done::after{top:28px;left:9px}
+.kt134-unified .route::before{height:6px}
+.kt134-unified .kt134-progress-panel{min-height:70px}
+.kt134-unified .kt134-progress-panel #subtitle{font-size:11px}
+}
 </style><script>
 if(new URLSearchParams(location.search).get('embedded')==='1')
  document.documentElement.classList.add('kt134-embedded');
@@ -138,8 +196,8 @@ if(new URLSearchParams(location.search).get('embedded')==='1')
   <a id="kt134-login-link" href="/auth/login" style="align-self:center;color:#e7c776">Вход с действащия КТ125 профил</a>
  </div>
  <p style="font-size:11px;color:#dacfa9" id="kt134-case-help" aria-live="polite">Списъкът се зарежда автоматично само за удостоверения експерт. Не са необходими UUID или нова регистрация.</p>
- </div><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><div class="auto-label"><span>⚙</span><div><strong>Автоматичен ход</strong><small>Скала на изпълнение на етапите</small></div></div><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
-</div><div class="kt134-progress-panel"><div class="subrow"><span class="loading-dots" aria-hidden="true">◌</span><div class="track"><div class="fill" id="fill"></div></div><span id="subtitle" aria-live="polite">Очаква се защитен контекст от КТ125</span></div><span class="kt134-panel-leaf" aria-hidden="true">❧</span></div>
+ </div><div class="kt134-unified" aria-label="Единен автоматичен маршрут: етапи, скала и статус"><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><div class="auto-label"><span>⚙</span><div><strong>Автоматичен ход</strong><small>Скала на изпълнение на етапите</small></div></div><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
+</div><div class="kt134-progress-panel"><div class="subrow"><span class="loading-dots" aria-hidden="true">◌</span><div class="track"><div class="fill" id="fill"></div></div><span id="subtitle" aria-live="polite">Очаква се защитен контекст от КТ125</span></div><span class="kt134-panel-leaf" aria-hidden="true">❧</span></div></div>
 <div class="actions"><button class="primary" id="start" disabled>Изготви проект по тази преписка</button></div>
 <div id="error" role="alert" class="error" hidden></div>
 <p class="note">Само реални данни от потвърдената преписка и защитената КТ125 сесия. Рецензентът извършва междинната преценка. Крайно административно решение не се издава автоматично.</p>
