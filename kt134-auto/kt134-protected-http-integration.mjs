@@ -6,25 +6,13 @@
  */
 import {createProtectedAutomaticCoordinator} from './kt134-protected-auto-coordinator.mjs';
 import {createKt134EgStage45Bridge} from './kt134-eg-stage45-live-bridge.mjs';
+import {encodeKt134Docx} from './kt134-docx-transport.mjs';
 
 const json=(data,status=200)=>new Response(JSON.stringify(data),{
   status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store',
     'x-content-type-options':'nosniff'}
 });
 const required=(name,value)=>{if(typeof value!=='function')throw Error('KT134_HOST_MISSING_'+name)};
-function base64(bytes) {
-  let result='';
-  for(let i=0;i<bytes.length;i+=8192)
-    result+=btoa(String.fromCharCode(...bytes.subarray(i,i+8192)));
-  // Each 8192-byte chunk is padded independently; join before encoding instead.
-  if(bytes.length>8192) {
-    const parts=[];
-    for(let i=0;i<bytes.length;i+=8190)
-      parts.push(btoa(String.fromCharCode(...bytes.subarray(i,i+8190))));
-    return parts.join('');
-  }
-  return result;
-}
 export function createKt134ProtectedHttpHandler({
   resolveKt125Session,loadProtectedContext,loadEvidenceBundle,buildDraftWord,
   egWorkerBase,egAccessToken,fetchImpl=fetch
@@ -73,7 +61,7 @@ export function createKt134ProtectedHttpHandler({
         revision:output.revision,registryNumber:output.registryNumber,
         subject:output.subject,author:output.author,reviewer:output.reviewer,
         intermediateDecision:output.intermediateDecision,stage5:output.stage5,
-        docxBase64:base64(output.docx),
+        docxBase64:encodeKt134Docx(output.docx),
         expertApproved:false,requiresExpertConfirmation:true,finalDecision:null});
     }catch(err){
       // Do not echo full evidence, source texts, credentials or arbitrary errors.
