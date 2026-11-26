@@ -74,10 +74,21 @@ function confirmedSources(d,ctx){
  const docs=completeDocuments(d);
  if(!docs.length)err('KT134_DOCUMENT_TEXTS_NOT_AVAILABLE');
  const audit=o(globals.KT80DossierAudit);
+ // A review flag is an E1/E2 intermediate quality issue, not a missing
+ // source. The native KT134 reviewer must assess it and suggest corrections.
+ // Never silently treat an actually incomplete dossier as complete.
  if(audit.filesExpected&&audit.filesExpected!==audit.filesExtracted)
    err('KT134_DOSSIER_INCOMPLETE');
- if(audit.filesNeedReview>0||audit.requiresExpertReview===true)
-   err('KT134_DOSSIER_REVIEW_REQUIRED');
+ const reviewNeeded=audit.filesNeedReview>0||audit.requiresExpertReview===true;
+ const dossierReview=reviewNeeded?{
+  required:true,source:'KT80DossierAudit',
+  filesNeedReview:Number.isSafeInteger(audit.filesNeedReview)&&audit.filesNeedReview>0?
+    audit.filesNeedReview:null,
+  requiresExpertReview:audit.requiresExpertReview===true,
+  status:'unresolved_intermediate_reviewer_assessment'
+ }:{
+  required:false,source:'KT80DossierAudit',status:'not_flagged'
+ };
  const gis=o(globals.KT80FreeGISResults);
  const skip=state.gisSkipConfirmed===true&&s(state.gisSkipReason);
  const required=gis.verified===true&&arr(gis.results).length>0&&
@@ -103,7 +114,7 @@ function confirmedSources(d,ctx){
  return {caseId:cId,revision,subject,scope,external,docs,
    gisMode:required?'required':'contextual_skip',
    gis:spatial,gisSkipReason:skip?s(state.gisSkipReason):'',
-   parcels,piMaster,record,root,body,state,values,globals};
+   parcels,piMaster,dossierReview,record,root,body,state,values,globals};
 }
 function makeReceipt(caseId,type,sourceId,digest){
  if(!s(sourceId)||!signed(digest))err('KT134_UNVERIFIED_SOURCE');
@@ -116,7 +127,8 @@ async function construct({response,normative,proof}){
  const principal=requirePrincipal({proof,record:d.record});
  const c=confirmedSources(d);
  const sourceDigest=await hash({caseId:c.caseId,revision:c.revision,
-  docs:c.docs,record:c.record,subject:c.subject,scope:c.scope});
+  docs:c.docs,record:c.record,subject:c.subject,scope:c.scope,
+  dossierReview:c.dossierReview});
  const piDigest=await hash({caseId:c.caseId,piMaster:c.piMaster,parcels:c.parcels,
    skip:c.gisSkipReason});
  const evidence={
@@ -148,7 +160,7 @@ async function construct({response,normative,proof}){
   gis:c.gis,gisMode:c.gisMode,gisSkipReason:c.gisSkipReason,
   piMaster:c.piMaster,normativeArchive:normative,registryNumber:c.external,
   pdf2Ref:s(c.body.pdf2Ref||c.state.pdf2Ref),
-  facts:[],procedureEvidence:[]
+  facts:[],procedureEvidence:[],dossierReview:c.dossierReview
  };
  return {ctx,bundle};
 }
