@@ -71,7 +71,24 @@ jobs:
           }
           const handlers=likelyNames.map(handlerSummary).filter(Boolean);
           const createRouteCalls=handlerNames.filter(v=>/^[a-zA-Z_$][\\w$]{2,90}$/.test(v));
-          writeFileSync('/tmp/kt134-new-case-contract.json',JSON.stringify({source:'native-kt125-worker',readOnly:true,privateSourceExported:false,hasCreateRoute:text.includes('/kt126/registry/create'),createRouteCalls,handlers,report},null,2));
+          // Capture only public API request field names from the existing KT126 client
+          // implementation; never copy file contents or user dossier data.
+          const matches=[];
+          for(const token of ['api("/create"', "api('/create'", 'api("/" +', '"/source"', '"/part/"', '"/finish"', '"/state"']){
+            let from=0;
+            for(let i=0;i<8;i++){
+              const at=text.indexOf(token,from);if(at<0)break;from=at+token.length;
+              const piece=text.slice(Math.max(0,at-110),at+950);
+              const reqMatch=/api\(\s*(["'][^"']+["']|[^,]{1,90})\s*,\s*\{([^}]{0,550})\}/.exec(piece);
+              const params=reqMatch?Array.from(reqMatch[2].matchAll(/(?:^|,)\s*([a-zA-Z_]\w*)\s*:/g),m=>m[1]):[];
+              matches.push({token,requestKeys:[...new Set(params)].filter(v=>allowedFields.test(v)),hasResponseRecord:/\.record\b|\.case_id\b/.test(piece)});
+            }
+          }
+          const routeIdx=text.indexOf('/kt126/registry/create');
+          const local=text.slice(Math.max(0,routeIdx-450),routeIdx+900);
+          const routeIdentifiers=[...new Set([...local.matchAll(/\b(?:createCase|createRegistry|registryCreate|newRegistry|POST|KT125_DB|KT126_DB|json|body|input)\b/g)].map(m=>m[0]))];
+          const clientCalls=matches;
+          writeFileSync('/tmp/kt134-new-case-contract.json',JSON.stringify({source:'native-kt125-worker',readOnly:true,privateSourceExported:false,hasCreateRoute:text.includes('/kt126/registry/create'),createRouteCalls,routeIdentifiers,clientCalls,handlers,report},null,2));
           console.log('KT134 contract metadata derived; private Worker source not logged');
           NODE
       - name: Save metadata in isolated checkpoint branch
