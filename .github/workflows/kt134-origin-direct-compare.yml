@@ -1,0 +1,56 @@
+name: KT134 compare direct and service-bound login response
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-origin-direct-compare.yml']
+permissions:
+  contents: write
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Compare GET /auth/login without credentials
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const hosts=[
+            'https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev',
+            'https://tpu-plovdiv-kt134-test.emilgergov.workers.dev'
+          ];
+          const list=[];
+          for(const host of hosts){
+            for(const headers of [{},{origin:host},{origin:'https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev'}]){
+              const r=await fetch(host+'/auth/login',{headers,redirect:'manual'});
+              const txt=await r.text();
+              list.push({host,origin:headers.origin||null,status:r.status,
+                contentType:(r.headers.get('content-type')||'').split(';')[0],
+                originRejected:txt.includes('ORIGIN_REJECTED'),
+                htmlLogin:/<form|<input|type="password"/i.test(txt),
+                responseLabel:txt.includes('ORIGIN_REJECTED')?'ORIGIN_REJECTED':
+                 txt.includes('NOT_FOUND')?'NOT_FOUND':'OTHER',
+                length:txt.length});
+            }
+          }
+          writeFileSync('kt134-auto/KT134_ORIGIN_COMPARISON.json',JSON.stringify({readOnly:true,checks:list},null,2)+'\n');
+          console.log(list.map(x=>[new URL(x.host).hostname,x.origin,x.status,x.responseLabel,x.htmlLogin].join(' ')).join('\n'));
+          NODE
+      - name: Save no-credential results
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          p='kt134-auto/KT134_ORIGIN_COMPARISON.json'
+          content="$(base64 -w0 "$p")"
+          for n in 1 2 3 4 5; do
+            sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/$p?ref=kt134-auto-mode-isolated" --jq '.sha' 2>/dev/null || true)"
+            if [ -n "$sha" ]; then
+              gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f branch='kt134-auto-mode-isolated' -f message='KT134: compare direct vs proxied login errors' -f content="$content" -f sha="$sha" >/dev/null && exit 0
+            else
+              gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f branch='kt134-auto-mode-isolated' -f message='KT134: compare direct vs proxied login errors' -f content="$content" >/dev/null && exit 0
+            fi
+            sleep 2
+          done
+          exit 1
