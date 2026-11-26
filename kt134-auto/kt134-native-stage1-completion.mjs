@@ -48,7 +48,8 @@ export function createKt134NativeStage1Completion({nativeFetch,egFetch,egAccessT
    fail('KT125_CASE_ACCESS_DENIED');
   if(!read.ok)fail('KT126_CASE_READ_FAILED');
   const snapshot=await txt(read,600000);
-  if(snapshot.record?.case_id!==caseId||!Number.isInteger(Number(snapshot.record?.revision)))
+  const record=plain(snapshot.record||snapshot.item||snapshot.registry);
+  if(record.case_id!==caseId||!Number.isInteger(Number(record.revision)))
    fail('KT126_CASE_RECEIPT_INVALID');
   // Verify the original was successfully stored, and its digest matches
   // the exact bytes selected for E1 by the browser.
@@ -64,7 +65,7 @@ export function createKt134NativeStage1Completion({nativeFetch,egFetch,egAccessT
   // classic case with a duplicate automatic E1.
   const prior=plain(snapshot.state);
   if(prior?.globals?.KT134AutomaticStage1?.completed===true)
-   return {caseId,internalNumber:snapshot.record.internal_number,
+   return {caseId,internalNumber:record.internal_number,
     status:'stage1_already_completed',leadingDocument:prior.globals.KT134AutomaticStage1.leadingDocument,
     registeredIn:'KT126_NATIVE_REGISTRY'};
   const eg=await egFetch(EG+'/kt134/stage1-leading',{
@@ -114,7 +115,7 @@ export function createKt134NativeStage1Completion({nativeFetch,egFetch,egAccessT
   const result=await nativeFetch(new Request(target+'/state',{
    method:'POST',redirect:'manual',headers:{Cookie:cookie,Origin:NATIVE,
     Referer:NATIVE+'/',Accept:'application/json','Content-Type':'application/json'},
-   body:JSON.stringify({revision:snapshot.record.revision,state})
+   body:JSON.stringify({revision:record.revision,state})
   }));
   if(result.status===409)fail('KT126_STAGE1_REVISION_CONFLICT');
   if([301,302,303,307,308,401,403].includes(result.status))
