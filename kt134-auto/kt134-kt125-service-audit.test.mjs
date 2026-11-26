@@ -7,7 +7,7 @@ const base=[
  {type:'secret_text',name:'KT134_SMOKE_TOKEN'}
 ];
 test('staging with only original isolated resources remains eligible',()=>{
- assert.equal(audit(base).eligible,true);
+ assert.equal(audit(base).eligible,false);
 });
 test('staging with exact native service binding remains eligible',()=>{
  const x=audit([...base,{type:'service',name:'KT125_NATIVE',
@@ -20,4 +20,17 @@ test('KT133 or unrelated service binding is never silently accepted',()=>{
 });
 test('production D1 cannot be attached to KT134 test Worker',()=>{
  assert.equal(audit([...base,{type:'d1',name:'KT125_DB',id:'real-production'}]).eligible,false);
+});
+
+test('isolated Worker permits one direct native KT125 plus one EG test service binding',()=>{
+ const x=audit([...base,
+  {type:'service',name:'KT125_NATIVE',service:'tpu-plovdiv-kt125-local-auth'},
+  {type:'service',name:'KT134_EG_NATIVE',service:'tpu-plovdiv-kt134-eg-test'}]);
+ assert.equal(x.eligible,true);assert.equal(x.egServicePresent,true);
+});
+test('other EG service or duplicate EG binding never qualifies',()=>{
+ const native={type:'service',name:'KT125_NATIVE',service:'tpu-plovdiv-kt125-local-auth'};
+ const eg={type:'service',name:'KT134_EG_NATIVE',service:'tpu-plovdiv-kt134-eg-test'};
+ assert.equal(audit([...base,native,eg,{...eg}]).eligible,false);
+ assert.equal(audit([...base,native,{...eg,service:'tpu-plovdiv-ai-author-v27'}]).eligible,false);
 });
