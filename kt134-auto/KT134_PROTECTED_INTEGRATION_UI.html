@@ -312,24 +312,36 @@ html.kt134-embedded .kt134-unified .kt134-choice input::file-selector-button{
  background:#876832!important;color:#fbeac3!important;border:1px solid #e1c67c!important
 }
 .kt134-unified .kt134-choice-hint,.kt134-unified .choice-note{font-size:12px;line-height:1.4}
+
+/* KT134 visual cleanup: fewer repeated labels, no manual archive refresh,
+   compact stage rhythm without altering accepted gates or controls. */
+.kt134-unified #kt134-refresh{display:none!important}
+.kt134-unified .stages{margin:8px 0;gap:10px}
+.kt134-unified .stage{min-height:136px;padding:12px 14px}
+.kt134-unified .stage .stage-icon{height:52px;width:52px;bottom:11px}
+.kt134-unified .auto{margin-top:2px;padding-top:8px}
+.kt134-unified .route{min-height:108px}
+.kt134-unified .gate{min-height:100px}
+.kt134-unified .kt134-intake-choices{margin-bottom:6px}
+.kt134-unified .unified-start{margin:6px 0 8px}
 </style><script>
 if(new URLSearchParams(location.search).get('embedded')==='1')
  document.documentElement.classList.add('kt134-embedded');
 </script></head><body><main>
 <header class="portal-head"><div class="brand"><span class="leaf">❧</span><b>WOW · Административен пътеводител</b></div><div class="head-right">Работите като: <b>Експерт</b><a href="/auth/login">Моят профил</a><a href="/auth/logout" class="logout">Изход</a></div></header>
-<div class="portal-intro"><h1>Административен пътеводител · Изберете работен панел</h1><p>Изберете етап за отваряне на съответния работен екран. Връщането не изтрива данните по преписката.</p></div>
+<div class="portal-intro"><h1>Административен пътеводител</h1></div>
 <section class="bar"><div class="case">
 <div>Активен експерт: <strong id="expert">—</strong></div>
 <div>Вътрешен №: <strong id="caseid">—</strong></div>
 <div>Деловоден №: <strong id="registry">—</strong></div></div>
 <div class="kt134-unified" aria-label="Автоматичен анализ"><div class="kt134-intake-choices">
 <section class="kt134-choice active" id="kt134-new-intake"><label class="choice-title" for="kt134-new-file">✚ Нова преписка</label><input id="kt134-new-file" type="file" accept=".zip,.pdf,.docx" aria-label="Документи за нова преписка"><span id="kt134-new-status" class="choice-note" aria-live="polite">Изберете ZIP, PDF или DOCX до 40 MB</span><button id="kt134-new-submit" type="button" disabled hidden>Регистрирай</button></section>
-<section class="kt134-choice" id="kt134-existing-intake"><label class="choice-title" for="kt134-case-select">▣ Преписка от архива</label><select id="kt134-case-select" disabled aria-label="Изберете преписка от архива"><option value="">Зареждане…</option></select><span id="kt134-case-help" class="choice-note" aria-live="polite">Изберете преписка</span><div class="choice-tools"><button id="kt134-refresh" type="button">Обнови архива</button><a id="kt134-login-link" href="/auth/login">Вход</a></div></section>
-</div><div class="unified-start"><button class="primary" id="start" disabled>Стартирай автоматичния анализ</button></div><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><div class="auto-label"><span>⚙</span><div><strong>Автоматичен ход</strong><small>Скала на изпълнение на етапите</small></div></div><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
+<section class="kt134-choice" id="kt134-existing-intake"><label class="choice-title" for="kt134-case-select">▣ Преписка от архива</label><select id="kt134-case-select" disabled aria-label="Изберете преписка от архива"><option value="">Зареждане…</option></select><span id="kt134-case-help" class="choice-note" aria-live="polite"></span><div class="choice-tools"><button id="kt134-refresh" type="button" hidden aria-hidden="true" tabindex="-1">Обнови архива</button><a id="kt134-login-link" href="/auth/login">Вход</a></div></section>
+</div><div class="unified-start"><button class="primary" id="start" disabled>Стартирай автоматичния анализ</button></div><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><div class="auto-label"><span>⚙</span><div><strong>Автоматичен ход</strong></div></div><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
 </div><div class="kt134-progress-panel"><div class="kt134-progress-body"><div class="kt134-progress-heading"><strong>Напредък на анализа</strong><strong id="kt134-percent" aria-live="polite">0%</strong></div><div class="kt134-progress-track" role="progressbar" aria-label="Напредък на анализа" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="fill" id="fill"></div></div><div class="kt134-progress-foot"><span class="kt134-progress-dot" aria-hidden="true">◉</span><span id="subtitle" aria-live="polite">Изберете преписка и стартирайте анализа</span><span id="kt134-elapsed" class="kt134-elapsed">—</span></div></div></div></div>
 
 <div id="error" role="alert" class="error" hidden></div>
-<p class="note">Само реални данни от потвърдената преписка и защитената КТ125 сесия. Рецензентът извършва междинната преценка. Крайно административно решение не се издава автоматично.</p>
+<p class="note">Проектът подлежи на окончателно одобрение от експерта.</p>
 </section>
 <section class="output" id="output"><div class="split">
 <div class="detail"><h2>Мотивирано предложение · Етап 4</h2>
@@ -415,8 +427,8 @@ async function loadAccessibleCases(){
     'Заредени '+caseRows.length+' достъпни преписки. Изберете една.':
     'Няма достъпни преписки за този профил.';
   el('kt134-case-help').textContent=caseRows.length?
-    'Изберете преписка от архива.':
-    'Регистърът е проверен, но няма достъпни за този профил преписки.';
+    '':
+    'Няма преписки в архива.';
   const preferred=new URL(location.href).searchParams.get('caseId');
   if(preferred&&caseRows.some(x=>x.caseId===preferred)){
     selector.value=preferred;setIntakeMode('existing');await verifySelectedCase(preferred);
