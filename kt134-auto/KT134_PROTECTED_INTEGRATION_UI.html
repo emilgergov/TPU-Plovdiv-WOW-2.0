@@ -322,6 +322,7 @@ async function loadAccessibleCases(){
     throw Error(r.status===401?'Необходим е вход с действащия профил КТ125.':
       'Регистърът не е достъпен ('+(data.error||r.status)+').');
   authenticated=true;caseRows=data.items;
+  if(newFile.files?.[0] && /\.(zip|pdf|docx)$/i.test(newFile.files[0].name))newSubmit.disabled=false;
   el('expert').textContent='Удостоверена КТ125 сесия';
   el('kt134-login-link').hidden=true;
   selector.replaceChildren(textOption('','Изберете преписка от регистъра'));
@@ -341,6 +342,7 @@ async function loadAccessibleCases(){
   }
  }catch(e){
   authenticated=false;
+  newSubmit.disabled=true;
   selector.replaceChildren(textOption('','Не е потвърдена сесия или регистър'));
   el('kt134-login-link').hidden=false;
   problem(e.message||'Регистърът не е достъпен.');
@@ -356,8 +358,8 @@ newFile.addEventListener('change',()=>{
  newRegistered=null;
  const valid=!!file && /\\.(zip|pdf|docx)$/i.test(file.name) &&
    file.size>0 && file.size<=40_000_000;
- newSubmit.disabled=!valid;
- newStatus.textContent=valid?'Избран файл: '+file.name+' · общ номер от КТ126.':
+ newSubmit.disabled=!valid||!authenticated;
+ newStatus.textContent=!authenticated?'Няма потвърдена КТ125 сесия. Нов запис не се допуска в този тестов екран.':valid?'Избран файл: '+file.name+' · общ номер от КТ126.':
   'Изберете ZIP, PDF или DOCX с размер до 40 MB.';
 });
 async function sendNew(path,body,contentType){
@@ -368,6 +370,7 @@ async function sendNew(path,body,contentType){
  return data;
 }
 newSubmit.addEventListener('click',async()=>{
+ if(!authenticated){newSubmit.disabled=true;newStatus.textContent='Не е потвърден достъп до общия регистър КТ126.';return;}
  const file=newFile.files?.[0];
  if(!file||!(/\\.(zip|pdf|docx)$/i.test(file.name))||file.size<1||
     file.size>40_000_000)return;
