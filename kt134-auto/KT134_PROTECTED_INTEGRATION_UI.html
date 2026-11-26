@@ -442,6 +442,7 @@ const newFile=el('kt134-new-file');
 const newSubmit=el('kt134-new-submit');
 const newStatus=el('kt134-new-status');
 let newRegistered=null;
+let registrationRequestKey=null;
 let stage1Intake=null;
 let readerLoad=null;
 async function loadApprovedE1Reader(){
@@ -461,6 +462,7 @@ async function loadApprovedE1Reader(){
 newFile.addEventListener('change',()=>{
  const file=newFile.files?.[0];
  newRegistered=null;stage1Intake=null;
+ registrationRequestKey=crypto.randomUUID();
  const valid=!!file && /\.(zip|pdf|docx)$/i.test(file.name) &&
    file.size>0 && file.size<=40_000_000;
  newSubmit.disabled=!valid||!authenticated;
@@ -497,9 +499,10 @@ async function registerNewCase(){
   const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)))
     .map(n=>n.toString(16).padStart(2,'0')).join('');
   const meta={filename:file.name,size:bytes.byteLength,sha256:digest};
+  const registerMeta={...meta,requestKey:registrationRequestKey};
   if(!id){
    newStatus.textContent='Регистрация на преписката с общия номератор КТ126…';
-   const record=await sendNew('/kt134/new-case/register',JSON.stringify(meta),'application/json');
+   const record=await sendNew('/kt134/new-case/register',JSON.stringify(registerMeta),'application/json');
    id=record.caseId;
    if(!id||!record.internalNumber)throw Error('КТ126 не върна потвърден вътрешен номер.');
    newRegistered={caseId:id,internalNumber:record.internalNumber,sourceId:null};
