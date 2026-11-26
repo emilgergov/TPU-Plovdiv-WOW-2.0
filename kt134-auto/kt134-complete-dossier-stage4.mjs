@@ -46,6 +46,10 @@ export function buildKt134CompleteStage4Request({caseId,revision,bundle,requestI
       status:'established',sourceId:x.sourceId,sourceLocation:'ГИС/ПДФ1',description:'Пространствен анализ: '+x.kind};
   });
  const caseFacts=[
+  ...(bundle.dossierReview?.required===true?[{
+   factId:'DOSSIER_QUALITY_REVIEW',value:'Проверка на входните документи: необходима е междинна рецензия по маркер от Етап 1. Рецензентът следва да посочи корекции и несигурности; не се допуска мълчаливо потвърждение.',
+   status:'uncertain',sourceId:'KT80DossierAudit',sourceLocation:'Етап 1',
+   description:'Междинна проверка за качество на преписката'}]:[]),
   {factId:'CASE_SUBJECT',value:subject,status:'established',sourceId:documents[0].source,sourceLocation:'Етап 2',description:'Предмет на преписката'},
   {factId:'CASE_SCOPE',value:scope,status:'established',sourceId:documents[0].source,sourceLocation:'Етап 2',description:'Обхват на ИП'},
   ...parcels.filter(p=>p.sourceId).map((p,i)=>({factId:'PARCEL_'+(i+1),
@@ -81,6 +85,16 @@ export function buildKt134CompleteStage4Request({caseId,revision,bundle,requestI
   incomingReference:safeText(bundle.registryNumber,110),
   completeCaseEvidence:{
    archiveName:'Преписка '+caseId,sourceTextCount:documents.length,sourceTexts:documents,
+   // Preserve KT80 intermediate quality flags. The independent reviewer
+   // must propose corrections; flags are not a reason to fabricate evidence.
+   dossierReview:plain(bundle.dossierReview)?{
+    required:bundle.dossierReview.required===true,
+    source:'KT80DossierAudit',
+    status:safeText(bundle.dossierReview.status,100),
+    filesNeedReview:Number.isSafeInteger(bundle.dossierReview.filesNeedReview)?
+      bundle.dossierReview.filesNeedReview:null,
+    requiresExpertReview:bundle.dossierReview.requiresExpertReview===true
+   }:null,
    documentRecords:documents.map(x=>({sourceId:x.source,fileName:x.fileName,type:x.type,date:x.date})),
    documents:documents.map(x=>({sourceId:x.source,name:x.fileName})),
    parcels,gis:gisDescription,subjectCandidates:[subject],gisContextMode:mode,
