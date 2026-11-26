@@ -1,0 +1,24 @@
+name: KT134 real institutional Word document check
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths:
+      - 'kt134-auto/kt134-official-word-builder.mjs'
+      - 'kt134-auto/kt134-official-word-builder.test.mjs'
+      - '.github/workflows/kt134-official-word-ci.yml'
+permissions:
+  contents: read
+jobs:
+  word:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install the existing approved Word ZIP dependency
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund fflate@0.8.2
+      - name: Test full RIOSV Plovdiv Word from a Stage5 draft
+        run: |
+          node --check kt134-auto/kt134-official-word-builder.mjs
+          node --test kt134-auto/kt134-official-word-builder.test.mjs
+          echo 'KT134 official document rendered with original template; synthetic draft text only'
