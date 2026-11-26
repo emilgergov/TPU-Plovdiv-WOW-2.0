@@ -11,14 +11,24 @@ function receipt(r, type, caseId) {
   return Object.freeze({type,caseId,sourceId:r.sourceId,digest:r.digest.toLowerCase(),verifiedAt:r.verifiedAt});
 }
 export function prepareProtectedAutomaticCase({principal,caseRecord,evidence,policy}={}) {
+  const rpc=principal?.nativeAuthorization;
+  const nativeAuthorized=rpc?.source==='KT125_NATIVE_RPC'&&
+    rpc.verified===true&&rpc.action==='case.edit'&&
+    rpc.actorId===principal?.userId&&
+    rpc.caseId===caseRecord?.id&&rpc.revision===caseRecord?.revision;
   if (principal?.source!=='KT125_SERVER' || principal?.authenticated!==true ||
       principal?.status!=='active' || !nonempty(principal.userId) ||
-      !principal.roles?.includes('expert')) fail('KT125_AUTH_REQUIRED');
+      (!principal.roles?.includes('expert')&&!nativeAuthorized))
+    fail('KT125_AUTH_REQUIRED');
   const c=caseRecord;
   if (!c || !nonempty(c.id) || !nonempty(c.revision) || !nonempty(c.subject) ||
       !nonempty(c.registryNumber)) fail('CASE_INCOMPLETE');
   if (c.status!=='active') fail('CASE_NOT_ACTIVE');
-  if (c.ownerUserId!==principal.userId && !principal.roles.includes('case_delegate')) fail('CASE_ACCESS_DENIED');
+  // Native KT125 RPC proves a per-case edit grant for this exact actor and
+  // revision, including properly delegated experts. It replaces the weaker
+  // local owner-ID guess ONLY in the native RPC branch.
+  if (!nativeAuthorized&&c.ownerUserId!==principal.userId &&
+      !principal.roles.includes('case_delegate')) fail('CASE_ACCESS_DENIED');
   if (c.registryConfirmed!==true) fail('REGISTRY_NOT_CONFIRMED');
   if (policy?.source!=='KT125_SERVER' || policy?.liveAutomaticEnabled!==true) fail('AUTOMATION_NOT_ENABLED');
   const records=[
