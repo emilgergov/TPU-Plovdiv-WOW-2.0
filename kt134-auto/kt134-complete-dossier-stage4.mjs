@@ -27,12 +27,17 @@ export function buildKt134CompleteStage4Request({caseId,revision,bundle,requestI
     landUse:safeText(x.landUse,250),sourceId:safeText(x.sourceId,140)}));
  const spatial=plain(bundle.gis)?bundle.gis:null;
  const mode=bundle.gisMode;
- if(mode!=='required'&&mode!=='contextual_skip')error('KT134_GIS_MODE_MISSING');
+ if(!['required','contextual_skip','spatial_review','contextual_review'].includes(mode))
+   error('KT134_GIS_MODE_MISSING');
  if(mode==='required'&&(!spatial||!nonempty(spatial.sourceId)||!nonempty(spatial.pdf1Ref)))
    error('KT134_GIS_PDF1_MISSING');
  if(mode==='contextual_skip'&&!nonempty(bundle.gisSkipReason))
    error('KT134_GIS_CONTEXT_REASON_MISSING');
- const spatialRows=mode==='required'?[
+ if(['spatial_review','contextual_review'].includes(mode)&&
+    (!spatial||!nonempty(bundle.gisReviewReason)||
+     !many(bundle.gisEvidenceIssues).length))
+   error('KT134_GIS_REVIEW_EVIDENCE_MISSING');
+ const spatialRows=['required','spatial_review'].includes(mode)?[
   ...many(spatial.protectedZones).map(x=>({...x,kind:'ЗЗ'})),
   ...many(spatial.protectedAreas).map(x=>({...x,kind:'ЗТ'}))
  ]:[];
@@ -43,9 +48,19 @@ export function buildKt134CompleteStage4Request({caseId,revision,bundle,requestI
     const area=Number.isFinite(x.intersectionAreaSqm)?'; площ на пресичане '+x.intersectionAreaSqm+' кв. м':'';
     return {factId:'GIS_'+(i+1),value:x.kind+' '+x.name+': '+intersect+distance+area+
       (nonempty(x.order)?'; заповед '+safeText(x.order,160):''),
-      status:'established',sourceId:x.sourceId,sourceLocation:'ГИС/ПДФ1',description:'Пространствен анализ: '+x.kind};
+      status:mode==='required'?'established':'uncertain',sourceId:x.sourceId,
+      sourceLocation:mode==='required'?'ГИС/ПДФ1':'ГИС слой — PDF1 не е потвърден',
+      description:'Пространствен анализ: '+x.kind};
   });
  const caseFacts=[
+  ...(['spatial_review','contextual_review'].includes(mode)?[{
+    factId:'GIS_E3_LIMITATION',
+    value:safeText(bundle.gisReviewReason,1000)+' Налични ограничения: '+
+      many(bundle.gisEvidenceIssues).map(v=>safeText(v,100)).join(', '),
+    status:'uncertain',sourceId:spatial.sourceId,
+    sourceLocation:'Етап 3 — ГИС, неподтвърден PDF1',
+    description:'Не се допуска пространствен или окончателен правен извод без допълнителна проверка.'
+  }]:[]),
   ...(bundle.dossierReview?.required===true?[{
    factId:'DOSSIER_QUALITY_REVIEW',value:'Проверка на входните документи: необходима е междинна рецензия по маркер от Етап 1. Рецензентът следва да посочи корекции и несигурности; не се допуска мълчаливо потвърждение.',
    status:'uncertain',sourceId:'KT80DossierAudit',sourceLocation:'Етап 1',
@@ -69,7 +84,21 @@ export function buildKt134CompleteStage4Request({caseId,revision,bundle,requestI
   sourceId:spatial.sourceId,pdf1Ref:spatial.pdf1Ref,analysisMode:'spatial',
   protectedZones:many(spatial.protectedZones),protectedAreas:many(spatial.protectedAreas),
   projection:safeText(spatial.projection,100),notes:safeText(spatial.notes,1600)
- }:{analysisMode:'contextual_skip',reason:safeText(bundle.gisSkipReason,300)};
+ }:mode==='contextual_skip'?{
+  analysisMode:'contextual_skip',reason:safeText(bundle.gisSkipReason,300)
+ }:{
+  sourceId:spatial.sourceId,
+  analysisMode:mode==='spatial_review'?
+    'verified_intersections_pending_pdf1':'contextual_unverified',
+  pdf1Verified:false,pdf1Ref:null,reason:safeText(bundle.gisReviewReason,1000),
+  evidenceIssues:many(bundle.gisEvidenceIssues).map(x=>safeText(x,100)),
+  verifiedParcelIds:many(spatial.verifiedParcelIds),
+  candidateParcelIds:many(spatial.candidateParcelIds),
+  protectedZones:many(spatial.protectedZones),protectedAreas:many(spatial.protectedAreas),
+  outsideZones:many(spatial.outsideZones),
+  limitations:many(spatial.limitations),
+  stage3Status:safeText(spatial.stage3Status,120)
+ };
  const archive=plain(bundle.normativeArchive)?bundle.normativeArchive:{};
  if(!nonempty(archive.name)||!Array.isArray(archive.verifiedReferences))
    error('KT134_NORMATIVE_MASTER_MISSING');
