@@ -14,6 +14,7 @@ on:
       - 'kt134-auto/kt134-native-case-list.mjs'
       - 'kt134-auto/kt134-native-case-list.test.mjs'
       - 'kt134-auto/kt134-kt125-service-audit.mjs'
+      - 'kt134-auto/kt134-kt125-service-audit.test.mjs'
       - 'kt134-auto/wrangler.auth-bridge.toml'
       - '.github/workflows/kt134-kt125-bridge-staging-deploy.yml'
   workflow_dispatch:
@@ -152,6 +153,21 @@ jobs:
           denied="$(curl --silent --show-error --max-time 12 -o /tmp/kt134-denied.json -w '%{http_code}' "$BASE/kt134/case-status?caseId=11111111-1111-4111-8111-111111111111")"
           test "$denied" = 401
           echo 'KT134: original native login GET PASS, unauthenticated dossier read correctly refused'
+          legal_status=000
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            legal_status="$(curl --silent --show-error --max-time 20 -o /tmp/kt134-legal-bridge.json -w '%{http_code}' "$BASE/kt134/normative-bridge-check")"
+            [ "$legal_status" = 200 ] && break
+            sleep 3
+          done
+          test "$legal_status" = 200
+          node - <<'NODE'
+          const x=require('/tmp/kt134-legal-bridge.json');
+          if(x.ready!==true||x.transport!=='cloudflare_test_worker_service_binding'||
+             x.upstreamStatus!==200||x.legalStatus!=='ready'||
+             x.requiredProvisionsVerified!==7||x.exactProvisionsReady<7)
+            throw Error('KT134_NORMATIVE_V11_SERVICE_BINDING_NOT_READY');
+          console.log('KT134 live legal V11 source: '+x.exactProvisionsReady+' provisions, '+x.requiredProvisionsVerified+'/7 verified, EG service binding confirmed');
+          NODE
           curl --fail --silent --show-error --max-time 15 "$BASE/kt134/automatic-health" -o /tmp/kt134-auto-health.json
           node - <<'NODE'
           const x=require('/tmp/kt134-auto-health.json');
