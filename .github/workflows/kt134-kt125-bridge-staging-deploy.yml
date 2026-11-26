@@ -1,0 +1,107 @@
+name: KT134 test-only KT125 service bridge deployment
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths:
+      - 'kt134-auto/kt134-kt125-bridge-staging-worker.mjs'
+      - 'kt134-auto/wrangler.auth-bridge.toml'
+      - '.github/workflows/kt134-kt125-bridge-staging-deploy.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: kt134-isolated-kt125-bridge
+  cancel-in-progress: false
+jobs:
+  deploy-and-check:
+    if: github.ref_name == 'kt134-auto-mode-isolated'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: "90df5489417e4b53179a852c446aeed1"
+      KT134_CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Verify existing test isolation BEFORE any mutation
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          grep -Fxq 'name = "tpu-plovdiv-kt134-test"' kt134-auto/wrangler.auth-bridge.toml
+          grep -Fxq 'service = "tpu-plovdiv-kt125-local-auth"' kt134-auto/wrangler.auth-bridge.toml
+          grep -Fxq 'binding = "DB"' kt134-auto/wrangler.auth-bridge.toml
+          grep -Fxq 'binding = "BUCKET"' kt134-auto/wrangler.auth-bridge.toml
+          grep -Fxq 'database_id = "9f977144-c6f1-4fbf-8262-5c48b818bfb1"' kt134-auto/wrangler.auth-bridge.toml
+          ! grep -Eq '(KT125_DB|tpu-plovdiv-ai-author-v27|kt133-tpu)' kt134-auto/wrangler.auth-bridge.toml
+          GITHUB_REF_NAME=kt134-auto-mode-isolated node kt134-auto/kt134-existing-staging-audit.mjs
+          node --check kt134-auto/kt134-kt125-bridge-staging-worker.mjs
+          node --test kt134-auto/kt134-existing-staging-audit.test.mjs
+      - name: Generate original institutional synthetic preview dependency
+        run: |
+          set -euo pipefail
+          npm install --no-save --ignore-scripts --no-audit --no-fund fflate@0.8.2
+          node kt134-auto/kt134-build-acceptance-package.mjs
+      - name: Build isolated KT125 bridge Worker
+        working-directory: kt134-auto
+        run: npx --yes wrangler@4 deploy --config wrangler.auth-bridge.toml --dry-run --outdir ../kt134-auth-bridge-built
+      - name: Deploy only existing KT134 test Worker
+        id: deployment
+        working-directory: kt134-auto
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 deploy --config wrangler.auth-bridge.toml --keep-vars
+      - name: Check native service binding and unauthenticated public KT125 login only
+        id: probe
+        run: |
+          set -euo pipefail
+          BASE='https://tpu-plovdiv-kt134-test.emilgergov.workers.dev'
+          for i in 1 2 3 4 5 6 7 8; do
+            code="$(curl --silent --show-error --max-time 12 -o /tmp/kt134-native.json -w '%{http_code}' "$BASE/kt134/kt125-bridge-check")"
+            if [ "$code" = 200 ]; then break; fi
+            sleep 3
+          done
+          test "$code" = 200
+          node - <<'NODE'
+          const x=require('/tmp/kt134-native.json');
+          if(x.bridge!=='native_kt125_service_reachable'||
+             x.authenticated!==false||x.caseDataRead!==false||
+             x.caseDataWritten!==false||x.realAutomaticRoute!==false||
+             x.productionWorkerChanged!==false||x.stagingOnly!==true)
+             throw Error('KT134 native service binding or privacy probe failed');
+          console.log('KT134: NATIVE KT125 SERVICE BINDING PASS, no dossiers read/written');
+          NODE
+          curl --fail --silent --show-error "$BASE/kt134/health" -o /tmp/kt134-preview-health.json
+          node - <<'NODE'
+          const x=require('/tmp/kt134-preview-health.json');
+          if(x.mode!=='synthetic_preview_only'||x.ready!==true)
+            throw Error('KT134 original preview behavior regressed');
+          NODE
+          code="$(curl --silent --show-error -X POST -o /dev/null -w '%{http_code}' "$BASE/kt134/kt125-bridge-check")"
+          test "$code" = 405
+          echo 'KT134: previous preview and method restrictions PASS'
+      - name: Record verified result, without any secrets or case data
+        if: always()
+        env:
+          DEPLOY_STATUS: ${{ steps.deployment.outcome }}
+          PROBE_STATUS: ${{ steps.probe.outcome }}
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const ok=process.env.DEPLOY_STATUS==='success'&&process.env.PROBE_STATUS==='success';
+          fs.writeFileSync('kt134-auto/KT134_KT125_BRIDGE_DEPLOY_STATUS.json',
+            JSON.stringify({runId:process.env.GITHUB_RUN_ID,sourceSha:process.env.GITHUB_SHA,
+              bridgeDeployed:ok,verifiedNativeKT125Service:ok,
+              publicTestWorker:'tpu-plovdiv-kt134-test',
+              realDossierProcessed:false,fullStage1To5Live:false,
+              productionWorkerSourceModified:false,
+              deploymentStep:process.env.DEPLOY_STATUS,probeStep:process.env.PROBE_STATUS},null,2)+'\n');
+          NODE
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kt134-auto/KT134_KT125_BRIDGE_DEPLOY_STATUS.json
+          git commit -m 'KT134: record actual existing native KT125 staging bridge result' || exit 0
+          git pull --rebase origin kt134-auto-mode-isolated
+          git push origin HEAD:kt134-auto-mode-isolated
