@@ -392,25 +392,26 @@ newSubmit.addEventListener('click',async()=>{
   if(!newRegistered.sourceId){
    const initial=await sendNew('/kt134/new-case/original/'+encodeURIComponent(id)+'/start',
      JSON.stringify(meta),'application/json');
+   // Native KT126 E1 stores the primary dossier under the fixed source
+   // identity "original", not a randomly generated source UUID.
    const source=initial.receipt||{};
-   const sourceId=source.sourceId||source.source_id||source.id||source.source?.source_id;
-   if(!sourceId||!(/^[0-9a-f-]{36}$/i.test(String(sourceId))))
-    throw Error('КТ126 не върна потвърден идентификатор на оригинала.');
-   newRegistered.sourceId=sourceId;
+   if(source.error||source.ok===false)
+    throw Error('КТ126 не потвърди началото на запис на оригинала.');
+   newRegistered.sourceId='original';
   }
   const sourceId=newRegistered.sourceId;
-  const chunkSize=1_000_000;
+  const chunkSize=256*1024;
   for(let pos=0,i=0;pos<bytes.length;pos+=chunkSize,i++){
    newStatus.textContent='Преписка '+newRegistered.internalNumber+
      ' · запис на документ, част '+(i+1)+'…';
    await sendNew('/kt134/new-case/original/'+encodeURIComponent(id)+
-    '/part/'+encodeURIComponent(sourceId)+'/'+i,
+    '/part/'+i,
     bytes.slice(pos,pos+chunkSize),'application/octet-stream');
   }
   await sendNew('/kt134/new-case/original/'+encodeURIComponent(id)+'/finish',
    JSON.stringify({sourceId}),'application/json');
   newStatus.textContent='Преписка '+newRegistered.internalNumber+
-   ' е регистрирана и оригиналът е записан в общия КТ126.';
+   ' е регистрирана и оригиналът е записан в КТ126. Следва задължителната автоматична обработка на документите и определяне на водещия документ — Етап 1 все още не е приключен.';
   newFile.value='';
   await loadAccessibleCases();
   if(caseRows.some(x=>x.caseId===id)){
