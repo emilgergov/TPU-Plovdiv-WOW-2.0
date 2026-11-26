@@ -8,7 +8,7 @@ test('real KT125 native service receives only cookie and fixed case-state GET',a
  const read=createKt134NativeCaseReader({nativeFetch:async r=>{
   ++count;
   assert.equal(r.method,'GET');
-  assert.equal(new URL(r.url).pathname,'/kt126/registry/'+id+'/state');
+  assert.equal(new URL(r.url).pathname,'/kt126/registry/'+id);
   assert.equal(r.headers.get('cookie'),'KT125_COOKIE=opaque-token');
   assert.equal(r.headers.get('authorization'),null);
   return new Response(JSON.stringify({record:{case_id:id,revision:4},
@@ -38,4 +38,14 @@ test('mismatched records never reach EG',async()=>{
 test('no cookie cannot be substituted by client active flag',async()=>{
  const read=createKt134NativeCaseReader({nativeFetch:async()=>{throw Error('should not run')}});
  await assert.rejects(()=>read({request:new Request(request.url),caseId:id}),/KT125_LOGIN_REQUIRED/);
+});
+
+test('native readState uses item.case_id from actual KT126 shape',async()=>{
+ const read=createKt134NativeCaseReader({nativeFetch:async r=>{
+  assert.equal(new URL(r.url).pathname,'/kt126/registry/'+id);
+  return new Response(JSON.stringify({item:{case_id:id,revision:7},state:{intake:{}}}),{
+   headers:{'content-type':'application/json'}});
+ }});
+ const result=await read({request,caseId:id});
+ assert.equal(result.state.item.revision,7);
 });
