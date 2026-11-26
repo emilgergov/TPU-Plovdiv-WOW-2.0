@@ -7,12 +7,17 @@ const NATIVE='https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev';
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const problem=code=>{const e=new Error(code);e.code=code;throw e};
 function destination(p){
- const m=/^\/kt134\/new-case\/original\/([0-9a-f-]{36})\/(start|finish|part\/([0-9]{1,5}))$/i.exec(p);
- if(!m||!UUID.test(m[1]))problem('KT134_INVALID_ORIGINAL_ROUTE');
- const [,caseId,step,index]=m;
- if(index&&Number(index)>4999)problem('KT134_PART_INDEX_INVALID');
- return {caseId,step,pathname:'/kt126/registry/'+caseId+'/source'+
-   (step==='start'?'':step==='finish'?'/finish':'/part/'+Number(index))};
+ const start=/^\/kt134\/new-case\/original\/([0-9a-f-]{36})\/start$/i.exec(p);
+ const part=/^\/kt134\/new-case\/original\/([0-9a-f-]{36})\/part\/([0-9a-f-]{36})\/([0-9]{1,5})$/i.exec(p);
+ const finish=/^\/kt134\/new-case\/original\/([0-9a-f-]{36})\/finish$/i.exec(p);
+ const id=start?.[1]||part?.[1]||finish?.[1];
+ if(!id||!UUID.test(id))problem('KT134_INVALID_ORIGINAL_ROUTE');
+ if(part&&(!UUID.test(part[2])||Number(part[3])>4999))
+  problem('KT134_PART_INDEX_INVALID');
+ const step=start?'start':part?'part':'finish';
+ const pathname='/kt126/registry/'+id+'/source/'+
+  (step==='start'?'start':step==='finish'?'finish':'part/'+part[2]+'/'+Number(part[3]));
+ return {caseId:id,step,pathname};
 }
 export function createKt134NativeOriginalTransport({nativeFetch}={}){
  if(typeof nativeFetch!=='function')problem('KT125_NATIVE_SERVICE_REQUIRED');
@@ -29,11 +34,11 @@ export function createKt134NativeOriginalTransport({nativeFetch}={}){
   if(!Number.isFinite(size)||size<0||size>4_400_000)
    problem('KT134_ORIGINAL_PART_TOO_LARGE');
   const type=request.headers.get('content-type')||'';
-  if(step==='start'&&!type.startsWith('application/json'))
+  if((step==='start'||step==='finish')&&!type.startsWith('application/json'))
    problem('KT134_ORIGINAL_METADATA_JSON_REQUIRED');
-  if(step.startsWith('part/')&&!type.startsWith('application/octet-stream'))
+  if(step==='part'&&!type.startsWith('application/octet-stream'))
    problem('KT134_ORIGINAL_PART_BINARY_REQUIRED');
-  const body=step==='finish'?undefined:await request.arrayBuffer();
+  const body=await request.arrayBuffer();
   if(body&&body.byteLength>4_400_000)problem('KT134_ORIGINAL_PART_TOO_LARGE');
   if(step==='start'){
    let metadata;
@@ -51,7 +56,7 @@ export function createKt134NativeOriginalTransport({nativeFetch}={}){
    method:'POST',redirect:'manual',headers:{
     Accept:'application/json',Cookie:cookie,Origin:NATIVE,Referer:NATIVE+'/',
     ...(step==='start'?{'Content-Type':'application/json'}:
-       step.startsWith('part/')?{'Content-Type':'application/octet-stream'}:{})
+       step==='part'?{'Content-Type':'application/octet-stream'}:{})
    },body
   }))}
   catch{problem('KT125_NATIVE_UNREACHABLE')}
