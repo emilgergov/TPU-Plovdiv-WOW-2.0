@@ -17,7 +17,7 @@ test('native KT125 login is same-origin, HttpOnly, no alternate password store',
  }});
  const r=await handle(req('/auth/login','POST','username=test&password=test'));
  assert.equal(r.status,303);assert.equal(count,1);
- assert.equal(r.headers.get('location'),url+'/kt134/final-test');
+ assert.equal(r.headers.get('location'),url+'/kt134/entry');
  assert.match(r.headers.get('set-cookie'),/HttpOnly/);
 });
 test('cross-origin submission never reaches native login',async()=>{
