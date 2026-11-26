@@ -52,6 +52,22 @@ export function buildKt134CompleteStage4Request({caseId,revision,bundle,requestI
       sourceLocation:mode==='required'?'ГИС/ПДФ1':'ГИС слой — PDF1 не е потвърден',
       description:'Пространствен анализ: '+x.kind};
   });
+ // Prefer an explicitly identified leading document; never silently assume that
+ // the first file in a ZIP establishes the purpose of the dossier.
+ const lead=plain(bundle.leadingDocument)?bundle.leadingDocument:{};
+ const selectedId=safeText(lead.sourceId||lead.source_id,180);
+ const selectedName=safeText(lead.fileName||lead.filename,180);
+ const matchedLeading=documents.find(d=>(selectedId&&d.source===selectedId)||
+   (selectedName&&d.fileName===selectedName));
+ const leadSource=matchedLeading?.source||'KT125_NATIVE_KT126_STATE';
+ const leadingRecord=matchedLeading?{
+  sourceId:matchedLeading.source,fileName:matchedLeading.fileName,
+  status:'selected_from_dossier',
+  rationale:safeText(lead.reasoning||lead.reason,1400)
+ }:{
+  sourceId:null,fileName:null,status:'requires_automatic_author_reviewer_selection',
+  rationale:'EG Авторът и рецензентът определят водещия документ по актуалното сезиране, хронологията и процесуалната роля на всички документи. Няма междинно експертно потвърждение.'
+ };
  const caseFacts=[
   ...(['spatial_review','contextual_review'].includes(mode)?[{
     factId:'GIS_E3_LIMITATION',
@@ -65,8 +81,8 @@ export function buildKt134CompleteStage4Request({caseId,revision,bundle,requestI
    factId:'DOSSIER_QUALITY_REVIEW',value:'Проверка на входните документи: необходима е междинна рецензия по маркер от Етап 1. Рецензентът следва да посочи корекции и несигурности; не се допуска мълчаливо потвърждение.',
    status:'uncertain',sourceId:'KT80DossierAudit',sourceLocation:'Етап 1',
    description:'Междинна проверка за качество на преписката'}]:[]),
-  {factId:'CASE_SUBJECT',value:subject,status:'established',sourceId:documents[0].source,sourceLocation:'Етап 2',description:'Предмет на преписката'},
-  {factId:'CASE_SCOPE',value:scope,status:'established',sourceId:documents[0].source,sourceLocation:'Етап 2',description:'Обхват на ИП'},
+  {factId:'CASE_SUBJECT',value:subject,status:'established',sourceId:leadSource,sourceLocation:'Етап 2 — състояние КТ126',description:'Предмет на преписката'},
+  {factId:'CASE_SCOPE',value:scope,status:'established',sourceId:leadSource,sourceLocation:'Етап 2 — състояние КТ126',description:'Обхват на ИП'},
   ...parcels.filter(p=>p.sourceId).map((p,i)=>({factId:'PARCEL_'+(i+1),
    value:'Имот '+p.identifier+(p.settlement?'; населено място '+p.settlement:'')+
      (p.municipality?'; община '+p.municipality:'')+
@@ -124,6 +140,8 @@ export function buildKt134CompleteStage4Request({caseId,revision,bundle,requestI
       bundle.dossierReview.filesNeedReview:null,
     requiresExpertReview:bundle.dossierReview.requiresExpertReview===true
    }:null,
+   leadingDocument:leadingRecord,
+   leadingDocumentRule:'Определете водещия документ по актуалното сезиране, съдържанието, хронологията и процесуалната роля на ВСИЧКИ документи, не по ред/име. EG Авторът предлага, рецензентът коригира; обичайни колебания не прекъсват обработката. Мотивирана несигурност — само при критична обективна невъзможност. Процедурата се квалифицира самостоятелно по нормативния MASTER.',
    documentRecords:documents.map(x=>({sourceId:x.source,fileName:x.fileName,type:x.type,date:x.date})),
    documents:documents.map(x=>({sourceId:x.source,name:x.fileName})),
    parcels,gis:gisDescription,subjectCandidates:[subject],gisContextMode:mode,
