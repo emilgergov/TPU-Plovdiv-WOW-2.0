@@ -730,6 +730,9 @@ if(document.documentElement.classList.contains('kt134-embedded')){
   parent.postMessage({type:'kt134:inline-height',height:h},location.origin);
  };
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(notify).observe(document.querySelector('main'));
+ addEventListener('message',e=>{
+  if(e.origin===location.origin&&e.source===window.parent&&e.data?.type==='kt134:measure-layout')notify();
+ });
  addEventListener('load',notify);
  notify();
 }
