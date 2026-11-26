@@ -1,0 +1,477 @@
+{
+  "source": "native-kt125-worker",
+  "readOnly": true,
+  "privateSourceExported": false,
+  "hasCreateRoute": true,
+  "report": [
+    {
+      "term": "/kt126/registry/create",
+      "occurrences": 1,
+      "nearby": [
+        {
+          "fields": [],
+          "verbs": [
+            "POST"
+          ],
+          "parsing": [],
+          "storage": [],
+          "pathHints": [
+            "/kt126/registry/create",
+            "/kt126/author"
+          ],
+          "hasConflictGuard": false,
+          "hasACLCheck": false
+        }
+      ]
+    },
+    {
+      "term": "/kt126/registry/",
+      "occurrences": 9,
+      "nearby": [
+        {
+          "fields": [],
+          "verbs": [
+            "POST"
+          ],
+          "parsing": [],
+          "storage": [],
+          "pathHints": [
+            "/kt126/registry/create",
+            "/kt126/author"
+          ],
+          "hasConflictGuard": false,
+          "hasACLCheck": false
+        },
+        {
+          "fields": [
+            "caseId",
+            "case_id",
+            "revision"
+          ],
+          "verbs": [
+            "POST",
+            "GET"
+          ],
+          "parsing": [
+            "JSON.parse("
+          ],
+          "storage": [],
+          "pathHints": [
+            "/kt126/registry/",
+            "/kt126/author"
+          ],
+          "hasConflictGuard": true,
+          "hasACLCheck": false
+        },
+        {
+          "fields": [
+            "name"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [],
+          "pathHints": [
+            "/kt126/registry/"
+          ],
+          "hasConflictGuard": false,
+          "hasACLCheck": false
+        },
+        {
+          "fields": [
+            "size"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [],
+          "pathHints": [
+            "/kt126/registry/"
+          ],
+          "hasConflictGuard": false,
+          "hasACLCheck": false
+        },
+        {
+          "fields": [
+            "name"
+          ],
+          "verbs": [],
+          "parsing": [
+            "JSON.parse("
+          ],
+          "storage": [],
+          "pathHints": [
+            "/kt126/registry/"
+          ],
+          "hasConflictGuard": true,
+          "hasACLCheck": false
+        },
+        {
+          "fields": [],
+          "verbs": [
+            "POST"
+          ],
+          "parsing": [],
+          "storage": [],
+          "pathHints": [
+            "/kt126/registry/"
+          ],
+          "hasConflictGuard": true,
+          "hasACLCheck": false
+        },
+        {
+          "fields": [],
+          "verbs": [],
+          "parsing": [],
+          "storage": [],
+          "pathHints": [
+            "/kt126/registry/"
+          ],
+          "hasConflictGuard": false,
+          "hasACLCheck": false
+        },
+        {
+          "fields": [],
+          "verbs": [],
+          "parsing": [],
+          "storage": [],
+          "pathHints": [
+            "/kt126/registry/"
+          ],
+          "hasConflictGuard": true,
+          "hasACLCheck": false
+        }
+      ]
+    },
+    {
+      "term": "/source/start",
+      "occurrences": 0,
+      "nearby": []
+    },
+    {
+      "term": "/source/part/",
+      "occurrences": 1,
+      "nearby": [
+        {
+          "fields": [
+            "name"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [],
+          "pathHints": [
+            "/kt126/registry/"
+          ],
+          "hasConflictGuard": false,
+          "hasACLCheck": false
+        }
+      ]
+    },
+    {
+      "term": "/source/finish",
+      "occurrences": 0,
+      "nearby": []
+    },
+    {
+      "term": "/part/",
+      "occurrences": 3,
+      "nearby": [
+        {
+          "fields": [
+            "case_id",
+            "internal_number",
+            "name",
+            "size"
+          ],
+          "verbs": [
+            "POST"
+          ],
+          "parsing": [],
+          "storage": [],
+          "pathHints": [
+            "/kt126/registry"
+          ],
+          "hasConflictGuard": false,
+          "hasACLCheck": false
+        },
+        {
+          "fields": [
+            "name"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [],
+          "pathHints": [
+            "/kt126/registry/"
+          ],
+          "hasConflictGuard": false,
+          "hasACLCheck": false
+        },
+        {
+          "fields": [
+            "size"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [],
+          "pathHints": [
+            "/kt126/registry/"
+          ],
+          "hasConflictGuard": false,
+          "hasACLCheck": false
+        }
+      ]
+    },
+    {
+      "term": "/finish",
+      "occurrences": 1,
+      "nearby": [
+        {
+          "fields": [
+            "case_id",
+            "internal_number",
+            "name",
+            "size"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [],
+          "pathHints": [],
+          "hasConflictGuard": false,
+          "hasACLCheck": false
+        }
+      ]
+    },
+    {
+      "term": "kt126_files",
+      "occurrences": 9,
+      "nearby": [
+        {
+          "fields": [
+            "filename",
+            "parts",
+            "sha256",
+            "size"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [
+            "kt126_registry",
+            "kt126_files",
+            "kt126_chunks"
+          ],
+          "pathHints": [],
+          "hasConflictGuard": false,
+          "hasACLCheck": true
+        },
+        {
+          "fields": [
+            "filename",
+            "parts",
+            "sha256",
+            "size"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [
+            "kt126_registry",
+            "kt126_files",
+            "kt126_chunks"
+          ],
+          "pathHints": [],
+          "hasConflictGuard": true,
+          "hasACLCheck": true
+        },
+        {
+          "fields": [
+            "filename",
+            "parts",
+            "sha256",
+            "size"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [
+            "kt126_registry",
+            "kt126_files",
+            "kt126_chunks"
+          ],
+          "pathHints": [],
+          "hasConflictGuard": true,
+          "hasACLCheck": true
+        },
+        {
+          "fields": [
+            "parts"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [
+            "kt126_registry",
+            "kt126_files",
+            "kt126_chunks"
+          ],
+          "pathHints": [],
+          "hasConflictGuard": true,
+          "hasACLCheck": true
+        },
+        {
+          "fields": [
+            "parts"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [
+            "kt126_registry",
+            "kt126_files",
+            "kt126_chunks"
+          ],
+          "pathHints": [],
+          "hasConflictGuard": true,
+          "hasACLCheck": true
+        },
+        {
+          "fields": [
+            "parts"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [
+            "kt126_registry",
+            "kt126_files",
+            "kt126_chunks"
+          ],
+          "pathHints": [],
+          "hasConflictGuard": true,
+          "hasACLCheck": true
+        },
+        {
+          "fields": [
+            "parts"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [
+            "kt126_registry",
+            "kt126_files",
+            "kt126_chunks"
+          ],
+          "pathHints": [],
+          "hasConflictGuard": true,
+          "hasACLCheck": true
+        },
+        {
+          "fields": [
+            "parts"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [
+            "kt126_registry",
+            "kt126_files",
+            "kt126_chunks"
+          ],
+          "pathHints": [],
+          "hasConflictGuard": true,
+          "hasACLCheck": true
+        }
+      ]
+    },
+    {
+      "term": "kt126_chunks",
+      "occurrences": 6,
+      "nearby": [
+        {
+          "fields": [
+            "parts",
+            "size"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [
+            "kt126_registry",
+            "kt126_files",
+            "kt126_chunks"
+          ],
+          "pathHints": [],
+          "hasConflictGuard": true,
+          "hasACLCheck": true
+        },
+        {
+          "fields": [
+            "parts"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [
+            "kt126_registry",
+            "kt126_files",
+            "kt126_chunks"
+          ],
+          "pathHints": [],
+          "hasConflictGuard": true,
+          "hasACLCheck": true
+        },
+        {
+          "fields": [
+            "parts"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [
+            "kt126_registry",
+            "kt126_files",
+            "kt126_chunks"
+          ],
+          "pathHints": [],
+          "hasConflictGuard": true,
+          "hasACLCheck": true
+        },
+        {
+          "fields": [
+            "parts"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [
+            "kt126_registry",
+            "kt126_files",
+            "kt126_chunks"
+          ],
+          "pathHints": [],
+          "hasConflictGuard": true,
+          "hasACLCheck": true
+        },
+        {
+          "fields": [
+            "parts"
+          ],
+          "verbs": [],
+          "parsing": [],
+          "storage": [
+            "kt126_registry",
+            "kt126_files",
+            "kt126_chunks"
+          ],
+          "pathHints": [],
+          "hasConflictGuard": true,
+          "hasACLCheck": true
+        },
+        {
+          "fields": [
+            "parts"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "parsing": [],
+          "storage": [
+            "kt126_registry",
+            "kt126_chunks"
+          ],
+          "pathHints": [],
+          "hasConflictGuard": true,
+          "hasACLCheck": true
+        }
+      ]
+    }
+  ]
+}
