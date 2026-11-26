@@ -1,0 +1,36 @@
+name: KT134 complete protected automatic route tests
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths:
+      - 'kt134-auto/kt134-native-automatic-route.mjs'
+      - 'kt134-auto/kt134-native-automatic-route.test.mjs'
+      - 'kt134-auto/KT134_PROTECTED_INTEGRATION_UI.html'
+      - '.github/workflows/kt134-native-automatic-route-ci.yml'
+permissions:
+  contents: read
+jobs:
+  protected-route:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install original Word template dependency
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund fflate@0.8.2
+      - name: Run complete native case to EG reviewer to Word contract
+        run: |
+          node --check kt134-auto/kt134-native-automatic-route.mjs
+          node --test kt134-auto/kt134-native-automatic-route.test.mjs
+          node --test kt134-auto/kt134-official-word-builder.test.mjs
+          node --test kt134-auto/kt134-native-case-http.test.mjs
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const html=fs.readFileSync('kt134-auto/KT134_PROTECTED_INTEGRATION_UI.html','utf8');
+          const source=html.match(/<script type="module">([\s\S]*?)<\/script>/)?.[1];
+          if(!source||!source.includes("fetch('/kt134/automatic/draft'")||
+             source.includes('__KT134_PROTECTED_CONTEXT__'))
+            throw Error('KT134_APPROVED_GATE_CLIENT_NOT_REAL');
+          fs.writeFileSync('/tmp/kt134-approved-gates-check.mjs',source);
+          NODE
+          node --check /tmp/kt134-approved-gates-check.mjs
