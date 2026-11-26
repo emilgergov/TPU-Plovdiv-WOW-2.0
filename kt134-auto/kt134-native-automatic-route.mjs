@@ -4,6 +4,7 @@
  * Native KT125 must authenticate the cookie and enforce per-case ACL first.
  */
 import {createKt134NativeCaseReader} from './kt134-native-case-http.mjs';
+import {decodeKt126StoredSnapshot} from './kt134-kt126-snapshot-decoder.mjs';
 import {createKt134NativeCaseAuthorization} from './kt134-native-case-authorization.mjs';
 import {createProtectedAutomaticCoordinator} from './kt134-protected-auto-coordinator.mjs';
 import {createKt134EgStage45Bridge} from './kt134-eg-stage45-live-bridge.mjs';
@@ -25,9 +26,12 @@ function selectPayload(api){
  // Native readState wrappers; never use any browser-provided facts.
  const root=o(api);
  const body=o(root.content||root.content_json||root.payload);
- const state=o(root.state||body.state||body);
- const values=o(root.values||body.values||state.values);
- const globals=o(root.globals||body.globals||state.globals);
+ // KT126 readState wraps the saved snapshot in root.state; the snapshot
+ // itself contains {state,values,globals}. Never confuse wrapper with intake.
+ const snapshot=o(root.state||body.state||body);
+ const state=o(snapshot.state||snapshot);
+ const values=o(root.values||body.values||snapshot.values||state.values);
+ const globals=o(root.globals||body.globals||snapshot.globals||state.globals);
  const record=o(root.record||root.item||root.registry||root.case);
  return {root,body,state,values,globals,record};
 }
@@ -106,7 +110,9 @@ function makeReceipt(caseId,type,sourceId,digest){
  return {type,caseId,sourceId,digest,verifiedAt:'native-kt125-read'};
 }
 async function construct({response,normative,proof}){
- const d=selectPayload(response);
+ const original=o(response);
+ const decoded=await decodeKt126StoredSnapshot(o(original.state));
+ const d=selectPayload({...original,state:decoded});
  const principal=requirePrincipal({proof,record:d.record});
  const c=confirmedSources(d);
  const sourceDigest=await hash({caseId:c.caseId,revision:c.revision,
