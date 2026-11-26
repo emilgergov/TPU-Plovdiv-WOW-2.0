@@ -19,7 +19,8 @@ export function createKt134NativeCaseReader({nativeFetch,maxBytes=4_000_000}={})
   if(!(request instanceof Request))fail('KT125_REQUEST_REQUIRED');
   const cookie=request.headers.get('cookie')||'';
   if(!cookie||cookie.length>8000)fail('KT125_LOGIN_REQUIRED');
-  const sourceUrl=native+'/kt126/registry/'+encodeURIComponent(caseId)+'/state';
+  // Native KT126 readState GET is /kt126/registry/:caseId (no /state suffix).
+  const sourceUrl=native+'/kt126/registry/'+encodeURIComponent(caseId);
   const internal=new Request(sourceUrl,{method:'GET',headers:{
    'Accept':'application/json','Cookie':cookie
   },redirect:'manual'});
@@ -36,7 +37,7 @@ export function createKt134NativeCaseReader({nativeFetch,maxBytes=4_000_000}={})
   if(new TextEncoder().encode(body).byteLength>maxBytes)fail('KT126_CASE_STATE_TOO_LARGE');
   const result=decodeStrictJSON(body);
   const embeddedId=result.caseId||result.case_id||
-    result.record?.case_id||result.registry?.case_id||result.case?.caseId;
+    result.record?.case_id||result.item?.case_id||result.registry?.case_id||result.case?.caseId;
   if(!embeddedId||embeddedId!==caseId)fail('KT125_DIFFERENT_CASE');
   if(result.error||result.authenticated===false)fail('KT125_CASE_ACCESS_DENIED');
   return Object.freeze({caseId,source:'KT125_NATIVE_CASE_ACL',
