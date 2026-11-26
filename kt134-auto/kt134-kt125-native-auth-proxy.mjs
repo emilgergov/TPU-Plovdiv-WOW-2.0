@@ -30,7 +30,7 @@ function redirectTarget(value,visibleOrigin) {
  try{next=new URL(value,native)}catch{return null}
  if(next.origin!==native.origin)return null;
  if(/^\/(?:module(?:\/|$)|user$)/.test(next.pathname))
-  return visibleOrigin+'/kt134/final-test';
+  return visibleOrigin+'/kt134/entry';
  if(/^\/(?:auth\/(?:login|logout|forgot|reset)|kt125\/local-auth)/.test(next.pathname))
   return visibleOrigin+next.pathname+next.search;
  return null;
