@@ -644,12 +644,16 @@ el('kt134-clear-screen').addEventListener('click',()=>{
  setIntakeMode('new');
  const url=new URL(location.href);url.searchParams.delete('caseId');
  history.replaceState(null,'',url.pathname+url.search);
+ // Reset layout after the output shrinks; never delete the saved KT126 case.
+ if(document.documentElement.classList.contains('kt134-embedded')){
+  parent.postMessage({type:'kt134:reset-layout'},location.origin);
+ }else{window.scrollTo({top:0,behavior:'instant'});}
 });
 el('kt134-to-dashboard').addEventListener('click',()=>{
  if(runBusy)return;
  // Same-origin navigation to the main dashboard, not to the automatic
  // form, both when embedded in iframe and when opened standalone.
- window.top.location.assign('/kt134/dashboard#all-panels');
+ window.top.location.assign('https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/module/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html');
 });
 el('start').addEventListener('click',async()=>{
  if(runBusy)return;
@@ -720,7 +724,9 @@ el('download').addEventListener('click',()=>{
 </script><script>
 if(document.documentElement.classList.contains('kt134-embedded')){
  const notify=()=>{
-  const h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  // Measure actual content, not the iframe viewport which cannot shrink.
+  const bounds=document.querySelector('main').getBoundingClientRect();
+  const h=Math.ceil(bounds.bottom+window.scrollY+12);
   parent.postMessage({type:'kt134:inline-height',height:h},location.origin);
  };
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(notify).observe(document.querySelector('main'));
