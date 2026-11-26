@@ -18,3 +18,24 @@ test('reject missing GIS evidence',()=>denied(x=>delete x.evidence.gisPdf1,'UNVE
 test('GIS contextual skip only when confirmed',()=>{const f=fixture();f.caseRecord.gisMode='contextual_skip';f.caseRecord.gisSkipReason='Жалба без ГИС предмет';f.caseRecord.gisSkipConfirmed=true;delete f.evidence.gisPdf1;assert.equal(prepare(f).gis.mode,'contextual_skip');denied(x=>{x.caseRecord.gisMode='contextual_skip';delete x.evidence.gisPdf1;},'GIS_SKIP_UNCONFIRMED');});
 test('live automatic mode disabled unless server-enabled',()=>denied(x=>x.policy.liveAutomaticEnabled=false,'AUTOMATION_NOT_ENABLED'));
 test('deny stale case and unauthorized finalization',()=>{const p=prepare(fixture());assert.throws(()=>assertSameCaseRevision(p,{id,revision:'8'}),/STALE_OR_DIFFERENT_CASE/);assert.throws(()=>assertDraftNotApproval({status:'approved',expertApproved:true}),/UNAUTHORIZED_FINALIZATION/);assert.equal(assertDraftNotApproval({status:'draft',expertApproved:false}).status,'draft');});
+
+test('native KT125 RPC grant proves actor, exact case and revision without pretending expert role',()=>{
+ const f=fixture();
+ f.principal.roles=['case_editor_verified'];
+ f.principal.userId='delegated-user';
+ f.principal.nativeAuthorization={source:'KT125_NATIVE_RPC',verified:true,
+  actorId:'delegated-user',caseId:id,revision:'7',action:'case.edit'};
+ assert.equal(prepare(f).principalId,'delegated-user');
+});
+test('native KT125 RPC grant must match actor, case, revision and action',()=>{
+ for(const bad of [
+  {actorId:'another-user'}, {caseId:'another-case'},
+  {revision:'8'},{action:'case.read'},{verified:false},{source:'PUBLIC'}
+ ]){
+  const f=fixture();
+  f.principal.roles=['case_editor_verified'];
+  f.principal.nativeAuthorization={source:'KT125_NATIVE_RPC',verified:true,
+   actorId:'expert1',caseId:id,revision:'7',action:'case.edit',...bad};
+  assert.throws(()=>prepare(f),/KT125_AUTH_REQUIRED/);
+ }
+});
