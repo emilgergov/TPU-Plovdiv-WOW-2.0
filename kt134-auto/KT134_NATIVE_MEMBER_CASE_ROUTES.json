@@ -1,0 +1,1010 @@
+{
+  "readOnly": true,
+  "createdAt": "2026-11-26T10:49:18.190Z",
+  "out": [
+    {
+      "term": "/member",
+      "matches": [
+        {
+          "paths": [
+            "/member",
+            "/auth/logout"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "session",
+            "auth",
+            "response",
+            "member",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/auth/login",
+            "/auth/register",
+            "/auth/submitted",
+            "/auth/activate",
+            "/auth/logout",
+            "/auth/forgot",
+            "/auth/reset",
+            "/auth/reset-sent",
+            "/auth/reset-done",
+            "/auth/admin",
+            "/member",
+            "/module/"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "pathname",
+            "method",
+            "auth",
+            "member",
+            "fetch"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/auth/reset-sent",
+            "/auth/reset-done",
+            "/auth/register",
+            "/auth/submitted",
+            "/auth/forgot",
+            "/auth/logout",
+            "/auth/login",
+            "/member",
+            "/auth/reset",
+            "/auth/admin"
+          ],
+          "verbs": [
+            "POST"
+          ],
+          "identifiers": [
+            "method",
+            "auth",
+            "member",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/auth/admin",
+            "/kt125/admin/panel/overview",
+            "/member"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "session",
+            "auth",
+            "organization_id",
+            "member",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/member"
+          ],
+          "verbs": [
+            "POST"
+          ],
+          "identifiers": [
+            "method",
+            "caseId",
+            "auth",
+            "response",
+            "json",
+            "member",
+            "fetch"
+          ],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "term": "/kt125/cases/",
+      "matches": [
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "auth",
+            "user",
+            "state"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "caseId"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "caseId"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "json",
+            "user"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "json",
+            "user"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "json",
+            "user"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "json",
+            "user",
+            "fetch"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "json",
+            "user",
+            "fetch"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "json",
+            "user",
+            "fetch"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/cases/",
+            "/manage"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "method",
+            "caseId"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        }
+      ]
+    },
+    {
+      "term": "/kt125/cases",
+      "matches": [
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "auth",
+            "user",
+            "state"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "caseId"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "caseId"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "json",
+            "user"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "json",
+            "user"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "json",
+            "user"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "json",
+            "user",
+            "fetch"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "json",
+            "user",
+            "fetch"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "json",
+            "user",
+            "fetch"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/cases/",
+            "/manage"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "method",
+            "caseId"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        }
+      ]
+    },
+    {
+      "term": "/kt125/local-auth",
+      "matches": [
+        {
+          "paths": [
+            "/kt125/local-auth"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "match",
+            "getCookie",
+            "auth",
+            "credential_version"
+          ],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "term": "/user",
+      "matches": [
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "user",
+            "state"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "select",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/kt125/enrollment/activate",
+            "/kt125/admin/panel/users"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "user",
+            "state"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/user"
+          ],
+          "verbs": [
+            "POST"
+          ],
+          "identifiers": [
+            "method",
+            "auth",
+            "response",
+            "json",
+            "user",
+            "fetch"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/auth/login",
+            "/module/",
+            "/kt125/admin/panel/users",
+            "/auth/logout"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "auth",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "caseId",
+            "organization_id",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "json",
+            "user"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "json",
+            "user"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "user",
+            "fetch"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "json",
+            "user",
+            "fetch"
+          ],
+          "checks": [
+            "/kt125/cases"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/panel/users"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "organization_id",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/kt125/admin/panel/users"
+          ],
+          "verbs": [
+            "GET",
+            "POST"
+          ],
+          "identifiers": [
+            "method",
+            "caseId",
+            "userId",
+            "json",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/kt125/admin/panel/users"
+          ],
+          "verbs": [
+            "POST"
+          ],
+          "identifiers": [
+            "method",
+            "json",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/kt125/admin/panel/users"
+          ],
+          "verbs": [
+            "POST"
+          ],
+          "identifiers": [
+            "method",
+            "json",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/kt125/admin/panel/users"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "method",
+            "json",
+            "user"
+          ],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "term": "SESSION_COOKIE",
+      "matches": [
+        {
+          "paths": [
+            "/kt125/local-auth"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "match",
+            "getCookie",
+            "auth",
+            "credential_version"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/kt125/local-auth"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "match",
+            "getCookie",
+            "auth",
+            "credential_version"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "auth",
+            "organization_id",
+            "user",
+            "state"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "auth",
+            "organization_id",
+            "credential_version",
+            "user",
+            "state"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "session",
+            "auth",
+            "organization_id",
+            "token_hash",
+            "credential_version",
+            "user",
+            "state"
+          ],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "term": "/module/",
+      "matches": [
+        {
+          "paths": [
+            "/auth/login",
+            "/module/",
+            "/kt125/admin/panel/users",
+            "/auth/logout"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "auth",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/auth/login",
+            "/auth/register",
+            "/auth/submitted",
+            "/auth/activate",
+            "/auth/logout",
+            "/auth/forgot",
+            "/auth/reset",
+            "/auth/reset-sent",
+            "/auth/reset-done",
+            "/auth/admin",
+            "/member",
+            "/module/",
+            "/kt125/admin/panel/overview"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "pathname",
+            "method",
+            "auth",
+            "member",
+            "fetch"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/module/",
+            "/auth/login",
+            "/kt125/admin/panel/presentation",
+            "/kt125/admin/presentation/",
+            "/kt126/",
+            "/kt126/client.js"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "method",
+            "auth"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/kt126/client.js",
+            "/kt126/author/",
+            "/module/",
+            "/module/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "method",
+            "auth",
+            "response",
+            "json",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/kt126/author/",
+            "/module/",
+            "/module/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "method",
+            "auth",
+            "response",
+            "json",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/kt126/author/",
+            "/module/",
+            "/module/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "method",
+            "auth",
+            "response",
+            "json",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [
+            "/kt126/author/",
+            "/module/",
+            "/module/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "method",
+            "auth",
+            "response",
+            "json",
+            "user"
+          ],
+          "checks": []
+        }
+      ]
+    },
+    {
+      "term": "kt125_cases",
+      "matches": [
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "caseId",
+            "userId",
+            "auth",
+            "listCases",
+            "organization_id",
+            "json",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "caseId",
+            "userId",
+            "auth",
+            "listCases",
+            "organization_id",
+            "json",
+            "user",
+            "state"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "caseId",
+            "userId",
+            "auth",
+            "listCases",
+            "organization_id",
+            "json",
+            "user",
+            "state"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "caseId",
+            "organization_id",
+            "json",
+            "user",
+            "state"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "caseId",
+            "userId",
+            "organization_id",
+            "json",
+            "user",
+            "state"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "userId",
+            "organization_id",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "caseId",
+            "userId",
+            "organization_id",
+            "json",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "caseId",
+            "userId",
+            "auth",
+            "organization_id",
+            "json",
+            "principal",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "caseId",
+            "userId",
+            "organization_id",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "caseId",
+            "userId",
+            "organization_id",
+            "json",
+            "user"
+          ],
+          "checks": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "caseId",
+            "userId",
+            "organization_id",
+            "json",
+            "user"
+          ],
+          "checks": []
+        }
+      ]
+    }
+  ]
+}
