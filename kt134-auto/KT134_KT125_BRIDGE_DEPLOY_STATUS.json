@@ -1,6 +1,6 @@
 {
-  "runId": "45786288007",
-  "sourceSha": "9c865ae1a4bc96d4099519f4d768db8c62c6da5d",
+  "runId": "45787456335",
+  "sourceSha": "37f17f2ccf0f1055cedde03c33899040ebcf9e04",
   "bridgeDeployed": true,
   "verifiedNativeKT125Service": true,
   "publicTestWorker": "tpu-plovdiv-kt134-test",
