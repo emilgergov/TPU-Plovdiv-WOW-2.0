@@ -20,7 +20,7 @@ const req=(payload={caseId},origin=base,authed=true)=>new Request(base+'/kt134/a
  method:'POST',headers:{origin,'content-type':'application/json',...(authed?{cookie}: {})},
  body:JSON.stringify(payload)
 });
-function handler({state=nativeData,nativeStatus=200,egCalls=[]}={}){
+function handler({state=nativeData,nativeStatus=200,egCalls=[],rpcProof=null}={}){
  return createKt134NativeAutomaticHandler({
   nativeFetch:async request=>{
    assert.equal(request.method,'GET');
@@ -28,6 +28,13 @@ function handler({state=nativeData,nativeStatus=200,egCalls=[]}={}){
    return new Response(nativeStatus===200?JSON.stringify(state):'Permission denied',{
     status:nativeStatus,headers:nativeStatus===200?{'content-type':'application/json'}:{}});
   },
+  nativeRpc:{getCaseContext:async ({cookie:current,caseId:id,action})=>{
+   assert.equal(current,cookie);
+   assert.equal(id,caseId);
+   assert.equal(action,'case.edit');
+   return rpcProof===null?{verified:true,caseId,revision:state.record?.revision??5,
+      actorId:'expert-1',externalNumber:'РИОСВ-123/2026'}:rpcProof;
+  }},
   egWorkerBase:'https://eg-test.invalid',egAccessToken:'server-only-testing-token',
   wordBuilder:async()=>Uint8Array.from({length:180},(_,i)=>i%256),
   fetchImpl:async(url,init)=>{
@@ -99,7 +106,27 @@ test('unverified GIS skip cannot be fabricated for a complaint',async()=>{
 });
 test('unverified user identity cannot be inferred from case owner alone',async()=>{
  const calls=[];
- const r=await handler({state:{...nativeData,principal:undefined},egCalls:calls})(req());
- assert.equal((await r.json()).error,'KT125_PRINCIPAL_AND_CASE_PERMISSION_NOT_CONFIRMED');
+ const r=await handler({state:{...nativeData,principal:undefined},
+  rpcProof:{verified:false,caseId,revision:5,actorId:'expert-1'},egCalls:calls})(req());
+ assert.equal((await r.json()).error,'KT125_CASE_EDIT_ACCESS_NOT_VERIFIED');
+ assert.equal(calls.length,0);
+});
+
+test('native RPC grants delegated actor explicit case.edit without pretending ownership',async()=>{
+ const calls=[];
+ const state={...nativeData,record:{...nativeData.record,owner_id:'someone-else'}};
+ const r=await handler({state,egCalls:calls,rpcProof:{
+  verified:true,caseId,revision:5,actorId:'authorized-delegate'
+ }})(req());
+ assert.equal(r.status,200);
+ assert.equal(calls.length,2);
+});
+test('native RPC rejects a case that changed revision after state read',async()=>{
+ const calls=[];
+ const r=await handler({egCalls:calls,rpcProof:{
+  verified:true,caseId,revision:6,actorId:'expert-1'
+ }})(req());
+ assert.equal(r.status,422);
+ assert.equal((await r.json()).error,'KT125_CASE_REVISION_CHANGED');
  assert.equal(calls.length,0);
 });
