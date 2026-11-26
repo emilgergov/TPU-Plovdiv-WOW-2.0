@@ -353,9 +353,25 @@ const newFile=el('kt134-new-file');
 const newSubmit=el('kt134-new-submit');
 const newStatus=el('kt134-new-status');
 let newRegistered=null;
+let stage1Intake=null;
+let readerLoad=null;
+async function loadApprovedE1Reader(){
+ if(window.V26LocalIntake?.process)return window.V26LocalIntake;
+ if(!readerLoad){
+  readerLoad=new Promise((resolve,reject)=>{
+   const script=document.createElement('script');
+   script.src='/kt134/e1/approved-reader.js';
+   script.onload=()=>window.V26LocalIntake?.process?
+     resolve(window.V26LocalIntake):reject(Error('Утвърденият четец Е1 не се инициализира.'));
+   script.onerror=()=>reject(Error('Не може да се зареди утвърденият четец на Етап 1.'));
+   document.head.appendChild(script);
+  }).catch(error=>{readerLoad=null;throw error});
+ }
+ return readerLoad;
+}
 newFile.addEventListener('change',()=>{
  const file=newFile.files?.[0];
- newRegistered=null;
+ newRegistered=null;stage1Intake=null;
  const valid=!!file && /\\.(zip|pdf|docx)$/i.test(file.name) &&
    file.size>0 && file.size<=40_000_000;
  newSubmit.disabled=!valid||!authenticated;
@@ -377,6 +393,16 @@ newSubmit.addEventListener('click',async()=>{
  newSubmit.disabled=true;el('error').hidden=true;
  let id=newRegistered?.caseId||null;
  try{
+  // The approved V26 E1 reader processes the entire dossier BEFORE
+  // consuming a native KT126 number; registration is not E1 completion.
+  if(!stage1Intake){
+   newStatus.textContent='Етап 1 · разчитане и обработка на всички документи…';
+   const reader=await loadApprovedE1Reader();
+   const parsed=await reader.process(file);
+   if(!Array.isArray(parsed?.document_texts)||!parsed.document_texts.length)
+    throw Error('Не са прочетени документи — няма надеждна основа за водещ документ.');
+   stage1Intake=parsed;
+  }
   const bytes=new Uint8Array(await file.arrayBuffer());
   const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)))
     .map(n=>n.toString(16).padStart(2,'0')).join('');
@@ -410,9 +436,16 @@ newSubmit.addEventListener('click',async()=>{
   }
   await sendNew('/kt134/new-case/original/'+encodeURIComponent(id)+'/finish',
    JSON.stringify({}),'application/json');
-  newStatus.textContent='Преписка '+newRegistered.internalNumber+
-   ' е регистрирана и оригиналът е записан в КТ126. Следва задължителната автоматична обработка на документите и определяне на водещия документ — Етап 1 все още не е приключен.';
-  newFile.value='';
+  newStatus.textContent='Етап 1 · EG Авторът и рецензентът определят водещия документ…';
+  const e1=await sendNew('/kt134/new-case/complete-stage1',
+   JSON.stringify({caseId:id,sha256:digest,intake:stage1Intake}),'application/json');
+  if(e1.caseId!==id||!['stage1_completed','stage1_already_completed'].includes(e1.status)||
+     !e1.leadingDocument?.sourceId)
+   throw Error('Етап 1 не е потвърден от общия регистър КТ126.');
+  newStatus.textContent='Етап 1 завършен · '+newRegistered.internalNumber+
+   ' · водещ документ: '+e1.leadingDocument.fileName+
+   '. Записано в общия КТ126. Преписката е достъпна и за класическия маршрут.';
+  newFile.value='';stage1Intake=null;
   await loadAccessibleCases();
   if(caseRows.some(x=>x.caseId===id)){
    selector.value=id;await verifySelectedCase(id);
@@ -423,8 +456,9 @@ newSubmit.addEventListener('click',async()=>{
   const name=newRegistered?.internalNumber||'';
   newStatus.textContent=(name?'Регистрирана преписка '+name+'. ':'')+
     (error.message||'Неуспешно въвеждане.');
-  // Never automatically create a second KT126 record on retry.
-  newSubmit.disabled=false;
+  // No new number is allocated on retry. Partial registration is
+  // retained only for this browser session and only for the selected file.
+  newSubmit.disabled=!authenticated;
  }
 });
 
