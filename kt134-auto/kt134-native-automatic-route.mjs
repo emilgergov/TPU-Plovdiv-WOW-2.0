@@ -6,6 +6,7 @@
 import {createKt134NativeCaseReader} from './kt134-native-case-http.mjs';
 import {decodeKt126StoredSnapshot} from './kt134-kt126-snapshot-decoder.mjs';
 import {createKt134NativeCaseAuthorization} from './kt134-native-case-authorization.mjs';
+import {adaptKt134NativeGis} from './kt134-native-gis-evidence.mjs';
 import {createProtectedAutomaticCoordinator} from './kt134-protected-auto-coordinator.mjs';
 import {createKt134EgStage45Bridge} from './kt134-eg-stage45-live-bridge.mjs';
 import {createKt134NormativeMasterLoader} from './kt134-normative-master-adapter.mjs';
@@ -89,31 +90,28 @@ function confirmedSources(d,ctx){
  }:{
   required:false,source:'KT80DossierAudit',status:'not_flagged'
  };
- const gis=o(globals.KT80FreeGISResults);
- const skip=state.gisSkipConfirmed===true&&s(state.gisSkipReason);
- const required=gis.verified===true&&arr(gis.results).length>0&&
-  s(gis.pdf1Ref||state.pdf1Ref||body.pdf1Ref);
- if(!skip&&!required)err('KT134_GIS_OR_CONTEXT_CONFIRMED_REQUIRED');
- const parcels=arr(o(state.parcelsConfirmed).parcels||state.parcelsConfirmed)
-   .filter(v=>s(o(v).identifier||o(v).cadastralId||o(v).id))
-   .map(v=>({...v,identifier:s(v.identifier||v.cadastralId||v.id)}));
+ const nativeGis=adaptKt134NativeGis({state,globals,documents:docs});
+ const parcels=nativeGis.parcels;
  const piMaster=o(globals.KT80IPMasterDraft);
- if(required&&!parcels.length)err('KT134_SPATIAL_PARCELS_NOT_CONFIRMED');
- if(required&&piMaster.spatialValidation!==true)
-   err('KT134_PI_MASTER_NOT_VALIDATED');
- const spatial=required?{
-  sourceId:s(gis.source||'KT80FreeGISResults'),
-  pdf1Ref:s(gis.pdf1Ref||state.pdf1Ref||body.pdf1Ref),
-  protectedZones:arr(gis.protectedZones),
-  protectedAreas:arr(gis.protectedAreas),
-  projection:s(gis.projection)
- }:null;
+ // Do not pretend the GIS or PI MASTER was finalized merely because a
+ // browser lookup produced geometry. Any missing validation is sent to
+ // independent reviewer as an explicit limitation.
+ const spatial=nativeGis.gis;
+ const gisIssues=[
+  ...nativeGis.issues,
+  ...(nativeGis.mode==='spatial_review'&&piMaster.spatialValidation!==true?
+     ['PI_MASTER_SPATIAL_VALIDATION_NOT_CONFIRMED']:[])
+ ];
+ const gisReason=nativeGis.reason+
+   (gisIssues.includes('PI_MASTER_SPATIAL_VALIDATION_NOT_CONFIRMED')?
+    ' ПИ MASTER все още изисква проверка.':'');
  const cId=s(root.caseId||root.case_id||record.case_id||record.caseId);
  const revision=String(record.revision??root.revision??'');
  if(!cId||!revision)err('KT134_NATIVE_CASE_REVISION_MISSING');
  return {caseId:cId,revision,subject,scope,external,docs,
-   gisMode:required?'required':'contextual_skip',
-   gis:spatial,gisSkipReason:skip?s(state.gisSkipReason):'',
+   gisMode:nativeGis.mode,
+   gis:spatial,gisSkipReason:nativeGis.mode==='contextual_skip'?nativeGis.reason:'',
+   gisReviewReason:gisReason,gisEvidenceIssues:gisIssues,
    parcels,piMaster,dossierReview,record,root,body,state,values,globals};
 }
 function makeReceipt(caseId,type,sourceId,digest){
@@ -143,7 +141,9 @@ async function construct({response,normative,proof}){
   registryConfirmed:true,status:'active',ownerUserId:principal.delegated?
     s(c.record.owner_id||c.record.ownerUserId):principal.userId,
   gisMode:c.gisMode,
-  ...(c.gisMode==='contextual_skip'?{gisSkipConfirmed:true,gisSkipReason:c.gisSkipReason}:{})
+  ...(c.gisMode==='contextual_skip'?{gisSkipConfirmed:true,gisSkipReason:c.gisSkipReason}:{}),
+  ...(['spatial_review','contextual_review'].includes(c.gisMode)?{
+    gisReviewReason:c.gisReviewReason,gisEvidenceIssues:c.gisEvidenceIssues}:{}),
  };
  const ctx={
   principal:{source:'KT125_SERVER',authenticated:true,status:'active',
@@ -158,6 +158,7 @@ async function construct({response,normative,proof}){
   receiptRefs:Object.values(evidence).map(x=>x.type+':'+x.digest),
   subject:c.subject,scope:c.scope,documents:c.docs,parcels:c.parcels,
   gis:c.gis,gisMode:c.gisMode,gisSkipReason:c.gisSkipReason,
+  gisReviewReason:c.gisReviewReason,gisEvidenceIssues:c.gisEvidenceIssues,
   piMaster:c.piMaster,normativeArchive:normative,registryNumber:c.external,
   pdf2Ref:s(c.body.pdf2Ref||c.state.pdf2Ref),
   facts:[],procedureEvidence:[],dossierReview:c.dossierReview
