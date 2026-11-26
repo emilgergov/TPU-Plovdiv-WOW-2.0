@@ -38,6 +38,20 @@ textarea{width:100%;min-height:180px;background:#fcf9ef;color:#293b2e;border:1px
 .note{font-size:11px;color:#ead6a7;margin-top:12px}
 @media(max-width:730px){main{padding:14px}.split{grid-template-columns:1fr}.stages{gap:4px}.stage{padding:9px 5px;min-height:110px}.stage div{font-size:9px}.route{grid-template-columns:41px repeat(5,minmax(0,1fr)) 41px;gap:3px}.gate{font-size:9px}.track{width:52px}}
 
+
+/* KT134 stable functional view: approved five-gate layout, compact readable results.
+   Presentation-only. All KT125, EG, Word and expert-approval behavior is unchanged. */
+.output.visible{scroll-margin-top:14px}
+.output .split{align-items:start}
+.output .detail{min-width:0;max-height:min(68vh,700px);overflow-y:auto;overscroll-behavior:contain;scrollbar-color:#9b8a53 #123b2b;scrollbar-width:thin}
+.output .detail h2{position:sticky;top:-16px;z-index:1;margin:-16px -16px 12px;padding:14px 16px 10px;background:#0c2d21;border-bottom:1px solid #436b53;font-size:14px}
+.output .detail h2:not(:first-child){top:-16px;margin-top:20px}
+.output pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.65 Verdana,Arial,sans-serif;margin:8px 0 14px}
+.output .paper{min-height:280px}
+.output .actions{position:sticky;bottom:0;z-index:2;background:#102e24;padding:12px;border:1px solid #50725b;border-radius:10px}
+#download{font-size:13px;padding:12px 18px}
+@media(max-width:730px){.output .detail{max-height:58vh}.output .detail h2{font-size:13px}}
+
 .error{margin-top:12px;padding:12px;border:1px solid #ce775e;border-radius:9px;color:#ffdbce;background:#482b24;font-size:12px}
 pre{white-space:pre-wrap;font:12px/1.6 Verdana,Arial;overflow-wrap:anywhere}
 #finalactions{display:none}.confirmnote{font-size:12px;color:#ffe1a6}
