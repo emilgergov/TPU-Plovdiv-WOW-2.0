@@ -38,3 +38,16 @@ test('unrecognized auth paths cannot act as open proxy',async()=>{
  const handle=createKt134NativeAuthProxy({nativeFetch:async()=>{throw Error('should not call')}});
  assert.equal(await handle(req('/kt126/registry')),null);
 });
+
+test('browser GET without Origin is forwarded with the native trusted KT125 Origin',async()=>{
+ const handle=createKt134NativeAuthProxy({nativeFetch:async upstream=>{
+  assert.equal(upstream.method,'GET');
+  assert.equal(upstream.headers.get('origin'),'https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev');
+  assert.equal(upstream.headers.get('referer'),'https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/auth/login');
+  return new Response('<form method="post"></form>',{status:200,
+   headers:{'content-type':'text/html'}});
+ }});
+ const r=await handle(req('/auth/login'));
+ assert.equal(r.status,200);
+ assert.match(await r.text(),/<form/);
+});
