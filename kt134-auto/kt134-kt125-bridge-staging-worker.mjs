@@ -88,7 +88,7 @@ export default {
       code==='KT126_STAGE1_REVISION_CONFLICT'?409:422);
    }
   }
-  if(path==='/kt134/automatic/draft'){
+  if(path==='/kt134/automatic/draft'||path==='/kt134/automatic/draft-events'){
    if(!nativeFetch)return json({error:'KT125_NATIVE_NOT_CONFIGURED'},503);
    if(!env.KT134_EG_ACCESS_TOKEN)return json({error:'KT134_EG_SECRET_NOT_PAIRED'},503);
    if(!env.KT134_EG_NATIVE?.fetch)return json({error:'KT134_EG_SERVICE_NOT_BOUND'},503);
