@@ -1,0 +1,51 @@
+name: KT134 identify authenticated case picker native contracts
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-native-case-picker-contract.yml']
+permissions: {contents: write}
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Locate native KT125 authenticated cases endpoint source
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth',{headers:{authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('KT125_SCRIPT_NOT_AVAILABLE');
+          const s=await r.text();
+          const keys=['/kt125/cases/','/user','/kt126/registry/','/kt125/local-auth'];
+          const rows=keys.map(key=>{
+            const offsets=[];let cursor=0;
+            while(offsets.length<8){const p=s.indexOf(key,cursor);if(p<0)break;offsets.push(p);cursor=p+key.length}
+            return {key,occurrences:offsets.length,contexts:offsets.map(p=>{
+              const segment=s.slice(Math.max(0,p-240),p+380);
+              return {routes:[...new Set([...segment.matchAll(/['"`](\/[\w/.-]{1,110})['"`]/g)].map(m=>m[1]))].slice(0,12),
+                methods:[...new Set([...segment.matchAll(/\b(GET|POST|DELETE|PUT|PATCH)\b/g)].map(m=>m[1]))],
+                identifiers:[...new Set([...segment.matchAll(/\b(?:sessions?|user_id|case_id|caseId|account_id|authorization|readCase|parseCookie|sessionUser|origin|owner_id|organization_id|rows|listCases)\b/gi)].map(m=>m[0]))]};})};
+          });
+          fs.writeFileSync('kt134-auto/KT134_NATIVE_CASE_PICKER_CONTRACT.json',JSON.stringify({metadataOnly:true,rows},null,2)+'\n');
+          console.log('metadata check completed');
+          NODE
+      - name: Save metadata
+        env: {GH_TOKEN: ${{ github.token }}}
+        run: |
+          p='kt134-auto/KT134_NATIVE_CASE_PICKER_CONTRACT.json'
+          data="$(base64 -w0 "$p")"
+          for i in 1 2 3 4; do
+            sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/$p?ref=kt134-auto-mode-isolated" --jq .sha 2>/dev/null || true)"
+            if [ -n "$sha" ]; then
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$data" -f sha="$sha" -f branch=kt134-auto-mode-isolated -f message='KT134: record native case picker API metadata' >/dev/null && exit 0
+            else
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$data" -f branch=kt134-auto-mode-isolated -f message='KT134: record native case picker API metadata' >/dev/null && exit 0
+            fi
+            sleep 2
+          done
+          exit 1
