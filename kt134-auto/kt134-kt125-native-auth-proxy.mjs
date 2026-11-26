@@ -6,6 +6,31 @@
  * No tokens, passwords or responses are logged/cached/stored.
  */
 const nativeOrigin='https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev';
+const LOGIN_CSRF_COOKIE='__Host-kt134_login_csrf';
+const LOGIN_CSRF_FIELD='kt134_login_csrf';
+function nonce(){
+ const bytes=crypto.getRandomValues(new Uint8Array(24));
+ let binary='';for(const b of bytes)binary+=String.fromCharCode(b);
+ return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function cookieValue(cookie,name){
+ const matches=String(cookie||'').split(';').map(x=>x.trim())
+  .filter(x=>x.startsWith(name+'='));
+ return matches.length===1?matches[0].slice(name.length+1):'';
+}
+function equalNonce(a,b){
+ if(!/^[A-Za-z0-9_-]{32}$/.test(a)||!/^[A-Za-z0-9_-]{32}$/.test(b))return false;
+ let delta=0;for(let i=0;i<32;i++)delta|=a.charCodeAt(i)^b.charCodeAt(i);
+ return delta===0;
+}
+function loginFormWithNonce(html,token){
+ let injected=false;
+ const updated=html.replace(/(<form\b[^>]*\baction=["']\/auth\/login["'][^>]*>)/i,(form)=>{
+  injected=true;
+  return form+'<input type="hidden" name="'+LOGIN_CSRF_FIELD+'" value="'+token+'">';
+ });
+ return injected?updated:null;
+}
 const json=(data,status)=>new Response(JSON.stringify(data),{status,headers:{
  'content-type':'application/json; charset=utf-8','cache-control':'no-store',
  'x-content-type-options':'nosniff','referrer-policy':'no-referrer'}});
@@ -45,13 +70,31 @@ export function createKt134NativeAuthProxy({nativeFetch,upstreamOrigin=nativeOri
   if(u.pathname==='/auth/logout'&&request.method!=='POST')
    return json({error:'METHOD_NOT_ALLOWED'},405);
   const origin=request.headers.get('origin');
-  if(request.method==='POST'&&origin!==u.origin)return json({error:'ORIGIN_REJECTED'},403);
+  const cookie=request.headers.get('cookie')||'';
+  let verifiedPostBody;
   if(request.method==='POST'){
     const type=request.headers.get('content-type')||'';
     if(!type.startsWith('application/x-www-form-urlencoded'))
       return json({error:'FORM_REQUIRED'},415);
     if(Number(request.headers.get('content-length')||0)>16000)
       return json({error:'LOGIN_BODY_TOO_LARGE'},413);
+    // A same-origin HTML form may arrive with Origin absent or "null" in
+    // privacy-hardened browsers. For this case require the one-time form
+    // token and a host-only Secure SameSite cookie. Never accept an explicit
+    // foreign Origin or a cross-site Fetch-Metadata request.
+    if(origin!==null&&origin!=='null'&&origin!==u.origin)
+      return json({error:'ORIGIN_REJECTED'},403);
+    if(request.headers.get('sec-fetch-site')==='cross-site')
+      return json({error:'ORIGIN_REJECTED'},403);
+    const raw=await request.text();
+    if(raw.length>16000)return json({error:'LOGIN_BODY_TOO_LARGE'},413);
+    const form=new URLSearchParams(raw);
+    const submitted=form.get(LOGIN_CSRF_FIELD)||'';
+    const stored=cookieValue(cookie,LOGIN_CSRF_COOKIE);
+    if(!equalNonce(submitted,stored))
+      return json({error:'LOGIN_FORM_EXPIRED',detail:'REOPEN_LOGIN_FORM'},403);
+    form.delete(LOGIN_CSRF_FIELD);
+    verifiedPostBody=form.toString();
   }
   const headers=new Headers();
   headers.set('Accept','text/html');
@@ -64,13 +107,15 @@ export function createKt134NativeAuthProxy({nativeFetch,upstreamOrigin=nativeOri
    headers.set('Content-Type','application/x-www-form-urlencoded');
    headers.set('Origin',nativeOrigin);
   }
-  const cookie=request.headers.get('cookie');
   // GET /auth/login is a public login form: do NOT forward stale KT134
   // browser cookies to the separate native KT125 origin. Only POST and
   // logout are permitted to carry a user's existing native cookie.
-  if(cookie&&cookie.length<8000&&request.method!=='GET')headers.set('Cookie',cookie);
-  const body=request.method==='POST'?await request.arrayBuffer():undefined;
-  if(body&&body.byteLength>16000)return json({error:'LOGIN_BODY_TOO_LARGE'},413);
+  if(cookie&&cookie.length<8000&&request.method!=='GET'){
+    const filtered=cookie.split(';').map(x=>x.trim())
+      .filter(x=>x&&!x.startsWith(LOGIN_CSRF_COOKIE+'=')).join('; ');
+    if(filtered)headers.set('Cookie',filtered);
+  }
+  const body=request.method==='POST'?verifiedPostBody:undefined;
   const target=nativeOrigin+u.pathname;
   let response;
   try{
@@ -91,6 +136,23 @@ export function createKt134NativeAuthProxy({nativeFetch,upstreamOrigin=nativeOri
     if(!safe)return json({error:'KT125_UNEXPECTED_LOGIN_REDIRECT'},502);
     outgoing.set('Location',safe);
    }else outgoing.set(key,val);
+  }
+  if(request.method==='GET'&&u.pathname==='/auth/login'&&response.ok){
+    const type=response.headers.get('content-type')||'';
+    if(!/text\/html/i.test(type))return json({error:'KT125_LOGIN_FORM_INVALID'},502);
+    const html=await response.text();
+    const token=nonce();
+    const safeHtml=loginFormWithNonce(html,token);
+    if(!safeHtml)return json({error:'KT125_LOGIN_FORM_INVALID'},502);
+    outgoing.append('Set-Cookie',LOGIN_CSRF_COOKIE+'='+token+
+      '; Path=/; Max-Age=600; Secure; HttpOnly; SameSite=Strict');
+    outgoing.set('Referrer-Policy','same-origin');
+    outgoing.set('Cache-Control','no-store, private');
+    return new Response(safeHtml,{status:response.status,headers:outgoing});
+  }
+  if(request.method==='POST'){
+    outgoing.append('Set-Cookie',LOGIN_CSRF_COOKIE+
+      '=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Strict');
   }
   outgoing.set('Cache-Control','no-store, private');
   outgoing.set('X-Content-Type-Options','nosniff');
