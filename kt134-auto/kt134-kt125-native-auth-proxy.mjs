@@ -58,11 +58,11 @@ function redirectTarget(value,visibleOrigin) {
  const path=next.pathname;
  // Existing KT125 redirects successful login into its own application
  // (e.g. /, /dashboard, /module). KT134 has its own separate, protected
- // test entry: route all native application redirects ONLY to that entry.
+ // test dashboard: route all native application redirects ONLY to the unified dashboard.
  if(['/auth/login','/auth/logout','/auth/forgot','/auth/reset'].some(
   p=>path===p||path.startsWith(p+'/')))
   return visibleOrigin+path+next.search;
- return visibleOrigin+'/kt134/final-test';
+ return visibleOrigin+'/kt134/dashboard';
 }
 export function createKt134NativeAuthProxy({nativeFetch,upstreamOrigin=nativeOrigin}={}){
  if(typeof nativeFetch!=='function'||upstreamOrigin!==nativeOrigin)
