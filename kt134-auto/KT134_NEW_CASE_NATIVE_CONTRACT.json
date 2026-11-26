@@ -515,6 +515,92 @@
       ]
     }
   ],
+  "uploadPathShapes": [
+    {
+      "anchor": "\"/source\"",
+      "identifiers": [
+        "record",
+        "sourceId",
+        "source",
+        "id6",
+        "file",
+        "filename",
+        "sha256"
+      ],
+      "tokens": [
+        "/start"
+      ],
+      "hasRawBody": false,
+      "hasJsonBody": false
+    },
+    {
+      "anchor": "\"/source\"",
+      "identifiers": [
+        "record",
+        "source",
+        "id6",
+        "file",
+        "data"
+      ],
+      "tokens": [],
+      "hasRawBody": false,
+      "hasJsonBody": false
+    },
+    {
+      "anchor": "\"/source\"",
+      "identifiers": [
+        "source_id",
+        "i",
+        "source",
+        "id6",
+        "part"
+      ],
+      "tokens": [
+        "/kt126/registry/",
+        "/part/"
+      ],
+      "hasRawBody": false,
+      "hasJsonBody": false
+    },
+    {
+      "anchor": "\"/part/\"",
+      "identifiers": [
+        "i",
+        "file",
+        "part"
+      ],
+      "tokens": [
+        "/kt126/registry"
+      ],
+      "hasRawBody": false,
+      "hasJsonBody": false
+    },
+    {
+      "anchor": "\"/part/\"",
+      "identifiers": [
+        "source_id",
+        "i",
+        "source",
+        "id6",
+        "part"
+      ],
+      "tokens": [
+        "/kt126/registry/",
+        "/source"
+      ],
+      "hasRawBody": false,
+      "hasJsonBody": false
+    },
+    {
+      "anchor": "\"/finish\"",
+      "identifiers": [
+        "file"
+      ],
+      "tokens": [],
+      "hasRawBody": false,
+      "hasJsonBody": false
+    }
+  ],
   "handlers": [
     {
       "name": "startSource",
