@@ -14,7 +14,7 @@ const json=(body,status=200)=>new Response(JSON.stringify(body),{
  'x-frame-options':'DENY','referrer-policy':'no-referrer'}
 });
 const entry=`<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>КТ134 — защитен тестов вход</title>
-<style>body{font:15px/1.6 Verdana,Arial,sans-serif;background:#142c23;color:#f4e9c6;margin:0;padding:7vh 5vw}main{max-width:860px;margin:auto;background:#1d3b30;border:1px solid #a58535;border-radius:18px;padding:28px}h1{color:#e6c56e;font-size:23px}label,input,button{display:block;margin:14px 0}input{width:96%;padding:13px;font:inherit;border-radius:7px}button{padding:12px 22px;border:0;border-radius:8px;background:#e6c56e;color:#14251c;font-weight:bold;cursor:pointer}.note{color:#d4c699}a{color:#eed17f}pre{white-space:pre-wrap;word-break:break-word}</style></head><body><main><h1>КТ134 — проверка на защитената преписка</h1><p>Това е техническа проверка на съществуващия достъп КТ125. Окончателният автоматичен анализ и Word проект още не са публикувани на този екран.</p><p><a href="/auth/login">Вход със съществуващия профил КТ125</a></p><label for="case">Уникален идентификатор на преписката (UUID)</label><input id="case" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off"><button id="check">Провери разрешения достъп</button><pre id="out" aria-live="polite"></pre><p class="note">Не въвеждайте пароли или документи в това поле. Не се извършва административно одобрение.</p></main><script>
+<style>body{font:15px/1.6 Verdana,Arial,sans-serif;background:#142c23;color:#f4e9c6;margin:0;padding:7vh 5vw}main{max-width:860px;margin:auto;background:#1d3b30;border:1px solid #a58535;border-radius:18px;padding:28px}h1{color:#e6c56e;font-size:23px}label,input,button{display:block;margin:14px 0}input{width:96%;padding:13px;font:inherit;border-radius:7px}button{padding:12px 22px;border:0;border-radius:8px;background:#e6c56e;color:#14251c;font-weight:bold;cursor:pointer}.note{color:#d4c699}a{color:#eed17f}pre{white-space:pre-wrap;word-break:break-word}</style></head><body><main><h1>КТ134 — проверка на защитената преписка</h1><p>Това е техническа проверка на съществуващия достъп КТ125. Окончателният автоматичен анализ и Word проект още не са публикувани на този екран.</p><p><a href="/auth/login">Вход със съществуващия профил КТ125</a> · <a href="/kt134/final-test">Автоматичен тест с петте гейта</a></p><label for="case">Уникален идентификатор на преписката (UUID)</label><input id="case" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off"><button id="check">Провери разрешения достъп</button><pre id="out" aria-live="polite"></pre><p class="note">Не въвеждайте пароли или документи в това поле. Не се извършва административно одобрение.</p></main><script>
 document.getElementById('check').onclick=async()=>{
  const id=document.getElementById('case').value.trim();
  const out=document.getElementById('out');out.textContent='Проверка...';
@@ -48,6 +48,18 @@ export default {
      'cache-control':'no-store, private','x-content-type-options':'nosniff',
      'referrer-policy':'no-referrer','x-frame-options':'DENY',
      'content-security-policy':"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"}});
+  }
+  if(path==='/kt134/automatic-health'){
+    if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
+    const configured=!!nativeFetch&&typeof env.KT134_EG_ACCESS_TOKEN==='string'&&
+      env.KT134_EG_ACCESS_TOKEN.length>=32;
+    return json({mode:'isolated_native_kt125_case_to_eg_draft',
+      ready:configured,protectedRoute:'/kt134/automatic/draft',
+      testScreen:'/kt134/final-test',
+      nativeKt125Service:!!nativeFetch,egServerSecretConfigured:configured,
+      stage1To5RealDossierVerified:false,
+      expertFinalApprovalAutomatic:false,
+      productionWorkerChanged:false},configured?200:503);
   }
   if(path==='/kt134/entry'){
    if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
