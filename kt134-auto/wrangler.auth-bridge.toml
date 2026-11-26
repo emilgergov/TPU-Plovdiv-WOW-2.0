@@ -18,6 +18,13 @@ bucket_name = "kt134-isolated-r2-2026"
 binding = "KT125_NATIVE"
 service = "tpu-plovdiv-kt125-local-auth"
 
+# Existing named WorkerEntrypoint exposes server-verified caseContext RPC.
+# The default KT125_NATIVE binding continues to serve protected HTTP routes.
+[[services]]
+binding = "KT125_IDENTITY_RPC"
+service = "tpu-plovdiv-kt125-local-auth"
+entrypoint = "LocalAuthService"
+
 [[services]]
 binding = "KT134_EG_NATIVE"
 service = "tpu-plovdiv-kt134-eg-test"
