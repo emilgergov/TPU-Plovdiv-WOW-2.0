@@ -438,7 +438,19 @@ newSubmit.addEventListener('click',async()=>{
    JSON.stringify({}),'application/json');
   newStatus.textContent='Етап 1 · EG Авторът и рецензентът определят водещия документ…';
   const e1=await sendNew('/kt134/new-case/complete-stage1',
-   JSON.stringify({caseId:id,sha256:digest,intake:stage1Intake}),'application/json');
+   JSON.stringify({caseId:id,sha256:digest,intake:{
+    archive_name:stage1Intake.archive_name,
+    files:(stage1Intake.files||[]).slice(0,50).map(f=>({
+      name:f.name||f.filename||f.file,status:f.status||''})),
+    document_texts:(stage1Intake.document_texts||[]).slice(0,50).map(d=>({
+      source:d.source,text:String(d.text||'').slice(0,8000)})),
+    dossier_documents:(stage1Intake.dossier_documents||[]).slice(0,50).map(d=>({
+      file:d.file||d.name,type:d.type||'',date:d.date||''})),
+    classification:stage1Intake.classification||{},
+    subject_candidates:(stage1Intake.subject_candidates||[]).slice(0,20)
+      .map(d=>({source:d.source,title:d.title||'',evidence:String(d.evidence||'').slice(0,500)})),
+    all_parcels:(stage1Intake.all_parcels||[]).slice(0,100)
+   }}),'application/json');
   if(e1.caseId!==id||!['stage1_completed','stage1_already_completed'].includes(e1.status)||
      !e1.leadingDocument?.sourceId)
    throw Error('Етап 1 не е потвърден от общия регистър КТ126.');
