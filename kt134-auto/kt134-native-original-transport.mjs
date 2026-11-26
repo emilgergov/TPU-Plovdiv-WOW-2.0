@@ -55,7 +55,7 @@ export function createKt134NativeOriginalTransport({nativeFetch}={}){
   try{upstream=await nativeFetch(new Request(NATIVE+pathname,{
    method:'POST',redirect:'manual',headers:{
     Accept:'application/json',Cookie:cookie,Origin:NATIVE,Referer:NATIVE+'/',
-    ...(step==='start'?{'Content-Type':'application/json'}:
+    ...(step==='start'||step==='finish'?{'Content-Type':'application/json'}:
        step==='part'?{'Content-Type':'application/octet-stream'}:{})
    },body
   }))}
