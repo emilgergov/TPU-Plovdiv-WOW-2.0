@@ -225,6 +225,36 @@ html.kt134-embedded .note{color:#d1dccb}
 .choice-note{font:11px Verdana;color:#e0e8dc;min-height:14px}.choice-tools{display:flex;gap:8px;justify-content:space-between;align-items:center}.choice-tools button{padding:6px 10px;font-size:11px}.choice-tools a{color:#ffe8ad}
 .unified-start{display:flex;justify-content:center;margin:4px 0 15px}.unified-start button{min-width:min(100%,470px);font:bold 16px Verdana;padding:16px 22px;background:linear-gradient(#ffdf8d,#b98b32);border:2px solid #f6d581;color:#173b29}
 .kt134-unified .auto{margin-top:12px}@media(max-width:750px){.kt134-intake-choices{grid-template-columns:1fr}}
+
+/* КТ134: хоризонтален автоматичен ход и пълноширинна скала */
+.kt134-unified .auto{display:flex;flex-direction:column;align-items:stretch;gap:12px;width:100%;min-height:0;padding:15px 0 16px;margin-top:14px}
+.kt134-unified .autohead{position:static;display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:16px;width:100%;margin:0;padding:0 9px 10px;border-bottom:1px solid #b1c77966}
+.kt134-unified .auto-label{display:flex;flex-direction:row;align-items:center;gap:12px}
+.kt134-unified .auto-label>span{font-size:26px}
+.kt134-unified .auto-label>div{display:flex;align-items:baseline;gap:15px;flex-wrap:wrap}
+.kt134-unified .auto-label strong{font-size:21px}
+.kt134-unified .auto-label small{font-size:12px;max-width:none;line-height:1.35}
+.kt134-unified .autohead>span{position:static;opacity:1;font-size:12px}
+.kt134-unified .route{display:grid;width:100%;grid-template-columns:112px repeat(5,minmax(0,1fr)) 112px;min-height:140px;gap:0}
+.kt134-unified .route:before{left:6%;right:6%}
+.kt134-unified .gate{min-height:128px;margin:0 5px;font-size:18px}
+.kt134-unified .node{width:66px;height:66px;font-size:25px}
+.kt134-unified .kt134-progress-panel{width:100%;min-height:82px}
+.kt134-unified .kt134-progress-panel .subrow{width:100%;max-width:none;margin:0 9px;justify-content:center}
+.kt134-unified .kt134-progress-panel .track{width:min(24%,220px)}
+@media(max-width:850px){
+ .kt134-unified .autohead{align-items:flex-start;flex-wrap:wrap}
+ .kt134-unified .route{grid-template-columns:64px repeat(5,minmax(0,1fr)) 64px;min-height:95px}
+ .kt134-unified .gate{min-height:90px;font-size:12px;border-width:5px;padding-top:27px}
+ .kt134-unified .node{width:42px;height:42px;font-size:15px;border-width:3px}
+ .kt134-unified .auto-label>div{gap:5px}
+}
+@media(max-width:480px){
+ .kt134-unified .route{grid-template-columns:41px repeat(5,minmax(0,1fr)) 41px;min-height:65px}
+ .kt134-unified .gate{min-height:58px;font-size:9px;margin:0 1px;border-width:3px;padding-top:15px}
+ .kt134-unified .node{width:29px;height:29px;font-size:12px;border-width:2px}
+ .kt134-unified .kt134-progress-panel .subrow{margin:0 3px;padding:7px}
+}
 </style><script>
 if(new URLSearchParams(location.search).get('embedded')==='1')
  document.documentElement.classList.add('kt134-embedded');
