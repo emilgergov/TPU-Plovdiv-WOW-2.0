@@ -24,7 +24,7 @@ function handler({state=nativeData,nativeStatus=200,egCalls=[]}={}){
  return createKt134NativeAutomaticHandler({
   nativeFetch:async request=>{
    assert.equal(request.method,'GET');
-   assert.match(request.url,/\/kt126\/registry\/.*\/state$/);
+   assert.equal(new URL(request.url).pathname,'/kt126/registry/'+caseId);
    return new Response(nativeStatus===200?JSON.stringify(state):'Permission denied',{
     status:nativeStatus,headers:nativeStatus===200?{'content-type':'application/json'}:{}});
   },
