@@ -64,11 +64,32 @@ jobs:
         run: |
           set -euo pipefail
           npx --yes wrangler@4 deploy --config kt134-auto/wrangler.eg-staging.toml --keep-vars
-      - name: Apply credentials only to isolated EG Worker
+      - name: Pair the SAME fresh credential on BOTH existing isolated KT134 test Workers
         run: |
           set -euo pipefail
+          grep -Fxq 'name = "tpu-plovdiv-kt134-test"' kt134-auto/wrangler.auth-bridge.toml
+          grep -Fxq 'name = "tpu-plovdiv-kt134-eg-test"' kt134-auto/wrangler.eg-staging.toml
           printf '%s' "$LIVE_API_KEY" | npx --yes wrangler@4 secret put OPENAI_API_KEY --config kt134-auto/wrangler.eg-staging.toml
           printf '%s' "$LIVE_EG_TOKEN" | npx --yes wrangler@4 secret put AI_AUTHOR_ACCESS_TOKEN --config kt134-auto/wrangler.eg-staging.toml
+          printf '%s' "$LIVE_EG_TOKEN" | npx --yes wrangler@4 secret put KT134_EG_ACCESS_TOKEN --config kt134-auto/wrangler.auth-bridge.toml
+          echo 'KT134: staged EG credential synchronized server-to-server (value withheld)'
+      - name: Assert newly paired credential is accepted by live EG Stage4 without invoking AI
+        run: |
+          set -euo pipefail
+          BASE='https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev'
+          code=000
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            code="$(curl --silent --show-error --max-time 12 -o /tmp/kt134-eg-auth-probe.json -w '%{http_code}' -X POST \
+              -H "Authorization: Bearer $LIVE_EG_TOKEN" -H 'Content-Type: application/json' \
+              --data 'INVALID-JSON-BODY' "$BASE/stage4-proposal")"
+            if [ "$code" = 400 ]; then break; fi
+            sleep 3
+          done
+          if [ "$code" != 400 ]; then
+            echo "::error::KT134 EG Stage4 token not synchronized: expected validated authenticated request rejection 400, got $code"
+            exit 1
+          fi
+          echo 'KT134: real EG Stage4 authorization PASS (400 malformed body; no AI request charged)'
       - name: Test live isolated EG Worker health and legal archive
         run: |
           set -euo pipefail
