@@ -1,0 +1,63 @@
+name: KT134 native intake upload route verification (read only)
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-native-intake-route-audit.yml']
+  workflow_dispatch:
+permissions: {contents: write}
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect current native KT126 frontend and backend intake protocol (no customer data)
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const url='https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth';
+          const response=await fetch(url,{headers:{Authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!response.ok)throw Error('NATIVE_KT125_SOURCE_UNAVAILABLE_'+response.status);
+          const s=await response.text();
+          const tokens=['"/create"','"/source"','"/part/"','"/finish"','"/state"','/kt126/registry/create'];
+          const out=[];
+          for(const token of tokens){
+            let i=0;const sites=[];
+            for(let n=0;n<12;n++){
+              const p=s.indexOf(token,i);if(p<0)break;i=p+token.length;
+              const before=s.slice(Math.max(0,p-270),p),after=s.slice(p,Math.min(s.length,p+370));
+              const apiPos=before.lastIndexOf('api(');
+              const expr=apiPos>=0?(before.slice(apiPos)+after).split(',')[0].replace(/^api\(/,'').slice(0,240):'';
+              const safeExpr=/^[A-Za-z0-9_."\s\/+()-]{1,240}$/.test(expr)?expr:'';
+              const nearby=before+after;
+              sites.push({expression:safeExpr,
+                httpVerbs:[...new Set([...nearby.matchAll(/method\s*:\s*["']([A-Z]+)["']/g)].map(m=>m[1]))],
+                bodyKind:nearby.includes('JSON.stringify')?'json':nearby.includes('Uint8Array')?'binary':'unknown',
+                hints:['source_id','sourceId','case_id','record','id6','parts','filename','sha256','size','index','revision','state','part'].filter(x=>new RegExp('\\b'+x+'\\b').test(nearby)),
+                responseFields:['record','source_id','sourceId','parts','complete','error'].filter(x=>new RegExp('(?:data|response|result|r2)\\.'+x+'\\b').test(nearby))
+              });
+            }
+            out.push({token,sites});
+          }
+          writeFileSync('/tmp/kt134-native-upload-audit.json',JSON.stringify({readOnly:true,noUserData:true,sourceExported:false,calls:out},null,2));
+          console.log('Verified native protocol metadata without exporting private Worker code');
+          NODE
+      - name: Store minimal audited route shapes in isolated branch
+        run: |
+          set -euo pipefail
+          path='kt134-auto/KT134_NATIVE_UPLOAD_EXACT_CONTRACT.json'
+          encoded="$(base64 -w0 /tmp/kt134-native-upload-audit.json)"
+          for i in 1 2 3 4; do
+            sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/$path?ref=kt134-auto-mode-isolated" --jq '.sha' 2>/dev/null || true)"
+            if [ -n "$sha" ]; then
+              gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$path" -f branch=kt134-auto-mode-isolated -f message='KT134 native upload API call shapes (no source)' -f content="$encoded" -f sha="$sha" >/dev/null && exit 0
+            else
+              gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$path" -f branch=kt134-auto-mode-isolated -f message='KT134 native upload API call shapes (no source)' -f content="$encoded" >/dev/null && exit 0
+            fi
+            sleep 1
+          done
+          exit 1
