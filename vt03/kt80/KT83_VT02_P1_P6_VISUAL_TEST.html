@@ -502,7 +502,19 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 .kt80-stage-panel[data-panel="5"]>#kt80ProposalInfo,
 .kt80-stage-panel[data-panel="5"]>#kt80ReviewSummary,
 .kt80-stage-panel[data-panel="5"]>label.kt80-check:has(#kt80RouteConfirmation){display:none!important}
-</style><link rel="stylesheet" href="integration/kt122-unified-visual.css?v=kt123-b2-20261116"></head><body>
+</style><link rel="stylesheet" href="integration/kt122-unified-visual.css?v=kt123-b2-20261116"><style id="kt134-accordion-css">
+.kt134-dash-accordion{margin:10px 0;border:1px solid #84946d;border-radius:10px;background:#163c2e;color:#f1dfae}
+.kt134-dash-accordion>summary{cursor:pointer;padding:12px 15px;list-style:none;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.kt134-dash-accordion>summary::-webkit-details-marker{display:none}
+.kt134-dash-accordion>summary::before{content:"▸";font-size:15px;margin-right:7px;color:#f0c56d}
+.kt134-dash-accordion[open]>summary::before{content:"▾"}
+.kt134-dash-accordion>summary span{margin-left:auto;font-size:12px;font-weight:500;color:#c9d8c4}
+.kt134-auto-content{border-top:1px solid #617b63;padding:13px 15px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.kt134-auto-content p{font-size:12px;color:#d1e1ce;line-height:1.55;max-width:880px;margin:6px 0 0}
+.kt134-auto-link{white-space:nowrap;padding:11px 16px;border-radius:8px;background:#c8a45b;color:#103023;text-decoration:none;font-weight:700;font-size:12px}
+.kt134-special-content{border-top:1px solid #617b63;padding:12px}
+@media(max-width:800px){.kt134-dash-accordion>summary{font-size:13px}.kt134-dash-accordion>summary span{font-size:10px}.kt134-auto-content{display:block}.kt134-auto-link{display:inline-block;margin-top:12px}}
+</style></head><body>
 <header><div><h1>WOW · Административен пътеводител</h1><small>Изолиран експертен тест · нормативните и ГИС резултати изискват доказателствена проверка</small></div><div class="kt80-header-actions"><button id="kt80ClearAll" type="button" aria-haspopup="dialog" aria-controls="kt80ResetDialog" aria-expanded="false">↺ Изчисти всичко</button><a class="kt80-legacy-float" href="legacy/KT80_V27_35_REFERENCE_CAPSULE_V10.html" title="Портал към началото на WOW — запазената работеща версия V27.35, отваря се в нов прозорец" target="_blank" rel="noopener">✦ Портал към историята · V27.35 ↗</a></div></header>
 <section id="kt80Dashboard" class="kt80-dashboard" aria-labelledby="kt80DashboardTitle">
 <div class="kt80-dashboard-intro">
@@ -512,9 +524,14 @@ body[data-kt80-view="candidate"] #overlay.open .dialog{width:min(96vw,1550px);ma
 </div>
 <h3>Основни работни етапи</h3>
 <div id="kt80DashboardFive" class="kt80-dashboard-grid" aria-label="Пет основни етапа"></div>
-<h3>Специализирани резултати и инструменти</h3>
-<p id="kt80DashboardCount" class="kt80-dashboard-count"></p>
-<div id="kt80DashboardRoutes" class="kt80-dashboard-grid" aria-label="22 равнопоставени специализирани кандидата"></div>
+<details class="kt134-dash-accordion" id="kt134AutoAccordion">
+ <summary>Автоматичен режим · КТ134 <span>EG Автор · независим рецензент · Word</span></summary>
+ <div class="kt134-auto-content"><div><strong>Автоматичен анализ на преписка</strong><p>Защитен маршрут Етапи 1–5, мотивирано предложение и реален Word проект. Окончателното административно решение остава на експерта.</p></div><a class="kt134-auto-link" href="https://tpu-plovdiv-kt134-test.emilgergov.workers.dev/kt134/final-test" target="_blank" rel="noopener noreferrer">Отвори автоматичния режим ↗</a></div>
+</details>
+<details class="kt134-dash-accordion" id="kt134SpecialAccordion">
+ <summary>Специализирани резултати и инструменти <span>22 панела</span></summary>
+ <div class="kt134-special-content"><p id="kt80DashboardCount" class="kt80-dashboard-count"></p><div id="kt80DashboardRoutes" class="kt80-dashboard-grid" aria-label="22 равнопоставени специализирани кандидата"></div></div>
+</details>
 </section>
 <div id="kt80DashboardSubnav" class="kt80-dashboard-subnav" aria-label="Навигация към началния екран">
 <button type="button" id="kt80DashboardBack" hidden>← Към всички панели</button>
