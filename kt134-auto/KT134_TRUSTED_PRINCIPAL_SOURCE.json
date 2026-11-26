@@ -1,0 +1,37 @@
+{
+  "metadataOnly": true,
+  "out": [
+    {
+      "term": "async function caseContext",
+      "found": true,
+      "structure": "async function caseContext({ db, who, org, caseId, action = \"case.read\", now = Date.now() }) {\n  if (!validCaseId(caseId) || who?.verified !== true) return null;\n  const row = await db.prepare(`SELECT case_id,internal_number,revision,external_number,external_status FROM kt126_registry WHERE case_id=? AND ${accessSQL}`).bind(caseId, ...accessArgs(who, org, action, now)).first();\n  return row ? { verified: true, caseId: row.case_id, internalNumber: row.internal_number, revision: row.revision, externalNumber: row.external_status === \"confirmed\" ? row.external_number : \"\", actorId: who.userId } : null;\n}\nvar actionGuard = { sql: accessSQL, args: accessArgs };\nasync function readHistory(args) {\n  if (!await readCase(args)) return null;\n  return (await args.db.prepare(\"SELECT revision,actor_id,kind,created_at_ms,CASE WHEN kind='external' THEN content_json ELSE NULL END AS external_json FROM kt126_versions WHERE case_id=? ORDER BY revision DESC LIMIT 100\").bind(args.caseId).all()).results || [];\n}\n\n// cloudflare/kt125-access/src/kt126/files.mjs\nimport { createHash } from \"node:crypto\";\nvar CHUNK = 256 * 1024;\nvar MAX = 40 * 1024 * 1024;\nvar source = (a) => a.sourceId || \"original\";\nvar valid = (a) => source(a) === \"original\" || validCaseId(source(a));\nvar hex = (bytes) => [...new Uint8Array(bytes)].map((x) => x.toString(16).padStart(2, \"0\")).join(\"\");\nasync function listSources(args) {\n  if (!await readCase(args)) return null;\n  return (await args.db.prepare(\"SELECT source_id,filename,size,sha256,parts,complete FROM kt126_files WHE"
+    },
+    {
+      "term": "async function identity",
+      "found": true,
+      "structure": "async function identityFor(request, verifier) {\n  try {\n    const who = await verifier.verify(request);\n    return who?.verified === true && text(who.issuer) && text(who.subject) ? who : null;\n  } catch {\n    return null;\n  }\n}\nasync function managerFor(request, verifier, db) {\n  const actor2 = await kt125ManagementPrincipal({ request, verifier, db });\n  return actor2 && [\"egmaster\", \"administrator\"].includes(actor2.role) ? actor2 : null;\n}\nasync function inviteKT125Staff({ request, verifier, db, name: name2, email, role, nowMs = Date.now(), uuid = () => crypto.randomUUID() } = {}) {\n  const normalized2 = normalizeKT125Email(email);\n  if (!displayName(name2) || !normalized2 || !roles2.has(role) || !Number.isSafeInteger(nowMs) || typeof db?.prepare !== \"function\" || typeof db?.batch !== \"function\") return denied(\"INVALID_INVITATION\");\n  const identity2 = await identityFor(request, verifier);\n  if (!identity2) return denied(\"UNVERIFIED\");\n  if (identity2.email === normalized2) return denied(\"SELF_INVITATION\");\n  const actor2 = await managerFor(request, verifier, db);\n  if (!actor2) return denied(\"NOT_PERMITTED\");\n  const invitationId = uuid(), eventId = uuid(), requestId = uuid();\n  if (![invitationId, eventId, requestId].every(id2) || (/* @__PURE__ */ new Set([invitationId, eventId, requestId])).size !== 3) return denied(\"INVALID_IDS\");"
+    },
+    {
+      "term": "async function registryHandler",
+      "found": false
+    },
+    {
+      "term": "async function readCase",
+      "found": true,
+      "structure": "async function readCase({ db, who, org, caseId, now = Date.now() }) {\n  if (!validCaseId(caseId) || who?.verified !== true) return null;\n  return db.prepare(`SELECT ${columns} FROM kt126_registry JOIN kt125_cases c USING(case_id) WHERE case_id=? AND ${accessSQL}`).bind(caseId, ...accessArgs(who, org, \"case.read\", now)).first();\n}\nasync function listCases({ db, who, org, now = Date.now() }) {\n  if (who?.verified !== true) return [];\n  const out = await db.prepare(`SELECT ${columns} FROM kt126_registry JOIN kt125_cases c USING(case_id) WHERE ${accessSQL} ORDER BY kt126_registry.created_at_ms DESC,case_id DESC LIMIT 100`).bind(...accessArgs(who, org, \"case.read\", now)).all();\n  return out.results || [];\n}\nasync function createCase({ db, who, org, input: input2, now = Date.now(), uuid = () => crypto.randomUUID() }) {\n  const user = await actor(db, who, org);\n  if (!user || !authorRoles.has(user.role)) return { status: 403 };\n  const key2 = input2?.requestKey, name2 = clean(input2?.sourceName, 512), hash = input2?.sourceHash;\n  if (!validCaseId(key2) || !name2 || typeof hash !== \"string\" || !/^[a-f0-9]{64}$/.test(hash)) return { status: 400 };\n  const payload = await sha256(JSON.stringify({ name: name2, hash })), caseId = uuid(), event = uuid(), year = registryYear(now);\n  if (!validCaseId(caseId) || !validCaseId(event) || caseId === event) return { status: 503 };\n  const statements = [\n    db.prepare(`INSERT INTO kt126_claims(organization_id,actor_id,request_key,case_id,payload_hash,year)\n SELECT ?,?,?,?,?,? WHERE EXISTS(SELECT "
+    },
+    {
+      "term": "async function listCases",
+      "found": true,
+      "structure": "async function listCases({ db, who, org, now = Date.now() }) {\n  if (who?.verified !== true) return [];\n  const out = await db.prepare(`SELECT ${columns} FROM kt126_registry JOIN kt125_cases c USING(case_id) WHERE ${accessSQL} ORDER BY kt126_registry.created_at_ms DESC,case_id DESC LIMIT 100`).bind(...accessArgs(who, org, \"case.read\", now)).all();\n  return out.results || [];\n}\nasync function createCase({ db, who, org, input: input2, now = Date.now(), uuid = () => crypto.randomUUID() }) {\n  const user = await actor(db, who, org);\n  if (!user || !authorRoles.has(user.role)) return { status: 403 };\n  const key2 = input2?.requestKey, name2 = clean(input2?.sourceName, 512), hash = input2?.sourceHash;\n  if (!validCaseId(key2) || !name2 || typeof hash !== \"string\" || !/^[a-f0-9]{64}$/.test(hash)) return { status: 400 };\n  const payload = await sha256(JSON.stringify({ name: name2, hash })), caseId = uuid(), event = uuid(), year = registryYear(now);\n  if (!validCaseId(caseId) || !validCaseId(event) || caseId === event) return { status: 503 };\n  const statements = [\n    db.prepare(`INSERT INTO kt126_claims(organization_id,actor_id,request_key,case_id,payload_hash,year)\n SELECT ?,?,?,?,?,? WHERE EXISTS(SELECT 1 FROM kt125_users WHERE user_id=? AND organization_id=? AND active=1 AND role IN ('expert','egmaster','administrator'))\n ON CONFLICT(organization_id,actor_id,request_key) DO NOTHING`).bind(org, user.user_id, key2, caseId, payload, year, user.user_id, org),\n    db.prepare(`INSERT INTO kt126_counters(organization_id,year,last_numbe"
+    },
+    {
+      "term": "const columns =",
+      "found": false
+    },
+    {
+      "term": "const accessSQL =",
+      "found": false
+    }
+  ]
+}
