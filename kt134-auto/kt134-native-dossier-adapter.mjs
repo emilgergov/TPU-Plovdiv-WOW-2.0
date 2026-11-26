@@ -44,7 +44,6 @@ function canonicalDocument(doc,files){
 export function createKt134NativeDossierAdapters({db,resolvePrincipal,getNormativeMaster}={}){
  if(typeof db?.prepare!=='function'||typeof resolvePrincipal!=='function'||
     typeof getNormativeMaster!=='function')fail('KT134_NATIVE_ADAPTER_NOT_CONFIGURED');
- const snapshots=new Map();
  async function read({authenticatedSession,caseId}){
   if(!str(caseId)||!str(authenticatedSession))fail('KT125_AUTH_REQUIRED');
   const principal=await resolvePrincipal(authenticatedSession);
@@ -143,16 +142,24 @@ export function createKt134NativeDossierAdapters({db,resolvePrincipal,getNormati
   return {ctx,bundle};
  }
  return {
+  // Never cache dossier contents or sessions in a long-lived Worker isolate.
+  // Each call loads only the currently authorized case from KT125 D1.
   async loadProtectedContext({authenticatedSession,caseId}){
    const data=await read({authenticatedSession,caseId});
-   snapshots.set(authenticatedSession+':'+caseId,data);
    return data.ctx;
   },
   async loadEvidenceBundle({preflight,authenticatedSession}){
-   const key=authenticatedSession+':'+preflight.case.caseId;
-   const data=snapshots.get(key);
-   if(!data)fail('KT134_CONTEXT_NOT_LOADED');
-   snapshots.delete(key);
+   if(!str(preflight?.case?.caseId)||!str(authenticatedSession))
+     fail('KT134_CONTEXT_NOT_LOADED');
+   const data=await read({authenticatedSession,caseId:preflight.case.caseId});
+   const current=data.ctx;
+   if(current.caseRecord.id!==preflight.case.caseId||
+      current.caseRecord.revision!==preflight.case.revision||
+      current.principal.userId!==preflight.principalId)
+      fail('KT134_CASE_SNAPSHOT_CHANGED');
+   const expected=preflight.evidence.map(x=>x.type+':'+x.digest).sort();
+   if(JSON.stringify(data.bundle.receiptRefs.slice().sort())!==JSON.stringify(expected))
+      fail('KT134_CASE_EVIDENCE_CHANGED');
    return data.bundle;
   }
  };
