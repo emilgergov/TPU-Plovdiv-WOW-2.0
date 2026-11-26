@@ -133,8 +133,8 @@ test('native RPC rejects a case that changed revision after state read',async()=
 
 test('native packed KT126 workflow snapshot restores original dossier texts and completes EG/Word',async()=>{
  const snapshot={state:nativeData.state,values:nativeData.values,globals:nativeData.globals};
- const gz=await new Blob([JSON.stringify(snapshot)]).stream().pipeThrough(
-  new CompressionStream('gzip')).arrayBuffer();
+ const gz=await new Response(new Blob([JSON.stringify(snapshot)]).stream().pipeThrough(
+  new CompressionStream('gzip'))).arrayBuffer();
  const packed={format:'KT126-GZIP-1',
   payload:btoa(String.fromCharCode(...new Uint8Array(gz)))};
  const state={caseId,revision:5,record:nativeData.record,state:packed};
@@ -149,9 +149,9 @@ test('native packed KT126 workflow snapshot restores original dossier texts and 
 });
 test('native packed KT126 snapshot with no dossier evidence cannot get an invented proposal',async()=>{
  const packed={format:'KT126-GZIP-1',
-  payload:btoa(String.fromCharCode(...new Uint8Array(await new Blob([
+  payload:btoa(String.fromCharCode(...new Uint8Array(await new Response(new Blob([
    JSON.stringify({state:{intake:{document_texts:[]}},values:nativeData.values,globals:nativeData.globals})
-  ]).stream().pipeThrough(new CompressionStream('gzip')).arrayBuffer())))};
+   ]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer())))};
  const calls=[];
  const r=await handler({state:{caseId,record:nativeData.record,state:packed},egCalls:calls})(req());
  assert.equal(r.status,422);
