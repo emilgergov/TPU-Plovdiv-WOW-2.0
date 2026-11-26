@@ -5,6 +5,7 @@
 import existing from './kt134-staging-preview-worker.mjs';
 import {createKt134NativeAuthProxy} from './kt134-kt125-native-auth-proxy.mjs';
 import {createKt134NativeCaseReader} from './kt134-native-case-http.mjs';
+import {createKt134NativeCaseList} from './kt134-native-case-list.mjs';
 import {createKt134NativeAutomaticHandler} from './kt134-native-automatic-route.mjs';
 import autoUI from './KT134_PROTECTED_INTEGRATION_UI.html';
 const nativeOrigin='https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev';
@@ -67,6 +68,19 @@ export default {
     'cache-control':'no-store','x-content-type-options':'nosniff',
     'referrer-policy':'no-referrer','x-frame-options':'DENY',
     'content-security-policy':"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"}});
+  }
+  if(path==='/kt134/available-cases'){
+   if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
+   if(!nativeFetch)return json({error:'KT125_NATIVE_NOT_CONFIGURED'},503);
+   try{
+    const list=createKt134NativeCaseList({nativeFetch});
+    const result=await list({request});
+    return json(result);
+   }catch(error){
+    const code=error?.code||'KT125_CASE_LIST_FAILED';
+    return json({error:code},code==='KT125_LOGIN_REQUIRED'?401:
+      code==='KT126_CASE_LIST_UNAVAILABLE'?503:422);
+   }
   }
   if(path==='/kt134/case-status'){
    if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
