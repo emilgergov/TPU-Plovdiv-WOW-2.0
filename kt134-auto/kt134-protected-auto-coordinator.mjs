@@ -34,6 +34,10 @@ export function createProtectedAutomaticCoordinator(adapters) {
    if(bundle?.caseId!==caseId||bundle?.revision!==preflight.case.revision||
       !bundle?.serverVerified||!bundle?.caseIsolated)error('INVALID_CASE_EVIDENCE_BUNDLE');
    receiptRefsMatch(preflight,bundle.receiptRefs);
+   // Only verified server-side milestones are reported; no timer-based %
+   // and no premature completion or fabricated confirmation.
+   adapters.onProgress?.({stage:2,percent:40,label:'Предметът и обхватът са проверени'});
+   adapters.onProgress?.({stage:3,percent:60,label:'Пространствените доказателства са обработени'});
    // Only evidence in this isolated bundle is supplied to the author and reviewer.
    const author=requireProposal(await adapters.invokeAuthor({
      caseId,revision:preflight.case.revision,subject:preflight.subject,
@@ -83,6 +87,7 @@ export function createProtectedAutomaticCoordinator(adapters) {
        docx:null,expertApproved:false,requiresExpertConfirmation:true
      });
    }
+   adapters.onProgress?.({stage:4,percent:80,label:'EG Авторът и рецензентът приключиха междинната преценка'});
    // Automatic Stage 5 text is generated AFTER reviewer intermediate confirmation.
    // Existing manually approved KT133 workflow remains unchanged.
    const stage5=await adapters.generateStage5Draft({
@@ -124,6 +129,7 @@ export function createProtectedAutomaticCoordinator(adapters) {
    });
    const word=await adapters.buildDraftWord(draft);
    if(!(word instanceof Uint8Array)||word.length<100)error('INVALID_DRAFT_WORD');
+   adapters.onProgress?.({stage:5,percent:100,label:'Документът Word е генериран и проверен'});
    return Object.freeze({status:'draft_ready',caseId,revision:preflight.case.revision,
      registryNumber:preflight.case.registryNumber,subject:preflight.subject,
      author:Object.freeze({panelId:author.panelId,reasoning:author.reasoning,
