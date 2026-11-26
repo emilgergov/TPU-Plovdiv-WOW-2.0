@@ -92,6 +92,24 @@ export default {
     'referrer-policy':'no-referrer','x-frame-options':'DENY',
     'content-security-policy':"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"}});
   }
+  if(path==='/kt134/native-authorization-health'){
+   if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
+   if(typeof env.KT125_NATIVE?.getCaseContext!=='function')
+     return json({ready:false,reason:'KT125_RPC_METHOD_NOT_AVAILABLE'},503);
+   try{
+    // Invalid throwaway cookie; native KT125 MUST refuse it. No user case
+    // UUID, session, or document is sent to this operational probe.
+    const rejected=await env.KT125_NATIVE.getCaseContext({
+      cookie:'kt125_invalid_probe=not-a-session',
+      caseId:'11111111-1111-4111-8111-111111111111',
+      action:'case.edit'
+    });
+    if(rejected!=null)return json({ready:false,reason:'KT125_RPC_REJECTED_INVALID_SESSION_INCORRECTLY'},503);
+    return json({ready:true,source:'KT125_NATIVE_RPC',
+      actorVerification:'native_case_edit',rejectsInvalidSession:true,
+      realCaseDataRead:false,productionWorkerChanged:false});
+   }catch{return json({ready:false,reason:'KT125_RPC_PROBE_UNAVAILABLE'},503)}
+  }
   if(path==='/kt134/available-cases'){
    if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
    if(!nativeFetch)return json({error:'KT125_NATIVE_NOT_CONFIGURED'},503);
