@@ -340,7 +340,7 @@ if(new URLSearchParams(location.search).get('embedded')==='1')
 <div>Активен експерт: <strong id="expert">—</strong></div>
 <div>Вътрешен №: <strong id="caseid">—</strong></div>
 <div>Деловоден №: <strong id="registry">—</strong></div></div>
-<div class="kt134-unified" aria-label="Автоматичен анализ"><div class="kt134-screen-tools"><button type="button" id="kt134-clear-screen" title="Нулира само текущия екран — не изтрива документи или преписки">Изчисти екрана</button><button type="button" id="kt134-to-dashboard" title="Към общото табло с петте етапа и панелите">Към таблото</button></div><div class="kt134-intake-choices">
+<div class="kt134-unified" aria-label="Автоматичен анализ"><div class="kt134-screen-tools"><button type="button" id="kt134-clear-screen" title="Нулира само текущия екран — не изтрива документи или преписки">Изчисти екрана</button><button type="button" id="kt134-to-dashboard" title="Отвори раздела с всички панели">Към всички панели</button></div><div class="kt134-intake-choices">
 <section class="kt134-choice active" id="kt134-new-intake"><label class="choice-title" for="kt134-new-file">✚ Нова преписка</label><input id="kt134-new-file" type="file" accept=".zip,.pdf,.docx" aria-label="Документи за нова преписка"><span id="kt134-new-status" class="choice-note" aria-live="polite">Изберете ZIP, PDF или DOCX до 40 MB</span><button id="kt134-new-submit" type="button" disabled hidden>Регистрирай</button></section>
 <section class="kt134-choice" id="kt134-existing-intake"><label class="choice-title" for="kt134-case-select">▣ Преписка от архива</label><select id="kt134-case-select" disabled aria-label="Изберете преписка от архива"><option value="">Зареждане…</option></select><span id="kt134-case-help" class="choice-note" aria-live="polite"></span><div class="choice-tools"><button id="kt134-refresh" type="button" hidden aria-hidden="true" tabindex="-1">Обнови архива</button><a id="kt134-login-link" href="/auth/login">Вход</a></div></section>
 </div><div class="unified-start"><button class="primary" id="start" disabled>Стартирай автоматичния анализ</button></div><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><div class="auto-label"><span>⚙</span><div><strong>Автоматичен ход</strong></div></div><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
@@ -623,7 +623,7 @@ el('kt134-to-dashboard').addEventListener('click',()=>{
  if(runBusy)return;
  // Same-origin navigation to the main dashboard, not to the automatic
  // form, both when embedded in iframe and when opened standalone.
- window.top.location.assign('/kt134/dashboard');
+ window.top.location.assign('/kt134/dashboard#all-panels');
 });
 el('start').addEventListener('click',async()=>{
  if(runBusy)return;
