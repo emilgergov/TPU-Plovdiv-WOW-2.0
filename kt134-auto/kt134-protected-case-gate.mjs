@@ -40,6 +40,15 @@ export function prepareProtectedAutomaticCase({principal,caseRecord,evidence,pol
   if (c.gisMode==='required') {
     gis=Object.freeze({mode:'required',receipt:receipt(evidence?.gisPdf1,'gis_pdf1',c.id)});
     records.push(gis.receipt);
+  } else if (c.gisMode==='spatial_review'||c.gisMode==='contextual_review') {
+    // Native KT80 has parcel-level overlay evidence but does not persist
+    // the original PDF1. A reviewer may prepare a provisional proposal
+    // without asserting that PDF1 or any missing GIS check is complete.
+    if(!nonempty(c.gisReviewReason)||!Array.isArray(c.gisEvidenceIssues)||
+       !c.gisEvidenceIssues.length||evidence?.gisPdf1!=null)
+      fail('GIS_REVIEW_EVIDENCE_REQUIRED');
+    gis=Object.freeze({mode:c.gisMode,reason:c.gisReviewReason,
+      evidenceIssues:[...c.gisEvidenceIssues],pdf1Verified:false});
   } else if (c.gisMode==='contextual_skip') {
     if (!c.gisSkipConfirmed || !nonempty(c.gisSkipReason) || evidence?.gisPdf1!=null)
       fail('GIS_SKIP_UNCONFIRMED');
