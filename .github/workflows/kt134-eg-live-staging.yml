@@ -4,6 +4,8 @@ on:
     branches: [kt134-auto-mode-isolated]
     paths:
       - 'cloudflare/ai-author-v27/src/worker.js'
+      - 'cloudflare/ai-author-v27/src/kt134-stage1-leading.mjs'
+      - 'cloudflare/ai-author-v27/src/kt134-stage1-leading.test.mjs'
       - 'cloudflare/ai-author-v27/src/kt134-legal-disposition.mjs'
       - 'cloudflare/ai-author-v27/src/kt134-legal-disposition.test.mjs'
       - 'cloudflare/ai-author-v27/src/kt134-reviewer-route-alignment.mjs'
@@ -42,6 +44,8 @@ jobs:
           grep -Fq 'reviewerIntermediateProof' cloudflare/ai-author-v27/src/worker.js
           grep -Fq 'automaticReviewerIntermediate' cloudflare/ai-author-v27/src/worker.js
           node --check cloudflare/ai-author-v27/src/worker.js
+          node --check cloudflare/ai-author-v27/src/kt134-stage1-leading.mjs
+          node --test cloudflare/ai-author-v27/src/kt134-stage1-leading.test.mjs
           node --check kt134-auto/kt134-eg-stage45-live-bridge.mjs
           node --check cloudflare/ai-author-v27/src/kt134-legal-disposition.mjs
           node --test cloudflare/ai-author-v27/src/kt134-legal-disposition.test.mjs
