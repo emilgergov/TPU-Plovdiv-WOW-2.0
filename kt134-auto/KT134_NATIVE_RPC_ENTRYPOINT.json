@@ -1,0 +1,24 @@
+{
+  "codeMetadataOnly": true,
+  "methodFound": true,
+  "precedingClasses": [
+    {
+      "className": "LocalAuthService",
+      "baseClass": "WorkerEntrypoint",
+      "offset": 16942
+    }
+  ],
+  "exportAliases": [
+    {
+      "source": "native_entry_default",
+      "export": "default"
+    }
+  ],
+  "nearestMethodContext": [
+    "      const verifier = { verify: async () => who };",
+    "      return withSessionBanner(await createKT125PrivateHandler({ getVerifier: () => verifier, identityConfigReady: () => true, clock, uuid }).fetch(request, { ...env, KT125_PRIVATE_ORIGIN: config.origin }), who);",
+    "var LocalAuthService = class extends WorkerEntrypoint {"
+  ],
+  "hasNamedExport": true,
+  "otherServiceEntrypoints": ":d9b771color:103d2cfont:14px Verdanatextalign:centeru041Au0422133 xB7 u0422u0415u0421u0422u041Eu0412u0410 u0412u0415u0420u0421u0418u042F xB7 u0418u0437u043Fu043Eu043Bu0437u0432u0430u0439u0442u0435 u0441u044Au0449u0435u0441u0442u0432u0443u0432u0430u0449u0438u044F u0441u0438 u043Fu0440u043Eu0444u0438u043B u0438 u043Fu0440u0435u043Fu0438u0441u043Au0430.aside\n    headers2.deleteContentLength\n    return new Responsehtml, { status: response.status, headers: headers2 }\n  }\n  return new Responseresponse.body, { status: response.status, headers: headers2 }\n} }\nexport {\n  LocalAuthService,\n  PasswordKdf,\n  native_entry_default as default\n}\n\nb841674f1b327d0d2c80a21ebe3efea3ee1735f564f9b9e0eaed7db4a9c8\n"
+}
