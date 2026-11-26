@@ -11,6 +11,8 @@ import {createKt134NativeCaseRegistration} from './kt134-native-new-case-registr
 import {createKt134NativeOriginalTransport} from './kt134-native-original-transport.mjs';
 import autoUI from './KT134_PROTECTED_INTEGRATION_UI.html';
 import dashboardUI from './KT134_EMBEDDED_DASHBOARD.html';
+import approvedE1Reader from './kt134-e1-approved-reader-text.mjs';
+import {createKt134NativeStage1Completion} from './kt134-native-stage1-completion.mjs';
 const nativeOrigin='https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev';
 const json=(body,status=200)=>new Response(JSON.stringify(body),{
  status,headers:{'content-type':'application/json; charset=utf-8',
@@ -62,6 +64,30 @@ export default {
       code==='KT125_CASE_ACCESS_DENIED'?403:422);
    }
   }
+  if(path==='/kt134/e1/approved-reader.js'){
+   if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
+   return new Response(approvedE1Reader,{headers:{
+    'content-type':'text/javascript; charset=utf-8',
+    'cache-control':'private, max-age=1800','x-content-type-options':'nosniff'}});
+  }
+  if(path==='/kt134/new-case/complete-stage1'){
+   if(request.method!=='POST')return json({error:'METHOD_NOT_ALLOWED'},405);
+   if(!nativeFetch||!env.KT134_EG_NATIVE?.fetch||!env.KT134_EG_ACCESS_TOKEN)
+    return json({error:'KT134_E1_SERVICES_UNAVAILABLE'},503);
+   try{
+    const handler=createKt134NativeStage1Completion({
+      nativeFetch,egFetch:env.KT134_EG_NATIVE.fetch.bind(env.KT134_EG_NATIVE),
+      egAccessToken:env.KT134_EG_ACCESS_TOKEN});
+    const result=await handler({request});
+    return json(result);
+   }catch(error){
+    const code=/^[A-Z0-9_]{5,90}$/.test(error?.code||'')?
+      error.code:'KT134_E1_UNAVAILABLE';
+    return json({error:code},code==='KT125_LOGIN_REQUIRED'?401:
+      code==='KT125_CASE_ACCESS_DENIED'||code==='KT125_CASE_WRITE_DENIED'?403:
+      code==='KT126_STAGE1_REVISION_CONFLICT'?409:422);
+   }
+  }
   if(path==='/kt134/automatic/draft'){
    if(!nativeFetch)return json({error:'KT125_NATIVE_NOT_CONFIGURED'},503);
    if(!env.KT134_EG_ACCESS_TOKEN)return json({error:'KT134_EG_SECRET_NOT_PAIRED'},503);
@@ -90,7 +116,7 @@ export default {
    return new Response(autoUI,{headers:{'content-type':'text/html; charset=utf-8',
      'cache-control':'no-store, private','x-content-type-options':'nosniff',
      'referrer-policy':'no-referrer','x-frame-options':'SAMEORIGIN',
-     'content-security-policy':"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'self'"}});
+     'content-security-policy':"default-src 'self'; script-src 'unsafe-inline' 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'unsafe-inline'; connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; worker-src 'self' blob: https://cdnjs.cloudflare.com; img-src 'self' data: blob:; form-action 'self'; base-uri 'none'; frame-ancestors 'self'"}});
   }
   // Only service readiness, no legal passages or case data are exposed.
   if(path==='/kt134/normative-bridge-check'){
