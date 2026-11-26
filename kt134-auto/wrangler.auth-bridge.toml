@@ -18,6 +18,10 @@ bucket_name = "kt134-isolated-r2-2026"
 binding = "KT125_NATIVE"
 service = "tpu-plovdiv-kt125-local-auth"
 
+[[services]]
+binding = "KT134_EG_NATIVE"
+service = "tpu-plovdiv-kt134-eg-test"
+
 [[rules]]
 type = "Text"
 globs = ["**/*.html"]
