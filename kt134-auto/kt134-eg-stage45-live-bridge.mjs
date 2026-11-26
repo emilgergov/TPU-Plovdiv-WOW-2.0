@@ -6,6 +6,7 @@
  */
 import {buildKt134CompleteStage4Request} from './kt134-complete-dossier-stage4.mjs';
 import {composeKt134CaseAwareStage5Draft} from './kt134-case-aware-word-body.mjs';
+import {limitKt134Stage4Payload} from './kt134-stage4-transport-budget.mjs';
 const invalid=(code)=>{const e=new Error(code);e.code=code;throw e;};
 const value=x=>typeof x==='string'?x.trim():'';
 const chosen=text=>value(text).match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\s*[—–-]?\s*([^\n]*)/iu);
@@ -46,7 +47,10 @@ export function createKt134EgStage45Bridge({workerBase,accessToken,fetchImpl,
     if(stage4?.task!=='draft_normative_proposal'||stage4?.caseId!==caseId||
        !value(stage4.subject)||!value(stage4.scope)||!Array.isArray(stage4.parcelIds)||
        !value(stage4.requestId))invalid('EG_STAGE4_PAYLOAD_MISSING');
-    const response=await post('/stage4-proposal',stage4);
+    const transport=limitKt134Stage4Payload(stage4);
+    // Only this truthful, bounded evidence set was seen by EG Author/Reviewer.
+    // Use it also for Stage5 provenance; never imply dropped text was examined.
+    const response=await post('/stage4-proposal',transport);
     if(response.caseId!==caseId||String(response.evidenceRevision)!==String(stage4.evidenceRevision)||
        !value(response.authorDraft))invalid('EG_STAGE4_RESULT_MISMATCH');
     const authorMatch=chosen(response.authorDraft);
@@ -54,7 +58,7 @@ export function createKt134EgStage45Bridge({workerBase,accessToken,fetchImpl,
     if(!authorMatch&&!reviewedMatch)invalid('EG_AUTHOR_NO_ROUTE');
     const panelId=Number(authorMatch?.[1]||reviewedMatch?.[1]);
     const documentTitle=value(authorMatch?.[2]||reviewedMatch?.[2])||'Проект на административен документ';
-    active={caseId,revision,stage4,response};
+    active={caseId,revision,stage4:transport,response};
     return {caseId,revision,status:'draft',expertApproved:false,panelId,
        reasoning:response.authorDraft,content:response.authorDraft,documentTitle};
   },
