@@ -26,10 +26,10 @@ test('metadata sent to the original KT126 storage with same session',async()=>{
 test('binary chunks never written to a parallel store',async()=>{
  const bytes=Uint8Array.from([1,2,3,4,5]);let calls=0;
  const send=createKt134NativeOriginalTransport({nativeFetch:async r=>{
-  calls++;assert.equal(new URL(r.url).pathname,'/kt126/registry/'+ID+'/source/part/'+ID+'/0');
+  calls++;assert.equal(new URL(r.url).pathname,'/kt126/registry/'+ID+'/source/part/0');
   assert.deepEqual(new Uint8Array(await r.arrayBuffer()),bytes);return receipt()
  }});
- const result=await send(req('part/'+ID+'/0',bytes,'application/octet-stream'));
+ const result=await send(req('part/0',bytes,'application/octet-stream'));
  assert.equal(calls,1);assert.equal(result.source,'KT126_NATIVE_ORIGINAL_STORE');
 });
 test('unauthorized and malformed requests are rejected without native mutation',async()=>{
