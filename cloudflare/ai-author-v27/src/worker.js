@@ -1,4 +1,5 @@
 import {getLegalContext} from "./legal-v11-loader.mjs";
+import {createKt134Stage1LeadingHandler} from "./kt134-stage1-leading.mjs";
 import {kt134ReviewerRouteIssues,kt134ReviewerActionMatch,kt134ComposeAlignedReviewerDraft} from "./kt134-reviewer-route-alignment.mjs";
 import {deriveKt134LegalDisposition,kt134DispositionTextIssues,composeKt134GroundedReviewerAlternative} from "./kt134-legal-disposition.mjs";
 import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
@@ -1460,6 +1461,7 @@ export default {
  async fetch(request,env) {
   const url=new URL(request.url);
   const origin=request.headers.get("Origin")||"";
+  if(url.pathname==="/kt134/stage1-leading")return createKt134Stage1LeadingHandler()(request,env);
   if(request.method==="OPTIONS" && (url.pathname==="/author"||url.pathname==="/subject-improve"||url.pathname==="/scope-improve"||(url.pathname==="/stage4-proposal"||url.pathname==="/stage5-document"||url.pathname==="/stage4-expert-decision"))) {
    if(origin!==ALLOWED_ORIGIN) return new Response(null,{status:403});
    return new Response(null,{status:204,headers:{"Access-Control-Allow-Origin":ALLOWED_ORIGIN,"Access-Control-Allow-Methods":"POST","Access-Control-Allow-Headers":"Authorization, Content-Type","Access-Control-Max-Age":"600","Vary":"Origin"}});
