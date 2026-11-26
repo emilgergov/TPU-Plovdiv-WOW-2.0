@@ -27,7 +27,7 @@ function selectPayload(api){
  const state=o(root.state||body.state||body);
  const values=o(root.values||body.values||state.values);
  const globals=o(root.globals||body.globals||state.globals);
- const record=o(root.record||root.registry||root.case);
+ const record=o(root.record||root.item||root.registry||root.case);
  return {root,body,state,values,globals,record};
 }
 function completeDocuments({root,body,state,globals}){
