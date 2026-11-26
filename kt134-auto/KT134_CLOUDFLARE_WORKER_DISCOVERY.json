@@ -1,6 +1,6 @@
 {
   "source": "Cloudflare read-only API",
-  "testedAt": "2026-11-26T22:42:32.824Z",
+  "testedAt": "2026-11-26T22:51:22.048Z",
   "testTarget": "tpu-plovdiv-kt134-test",
   "egTarget": "tpu-plovdiv-kt134-eg-test",
   "workers": [
