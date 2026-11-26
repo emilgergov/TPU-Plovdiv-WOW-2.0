@@ -1,6 +1,6 @@
 {
   "source": "Cloudflare read-only API",
-  "testedAt": "2026-11-26T22:28:54.449Z",
+  "testedAt": "2026-11-26T22:42:32.824Z",
   "testTarget": "tpu-plovdiv-kt134-test",
   "egTarget": "tpu-plovdiv-kt134-eg-test",
   "workers": [
@@ -30,7 +30,7 @@
     },
     {
       "name": "tpu-plovdiv-kt134-test",
-      "modified": "2026-11-26T22:28:15.437539Z"
+      "modified": "2026-11-26T22:42:00.015115Z"
     }
   ],
   "warning": "Worker names are not proof of KT125 protected host connectivity"
