@@ -1,0 +1,19 @@
+name: KT134 native server RPC probe diagnosis
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-native-rpc-probe.yml']
+permissions: {contents: read}
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe only service RPC capability (no user session or case contents)
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --max-time 20 -o /tmp/kt134-rpc-health.json -w 'HTTP %{http_code}\n'             'https://tpu-plovdiv-kt134-test.emilgergov.workers.dev/kt134/native-authorization-health'
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('/tmp/kt134-rpc-health.json','utf8'));
+          console.log(JSON.stringify({ready:x.ready,reason:x.reason,source:x.source}));
+          NODE
