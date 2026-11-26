@@ -1,4 +1,4 @@
-name: KT130 public V27.36 entry verification
+name: WOW public expert entry verification (KT134 + KT133 fallback)
 on:
   push:
     branches: [main, work/kt125-access-register-from-kt124-r6]
@@ -23,21 +23,23 @@ jobs:
         run: |
           gh api "repos/$GITHUB_REPOSITORY/pages" --jq '{build_type, source}'
           gh api --method POST "repos/$GITHUB_REPOSITORY/pages/builds" --jq '{status, url}'
-      - name: Verify KT133 on the live public site
+      - name: Verify KT134 on the live public site and KT133 fallback
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           for attempt in $(seq 1 30); do
             if curl -fsS --max-time 15 "https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/?verify=$GITHUB_RUN_ID-$attempt" -o "$RUNNER_TEMP/wow-public.html" &&
+              grep -Fq 'tpu-plovdiv-kt134-test.emilgergov.workers.dev/auth/login' "$RUNNER_TEMP/wow-public.html" &&
+              grep -Fq 'Текуща стабилна тестова версия' "$RUNNER_TEMP/wow-public.html" &&
               grep -Fq 'kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/auth/login' "$RUNNER_TEMP/wow-public.html" &&
               grep -Fq 'class="doclinks expert-version-list"' "$RUNNER_TEMP/wow-public.html"; then
-              echo "Live GitHub Pages serves the KT133 entry and the Block 06 version list."
+              echo "Live GitHub Pages serves the KT134 entry and Block 06 with KT133 fallback."
               exit 0
             fi
             gh api "repos/$GITHUB_REPOSITORY/pages/builds/latest" --jq '{status, commit, error}' || true
             sleep 10
           done
-          echo "::error::The public site did not serve the KT133 entry within the verification window."
+          echo "::error::The public site did not serve the KT134 entry with KT133 fallback within the verification window."
           exit 1
   browser:
     runs-on: ubuntu-24.04
