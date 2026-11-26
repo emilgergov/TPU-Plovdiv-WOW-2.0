@@ -37,7 +37,8 @@ export default {
    if(!env.KT134_EG_ACCESS_TOKEN)return json({error:'KT134_EG_SECRET_NOT_PAIRED'},503);
    if(!env.KT134_EG_NATIVE?.fetch)return json({error:'KT134_EG_SERVICE_NOT_BOUND'},503);
    const draft=createKt134NativeAutomaticHandler({
-    nativeFetch,egWorkerBase:'https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev',
+    nativeFetch,nativeRpc:env.KT125_NATIVE,
+    egWorkerBase:'https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev',
     egAccessToken:env.KT134_EG_ACCESS_TOKEN,
     fetchImpl:env.KT134_EG_NATIVE.fetch.bind(env.KT134_EG_NATIVE)
    });
