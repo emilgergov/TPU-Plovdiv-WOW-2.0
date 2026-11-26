@@ -34,3 +34,14 @@ test('other EG service or duplicate EG binding never qualifies',()=>{
  assert.equal(audit([...base,native,eg,{...eg}]).eligible,false);
  assert.equal(audit([...base,native,{...eg,service:'tpu-plovdiv-ai-author-v27'}]).eligible,false);
 });
+
+test('native identity RPC only accepts published LocalAuthService named entrypoint',()=>{
+ const native={type:'service',name:'KT125_NATIVE',service:'tpu-plovdiv-kt125-local-auth'};
+ const eg={type:'service',name:'KT134_EG_NATIVE',service:'tpu-plovdiv-kt134-eg-test'};
+ const rpc={type:'service',name:'KT125_IDENTITY_RPC',
+   service:'tpu-plovdiv-kt125-local-auth',entrypoint:'LocalAuthService'};
+ assert.equal(audit([...base,native,eg,rpc]).eligible,true);
+ assert.equal(audit([...base,native,eg,rpc]).identityRpcPresent,true);
+ assert.equal(audit([...base,native,eg,{...rpc,entrypoint:'default'}]).eligible,false);
+ assert.equal(audit([...base,native,eg,{...rpc,service:'kt133-tpu-plovdiv'}]).eligible,false);
+});
