@@ -4,6 +4,11 @@ on:
     branches: [kt134-auto-mode-isolated]
     paths:
       - 'kt134-auto/kt134-kt125-bridge-staging-worker.mjs'
+      - 'kt134-auto/kt134-native-stage1-completion.mjs'
+      - 'kt134-auto/kt134-native-stage1-completion.test.mjs'
+      - 'kt134-auto/kt134-e1-approved-reader-text.mjs'
+      - 'kt134-auto/kt134-native-original-transport.mjs'
+      - 'kt134-auto/kt134-native-original-transport.test.mjs'
       - 'kt134-auto/kt134-native-automatic-route.mjs'
       - 'kt134-auto/kt134-eg-stage45-live-bridge.mjs'
       - 'kt134-auto/kt134-stage4-transport-budget.mjs'
@@ -61,6 +66,9 @@ jobs:
           ! grep -Eq '(KT125_DB|tpu-plovdiv-ai-author-v27|kt133-tpu)' kt134-auto/wrangler.auth-bridge.toml
           GITHUB_REF_NAME=kt134-auto-mode-isolated node kt134-auto/kt134-kt125-service-audit.mjs
           node --check kt134-auto/kt134-kt125-bridge-staging-worker.mjs
+          node --check kt134-auto/kt134-native-stage1-completion.mjs
+          node --test kt134-auto/kt134-native-stage1-completion.test.mjs
+          node --test kt134-auto/kt134-native-original-transport.test.mjs
           node --test kt134-auto/kt134-kt125-service-audit.test.mjs
           node --test kt134-auto/kt134-kt125-native-auth-proxy.test.mjs
           node --test kt134-auto/kt134-native-case-http.test.mjs
