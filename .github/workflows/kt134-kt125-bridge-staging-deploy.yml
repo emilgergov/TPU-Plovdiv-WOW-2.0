@@ -10,6 +10,9 @@ on:
       - 'kt134-auto/kt134-official-word-builder.mjs'
       - 'kt134-auto/kt134-kt125-native-auth-proxy.mjs'
       - 'kt134-auto/kt134-native-case-http.mjs'
+      - 'kt134-auto/kt134-native-case-http.test.mjs'
+      - 'kt134-auto/kt134-native-case-list.mjs'
+      - 'kt134-auto/kt134-native-case-list.test.mjs'
       - 'kt134-auto/kt134-kt125-service-audit.mjs'
       - 'kt134-auto/wrangler.auth-bridge.toml'
       - '.github/workflows/kt134-kt125-bridge-staging-deploy.yml'
@@ -47,6 +50,7 @@ jobs:
           node --test kt134-auto/kt134-kt125-service-audit.test.mjs
           node --test kt134-auto/kt134-kt125-native-auth-proxy.test.mjs
           node --test kt134-auto/kt134-native-case-http.test.mjs
+          node --test kt134-auto/kt134-native-case-list.test.mjs
           node --check kt134-auto/kt134-native-automatic-route.mjs
       - name: Generate original institutional synthetic preview dependency
         run: |
@@ -161,6 +165,18 @@ jobs:
           curl --fail --silent --show-error --max-time 15 "$BASE/kt134/final-test" -o /tmp/kt134-final-ui.html
           grep -Fq 'Внасяне и анализ на преписката' /tmp/kt134-final-ui.html
           grep -Fq '/kt134/automatic/draft' /tmp/kt134-final-ui.html
+          grep -Fq 'id="kt134-case-select"' /tmp/kt134-final-ui.html
+          grep -Fq '/kt134/available-cases' /tmp/kt134-final-ui.html
+          if grep -Fq 'id="kt134-case-id"' /tmp/kt134-final-ui.html; then
+            echo '::error::manual UUID input still present in final five gates'; exit 1
+          fi
+          unauth_code="$(curl --silent --show-error --max-time 12 -o /tmp/kt134-case-list-denied.json -w '%{http_code}' "$BASE/kt134/available-cases")"
+          test "$unauth_code" = 401
+          node - <<'NODE'
+          const data=require('/tmp/kt134-case-list-denied.json');
+          if(data.error!=='KT125_LOGIN_REQUIRED')throw Error('KT134 registry leaked without login');
+          console.log('KT134: automatic case chooser visible, anonymous case listing denied');
+          NODE
           code="$(curl --silent --show-error --max-time 15 -o /tmp/kt134-draft-denied.json -w '%{http_code}' \
              -X POST -H "Origin: $BASE" -H 'Content-Type: application/json' \
              --data '{"caseId":"11111111-1111-4111-8111-111111111111"}' "$BASE/kt134/automatic/draft")"
