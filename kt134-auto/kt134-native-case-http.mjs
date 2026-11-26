@@ -37,7 +37,7 @@ export function createKt134NativeCaseReader({nativeFetch,maxBytes=4_000_000}={})
   const result=decodeStrictJSON(body);
   const embeddedId=result.caseId||result.case_id||
     result.record?.case_id||result.registry?.case_id||result.case?.caseId;
-  if(embeddedId&&embeddedId!==caseId)fail('KT125_DIFFERENT_CASE');
+  if(!embeddedId||embeddedId!==caseId)fail('KT125_DIFFERENT_CASE');
   if(result.error||result.authenticated===false)fail('KT125_CASE_ACCESS_DENIED');
   return Object.freeze({caseId,source:'KT125_NATIVE_CASE_ACL',
    state:result,readOnly:true,storedExternally:false});
