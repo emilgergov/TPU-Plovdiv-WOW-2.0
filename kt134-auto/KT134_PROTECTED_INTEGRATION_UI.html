@@ -235,6 +235,14 @@ if(new URLSearchParams(location.search).get('embedded')==='1')
   <a id="kt134-login-link" href="/auth/login" style="align-self:center;color:#e7c776">Вход с действащия КТ125 профил</a>
  </div>
  <p style="font-size:11px;color:#dacfa9" id="kt134-case-help" aria-live="polite">Списъкът се зарежда автоматично само за удостоверения експерт. Не са необходими UUID или нова регистрация.</p>
+ </div><div id="kt134-new-intake" style="margin:13px 0 0;padding:12px 15px;border:1px solid #b09a69;border-radius:9px;background:#173d2c">
+ <div style="font-weight:700;color:#f1d492;margin-bottom:8px">Нова преписка · общ регистър КТ126</div>
+ <div class="actions" style="margin:0;align-items:center">
+  <input id="kt134-new-file" type="file" accept=".zip,.pdf,.docx" aria-label="Изберете ZIP или документ за нова преписка"
+   style="flex:1;min-width:230px;color:#f0ead6;font:13px Segoe UI,Arial,sans-serif">
+  <button id="kt134-new-submit" type="button" disabled>Въведи нова преписка</button>
+ </div>
+ <p id="kt134-new-status" aria-live="polite" style="margin:8px 0 0;color:#d1dccb;font-size:12px">Използва съществуващия профил КТ125, общия номератор и регистър КТ126.</p>
  </div><div class="kt134-unified" aria-label="Единен автоматичен маршрут: етапи, скала и статус"><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><div class="auto-label"><span>⚙</span><div><strong>Автоматичен ход</strong><small>Скала на изпълнение на етапите</small></div></div><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
 </div><div class="kt134-progress-panel"><div class="subrow"><span class="loading-dots" aria-hidden="true">◌</span><div class="track"><div class="fill" id="fill"></div></div><span id="subtitle" aria-live="polite">Очаква се защитен контекст от КТ125</span></div><span class="kt134-panel-leaf" aria-hidden="true">❧</span></div></div>
 <div class="actions"><button class="primary" id="start" disabled>Изготви проект по тази преписка</button></div>
@@ -338,6 +346,84 @@ async function loadAccessibleCases(){
   problem(e.message||'Регистърът не е достъпен.');
  }
 }
+
+const newFile=el('kt134-new-file');
+const newSubmit=el('kt134-new-submit');
+const newStatus=el('kt134-new-status');
+let newRegistered=null;
+newFile.addEventListener('change',()=>{
+ const file=newFile.files?.[0];
+ newRegistered=null;
+ const valid=!!file && /\\.(zip|pdf|docx)$/i.test(file.name) &&
+   file.size>0 && file.size<=40_000_000;
+ newSubmit.disabled=!valid;
+ newStatus.textContent=valid?'Избран файл: '+file.name+' · общ номер от КТ126.':
+  'Изберете ZIP, PDF или DOCX с размер до 40 MB.';
+});
+async function sendNew(path,body,contentType){
+ const response=await fetch(path,{method:'POST',credentials:'same-origin',
+  headers:{'Content-Type':contentType},body});
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok)throw Error(data.error||'Неуспешен запис в КТ126 ('+response.status+').');
+ return data;
+}
+newSubmit.addEventListener('click',async()=>{
+ const file=newFile.files?.[0];
+ if(!file||!(/\\.(zip|pdf|docx)$/i.test(file.name))||file.size<1||
+    file.size>40_000_000)return;
+ newSubmit.disabled=true;el('error').hidden=true;
+ let id=newRegistered?.caseId||null;
+ try{
+  const bytes=new Uint8Array(await file.arrayBuffer());
+  const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)))
+    .map(n=>n.toString(16).padStart(2,'0')).join('');
+  const meta={filename:file.name,size:bytes.byteLength,sha256:digest};
+  if(!id){
+   newStatus.textContent='Регистрация на преписката с общия номератор КТ126…';
+   const record=await sendNew('/kt134/new-case/register',JSON.stringify(meta),'application/json');
+   id=record.caseId;
+   if(!id||!record.internalNumber)throw Error('КТ126 не върна потвърден вътрешен номер.');
+   newRegistered={caseId:id,internalNumber:record.internalNumber,sourceId:null};
+  }
+  newStatus.textContent='Преписка '+newRegistered.internalNumber+' · записване на оригинала…';
+  if(!newRegistered.sourceId){
+   const initial=await sendNew('/kt134/new-case/original/'+encodeURIComponent(id)+'/start',
+     JSON.stringify(meta),'application/json');
+   const source=initial.receipt||{};
+   const sourceId=source.sourceId||source.source_id||source.id||source.source?.source_id;
+   if(!sourceId||!(/^[0-9a-f-]{36}$/i.test(String(sourceId))))
+    throw Error('КТ126 не върна потвърден идентификатор на оригинала.');
+   newRegistered.sourceId=sourceId;
+  }
+  const sourceId=newRegistered.sourceId;
+  const chunkSize=1_000_000;
+  for(let pos=0,i=0;pos<bytes.length;pos+=chunkSize,i++){
+   newStatus.textContent='Преписка '+newRegistered.internalNumber+
+     ' · запис на документ, част '+(i+1)+'…';
+   await sendNew('/kt134/new-case/original/'+encodeURIComponent(id)+
+    '/part/'+encodeURIComponent(sourceId)+'/'+i,
+    bytes.slice(pos,pos+chunkSize),'application/octet-stream');
+  }
+  await sendNew('/kt134/new-case/original/'+encodeURIComponent(id)+'/finish',
+   JSON.stringify({sourceId}),'application/json');
+  newStatus.textContent='Преписка '+newRegistered.internalNumber+
+   ' е регистрирана и оригиналът е записан в общия КТ126.';
+  newFile.value='';
+  await loadAccessibleCases();
+  if(caseRows.some(x=>x.caseId===id)){
+   selector.value=id;await verifySelectedCase(id);
+  }else{
+   newStatus.textContent+=' Записът ще се появи в списъка след обновяване.';
+  }
+ }catch(error){
+  const name=newRegistered?.internalNumber||'';
+  newStatus.textContent=(name?'Регистрирана преписка '+name+'. ':'')+
+    (error.message||'Неуспешно въвеждане.');
+  // Never automatically create a second KT126 record on retry.
+  newSubmit.disabled=false;
+ }
+});
+
 selector.addEventListener('change',()=>verifySelectedCase(selector.value));
 el('kt134-refresh').addEventListener('click',loadAccessibleCases);
 loadAccessibleCases();
