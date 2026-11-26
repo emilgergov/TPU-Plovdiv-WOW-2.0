@@ -1,0 +1,951 @@
+{
+  "readOnly": true,
+  "privateSourceNotExported": true,
+  "report": [
+    {
+      "term": "/kt125/cases/",
+      "occurrences": 10,
+      "matches": [
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "caseId"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/kt125/admin/panel/cases"
+          ],
+          "methods": [],
+          "bindings": [
+            "caseId"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "methods": [],
+          "bindings": [
+            "KT125_PRIVATE_ORIGIN"
+          ],
+          "routePatterns": [
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \""
+          ]
+        },
+        {
+          "routes": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "methods": [],
+          "bindings": [
+            "KT125_PRIVATE_ORIGIN"
+          ],
+          "routePatterns": [
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \""
+          ]
+        },
+        {
+          "routes": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "methods": [],
+          "bindings": [
+            "KT125_PRIVATE_ORIGIN"
+          ],
+          "routePatterns": [
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \""
+          ]
+        },
+        {
+          "routes": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate",
+            "/kt125/admin/panel/overview"
+          ],
+          "methods": [
+            "GET"
+          ],
+          "bindings": [
+            "KT125_PRIVATE_ORIGIN",
+            "KT125_DB"
+          ],
+          "routePatterns": [
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \""
+          ]
+        },
+        {
+          "routes": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate",
+            "/kt125/admin/panel/overview"
+          ],
+          "methods": [
+            "GET"
+          ],
+          "bindings": [
+            "KT125_PRIVATE_ORIGIN",
+            "KT125_DB"
+          ],
+          "routePatterns": [
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \""
+          ]
+        },
+        {
+          "routes": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate",
+            "/kt125/admin/panel/overview"
+          ],
+          "methods": [
+            "GET"
+          ],
+          "bindings": [
+            "KT125_PRIVATE_ORIGIN",
+            "KT125_DB"
+          ],
+          "routePatterns": [
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \"",
+            "\"^/kt125/cases/(\" + pathId + \""
+          ]
+        },
+        {
+          "routes": [
+            "/kt125/cases/",
+            "/manage"
+          ],
+          "methods": [
+            "GET"
+          ],
+          "bindings": [
+            "KT125_DB",
+            "caseId"
+          ],
+          "routePatterns": []
+        }
+      ]
+    },
+    {
+      "term": "/kt126/registry",
+      "occurrences": 13,
+      "matches": [
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "user_id",
+            "kt125_users",
+            "organization_id",
+            "kt125_cases",
+            "kt126_registry",
+            "kt125_grants",
+            "caseId"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/kt126/registry"
+          ],
+          "methods": [],
+          "bindings": [
+            "readState",
+            "caseId"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/kt126/registry/create"
+          ],
+          "methods": [],
+          "bindings": [
+            "caseId"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/kt126/registry"
+          ],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/source",
+            "/start",
+            "/kt126/registry",
+            "/part/",
+            "/finish",
+            "/create"
+          ],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/custom-properties",
+            "/kt126/registry/",
+            "/artifacts",
+            "/author",
+            "/subject-improve",
+            "/scope-improve",
+            "/stage4-proposal",
+            "/stage4-expert-decision",
+            "/stage5-document"
+          ],
+          "methods": [],
+          "bindings": [
+            "caseId",
+            "revision",
+            "Revision"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/kt126/registry/",
+            "/source/part/"
+          ],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/kt126/registry/",
+            "/source",
+            "/part/"
+          ],
+          "methods": [],
+          "bindings": [
+            "source_id"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/kt126/registry/",
+            "/artifacts/"
+          ],
+          "methods": [],
+          "bindings": [
+            "revision"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/kt126/registry/",
+            "/artifacts"
+          ],
+          "methods": [],
+          "bindings": [
+            "caseId",
+            "Revision",
+            "revision"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/kt126/registry/",
+            "/artifacts/"
+          ],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/artifacts",
+            "/kt126/registry/",
+            "/artifacts/",
+            "/history"
+          ],
+          "methods": [],
+          "bindings": [
+            "revision"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/kt126/registry/",
+            "/artifacts/",
+            "/history"
+          ],
+          "methods": [],
+          "bindings": [
+            "revision"
+          ],
+          "routePatterns": []
+        }
+      ]
+    },
+    {
+      "term": "kt126_versions",
+      "occurrences": 3,
+      "matches": [
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "kt126_registry",
+            "revision",
+            "caseId",
+            "kt126_versions",
+            "content_json",
+            "kt125_audit",
+            "organization_id",
+            "kt125_cases",
+            "readState",
+            "source_id"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "revision",
+            "kt126_registry",
+            "caseId",
+            "kt125_cases",
+            "readState",
+            "content_json",
+            "kt126_versions",
+            "kt125_audit",
+            "source_id"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "caseId",
+            "revision",
+            "kt126_registry",
+            "content_json",
+            "kt126_versions",
+            "source_id",
+            "kt126_files"
+          ],
+          "routePatterns": []
+        }
+      ]
+    },
+    {
+      "term": "kt126_files",
+      "occurrences": 9,
+      "matches": [
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "revision",
+            "content_json",
+            "kt126_versions",
+            "caseId",
+            "source_id",
+            "kt126_files",
+            "kt126_registry"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "caseId",
+            "source_id",
+            "kt126_files",
+            "kt126_registry",
+            "kt126_c"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "source_id",
+            "kt126_files",
+            "caseId",
+            "kt126_registry",
+            "kt126_chunks",
+            "digest2"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "digest2",
+            "kt126_chunks",
+            "source_id",
+            "caseId",
+            "kt126_files",
+            "kt126_registry",
+            "kt125_audit",
+            "organization_id",
+            "revision"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "kt126_chunks",
+            "source_id",
+            "caseId",
+            "digest2",
+            "kt126_files",
+            "kt126_registry",
+            "kt125_audit",
+            "organization_id",
+            "revision"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "kt126_chunks",
+            "source_id",
+            "caseId",
+            "digest2",
+            "kt126_files",
+            "kt126_registry",
+            "kt125_audit",
+            "organization_id",
+            "revision"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "kt126_chunks",
+            "source_id",
+            "caseId",
+            "digest2",
+            "kt126_files",
+            "kt126_registry",
+            "kt125_audit",
+            "organization_id",
+            "revision"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "source_id",
+            "caseId",
+            "digest2",
+            "kt126_files",
+            "kt126_chunks",
+            "kt126_registry",
+            "kt125_audit",
+            "organization_id",
+            "revision"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "digest2",
+            "kt126_files",
+            "source_id",
+            "kt126_chunks",
+            "kt126_registry",
+            "caseId",
+            "kt125_audit",
+            "organization_id",
+            "revision"
+          ],
+          "routePatterns": []
+        }
+      ]
+    },
+    {
+      "term": "/auth/login",
+      "occurrences": 18,
+      "matches": [
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "organization_id",
+            "kt125_users",
+            "user_id"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/auth/login",
+            "/auth/admin",
+            "/auth/register",
+            "/auth/forgot"
+          ],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/auth/admin",
+            "/auth/login",
+            "/auth/register",
+            "/auth/forgot"
+          ],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/auth/login",
+            "/module/",
+            "/kt125/admin/panel/users",
+            "/auth/logout",
+            "/auth/forgot"
+          ],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/auth/forgot",
+            "/auth/login",
+            "/auth/reset"
+          ],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/auth/login",
+            "/auth/reset"
+          ],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/auth/login"
+          ],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/auth/login"
+          ],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/auth/login",
+            "/kt125/enrollment/activate"
+          ],
+          "methods": [],
+          "bindings": [
+            "kt125_invitation_mail",
+            "organization_id",
+            "kt125_staff_invitations",
+            "kt125_users",
+            "user_id"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/auth/login",
+            "/auth/register",
+            "/auth/submitted",
+            "/auth/activate",
+            "/auth/logout",
+            "/auth/forgot",
+            "/auth/reset",
+            "/auth/reset-sent",
+            "/auth/reset-done",
+            "/auth/admin",
+            "/member",
+            "/module/",
+            "/kt125/admin/panel/overview"
+          ],
+          "methods": [
+            "GET"
+          ],
+          "bindings": [
+            "KT125_PASSWORDS",
+            "KT125_DB"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/auth/login",
+            "/auth/register",
+            "/auth/submitted",
+            "/auth/activate",
+            "/auth/logout",
+            "/auth/forgot",
+            "/auth/reset",
+            "/auth/reset-sent",
+            "/auth/reset-done",
+            "/auth/admin",
+            "/member",
+            "/module/",
+            "/kt125/admin/panel/overview"
+          ],
+          "methods": [
+            "GET"
+          ],
+          "bindings": [
+            "KT125_DB"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/auth/reset-sent",
+            "/auth/reset-done",
+            "/auth/register",
+            "/auth/submitted",
+            "/auth/forgot",
+            "/auth/logout",
+            "/auth/login",
+            "/member",
+            "/auth/reset",
+            "/auth/admin"
+          ],
+          "methods": [
+            "POST"
+          ],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/auth/reset-sent",
+            "/auth/reset-done",
+            "/auth/register",
+            "/auth/submitted",
+            "/auth/forgot",
+            "/auth/logout",
+            "/auth/login",
+            "/member",
+            "/auth/reset",
+            "/auth/admin"
+          ],
+          "methods": [
+            "POST"
+          ],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/auth/reset-sent",
+            "/auth/reset-done",
+            "/auth/register",
+            "/auth/submitted",
+            "/auth/forgot",
+            "/auth/logout",
+            "/auth/login",
+            "/member",
+            "/auth/reset",
+            "/auth/admin"
+          ],
+          "methods": [
+            "POST"
+          ],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/member",
+            "/auth/login",
+            "/auth/register",
+            "/auth/logout",
+            "/auth/forgot",
+            "/auth/reset",
+            "/auth/admin"
+          ],
+          "methods": [
+            "POST"
+          ],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/auth/reset-done",
+            "/auth/logout",
+            "/auth/login",
+            "/auth/register",
+            "/auth/submitted"
+          ],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/module/",
+            "/auth/login",
+            "/kt125/admin/panel/presentation",
+            "/kt125/admin/presentation/",
+            "/kt126/",
+            "/kt126/client.js",
+            "/kt126/author/"
+          ],
+          "methods": [
+            "GET"
+          ],
+          "bindings": [
+            "KT126_REGISTRY_ENABLED"
+          ],
+          "routePatterns": []
+        }
+      ]
+    },
+    {
+      "term": "kt125_local_sessions",
+      "occurrences": 7,
+      "matches": [
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "user_id",
+            "kt125_access_requests",
+            "organization_id",
+            "kt125_users",
+            "kt125_local_sessions",
+            "token_hash",
+            "kt125_local_accounts",
+            "kt125_local_outbox",
+            "kt125_revoke_local_sessions",
+            "kt125_local_limits"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "kt125_access_requests",
+            "user_id",
+            "organization_id",
+            "kt125_users",
+            "kt125_local_sessions",
+            "token_hash",
+            "kt125_local_accounts",
+            "kt125_local_outbox",
+            "kt125_revoke_local_sessions",
+            "kt125_local_limits"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "kt125_local_accounts",
+            "kt125_local_sessions",
+            "kt125_local_outbox",
+            "organization_id",
+            "kt125_revoke_local_sessions",
+            "kt125_users",
+            "user_id",
+            "kt125_local_limits"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "kt125_local_resets",
+            "kt125_audit",
+            "organization_id",
+            "kt125_local_accounts",
+            "user_id",
+            "kt125_local_sessions"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "kt125_local_accounts",
+            "kt125_audit",
+            "organization_id",
+            "user_id",
+            "kt125_local_sessions",
+            "token_hash",
+            "kt125_users",
+            "getCookie"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "token_hash",
+            "kt125_local_accounts",
+            "kt125_users",
+            "user_id",
+            "organization_id",
+            "getCookie",
+            "kt125_local_sessions"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "kt125_local_accounts",
+            "kt125_users",
+            "user_id",
+            "organization_id",
+            "token_hash",
+            "getCookie",
+            "kt125_local_sessions"
+          ],
+          "routePatterns": []
+        }
+      ]
+    },
+    {
+      "term": "document_texts",
+      "occurrences": 6,
+      "matches": [
+        {
+          "routes": [
+            "/state"
+          ],
+          "methods": [],
+          "bindings": [
+            "revision",
+            "caseId"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "caseId"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [
+            "caseId"
+          ],
+          "routePatterns": []
+        },
+        {
+          "routes": [],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/kt96-eg-ai-stage4-author.mjs"
+          ],
+          "methods": [],
+          "bindings": [],
+          "routePatterns": []
+        },
+        {
+          "routes": [
+            "/kt96-eg-ai-stage4-author.mjs"
+          ],
+          "methods": [],
+          "bindings": [
+            "caseId"
+          ],
+          "routePatterns": []
+        }
+      ]
+    }
+  ]
+}
