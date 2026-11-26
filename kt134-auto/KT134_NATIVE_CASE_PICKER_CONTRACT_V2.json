@@ -1,0 +1,784 @@
+{
+  "readOnly": true,
+  "createdAt": "2026-11-26T10:48:30.337Z",
+  "out": [
+    {
+      "term": "/kt125/cases/",
+      "matches": [
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "caseId"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "caseId"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/cases/",
+            "/manage"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "method",
+            "caseId"
+          ]
+        }
+      ]
+    },
+    {
+      "term": "/kt125/cases",
+      "matches": [
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "caseId"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "caseId"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/cases/",
+            "/manage"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "method",
+            "caseId"
+          ]
+        }
+      ]
+    },
+    {
+      "term": "/user",
+      "matches": [
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "method"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "method"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/enrollment/activate",
+            "/kt125/admin/panel/users"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/user"
+          ],
+          "verbs": [
+            "POST"
+          ],
+          "identifiers": [
+            "method",
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/module/",
+            "/kt125/admin/panel/users",
+            "/auth/logout"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "auth"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/admin/users/invite",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt125/admin/panel/users"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "organization_id"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/panel/users"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "method",
+            "caseId",
+            "userId"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/panel/users"
+          ],
+          "verbs": [
+            "POST"
+          ],
+          "identifiers": [
+            "method"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/panel/users"
+          ],
+          "verbs": [
+            "POST"
+          ],
+          "identifiers": [
+            "method"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/admin/panel/users"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "method"
+          ]
+        }
+      ]
+    },
+    {
+      "term": "/auth/login",
+      "matches": [
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "auth"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/auth/login"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/auth/admin",
+            "/auth/login"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/auth/login",
+            "/module/",
+            "/kt125/admin/panel/users"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/auth/forgot",
+            "/auth/login"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/auth/login",
+            "/auth/reset"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "method",
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/auth/login"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/auth/login"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/auth/login",
+            "/kt125/enrollment/activate"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/auth/login",
+            "/auth/register",
+            "/auth/submitted",
+            "/auth/activate",
+            "/auth/logout",
+            "/auth/forgot",
+            "/auth/reset",
+            "/auth/reset-sent",
+            "/auth/reset-done",
+            "/auth/admin",
+            "/member",
+            "/module/"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "pathname",
+            "method",
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/auth/reset-done",
+            "/auth/admin",
+            "/member",
+            "/auth/activate",
+            "/auth/reset",
+            "/module/",
+            "/auth/login"
+          ],
+          "verbs": [
+            "GET"
+          ],
+          "identifiers": [
+            "method",
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/auth/reset-done",
+            "/auth/register",
+            "/auth/submitted",
+            "/auth/forgot",
+            "/auth/logout",
+            "/auth/login",
+            "/member",
+            "/auth/reset",
+            "/auth/admin"
+          ],
+          "verbs": [
+            "POST"
+          ],
+          "identifiers": [
+            "method",
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/auth/forgot",
+            "/auth/logout",
+            "/auth/login",
+            "/member",
+            "/auth/register",
+            "/auth/reset",
+            "/auth/admin"
+          ],
+          "verbs": [
+            "POST"
+          ],
+          "identifiers": [
+            "method",
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/auth/logout",
+            "/auth/login",
+            "/member",
+            "/auth/register",
+            "/auth/forgot",
+            "/auth/reset",
+            "/auth/admin"
+          ],
+          "verbs": [
+            "POST"
+          ],
+          "identifiers": [
+            "method",
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/auth/register",
+            "/auth/login",
+            "/auth/admin",
+            "/auth/forgot",
+            "/auth/reset"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/auth/reset-done",
+            "/auth/logout",
+            "/auth/login",
+            "/auth/register"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/module/",
+            "/auth/login",
+            "/kt125/admin/panel/presentation",
+            "/kt125/admin/presentation/"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "auth"
+          ]
+        }
+      ]
+    },
+    {
+      "term": "/kt126/registry/",
+      "matches": [
+        {
+          "paths": [
+            "/kt126/registry/create"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "caseId"
+          ]
+        },
+        {
+          "paths": [
+            "/kt126/registry/",
+            "/artifacts"
+          ],
+          "verbs": [
+            "POST"
+          ],
+          "identifiers": [
+            "method",
+            "caseId"
+          ]
+        },
+        {
+          "paths": [
+            "/kt126/registry/",
+            "/source/part/"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt126/registry/",
+            "/source",
+            "/part/"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt126/registry/",
+            "/artifacts/"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt126/registry/",
+            "/artifacts"
+          ],
+          "verbs": [
+            "POST"
+          ],
+          "identifiers": [
+            "method",
+            "caseId"
+          ]
+        },
+        {
+          "paths": [
+            "/kt126/registry/",
+            "/artifacts/"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/artifacts",
+            "/kt126/registry/",
+            "/artifacts/"
+          ],
+          "verbs": [],
+          "identifiers": []
+        },
+        {
+          "paths": [
+            "/kt126/registry/",
+            "/artifacts/",
+            "/history"
+          ],
+          "verbs": [],
+          "identifiers": []
+        }
+      ]
+    },
+    {
+      "term": "kt125_local_sessions",
+      "matches": [
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "session",
+            "organization_id",
+            "token_hash",
+            "credential_version"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "session",
+            "organization_id",
+            "token_hash",
+            "credential_version"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [
+            "DELETE"
+          ],
+          "identifiers": [
+            "session",
+            "credential_version"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [
+            "DELETE"
+          ],
+          "identifiers": [
+            "session",
+            "auth",
+            "credential_version"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "session",
+            "organization_id",
+            "token_hash",
+            "credential_version"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "session",
+            "getCookie",
+            "organization_id",
+            "token_hash",
+            "credential_version"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [
+            "DELETE"
+          ],
+          "identifiers": [
+            "userId",
+            "session",
+            "getCookie",
+            "token_hash"
+          ]
+        }
+      ]
+    },
+    {
+      "term": "KT125_SESSION_COOKIE",
+      "matches": []
+    },
+    {
+      "term": "SESSION_COOKIE",
+      "matches": [
+        {
+          "paths": [
+            "/kt125/local-auth"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "getCookie",
+            "auth"
+          ]
+        },
+        {
+          "paths": [
+            "/kt125/local-auth"
+          ],
+          "verbs": [],
+          "identifiers": [
+            "getCookie",
+            "auth"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "auth"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "auth",
+            "organization_id"
+          ]
+        },
+        {
+          "paths": [],
+          "verbs": [],
+          "identifiers": [
+            "organization_id"
+          ]
+        }
+      ]
+    }
+  ]
+}
