@@ -15,5 +15,5 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');
           const x=JSON.parse(fs.readFileSync('/tmp/kt134-rpc-health.json','utf8'));
-          console.log(JSON.stringify({ready:x.ready,reason:x.reason,errorKind:x.errorKind,source:x.source}));
+          console.log(JSON.stringify({ready:x.ready,reason:x.reason,errorKind:x.errorKind,errorHint:x.errorHint,source:x.source}));
           NODE
