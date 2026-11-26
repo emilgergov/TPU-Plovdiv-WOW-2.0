@@ -1,0 +1,61 @@
+name: KT134 diagnose exact native origin rejection
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-origin-diagnostic.yml']
+permissions:
+  contents: write
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Read the exact origin guard from existing native KT125 Worker (no secrets)
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const url='https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth';
+          const r=await fetch(url,{headers:{Authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('KT125_SOURCE_UNAVAILABLE');
+          const s=await r.text();
+          const markers=['ORIGIN_REJECTED','isAllowedOrigin','allowedOrigin','ALLOWED_ORIGINS','Origin'];
+          const output=[];
+          for(const marker of markers){
+            const snippets=[];let from=0;
+            for(let n=0;n<12;n++){
+              const pos=s.indexOf(marker,from);if(pos<0)break;from=pos+marker.length;
+              let snippet=s.slice(Math.max(0,pos-850),Math.min(s.length,pos+450));
+              // Never export secret values or headers; emit only code near origin guard.
+              if(marker==='Origin')snippet=s.slice(Math.max(0,pos-130),Math.min(s.length,pos+90));
+              snippet=snippet.replace(/(authorization|password|secret|api_key|token)(\\s*[:=]\\s*)(['"`])[^'"`]+\\3/gi,'$1$2[REDACTED]');
+              snippet=snippet.replace(/(?:sk-[A-Za-z0-9_-]{12,}|Bearer\\s+[A-Za-z0-9._-]+)/g,'[REDACTED]');
+              snippets.push(snippet);
+            }
+            output.push({marker,count:snippets.length,snippets});
+          }
+          writeFileSync('kt134-auto/KT134_EXACT_ORIGIN_DIAGNOSIS.json',JSON.stringify({readOnly:true,diagnostic:output},null,2)+'\n');
+          console.log('Origin guard diagnostic written, no credentials');
+          NODE
+      - name: Persist diagnostic report only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          p='kt134-auto/KT134_EXACT_ORIGIN_DIAGNOSIS.json'
+          b64="$(base64 -w0 "$p")"
+          for attempt in 1 2 3 4 5; do
+            sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/$p?ref=kt134-auto-mode-isolated" --jq '.sha' 2>/dev/null || true)"
+            if [ -n "$sha" ]; then
+              gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f branch='kt134-auto-mode-isolated' -f message='KT134: identify actual native origin reject branch' -f content="$b64" -f sha="$sha" >/dev/null && exit 0
+            else
+              gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f branch='kt134-auto-mode-isolated' -f message='KT134: identify actual native origin reject branch' -f content="$b64" >/dev/null && exit 0
+            fi
+            sleep 2
+          done
+          exit 1
