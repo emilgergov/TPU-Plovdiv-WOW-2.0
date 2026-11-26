@@ -4,6 +4,7 @@
  * Native KT125 must authenticate the cookie and enforce per-case ACL first.
  */
 import {createKt134NativeCaseReader} from './kt134-native-case-http.mjs';
+import {createKt134NativeCaseAuthorization} from './kt134-native-case-authorization.mjs';
 import {createProtectedAutomaticCoordinator} from './kt134-protected-auto-coordinator.mjs';
 import {createKt134EgStage45Bridge} from './kt134-eg-stage45-live-bridge.mjs';
 import {createKt134NormativeMasterLoader} from './kt134-normative-master-adapter.mjs';
@@ -46,16 +47,14 @@ function completeDocuments({root,body,state,globals}){
  }));
  return [...new Map(docs.map(d=>[d.sourceId,d])).values()];
 }
-function requirePrincipal({root,record}){
- const p=o(root.principal||root.currentUser||root.user||root.actor);
- const userId=s(p.userId||p.user_id);
- const role=s(p.role||p.approved_role).toLowerCase();
+function requirePrincipal({proof,record}){
+ if(proof?.source!=='KT125_NATIVE_RPC'||proof?.verified!==true||
+    proof?.action!=='case.edit'||!s(proof.actorId))
+   err('KT125_PRINCIPAL_AND_CASE_PERMISSION_NOT_CONFIRMED');
+ // KT125 itself checks actual session status, actor identity, role grants
+ // and case.edit permission. Do not trust a principal inside KT126 state.
  const owner=s(record.owner_id||record.ownerUserId);
- const delegated=p.delegated===true||p.caseAccess==='delegated';
- if(!userId||!['expert','egmaster','administrator','admin'].includes(role)||
-    p.active===false||(!delegated&&userId!==owner))
-  err('KT125_PRINCIPAL_AND_CASE_PERMISSION_NOT_CONFIRMED');
- return {userId,delegated};
+ return {userId:proof.actorId,delegated:!!owner&&owner!==proof.actorId};
 }
 function confirmedSources(d,ctx){
  const {root,body,state,values,globals,record}=d;
@@ -106,9 +105,9 @@ function makeReceipt(caseId,type,sourceId,digest){
  if(!s(sourceId)||!signed(digest))err('KT134_UNVERIFIED_SOURCE');
  return {type,caseId,sourceId,digest,verifiedAt:'native-kt125-read'};
 }
-async function construct({response,normative}){
+async function construct({response,normative,proof}){
  const d=selectPayload(response);
- const principal=requirePrincipal(d);
+ const principal=requirePrincipal({proof,record:d.record});
  const c=confirmedSources(d);
  const sourceDigest=await hash({caseId:c.caseId,revision:c.revision,
   docs:c.docs,record:c.record,subject:c.subject,scope:c.scope});
@@ -130,7 +129,9 @@ async function construct({response,normative}){
  };
  const ctx={
   principal:{source:'KT125_SERVER',authenticated:true,status:'active',
-    userId:principal.userId,roles:['expert',...(principal.delegated?['case_delegate']:[])]},
+    userId:principal.userId,roles:['case_editor_verified',
+      ...(principal.delegated?['case_delegate']:[])],
+    nativeAuthorization:proof},
   caseRecord,evidence,
   policy:{source:'KT125_SERVER',liveAutomaticEnabled:true}
  };
@@ -149,7 +150,7 @@ const respond=(data,status=200)=>new Response(JSON.stringify(data),{
  status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store, private',
  'x-content-type-options':'nosniff','referrer-policy':'no-referrer'}});
 export function createKt134NativeAutomaticHandler({
- nativeFetch,egWorkerBase,egAccessToken,
+ nativeFetch,nativeRpc,egWorkerBase,egAccessToken,
  fetchImpl=fetch,
  wordBuilder=createKt134OfficialWordBuilder()
 }={}){
@@ -157,6 +158,7 @@ export function createKt134NativeAutomaticHandler({
     typeof fetchImpl!=='function'||typeof wordBuilder!=='function')
    err('KT134_NATIVE_AUTOMATIC_NOT_CONFIGURED');
  const read=createKt134NativeCaseReader({nativeFetch});
+ const authorize=createKt134NativeCaseAuthorization({nativeRpc});
  const getNormative=createKt134NormativeMasterLoader({egWorkerBase,fetchImpl});
  return async function handle(request){
   const url=new URL(request.url);
@@ -183,7 +185,11 @@ export function createKt134NativeAutomaticHandler({
    const normative=await getNormative();
    const load=async()=>{
     const raw=await read({request,caseId});
-    return construct({response:raw.state,normative});
+    const response=raw.state;
+    const record=o(response.record||response.item||response.registry||response.case);
+    const revision=record.revision??response.revision;
+    const proof=await authorize({request,caseId,revision});
+    return construct({response,normative,proof});
    };
    const eg=createKt134EgStage45Bridge({
      workerBase:egWorkerBase,accessToken:egAccessToken,fetchImpl
