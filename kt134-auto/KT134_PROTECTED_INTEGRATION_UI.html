@@ -49,14 +49,16 @@ pre{white-space:pre-wrap;font:12px/1.6 Verdana,Arial;overflow-wrap:anywhere}
 <div>Вътрешен №: <strong id="caseid">—</strong></div>
 <div>Деловоден №: <strong id="registry">—</strong></div></div>
 <div style="margin:13px 0 0;padding:12px;border:1px solid #527d5a;border-radius:10px">
- <label for="kt134-case-id">Преписка от съществуващия КТ125 регистър</label>
- <div class="actions" style="margin-top:6px">
-  <input id="kt134-case-id" autocomplete="off" placeholder="Уникален идентификатор (UUID)"
+ <label for="kt134-case-select">Преписки, достъпни чрез съществуващия профил КТ125</label>
+ <div class="actions" style="margin-top:6px;align-items:center">
+  <select id="kt134-case-select" disabled aria-label="Изберете преписка от регистъра"
    style="flex:1;min-width:240px;font:13px Verdana;padding:10px;background:#153c2a;color:#f4eddb;border:1px solid #a7b98c;border-radius:8px">
-  <button id="kt134-verify" type="button">Провери достъпа до преписката</button>
-  <a href="/auth/login" style="align-self:center;color:#e7c776">Вход с действащия КТ125 профил</a>
+   <option value="">Зареждане от защитения регистър…</option>
+  </select>
+  <button id="kt134-refresh" type="button">Обнови преписките</button>
+  <a id="kt134-login-link" href="/auth/login" style="align-self:center;color:#e7c776">Вход с действащия КТ125 профил</a>
  </div>
- <p style="font-size:11px;color:#dacfa9">Въвежда се само идентификаторът; никакви документи, пароли или доказателства не се подават от този екран.</p>
+ <p style="font-size:11px;color:#dacfa9" id="kt134-case-help" aria-live="polite">Списъкът се зарежда автоматично само за удостоверения експерт. Не са необходими UUID или нова регистрация.</p>
  </div><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><strong>Автоматична обработка</strong><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
 <div class="subrow"><div class="track"><div class="fill" id="fill"></div></div><span id="subtitle" aria-live="polite">Очаква се защитен контекст от КТ125</span></div></div>
 <div class="actions"><button class="primary" id="start" disabled>Изготви проект по тази преписка</button></div>
@@ -83,31 +85,80 @@ const el=id=>document.getElementById(id);
 function render(n){tiles.forEach((x,i)=>x.className='stage '+(i<n?'done':i===n?'active':''));nodes.forEach((x,i)=>x.className='node '+(i<n?'done':i===n?'active':''));el('fill').style.width=(n*20)+'%'}
 function problem(msg){el('error').hidden=false;el('error').textContent=msg;el('subtitle').textContent='Автоматичната обработка не е завършила'}
 let context=null;
+let caseRows=[];
+let authenticated=false;
 render(0);
-el('subtitle').textContent='Изисква се потвърден достъп до преписка в КТ125';
-const urlCaseId=new URL(location.href).searchParams.get('caseId');
-if(urlCaseId)el('kt134-case-id').value=urlCaseId;
-el('kt134-verify').addEventListener('click',async()=>{
- const caseId=el('kt134-case-id').value.trim();
- el('start').disabled=true;el('error').hidden=true;context=null;
- el('subtitle').textContent='Сървърна проверка на правата в КТ125...';
+const selector=el('kt134-case-select');
+const textOption=(value,label)=>{const o=document.createElement('option');o.value=value;o.textContent=label;return o;};
+function clearSelection(){
+ context=null;el('start').disabled=true;el('output').classList.remove('visible');
+ el('download').disabled=true;render(0);
+}
+function rowLabel(c){
+ return [c.internalNumber||'Преписка',c.externalNumber||'без деловоден №',
+         c.title||''].filter(Boolean).join(' · ');
+}
+async function verifySelectedCase(caseId){
+ clearSelection();el('error').hidden=true;
+ if(!caseId)return;
+ el('subtitle').textContent='Проверка на правата за избраната преписка…';
  try{
+  const c=caseRows.find(x=>x.caseId===caseId);
+  if(!c)throw Error('Непозната преписка в защитения регистър.');
   const r=await fetch('/kt134/case-status?caseId='+encodeURIComponent(caseId),{
-    method:'GET',credentials:'same-origin',cache:'no-store'});
-  const data=await r.json();
+    credentials:'same-origin',cache:'no-store'});
+  const data=await r.json().catch(()=>({}));
   if(!r.ok||data.caseId!==caseId||data.authenticatedVia!=='KT125_NATIVE_CASE_ACL')
-   throw Error('КТ125 не потвърди преписката ('+(data.error||r.status)+').');
-  context={caseId,registryNumber:'—'};
-  el('expert').textContent='Удостоверена КТ125 сесия';
-  el('caseid').textContent=caseId;
-  el('registry').textContent='Проверява се от сървъра';
+    throw Error('КТ125 не потвърди достъпа ('+(data.error||r.status)+').');
+  context={caseId,registryNumber:c.externalNumber||'—'};
+  el('expert').textContent='Проверена КТ125 сесия';
+  el('caseid').textContent=c.internalNumber||caseId;
+  el('registry').textContent=c.externalNumber||'—';
   el('start').disabled=false;
-  el('subtitle').textContent='Достъпът е потвърден; готовност за автоматичен анализ';
-  window.history.replaceState(null,'','/kt134/final-test?caseId='+encodeURIComponent(caseId));
- }catch(error){
-  problem(error.message||'Достъпът не е потвърден.');
+  el('subtitle').textContent='Преписката е потвърдена. Готовност за автоматичен анализ.';
+  history.replaceState(null,'','/kt134/final-test?caseId='+encodeURIComponent(caseId));
+ }catch(e){problem(e.message||'Няма потвърден достъп до преписката.');}
+}
+async function loadAccessibleCases(){
+ clearSelection();el('error').hidden=true;selector.disabled=true;
+ selector.replaceChildren(textOption('','Зареждане на преписките…'));
+ el('subtitle').textContent='Зареждане на регистъра през защитената сесия КТ125…';
+ try{
+  const r=await fetch('/kt134/available-cases',{credentials:'same-origin',cache:'no-store'});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok||data.authenticated!==true||
+    data.source!=='KT125_NATIVE_REGISTRY_CASE_READ_ACL'||
+    !Array.isArray(data.items))
+    throw Error(r.status===401?'Необходим е вход с действащия профил КТ125.':
+      'Регистърът не е достъпен ('+(data.error||r.status)+').');
+  authenticated=true;caseRows=data.items;
+  el('expert').textContent='Удостоверена КТ125 сесия';
+  el('kt134-login-link').hidden=true;
+  selector.replaceChildren(textOption('','Изберете преписка от регистъра'));
+  caseRows.forEach(c=>selector.append(textOption(c.caseId,rowLabel(c))));
+  selector.disabled=!caseRows.length;
+  el('subtitle').textContent=caseRows.length?
+    'Заредени '+caseRows.length+' достъпни преписки. Изберете една.':
+    'Няма достъпни преписки за този профил.';
+  el('kt134-case-help').textContent=caseRows.length?
+    'Няма нужда от ръчен UUID: изберете преписката, след което генерирайте проекта.':
+    'Регистърът е проверен, но няма достъпни за този профил преписки.';
+  const preferred=new URL(location.href).searchParams.get('caseId');
+  if(preferred&&caseRows.some(x=>x.caseId===preferred)){
+    selector.value=preferred;await verifySelectedCase(preferred);
+  }else if(caseRows.length===1){
+    selector.value=caseRows[0].caseId;await verifySelectedCase(caseRows[0].caseId);
+  }
+ }catch(e){
+  authenticated=false;
+  selector.replaceChildren(textOption('','Не е потвърдена сесия или регистър'));
+  el('kt134-login-link').hidden=false;
+  problem(e.message||'Регистърът не е достъпен.');
  }
-});
+}
+selector.addEventListener('change',()=>verifySelectedCase(selector.value));
+el('kt134-refresh').addEventListener('click',loadAccessibleCases);
+loadAccessibleCases();
 let word=null;
 el('start').addEventListener('click',async()=>{
  if(!context)return;el('start').disabled=true;el('error').hidden=true;render(0);
