@@ -1,0 +1,106 @@
+name: KT134 pair isolated live EG secret with protected test Worker
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths:
+      - '.github/workflows/kt134-pair-isolated-eg.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: kt134-isolated-kt125-bridge
+  cancel-in-progress: false
+jobs:
+  pair:
+    if: github.ref_name == 'kt134-auto-mode-isolated'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Confirm both destinations are isolated test Workers
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          grep -Fxq 'name = "tpu-plovdiv-kt134-test"' kt134-auto/wrangler.auth-bridge.toml
+          grep -Fxq 'name = "tpu-plovdiv-kt134-eg-test"' kt134-auto/wrangler.eg-staging.toml
+          GITHUB_REF_NAME=kt134-auto-mode-isolated node kt134-auto/kt134-kt125-service-audit.mjs
+      - name: Set one fresh server-only token on BOTH isolated existing Workers
+        id: secrets
+        run: |
+          set -euo pipefail
+          token="$(openssl rand -hex 32)"
+          echo "::add-mask::$token"
+          printf %s "$token" | npx --yes wrangler@4 secret put AI_AUTHOR_ACCESS_TOKEN --config kt134-auto/wrangler.eg-staging.toml
+          printf %s "$token" | npx --yes wrangler@4 secret put KT134_EG_ACCESS_TOKEN --config kt134-auto/wrangler.auth-bridge.toml
+          echo "KT134: both isolated Workers now hold paired server-only EG credential"
+          BASE='https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev'
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            code="$(curl --silent --show-error --max-time 12 -o /dev/null -w '%{http_code}' -X POST \
+              -H "Authorization: Bearer $token" -H "Content-Type: application/json" \
+              --data 'INVALID-JSON-BODY' "$BASE/stage4-proposal")"
+            if [ "$code" != 401 ]; then break; fi
+            sleep 3
+          done
+          if [ "$code" = 401 ]; then echo "::error::Paired EG test credential was not accepted"; exit 1; fi
+          curl --fail --silent --show-error "$BASE/health" -o /tmp/kt134-eg-health.json
+          node - <<'NODE'
+          const d=require('/tmp/kt134-eg-health.json');
+          if(!d.apiKeyConfigured||!d.aiGenerationEnabled)throw Error('EG_TEST_NOT_READY');
+          console.log('KT134: EG test Worker live and paired token accepted');
+          NODE
+      - name: Confirm exact secret binding names without reading secrets
+        id: verify
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const root='https://api.cloudflare.com/client/v4/accounts/'+process.env.CLOUDFLARE_ACCOUNT_ID;
+          const h={Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN};
+          for(const [worker,secret] of [
+           ['tpu-plovdiv-kt134-test','KT134_EG_ACCESS_TOKEN'],
+           ['tpu-plovdiv-kt134-eg-test','AI_AUTHOR_ACCESS_TOKEN']
+          ]){
+           const r=await fetch(root+'/workers/scripts/'+worker+'/settings',{headers:h});
+           const j=await r.json();
+           if(!r.ok||!j.success||(j.result?.bindings||[]).filter(x=>x.name===secret&&x.type==='secret_text').length!==1)
+             throw Error('TEST_SECRET_BINDING_NOT_VERIFIED_'+worker);
+           console.log(worker+': isolated server secret configured (no value displayed)');
+          }
+          NODE
+      - name: Record EG pairing status without secrets
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SECRET_STEP: ${{ steps.secrets.outcome }}
+          VERIFY_STEP: ${{ steps.verify.outcome }}
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const ok=process.env.SECRET_STEP==='success'&&process.env.VERIFY_STEP==='success';
+          fs.writeFileSync('/tmp/kt134-paired.json',JSON.stringify({
+            runId:process.env.GITHUB_RUN_ID,paired:ok,
+            stagingWorker:'tpu-plovdiv-kt134-test',egWorker:'tpu-plovdiv-kt134-eg-test',
+            realDossierProcessed:false,productionWorkerChanged:false
+          },null,2)+'\n');
+          NODE
+          encoded="$(base64 -w0 /tmp/kt134-paired.json)"
+          path='kt134-auto/KT134_EG_SECRET_PAIRING_STATUS.json'
+          for i in 1 2 3 4 5; do
+            existing="$(gh api "repos/$GITHUB_REPOSITORY/contents/$path?ref=kt134-auto-mode-isolated" --jq '.sha' 2>/dev/null || true)"
+            if [ -n "$existing" ]; then
+              if gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$path" \
+                 -f message='KT134: record isolated live EG secret pairing' \
+                 -f branch='kt134-auto-mode-isolated' -f content="$encoded" -f sha="$existing" >/dev/null 2>&1; then exit 0; fi
+            else
+              if gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$path" \
+                 -f message='KT134: record isolated live EG secret pairing' \
+                 -f branch='kt134-auto-mode-isolated' -f content="$encoded" >/dev/null 2>&1; then exit 0; fi
+            fi
+            sleep 2
+          done
+          exit 1
