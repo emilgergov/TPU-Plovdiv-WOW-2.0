@@ -87,8 +87,34 @@ jobs:
           const routeIdx=text.indexOf('/kt126/registry/create');
           const local=text.slice(Math.max(0,routeIdx-450),routeIdx+900);
           const routeIdentifiers=[...new Set([...local.matchAll(/\b(?:createCase|createRegistry|registryCreate|newRegistry|POST|KT125_DB|KT126_DB|json|body|input)\b/g)].map(m=>m[0]))];
+          // Compile strictly structural information on the original native client calls.
+          // No code fragments, document content, user data or secrets are exported.
+          const apiStructures=[];
+          for(const token of ['api("/create"', '"/source"', '"/part/"', '"/finish"']){
+            let offset=0;
+            for(let n=0;n<12;n++){
+              const at=text.indexOf(token,offset);if(at<0)break;offset=at+token.length;
+              const sec=text.slice(at,Math.min(text.length,at+1050));
+              const close=/\}\s*\)/.exec(sec);
+              const payload=close?sec.slice(0,close.index):sec.slice(0,400);
+              const callArgs=/api\([^,\n]{2,140},\s*\{([\s\S]{0,700})/.exec(text.slice(Math.max(0,at-17),at+900));
+              const fieldRx=/(?:^|[,{]\s*)([a-zA-Z_]\w*)(?:\s*:|\s*(?=[,}]))/g;
+              const fields=[...new Set([...String(callArgs?.[1]||payload).matchAll(fieldRx)].map(x=>x[1]))].filter(x=>allowedFields.test(x));
+              const statements=[...new Set([...text.slice(Math.max(0,at-450),at+1000).matchAll(/(?:const|let)\s+([A-Za-z_]\w*)\s*=/g)].map(x=>x[1]))].filter(x=>allowedFields.test(x));
+              apiStructures.push({token,fields,statements,returnsCase:/(?:data|record|result)\.record|\.case_id/.test(sec)});
+            }
+          }
+          const createRegion=text.slice(Math.max(0,routeIdx-1900),routeIdx+1900);
+          const backendCalls=[...new Set([...createRegion.matchAll(/(?:await|return)\s+([A-Za-z_$][\w$]{2,85})\s*\(/g)].map(x=>x[1]))].filter(x=>!/(?:json|Response|URL|Error)/.test(x));
+          const functionBodies=[];
+          for(const fn of ['createCase','startSource','finishSource']){
+            const x=new RegExp('(?:async\\s+)?function\\s+'+fn+'\\s*\\(').exec(text);
+            if(!x)continue;
+            const sec=text.slice(x.index,x.index+4500);
+            functionBodies.push({name:fn,callArgShape:[...new Set([...sec.matchAll(/(?:api\(\s*["'][^"']+["']\s*,\s*\{)([^}]{0,340})\}/g)].map(m=>m[1].replace(/[^a-zA-Z0-9_,:\s]/g,' ').trim().slice(0,150)))],fieldReferences:safeFields(sec),startsWithCreate:/api\(\s*["']\/create["']/.test(sec),containsExternalNumber:/externalNumber|external_number/.test(sec)});
+          }
           const clientCalls=matches;
-          writeFileSync('/tmp/kt134-new-case-contract.json',JSON.stringify({source:'native-kt125-worker',readOnly:true,privateSourceExported:false,hasCreateRoute:text.includes('/kt126/registry/create'),createRouteCalls,routeIdentifiers,clientCalls,handlers,report},null,2));
+          writeFileSync('/tmp/kt134-new-case-contract.json',JSON.stringify({source:'native-kt125-worker',readOnly:true,privateSourceExported:false,hasCreateRoute:text.includes('/kt126/registry/create'),createRouteCalls,routeIdentifiers,clientCalls,apiStructures,backendCalls,functionBodies,handlers,report},null,2));
           console.log('KT134 contract metadata derived; private Worker source not logged');
           NODE
       - name: Save metadata in isolated checkpoint branch
