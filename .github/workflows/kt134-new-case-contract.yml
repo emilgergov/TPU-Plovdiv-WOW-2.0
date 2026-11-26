@@ -127,8 +127,23 @@ jobs:
             }
             uploads.push({anchor,occurrences:hits.length,hits:hits.slice(0,10)});
           }
+          // Inspect upload path composition as identifiers and fixed path fragments only.
+          const uploadPathShapes=[];
+          for(const a of ['"/source"','"/part/"','"/finish"']){
+            let begin=0;
+            for(let i=0;i<9;i++){
+              const at=text.indexOf(a,begin);if(at<0)break;begin=at+a.length;
+              const before=text.slice(Math.max(0,at-250),at);
+              const after=text.slice(at+1,Math.min(text.length,at+260));
+              const fragment=before+after;
+              const reserved=['caseId','record','case_id','sourceId','source_id','index','i','partIndex','source','id6','file','data','offset','part','chunk','bytes','revision','id','filename','digest','sha256','Buffer','Uint8Array','JSON'];
+              const identifiers=reserved.filter(z=>new RegExp('\\b'+z+'\\b').test(fragment));
+              const tokens=[...new Set([...fragment.matchAll(/["'](\/[a-zA-Z0-9_\/.-]{1,85})["']/g)].map(m=>m[1]))].filter(x=>x.startsWith('/'));
+              uploadPathShapes.push({anchor:a,identifiers,tokens,hasRawBody:/body:\s*(?:part|chunk|bytes|slice|data)/.test(fragment),hasJsonBody:/JSON.stringify/.test(fragment)});
+            }
+          }
           const clientCalls=matches;
-          writeFileSync('/tmp/kt134-new-case-contract.json',JSON.stringify({source:'native-kt125-worker',readOnly:true,privateSourceExported:false,hasCreateRoute:text.includes('/kt126/registry/create'),createRouteCalls,routeIdentifiers,clientCalls,apiStructures,backendCalls,functionBodies,uploads,handlers,report},null,2));
+          writeFileSync('/tmp/kt134-new-case-contract.json',JSON.stringify({source:'native-kt125-worker',readOnly:true,privateSourceExported:false,hasCreateRoute:text.includes('/kt126/registry/create'),createRouteCalls,routeIdentifiers,clientCalls,apiStructures,backendCalls,functionBodies,uploads,uploadPathShapes,handlers,report},null,2));
           console.log('KT134 contract metadata derived; private Worker source not logged');
           NODE
       - name: Save metadata in isolated checkpoint branch
