@@ -79,6 +79,33 @@ test('complete native ACL state -> Stage4 EG -> independent reviewer -> Stage5 -
   'Възражение без ново инвестиционно предложение');
  assert.equal(Uint8Array.from(atob(d.docxBase64),x=>x.charCodeAt(0)).length,180);
 });
+test('same native ACL and original case produce strictly verified E2–E5 milestone events',async()=>{
+ const calls=[],original=req();
+ const streamed=new Request(base+'/kt134/automatic/draft-events',{
+  method:'POST',headers:original.headers,body:JSON.stringify({caseId})});
+ const response=await handler({egCalls:calls})(streamed);
+ assert.equal(response.status,200);
+ assert.match(response.headers.get('content-type'),/application\/x-ndjson/);
+ const events=(await response.text()).trim().split('\n').map(x=>JSON.parse(x));
+ assert.deepEqual(events.filter(e=>e.type==='progress').map(e=>e.percent),
+  [40,60,80,100]);
+ assert.deepEqual(events.filter(e=>e.type==='progress').map(e=>e.stage),
+  [2,3,4,5]);
+ assert.equal(events.at(-1).type,'result');
+ assert.equal(events.at(-1).status,200);
+ assert.equal(events.at(-1).data.status,'draft_ready');
+ assert.equal(events.at(-1).data.expertApproved,false);
+ assert.equal(events.at(-1).data.finalDecision,null);
+ assert.equal(calls.length,2);
+});
+test('progress stream fails closed on bad origin with no EG calls',async()=>{
+ const calls=[];
+ const response=await handler({egCalls:calls})(new Request(base+'/kt134/automatic/draft-events',{
+  method:'POST',headers:{origin:'https://unknown.example',cookie,'content-type':'application/json'},
+  body:JSON.stringify({caseId})}));
+ assert.equal(response.status,403);
+ assert.equal(calls.length,0);
+});
 test('no authenticated native session never enters EG',async()=>{
  const calls=[];
  const r=await handler({nativeStatus:403,egCalls:calls})(req());
