@@ -1,0 +1,36 @@
+name: KT134 KT126 registry GET route diagnostics
+on:
+  push:
+    branches:
+      - kt134-auto-mode-isolated
+    paths:
+      - .github/workflows/kt134-probe-kt126-registry.yml
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Identify read-only route clauses for KT126 registry
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth',{headers:{authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('WORKER_SOURCE_UNAVAILABLE');
+          const source=await r.text();
+          for(const term of ['registryRoute','registryList','registryCreate','/kt126/registry','caseList','listCases','kt126_registry','listRegistry']){
+            const positions=[];let cursor=0;
+            for(let i=0;i<80;i++){const p=source.indexOf(term,cursor);if(p<0)break;positions.push(p);cursor=p+term.length}
+            console.log('TERM '+term+' COUNT '+positions.length);
+            for(const p of positions.slice(-10)){
+              let block=source.slice(Math.max(0,p-290),p+460);
+              block=block.replace(/(authorization|password|secret|token|key)\s*[:=]\s*['"`][^'"`]+['"`]/gi,'$1=[REDACTED]');
+              console.log('CONTEXT_START\n'+block+'\nCONTEXT_END');
+            }
+          }
+          NODE
