@@ -43,7 +43,22 @@ jobs:
             }
             out.push({token,sites});
           }
-          writeFileSync('/tmp/kt134-native-upload-audit.json',JSON.stringify({readOnly:true,noUserData:true,sourceExported:false,calls:out},null,2));
+          const declarations=[...s.matchAll(/\b(?:const|let)\s+(base2|sourceId|parts)\s*=\s*([^\n;]{1,180})/g)]
+            .filter(m=>m[1]==='base2').slice(0,6).map(m=>({name:m[1],
+             expression:m[2].replace(/[^A-Za-z0-9_."\/+() -]/g,'').slice(0,160)}));
+          const apiExpressions=[];
+          for(const token of ['"/source"', '"/part/"','"/finish"']){
+            let from=0;
+            for(let i=0;i<8;i++){
+              const pos=s.indexOf(token,from);if(pos<0)break;from=pos+token.length;
+              const near=s.slice(Math.max(0,pos-160),pos+170);
+              const m=/api\(([^,\n]{1,240}),/.exec(near);
+              const expression=m?.[1].replace(/[^A-Za-z0-9_."\/+() -]/g,'').slice(0,180)||'';
+              const relevant=near.replace(/[^A-Za-z0-9_."\/+():,{}= -]/g,' ').replace(/\s+/g,' ').slice(0,270);
+              apiExpressions.push({token,expression,relevant});
+            }
+          }
+          writeFileSync('/tmp/kt134-native-upload-audit.json',JSON.stringify({readOnly:true,noUserData:true,sourceExported:false,calls:out,declarations,apiExpressions},null,2));
           console.log('Verified native protocol metadata without exporting private Worker code');
           NODE
       - name: Store minimal audited route shapes in isolated branch
