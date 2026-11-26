@@ -62,7 +62,7 @@ function redirectTarget(value,visibleOrigin) {
  if(['/auth/login','/auth/logout','/auth/forgot','/auth/reset'].some(
   p=>path===p||path.startsWith(p+'/')))
   return visibleOrigin+path+next.search;
- return visibleOrigin+'/kt134/entry';
+ return visibleOrigin+'/kt134/final-test';
 }
 export function createKt134NativeAuthProxy({nativeFetch,upstreamOrigin=nativeOrigin}={}){
  if(typeof nativeFetch!=='function'||upstreamOrigin!==nativeOrigin)
