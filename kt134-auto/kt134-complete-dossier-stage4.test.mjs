@@ -56,3 +56,21 @@ test('EG bridge directly accepts E1-E3 bundle without a second hardcoded factory
  assert.equal(body.completeCaseEvidence.registryNumber,'ТЕСТ-0004');
  assert.equal(body.kt134AutomaticInterim,true);
 });
+
+
+test('leading document is never assumed to be the first ZIP entry',()=>{
+ const b=example();
+ b.documents=[
+  {sourceId:'notice',fileName:'01_notice.pdf',type:'уведомление',text:'Първоначално уведомление за ИП.'},
+  {sourceId:'reply',fileName:'02_reply.pdf',type:'писмо',text:'Издадено предходно писмо по чл. 2, ал. 2.'},
+  {sourceId:'appeal',fileName:'03_objection.pdf',type:'възражение',text:'Актуално възражение срещу предходното писмо.'}
+ ];
+ const noLead=buildKt134CompleteStage4Request({caseId:b.caseId,revision:'rev4',bundle:b});
+ assert.equal(noLead.completeCaseEvidence.leadingDocument.status,'requires_automatic_author_reviewer_selection');
+ assert.equal(noLead.evidence.find(f=>f.factId==='CASE_SUBJECT').sourceId,'KT125_NATIVE_KT126_STATE');
+ assert.match(noLead.completeCaseEvidence.leadingDocumentRule,/ВСИЧКИ документи/);
+ b.leadingDocument={sourceId:'appeal',fileName:'03_objection.pdf',reasoning:'Текущото възражение е предмет на разглеждане.'};
+ const chosen=buildKt134CompleteStage4Request({caseId:b.caseId,revision:'rev4',bundle:b});
+ assert.equal(chosen.completeCaseEvidence.leadingDocument.sourceId,'appeal');
+ assert.equal(chosen.evidence.find(f=>f.factId==='CASE_SUBJECT').sourceId,'appeal');
+});
