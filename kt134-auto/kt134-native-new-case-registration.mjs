@@ -9,10 +9,11 @@ const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]
 function fail(code){const error=new Error(code);error.code=code;throw error}
 export function createKt134NativeCaseRegistration({nativeFetch}={}){
  if(typeof nativeFetch!=='function')fail('KT125_NATIVE_SERVICE_REQUIRED');
- return async function register({request,originalsStored}={}){
+ return async function register({request,intakeValidated}={}){
   if(!(request instanceof Request))fail('KT125_REQUEST_REQUIRED');
-  // An unpersisted original cannot consume a KT126 sequence number.
-  if(originalsStored!==true)fail('KT134_ORIGINALS_NOT_PERSISTED');
+  // E1 intake validation must precede allocation. Original uploads require
+  // the newly allocated native caseId and follow on this SAME record.
+  if(intakeValidated!==true)fail('KT134_INTAKE_NOT_VALIDATED');
   const url=new URL(request.url);
   if(request.method!=='POST'||url.pathname!=='/kt134/new-case/register')
    fail('KT134_REGISTER_METHOD_OR_PATH_INVALID');
