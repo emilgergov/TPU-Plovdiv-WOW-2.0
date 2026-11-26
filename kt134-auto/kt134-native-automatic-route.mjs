@@ -161,6 +161,18 @@ async function construct({response,normative,proof}){
   gisReviewReason:c.gisReviewReason,gisEvidenceIssues:c.gisEvidenceIssues,
   piMaster:c.piMaster,normativeArchive:normative,registryNumber:c.external,
   pdf2Ref:s(c.body.pdf2Ref||c.state.pdf2Ref),
+  // Use the chosen KT126 leading document only if it belongs to the SAME case.
+  // Otherwise pass the complete dossier to EG Author/Reviewer for selection.
+  leadingDocument:(()=>{
+   const d=o(c.state.leadingDocument||c.globals.KT126LeadingDocument);
+   const belongs=s(d.caseId||d.case_id);
+   if(belongs&&belongs!==c.caseId)return {};
+   const sourceId=s(d.sourceId||d.source_id);
+   const fileName=s(d.fileName||d.filename||d.name);
+   if(!c.docs.some(x=>(sourceId&&x.sourceId===sourceId)||
+     (fileName&&x.fileName===fileName)))return {};
+   return {sourceId,fileName,reasoning:s(d.reasoning||d.reason)};
+  })(),
   facts:[],procedureEvidence:[],dossierReview:c.dossierReview
  };
  return {ctx,bundle};
