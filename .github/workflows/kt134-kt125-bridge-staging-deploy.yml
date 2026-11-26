@@ -123,14 +123,14 @@ jobs:
             path='kt134-auto/KT134_KT125_BRIDGE_DEPLOY_STATUS.json'
             existing="$(gh api "repos/$GITHUB_REPOSITORY/contents/$path?ref=kt134-auto-mode-isolated" --jq '.sha' 2>/dev/null || true)"
             if [ -n "$existing" ]; then
-              if gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$path" \\
-                -f message='KT134: record native service bridge live result' \\
-                -f branch='kt134-auto-mode-isolated' \\
+              if gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$path" \
+                -f message='KT134: record native service bridge live result' \
+                -f branch='kt134-auto-mode-isolated' \
                 -f content="$encoded" -f sha="$existing" >/dev/null 2>&1; then gh_status=0; break; fi
             else
-              if gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$path" \\
-                -f message='KT134: record native service bridge live result' \\
-                -f branch='kt134-auto-mode-isolated' \\
+              if gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$path" \
+                -f message='KT134: record native service bridge live result' \
+                -f branch='kt134-auto-mode-isolated' \
                 -f content="$encoded" >/dev/null 2>&1; then gh_status=0; break; fi
             fi
             sleep 2
