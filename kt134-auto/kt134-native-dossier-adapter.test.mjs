@@ -80,3 +80,37 @@ test('actual KT126 nested state and values snapshots feed Stage2 context',async(
  assert.equal(b.scope,'Редакция на съдържание на административно писмо');
  assert.equal(b.documents[0].sourceId,'doc1');
 });
+
+test('KT126 document_texts links exact filename to the only authoritative file',async()=>{
+ const versions=[{revision:4,kind:'stage1',content_json:JSON.stringify({
+   state:{intake:{document_texts:[{source:'vazrazhenie.pdf',text:'Пълен извлечен текст от възражение.'}],
+     gisSkipConfirmed:true,gisSkipReason:'Жалба без ново пространствено действие'}},
+   values:{kt80SubjectText:'Възражение',kt80ScopeText:'Преразглеждане на писмо'},
+   gisSkipConfirmed:true,gisSkipReason:'Жалба без пространствена преценка'
+ })}];
+ const a=fixture({versions});
+ await a.loadProtectedContext({authenticatedSession:'session-doc-texts',caseId:id});
+ const b=await a.loadEvidenceBundle({
+   authenticatedSession:'session-doc-texts',preflight:{case:{caseId:id}}
+ });
+ assert.deepEqual(b.documents.map(d=>d.sourceId),['doc1']);
+ assert.equal(b.documents[0].text,'Пълен извлечен текст от възражение.');
+});
+test('duplicate filenames in manifest cannot attach unverified document text',async()=>{
+ const versions=[{revision:5,content_json:JSON.stringify({
+   subject:'Възражение',scope:'Отговор',gisSkipConfirmed:true,gisSkipReason:'Без ГИС',
+   document_texts:[{source:'vazrazhenie.pdf',text:'Текст от файл'}]
+ })}];
+ const files=[{source_id:'doc1',filename:'vazrazhenie.pdf',sha256:'b'.repeat(64),complete:1},
+              {source_id:'doc2',filename:'vazrazhenie.pdf',sha256:'c'.repeat(64),complete:1}];
+ await assert.rejects(()=>fixture({versions,files})
+  .loadProtectedContext({authenticatedSession:'session-ambiguous',caseId:id}),
+  /KT134_DOCUMENT_SOURCE_UNVERIFIED/);
+});
+test('missing manifest source refuses partial dossier instead of drafting',async()=>{
+ const files=[...rows.kt126_files,
+  {source_id:'doc2',filename:'attachment.pdf',sha256:'c'.repeat(64),complete:1}];
+ await assert.rejects(()=>fixture({files}).loadProtectedContext({
+  authenticatedSession:'session-incomplete',caseId:id
+ }),/KT134_VERIFIED_SOURCE_TEXTS_MISSING/);
+});
