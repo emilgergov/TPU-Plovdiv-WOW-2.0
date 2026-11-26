@@ -190,5 +190,43 @@
         }
       ]
     }
+  ],
+  "declarations": [
+    {
+      "name": "base2",
+      "expression": "\"/\" + id6 + \"/source\" + (sourceId  \"original\"  \"\"  \"/\" + sourceId)"
+    }
+  ],
+  "apiExpressions": [
+    {
+      "token": "\"/source\"",
+      "expression": "base2 + \"/start\"",
+      "relevant": "nc function storeSource(file, id6, sourceId = \"original\", sourceHash = record.source_hash, stillCurrent = () = isCurrent(id6)) { const base2 = \"/\" + id6 + \"/source\" + (sourceId === \"original\" \"\" : \"/\" + sourceId) const start = await api(base2 + \"/start\", { filename: fil"
+    },
+    {
+      "token": "\"/source\"",
+      "expression": "",
+      "relevant": "Current()) return const data = await api(\"/\" + id6) if ( openingCurrent()) return let fileInfo try { fileInfo = await api(\"/\" + id6 + \"/source\") } catch { fileInfo = { file: null } } const supplied = fileInfo.file .complete await selectOriginal(data.record) : null if ( "
+    },
+    {
+      "token": "\"/source\"",
+      "expression": "",
+      "relevant": " true try { const parts = for (let i = 0 i meta.parts i++) { const r2 = await fetch(\"/kt126/registry/\" + id6 + \"/source\" + (meta.source_id === \"original\" \"\" : \"/\" + meta.source_id) + \"/part/\" + i, { credentials: \"same-origin\", cache: \"no-store\" }) if ( r2.ok) throw "
+    },
+    {
+      "token": "\"/part/\"",
+      "expression": "",
+      "relevant": "043F u0438 u0441 u043A u0430 u0442 u0430 u0435 u0441 u043C u0435 u043D u0435 u043D u0430.\") const response = await fetch(\"/kt126/registry\" + base2 + \"/part/\" + i, { method: \"POST\", headers: { \"Content-Type\": \"application/octet-stream\" }, body: await file.slice(i CHUNK2,"
+    },
+    {
+      "token": "\"/part/\"",
+      "expression": "",
+      "relevant": " i meta.parts i++) { const r2 = await fetch(\"/kt126/registry/\" + id6 + \"/source\" + (meta.source_id === \"original\" \"\" : \"/\" + meta.source_id) + \"/part/\" + i, { credentials: \"same-origin\", cache: \"no-store\" }) if ( r2.ok) throw Error(\" u0414 u043E u043A u0443 u043C u0435 "
+    },
+    {
+      "token": "\"/finish\"",
+      "expression": "base2 + \"/finish\"",
+      "relevant": "F u043E u0432 u0442 u043E u0440 u0435 u0442 u0435 u043E u0431 u0440 u0430 u0431 u043E u0442 u043A u0430 u0442 u0430.\") } })) await api(base2 + \"/finish\", {}) } async function beforeProcess(file) { if (file.size 40 1024 1024) throw Error(\" u041C u0430 u043A u0441 u0438 u"
+    }
   ]
 }
