@@ -1,11 +1,11 @@
 <!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>WOW · Административен пътеводител</title><style>
 :root{font-family:Verdana,Arial,sans-serif;color:#f3eddf;background:#082a20}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 10%,#26503a,#082a20 62%);min-height:100vh}.top{display:flex;align-items:center;justify-content:space-between;background:#07241b;border-bottom:1px solid #cba65d;padding:15px 3vw;gap:10px;flex-wrap:wrap}.top strong{font-size:21px;color:#f2cb73}.top a{color:#f0cf89;text-decoration:none}.main{max-width:1500px;margin:20px auto;padding:0 20px}.intro{border:1px solid #b39b5b;border-radius:12px;background:#153e2f;padding:18px;margin-bottom:20px}h1{font-size:21px;color:#f4ca74;margin:0 0 9px}h2{font-size:17px;color:#f4ca74}.intro p{font-size:12px;margin:0}.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:13px;margin:10px 0 18px}.stage{border:1px solid #819a76;border-radius:11px;min-height:185px;padding:18px 12px;background:linear-gradient(160deg,#22533d,#123f2e);position:relative}.stage strong{display:block;font-size:13px;color:#f6d081}.stage p{font-weight:700;font-size:16px;line-height:1.5}.stage:first-child{background:linear-gradient(140deg,#f6df9a,#c9a653);color:#153c2b}.stage:first-child strong{color:#153c2b}.stage a{color:inherit;text-decoration:none}.stage a:focus-visible{outline:3px solid #ffe39c}.stage a:hover{color:#ffe39c}.stage:first-child a:hover{color:#124630}.stage .arrow{position:absolute;bottom:10px;right:16px;font-size:24px}.note{font-size:12px;color:#e0d8bb}details{margin:11px 0;border:1px solid #9f9b5e;border-radius:10px;overflow:hidden;background:#17432f}summary{cursor:pointer;padding:15px 20px;color:#f8d083;font-size:15px;font-weight:700;list-style:none}summary::before{content:"▸ ";color:#f1b861}details[open] summary::before{content:"▾ "}summary span{float:right;color:#d8e4d4;font-size:11px;font-weight:400}.inside{border-top:1px solid #657b60;padding:13px}.inside p{margin:0 0 12px;font-size:12px;line-height:1.6}iframe{width:100%;height:1060px;background:#072d21;border:0;border-radius:12px}.hint{padding:13px;background:#124130;border-radius:8px;margin-bottom:10px;color:#e1d4af;font-size:12px}.panels{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.panel{border:1px solid #6e866a;border-radius:9px;padding:12px;background:#234c3d;min-height:85px}.panel b{color:#ebc16b;font-size:11px}.panel p{font-size:12px;font-weight:700;margin:6px 0}.panel.special{border:2px solid #f3cb62;background:linear-gradient(145deg,#55734a,#17402f)}@media(max-width:980px){.grid,.panels{grid-template-columns:repeat(2,minmax(0,1fr))}iframe{height:1200px}}@media(max-width:600px){.grid,.panels{grid-template-columns:1fr}.stage{min-height:105px}summary span{display:none}}
 
-/* Една система, един набор карти: разгънатата КТ134 скрива дублиращия ред на КТ133. */
-body:has(#auto[open]) #kt134-classic-title,
-body:has(#auto[open])>.main>.grid{display:none}
-body:has(#auto[open]) .grid{display:none}
-body:has(#auto[open]) #auto{margin-top:0}
+/* One permanent classic stage deck above the expandable automatic route.
+   KT134 embedded mode hides its own duplicate stage deck. */
+#kt134-classic-title,.main>.grid{display:block}
+.main>.grid{display:grid}
+#auto{margin-top:0}
 #auto .inside{padding:9px}
 #auto .inside>p{padding:4px 7px 9px;font-size:12px;margin:0}
 #kt134-live{display:block;height:950px;overflow:hidden;border:0;border-radius:10px;background:#082a20}
@@ -50,6 +50,25 @@ details>summary span{color:#c9d3c1}
 .stage p{font-size:15px;line-height:1.35;margin:9px 0}
 #auto:not([open]) #kt134-live{display:none}
 #auto[open] .inside{padding:6px 8px 9px}
+
+/* The common stage deck takes its graphical language from the stable KT133. */
+.main>.grid{gap:14px;margin-bottom:15px}
+.main>.grid>.stage{min-height:218px;border-radius:12px;overflow:hidden;border:1px solid #688067;padding:15px 16px;background:
+linear-gradient(133deg,transparent 59%,#ffffff09 60%,transparent 61%),
+linear-gradient(160deg,#214b39,#1c4232 72%,#275742)}
+.main>.grid>.stage:first-child{background:linear-gradient(155deg,#efd597,#cda95c)}
+.main>.grid>.stage p{font-size:18px;line-height:1.38;margin:15px 0;font-weight:720}
+.main>.grid>.stage strong{font-size:14px;letter-spacing:.02em}
+.main>.grid>.stage::after{content:"";position:absolute;right:-9px;bottom:-24px;width:126px;height:126px;opacity:.19;border:3px solid currentColor;border-radius:22% 47% 35% 25%;transform:rotate(17deg);pointer-events:none}
+.main>.grid>.stage:nth-child(2)::after{border-radius:55% 20% 55% 20%;transform:rotate(-30deg)}
+.main>.grid>.stage:nth-child(3)::after{border-radius:15%;transform:rotate(55deg)}
+.main>.grid>.stage:nth-child(4)::after{border-radius:50%;transform:rotate(8deg)}
+.main>.grid>.stage:nth-child(5)::after{border-radius:8%}
+.main>.grid>.stage .arrow{font-size:30px;z-index:1;right:14px;bottom:11px}
+.main>.grid>.stage:focus-within{outline:2px solid #e9d08a}
+#auto .inside>p{display:none}
+@media(max-width:980px){.main>.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.main>.grid>.stage{min-height:130px}}
+@media(max-width:600px){.main>.grid{grid-template-columns:1fr}.main>.grid>.stage{min-height:100px}.main>.grid>.stage p{font-size:15px}}
 </style><script>
 addEventListener('message',e=>{
  if(e.origin!==location.origin||e.source!==document.getElementById('kt134-live')?.contentWindow)return;
