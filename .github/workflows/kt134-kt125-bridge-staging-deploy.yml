@@ -71,7 +71,9 @@ jobs:
           node --test kt134-auto/kt134-native-new-case-registration.test.mjs
           node --test kt134-auto/kt134-native-original-transport.test.mjs
           grep -Fq '/kt134/new-case/register' kt134-auto/kt134-kt125-bridge-staging-worker.mjs
-          grep -Fq 'Въведи нова преписка' kt134-auto/KT134_PROTECTED_INTEGRATION_UI.html
+          grep -Fq 'Стартирай автоматичния анализ' kt134-auto/KT134_PROTECTED_INTEGRATION_UI.html
+          grep -Fq 'id="kt134-new-file"' kt134-auto/KT134_PROTECTED_INTEGRATION_UI.html
+          grep -Fq 'id="kt134-case-select"' kt134-auto/KT134_PROTECTED_INTEGRATION_UI.html
           grep -Fq '/kt134/new-case/complete-stage1' kt134-auto/KT134_PROTECTED_INTEGRATION_UI.html
           node --test kt134-auto/kt134-kt125-service-audit.test.mjs
           node --test kt134-auto/kt134-kt125-native-auth-proxy.test.mjs
