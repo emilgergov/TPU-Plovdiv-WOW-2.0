@@ -1,0 +1,39 @@
+name: KT134 native case API route implementation probe
+on:
+  push:
+    branches:
+      - kt134-auto-mode-isolated
+    paths:
+      - .github/workflows/kt134-probe-case-route-logic.yml
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect only route branch conditions, not secrets or case contents
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth',{headers:{authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('WORKER_SOURCE_UNAVAILABLE');
+          const source=await r.text();
+          for(const term of ['/kt125/cases/','/member','/kt126/registry/','kt125_cases']){
+            const positions=[];let cursor=0;
+            for(let i=0;i<60;i++){
+              const p=source.indexOf(term,cursor);if(p<0)break;positions.push(p);cursor=p+term.length;
+            }
+            console.log('TERM '+term+' COUNT '+positions.length);
+            for(const p of positions.slice(-5)){
+              let block=source.slice(Math.max(0,p-360),p+730);
+              block=block.replace(/(authorization|password|secret|token|key)\s*[:=]\s*['"`][^'"`]+['"`]/gi,'$1=[REDACTED]');
+              block=block.replace(/(?:sk-[A-Za-z0-9_-]{12,}|Bearer\s+[A-Za-z0-9._-]+)/g,'[REDACTED]');
+              console.log('ROUTE_CONTEXT_BEGIN\n'+block+'\nROUTE_CONTEXT_END');
+            }
+          }
+          NODE
