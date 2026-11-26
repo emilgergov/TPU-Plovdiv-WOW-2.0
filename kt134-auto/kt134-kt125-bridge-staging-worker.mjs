@@ -100,7 +100,7 @@ export default {
     // Invalid throwaway cookie; native KT125 MUST refuse it. No user case
     // UUID, session, or document is sent to this operational probe.
     const rejected=await env.KT125_NATIVE.getCaseContext({
-      cookie:'kt125_invalid_probe=not-a-session',
+      cookie:'',
       caseId:'11111111-1111-4111-8111-111111111111',
       action:'case.edit'
     });
@@ -108,7 +108,10 @@ export default {
     return json({ready:true,source:'KT125_NATIVE_RPC',
       actorVerification:'native_case_edit',rejectsInvalidSession:true,
       realCaseDataRead:false,productionWorkerChanged:false});
-   }catch{return json({ready:false,reason:'KT125_RPC_PROBE_UNAVAILABLE'},503)}
+   }catch(error){
+    const kind=typeof error?.name==='string'&&/^[A-Za-z]{2,40}$/.test(error.name)?error.name:'Unknown';
+    return json({ready:false,reason:'KT125_RPC_PROBE_UNAVAILABLE',errorKind:kind},503)
+   }
   }
   if(path==='/kt134/available-cases'){
    if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
