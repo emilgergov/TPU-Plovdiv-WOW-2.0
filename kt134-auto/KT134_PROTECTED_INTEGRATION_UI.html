@@ -175,6 +175,45 @@ html.kt134-embedded .bar{margin-top:0}
 .kt134-unified .kt134-progress-panel{min-height:70px}
 .kt134-unified .kt134-progress-panel #subtitle{font-size:11px}
 }
+
+/* KT134 = WOW KT133 visual system; sourced from the actual KT133 dashboard.
+   Appearance only. Retain all approved gates, cards and live identifiers. */
+:root{font-family:"Segoe UI",Arial,sans-serif;background:#09271d;color:#f0ead6}
+html.kt134-embedded,html.kt134-embedded body{background:transparent;color:#f0ead6}
+html.kt134-embedded main{font-family:"Segoe UI",Arial,sans-serif}
+html.kt134-embedded .bar .case{background:#123628;border:1px solid #9b8556;border-radius:9px;color:#e4dfc9}
+html.kt134-embedded .case strong{color:#efd18c}
+html.kt134-embedded .bar>div:nth-child(2){background:#123628!important;border-color:#947b4c!important}
+html.kt134-embedded .bar label{color:#f2ddb0;font-weight:600;font-size:13px}
+html.kt134-embedded #kt134-case-select{background:#fbf9f0!important;color:#193c2a!important;border:1px solid #d4bd81!important;border-radius:8px!important;font-family:"Segoe UI",Arial,sans-serif!important;font-size:14px!important}
+html.kt134-embedded button:not(.primary){background:#24593c;border:1px solid #cfb271;color:#f7e5b8;font-family:"Segoe UI",Arial,sans-serif}
+html.kt134-embedded button.primary{background:linear-gradient(#e4c681,#cfac66);border:1px solid #cfb271;color:#173124;font-family:"Segoe UI",Arial,sans-serif}
+html.kt134-embedded .kt134-unified{border:1px solid #ae915a;background:linear-gradient(125deg,#123628 0%,#1b4b34 58%,#214b33 100%);box-shadow:inset 0 0 16px #b8b5801a,0 5px 14px #00180e55;border-radius:12px}
+html.kt134-embedded .kt134-unified .stage{background:linear-gradient(145deg,#1e4d37,#24563b);border:1px solid #67825c;box-shadow:0 3px 9px #08241c66;border-radius:10px}
+html.kt134-embedded .kt134-unified .stage::before{background:linear-gradient(35deg,#7eab5e66,#b6be6777);opacity:.65}
+html.kt134-embedded .kt134-unified .stage>span:first-child{color:#f3d18c}
+html.kt134-embedded .kt134-unified .stage>div{color:#f5e8c8;text-shadow:none}
+html.kt134-embedded .kt134-unified .stage .stage-icon{color:#dcb66d;filter:drop-shadow(1px 2px 2px #0a301d)}
+html.kt134-embedded .kt134-unified .stage.active{background:linear-gradient(140deg,#f1d696,#d5b774 88%);border-color:#f5e1b1;box-shadow:0 0 10px #dfc17f88}
+html.kt134-embedded .kt134-unified .stage.active>span:first-child,html.kt134-embedded .kt134-unified .stage.active>div{color:#193c2a}
+html.kt134-embedded .kt134-unified .stage.active .stage-icon{color:#947337}
+html.kt134-embedded .kt134-unified .stage.done{background:linear-gradient(150deg,#356f47,#255b3d);border-color:#92af76}
+html.kt134-embedded .kt134-unified .auto{border-top:1px solid #a18f5f80}
+html.kt134-embedded .auto-label strong{color:#efd18c}
+html.kt134-embedded .auto-label small{color:#d1dccb}
+html.kt134-embedded .auto-label>span{color:#e9c475}
+html.kt134-embedded .kt134-unified .route::before{background:linear-gradient(90deg,#d5b46e,#f3d996 13%,#c9dd99 50%,#f3d996 87%,#d5b46e);box-shadow:0 0 8px #e6cf8788}
+html.kt134-embedded .kt134-unified .gate{border-color:#d1af66;border-bottom-color:#c49e55;background:radial-gradient(ellipse at 50% 85%,#e5c47b 0%,#a98543 28%,#28573a 74%);color:#fff0cc;box-shadow:inset 0 0 11px #e2c180,0 0 11px #cbb06a88}
+html.kt134-embedded .kt134-unified .node{border-color:#bad49d;background:linear-gradient(#2b6b43,#17472f);color:#fff6df;box-shadow:0 0 8px #8eb97a66}
+html.kt134-embedded .kt134-unified .node.active{border-color:#f6de9b;background:linear-gradient(#e7c66a,#ac8640);color:#173124;box-shadow:0 0 0 5px #aa824244,0 0 14px #d6b56a}
+html.kt134-embedded .kt134-unified .kt134-progress-panel{border-top:1px solid #b09a69a1;background:none}
+html.kt134-embedded .kt134-unified .kt134-progress-panel .subrow{background:#123d2b;border:1px solid #cfb271;box-shadow:0 0 8px #c2aa6e66;color:#f5e8c8}
+html.kt134-embedded .kt134-unified #subtitle{color:#f2ead6}
+html.kt134-embedded .kt134-unified .kt134-panel-leaf{color:#92af70;opacity:.48}
+html.kt134-embedded .kt134-unified .track{background:#3c654b}
+html.kt134-embedded .kt134-unified .fill{background:#d9b66a}
+html.kt134-embedded .note{color:#d1dccb}
+
 </style><script>
 if(new URLSearchParams(location.search).get('embedded')==='1')
  document.documentElement.classList.add('kt134-embedded');
