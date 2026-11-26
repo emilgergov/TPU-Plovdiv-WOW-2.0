@@ -55,6 +55,11 @@ export function createKt134NativeAuthProxy({nativeFetch,upstreamOrigin=nativeOri
   }
   const headers=new Headers();
   headers.set('Accept','text/html');
+  // The native KT125 origin guard also checks forwarded GET requests.
+  // A browser navigation GET normally has no Origin header, but a
+  // service-bound request must represent the native KT125 origin.
+  headers.set('Origin',nativeOrigin);
+  headers.set('Referer',nativeOrigin+'/auth/login');
   if(request.method==='POST'){
    headers.set('Content-Type','application/x-www-form-urlencoded');
    headers.set('Origin',nativeOrigin);
