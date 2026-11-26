@@ -7,6 +7,8 @@ import {createKt134NativeAuthProxy} from './kt134-kt125-native-auth-proxy.mjs';
 import {createKt134NativeCaseReader} from './kt134-native-case-http.mjs';
 import {createKt134NativeCaseList} from './kt134-native-case-list.mjs';
 import {createKt134NativeAutomaticHandler} from './kt134-native-automatic-route.mjs';
+import {createKt134NativeCaseRegistration} from './kt134-native-new-case-registration.mjs';
+import {createKt134NativeOriginalTransport} from './kt134-native-original-transport.mjs';
 import autoUI from './KT134_PROTECTED_INTEGRATION_UI.html';
 import dashboardUI from './KT134_EMBEDDED_DASHBOARD.html';
 const nativeOrigin='https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev';
@@ -32,6 +34,33 @@ export default {
   if(path==='/auth/login'||path==='/auth/logout'){
    if(!nativeFetch)return json({error:'KT125_NATIVE_NOT_CONFIGURED'},503);
    return createKt134NativeAuthProxy({nativeFetch})(request);
+  }
+  // New dossier uses the SAME native KT126 sequence and original-file store
+  // as classic E1. No parallel registry, no new identity architecture.
+  if(path==='/kt134/new-case/register'){
+   if(!nativeFetch)return json({error:'KT125_NATIVE_NOT_CONFIGURED'},503);
+   try{
+    const register=createKt134NativeCaseRegistration({nativeFetch});
+    const result=await register({request,intakeValidated:true});
+    return json(result,201);
+   }catch(error){
+    const code=/^[A-Z0-9_]{5,90}$/.test(error?.code||'')?
+      error.code:'KT134_NATIVE_REGISTRATION_UNAVAILABLE';
+    return json({error:code},code==='KT125_LOGIN_REQUIRED'?401:
+     code==='KT125_CASE_CREATE_FORBIDDEN'?403:422);
+   }
+  }
+  if(path.startsWith('/kt134/new-case/original/')){
+   if(!nativeFetch)return json({error:'KT125_NATIVE_NOT_CONFIGURED'},503);
+   try{
+    const transfer=createKt134NativeOriginalTransport({nativeFetch});
+    return json(await transfer(request));
+   }catch(error){
+    const code=/^[A-Z0-9_]{5,90}$/.test(error?.code||'')?
+      error.code:'KT134_NATIVE_ORIGINAL_WRITE_UNAVAILABLE';
+    return json({error:code},code==='KT125_LOGIN_REQUIRED'?401:
+      code==='KT125_CASE_ACCESS_DENIED'?403:422);
+   }
   }
   if(path==='/kt134/automatic/draft'){
    if(!nativeFetch)return json({error:'KT125_NATIVE_NOT_CONFIGURED'},503);
