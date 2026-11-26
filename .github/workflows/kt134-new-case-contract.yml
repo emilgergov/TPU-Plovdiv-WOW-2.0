@@ -1,0 +1,70 @@
+name: KT134 new case secure contract discovery
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-new-case-contract.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  read_contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Derive native KT126 create and original-file write contract without copying private source
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const endpoint='https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth';
+          const res=await fetch(endpoint,{headers:{Authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!res.ok)throw Error('KT125_NATIVE_SOURCE_UNAVAILABLE_'+res.status);
+          const text=await res.text();
+          const terms=['/kt126/registry/create','/kt126/registry/','/source/start','/source/part/','/source/finish','/part/','/finish','kt126_files','kt126_chunks'];
+          const allowedFields=/^(?:caseId|case_id|internalNumber|internal_number|externalNumber|external_number|revision|sourceId|source_id|fileId|file_id|fileName|filename|name|kind|type|contentType|content_type|mime|size|byteLength|bytes|sha256|digest|hash|content|text|payload|data|state|intake|documents|files|originals|organization_id|user_id|subject|scope|status|parts|index|part|partIndex|total|totalParts|checksum|clientId|idempotencyKey|expectedRevision|sourceText|body|reason|action|case|registry|id|title)$/;
+          function safeFields(str){
+            const hits=[...str.matchAll(/(?:body|payload|input|data|params|requestBody|json|record|file|source|state)\.([A-Za-z_][\w]*)/g)]
+              .map(x=>x[1]).filter(x=>allowedFields.test(x));
+            const get=[...str.matchAll(/\.get\(\s*['"]([a-zA-Z_][\w]*)['"]\s*\)/g)]
+              .map(x=>x[1]).filter(x=>allowedFields.test(x));
+            const destruct=[...str.matchAll(/\b(?:const|let)\s*\{([^\n}]{1,250})\}\s*=\s*(?:body|payload|input|data|params|requestBody|json)\b/g)]
+              .flatMap(m=>m[1].split(',').map(x=>x.split(':')[0].trim())).filter(x=>allowedFields.test(x));
+            return [...new Set([...hits,...get,...destruct])].sort();
+          }
+          const report=terms.map(term=>{
+            let offset=0,around=[];
+            for(let i=0;i<24;i++){
+              const at=text.indexOf(term,offset);if(at<0)break;offset=at+term.length;
+              const pre=text.slice(Math.max(0,at-550),at),post=text.slice(at,at+4200);
+              const segment=pre+post;
+              const verbs=[...new Set([...segment.matchAll(/\b(GET|POST|PUT|PATCH|DELETE)\b/g)].map(x=>x[1]))];
+              const storage=['kt126_registry','kt126_versions','kt126_files','kt126_chunks','kt125_cases','R2','BUCKET'].filter(x=>segment.includes(x));
+              const parsing=['request.json()','request.formData()','request.text()','request.arrayBuffer()','JSON.parse('].filter(x=>segment.includes(x));
+              const pathHints=[...new Set([...segment.matchAll(/['"](\/kt126\/[a-zA-Z0-9_/:.-]{1,80})['"]/g)].map(x=>x[1]))].slice(0,12);
+              around.push({fields:safeFields(segment),verbs,parsing,storage,pathHints,hasConflictGuard:/revision|idempotenc|duplicate/i.test(segment),hasACLCheck:/case\.edit|canEditCase|verified|organization_id/.test(segment)});
+            }
+            return {term,occurrences:around.length,nearby:around.slice(0,8)};
+          });
+          writeFileSync('/tmp/kt134-new-case-contract.json',JSON.stringify({source:'native-kt125-worker',readOnly:true,privateSourceExported:false,hasCreateRoute:text.includes('/kt126/registry/create'),report},null,2));
+          console.log('KT134 contract metadata derived; private Worker source not logged');
+          NODE
+      - name: Save metadata in isolated checkpoint branch
+        run: |
+          set -euo pipefail
+          file=kt134-auto/KT134_NEW_CASE_NATIVE_CONTRACT.json
+          content="$(base64 -w0 /tmp/kt134-new-case-contract.json)"
+          for i in 1 2 3 4 5; do
+            sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/$file?ref=kt134-auto-mode-isolated" --jq .sha 2>/dev/null || true)"
+            if [ -n "$sha" ]; then
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$file" -f branch=kt134-auto-mode-isolated -f message='KT134: private source-free new case contract metadata' -f content="$content" -f sha="$sha" >/dev/null && exit 0
+            else
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$file" -f branch=kt134-auto-mode-isolated -f message='KT134: private source-free new case contract metadata' -f content="$content" >/dev/null && exit 0
+            fi
+            sleep 2
+          done
+          exit 1
