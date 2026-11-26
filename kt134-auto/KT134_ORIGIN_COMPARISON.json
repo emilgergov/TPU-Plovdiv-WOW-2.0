@@ -1,0 +1,65 @@
+{
+  "readOnly": true,
+  "checks": [
+    {
+      "host": "https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev",
+      "origin": null,
+      "status": 200,
+      "contentType": "text/html",
+      "originRejected": false,
+      "htmlLogin": true,
+      "responseLabel": "OTHER",
+      "length": 9280
+    },
+    {
+      "host": "https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev",
+      "origin": "https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev",
+      "status": 200,
+      "contentType": "text/html",
+      "originRejected": false,
+      "htmlLogin": true,
+      "responseLabel": "OTHER",
+      "length": 9280
+    },
+    {
+      "host": "https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev",
+      "origin": "https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev",
+      "status": 200,
+      "contentType": "text/html",
+      "originRejected": false,
+      "htmlLogin": true,
+      "responseLabel": "OTHER",
+      "length": 9280
+    },
+    {
+      "host": "https://tpu-plovdiv-kt134-test.emilgergov.workers.dev",
+      "origin": null,
+      "status": 200,
+      "contentType": "text/html",
+      "originRejected": false,
+      "htmlLogin": true,
+      "responseLabel": "OTHER",
+      "length": 9280
+    },
+    {
+      "host": "https://tpu-plovdiv-kt134-test.emilgergov.workers.dev",
+      "origin": "https://tpu-plovdiv-kt134-test.emilgergov.workers.dev",
+      "status": 200,
+      "contentType": "text/html",
+      "originRejected": false,
+      "htmlLogin": true,
+      "responseLabel": "OTHER",
+      "length": 9280
+    },
+    {
+      "host": "https://tpu-plovdiv-kt134-test.emilgergov.workers.dev",
+      "origin": "https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev",
+      "status": 200,
+      "contentType": "text/html",
+      "originRejected": false,
+      "htmlLogin": true,
+      "responseLabel": "OTHER",
+      "length": 9280
+    }
+  ]
+}
