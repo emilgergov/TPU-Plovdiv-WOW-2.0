@@ -1,0 +1,12 @@
+{
+  "runId": "45784421976",
+  "sourceSha": "ecd615237e7dea981713336bcb88e69ccf67d524",
+  "bridgeDeployed": true,
+  "verifiedNativeKT125Service": true,
+  "publicTestWorker": "tpu-plovdiv-kt134-test",
+  "realDossierProcessed": false,
+  "fullStage1To5Live": false,
+  "productionWorkerSourceModified": false,
+  "deploymentStep": "success",
+  "probeStep": "success"
+}
