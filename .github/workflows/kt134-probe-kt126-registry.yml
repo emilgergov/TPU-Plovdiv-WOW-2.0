@@ -23,7 +23,7 @@ jobs:
           const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth',{headers:{authorization:'Bearer '+process.env.CF_TOKEN}});
           if(!r.ok)throw Error('WORKER_SOURCE_UNAVAILABLE_'+r.status);
           const s=await r.text();
-          for(const term of ['/kt126/registry/create','registry/create','registryCreate','registry.create','case.create','async createCase','/kt126/registry']){
+          for(const term of ['/kt126/registry/create','async function createCase(','function createCase(','await createCase(','const created = await registry','registryApi("/create"','registryApi("/create",','/create", {','/kt126/registry']){
             const hits=[];let start=0;
             for(let i=0;i<20;i++){const p=s.indexOf(term,start);if(p<0)break;hits.push(p);start=p+term.length}
             console.log('TERM '+term+' COUNT '+hits.length);
