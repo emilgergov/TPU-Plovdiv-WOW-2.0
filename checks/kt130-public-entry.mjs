@@ -5,7 +5,8 @@ import vm from 'node:vm';
 const require=createRequire(process.env.KT130_BROWSER_PACKAGE+'/package.json');
 const {chromium}=require('playwright');
 const html=readFileSync('index.html','utf8');
-const login='https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/auth/login';
+const login='https://tpu-plovdiv-kt134-test.emilgergov.workers.dev/auth/login';
+const fallback='https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/auth/login';
 const old='v26-test/v27-preview/KT79_25_V27_35_STABLE_WORKING_BLOCK06.html';
 assert(html.includes(login));assert(html.includes('https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/auth/login'));assert(html.includes(old));
 for(const script of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gu))new vm.Script(script[1]);
@@ -32,7 +33,7 @@ try{
   assert(await entry.isVisible(),'Automatic slide change must not hide entry');
   const popupPromise=page.waitForEvent('popup');
   await entry.click();const popup=await popupPromise;await popup.waitForURL(url=>url.origin===new URL(login).origin,{timeout:30000});await popup.waitForLoadState('domcontentloaded');
-  assert.equal(new URL(popup.url()).origin,'https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev');await popup.close();
+  assert.equal(new URL(popup.url()).origin,new URL(login).origin);await popup.close();
   // Run every scheduled scene callback, even if Chromium throttles the opener during popup navigation.
   await page.clock.runFor(11 * 4200 + 1000);
   await page.locator('#tree').waitFor({state:'visible',timeout:5000});assert(await entry.isVisible(),'Entry must survive automatic transition to tree');
@@ -47,8 +48,10 @@ try{
   await page.locator('#classicPanel').evaluate(el=>{el.hidden=false});
   await page.waitForTimeout(1);assert(!(await entry.isVisible()),'Do not cover classical document panel');
   const rows=page.locator('#expert-analysis-v26 .expert-version-list > li');
-  assert.equal(await rows.count(),3);
-  assert.match(await rows.first().innerText(),/Текуща версия[\s\S]*КТ133/u);
+  assert.equal(await rows.count(),4);
+  assert.match(await rows.first().innerText(),/Текуща стабилна тестова версия[\s\S]*КТ134/u);
+  assert.equal(await rows.nth(1).locator('a').getAttribute('href'),fallback);
+  assert.match(await rows.nth(1).innerText(),/КТ133/u);
   const primary=rows.first().locator('a'),previous=rows.last().locator('a');
   assert.equal(await primary.getAttribute('href'),login);assert.equal(await previous.getAttribute('href'),old);
   await page.locator('#expert-analysis-v26').scrollIntoViewIfNeeded();await page.screenshot({path:'kt130-public-qa/'+label+'-block06.png'});
@@ -56,5 +59,5 @@ try{
   assert.deepEqual(errors,[]);await context.close();
  }
  const response=await fetch(login,{redirect:'follow'});assert.equal(response.status,200);
- console.log('PASS persistent intro/tree entry, timed advance, safe desktop/mobile position, protected login popup, both Block06 entries, previous version retained, no script errors');
+ console.log('PASS persistent intro/tree entry, timed advance, safe desktop/mobile position, protected login popup, KT134 current plus KT133 fallback in Block06, previous stable version retained, no script errors');
 }finally{await browser.close()}
