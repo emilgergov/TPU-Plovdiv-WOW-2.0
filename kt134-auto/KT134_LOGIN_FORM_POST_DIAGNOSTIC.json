@@ -1,0 +1,75 @@
+{
+  "publicOnly": true,
+  "findings": [
+    {
+      "host": "https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev",
+      "getStatus": 200,
+      "forms": [
+        "<form method=\"post\" action=\"/auth/login\">"
+      ],
+      "scripts": [
+        "actions{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:14px;padding-top:12px;border-top:1px solid #42664e}.auth-page .confirm-field{display:flex;align",
+        "actions{align-items:stretch;flex-direction:column}.auth-page .field-help{grid-column:1/-1}}",
+        "action=\"/auth/login\"><fieldset><legend>Данни за вход</legend><label class=\"wide-field\"><span>Потребителско име</span><input name=\"username\" type=\"text\" required maxlength=\"40\" autocomple"
+      ],
+      "posts": [
+        {
+          "origin": "https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev",
+          "status": 400,
+          "originRejected": false,
+          "code": "NONE",
+          "isHtml": true
+        },
+        {
+          "origin": "ABSENT",
+          "status": 403,
+          "originRejected": false,
+          "code": "NONE",
+          "isHtml": true
+        },
+        {
+          "origin": "null",
+          "status": 403,
+          "originRejected": false,
+          "code": "NONE",
+          "isHtml": true
+        }
+      ]
+    },
+    {
+      "host": "https://tpu-plovdiv-kt134-test.emilgergov.workers.dev",
+      "getStatus": 200,
+      "forms": [
+        "<form method=\"post\" action=\"/auth/login\">"
+      ],
+      "scripts": [
+        "actions{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:14px;padding-top:12px;border-top:1px solid #42664e}.auth-page .confirm-field{display:flex;align",
+        "actions{align-items:stretch;flex-direction:column}.auth-page .field-help{grid-column:1/-1}}",
+        "action=\"/auth/login\"><fieldset><legend>Данни за вход</legend><label class=\"wide-field\"><span>Потребителско име</span><input name=\"username\" type=\"text\" required maxlength=\"40\" autocomple"
+      ],
+      "posts": [
+        {
+          "origin": "https://tpu-plovdiv-kt134-test.emilgergov.workers.dev",
+          "status": 400,
+          "originRejected": false,
+          "code": "NONE",
+          "isHtml": true
+        },
+        {
+          "origin": "ABSENT",
+          "status": 403,
+          "originRejected": true,
+          "code": "ORIGIN_REJECTED",
+          "isHtml": false
+        },
+        {
+          "origin": "null",
+          "status": 403,
+          "originRejected": true,
+          "code": "ORIGIN_REJECTED",
+          "isHtml": false
+        }
+      ]
+    }
+  ]
+}
