@@ -661,11 +661,38 @@ el('start').addEventListener('click',async()=>{
   awaitingUnreportedStages();
  el('subtitle').textContent='Анализът се изпълнява · изчаква се потвърден резултат от етапите';el('kt134-elapsed').textContent='Обработва…';
  try{
-  const r=await fetch('/kt134/automatic/draft',{method:'POST',credentials:'same-origin',
+  const r=await fetch('/kt134/automatic/draft-events',{method:'POST',credentials:'same-origin',
    headers:{'Content-Type':'application/json'},body:JSON.stringify({caseId:context.caseId})});
-  const data=await r.json().catch(()=>({}));
-  if(!r.ok||data.status!=='draft_ready'||!data.stage5||!data.docxBase64)
-    throw Error('Защитеният маршрут не върна завършен проект ('+(data.error||data.status||r.status)+').');
+  if(!r.ok||!r.body)throw Error('Няма връзка със защитеното отчитане на етапите ('+r.status+').');
+  const reader=r.body.getReader(),decoder=new TextDecoder();
+  let buffer='',final=null,streamFinished=false;
+  const accept=line=>{
+   if(!line.trim())return;
+   const event=JSON.parse(line);
+   if(event.type==='progress'){
+    if(!Number.isInteger(event.stage)||event.stage<2||event.stage>5||
+       event.percent!==event.stage*20)return;
+    render(event.stage);
+    if(event.label)el('subtitle').textContent=event.label;
+   }else if(event.type==='result'){
+    final=event;streamFinished=true;
+   }
+  };
+  while(true){
+   const {done,value}=await reader.read();
+   if(done)break;
+   buffer+=decoder.decode(value,{stream:true});
+   let i;
+   while((i=buffer.indexOf('\n'))>=0){
+    accept(buffer.slice(0,i));buffer=buffer.slice(i+1);
+   }
+  }
+  buffer+=decoder.decode();if(buffer.trim())accept(buffer);
+  if(!streamFinished)throw Error('Връзката прекъсна преди сървърът да завърши проекта.');
+  const data=final.data||{};
+  if(final.status!==200||data.status!=='draft_ready'||!data.stage5||!data.docxBase64)
+    throw Error('Защитеният маршрут не върна завършен проект ('+
+      (data.error||data.status||final.status)+').');
   if(data.caseId!==context.caseId||data.expertApproved!==false||data.finalDecision!==null)
     throw Error('Връщане на несъвместима преписка или неразрешено одобрение.');
   word=data.docxBase64;
