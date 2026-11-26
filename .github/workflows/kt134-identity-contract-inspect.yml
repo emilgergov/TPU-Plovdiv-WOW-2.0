@@ -1,0 +1,57 @@
+name: KT134 inspect authenticated identity contract
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-identity-contract-inspect.yml']
+permissions: {contents: write}
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Locate native authenticated member API and case response shape, metadata only
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const u='https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth';
+          const r=await fetch(u,{headers:{authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('NATIVE_SCRIPT_UNAVAILABLE');
+          const source=await r.text();
+          const keys=['url.pathname==="/member"','path==="/member"','/member','"/kt125/local-auth"','"/kt125/cases"','registryRoute','"/kt126/registry"','getLocalSession','session.user','session.user_id','auth.user'];
+          const out=keys.map(term=>{
+            const hits=[];let cursor=0;
+            for(let n=0;n<18;n++){
+              const i=source.indexOf(term,cursor);if(i<0)break;cursor=i+term.length;
+              const around=source.slice(Math.max(0,i-680),i+1050);
+              const lines=around.split('\n').map(l=>l.trim()).filter(Boolean);
+              const visible=lines.filter(line=>/method|pathname|\/member|\/kt125\/local-auth|\/kt125\/cases|\/kt126\/registry|return reply|return json|user_id|userId|user\.role|role:|owner_id|session|case_id|actor|permissions|login/.test(line)).slice(0,20);
+              const safe=visible.map(line=>line.slice(0,240)
+                .replace(/(['"`])(?:sk-|Bearer )[A-Za-z0-9._-]{12,}\1/g,'[REDACTED]')
+                .replace(/(password|token|secret|hash|authorization)\s*[:=]\s*[^,;}]+/gi,'$1=[REDACTED]'));
+              hits.push(safe);
+            }
+            return {term,hits};
+          });
+          fs.writeFileSync('/tmp/kt134-identity-contract.json',JSON.stringify({metadataOnly:true,out},null,2));
+          console.log('Compiled exact identity route structure, no database access');
+          NODE
+      - name: Upload safe route metadata
+        run: |
+          p='kt134-auto/KT134_NATIVE_IDENTITY_CONTRACT.json'
+          enc="$(base64 -w0 /tmp/kt134-identity-contract.json)"
+          for n in 1 2 3 4; do
+            sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/$p?ref=kt134-auto-mode-isolated" --jq .sha 2>/dev/null || true)"
+            if [ -n "$sha" ]; then
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$enc" -f sha="$sha" -f branch=kt134-auto-mode-isolated -f message='KT134: native identity contract metadata' >/dev/null && exit 0
+            else
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$enc" -f branch=kt134-auto-mode-isolated -f message='KT134: native identity contract metadata' >/dev/null && exit 0
+            fi
+            sleep 2
+          done
+          exit 1
