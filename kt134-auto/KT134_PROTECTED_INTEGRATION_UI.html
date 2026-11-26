@@ -464,6 +464,7 @@ newFile.addEventListener('change',()=>{
  const valid=!!file && /\.(zip|pdf|docx)$/i.test(file.name) &&
    file.size>0 && file.size<=40_000_000;
  newSubmit.disabled=!valid||!authenticated;
+ setIntakeMode('new');
  newStatus.textContent=!authenticated?'Необходим е вход в профила.':valid?'Избран файл: '+file.name+'.':
   'Изберете ZIP, PDF или DOCX с размер до 40 MB.';
 });
