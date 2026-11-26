@@ -23,6 +23,21 @@ export function createKt134NativeCaseRegistration({nativeFetch}={}){
    fail('KT134_REGISTER_CROSS_SITE_REJECTED');
   const cookie=request.headers.get('cookie')||'';
   if(!cookie||cookie.length>8000)fail('KT125_LOGIN_REQUIRED');
+  // All user-supplied intake metadata is validated before consuming the shared
+  // KT126 number. Never accept author content or a client-generated caseId.
+  let metadata;
+  const text=await request.text();
+  if(text.length>1500)fail('KT134_INTAKE_METADATA_TOO_LARGE');
+  try{metadata=JSON.parse(text)}catch{fail('KT134_INTAKE_METADATA_INVALID')}
+  const allowed=['filename','size','sha256'];
+  if(!metadata||typeof metadata!=='object'||Array.isArray(metadata)||
+     Object.keys(metadata).some(k=>!allowed.includes(k))||
+     typeof metadata.filename!=='string'||!metadata.filename.trim()||
+     metadata.filename.length>255||/[\\/]/.test(metadata.filename)||
+     !/\.(zip|pdf|docx)$/i.test(metadata.filename)||
+     !Number.isSafeInteger(metadata.size)||metadata.size<1||metadata.size>40_000_000||
+     !/^[a-f0-9]{64}$/i.test(metadata.sha256||''))
+   fail('KT134_INTAKE_METADATA_INVALID');
   const forward=new Request(NATIVE_ORIGIN+'/kt126/registry/create',{
    method:'POST',redirect:'manual',headers:{
     'Accept':'application/json','Content-Type':'application/json',
