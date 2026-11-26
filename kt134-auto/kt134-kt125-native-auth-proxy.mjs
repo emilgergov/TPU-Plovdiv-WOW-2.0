@@ -49,16 +49,19 @@ function cleanCookieScope(cookie) {
  return [pieces[0],...attributes].join(';');
 }
 function redirectTarget(value,visibleOrigin) {
- if(!value)return null;
+ if(!value||/[\\r\\n\\x00-\\x1f]/.test(value))return null;
  const native=new URL(nativeOrigin);
  let next;
  try{next=new URL(value,native)}catch{return null}
- if(next.origin!==native.origin)return null;
- if(/^\/(?:module(?:\/|$)|user$)/.test(next.pathname))
-  return visibleOrigin+'/kt134/entry';
- if(/^\/(?:auth\/(?:login|logout|forgot|reset)|kt125\/local-auth)/.test(next.pathname))
-  return visibleOrigin+next.pathname+next.search;
- return null;
+ // Never follow external redirects or change the native scheme/host.
+ if(next.origin!==native.origin||next.username||next.password)return null;
+ const path=next.pathname;
+ // Existing KT125 redirects successful login into its own application
+ // (e.g. /, /dashboard, /module). KT134 has its own separate, protected
+ // test entry: route all native application redirects ONLY to that entry.
+ if(/^\\/(?:auth\\/(?:login|logout|forgot|reset))(?:\\/|$)/.test(path))
+  return visibleOrigin+path+next.search;
+ return visibleOrigin+'/kt134/entry';
 }
 export function createKt134NativeAuthProxy({nativeFetch,upstreamOrigin=nativeOrigin}={}){
  if(typeof nativeFetch!=='function'||upstreamOrigin!==nativeOrigin)
