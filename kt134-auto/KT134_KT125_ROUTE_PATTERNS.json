@@ -1,0 +1,209 @@
+{
+  "readOnly": true,
+  "backendSourceNotExported": true,
+  "report": [
+    {
+      "anchor": "^/kt125/cases/",
+      "hits": [
+        {
+          "literals": [
+            "/kt125/admin/users/invite",
+            "^/kt125/admin/invitations/(",
+            "/kt125/enrollment/request"
+          ],
+          "tokens": [],
+          "routeRegex": [
+            "\"^/kt125/cases/(\" + pathId + \")/access$\");",
+            "\"^/kt125/cases/(\" + pathId + \")/grants$\");",
+            "\"^/kt125/cases/(\" + pathId + \")/grants/(\" + pathId + \")$\");",
+            "\"^/kt125/admin/invitations/(\" + pathId + \")/revoke$\");"
+          ]
+        },
+        {
+          "literals": [
+            "/kt125/admin/users/invite",
+            "^/kt125/admin/invitations/(",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received"
+          ],
+          "tokens": [],
+          "routeRegex": [
+            "\"^/kt125/cases/(\" + pathId + \")/access$\");",
+            "\"^/kt125/cases/(\" + pathId + \")/grants$\");",
+            "\"^/kt125/cases/(\" + pathId + \")/grants/(\" + pathId + \")$\");",
+            "\"^/kt125/admin/invitations/(\" + pathId + \")/revoke$\");"
+          ]
+        },
+        {
+          "literals": [
+            "^/kt125/cases/(",
+            "/kt125/admin/users/invite",
+            "^/kt125/admin/invitations/(",
+            "/kt125/enrollment/request",
+            "/kt125/enrollment/request/received",
+            "^/kt125/admin/requests/("
+          ],
+          "tokens": [],
+          "routeRegex": [
+            "\"^/kt125/cases/(\" + pathId + \")/access$\");",
+            "\"^/kt125/cases/(\" + pathId + \")/grants$\");",
+            "\"^/kt125/cases/(\" + pathId + \")/grants/(\" + pathId + \")$\");",
+            "\"^/kt125/admin/invitations/(\" + pathId + \")/revoke$\");",
+            "\"^/kt125/admin/requests/(\" + pathId + \")/(decide|mail|link"
+          ]
+        },
+        {
+          "literals": [
+            "^/kt125/admin/users/(",
+            "^/kt125/cases/("
+          ],
+          "tokens": [],
+          "routeRegex": [
+            "\"^/kt125/admin/users/(\" + pathId + \")/enable$\");",
+            "\"^/kt125/admin/users/(\" + pathId + \")/disable$\");",
+            "\"^/kt125/cases/(\" + pathId + \")/manage$\");",
+            "\"^/kt125/cases/(\" + pathId + \")/grants/form$\");",
+            "\"^/kt125/cases/(\" + pathId + \")/grants/(\" + pathId + \")/revoke$\");"
+          ]
+        },
+        {
+          "literals": [],
+          "tokens": [],
+          "routeRegex": [
+            "\"^/kt125/admin/users/(\" + pathId + \")/disable$\");",
+            "\"^/kt125/cases/(\" + pathId + \")/manage$\");",
+            "\"^/kt125/cases/(\" + pathId + \")/grants/form$\");",
+            "\"^/kt125/cases/(\" + pathId + \")/grants/(\" + pathId + \")/revoke$\");"
+          ]
+        },
+        {
+          "literals": [],
+          "tokens": [],
+          "routeRegex": [
+            "\"^/kt125/cases/(\" + pathId + \")/manage$\");",
+            "\"^/kt125/cases/(\" + pathId + \")/grants/form$\");",
+            "\"^/kt125/cases/(\" + pathId + \")/grants/(\" + pathId + \")/revoke$\");"
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "^/kt126/registry/",
+      "hits": []
+    },
+    {
+      "anchor": "^/kt126/registry",
+      "hits": []
+    },
+    {
+      "anchor": "/state",
+      "hits": [
+        {
+          "literals": [
+            "/",
+            "/state"
+          ],
+          "tokens": [
+            "caseId",
+            "revision",
+            "case_id"
+          ],
+          "routeRegex": []
+        },
+        {
+          "literals": [],
+          "tokens": [
+            "revision",
+            "case_id"
+          ],
+          "routeRegex": []
+        },
+        {
+          "literals": [
+            "/",
+            "/state"
+          ],
+          "tokens": [
+            "revision"
+          ],
+          "routeRegex": []
+        },
+        {
+          "literals": [],
+          "tokens": [
+            "revision"
+          ],
+          "routeRegex": []
+        }
+      ]
+    },
+    {
+      "anchor": "/part/",
+      "hits": [
+        {
+          "literals": [
+            "/kt126/registry",
+            "/part/",
+            "POST"
+          ],
+          "tokens": [
+            "POST",
+            "fetch"
+          ],
+          "routeRegex": []
+        },
+        {
+          "literals": [
+            "/kt126/registry/",
+            "/source/part/"
+          ],
+          "tokens": [
+            "fetch"
+          ],
+          "routeRegex": []
+        },
+        {
+          "literals": [
+            "/kt126/registry/",
+            "/source"
+          ],
+          "tokens": [
+            "fetch",
+            "source_id"
+          ],
+          "routeRegex": []
+        }
+      ]
+    },
+    {
+      "anchor": "/finish",
+      "hits": [
+        {
+          "literals": [],
+          "tokens": [],
+          "routeRegex": []
+        }
+      ]
+    },
+    {
+      "anchor": "/start",
+      "hits": [
+        {
+          "literals": [
+            "/",
+            "/source",
+            "/kt126/registry",
+            "/part/",
+            "POST"
+          ],
+          "tokens": [
+            "POST",
+            "fetch",
+            "sourceId"
+          ],
+          "routeRegex": []
+        }
+      ]
+    }
+  ]
+}
