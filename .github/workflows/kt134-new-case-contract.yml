@@ -113,8 +113,22 @@ jobs:
             const sec=text.slice(x.index,x.index+4500);
             functionBodies.push({name:fn,callArgShape:[...new Set([...sec.matchAll(/(?:api\(\s*["'][^"']+["']\s*,\s*\{)([^}]{0,340})\}/g)].map(m=>m[1].replace(/[^a-zA-Z0-9_,:\s]/g,' ').trim().slice(0,150)))],fieldReferences:safeFields(sec),startsWithCreate:/api\(\s*["']\/create["']/.test(sec),containsExternalNumber:/externalNumber|external_number/.test(sec)});
           }
+          // Source-attachment compatibility checklist of existing E1 uploads.
+          const uploads=[];
+          const anchors=['"/source"', '"/part/"', '"/finish"','/kt126/registry/','sha256:','sourceId'];
+          for(const anchor of anchors){
+            const hits=[];let pos=0;
+            for(let i=0;i<16;i++){
+              const at=text.indexOf(anchor,pos);if(at<0)break;pos=at+anchor.length;
+              const nearby=text.slice(Math.max(0,at-320),at+800);
+              const indicators=['Blob','FormData','ArrayBuffer','Uint8Array','TextEncoder','JSON.stringify','btoa(','crypto.subtle.digest','sourceId','filename','sha256','base64','multipart/form-data','application/json','Content-Type','POST','parts','slice(','byteLength','size','fileId','data','chunk','partNumber','index','totalParts'].filter(z=>nearby.includes(z));
+              const keys=[...new Set([...nearby.matchAll(/\b(?:filename|sha256|size|sourceId|source_id|data|body|part|index|parts|revision|state|content|file|id)\s*:/g)].map(z=>z[0].replace(':','').trim()))];
+              hits.push({indicators,keys});
+            }
+            uploads.push({anchor,occurrences:hits.length,hits:hits.slice(0,10)});
+          }
           const clientCalls=matches;
-          writeFileSync('/tmp/kt134-new-case-contract.json',JSON.stringify({source:'native-kt125-worker',readOnly:true,privateSourceExported:false,hasCreateRoute:text.includes('/kt126/registry/create'),createRouteCalls,routeIdentifiers,clientCalls,apiStructures,backendCalls,functionBodies,handlers,report},null,2));
+          writeFileSync('/tmp/kt134-new-case-contract.json',JSON.stringify({source:'native-kt125-worker',readOnly:true,privateSourceExported:false,hasCreateRoute:text.includes('/kt126/registry/create'),createRouteCalls,routeIdentifiers,clientCalls,apiStructures,backendCalls,functionBodies,uploads,handlers,report},null,2));
           console.log('KT134 contract metadata derived; private Worker source not logged');
           NODE
       - name: Save metadata in isolated checkpoint branch
