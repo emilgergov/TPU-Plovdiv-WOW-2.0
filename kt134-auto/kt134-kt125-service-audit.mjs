@@ -8,18 +8,19 @@ export function assessKt134NativeBridgeBindings(bindings=[]){
  const count=(type,name)=>bindings.filter(b=>b.type===type&&b.name===name);
  const d1=count('d1','DB'),r2=count('r2_bucket','BUCKET');
  const services=bindings.filter(b=>b.type==='service');
- const extras=bindings.filter(b=>!['DB','BUCKET','KT125_NATIVE','KT134_SMOKE_TOKEN'].includes(b.name));
+ const extras=bindings.filter(b=>!['DB','BUCKET','KT125_NATIVE','KT134_SMOKE_TOKEN','KT134_EG_ACCESS_TOKEN'].includes(b.name));
  const allowed=bindings.every(b=>(
   (b.name==='DB'&&b.type==='d1')||
   (b.name==='BUCKET'&&b.type==='r2_bucket')||
   (b.name==='KT125_NATIVE'&&b.type==='service')||
-  (b.name==='KT134_SMOKE_TOKEN'&&b.type==='secret_text')));
+  ((b.name==='KT134_SMOKE_TOKEN'||b.name==='KT134_EG_ACCESS_TOKEN')&&b.type==='secret_text')));
  const serviceValid=services.length<=1&&
   services.every(b=>b.name==='KT125_NATIVE'&&b.service==='tpu-plovdiv-kt125-local-auth');
  return Object.freeze({
   eligible:allowed&&extras.length===0&&d1.length===1&&d1[0].id===DB&&
     r2.length===1&&r2[0].bucket_name==='kt134-isolated-r2-2026'&&
-    serviceValid&&bindings.filter(b=>b.name==='KT134_SMOKE_TOKEN').length<=1,
+    serviceValid&&bindings.filter(b=>b.name==='KT134_SMOKE_TOKEN').length<=1&&
+    bindings.filter(b=>b.name==='KT134_EG_ACCESS_TOKEN').length<=1,
   nativeServicePresent:services.length===1,
   productionDirectDbBound:bindings.some(b=>b.name==='KT125_DB')
  });
