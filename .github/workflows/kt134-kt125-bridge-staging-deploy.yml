@@ -5,6 +5,9 @@ on:
     paths:
       - 'kt134-auto/kt134-kt125-bridge-staging-worker.mjs'
       - 'kt134-auto/kt134-native-automatic-route.mjs'
+      - 'kt134-auto/kt134-native-gis-evidence.mjs'
+      - 'kt134-auto/kt134-native-gis-evidence.test.mjs'
+      - 'kt134-auto/kt134-complete-dossier-stage4.mjs'
       - 'kt134-auto/kt134-kt126-snapshot-decoder.mjs'
       - 'kt134-auto/kt134-kt126-snapshot-decoder.test.mjs'
       - 'kt134-auto/kt134-native-case-authorization.mjs'
@@ -59,6 +62,7 @@ jobs:
           node --test kt134-auto/kt134-native-case-http.test.mjs
           node --test kt134-auto/kt134-native-case-list.test.mjs
           node --test kt134-auto/kt134-native-case-authorization.test.mjs
+          node --test kt134-auto/kt134-native-gis-evidence.test.mjs
           node --test kt134-auto/kt134-kt126-snapshot-decoder.test.mjs
           node --test kt134-auto/kt134-protected-case-gate.test.mjs
           node --check kt134-auto/kt134-native-automatic-route.mjs
