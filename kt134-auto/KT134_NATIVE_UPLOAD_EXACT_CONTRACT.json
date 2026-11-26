@@ -1,0 +1,194 @@
+{
+  "readOnly": true,
+  "noUserData": true,
+  "sourceExported": false,
+  "calls": [
+    {
+      "token": "\"/create\"",
+      "sites": [
+        {
+          "expression": "\"/create\"",
+          "httpVerbs": [],
+          "bodyKind": "unknown",
+          "hints": [
+            "record"
+          ],
+          "responseFields": [
+            "record"
+          ]
+        },
+        {
+          "expression": "\"/create\"",
+          "httpVerbs": [],
+          "bodyKind": "unknown",
+          "hints": [
+            "case_id",
+            "record",
+            "size"
+          ],
+          "responseFields": []
+        }
+      ]
+    },
+    {
+      "token": "\"/source\"",
+      "sites": [
+        {
+          "expression": "",
+          "httpVerbs": [],
+          "bodyKind": "unknown",
+          "hints": [
+            "sourceId",
+            "record",
+            "id6",
+            "filename",
+            "sha256",
+            "size"
+          ],
+          "responseFields": []
+        },
+        {
+          "expression": "",
+          "httpVerbs": [],
+          "bodyKind": "unknown",
+          "hints": [
+            "record",
+            "id6"
+          ],
+          "responseFields": [
+            "record"
+          ]
+        },
+        {
+          "expression": "",
+          "httpVerbs": [],
+          "bodyKind": "unknown",
+          "hints": [
+            "source_id",
+            "id6",
+            "parts",
+            "part"
+          ],
+          "responseFields": []
+        }
+      ]
+    },
+    {
+      "token": "\"/part/\"",
+      "sites": [
+        {
+          "expression": "",
+          "httpVerbs": [
+            "POST"
+          ],
+          "bodyKind": "unknown",
+          "hints": [
+            "size",
+            "part"
+          ],
+          "responseFields": []
+        },
+        {
+          "expression": "",
+          "httpVerbs": [],
+          "bodyKind": "unknown",
+          "hints": [
+            "source_id",
+            "id6",
+            "parts",
+            "filename",
+            "part"
+          ],
+          "responseFields": []
+        }
+      ]
+    },
+    {
+      "token": "\"/finish\"",
+      "sites": [
+        {
+          "expression": "base2 + \"/finish\"",
+          "httpVerbs": [],
+          "bodyKind": "unknown",
+          "hints": [
+            "record",
+            "size"
+          ],
+          "responseFields": []
+        }
+      ]
+    },
+    {
+      "token": "\"/state\"",
+      "sites": [
+        {
+          "expression": "\"/\" + id6 + \"/state\"",
+          "httpVerbs": [],
+          "bodyKind": "json",
+          "hints": [
+            "record",
+            "id6",
+            "revision",
+            "state"
+          ],
+          "responseFields": [
+            "record"
+          ]
+        },
+        {
+          "expression": "\"/\" + created.case_id + \"/state\"",
+          "httpVerbs": [],
+          "bodyKind": "unknown",
+          "hints": [
+            "case_id",
+            "id6",
+            "revision",
+            "state"
+          ],
+          "responseFields": []
+        },
+        {
+          "expression": "\"/\" + id6 + \"/state\"",
+          "httpVerbs": [],
+          "bodyKind": "json",
+          "hints": [
+            "record",
+            "id6",
+            "revision",
+            "state"
+          ],
+          "responseFields": []
+        },
+        {
+          "expression": "\"/\" + id6 + \"/state\"",
+          "httpVerbs": [],
+          "bodyKind": "json",
+          "hints": [
+            "record",
+            "id6",
+            "revision",
+            "state"
+          ],
+          "responseFields": []
+        }
+      ]
+    },
+    {
+      "token": "/kt126/registry/create",
+      "sites": [
+        {
+          "expression": "",
+          "httpVerbs": [],
+          "bodyKind": "unknown",
+          "hints": [
+            "sourceId",
+            "record"
+          ],
+          "responseFields": [
+            "record"
+          ]
+        }
+      ]
+    }
+  ]
+}
