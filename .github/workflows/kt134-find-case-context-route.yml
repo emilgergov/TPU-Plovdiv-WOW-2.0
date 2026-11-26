@@ -1,0 +1,51 @@
+name: KT134 locate trusted native caseContext API
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-find-case-context-route.yml']
+permissions: {contents: write}
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Identify route returning native verified actorId
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth',{headers:{authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('WORKER_SOURCE_UNAVAILABLE');
+          const source=await r.text();
+          const keys=['caseContext(','caseContext({','caseContext,','/context','actorId: who.userId','caseContext('];
+          const out=keys.map(term=>{
+            let cursor=0,hits=[];
+            for(let i=0;i<20;i++){const at=source.indexOf(term,cursor);if(at<0)break;cursor=at+term.length;
+             const pre=source.slice(Math.max(0,at-650),at+680);
+             const filtered=pre.split('\n').filter(l=>/caseContext|actorId|\bGET\b|\bPOST\b|path3|caseId|context|case\.read|\.json|registry|handle|return/.test(l)).slice(0,21).join('\n');
+             hits.push(filtered.slice(0,2100));
+            }
+            return {term,hits};
+          });
+          fs.writeFileSync('/tmp/kt134-context.json',JSON.stringify({metadataOnly:true,out},null,2));
+          console.log('native verified actor route inspected');
+          NODE
+      - name: Save route metadata
+        run: |
+          p='kt134-auto/KT134_NATIVE_CONTEXT_ROUTE.json'
+          enc="$(base64 -w0 /tmp/kt134-context.json)"
+          for n in 1 2 3 4; do
+            sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/$p?ref=kt134-auto-mode-isolated" --jq .sha 2>/dev/null || true)"
+            if [ -n "$sha" ]; then
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$enc" -f sha="$sha" -f branch=kt134-auto-mode-isolated -f message='KT134: native caseContext actor route metadata' >/dev/null && exit 0
+            else
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$enc" -f branch=kt134-auto-mode-isolated -f message='KT134: native caseContext actor route metadata' >/dev/null && exit 0
+            fi
+            sleep 2
+          done
+          exit 1
