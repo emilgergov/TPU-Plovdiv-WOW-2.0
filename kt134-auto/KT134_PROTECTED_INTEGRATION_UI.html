@@ -42,13 +42,22 @@ textarea{width:100%;min-height:180px;background:#fcf9ef;color:#293b2e;border:1px
 pre{white-space:pre-wrap;font:12px/1.6 Verdana,Arial;overflow-wrap:anywhere}
 #finalactions{display:none}.confirmnote{font-size:12px;color:#ffe1a6}
 </style></head><body><main>
-<div class="topline"><div>WOW · Експертен модул · КТ134</div><div class="demo">ИЗОЛИРАН ИНТЕГРАЦИОНЕН ТЕСТ · БЕЗ СИНТЕТИЧНИ ОТГОВОРИ</div></div>
+<div class="topline"><div>WOW · Експертен модул · КТ134</div><div class="demo">ИЗОЛИРАН ИНТЕГРАЦИОНЕН ТЕСТ · СЪРВЪРНА ПРОВЕРКА КТ125</div></div>
 <h1>Автоматичен анализ на преписка</h1>
 <section class="bar"><div class="case">
 <div>Активен експерт: <strong id="expert">—</strong></div>
 <div>Вътрешен №: <strong id="caseid">—</strong></div>
 <div>Деловоден №: <strong id="registry">—</strong></div></div>
-<div class="stages" id="stages"></div><div class="auto"><div class="autohead"><strong>Автоматична обработка</strong><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
+<div style="margin:13px 0 0;padding:12px;border:1px solid #527d5a;border-radius:10px">
+ <label for="kt134-case-id">Преписка от съществуващия КТ125 регистър</label>
+ <div class="actions" style="margin-top:6px">
+  <input id="kt134-case-id" autocomplete="off" placeholder="Уникален идентификатор (UUID)"
+   style="flex:1;min-width:240px;font:13px Verdana;padding:10px;background:#153c2a;color:#f4eddb;border:1px solid #a7b98c;border-radius:8px">
+  <button id="kt134-verify" type="button">Провери достъпа до преписката</button>
+  <a href="/auth/login" style="align-self:center;color:#e7c776">Вход с действащия КТ125 профил</a>
+ </div>
+ <p style="font-size:11px;color:#dacfa9">Въвежда се само идентификаторът; никакви документи, пароли или доказателства не се подават от този екран.</p>
+ </div><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><strong>Автоматична обработка</strong><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
 <div class="subrow"><div class="track"><div class="fill" id="fill"></div></div><span id="subtitle" aria-live="polite">Очаква се защитен контекст от КТ125</span></div></div>
 <div class="actions"><button class="primary" id="start" disabled>Изготви проект по тази преписка</button></div>
 <div id="error" role="alert" class="error" hidden></div>
@@ -73,13 +82,35 @@ const tiles=[...stages.children],nodes=[...route.children].slice(1,6);
 const el=id=>document.getElementById(id);
 function render(n){tiles.forEach((x,i)=>x.className='stage '+(i<n?'done':i===n?'active':''));nodes.forEach((x,i)=>x.className='node '+(i<n?'done':i===n?'active':''));el('fill').style.width=(n*20)+'%'}
 function problem(msg){el('error').hidden=false;el('error').textContent=msg;el('subtitle').textContent='Автоматичната обработка не е завършила'}
-const context=window.__KT134_PROTECTED_CONTEXT__;
-const ok=context&&typeof context.caseId==='string'&&context.caseId.length>=4&&context.kt125Authenticated===true;
-if(ok){el('expert').textContent=context.expertName||'Активен експерт';el('caseid').textContent=context.caseId;el('registry').textContent=context.registryNumber||'—';el('start').disabled=false;el('subtitle').textContent='Готовност за анализ на потвърдената преписка';render(0)}
-else problem('Няма потвърдена КТ125 сесия и идентичност на преписката. Не се изпълнява демонстрационен анализ.');
+let context=null;
+render(0);
+el('subtitle').textContent='Изисква се потвърден достъп до преписка в КТ125';
+const urlCaseId=new URL(location.href).searchParams.get('caseId');
+if(urlCaseId)el('kt134-case-id').value=urlCaseId;
+el('kt134-verify').addEventListener('click',async()=>{
+ const caseId=el('kt134-case-id').value.trim();
+ el('start').disabled=true;el('error').hidden=true;context=null;
+ el('subtitle').textContent='Сървърна проверка на правата в КТ125...';
+ try{
+  const r=await fetch('/kt134/case-status?caseId='+encodeURIComponent(caseId),{
+    method:'GET',credentials:'same-origin',cache:'no-store'});
+  const data=await r.json();
+  if(!r.ok||data.caseId!==caseId||data.authenticatedVia!=='KT125_NATIVE_CASE_ACL')
+   throw Error('КТ125 не потвърди преписката ('+(data.error||r.status)+').');
+  context={caseId,registryNumber:'—'};
+  el('expert').textContent='Удостоверена КТ125 сесия';
+  el('caseid').textContent=caseId;
+  el('registry').textContent='Проверява се от сървъра';
+  el('start').disabled=false;
+  el('subtitle').textContent='Достъпът е потвърден; готовност за автоматичен анализ';
+  window.history.replaceState(null,'','/kt134/final-test?caseId='+encodeURIComponent(caseId));
+ }catch(error){
+  problem(error.message||'Достъпът не е потвърден.');
+ }
+});
 let word=null;
 el('start').addEventListener('click',async()=>{
- if(!ok)return;el('start').disabled=true;el('error').hidden=true;render(0);
+ if(!context)return;el('start').disabled=true;el('error').hidden=true;render(0);
  el('subtitle').textContent='Подаване към защитения автоматичен маршрут';
  try{
   const r=await fetch('/kt134/automatic/draft',{method:'POST',credentials:'same-origin',
@@ -101,7 +132,7 @@ el('start').addEventListener('click',async()=>{
  }catch(e){render(0);problem(e.message||'Неуспешно изпълнение');el('start').disabled=false}
 });
 el('download').addEventListener('click',()=>{
- if(!word||!ok)return;
+ if(!word||!context)return;
  try{
   const bin=atob(word),bytes=new Uint8Array(bin.length);
   for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
