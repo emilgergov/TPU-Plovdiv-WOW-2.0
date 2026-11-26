@@ -28,7 +28,7 @@ jobs:
           import fs from 'node:fs';
           const html=fs.readFileSync('kt134-auto/KT134_PROTECTED_INTEGRATION_UI.html','utf8');
           const source=html.match(/<script type="module">([\s\S]*?)<\/script>/)?.[1];
-          if(!source||!source.includes("fetch('/kt134/automatic/draft'")||
+          if(!source||!source.includes("fetch('/kt134/automatic/draft-events'")||
              source.includes('__KT134_PROTECTED_CONTEXT__'))
             throw Error('KT134_APPROVED_GATE_CLIENT_NOT_REAL');
           fs.writeFileSync('/tmp/kt134-approved-gates-check.mjs',source);
