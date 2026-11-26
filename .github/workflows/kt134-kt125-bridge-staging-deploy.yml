@@ -86,9 +86,14 @@ jobs:
           code="$(curl --silent --show-error -X POST -o /dev/null -w '%{http_code}' "$BASE/kt134/kt125-bridge-check")"
           test "$code" = 405
           echo 'KT134: previous preview and method restrictions PASS'
-          login_code="$(curl --silent --show-error --max-time 12 -o /dev/null -w '%{http_code}' "$BASE/auth/login")"
+          login_code=000
+          for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            login_code="$(curl --silent --show-error --max-time 12 -o /dev/null -w '%{http_code}' "$BASE/auth/login")"
+            if [ "$login_code" = 200 ] || [ "$login_code" = 302 ] || [ "$login_code" = 303 ]; then break; fi
+            sleep 3
+          done
           if [ "$login_code" != 200 ] && [ "$login_code" != 302 ] && [ "$login_code" != 303 ]; then
-            echo "::error::Native KT125 login proxy returned $login_code"; exit 1
+            echo "::error::Native KT125 login proxy returned $login_code after edge activation retries"; exit 1
           fi
           denied="$(curl --silent --show-error --max-time 12 -o /tmp/kt134-denied.json -w '%{http_code}' "$BASE/kt134/case-status?caseId=11111111-1111-4111-8111-111111111111")"
           test "$denied" = 401
@@ -96,6 +101,7 @@ jobs:
       - name: Record verified result, without any secrets or case data
         if: always()
         env:
+          GH_TOKEN: ${{ github.token }}
           DEPLOY_STATUS: ${{ steps.deployment.outcome }}
           PROBE_STATUS: ${{ steps.probe.outcome }}
         run: |
@@ -111,9 +117,22 @@ jobs:
               productionWorkerSourceModified:false,
               deploymentStep:process.env.DEPLOY_STATUS,probeStep:process.env.PROBE_STATUS},null,2)+'\n');
           NODE
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add kt134-auto/KT134_KT125_BRIDGE_DEPLOY_STATUS.json
-          git commit -m 'KT134: record actual existing native KT125 staging bridge result' || exit 0
-          git pull --rebase origin kt134-auto-mode-isolated
-          git push origin HEAD:kt134-auto-mode-isolated
+          gh_status=1
+          encoded="$(base64 -w0 kt134-auto/KT134_KT125_BRIDGE_DEPLOY_STATUS.json)"
+          for attempt in 1 2 3 4 5; do
+            path='kt134-auto/KT134_KT125_BRIDGE_DEPLOY_STATUS.json'
+            existing="$(gh api "repos/$GITHUB_REPOSITORY/contents/$path?ref=kt134-auto-mode-isolated" --jq '.sha' 2>/dev/null || true)"
+            if [ -n "$existing" ]; then
+              if gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$path" \\
+                -f message='KT134: record native service bridge live result' \\
+                -f branch='kt134-auto-mode-isolated' \\
+                -f content="$encoded" -f sha="$existing" >/dev/null 2>&1; then gh_status=0; break; fi
+            else
+              if gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$path" \\
+                -f message='KT134: record native service bridge live result' \\
+                -f branch='kt134-auto-mode-isolated' \\
+                -f content="$encoded" >/dev/null 2>&1; then gh_status=0; break; fi
+            fi
+            sleep 2
+          done
+          test "$gh_status" = 0
