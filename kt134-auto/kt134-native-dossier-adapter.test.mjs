@@ -35,11 +35,13 @@ function fixture(overrides={}){
   getNormativeMaster:async()=>({name:'НОРМАТИВЕН MASTER',sha256:'a'.repeat(64),verifiedReferences:[{id:'zbr'}]})
  });
 }
+const verifiedPreflight=(ctx)=>({case:{caseId:ctx.caseRecord.id,revision:ctx.caseRecord.revision},
+ principalId:ctx.principal.userId,evidence:Object.values(ctx.evidence)});
 test('isolated server D1 dossier generates case-bound evidence, no user-supplied identity',async()=>{
  const a=fixture();
  const ctx=await a.loadProtectedContext({authenticatedSession:'protected-server-session',caseId:id});
  assert.equal(ctx.principal.userId,'u1');assert.equal(ctx.caseRecord.id,id);
- const b=await a.loadEvidenceBundle({preflight:{case:{caseId:id}},authenticatedSession:'protected-server-session'});
+ const b=await a.loadEvidenceBundle({preflight:verifiedPreflight(ctx),authenticatedSession:'protected-server-session'});
  assert.equal(b.documents[0].text,'Подадено е възражение срещу формулировката в писмото.');
  assert.equal(b.gisMode,'contextual_skip');
  assert.equal(b.receiptRefs.length,3);
@@ -76,7 +78,7 @@ test('actual KT126 nested state and values snapshots feed Stage2 context',async(
  const a=fixture({versions});
  const c=await a.loadProtectedContext({authenticatedSession:'session-nested',caseId:id});
  assert.equal(c.caseRecord.subject,'Възражение срещу предходно писмо');
- const b=await a.loadEvidenceBundle({preflight:{case:{caseId:id}},authenticatedSession:'session-nested'});
+ const b=await a.loadEvidenceBundle({preflight:verifiedPreflight(c),authenticatedSession:'session-nested'});
  assert.equal(b.scope,'Редакция на съдържание на административно писмо');
  assert.equal(b.documents[0].sourceId,'doc1');
 });
@@ -89,9 +91,9 @@ test('KT126 document_texts links exact filename to the only authoritative file',
    gisSkipConfirmed:true,gisSkipReason:'Жалба без пространствена преценка'
  })}];
  const a=fixture({versions});
- await a.loadProtectedContext({authenticatedSession:'session-doc-texts',caseId:id});
+ const c=await a.loadProtectedContext({authenticatedSession:'session-doc-texts',caseId:id});
  const b=await a.loadEvidenceBundle({
-   authenticatedSession:'session-doc-texts',preflight:{case:{caseId:id}}
+   authenticatedSession:'session-doc-texts',preflight:verifiedPreflight(c)
  });
  assert.deepEqual(b.documents.map(d=>d.sourceId),['doc1']);
  assert.equal(b.documents[0].text,'Пълен извлечен текст от възражение.');
