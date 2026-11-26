@@ -553,8 +553,14 @@ async function registerNewCase(){
   newFile.value='';stage1Intake=null;
   await loadAccessibleCases();
   if(caseRows.some(x=>x.caseId===id)){
-   selector.value=id;await verifySelectedCase(id);
-   setIntakeMode('existing');
+   // The same Start click continues with the newly registered case.
+   // Verify native KT125 case ACL but never switch to or require archive selection.
+   await verifySelectedCase(id);
+   if(context?.caseId!==id)throw Error('КТ125 не потвърди новата преписка за автоматичния маршрут.');
+   selector.value='';
+   setIntakeMode('new');
+   newStatus.textContent='Етап 1 завършен · '+newRegistered.internalNumber+
+     ' · преминаване към автоматичния анализ без повторен избор или старт.';
    return true;
   }else{
    newStatus.textContent+=' Записът ще се появи в списъка след обновяване.';
