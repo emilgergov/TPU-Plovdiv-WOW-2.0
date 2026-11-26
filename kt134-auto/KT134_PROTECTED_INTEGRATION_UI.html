@@ -409,7 +409,7 @@ newSubmit.addEventListener('click',async()=>{
     bytes.slice(pos,pos+chunkSize),'application/octet-stream');
   }
   await sendNew('/kt134/new-case/original/'+encodeURIComponent(id)+'/finish',
-   JSON.stringify({sourceId}),'application/json');
+   JSON.stringify({}),'application/json');
   newStatus.textContent='Преписка '+newRegistered.internalNumber+
    ' е регистрирана и оригиналът е записан в КТ126. Следва задължителната автоматична обработка на документите и определяне на водещия документ — Етап 1 все още не е приключен.';
   newFile.value='';
