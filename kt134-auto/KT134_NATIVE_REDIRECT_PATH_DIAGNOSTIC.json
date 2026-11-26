@@ -1,0 +1,149 @@
+{
+  "metadataOnly": true,
+  "results": [
+    {
+      "name": "native",
+      "path": "/auth/login",
+      "withOrigin": false,
+      "withStaleCookie": false,
+      "status": 200,
+      "redirected": false,
+      "redirectHost": null,
+      "redirectPath": null,
+      "redirectIsSameOrigin": false,
+      "errorCode": null
+    },
+    {
+      "name": "native",
+      "path": "/auth/login",
+      "withOrigin": true,
+      "withStaleCookie": false,
+      "status": 200,
+      "redirected": false,
+      "redirectHost": null,
+      "redirectPath": null,
+      "redirectIsSameOrigin": false,
+      "errorCode": null
+    },
+    {
+      "name": "native",
+      "path": "/auth/login",
+      "withOrigin": true,
+      "withStaleCookie": true,
+      "status": 200,
+      "redirected": false,
+      "redirectHost": null,
+      "redirectPath": null,
+      "redirectIsSameOrigin": false,
+      "errorCode": null
+    },
+    {
+      "name": "native",
+      "path": "/auth/login?probe=1",
+      "withOrigin": false,
+      "withStaleCookie": false,
+      "status": 400,
+      "redirected": false,
+      "redirectHost": null,
+      "redirectPath": null,
+      "redirectIsSameOrigin": false,
+      "errorCode": null
+    },
+    {
+      "name": "native",
+      "path": "/auth/login?probe=1",
+      "withOrigin": true,
+      "withStaleCookie": false,
+      "status": 400,
+      "redirected": false,
+      "redirectHost": null,
+      "redirectPath": null,
+      "redirectIsSameOrigin": false,
+      "errorCode": null
+    },
+    {
+      "name": "native",
+      "path": "/auth/login?probe=1",
+      "withOrigin": true,
+      "withStaleCookie": true,
+      "status": 400,
+      "redirected": false,
+      "redirectHost": null,
+      "redirectPath": null,
+      "redirectIsSameOrigin": false,
+      "errorCode": null
+    },
+    {
+      "name": "staging",
+      "path": "/auth/login",
+      "withOrigin": false,
+      "withStaleCookie": false,
+      "status": 200,
+      "redirected": false,
+      "redirectHost": null,
+      "redirectPath": null,
+      "redirectIsSameOrigin": false,
+      "errorCode": null
+    },
+    {
+      "name": "staging",
+      "path": "/auth/login",
+      "withOrigin": true,
+      "withStaleCookie": false,
+      "status": 200,
+      "redirected": false,
+      "redirectHost": null,
+      "redirectPath": null,
+      "redirectIsSameOrigin": false,
+      "errorCode": null
+    },
+    {
+      "name": "staging",
+      "path": "/auth/login",
+      "withOrigin": true,
+      "withStaleCookie": true,
+      "status": 200,
+      "redirected": false,
+      "redirectHost": null,
+      "redirectPath": null,
+      "redirectIsSameOrigin": false,
+      "errorCode": null
+    },
+    {
+      "name": "staging",
+      "path": "/auth/login?probe=1",
+      "withOrigin": false,
+      "withStaleCookie": false,
+      "status": 200,
+      "redirected": false,
+      "redirectHost": null,
+      "redirectPath": null,
+      "redirectIsSameOrigin": false,
+      "errorCode": null
+    },
+    {
+      "name": "staging",
+      "path": "/auth/login?probe=1",
+      "withOrigin": true,
+      "withStaleCookie": false,
+      "status": 200,
+      "redirected": false,
+      "redirectHost": null,
+      "redirectPath": null,
+      "redirectIsSameOrigin": false,
+      "errorCode": null
+    },
+    {
+      "name": "staging",
+      "path": "/auth/login?probe=1",
+      "withOrigin": true,
+      "withStaleCookie": true,
+      "status": 200,
+      "redirected": false,
+      "redirectHost": null,
+      "redirectPath": null,
+      "redirectIsSameOrigin": false,
+      "errorCode": null
+    }
+  ]
+}
