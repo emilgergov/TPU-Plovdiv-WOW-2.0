@@ -19,6 +19,7 @@ on:
       - 'kt134-auto/kt134-protected-case-gate.test.mjs'
       - 'kt134-auto/kt134-native-automatic-route.test.mjs'
       - 'kt134-auto/KT134_PROTECTED_INTEGRATION_UI.html'
+      - 'kt134-auto/KT134_EMBEDDED_DASHBOARD.html'
       - 'kt134-auto/kt134-official-word-builder.mjs'
       - 'kt134-auto/kt134-kt125-native-auth-proxy.mjs'
       - 'kt134-auto/kt134-native-case-http.mjs'
