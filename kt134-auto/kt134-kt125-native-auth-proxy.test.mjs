@@ -2,65 +2,113 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {createKt134NativeAuthProxy} from './kt134-kt125-native-auth-proxy.mjs';
 const url='https://tpu-plovdiv-kt134-test.emilgergov.workers.dev';
-const req=(path,method='GET',body='')=>new Request(url+path,{method,
- headers:{...(method==='POST'?{'origin':url,'content-type':'application/x-www-form-urlencoded'}:{})},
- ...(method==='POST'?{body}:{})});
-test('native KT125 login is same-origin, HttpOnly, no alternate password store',async()=>{
- let count=0;
- const handle=createKt134NativeAuthProxy({nativeFetch:async request=>{
-  count++;assert.equal(new URL(request.url).pathname,'/auth/login');
-  assert.equal(request.method,'POST');
-  return new Response(null,{status:303,headers:{
-   'set-cookie':'kt125-session=opaque; Path=/; HttpOnly; Secure; SameSite=Lax',
-   'location':'/module'
-  }});
+const native='https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev';
+const publicForm='<html><form method="post" action="/auth/login"><input name="username"><input name="password" type="password"></form></html>';
+function get(){return new Request(url+'/auth/login',{method:'GET',
+ headers:{cookie:'kt125_session=stale; kt134_test=old'}})}
+async function nonceFrom(handle){
+ const response=await handle(get());
+ assert.equal(response.status,200);
+ const html=await response.text();
+ const token=html.match(/name="kt134_login_csrf" value="([A-Za-z0-9_-]+)"/)?.[1];
+ const cookie=response.headers.get('set-cookie')||'';
+ assert.ok(token,'login token injected into actual native form');
+ assert.ok(cookie.includes('__Host-kt134_login_csrf='+token),'host-only cookie matches form');
+ assert.match(cookie,/SameSite=Strict/);
+ assert.match(cookie,/HttpOnly/);
+ return {token,cookie:'__Host-kt134_login_csrf='+token,html};
+}
+function proxy(upstream){
+ return createKt134NativeAuthProxy({nativeFetch:async r=>{
+  if(r.method==='GET'){
+   assert.equal(r.headers.get('cookie'),null,'stale browser cookie not forwarded on GET');
+   assert.equal(r.headers.get('origin'),native);
+   return new Response(publicForm,{status:200,headers:{'content-type':'text/html'}});
+  }
+  return upstream(r);
  }});
- const r=await handle(req('/auth/login','POST','username=test&password=test'));
- assert.equal(r.status,303);assert.equal(count,1);
- assert.equal(r.headers.get('location'),url+'/kt134/entry');
- assert.match(r.headers.get('set-cookie'),/HttpOnly/);
+}
+function post({token,cookie,origin=url,site='same-origin'}){
+ const form=new URLSearchParams({username:'',password:'',kt134_login_csrf:token||''});
+ return new Request(url+'/auth/login',{method:'POST',headers:{
+  ...(origin===undefined?{}:{origin}),
+  ...(site?{'sec-fetch-site':site}:{}),
+  'content-type':'application/x-www-form-urlencoded',
+  ...(cookie?{cookie}: {})
+ },body:form.toString()});
+}
+test('GET returns real KT125 form with one-time host-only CSRF token',async()=>{
+ const handle=proxy(()=>{throw Error('POST unexpected')});
+ const {html}=await nonceFrom(handle);
+ assert.match(html,/action="\/auth\/login"/);
+ assert.match(html,/kt134_login_csrf/);
 });
-test('cross-origin submission never reaches native login',async()=>{
- let count=0;
- const handle=createKt134NativeAuthProxy({nativeFetch:async()=>{count++;return new Response('')}})
- const r=await handle(new Request(url+'/auth/login',{method:'POST',
-  headers:{'origin':'https://evil.example','content-type':'application/x-www-form-urlencoded'},
-  body:'username=u&password=p'}));
- assert.equal(r.status,403);assert.equal(count,0);
+test('normal same-origin form POST forwards native KT125 and strips the one-time CSRF field',async()=>{
+ let posted=0;
+ const handle=proxy(async r=>{
+  posted++;
+  assert.equal(r.headers.get('origin'),native);
+  assert.equal(r.headers.get('referer'),native+'/auth/login');
+  assert.equal(r.headers.get('cookie'),null);
+  const form=new URLSearchParams(await r.text());
+  assert.equal(form.get('username'),'');
+  assert.equal(form.get('kt134_login_csrf'),null);
+  return new Response('Invalid login',{status:400,headers:{'content-type':'text/html'}});
+ });
+ const {token,cookie}=await nonceFrom(handle);
+ const result=await handle(post({token,cookie}));
+ assert.equal(result.status,400);assert.equal(posted,1);
 });
-test('arbitrary upstream redirects cannot escape staged login',async()=>{
- const handle=createKt134NativeAuthProxy({nativeFetch:async()=>new Response(null,{
-  status:302,headers:{location:'https://attacker.example/credentials'}
- })});
- const r=await handle(req('/auth/login'));assert.equal(r.status,502);
+for(const origin of [undefined,'null']){
+ test('privacy-hardened browser login POST with Origin '+String(origin)+' is allowed only with one-time token',async()=>{
+  let posts=0;
+  const handle=proxy(async()=>{
+   posts++;return new Response('Native login form rejected empty credentials',{status:400,
+    headers:{'content-type':'text/html'}});
+  });
+  const {token,cookie}=await nonceFrom(handle);
+  const result=await handle(post({token,cookie,origin}));
+  assert.equal(result.status,400);assert.equal(posts,1);
+  assert.doesNotMatch(await result.text(),/ORIGIN_REJECTED/);
+ });
+}
+test('foreign Origin is rejected even if a valid token is supplied',async()=>{
+ let posts=0;const handle=proxy(async()=>{posts++;return new Response('NEVER')});
+ const {token,cookie}=await nonceFrom(handle);
+ const result=await handle(post({token,cookie,origin:'https://attacker.example'}));
+ assert.equal(result.status,403);assert.equal(posts,0);
+ assert.equal((await result.json()).error,'ORIGIN_REJECTED');
 });
-test('unrecognized auth paths cannot act as open proxy',async()=>{
- const handle=createKt134NativeAuthProxy({nativeFetch:async()=>{throw Error('should not call')}});
- assert.equal(await handle(req('/kt126/registry')),null);
+test('cross-site fetch metadata blocks CSRF even with token',async()=>{
+ let posts=0;const handle=proxy(async()=>{posts++;return new Response('NEVER')});
+ const {token,cookie}=await nonceFrom(handle);
+ const result=await handle(post({token,cookie,origin:undefined,site:'cross-site'}));
+ assert.equal(result.status,403);assert.equal(posts,0);
 });
-
-test('browser GET without Origin is forwarded with the native trusted KT125 Origin',async()=>{
- const handle=createKt134NativeAuthProxy({nativeFetch:async upstream=>{
-  assert.equal(upstream.method,'GET');
-  assert.equal(upstream.headers.get('origin'),'https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev');
-  assert.equal(upstream.headers.get('referer'),'https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/auth/login');
-  return new Response('<form method="post"></form>',{status:200,
-   headers:{'content-type':'text/html'}});
- }});
- const r=await handle(req('/auth/login'));
- assert.equal(r.status,200);
- assert.match(await r.text(),/<form/);
+test('no one-time form token cannot enter native KT125 password flow',async()=>{
+ let posts=0;const handle=proxy(async()=>{posts++;return new Response('NEVER')});
+ const result=await handle(post({token:'',cookie:'',origin:undefined}));
+ assert.equal(result.status,403);assert.equal((await result.json()).error,'LOGIN_FORM_EXPIRED');
+ assert.equal(posts,0);
 });
-
-test('GET login never forwards stale KT134 browser cookies to native KT125',async()=>{
- const handle=createKt134NativeAuthProxy({nativeFetch:async upstream=>{
-  assert.equal(upstream.method,'GET');
-  assert.equal(upstream.headers.get('cookie'),null);
-  return new Response('<form action="/auth/login" method="post"></form>',{
-   status:200,headers:{'content-type':'text/html; charset=utf-8'}});
- }});
- const r=await handle(new Request(url+'/auth/login',{method:'GET',
-  headers:{cookie:'kt125_session=stale-data; kt134_test=old-value'}}));
- assert.equal(r.status,200);
- assert.match(await r.text(),/<form/);
+test('open redirect after native login is rejected',async()=>{
+ const handle=proxy(async()=>new Response(null,{status:302,
+  headers:{location:'https://attacker.example/credentials'}}));
+ const {token,cookie}=await nonceFrom(handle);
+ const result=await handle(post({token,cookie}));
+ assert.equal(result.status,502);
+});
+test('valid native login redirect and session cookie remain protected',async()=>{
+ const handle=proxy(async()=>new Response(null,{status:303,
+  headers:{location:'/module',
+   'set-cookie':'kt125-session=opaque; Path=/; HttpOnly; Secure; SameSite=Lax'}}));
+ const {token,cookie}=await nonceFrom(handle);
+ const result=await handle(post({token,cookie}));
+ assert.equal(result.status,303);
+ assert.equal(result.headers.get('location'),url+'/kt134/entry');
+ assert.match(result.headers.get('set-cookie'),/HttpOnly/);
+});
+test('unrecognized paths cannot be proxied to native KT125',async()=>{
+ const handle=proxy(async()=>{throw Error('should not call')});
+ assert.equal(await handle(new Request(url+'/kt126/registry')),null);
 });
