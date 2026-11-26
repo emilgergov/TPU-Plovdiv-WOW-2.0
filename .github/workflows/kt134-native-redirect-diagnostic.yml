@@ -1,0 +1,63 @@
+name: KT134 diagnose safe KT125 redirect path
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-native-redirect-diagnostic.yml']
+permissions:
+  contents: write
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Inspect unauthenticated GET redirect without credentials
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const origin='https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev';
+          const staged='https://tpu-plovdiv-kt134-test.emilgergov.workers.dev';
+          const output=[];
+          for(const [name,target] of [['native',origin],['staging',staged]]){
+            for(const path of ['/auth/login','/auth/login?probe=1']){
+              for(const headers of [
+                {accept:'text/html'},
+                {accept:'text/html',origin:origin,referer:origin+'/auth/login'},
+                {accept:'text/html',cookie:'__Host-kt134_login_csrf=expired',origin:origin}
+              ]){
+                const response=await fetch(target+path,{headers,redirect:'manual'});
+                const location=response.headers.get('location');
+                const locationUrl=location?new URL(location,target):null;
+                output.push({name,path,withOrigin:!!headers.origin,
+                  withStaleCookie:!!headers.cookie,status:response.status,
+                  redirected:response.status>=300&&response.status<400,
+                  redirectHost:locationUrl?.hostname||null,
+                  redirectPath:locationUrl?.pathname||null,
+                  redirectIsSameOrigin:locationUrl?.origin===target,
+                  errorCode:response.status>=400?(await response.text()).match(/"error":"([A-Z_]+)"/)?.[1]||null:null
+                });
+              }
+            }
+          }
+          fs.writeFileSync('kt134-auto/KT134_NATIVE_REDIRECT_PATH_DIAGNOSTIC.json',
+            JSON.stringify({metadataOnly:true,results:output},null,2)+'\n');
+          console.log(JSON.stringify(output));
+          NODE
+      - name: Save redirect metadata without credentials
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          p='kt134-auto/KT134_NATIVE_REDIRECT_PATH_DIAGNOSTIC.json'
+          encoded="$(base64 -w0 "$p")"
+          for attempt in 1 2 3 4; do
+            sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/$p?ref=kt134-auto-mode-isolated" --jq '.sha' 2>/dev/null || true)"
+            if [ -n "$sha" ]; then
+              gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f branch='kt134-auto-mode-isolated' -f message='KT134: record safe GET redirect metadata for native login' -f content="$encoded" -f sha="$sha" >/dev/null && exit 0
+            else
+              gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f branch='kt134-auto-mode-isolated' -f message='KT134: record safe GET redirect metadata for native login' -f content="$encoded" >/dev/null && exit 0
+            fi
+            sleep 2
+          done
+          exit 1
