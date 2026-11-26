@@ -108,7 +108,19 @@ main{max-width:1650px;padding:0 42px 60px}
 .error{margin-top:12px;padding:12px;border:1px solid #ce775e;border-radius:9px;color:#ffdbce;background:#482b24;font-size:12px}
 pre{white-space:pre-wrap;font:12px/1.6 Verdana,Arial;overflow-wrap:anywhere}
 #finalactions{display:none}.confirmnote{font-size:12px;color:#ffe1a6}
-</style></head><body><main>
+
+/* В интеграционното табло премахваме повторната заглавна лента и интро,
+   запазваме истинските пет етапа, регистъра, напредъка и Word. */
+html.kt134-embedded{background:transparent}
+html.kt134-embedded body{background:transparent;min-height:0}
+html.kt134-embedded main{max-width:none;width:100%;padding:6px 4px 22px}
+html.kt134-embedded .portal-head,
+html.kt134-embedded .portal-intro{display:none!important}
+html.kt134-embedded .bar{margin-top:0}
+</style><script>
+if(new URLSearchParams(location.search).get('embedded')==='1')
+ document.documentElement.classList.add('kt134-embedded');
+</script></head><body><main>
 <header class="portal-head"><div class="brand"><span class="leaf">❧</span><b>WOW · Административен пътеводител</b></div><div class="head-right">Работите като: <b>Експерт</b><a href="/auth/login">Моят профил</a><a href="/auth/logout" class="logout">Изход</a></div></header>
 <div class="portal-intro"><h1>Административен пътеводител · Изберете работен панел</h1><p>Изберете етап за отваряне на съответния работен екран. Връщането не изтрива данните по преписката.</p><small>КТ134 · стабилна функционална версия · съдържанието подлежи на последваща проверка</small></div>
 <section class="bar"><div class="case">
@@ -265,4 +277,14 @@ el('download').addEventListener('click',()=>{
   setTimeout(()=>URL.revokeObjectURL(url),3000);
  }catch{problem('Word файлът не може да бъде изтеглен.')}
 });
+</script><script>
+if(document.documentElement.classList.contains('kt134-embedded')){
+ const notify=()=>{
+  const h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  parent.postMessage({type:'kt134:inline-height',height:h},location.origin);
+ };
+ if(typeof ResizeObserver!=='undefined')new ResizeObserver(notify).observe(document.querySelector('main'));
+ addEventListener('load',notify);
+ notify();
+}
 </script></body></html>
