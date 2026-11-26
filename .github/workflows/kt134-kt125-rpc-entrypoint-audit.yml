@@ -1,0 +1,51 @@
+name: KT134 identify named KT125 RPC entrypoint
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-kt125-rpc-entrypoint-audit.yml']
+permissions: {contents: write}
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Inspect exact class and named export of existing getCaseContext RPC
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth',{headers:{authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('WORKER_SOURCE_UNAVAILABLE');
+          const s=await r.text();
+          const ix=s.indexOf('async getCaseContext(');
+          if(ix<0)throw Error('CASE_CONTEXT_METHOD_MISSING');
+          const before=s.slice(Math.max(0,ix-17000),ix);
+          const classes=[...before.matchAll(/(?:var\s+)?([A-Za-z_$][\w$]*)\s*=\s*class\s*(?:[A-Za-z_$][\w$]*)?\s+extends\s+([A-Za-z_$][\w$]*)|class\s+([A-Za-z_$][\w$]*)\s+extends\s+([A-Za-z_$][\w$]*)/g)];
+          const last=classes.slice(-5).map(x=>({className:x[1]||x[3],baseClass:x[2]||x[4],offset:x.index}));
+          const exports=s.slice(-9000);
+          const named=[...exports.matchAll(/\b([A-Za-z_$][\w$]*)\s+as\s+([A-Za-z_$][\w$]*)/g)].map(x=>({source:x[1],export:x[2]})).slice(-55);
+          const nearest=before.slice(-1400).split('\n').filter(l=>/class\s|extends|constructor|async |getCaseContext|fetch\(/.test(l)).slice(-14);
+          const out={methodFound:true,precedingClasses:last,exportAliases:named,nearestMethodContext:nearest,
+            hasNamedExport:exports.includes('getCaseContext'),otherServiceEntrypoints:exports.slice(-900).replace(/[^A-Za-z0-9_$,.:{} \n]/g,'').slice(-700)};
+          fs.writeFileSync('/tmp/kt134-native-entry.json',JSON.stringify({codeMetadataOnly:true,...out},null,2));
+          console.log(JSON.stringify({precedingClasses:last,exportAliases:named}));
+          NODE
+      - name: Save metadata
+        run: |
+          p='kt134-auto/KT134_NATIVE_RPC_ENTRYPOINT.json'
+          enc="$(base64 -w0 /tmp/kt134-native-entry.json)"
+          for n in 1 2 3 4; do
+            sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/$p?ref=kt134-auto-mode-isolated" --jq .sha 2>/dev/null || true)"
+            if [ -n "$sha" ]; then
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$enc" -f sha="$sha" -f branch=kt134-auto-mode-isolated -f message='KT134: exact KT125 named RPC entrypoint' >/dev/null && exit 0
+            else
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$enc" -f branch=kt134-auto-mode-isolated -f message='KT134: exact KT125 named RPC entrypoint' >/dev/null && exit 0
+            fi
+            sleep 2
+          done
+          exit 1
