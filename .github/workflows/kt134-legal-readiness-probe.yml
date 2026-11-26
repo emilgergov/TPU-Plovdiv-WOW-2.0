@@ -1,0 +1,49 @@
+name: KT134 inspect live normative MASTER readiness
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths: ['.github/workflows/kt134-legal-readiness-probe.yml']
+permissions: {contents: write}
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: kt134-auto-mode-isolated}
+      - name: Check actual public legal archive health and route format
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const base='https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev';
+          const output={};
+          for(const suffix of ['/health','/legal-archive-health']){
+            const response=await fetch(base+suffix,{redirect:'manual',cache:'no-store'});
+            const raw=await response.text();
+            let body;try{body=JSON.parse(raw)}catch{body={invalidJson:true}};
+            output[suffix]={httpStatus:response.status,body: {
+              status:body.status,service:body.service,apiKeyConfigured:body.apiKeyConfigured,
+              aiGenerationEnabled:body.aiGenerationEnabled,archiveSHA256:body.archiveSHA256,
+              sourceDocuments:body.sourceDocuments,exactProvisionsReady:body.exactProvisionsReady,
+              requiredProvisionsVerified:body.requiredProvisionsVerified,verifiedProvisions:body.verifiedProvisions,
+              required:body.required,invalidJson:body.invalidJson
+            }};
+          }
+          fs.writeFileSync('/tmp/kt134-legal-status.json',JSON.stringify(output,null,2)+'\n');
+          console.log(JSON.stringify(output));
+          NODE
+      - name: Save actual state of normative MASTER
+        run: |
+          p='kt134-auto/KT134_LIVE_LEGAL_HEALTH.json'; v="$(base64 -w0 /tmp/kt134-legal-status.json)"
+          for n in 1 2 3 4; do
+            sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/$p?ref=kt134-auto-mode-isolated" --jq .sha 2>/dev/null || true)"
+            if [ -n "$sha" ]; then
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f branch=kt134-auto-mode-isolated -f message='KT134: record actual legal V11 readiness' -f content="$v" -f sha="$sha" >/dev/null && exit 0
+            else
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f branch=kt134-auto-mode-isolated -f message='KT134: record actual legal V11 readiness' -f content="$v" >/dev/null && exit 0
+            fi
+            sleep 2
+          done
+          exit 1
