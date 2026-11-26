@@ -52,12 +52,41 @@ textarea{width:100%;min-height:180px;background:#fcf9ef;color:#293b2e;border:1px
 #download{font-size:13px;padding:12px 18px}
 @media(max-width:730px){.output .detail{max-height:58vh}.output .detail h2{font-size:13px}}
 
+
+/* КТ134 — изображение №1: зелено-златен административен пътеводител.
+   Само оформление: всички работещи KT125/EG/Word handlers и element IDs са запазени. */
+body{background:radial-gradient(ellipse at 40% 0%,#0e703c,#034628 52%,#00271b);background-attachment:fixed}
+main{max-width:1650px;padding:0 42px 60px}
+.portal-head{height:66px;margin:0 -42px;padding:0 42px;display:flex;align-items:center;justify-content:space-between;gap:15px;background:linear-gradient(90deg,#003a24,#035632,#003021);border-bottom:1px solid #a7ce5d}
+.brand{display:flex;align-items:center;gap:13px;color:#fff8da;font-size:23px}.leaf{font-size:39px;color:#d8ee88}.head-right{display:flex;align-items:center;gap:26px;font-size:15px}.head-right b,.head-right a{color:#ffde7d}.head-right .logout{border:1px solid #d6a94c;border-radius:13px;padding:9px 17px;color:#ffecb8;text-decoration:none}
+.portal-intro{padding:24px 4px 9px}.portal-intro h1{font-size:32px;font-weight:700;color:#ffe8ae;margin:0 0 7px;text-shadow:0 2px 6px #001c0a}.portal-intro p{font-size:18px;margin:0 0 10px;color:#f8f2dc}.portal-intro small{color:#e9c97a;font-size:11px}
+.bar{margin-top:5px;border:0;background:transparent;padding:0}.case{background:#073d28;border:1px solid #6b976a;border-radius:12px;padding:10px 16px}
+.stages{gap:18px;margin:17px 0}.stage{position:relative;min-height:235px;padding:18px 22px;overflow:hidden;border:2px solid #a9d66e;border-radius:18px;background:linear-gradient(145deg,#157740,#006336 62%,#32a04c);box-shadow:0 8px 15px #001b11,inset 0 0 19px #7be77d33}
+.stage::before{content:"";position:absolute;left:-15%;bottom:-34px;width:135%;height:95px;background:linear-gradient(40deg,#1cba50bb,#bfe66c22);border-radius:50%;transform:rotate(-6deg)}
+.stage::after{content:"➜";position:absolute;bottom:12px;right:12px;font-size:30px;color:#fff4a8;text-shadow:0 2px 5px #00341c}
+.stage>span:first-child{font:bold 28px Verdana;color:#fff2c0}.stage>div{font:bold 23px/1.24 Verdana;color:#fff;max-width:95%;margin-top:12px;position:relative;z-index:1;text-shadow:0 2px 4px #003320}
+.stage .stage-icon{position:absolute;display:block;right:32px;bottom:19px;font:82px Georgia,serif;color:#ffdfa1;text-shadow:0 0 11px #efd97e;z-index:1}
+.stage.active{background:linear-gradient(135deg,#fff2a2,#e8b63f 65%,#f6df79);border-color:#fff3b1;box-shadow:0 0 19px 4px #fadc66ad,inset 0 0 15px #fff3c0}.stage.active>span:first-child,.stage.active>div{color:#073d29;text-shadow:none}.stage.active .stage-icon{color:#b58017}
+.stage.done{background:linear-gradient(145deg,#137744,#1b9049 75%,#50ba56);border-color:#a2e99c}
+.auto{margin-top:28px;padding:20px 25px 18px;background:linear-gradient(115deg,#064c2f,#0c753b 53%,#064c30);border:2px solid #d7d078;border-radius:25px;box-shadow:inset 0 0 20px #b8f0832e}
+.autohead{margin-bottom:12px}.auto-label{display:flex;align-items:center;gap:15px}.auto-label>span{font-size:42px;color:#f5d66e}.auto-label strong{font-size:22px;color:#ffe28b}.auto-label small{display:block;color:#e5efd7;font-size:13px;margin-top:6px}
+.route{position:relative;grid-template-columns:145px repeat(5,minmax(0,1fr)) 145px;gap:0;align-items:center}
+.route:before{content:"";height:7px;position:absolute;z-index:0;top:50%;left:9%;right:9%;background:linear-gradient(90deg,#f2d777,#9eee82,#f4d86e);box-shadow:0 0 10px #dcfc7c}
+.gate{position:relative;z-index:1;min-height:125px;margin:0 9px;display:flex;align-items:center;justify-content:center;border:9px ridge #d2ac53;border-bottom-width:14px;border-radius:75px 75px 10px 10px;background:radial-gradient(ellipse at 50% 80%,#fedd61,#bf9b24 25%,#075534 70%);box-shadow:inset 0 0 14px #ffe875,0 0 13px #f7d676a3;color:#fff0aa;text-shadow:0 2px 5px #16341f;font:bold 22px Verdana}
+.node{position:relative;z-index:1;width:68px;height:68px;justify-self:center;border-radius:50%;border:5px solid #b1ed9d;background:linear-gradient(#17854a,#064d32);color:#fff;font:bold 27px Verdana;box-shadow:0 0 13px #044b2a}
+.node.done{border-color:#c4f6a1;background:linear-gradient(#269c4b,#07613c)}.node.done:after{content:"✓";position:absolute;top:63px;left:26px;color:#ffe478;font-size:19px}.node.active{background:linear-gradient(#ffd453,#be8811);border-color:#fff18e;box-shadow:0 0 0 7px #b7822899,0 0 18px 8px #ffdc6f}
+.subrow{max-width:770px;min-height:48px;margin:17px auto 0;justify-content:center;border:1px solid #d4bd65;border-radius:28px;background:#064a2c;font-size:14px}
+.bar>.actions{justify-content:center;margin:18px 0}.bar>.actions .primary{padding:15px 28px;font-size:15px;background:linear-gradient(#f1ce72,#9a6d24);border-color:#f6d880}
+.output .split{grid-template-columns:1fr 1.12fr}
+@media(max-width:1150px){main{padding:0 16px 35px}.portal-head{margin:0 -16px;padding:8px 16px}.brand{font-size:17px}.head-right{gap:9px;font-size:12px}.stage{padding:14px 10px;min-height:175px}.stage>span:first-child{font-size:19px}.stage>div{font-size:15px}.stage .stage-icon{font-size:55px}.route{grid-template-columns:100px repeat(5,minmax(0,1fr)) 100px}.gate{min-height:92px;font-size:15px}.node{height:48px;width:48px;font-size:19px}}
+@media(max-width:730px){.portal-head{height:auto;flex-wrap:wrap}.portal-intro h1{font-size:23px}.portal-intro p{font-size:14px}.stages{grid-template-columns:repeat(2,minmax(0,1fr))}.stage{min-height:150px}.auto{padding:12px}.autohead>span{display:none}.route{grid-template-columns:48px repeat(5,minmax(0,1fr)) 48px}.gate{margin:0 2px;border-width:3px;min-height:55px;font-size:10px;border-radius:25px 25px 7px 7px}.node{width:31px;height:31px;border-width:2px;font-size:12px}.node.done:after{top:32px;left:10px;font-size:11px}}
+
 .error{margin-top:12px;padding:12px;border:1px solid #ce775e;border-radius:9px;color:#ffdbce;background:#482b24;font-size:12px}
 pre{white-space:pre-wrap;font:12px/1.6 Verdana,Arial;overflow-wrap:anywhere}
 #finalactions{display:none}.confirmnote{font-size:12px;color:#ffe1a6}
 </style></head><body><main>
-<div class="topline"><div>WOW · Експертен модул · КТ134</div><div class="demo">ИЗОЛИРАН ИНТЕГРАЦИОНЕН ТЕСТ · СЪРВЪРНА ПРОВЕРКА КТ125</div></div>
-<h1>Автоматичен анализ на преписка</h1>
+<header class="portal-head"><div class="brand"><span class="leaf">❧</span><b>WOW · Административен пътеводител</b></div><div class="head-right">Работите като: <b>Експерт</b><a href="/auth/login">Моят профил</a><a href="/auth/logout" class="logout">Изход</a></div></header>
+<div class="portal-intro"><h1>Административен пътеводител · Изберете работен панел</h1><p>Изберете етап за отваряне на съответния работен екран. Връщането не изтрива данните по преписката.</p><small>КТ134 · стабилна функционална версия · съдържанието подлежи на последваща проверка</small></div>
 <section class="bar"><div class="case">
 <div>Активен експерт: <strong id="expert">—</strong></div>
 <div>Вътрешен №: <strong id="caseid">—</strong></div>
@@ -73,7 +102,7 @@ pre{white-space:pre-wrap;font:12px/1.6 Verdana,Arial;overflow-wrap:anywhere}
   <a id="kt134-login-link" href="/auth/login" style="align-self:center;color:#e7c776">Вход с действащия КТ125 профил</a>
  </div>
  <p style="font-size:11px;color:#dacfa9" id="kt134-case-help" aria-live="polite">Списъкът се зарежда автоматично само за удостоверения експерт. Не са необходими UUID или нова регистрация.</p>
- </div><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><strong>Автоматична обработка</strong><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
+ </div><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><div class="auto-label"><span>⚙</span><div><strong>Автоматичен ход</strong><small>Скала на изпълнение на етапите</small></div></div><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
 <div class="subrow"><div class="track"><div class="fill" id="fill"></div></div><span id="subtitle" aria-live="polite">Очаква се защитен контекст от КТ125</span></div></div>
 <div class="actions"><button class="primary" id="start" disabled>Изготви проект по тази преписка</button></div>
 <div id="error" role="alert" class="error" hidden></div>
@@ -91,7 +120,7 @@ pre{white-space:pre-wrap;font:12px/1.6 Verdana,Arial;overflow-wrap:anywhere}
 <script type="module">
 const labels=['Внасяне и анализ на преписката','Предмет и обхват на ИП','Имоти и пространствен анализ на ИП','Нормативна и процедурна преценка на ИП','Определяне на процедурата по ИП'];
 const stages=document.querySelector('#stages'),route=document.querySelector('#route');
-for(let i=0;i<5;i++){const e=document.createElement('div');e.className='stage';const n=document.createElement('span');n.textContent=String(i+1).padStart(2,'0');const t=document.createElement('div');t.textContent=labels[i];e.append(n,t);stages.append(e)}
+for(let i=0;i<5;i++){const e=document.createElement('div');e.className='stage';const n=document.createElement('span');n.textContent='Етап '+String(i+1);const t=document.createElement('div');t.textContent=labels[i];const ico=document.createElement('span');ico.className='stage-icon';ico.setAttribute('aria-hidden','true');ico.textContent=['▤','◇','⌖','⚖','▦'][i];e.append(n,t,ico);stages.append(e)}
 const gate=(text,cls)=>{const e=document.createElement('div');e.className=cls;e.textContent=text;route.append(e)};
 gate('Вход','gate');for(let i=1;i<=5;i++)gate(String(i),'node');gate('Изход','gate');
 const tiles=[...stages.children],nodes=[...route.children].slice(1,6);
