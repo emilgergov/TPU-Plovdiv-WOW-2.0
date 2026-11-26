@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createKt134NativeCaseRegistration} from './kt134-native-new-case-registration.mjs';
 const UUID='7d895a17-e947-4c61-9f31-7e887cef0117';
 const request=(opts={})=>new Request('https://tpu-plovdiv-kt134-test.emilgergov.workers.dev/kt134/new-case/register',{
- method:'POST',headers:{origin:'https://tpu-plovdiv-kt134-test.emilgergov.workers.dev',cookie:'kt125_session=synthetic-test-cookie',...opts.headers}
+ method:'POST',body:JSON.stringify({filename:'new-dossier.zip',size:123,sha256:'a'.repeat(64)}),headers:{origin:'https://tpu-plovdiv-kt134-test.emilgergov.workers.dev',cookie:'kt125_session=synthetic-test-cookie',...opts.headers}
 });
 const native=()=>new Response(JSON.stringify({record:{case_id:UUID,internal_number:'EG-2026-TEST123',revision:1}}),{
  headers:{'Content-Type':'application/json'}});
