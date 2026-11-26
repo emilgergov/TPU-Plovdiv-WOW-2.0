@@ -31,7 +31,7 @@ function proxy(upstream){
 function post({token,cookie,origin=url,site='same-origin'}){
  const form=new URLSearchParams({username:'',password:'',kt134_login_csrf:token||''});
  return new Request(url+'/auth/login',{method:'POST',headers:{
-  ...(origin===undefined?{}:{origin}),
+  ...(origin===undefined||origin==='__ABSENT__'?{}:{origin}),
   ...(site?{'sec-fetch-site':site}:{}),
   'content-type':'application/x-www-form-urlencoded',
   ...(cookie?{cookie}: {})
@@ -59,7 +59,7 @@ test('normal same-origin form POST forwards native KT125 and strips the one-time
  const result=await handle(post({token,cookie}));
  assert.equal(result.status,400);assert.equal(posted,1);
 });
-for(const origin of [undefined,'null']){
+for(const origin of ['__ABSENT__','null']){
  test('privacy-hardened browser login POST with Origin '+String(origin)+' is allowed only with one-time token',async()=>{
   let posts=0;
   const handle=proxy(async()=>{
@@ -82,12 +82,12 @@ test('foreign Origin is rejected even if a valid token is supplied',async()=>{
 test('cross-site fetch metadata blocks CSRF even with token',async()=>{
  let posts=0;const handle=proxy(async()=>{posts++;return new Response('NEVER')});
  const {token,cookie}=await nonceFrom(handle);
- const result=await handle(post({token,cookie,origin:undefined,site:'cross-site'}));
+ const result=await handle(post({token,cookie,origin:'__ABSENT__',site:'cross-site'}));
  assert.equal(result.status,403);assert.equal(posts,0);
 });
 test('no one-time form token cannot enter native KT125 password flow',async()=>{
  let posts=0;const handle=proxy(async()=>{posts++;return new Response('NEVER')});
- const result=await handle(post({token:'',cookie:'',origin:undefined}));
+ const result=await handle(post({token:'',cookie:'',origin:'__ABSENT__'}));
  assert.equal(result.status,403);assert.equal((await result.json()).error,'LOGIN_FORM_EXPIRED');
  assert.equal(posts,0);
 });
