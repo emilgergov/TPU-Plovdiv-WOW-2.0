@@ -196,6 +196,16 @@ jobs:
             throw Error('KT134_PROTECTED_AUTOMATIC_HEALTH_FAILED');
           console.log('KT134 live protected route is configured: '+x.protectedRoute);
           NODE
+          # KT134 final dashboard: the automatic route MUST be inline, not a second-click menu.
+          curl --fail --silent --show-error --max-time 15 "$BASE/kt134/dashboard" -o /tmp/kt134-dashboard.html
+          grep -Fq '<details id="auto">' /tmp/kt134-dashboard.html
+          grep -Fq 'src="/kt134/final-test?embedded=1"' /tmp/kt134-dashboard.html
+          if grep -Fq 'Отвори автоматичния режим' /tmp/kt134-dashboard.html; then
+            echo '::error::Unexpected second-click auto button'; exit 1
+          fi
+          frame_headers="$(curl -sS -D - -o /dev/null --max-time 15 "$BASE/kt134/final-test")"
+          printf '%s' "$frame_headers" | grep -Eiq 'x-frame-options: SAMEORIGIN'
+          printf '%s' "$frame_headers" | grep -Eiq "frame-ancestors 'self'"
           curl --fail --silent --show-error --max-time 15 "$BASE/kt134/final-test" -o /tmp/kt134-final-ui.html
           grep -Fq 'Внасяне и анализ на преписката' /tmp/kt134-final-ui.html
           grep -Fq '/kt134/automatic/draft' /tmp/kt134-final-ui.html
