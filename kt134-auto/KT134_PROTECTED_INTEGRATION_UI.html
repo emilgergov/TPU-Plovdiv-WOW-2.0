@@ -324,6 +324,12 @@ html.kt134-embedded .kt134-unified .kt134-choice input::file-selector-button{
 .kt134-unified .gate{min-height:100px}
 .kt134-unified .kt134-intake-choices{margin-bottom:6px}
 .kt134-unified .unified-start{margin:6px 0 8px}
+
+/* Small non-primary actions: remain distinct from the one Start button. */
+.kt134-screen-tools{display:flex;justify-content:flex-end;gap:9px;margin:0 0 9px;flex-wrap:wrap}
+.kt134-screen-tools button{font:600 12px Verdana,Arial,sans-serif;padding:8px 15px;border:1px solid #b9995d;border-radius:9px;background:linear-gradient(125deg,#184f38,#123a2b);color:#edd395;cursor:pointer;min-height:34px}
+.kt134-screen-tools button:hover{background:#255d43;border-color:#e8c677}
+.kt134-screen-tools button:disabled{opacity:.45;cursor:not-allowed}
 </style><script>
 if(new URLSearchParams(location.search).get('embedded')==='1')
  document.documentElement.classList.add('kt134-embedded');
@@ -334,7 +340,7 @@ if(new URLSearchParams(location.search).get('embedded')==='1')
 <div>Активен експерт: <strong id="expert">—</strong></div>
 <div>Вътрешен №: <strong id="caseid">—</strong></div>
 <div>Деловоден №: <strong id="registry">—</strong></div></div>
-<div class="kt134-unified" aria-label="Автоматичен анализ"><div class="kt134-intake-choices">
+<div class="kt134-unified" aria-label="Автоматичен анализ"><div class="kt134-screen-tools"><button type="button" id="kt134-clear-screen" title="Нулира само текущия екран — не изтрива документи или преписки">Изчисти екрана</button><button type="button" id="kt134-to-dashboard" title="Към общото табло с петте етапа и панелите">Към таблото</button></div><div class="kt134-intake-choices">
 <section class="kt134-choice active" id="kt134-new-intake"><label class="choice-title" for="kt134-new-file">✚ Нова преписка</label><input id="kt134-new-file" type="file" accept=".zip,.pdf,.docx" aria-label="Документи за нова преписка"><span id="kt134-new-status" class="choice-note" aria-live="polite">Изберете ZIP, PDF или DOCX до 40 MB</span><button id="kt134-new-submit" type="button" disabled hidden>Регистрирай</button></section>
 <section class="kt134-choice" id="kt134-existing-intake"><label class="choice-title" for="kt134-case-select">▣ Преписка от архива</label><select id="kt134-case-select" disabled aria-label="Изберете преписка от архива"><option value="">Зареждане…</option></select><span id="kt134-case-help" class="choice-note" aria-live="polite"></span><div class="choice-tools"><button id="kt134-refresh" type="button" hidden aria-hidden="true" tabindex="-1">Обнови архива</button><a id="kt134-login-link" href="/auth/login">Вход</a></div></section>
 </div><div class="unified-start"><button class="primary" id="start" disabled>Стартирай автоматичния анализ</button></div><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><div class="auto-label"><span>⚙</span><div><strong>Автоматичен ход</strong></div></div><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
@@ -371,6 +377,7 @@ function problem(msg){el('kt134-elapsed').textContent='Прекъснато';el(
 let context=null;
 let caseRows=[];
 let authenticated=false;
+let runBusy=false;
 render(0);
 const selector=el('kt134-case-select');
 const textOption=(value,label)=>{const o=document.createElement('option');o.value=value;o.textContent=label;return o;};
@@ -593,7 +600,35 @@ selector.addEventListener('change',()=>{setIntakeMode('existing');verifySelected
 el('kt134-refresh').addEventListener('click',loadAccessibleCases);
 loadAccessibleCases();
 let word=null;
+el('kt134-clear-screen').addEventListener('click',()=>{
+ if(runBusy)return;
+ // Clear presentation and local intake state ONLY. KT126 records and
+ // original uploaded documents remain safely stored and unchanged.
+ newFile.value='';newRegistered=null;registrationRequestKey=null;stage1Intake=null;
+ newSubmit.disabled=true;newStatus.textContent='Изберете ZIP, PDF или DOCX до 40 MB';
+ selector.value='';word=null;
+ clearSelection();
+ el('caseid').textContent='—';el('registry').textContent='—';
+ el('expert').textContent=authenticated?'Удостоверен експерт':'—';
+ el('panel').textContent='—';el('proposal').textContent='';
+ el('review').textContent='';el('doc-title').textContent='';
+ el('draft').textContent='';
+ el('error').hidden=true;el('error').textContent='';
+ el('subtitle').textContent='Изберете нова преписка или преписка от архива.';
+ setIntakeMode('new');
+ const url=new URL(location.href);url.searchParams.delete('caseId');
+ history.replaceState(null,'',url.pathname+url.search);
+});
+el('kt134-to-dashboard').addEventListener('click',()=>{
+ if(runBusy)return;
+ // Same-origin navigation to the main dashboard, not to the automatic
+ // form, both when embedded in iframe and when opened standalone.
+ window.top.location.assign('/kt134/dashboard');
+});
 el('start').addEventListener('click',async()=>{
+ if(runBusy)return;
+ runBusy=true;el('kt134-clear-screen').disabled=true;el('kt134-to-dashboard').disabled=true;
+ try{
  if(intakeMode==='new'){el('start').disabled=true;if(!(await registerNewCase())){syncStart();return;}}
  if(!context){syncStart();return;}el('start').disabled=true;el('error').hidden=true;render(0);
  el('subtitle').textContent='Анализът се изпълнява · изчаква се потвърден резултат от етапите';el('kt134-elapsed').textContent='Обработва…';
@@ -615,6 +650,7 @@ el('start').addEventListener('click',async()=>{
   render(5);el('kt134-elapsed').textContent='Завършено';el('subtitle').textContent='Готов проект · очаква окончателно решение на експерта';
   el('output').classList.add('visible');el('download').disabled=false;
  }catch(e){render(0);problem(e.message||'Неуспешно изпълнение');el('start').disabled=false}
+ }finally{runBusy=false;el('kt134-clear-screen').disabled=false;el('kt134-to-dashboard').disabled=false;}
 });
 el('download').addEventListener('click',()=>{
  if(!word||!context)return;
