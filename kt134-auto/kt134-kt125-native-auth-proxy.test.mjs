@@ -112,3 +112,25 @@ test('unrecognized paths cannot be proxied to native KT125',async()=>{
  const handle=proxy(async()=>{throw Error('should not call')});
  assert.equal(await handle(new Request(url+'/kt126/registry')),null);
 });
+
+for(const path of ['/', '/dashboard', '/app', '/cases', '/module', '/kt125/portal']){
+ test('trusted native post-login redirect '+path+' resolves to the isolated case entry',async()=>{
+  const handle=proxy(async()=>new Response(null,{status:303,headers:{
+   location:path,
+   'set-cookie':'kt125-session=opaque; Path=/; HttpOnly; Secure; SameSite=Lax'
+  }}));
+  const {token,cookie}=await nonceFrom(handle);
+  const result=await handle(post({token,cookie}));
+  assert.equal(result.status,303);
+  assert.equal(result.headers.get('location'),url+'/kt134/entry');
+  assert.match(result.headers.get('set-cookie'),/HttpOnly/);
+ });
+}
+test('cross-host native login redirect is always rejected',async()=>{
+ const handle=proxy(async()=>new Response(null,{status:303,
+  headers:{location:'https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/app'}}));
+ const {token,cookie}=await nonceFrom(handle);
+ const result=await handle(post({token,cookie}));
+ assert.equal(result.status,502);
+ assert.equal((await result.json()).error,'KT125_UNEXPECTED_LOGIN_REDIRECT');
+});
