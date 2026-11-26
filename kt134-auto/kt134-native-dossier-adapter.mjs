@@ -20,12 +20,27 @@ function decodeVersion(value){
  try{return JSON.parse(value||'{}')}catch{fail('KT126_VERSION_INVALID_JSON')}
 }
 const sourceDocuments=x=>{
- const a=list(x?.documents?.length?x.documents:x?.sourceTexts?.length?x.sourceTexts:x?.files);
- return a.filter(v=>obj(v)&&str(v.text)&&str(v.sourceId||v.source))
-  .map(v=>({sourceId:str(v.sourceId||v.source),text:str(v.text),
-     fileName:str(v.fileName||v.filename||v.name),
+ const arrays=[x?.documents,x?.sourceTexts,x?.document_texts,x?.files];
+ const a=arrays.flatMap(list);
+ return a.filter(v=>obj(v)&&str(v.text||v.extractedText||v.fullText)&&
+      str(v.sourceId||v.source_id||v.source||v.fileId||v.filename||v.fileName))
+  .map(v=>({sourceId:str(v.sourceId||v.source_id||v.fileId||v.source),
+     text:str(v.text||v.extractedText||v.fullText),
+     fileName:str(v.fileName||v.filename||v.name||v.source),
      type:str(v.type),date:str(v.date)}));
 };
+// A source text can be linked to the canonical KT126 file manifest only
+// by its exact source ID, or by a unique exact filename from that manifest.
+// Ambiguous filenames must not silently attach an unrelated document.
+function canonicalDocument(doc,files){
+ const matchId=files.find(f=>f.source_id===doc.sourceId);
+ if(matchId)return {...doc,sourceId:matchId.source_id,
+   fileName:doc.fileName||matchId.filename};
+ const matches=files.filter(f=>f.filename&&
+   (f.filename===doc.fileName||f.filename===doc.sourceId));
+ if(matches.length!==1)fail('KT134_DOCUMENT_SOURCE_UNVERIFIED');
+ return {...doc,sourceId:matches[0].source_id,fileName:matches[0].filename};
+}
 export function createKt134NativeDossierAdapters({db,resolvePrincipal,getNormativeMaster}={}){
  if(typeof db?.prepare!=='function'||typeof resolvePrincipal!=='function'||
     typeof getNormativeMaster!=='function')fail('KT134_NATIVE_ADAPTER_NOT_CONFIGURED');
@@ -81,12 +96,15 @@ export function createKt134NativeDossierAdapters({db,resolvePrincipal,getNormati
     ...sourceDocuments(v.data?.globals?.KT80DossierAudit),
     ...sourceDocuments(v.data?.globals?.KT80CH2Passport)
   ]);
-  const unique=[...new Map(documents.map(x=>[x.sourceId,x])).values()];
   const files=await all(db,'SELECT source_id,filename,sha256,complete FROM kt126_files WHERE case_id=?',caseId);
   if(!files.length||!files.every(f=>Number(f.complete)===1&&/^[a-f0-9]{64}$/i.test(f.sha256||'')))
     fail('KT126_FILE_MANIFEST_INCOMPLETE');
-  const bySource=new Map(files.map(f=>[f.source_id,f]));
-  if(!unique.length||unique.some(x=>!bySource.has(x.sourceId)))
+  // Match text to the trusted manifest rather than accepting free-text filename
+  // claims from stored UI state; keep the latest content for each file.
+  const canonical=documents.map(d=>canonicalDocument(d,files));
+  const unique=[...new Map(canonical.map(x=>[x.sourceId,x])).values()];
+  if(!unique.length||unique.length!==files.length||
+     files.some(f=>!unique.some(d=>d.sourceId===f.source_id)))
     fail('KT134_VERIFIED_SOURCE_TEXTS_MISSING');
   const gis=get(['gis','spatialEvidence','gisResult','KT80FreeGISResults']);
   const gisMode=gis?.pdf1Ref&&gis?.sourceId?'required':
