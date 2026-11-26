@@ -49,7 +49,7 @@ function cleanCookieScope(cookie) {
  return [pieces[0],...attributes].join(';');
 }
 function redirectTarget(value,visibleOrigin) {
- if(!value||/[\\r\\n\\x00-\\x1f]/.test(value))return null;
+ if(!value||Array.from(value).some(c=>c.charCodeAt(0)<32))return null;
  const native=new URL(nativeOrigin);
  let next;
  try{next=new URL(value,native)}catch{return null}
@@ -59,7 +59,8 @@ function redirectTarget(value,visibleOrigin) {
  // Existing KT125 redirects successful login into its own application
  // (e.g. /, /dashboard, /module). KT134 has its own separate, protected
  // test entry: route all native application redirects ONLY to that entry.
- if(/^\\/(?:auth\\/(?:login|logout|forgot|reset))(?:\\/|$)/.test(path))
+ if(['/auth/login','/auth/logout','/auth/forgot','/auth/reset'].some(
+  p=>path===p||path.startsWith(p+'/')))
   return visibleOrigin+path+next.search;
  return visibleOrigin+'/kt134/entry';
 }
