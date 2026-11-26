@@ -4,6 +4,133 @@
   "privateSourceExported": false,
   "hasCreateRoute": true,
   "createRouteCalls": [],
+  "routeIdentifiers": [
+    "createCase",
+    "input"
+  ],
+  "clientCalls": [
+    {
+      "token": "api(\"/create\"",
+      "requestKeys": [],
+      "hasResponseRecord": true
+    },
+    {
+      "token": "api(\"/create\"",
+      "requestKeys": [],
+      "hasResponseRecord": true
+    },
+    {
+      "token": "api(\"/\" +",
+      "requestKeys": [
+        "revision"
+      ],
+      "hasResponseRecord": true
+    },
+    {
+      "token": "api(\"/\" +",
+      "requestKeys": [
+        "revision",
+        "state"
+      ],
+      "hasResponseRecord": true
+    },
+    {
+      "token": "api(\"/\" +",
+      "requestKeys": [],
+      "hasResponseRecord": true
+    },
+    {
+      "token": "api(\"/\" +",
+      "requestKeys": [],
+      "hasResponseRecord": true
+    },
+    {
+      "token": "api(\"/\" +",
+      "requestKeys": [],
+      "hasResponseRecord": false
+    },
+    {
+      "token": "api(\"/\" +",
+      "requestKeys": [],
+      "hasResponseRecord": false
+    },
+    {
+      "token": "api(\"/\" +",
+      "requestKeys": [],
+      "hasResponseRecord": false
+    },
+    {
+      "token": "api(\"/\" +",
+      "requestKeys": [],
+      "hasResponseRecord": true
+    },
+    {
+      "token": "\"/source\"",
+      "requestKeys": [
+        "filename",
+        "size",
+        "sha256"
+      ],
+      "hasResponseRecord": false
+    },
+    {
+      "token": "\"/source\"",
+      "requestKeys": [],
+      "hasResponseRecord": true
+    },
+    {
+      "token": "\"/source\"",
+      "requestKeys": [],
+      "hasResponseRecord": false
+    },
+    {
+      "token": "\"/part/\"",
+      "requestKeys": [],
+      "hasResponseRecord": false
+    },
+    {
+      "token": "\"/part/\"",
+      "requestKeys": [],
+      "hasResponseRecord": false
+    },
+    {
+      "token": "\"/finish\"",
+      "requestKeys": [],
+      "hasResponseRecord": true
+    },
+    {
+      "token": "\"/state\"",
+      "requestKeys": [
+        "revision",
+        "state"
+      ],
+      "hasResponseRecord": true
+    },
+    {
+      "token": "\"/state\"",
+      "requestKeys": [
+        "revision",
+        "state"
+      ],
+      "hasResponseRecord": true
+    },
+    {
+      "token": "\"/state\"",
+      "requestKeys": [
+        "revision",
+        "state"
+      ],
+      "hasResponseRecord": true
+    },
+    {
+      "token": "\"/state\"",
+      "requestKeys": [
+        "revision",
+        "state"
+      ],
+      "hasResponseRecord": true
+    }
+  ],
   "handlers": [
     {
       "name": "startSource",
