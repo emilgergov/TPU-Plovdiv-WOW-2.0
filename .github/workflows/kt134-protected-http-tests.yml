@@ -12,6 +12,8 @@ on:
       - 'kt134-auto/kt134-normative-master-adapter.mjs'
       - 'kt134-auto/kt134-normative-master-adapter.test.mjs'
       - 'kt134-auto/kt134-protected-host.mjs'
+      - 'kt134-auto/kt134-docx-transport.mjs'
+      - 'kt134-auto/kt134-docx-transport.test.mjs'
       - '.github/workflows/kt134-protected-http-tests.yml'
   workflow_dispatch:
 permissions:
@@ -34,6 +36,7 @@ jobs:
           node --test kt134-auto/kt134-kt125-session-verifier.test.mjs
           node --test kt134-auto/kt134-normative-master-adapter.test.mjs
           node --check kt134-auto/kt134-protected-host.mjs
+          node --test kt134-auto/kt134-docx-transport.test.mjs
           node --test kt134-auto/kt134-eg-stage45-live-bridge.test.mjs
       - name: Record real test result on isolated branch
         if: always()
