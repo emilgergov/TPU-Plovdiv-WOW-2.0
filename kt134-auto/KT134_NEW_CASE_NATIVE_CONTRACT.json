@@ -131,6 +131,107 @@
       "hasResponseRecord": true
     }
   ],
+  "apiStructures": [
+    {
+      "token": "api(\"/create\"",
+      "fields": [],
+      "statements": [],
+      "returnsCase": true
+    },
+    {
+      "token": "api(\"/create\"",
+      "fields": [
+        "subject",
+        "revision",
+        "state"
+      ],
+      "statements": [],
+      "returnsCase": true
+    },
+    {
+      "token": "\"/source\"",
+      "fields": [
+        "size",
+        "sha256",
+        "body"
+      ],
+      "statements": [],
+      "returnsCase": false
+    },
+    {
+      "token": "\"/source\"",
+      "fields": [],
+      "statements": [
+        "data"
+      ],
+      "returnsCase": true
+    },
+    {
+      "token": "\"/source\"",
+      "fields": [],
+      "statements": [
+        "parts"
+      ],
+      "returnsCase": false
+    },
+    {
+      "token": "\"/part/\"",
+      "fields": [],
+      "statements": [],
+      "returnsCase": false
+    },
+    {
+      "token": "\"/part/\"",
+      "fields": [],
+      "statements": [
+        "parts"
+      ],
+      "returnsCase": false
+    },
+    {
+      "token": "\"/finish\"",
+      "fields": [],
+      "statements": [],
+      "returnsCase": true
+    }
+  ],
+  "backendCalls": [
+    "registryJson",
+    "startSource",
+    "finishSource",
+    "createCase",
+    "changeCase"
+  ],
+  "functionBodies": [
+    {
+      "name": "createCase",
+      "callArgShape": [],
+      "fieldReferences": [],
+      "startsWithCreate": false,
+      "containsExternalNumber": true
+    },
+    {
+      "name": "startSource",
+      "callArgShape": [],
+      "fieldReferences": [
+        "filename",
+        "parts",
+        "sha256",
+        "size"
+      ],
+      "startsWithCreate": false,
+      "containsExternalNumber": false
+    },
+    {
+      "name": "finishSource",
+      "callArgShape": [],
+      "fieldReferences": [
+        "parts"
+      ],
+      "startsWithCreate": false,
+      "containsExternalNumber": false
+    }
+  ],
   "handlers": [
     {
       "name": "startSource",
