@@ -3,6 +3,49 @@
   "readOnly": true,
   "privateSourceExported": false,
   "hasCreateRoute": true,
+  "createRouteCalls": [],
+  "handlers": [
+    {
+      "name": "startSource",
+      "fields": [
+        "filename",
+        "sha256",
+        "size"
+      ],
+      "verbs": [],
+      "parsing": [],
+      "routePatterns": [],
+      "hasStateSave": false,
+      "hasOriginalUpload": true
+    },
+    {
+      "name": "finishSource",
+      "fields": [],
+      "verbs": [],
+      "parsing": [],
+      "routePatterns": [],
+      "hasStateSave": false,
+      "hasOriginalUpload": true
+    },
+    {
+      "name": "createCase",
+      "fields": [],
+      "verbs": [],
+      "parsing": [],
+      "routePatterns": [],
+      "hasStateSave": false,
+      "hasOriginalUpload": false
+    },
+    {
+      "name": "changeCase",
+      "fields": [],
+      "verbs": [],
+      "parsing": [],
+      "routePatterns": [],
+      "hasStateSave": false,
+      "hasOriginalUpload": false
+    }
+  ],
   "report": [
     {
       "term": "/kt126/registry/create",
