@@ -8,15 +8,15 @@ const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]
 const problem=code=>{const e=new Error(code);e.code=code;throw e};
 function destination(p){
  const start=/^\/kt134\/new-case\/original\/([0-9a-f-]{36})\/start$/i.exec(p);
- const part=/^\/kt134\/new-case\/original\/([0-9a-f-]{36})\/part\/([0-9a-f-]{36})\/([0-9]{1,5})$/i.exec(p);
+ const part=/^\/kt134\/new-case\/original\/([0-9a-f-]{36})\/part\/([0-9]{1,5})$/i.exec(p);
  const finish=/^\/kt134\/new-case\/original\/([0-9a-f-]{36})\/finish$/i.exec(p);
  const id=start?.[1]||part?.[1]||finish?.[1];
  if(!id||!UUID.test(id))problem('KT134_INVALID_ORIGINAL_ROUTE');
- if(part&&(!UUID.test(part[2])||Number(part[3])>4999))
+ if(part&&Number(part[2])>4999)
   problem('KT134_PART_INDEX_INVALID');
  const step=start?'start':part?'part':'finish';
  const pathname='/kt126/registry/'+id+'/source/'+
-  (step==='start'?'start':step==='finish'?'finish':'part/'+part[2]+'/'+Number(part[3]));
+  (step==='start'?'start':step==='finish'?'finish':'part/'+Number(part[2]));
  return {caseId:id,step,pathname};
 }
 export function createKt134NativeOriginalTransport({nativeFetch}={}){
