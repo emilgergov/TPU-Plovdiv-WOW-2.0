@@ -37,7 +37,7 @@ export default {
    if(!env.KT134_EG_ACCESS_TOKEN)return json({error:'KT134_EG_SECRET_NOT_PAIRED'},503);
    if(!env.KT134_EG_NATIVE?.fetch)return json({error:'KT134_EG_SERVICE_NOT_BOUND'},503);
    const draft=createKt134NativeAutomaticHandler({
-    nativeFetch,nativeRpc:env.KT125_NATIVE,
+    nativeFetch,nativeRpc:env.KT125_IDENTITY_RPC,
     egWorkerBase:'https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev',
     egAccessToken:env.KT134_EG_ACCESS_TOKEN,
     fetchImpl:env.KT134_EG_NATIVE.fetch.bind(env.KT134_EG_NATIVE)
@@ -94,12 +94,12 @@ export default {
   }
   if(path==='/kt134/native-authorization-health'){
    if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
-   if(typeof env.KT125_NATIVE?.getCaseContext!=='function')
+   if(typeof env.KT125_IDENTITY_RPC?.getCaseContext!=='function')
      return json({ready:false,reason:'KT125_RPC_METHOD_NOT_AVAILABLE'},503);
    try{
     // Invalid throwaway cookie; native KT125 MUST refuse it. No user case
     // UUID, session, or document is sent to this operational probe.
-    const rejected=await env.KT125_NATIVE.getCaseContext({
+    const rejected=await env.KT125_IDENTITY_RPC.getCaseContext({
       cookie:'',
       caseId:'11111111-1111-4111-8111-111111111111',
       action:'case.edit'
