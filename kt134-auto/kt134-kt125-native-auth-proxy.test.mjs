@@ -105,7 +105,7 @@ test('valid native login redirect and session cookie remain protected',async()=>
  const {token,cookie}=await nonceFrom(handle);
  const result=await handle(post({token,cookie}));
  assert.equal(result.status,303);
- assert.equal(result.headers.get('location'),url+'/kt134/entry');
+ assert.equal(result.headers.get('location'),url+'/kt134/final-test');
  assert.match(result.headers.get('set-cookie'),/HttpOnly/);
 });
 test('unrecognized paths cannot be proxied to native KT125',async()=>{
@@ -122,7 +122,7 @@ for(const path of ['/', '/dashboard', '/app', '/cases', '/module', '/kt125/porta
   const {token,cookie}=await nonceFrom(handle);
   const result=await handle(post({token,cookie}));
   assert.equal(result.status,303);
-  assert.equal(result.headers.get('location'),url+'/kt134/entry');
+  assert.equal(result.headers.get('location'),url+'/kt134/final-test');
   assert.match(result.headers.get('set-cookie'),/HttpOnly/);
  });
 }
