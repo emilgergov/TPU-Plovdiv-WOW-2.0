@@ -1,0 +1,19 @@
+name: KT134 shared KT126 registration contract unit tests
+on:
+  push:
+    branches: [kt134-auto-mode-isolated]
+    paths:
+      - 'kt134-auto/kt134-native-new-case-registration.mjs'
+      - 'kt134-auto/kt134-native-new-case-registration.test.mjs'
+      - '.github/workflows/kt134-new-case-registration-tests.yml'
+permissions: {contents: read}
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Check shared numbering register tests (all synthetic, no case writes)
+        run: node --test kt134-auto/kt134-native-new-case-registration.test.mjs
