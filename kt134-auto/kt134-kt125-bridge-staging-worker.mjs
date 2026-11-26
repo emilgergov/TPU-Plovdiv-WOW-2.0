@@ -5,6 +5,8 @@
 import existing from './kt134-staging-preview-worker.mjs';
 import {createKt134NativeAuthProxy} from './kt134-kt125-native-auth-proxy.mjs';
 import {createKt134NativeCaseReader} from './kt134-native-case-http.mjs';
+import {createKt134NativeAutomaticHandler} from './kt134-native-automatic-route.mjs';
+import autoUI from './KT134_PROTECTED_INTEGRATION_UI.html';
 const nativeOrigin='https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev';
 const json=(body,status=200)=>new Response(JSON.stringify(body),{
  status,headers:{'content-type':'application/json; charset=utf-8',
@@ -28,6 +30,24 @@ export default {
   if(path==='/auth/login'||path==='/auth/logout'){
    if(!nativeFetch)return json({error:'KT125_NATIVE_NOT_CONFIGURED'},503);
    return createKt134NativeAuthProxy({nativeFetch})(request);
+  }
+  if(path==='/kt134/automatic/draft'){
+   if(!nativeFetch)return json({error:'KT125_NATIVE_NOT_CONFIGURED'},503);
+   if(!env.KT134_EG_ACCESS_TOKEN)return json({error:'KT134_EG_SECRET_NOT_PAIRED'},503);
+   const draft=createKt134NativeAutomaticHandler({
+    nativeFetch,egWorkerBase:'https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev',
+    egAccessToken:env.KT134_EG_ACCESS_TOKEN
+   });
+   return draft(request);
+  }
+  if(path==='/kt134/final-test'){
+   if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
+   // The HTML never supplies authentication facts to the server; those are
+   // independently verified on every native-KT125 case request.
+   return new Response(autoUI,{headers:{'content-type':'text/html; charset=utf-8',
+     'cache-control':'no-store, private','x-content-type-options':'nosniff',
+     'referrer-policy':'no-referrer','x-frame-options':'DENY',
+     'content-security-policy':"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"}});
   }
   if(path==='/kt134/entry'){
    if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
