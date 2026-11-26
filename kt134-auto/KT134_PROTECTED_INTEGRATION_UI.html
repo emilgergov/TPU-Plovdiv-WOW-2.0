@@ -330,6 +330,14 @@ html.kt134-embedded .kt134-unified .kt134-choice input::file-selector-button{
 .kt134-screen-tools button{font:600 12px Verdana,Arial,sans-serif;padding:8px 15px;border:1px solid #b9995d;border-radius:9px;background:linear-gradient(125deg,#184f38,#123a2b);color:#edd395;cursor:pointer;min-height:34px}
 .kt134-screen-tools button:hover{background:#255d43;border-color:#e8c677}
 .kt134-screen-tools button:disabled{opacity:.45;cursor:not-allowed}
+
+/* One dashboard, one card deck: automation retains its gates but not five duplicate cards. */
+html.kt134-embedded #stages{display:none!important}
+html.kt134-embedded .kt134-unified .auto{margin-top:4px;padding-top:8px}
+.kt134-progress-track.waiting{position:relative;overflow:hidden}
+.kt134-progress-track.waiting:after{content:"";position:absolute;inset:2px auto 2px 0;width:16%;border-radius:99px;background:linear-gradient(90deg,transparent,#eed18888,transparent);animation:kt134Activity 1.7s ease-in-out infinite}
+@keyframes kt134Activity{0%{transform:translateX(-130%)}100%{transform:translateX(760%)}}
+@media(prefers-reduced-motion:reduce){.kt134-progress-track.waiting:after{animation:none}}
 </style><script>
 if(new URLSearchParams(location.search).get('embedded')==='1')
  document.documentElement.classList.add('kt134-embedded');
@@ -372,7 +380,17 @@ const gate=(text,cls)=>{const e=document.createElement('div');e.className=cls;e.
 gate('Вход','gate');for(let i=1;i<=5;i++)gate(String(i),'node');gate('Изход','gate');
 const tiles=[...stages.children],nodes=[...route.children].slice(1,6);
 const el=id=>document.getElementById(id);
-function render(n){tiles.forEach((x,i)=>x.className='stage '+(i<n?'done':i===n?'active':''));nodes.forEach((x,i)=>x.className='node '+(i<n?'done':i===n?'active':''));const pct=n*20;el('fill').style.width=pct+'%';el('kt134-percent').textContent=pct+'%';document.querySelector('.kt134-progress-track').setAttribute('aria-valuenow',String(pct));}
+function render(n){tiles.forEach((x,i)=>x.className='stage '+(i<n?'done':i===n?'active':''));nodes.forEach((x,i)=>x.className='node '+(i<n?'done':i===n?'active':''));const pct=n*20;el('fill').style.width=pct+'%';el('kt134-percent').textContent=pct+'%';document.querySelector('.kt134-progress-track').setAttribute('aria-valuenow',String(pct));document.querySelector('.kt134-progress-track').classList.remove('waiting');}
+function realE1Progress(pct,label){
+ const v=Math.max(0,Math.min(19,Math.round(pct)));
+ el('fill').style.width=v+'%';el('kt134-percent').textContent=v+'%';
+ document.querySelector('.kt134-progress-track').setAttribute('aria-valuenow',String(v));
+ if(label)el('subtitle').textContent=label;
+}
+function awaitingUnreportedStages(){
+ document.querySelector('.kt134-progress-track').classList.add('waiting');
+ el('subtitle').textContent='Етапи 2–5 · анализ и рецензия; очаква се потвърден резултат от сървъра';
+}
 function problem(msg){el('kt134-elapsed').textContent='Прекъснато';el('error').hidden=false;el('error').textContent=msg;el('subtitle').textContent='Автоматичната обработка не е завършила'}
 let context=null;
 let caseRows=[];
@@ -508,11 +526,13 @@ async function registerNewCase(){
   // consuming a native KT126 number; registration is not E1 completion.
   if(!stage1Intake){
    newStatus.textContent='Етап 1 · разчитане и обработка на всички документи…';
+    realE1Progress(1,'Етап 1 · разчитане на входните документи');
    const reader=await loadApprovedE1Reader();
    const parsed=await reader.process(file);
    if(!Array.isArray(parsed?.document_texts)||!parsed.document_texts.length)
     throw Error('Не са прочетени документи — няма надеждна основа за водещ документ.');
    stage1Intake=parsed;
+    realE1Progress(4,'Етап 1 · документите са разчетени');
   }
   const bytes=new Uint8Array(await file.arrayBuffer());
   const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)))
@@ -523,6 +543,7 @@ async function registerNewCase(){
    newStatus.textContent='Регистрация на преписката с общия номератор КТ126…';
    const record=await sendNew('/kt134/new-case/register',JSON.stringify(registerMeta),'application/json');
    id=record.caseId;
+    realE1Progress(7,'Етап 1 · регистрирана е нова преписка');
    if(!id||!record.internalNumber)throw Error('КТ126 не върна потвърден вътрешен номер.');
    newRegistered={caseId:id,internalNumber:record.internalNumber,sourceId:null};
   }
@@ -536,6 +557,7 @@ async function registerNewCase(){
    if(source.error||source.ok===false)
     throw Error('КТ126 не потвърди началото на запис на оригинала.');
    newRegistered.sourceId='original';
+    realE1Progress(9,'Етап 1 · започва записът на оригинала');
   }
   const sourceId=newRegistered.sourceId;
   const chunkSize=256*1024;
@@ -545,10 +567,13 @@ async function registerNewCase(){
    await sendNew('/kt134/new-case/original/'+encodeURIComponent(id)+
     '/part/'+i,
     bytes.slice(pos,pos+chunkSize),'application/octet-stream');
+    realE1Progress(9+6*Math.min(1,(pos+chunkSize)/bytes.length),
+      'Етап 1 · записване на оригиналните документи');
   }
   await sendNew('/kt134/new-case/original/'+encodeURIComponent(id)+'/finish',
    JSON.stringify({}),'application/json');
-  newStatus.textContent='Етап 1 · EG Авторът и рецензентът определят водещия документ…';
+  realE1Progress(16,'Етап 1 · оригиналът е записан');
+   newStatus.textContent='Етап 1 · EG Авторът и рецензентът определят водещия документ…';
   const e1=await sendNew('/kt134/new-case/complete-stage1',
    JSON.stringify({caseId:id,sha256:digest,intake:{
     archive_name:stage1Intake.archive_name,
@@ -566,7 +591,8 @@ async function registerNewCase(){
   if(e1.caseId!==id||!['stage1_completed','stage1_already_completed'].includes(e1.status)||
      !e1.leadingDocument?.sourceId)
    throw Error('Етап 1 не е потвърден от общия регистър КТ126.');
-  newStatus.textContent='Етап 1 завършен · '+newRegistered.internalNumber+
+  render(1);
+   newStatus.textContent='Етап 1 завършен · '+newRegistered.internalNumber+
    ' · водещ документ: '+e1.leadingDocument.fileName+
    '. Преписката е достъпна и за класическия маршрут.';
   newFile.value='';stage1Intake=null;
@@ -630,7 +656,9 @@ el('start').addEventListener('click',async()=>{
  runBusy=true;el('kt134-clear-screen').disabled=true;el('kt134-to-dashboard').disabled=true;
  try{
  if(intakeMode==='new'){el('start').disabled=true;if(!(await registerNewCase())){syncStart();return;}}
- if(!context){syncStart();return;}el('start').disabled=true;el('error').hidden=true;render(0);
+ if(!context){syncStart();return;}el('start').disabled=true;el('error').hidden=true;
+  if(intakeMode!=='new')render(0);
+  awaitingUnreportedStages();
  el('subtitle').textContent='Анализът се изпълнява · изчаква се потвърден резултат от етапите';el('kt134-elapsed').textContent='Обработва…';
  try{
   const r=await fetch('/kt134/automatic/draft',{method:'POST',credentials:'same-origin',
@@ -649,7 +677,7 @@ el('start').addEventListener('click',async()=>{
   el('draft').textContent=data.stage5.content||'—';
   render(5);el('kt134-elapsed').textContent='Завършено';el('subtitle').textContent='Готов проект · очаква окончателно решение на експерта';
   el('output').classList.add('visible');el('download').disabled=false;
- }catch(e){render(0);problem(e.message||'Неуспешно изпълнение');el('start').disabled=false}
+ }catch(e){document.querySelector('.kt134-progress-track').classList.remove('waiting');problem(e.message||'Неуспешно изпълнение');el('start').disabled=false}
  }finally{runBusy=false;el('kt134-clear-screen').disabled=false;el('kt134-to-dashboard').disabled=false;}
 });
 el('download').addEventListener('click',()=>{
