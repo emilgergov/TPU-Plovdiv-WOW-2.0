@@ -232,6 +232,289 @@
       "containsExternalNumber": false
     }
   ],
+  "uploads": [
+    {
+      "anchor": "\"/source\"",
+      "occurrences": 3,
+      "hits": [
+        {
+          "indicators": [
+            "sourceId",
+            "filename",
+            "sha256",
+            "Content-Type",
+            "POST",
+            "slice(",
+            "size"
+          ],
+          "keys": [
+            "filename",
+            "size",
+            "sha256",
+            "body"
+          ]
+        },
+        {
+          "indicators": [
+            "data"
+          ],
+          "keys": [
+            "file"
+          ]
+        },
+        {
+          "indicators": [
+            "filename",
+            "sha256",
+            "parts"
+          ],
+          "keys": []
+        }
+      ]
+    },
+    {
+      "anchor": "\"/part/\"",
+      "occurrences": 2,
+      "hits": [
+        {
+          "indicators": [
+            "Content-Type",
+            "POST",
+            "slice(",
+            "size"
+          ],
+          "keys": [
+            "body"
+          ]
+        },
+        {
+          "indicators": [
+            "filename",
+            "sha256",
+            "parts"
+          ],
+          "keys": []
+        }
+      ]
+    },
+    {
+      "anchor": "\"/finish\"",
+      "occurrences": 1,
+      "hits": [
+        {
+          "indicators": [
+            "size"
+          ],
+          "keys": []
+        }
+      ]
+    },
+    {
+      "anchor": "/kt126/registry/",
+      "occurrences": 9,
+      "hits": [
+        {
+          "indicators": [
+            "sourceId"
+          ],
+          "keys": [
+            "sourceId",
+            "file"
+          ]
+        },
+        {
+          "indicators": [
+            "filename",
+            "Content-Type",
+            "POST",
+            "data"
+          ],
+          "keys": [
+            "body"
+          ]
+        },
+        {
+          "indicators": [
+            "filename",
+            "sha256",
+            "parts"
+          ],
+          "keys": []
+        },
+        {
+          "indicators": [
+            "filename",
+            "sha256",
+            "parts"
+          ],
+          "keys": []
+        },
+        {
+          "indicators": [
+            "filename"
+          ],
+          "keys": []
+        },
+        {
+          "indicators": [
+            "filename",
+            "Content-Type",
+            "POST",
+            "data"
+          ],
+          "keys": [
+            "body"
+          ]
+        },
+        {
+          "indicators": [
+            "filename"
+          ],
+          "keys": []
+        },
+        {
+          "indicators": [
+            "filename"
+          ],
+          "keys": []
+        },
+        {
+          "indicators": [
+            "filename"
+          ],
+          "keys": []
+        }
+      ]
+    },
+    {
+      "anchor": "sha256:",
+      "occurrences": 1,
+      "hits": [
+        {
+          "indicators": [
+            "sourceId",
+            "filename",
+            "sha256",
+            "Content-Type",
+            "POST",
+            "slice(",
+            "size"
+          ],
+          "keys": [
+            "filename",
+            "size",
+            "sha256",
+            "body"
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "sourceId",
+      "occurrences": 8,
+      "hits": [
+        {
+          "indicators": [
+            "Uint8Array",
+            "sourceId",
+            "filename",
+            "sha256",
+            "parts",
+            "size"
+          ],
+          "keys": []
+        },
+        {
+          "indicators": [
+            "Uint8Array",
+            "sourceId",
+            "Content-Type"
+          ],
+          "keys": [
+            "sourceId"
+          ]
+        },
+        {
+          "indicators": [
+            "Uint8Array",
+            "sourceId",
+            "Content-Type",
+            "parts",
+            "byteLength",
+            "size"
+          ],
+          "keys": [
+            "sourceId"
+          ]
+        },
+        {
+          "indicators": [
+            "sourceId"
+          ],
+          "keys": [
+            "sourceId",
+            "file"
+          ]
+        },
+        {
+          "indicators": [
+            "sourceId"
+          ],
+          "keys": [
+            "sourceId",
+            "file"
+          ]
+        },
+        {
+          "indicators": [
+            "sourceId",
+            "filename",
+            "sha256",
+            "size"
+          ],
+          "keys": [
+            "filename",
+            "size",
+            "sha256"
+          ]
+        },
+        {
+          "indicators": [
+            "sourceId",
+            "filename",
+            "sha256",
+            "Content-Type",
+            "POST",
+            "slice(",
+            "size"
+          ],
+          "keys": [
+            "filename",
+            "size",
+            "sha256",
+            "body"
+          ]
+        },
+        {
+          "indicators": [
+            "sourceId",
+            "filename",
+            "sha256",
+            "Content-Type",
+            "POST",
+            "slice(",
+            "size"
+          ],
+          "keys": [
+            "filename",
+            "size",
+            "sha256",
+            "body"
+          ]
+        }
+      ]
+    }
+  ],
   "handlers": [
     {
       "name": "startSource",
