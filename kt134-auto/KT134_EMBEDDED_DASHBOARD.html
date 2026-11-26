@@ -72,9 +72,19 @@ linear-gradient(160deg,#214b39,#1c4232 72%,#275742)}
 </style><script>
 addEventListener('message',e=>{
  if(e.origin!==location.origin||e.source!==document.getElementById('kt134-live')?.contentWindow)return;
+ const iframe=document.getElementById('kt134-live');
+ if(e.data?.type==='kt134:reset-layout'){
+  // Release the former long Word preview height after "Изчисти екрана".
+  iframe.style.height='790px';
+  requestAnimationFrame(()=>{
+   document.getElementById('auto')?.scrollIntoView({block:'start'});
+   iframe.contentWindow?.postMessage({type:'kt134:measure-layout'},location.origin);
+  });
+  return;
+ }
  if(e.data?.type!=='kt134:inline-height')return;
  const h=Number(e.data.height);
- if(Number.isFinite(h)&&h>450&&h<6500)document.getElementById('kt134-live').style.height=Math.ceil(h+12)+'px';
+ if(Number.isFinite(h)&&h>450&&h<6500)iframe.style.height=Math.ceil(h+12)+'px';
 });
 </script></head><body><header class="top"><strong>WOW · Административен пътеводител</strong><nav><a href="/auth/login">Моят профил</a> &nbsp; · &nbsp; <a href="/auth/logout">Изход</a></nav></header><main class="main"><section class="intro"><h1>Административен пътеводител</h1><p>Изберете работен етап или разгънете автоматичния анализ и специализираните панели.</p></section><h2 id="kt134-classic-title">Основни работни етапи</h2><div class="grid"><div class="stage"><strong>ЕТАП 1</strong><p>Внасяне и анализ на преписката</p><a href="https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/module/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html" title="Класически маршрут" target="_blank" rel="noopener" class="arrow">➜</a></div><div class="stage"><strong>ЕТАП 2</strong><p>Предмет и обхват</p><a class="arrow" title="Отвори класическия експертен модул" href="https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/module/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html" target="_blank" rel="noopener">➜</a></div><div class="stage"><strong>ЕТАП 3</strong><p>Имоти и пространствен анализ</p><a class="arrow" title="Отвори класическия експертен модул" href="https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/module/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html" target="_blank" rel="noopener">➜</a></div><div class="stage"><strong>ЕТАП 4</strong><p>Нормативна и процедурна преценка</p><a class="arrow" title="Отвори класическия експертен модул" href="https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/module/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html" target="_blank" rel="noopener">➜</a></div><div class="stage"><strong>ЕТАП 5</strong><p>Определяне на процедурата</p><a class="arrow" title="Отвори класическия експертен модул" href="https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/module/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html" target="_blank" rel="noopener">➜</a></div></div>
 <details id="auto"><summary>Автоматичен анализ <span>Експертна обработка и проверка</span></summary><div class="inside"><iframe id="kt134-live" title="Автоматичен маршрут КТ134" loading="lazy" src="/kt134/final-test?embedded=1"></iframe></div></details>
