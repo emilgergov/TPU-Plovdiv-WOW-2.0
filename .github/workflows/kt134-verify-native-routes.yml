@@ -1,0 +1,63 @@
+name: KT134 native routes inspection verified
+on:
+  push:
+    branches:
+      - kt134-auto-mode-isolated
+    paths:
+      - .github/workflows/kt134-verify-native-routes.yml
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_ACCOUNT: "90df5489417e4b53179a852c446aeed1"
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: kt134-auto-mode-isolated
+      - name: Read and describe native route contracts without case data
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const u='https://api.cloudflare.com/client/v4/accounts/'+process.env.CF_ACCOUNT+'/workers/scripts/tpu-plovdiv-kt125-local-auth';
+          const r=await fetch(u,{headers:{Authorization:'Bearer '+process.env.CF_TOKEN}});
+          if(!r.ok)throw Error('CLOUDFLARE_SOURCE_UNAVAILABLE_'+r.status);
+          const s=await r.text();
+          const keys=['/kt125/cases/','/kt125/cases','/user','/auth/login','/kt126/registry/','kt125_local_sessions','KT125_SESSION_COOKIE','SESSION_COOKIE'];
+          const out=keys.map(term=>{
+            let cursor=0,occ=[];
+            for(let i=0;i<20;i++){
+              const at=s.indexOf(term,cursor);if(at<0)break;
+              cursor=at+term.length;
+              const around=s.slice(Math.max(at-400,0),at+600);
+              const paths=[...new Set(Array.from(around.matchAll(/['"`](\/[a-zA-Z0-9._\/-]{2,100})['"`]/g),x=>x[1]))].slice(0,20);
+              const verbs=[...new Set(Array.from(around.matchAll(/\b(GET|POST|DELETE|PUT|PATCH)\b/g),x=>x[1]))];
+              const identifiers=['pathname','method','matches','match','route','caseId','userId','session','getCookie','readCookie','auth','currentUser','listCases','organization_id','token_hash','credential_version']
+                .filter(key=>around.includes(key));
+              occ.push({paths,verbs,identifiers});
+            }
+            return {term,matches:occ};
+          });
+          fs.writeFileSync('/tmp/kt134-routes.json',JSON.stringify({readOnly:true,createdAt:new Date().toISOString(),out},null,2));
+          console.log('Native route metadata captured, no source code or case records');
+          NODE
+      - name: Store route metadata through GitHub content API
+        run: |
+          set -euo pipefail
+          p='kt134-auto/KT134_NATIVE_CASE_PICKER_CONTRACT_V2.json'
+          enc="$(base64 -w0 /tmp/kt134-routes.json)"
+          for attempt in 1 2 3 4 5; do
+            sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/$p?ref=kt134-auto-mode-isolated" --jq .sha 2>/dev/null || true)"
+            if [ -n "$sha" ]; then
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$enc" -f sha="$sha" -f branch=kt134-auto-mode-isolated -f message='KT134: native route contracts metadata' >/dev/null && exit 0
+            else
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$p" -f content="$enc" -f branch=kt134-auto-mode-isolated -f message='KT134: native route contracts metadata' >/dev/null && exit 0
+            fi
+            sleep 2
+          done
+          exit 1
