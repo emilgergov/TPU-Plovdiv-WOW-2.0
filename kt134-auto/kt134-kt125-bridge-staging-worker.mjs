@@ -8,6 +8,7 @@ import {createKt134NativeCaseReader} from './kt134-native-case-http.mjs';
 import {createKt134NativeCaseList} from './kt134-native-case-list.mjs';
 import {createKt134NativeAutomaticHandler} from './kt134-native-automatic-route.mjs';
 import autoUI from './KT134_PROTECTED_INTEGRATION_UI.html';
+import dashboardUI from './KT134_EMBEDDED_DASHBOARD.html';
 const nativeOrigin='https://tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev';
 const json=(body,status=200)=>new Response(JSON.stringify(body),{
  status,headers:{'content-type':'application/json; charset=utf-8',
@@ -44,14 +45,23 @@ export default {
    });
    return draft(request);
   }
+  if(path==='/kt134/dashboard'){
+   if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
+   return new Response(dashboardUI,{headers:{
+     'content-type':'text/html; charset=utf-8',
+     'cache-control':'no-store, private','x-content-type-options':'nosniff',
+     'referrer-policy':'no-referrer',
+     'content-security-policy':"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; frame-src 'self'; base-uri 'none'; frame-ancestors 'none'"
+   }});
+  }
   if(path==='/kt134/final-test'){
    if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
    // The HTML never supplies authentication facts to the server; those are
    // independently verified on every native-KT125 case request.
    return new Response(autoUI,{headers:{'content-type':'text/html; charset=utf-8',
      'cache-control':'no-store, private','x-content-type-options':'nosniff',
-     'referrer-policy':'no-referrer','x-frame-options':'DENY',
-     'content-security-policy':"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"}});
+     'referrer-policy':'no-referrer','x-frame-options':'SAMEORIGIN',
+     'content-security-policy':"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'self'"}});
   }
   // Only service readiness, no legal passages or case data are exposed.
   if(path==='/kt134/normative-bridge-check'){
