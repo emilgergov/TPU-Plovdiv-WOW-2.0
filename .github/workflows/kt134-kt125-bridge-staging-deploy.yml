@@ -199,6 +199,18 @@ jobs:
           if(data.error!=='KT125_LOGIN_REQUIRED')throw Error('KT134 registry leaked without login');
           console.log('KT134: automatic case chooser visible, anonymous case listing denied');
           NODE
+          auth_probe_code="$(curl --silent --show-error --max-time 15 -o /tmp/kt134-native-rpc.json -w '%{http_code}' "$BASE/kt134/native-authorization-health")"
+          test "$auth_probe_code" = 200
+          node - <<'NODE'
+          const x=require('/tmp/kt134-native-rpc.json');
+          if(x.ready!==true||x.source!=='KT125_NATIVE_RPC'||
+             x.actorVerification!=='native_case_edit'||
+             x.rejectsInvalidSession!==true||
+             x.realCaseDataRead!==false||
+             x.productionWorkerChanged!==false)
+            throw Error('KT134_KT125_NATIVE_RPC_PROOF_NOT_READY');
+          console.log('KT134: native getCaseContext RPC available and refuses invalid sessions');
+          NODE
           code="$(curl --silent --show-error --max-time 15 -o /tmp/kt134-draft-denied.json -w '%{http_code}' \
              -X POST -H "Origin: $BASE" -H 'Content-Type: application/json' \
              --data '{"caseId":"11111111-1111-4111-8111-111111111111"}' "$BASE/kt134/automatic/draft")"
