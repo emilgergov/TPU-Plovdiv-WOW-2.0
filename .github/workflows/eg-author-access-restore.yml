@@ -27,7 +27,7 @@ jobs:
             return r;
           }
           const source=await (await api()).text();
-          assert.ok(source.includes('Категоричен извод за неприложимост е заменен'), 'Active source is not the known editorial deployment');
+          assert.ok(source.includes('editorialFlags.unshift(') && source.includes('UNSUPPORTED_CATEGORICAL_CONCLUSION'), 'Active source is not the known editorial deployment');
           const {result}=await (await api('/deployments')).json();
           const history=(result.deployments||result.items||[]).sort((a,b)=>Date.parse(b.created_on)-Date.parse(a.created_on));
           assert.equal(history[0]?.versions?.length,1);
