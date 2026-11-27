@@ -216,6 +216,12 @@ jobs:
           # KT134 final dashboard: the automatic route MUST be inline, not a second-click menu.
           curl --fail --silent --show-error --max-time 15 "$BASE/kt134/dashboard" -o /tmp/kt134-dashboard.html
           grep -Fq '<details id="auto">' /tmp/kt134-dashboard.html
+          curl --fail --silent --show-error --max-time 15 "$BASE/kt134/dashboard?preview=cinematic" -o /tmp/kt134-cinematic-dashboard.html
+          grep -Fq -- '--stage-art:url(' /tmp/kt134-cinematic-dashboard.html
+          ! grep -Fq -- '--stage-art:url(' /tmp/kt134-dashboard.html
+          grep -Fq 'embedded=1&amp;preview=cinematic' /tmp/kt134-cinematic-dashboard.html
+          curl --fail --silent --show-error --max-time 15 "$BASE/kt134/final-test?embedded=1&preview=cinematic" -o /tmp/kt134-cinematic-auto.html
+          grep -Fq 'Cinematic route and progress share one panel' /tmp/kt134-cinematic-auto.html
           grep -Fq 'src="/kt134/final-test?embedded=1"' /tmp/kt134-dashboard.html
           if grep -Fq 'Отвори автоматичния режим' /tmp/kt134-dashboard.html; then
             echo '::error::Unexpected second-click auto button'; exit 1

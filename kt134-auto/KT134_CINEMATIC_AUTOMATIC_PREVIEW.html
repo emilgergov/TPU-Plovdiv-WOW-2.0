@@ -1,0 +1,836 @@
+<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>КТ134 · реален автоматичен маршрут</title>
+<style>
+:root{color-scheme:dark;font-family:Verdana,Arial,sans-serif;background:#071f18;color:#f0e7d2}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 30% 0%,#194b37,#071f18 65%)}
+main{max-width:1050px;margin:auto;padding:22px 22px 60px}h1{font-size:21px;line-height:1.35;margin:4px 0 13px;font-weight:600}h2{font-size:14px;margin:0 0 12px;color:#f3db9b}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#d5c9ac;font-size:12px}
+.demo{color:#f6d18c;background:#654a25;border:1px solid #c9a05d;border-radius:18px;padding:5px 11px;font-weight:700}
+.bar{border:1px solid #537961;background:#103226;border-radius:13px;padding:15px 17px;margin-top:14px}
+.case{display:flex;gap:20px;flex-wrap:wrap;font-size:12px;color:#e6ddc4}.case strong{color:#f3c46d}
+.stages{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-top:15px}
+.stage{background:#174332;border:1px solid #668466;border-radius:11px;padding:13px 10px;min-height:94px}
+.stage span{display:block;font-size:17px;color:#dbb96d;margin-bottom:5px}
+.stage div{font-size:11px;line-height:1.5}
+.stage.done{border-color:#87bd8d;background:#24573a}.stage.done span{color:#b6e4b7}
+.stage.active{border-color:#e7c165;background:#5a4b25}
+.auto{margin-top:16px;background:linear-gradient(115deg,#113b2a,#1d4c34);border:1px solid #c2a45b;border-radius:12px;padding:14px}
+.autohead{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px;margin-bottom:11px}
+.autohead strong{color:#f4d896} .route{display:grid;grid-template-columns:64px repeat(5,minmax(0,1fr)) 64px;gap:7px;align-items:center}
+.gate{border:1px solid #bc9c5c;border-radius:18px 18px 7px 7px;text-align:center;padding:10px 2px;background:#255037;font-size:11px;color:#ffdb8d}
+.node{border:1px solid #587662;background:#1c3e2d;text-align:center;border-radius:25px;height:30px;display:flex;align-items:center;justify-content:center;color:#dadfca;font-size:12px}
+.node.done{background:#318150;border-color:#b5d29b;color:white}.node.active{background:#786127;border-color:#edc66b}
+.subrow{border-top:1px solid #497454;margin-top:10px;padding-top:9px;display:flex;gap:13px;align-items:center;font-size:11px;color:#e3d7b1}
+.track{width:135px;background:#294f3c;height:4px;border-radius:9px;overflow:hidden;flex-shrink:0}
+.fill{height:100%;background:#ddb863;width:0;transition:width .25s}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}
+button{font:12px Verdana,Arial,sans-serif;font-weight:600;color:#f9efdc;background:#235239;border:1px solid #8eb47c;padding:11px 15px;border-radius:9px;cursor:pointer}
+button.primary{background:#856829;border-color:#e2bc5d}button:disabled{opacity:.5;cursor:not-allowed}
+button:hover:not(:disabled){filter:brightness(1.14)}
+.output{margin-top:17px;display:none} .output.visible{display:block}
+.split{display:grid;grid-template-columns:1fr 1.3fr;gap:15px}
+.detail{background:#0c2d21;border:1px solid #436b53;border-radius:11px;padding:16px;line-height:1.75;font-size:12px}
+.detail p{margin:7px 0 13px}.muted{color:#b9c7b8}
+.paper{background:#fffaf2;color:#27352c;border-radius:8px;padding:22px 24px;min-height:290px;font:12px/1.65 Verdana,Arial}
+.paper .header{text-align:center;font-size:10px;border-bottom:1px solid #aebbae;padding-bottom:10px;color:#344e3c}
+.paper h3{text-align:center;font-size:13px;color:#263b2c;margin:23px 0}
+.paper p{text-align:justify;text-indent:1cm;margin-bottom:8px}.paper .foot{margin-top:28px;text-align:right;color:#607065;font-size:10px}
+textarea{width:100%;min-height:180px;background:#fcf9ef;color:#293b2e;border:1px solid #b1ac8e;border-radius:6px;padding:12px;font:12px/1.65 Verdana,Arial}
+.note{font-size:11px;color:#ead6a7;margin-top:12px}
+@media(max-width:730px){main{padding:14px}.split{grid-template-columns:1fr}.stages{gap:4px}.stage{padding:9px 5px;min-height:110px}.stage div{font-size:9px}.route{grid-template-columns:41px repeat(5,minmax(0,1fr)) 41px;gap:3px}.gate{font-size:9px}.track{width:52px}}
+
+
+/* KT134 stable functional view: approved five-gate layout, compact readable results.
+   Presentation-only. All KT125, EG, Word and expert-approval behavior is unchanged. */
+.output.visible{scroll-margin-top:14px}
+.output .split{align-items:start}
+.output .detail{min-width:0;max-height:min(68vh,700px);overflow-y:auto;overscroll-behavior:contain;scrollbar-color:#9b8a53 #123b2b;scrollbar-width:thin}
+.output .detail h2{position:sticky;top:-16px;z-index:1;margin:-16px -16px 12px;padding:14px 16px 10px;background:#0c2d21;border-bottom:1px solid #436b53;font-size:14px}
+.output .detail h2:not(:first-child){top:-16px;margin-top:20px}
+.output pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.65 Verdana,Arial,sans-serif;margin:8px 0 14px}
+.output .paper{min-height:280px}
+.output .actions{position:sticky;bottom:0;z-index:2;background:#102e24;padding:12px;border:1px solid #50725b;border-radius:10px}
+#download{font-size:13px;padding:12px 18px}
+@media(max-width:730px){.output .detail{max-height:58vh}.output .detail h2{font-size:13px}}
+
+
+/* КТ134 — изображение №1: зелено-златен административен пътеводител.
+   Само оформление: всички работещи KT125/EG/Word handlers и element IDs са запазени. */
+body{background:radial-gradient(ellipse at 40% 0%,#0e703c,#034628 52%,#00271b);background-attachment:fixed}
+main{max-width:1650px;padding:0 42px 60px}
+.portal-head{height:66px;margin:0 -42px;padding:0 42px;display:flex;align-items:center;justify-content:space-between;gap:15px;background:linear-gradient(90deg,#003a24,#035632,#003021);border-bottom:1px solid #a7ce5d}
+.brand{display:flex;align-items:center;gap:13px;color:#fff8da;font-size:23px}.leaf{font-size:39px;color:#d8ee88}.head-right{display:flex;align-items:center;gap:26px;font-size:15px}.head-right b,.head-right a{color:#ffde7d}.head-right .logout{border:1px solid #d6a94c;border-radius:13px;padding:9px 17px;color:#ffecb8;text-decoration:none}
+.portal-intro{padding:24px 4px 9px}.portal-intro h1{font-size:32px;font-weight:700;color:#ffe8ae;margin:0 0 7px;text-shadow:0 2px 6px #001c0a}.portal-intro p{font-size:18px;margin:0 0 10px;color:#f8f2dc}.portal-intro small{color:#e9c97a;font-size:11px}
+.bar{margin-top:5px;border:0;background:transparent;padding:0}.case{background:#073d28;border:1px solid #6b976a;border-radius:12px;padding:10px 16px}
+.stages{gap:18px;margin:17px 0}.stage{position:relative;min-height:235px;padding:18px 22px;overflow:hidden;border:2px solid #a9d66e;border-radius:18px;background:linear-gradient(145deg,#157740,#006336 62%,#32a04c);box-shadow:0 8px 15px #001b11,inset 0 0 19px #7be77d33}
+.stage::before{content:"";position:absolute;left:-15%;bottom:-34px;width:135%;height:95px;background:linear-gradient(40deg,#1cba50bb,#bfe66c22);border-radius:50%;transform:rotate(-6deg)}
+.stage::after{content:"➜";position:absolute;bottom:12px;right:12px;font-size:30px;color:#fff4a8;text-shadow:0 2px 5px #00341c}
+.stage>span:first-child{font:bold 28px Verdana;color:#fff2c0}.stage>div{font:bold 23px/1.24 Verdana;color:#fff;max-width:95%;margin-top:12px;position:relative;z-index:1;text-shadow:0 2px 4px #003320}
+.stage .stage-icon{position:absolute;display:block;right:32px;bottom:19px;font:82px Georgia,serif;color:#ffdfa1;text-shadow:0 0 11px #efd97e;z-index:1}
+.stage.active{background:linear-gradient(135deg,#fff2a2,#e8b63f 65%,#f6df79);border-color:#fff3b1;box-shadow:0 0 19px 4px #fadc66ad,inset 0 0 15px #fff3c0}.stage.active>span:first-child,.stage.active>div{color:#073d29;text-shadow:none}.stage.active .stage-icon{color:#b58017}
+.stage.done{background:linear-gradient(145deg,#137744,#1b9049 75%,#50ba56);border-color:#a2e99c}
+.auto{margin-top:28px;padding:20px 25px 18px;background:linear-gradient(115deg,#064c2f,#0c753b 53%,#064c30);border:2px solid #d7d078;border-radius:25px;box-shadow:inset 0 0 20px #b8f0832e}
+.autohead{margin-bottom:12px}.auto-label{display:flex;align-items:center;gap:15px}.auto-label>span{font-size:42px;color:#f5d66e}.auto-label strong{font-size:22px;color:#ffe28b}.auto-label small{display:block;color:#e5efd7;font-size:13px;margin-top:6px}
+.route{position:relative;grid-template-columns:145px repeat(5,minmax(0,1fr)) 145px;gap:0;align-items:center}
+.route:before{content:"";height:7px;position:absolute;z-index:0;top:50%;left:9%;right:9%;background:linear-gradient(90deg,#f2d777,#9eee82,#f4d86e);box-shadow:0 0 10px #dcfc7c}
+.gate{position:relative;z-index:1;min-height:125px;margin:0 9px;display:flex;align-items:center;justify-content:center;border:9px ridge #d2ac53;border-bottom-width:14px;border-radius:75px 75px 10px 10px;background:radial-gradient(ellipse at 50% 80%,#fedd61,#bf9b24 25%,#075534 70%);box-shadow:inset 0 0 14px #ffe875,0 0 13px #f7d676a3;color:#fff0aa;text-shadow:0 2px 5px #16341f;font:bold 22px Verdana}
+.node{position:relative;z-index:1;width:68px;height:68px;justify-self:center;border-radius:50%;border:5px solid #b1ed9d;background:linear-gradient(#17854a,#064d32);color:#fff;font:bold 27px Verdana;box-shadow:0 0 13px #044b2a}
+.node.done{border-color:#c4f6a1;background:linear-gradient(#269c4b,#07613c)}.node.done:after{content:"✓";position:absolute;top:63px;left:26px;color:#ffe478;font-size:19px}.node.active{background:linear-gradient(#ffd453,#be8811);border-color:#fff18e;box-shadow:0 0 0 7px #b7822899,0 0 18px 8px #ffdc6f}
+.subrow{max-width:770px;min-height:48px;margin:17px auto 0;justify-content:center;border:1px solid #d4bd65;border-radius:28px;background:#064a2c;font-size:14px}
+.bar>.actions{justify-content:center;margin:18px 0}.bar>.actions .primary{padding:15px 28px;font-size:15px;background:linear-gradient(#f1ce72,#9a6d24);border-color:#f6d880}
+.output .split{grid-template-columns:1fr 1.12fr}
+@media(max-width:1150px){main{padding:0 16px 35px}.portal-head{margin:0 -16px;padding:8px 16px}.brand{font-size:17px}.head-right{gap:9px;font-size:12px}.stage{padding:14px 10px;min-height:175px}.stage>span:first-child{font-size:19px}.stage>div{font-size:15px}.stage .stage-icon{font-size:55px}.route{grid-template-columns:100px repeat(5,minmax(0,1fr)) 100px}.gate{min-height:92px;font-size:15px}.node{height:48px;width:48px;font-size:19px}}
+@media(max-width:730px){.portal-head{height:auto;flex-wrap:wrap}.portal-intro h1{font-size:23px}.portal-intro p{font-size:14px}.stages{grid-template-columns:repeat(2,minmax(0,1fr))}.stage{min-height:150px}.auto{padding:12px}.autohead>span{display:none}.route{grid-template-columns:48px repeat(5,minmax(0,1fr)) 48px}.gate{margin:0 2px;border-width:3px;min-height:55px;font-size:10px;border-radius:25px 25px 7px 7px}.node{width:31px;height:31px;border-width:2px;font-size:12px}.node.done:after{top:32px;left:10px;font-size:11px}}
+
+
+/* Reference image 1 detail fidelity: stage illustration, gate geometry and lower progress chamber */
+.stage .stage-icon{right:32px;bottom:20px;width:97px;height:97px;filter:drop-shadow(1px 3px 3px #002d1a);color:#e7e1a2}
+.stage .stage-icon svg{display:block;width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.stage.active .stage-icon{color:#d09c22}
+.auto{position:relative;min-height:175px;display:grid;grid-template-columns:290px minmax(0,1fr);column-gap:12px;align-items:center;padding:17px 22px}
+.autohead{margin:0}.auto-label{gap:13px}.auto-label>span{font-size:42px}.auto-label strong{font-size:21px}.auto-label small{line-height:1.5;max-width:200px}
+.autohead>span{position:absolute;top:8px;right:15px;opacity:.8;font-size:10px}
+.route{min-height:138px}
+.kt134-progress-panel{margin:20px 0 0;min-height:128px;border:2px solid #91d05d;border-radius:22px;background:linear-gradient(135deg,#13763e 0%,#064c2d 45%,#0c703c 100%);position:relative;display:flex;justify-content:center;align-items:center;overflow:hidden;box-shadow:inset 0 0 22px #95ed7566}
+.kt134-progress-panel:before{content:"";position:absolute;left:-8%;bottom:-72px;width:115%;height:115px;border-radius:50%;transform:rotate(-4deg);background:linear-gradient(90deg,#ddc86966,#28a95a55)}
+.kt134-progress-panel .subrow{position:relative;z-index:2;width:min(100%,700px);max-width:700px;min-height:68px;margin:0;padding:10px 23px;border:2px solid #ffe48b;box-shadow:0 0 17px #ffe1628c, inset 0 0 10px #d1ce6444;background:#07472c;display:flex;gap:12px}
+.loading-dots{color:#f1cc59;font-size:31px;line-height:1;animation:kt134-rotate 3s linear infinite}
+@keyframes kt134-rotate{to{transform:rotate(360deg)}}
+.kt134-progress-panel .track{width:80px;height:8px;flex:none}
+.kt134-progress-panel #subtitle{font-size:16px;color:#faf4dc}
+.kt134-panel-leaf{position:absolute;right:19px;bottom:-24px;font-size:111px;color:#a8d65e;opacity:.7;transform:rotate(-20deg)}
+.gate{border:9px solid #c99e3e;background:radial-gradient(ellipse at 50% 84%,#ffeb89 0%,#ffc84a 15%,#c8992b 30%,#075534 72%);border-bottom:14px solid #dfb759;box-shadow:inset 0 0 10px 3px #ffe378,0 0 22px #ffe65eaa}
+.gate:first-child::before{content:"⇧";display:block;position:absolute;top:18px;color:#ffeaa7;font-size:31px}
+.gate:last-child::before{content:"▤";display:block;position:absolute;top:18px;color:#ffeaa7;font-size:25px}
+.gate{padding-top:41px}
+@media(max-width:1150px){.auto{grid-template-columns:210px minmax(0,1fr)}.stage .stage-icon{width:60px;height:60px}}
+@media(max-width:730px){.auto{display:block;min-height:0}.autohead{padding-bottom:15px}.stage .stage-icon{width:50px;height:50px}.kt134-progress-panel{min-height:96px}.kt134-progress-panel .subrow{min-height:52px;padding:9px}.kt134-progress-panel #subtitle{font-size:11px}.kt134-progress-panel .track{width:35px}}
+
+.error{margin-top:12px;padding:12px;border:1px solid #ce775e;border-radius:9px;color:#ffdbce;background:#482b24;font-size:12px}
+pre{white-space:pre-wrap;font:12px/1.6 Verdana,Arial;overflow-wrap:anywhere}
+#finalactions{display:none}.confirmnote{font-size:12px;color:#ffe1a6}
+
+/* В интеграционното табло премахваме повторната заглавна лента и интро,
+   запазваме истинските пет етапа, регистъра, напредъка и Word. */
+html.kt134-embedded{background:transparent}
+html.kt134-embedded body{background:transparent;min-height:0}
+html.kt134-embedded main{max-width:none;width:100%;padding:6px 4px 22px}
+html.kt134-embedded .portal-head,
+html.kt134-embedded .portal-intro{display:none!important}
+html.kt134-embedded .bar{margin-top:0}
+
+/* КТ134 единен визуален блок — намалени ориентирни етапи, водеща непрекъсната
+   скала Вход–1–2–3–4–5–Изход и интегриран статус. Не променя обработката. */
+.kt134-unified{margin-top:14px;padding:15px 17px 13px;border:2px solid #d8cc75;border-radius:22px;background:linear-gradient(145deg,#06432d 0%,#086b3a 56%,#064b2f 100%);box-shadow:inset 0 0 30px #8ced7833,0 7px 18px #001c12;overflow:hidden}
+.kt134-unified .stages{gap:13px;margin:0 0 15px}
+.kt134-unified .stage{min-height:142px;padding:12px 14px;border-width:1.5px;border-radius:13px;box-shadow:0 4px 10px #00231899;transition:box-shadow .2s}
+.kt134-unified .stage>span:first-child{font-size:20px;margin-bottom:1px}
+.kt134-unified .stage>div{font-size:15px;line-height:1.23;margin-top:5px;max-width:96%}
+.kt134-unified .stage .stage-icon{width:54px;height:54px;right:23px;bottom:9px;opacity:.82}
+.kt134-unified .stage::before{height:49px;bottom:-18px}
+.kt134-unified .stage::after{font-size:22px;bottom:6px;right:6px}
+.kt134-unified .auto{border:0;border-top:1px solid #bed77877;border-radius:0;padding:20px 7px 12px;min-height:174px;margin:0;background:transparent;box-shadow:none;grid-template-columns:230px minmax(0,1fr);gap:6px}
+.kt134-unified .auto-label>span{font-size:36px}
+.kt134-unified .auto-label strong{font-size:21px}
+.kt134-unified .auto-label small{font-size:12px}
+.kt134-unified .route{min-height:150px;grid-template-columns:130px repeat(5,minmax(0,1fr)) 130px;gap:0;width:100%}
+.kt134-unified .route::before{height:11px;left:7%;right:7%;background:linear-gradient(90deg,#eabb4c 0%,#fff1a1 11%,#a9f38f 50%,#fff1a1 89%,#eabb4c 100%);box-shadow:0 0 14px 3px #dfff72aa,0 0 3px #fff6ba;top:50%;transform:translateY(-50%)}
+.kt134-unified .gate{min-height:128px;margin:0 2px;border-width:9px;border-bottom-width:13px;box-shadow:inset 0 0 13px #ffe378,0 0 22px #ffd958bb}
+.kt134-unified .node{width:72px;height:72px;border-width:5px;font-size:27px;box-shadow:0 0 17px #a9f69188}
+.kt134-unified .node.active{box-shadow:0 0 0 7px #b7822899,0 0 22px 9px #ffdc6f}
+.kt134-unified .kt134-progress-panel{min-height:78px;margin:7px 0 0;border:0;border-top:1px solid #b9d37e77;border-radius:0;background:transparent;box-shadow:none}
+.kt134-unified .kt134-progress-panel::before{height:65px;bottom:-55px}
+.kt134-unified .kt134-progress-panel .subrow{min-height:51px;max-width:780px;width:min(100%,780px);box-shadow:0 0 12px #e8d46877}
+.kt134-unified .kt134-progress-panel #subtitle{font-size:13px}
+.kt134-unified .kt134-panel-leaf{font-size:75px;bottom:-22px;right:10px}
+@media(max-width:1150px){
+.kt134-unified{padding:12px}
+.kt134-unified .stages{gap:8px}
+.kt134-unified .stage{min-height:125px;padding:9px}
+.kt134-unified .stage>span:first-child{font-size:17px}
+.kt134-unified .stage>div{font-size:12px}
+.kt134-unified .stage .stage-icon{width:39px;height:39px;right:12px;bottom:11px}
+.kt134-unified .auto{grid-template-columns:175px minmax(0,1fr);padding-top:13px}
+.kt134-unified .route{grid-template-columns:92px repeat(5,minmax(0,1fr)) 92px;min-height:115px}
+.kt134-unified .gate{min-height:103px;font-size:15px}
+.kt134-unified .node{width:52px;height:52px;font-size:20px}
+.kt134-unified .node.done::after{top:50px;left:16px}
+}
+@media(max-width:730px){
+.kt134-unified .stages{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.kt134-unified .stage{min-height:108px;padding:6px}
+.kt134-unified .stage>span:first-child{font-size:12px}
+.kt134-unified .stage>div{font-size:10px;line-height:1.23}
+.kt134-unified .stage .stage-icon{width:24px;height:24px;right:6px;bottom:6px}
+.kt134-unified .stage::after{font-size:13px}
+.kt134-unified .auto{display:block}
+.kt134-unified .autohead{padding:0 0 10px}
+.kt134-unified .auto-label strong{font-size:18px}
+.kt134-unified .route{grid-template-columns:45px repeat(5,minmax(0,1fr)) 45px;min-height:64px}
+.kt134-unified .gate{min-height:56px;border-width:3px;border-bottom-width:5px;font-size:10px;margin:0}
+.kt134-unified .gate::before{font-size:13px!important;top:8px!important}
+.kt134-unified .gate{padding-top:14px}
+.kt134-unified .node{height:29px;width:29px;font-size:12px;border-width:2px}
+.kt134-unified .node.done::after{top:28px;left:9px}
+.kt134-unified .route::before{height:6px}
+.kt134-unified .kt134-progress-panel{min-height:70px}
+.kt134-unified .kt134-progress-panel #subtitle{font-size:11px}
+}
+
+/* KT134 = WOW KT133 visual system; sourced from the actual KT133 dashboard.
+   Appearance only. Retain all approved gates, cards and live identifiers. */
+:root{font-family:"Segoe UI",Arial,sans-serif;background:#09271d;color:#f0ead6}
+html.kt134-embedded,html.kt134-embedded body{background:transparent;color:#f0ead6}
+html.kt134-embedded main{font-family:"Segoe UI",Arial,sans-serif}
+html.kt134-embedded .bar .case{background:#123628;border:1px solid #9b8556;border-radius:9px;color:#e4dfc9}
+html.kt134-embedded .case strong{color:#efd18c}
+html.kt134-embedded .bar>div:nth-child(2){background:#123628!important;border-color:#947b4c!important}
+html.kt134-embedded .bar label{color:#f2ddb0;font-weight:600;font-size:13px}
+html.kt134-embedded #kt134-case-select{background:#fbf9f0!important;color:#193c2a!important;border:1px solid #d4bd81!important;border-radius:8px!important;font-family:"Segoe UI",Arial,sans-serif!important;font-size:14px!important}
+html.kt134-embedded button:not(.primary){background:#24593c;border:1px solid #cfb271;color:#f7e5b8;font-family:"Segoe UI",Arial,sans-serif}
+html.kt134-embedded button.primary{background:linear-gradient(#e4c681,#cfac66);border:1px solid #cfb271;color:#173124;font-family:"Segoe UI",Arial,sans-serif}
+html.kt134-embedded .kt134-unified{border:1px solid #ae915a;background:linear-gradient(125deg,#123628 0%,#1b4b34 58%,#214b33 100%);box-shadow:inset 0 0 16px #b8b5801a,0 5px 14px #00180e55;border-radius:12px}
+html.kt134-embedded .kt134-unified .stage{background:linear-gradient(145deg,#1e4d37,#24563b);border:1px solid #67825c;box-shadow:0 3px 9px #08241c66;border-radius:10px}
+html.kt134-embedded .kt134-unified .stage::before{background:linear-gradient(35deg,#7eab5e66,#b6be6777);opacity:.65}
+html.kt134-embedded .kt134-unified .stage>span:first-child{color:#f3d18c}
+html.kt134-embedded .kt134-unified .stage>div{color:#f5e8c8;text-shadow:none}
+html.kt134-embedded .kt134-unified .stage .stage-icon{color:#dcb66d;filter:drop-shadow(1px 2px 2px #0a301d)}
+html.kt134-embedded .kt134-unified .stage.active{background:linear-gradient(140deg,#f1d696,#d5b774 88%);border-color:#f5e1b1;box-shadow:0 0 10px #dfc17f88}
+html.kt134-embedded .kt134-unified .stage.active>span:first-child,html.kt134-embedded .kt134-unified .stage.active>div{color:#193c2a}
+html.kt134-embedded .kt134-unified .stage.active .stage-icon{color:#947337}
+html.kt134-embedded .kt134-unified .stage.done{background:linear-gradient(150deg,#356f47,#255b3d);border-color:#92af76}
+html.kt134-embedded .kt134-unified .auto{border-top:1px solid #a18f5f80}
+html.kt134-embedded .auto-label strong{color:#efd18c}
+html.kt134-embedded .auto-label small{color:#d1dccb}
+html.kt134-embedded .auto-label>span{color:#e9c475}
+html.kt134-embedded .kt134-unified .route::before{background:linear-gradient(90deg,#d5b46e,#f3d996 13%,#c9dd99 50%,#f3d996 87%,#d5b46e);box-shadow:0 0 8px #e6cf8788}
+html.kt134-embedded .kt134-unified .gate{border-color:#d1af66;border-bottom-color:#c49e55;background:radial-gradient(ellipse at 50% 85%,#e5c47b 0%,#a98543 28%,#28573a 74%);color:#fff0cc;box-shadow:inset 0 0 11px #e2c180,0 0 11px #cbb06a88}
+html.kt134-embedded .kt134-unified .node{border-color:#bad49d;background:linear-gradient(#2b6b43,#17472f);color:#fff6df;box-shadow:0 0 8px #8eb97a66}
+html.kt134-embedded .kt134-unified .node.active{border-color:#f6de9b;background:linear-gradient(#e7c66a,#ac8640);color:#173124;box-shadow:0 0 0 5px #aa824244,0 0 14px #d6b56a}
+html.kt134-embedded .kt134-unified .kt134-progress-panel{border-top:1px solid #b09a69a1;background:none}
+html.kt134-embedded .kt134-unified .kt134-progress-panel .subrow{background:#123d2b;border:1px solid #cfb271;box-shadow:0 0 8px #c2aa6e66;color:#f5e8c8}
+html.kt134-embedded .kt134-unified #subtitle{color:#f2ead6}
+html.kt134-embedded .kt134-unified .kt134-panel-leaf{color:#92af70;opacity:.48}
+html.kt134-embedded .kt134-unified .track{background:#3c654b}
+html.kt134-embedded .kt134-unified .fill{background:#d9b66a}
+html.kt134-embedded .note{color:#d1dccb}
+
+
+.kt134-unified{border:2px solid #cdb46a;border-radius:20px;background:linear-gradient(125deg,#064a2e,#0b683a);padding:17px}
+.kt134-intake-choices{display:grid;grid-template-columns:1fr 1fr;gap:17px;margin-bottom:13px}
+.kt134-choice{display:flex;flex-direction:column;gap:9px;min-width:0;padding:15px;background:#164a32;border:2px solid #75a06f;border-radius:14px;cursor:pointer}
+.kt134-choice.active{background:linear-gradient(130deg,#e0c980,#b59043);border-color:#ffe59d;box-shadow:0 0 0 2px #f8d88344}
+.choice-title{font:bold 17px Verdana;color:#ffe7a5;cursor:pointer}.kt134-choice.active .choice-title,.kt134-choice.active .choice-note{color:#143c29}
+.kt134-choice input,.kt134-choice select{width:100%;min-width:0;font:13px Verdana;padding:11px;background:#fffaf0;color:#143c29;border:1px solid #bfae74;border-radius:8px}
+.kt134-choice input::file-selector-button{background:#236342;color:#fff4d4;padding:9px;border:0;border-radius:7px;cursor:pointer}
+.choice-note{font:11px Verdana;color:#e0e8dc;min-height:14px}.choice-tools{display:flex;gap:8px;justify-content:space-between;align-items:center}.choice-tools button{padding:6px 10px;font-size:11px}.choice-tools a{color:#ffe8ad}
+.unified-start{display:flex;justify-content:center;margin:4px 0 15px}.unified-start button{min-width:min(100%,470px);font:bold 16px Verdana;padding:16px 22px;background:linear-gradient(#ffdf8d,#b98b32);border:2px solid #f6d581;color:#173b29}
+.kt134-unified .auto{margin-top:12px}@media(max-width:750px){.kt134-intake-choices{grid-template-columns:1fr}}
+
+/* КТ134: хоризонтален автоматичен ход и пълноширинна скала */
+.kt134-unified .auto{display:flex;flex-direction:column;align-items:stretch;gap:12px;width:100%;min-height:0;padding:15px 0 16px;margin-top:14px}
+.kt134-unified .autohead{position:static;display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:16px;width:100%;margin:0;padding:0 9px 10px;border-bottom:1px solid #b1c77966}
+.kt134-unified .auto-label{display:flex;flex-direction:row;align-items:center;gap:12px}
+.kt134-unified .auto-label>span{font-size:26px}
+.kt134-unified .auto-label>div{display:flex;align-items:baseline;gap:15px;flex-wrap:wrap}
+.kt134-unified .auto-label strong{font-size:21px}
+.kt134-unified .auto-label small{font-size:12px;max-width:none;line-height:1.35}
+.kt134-unified .autohead>span{position:static;opacity:1;font-size:12px}
+.kt134-unified .route{display:grid;width:100%;grid-template-columns:112px repeat(5,minmax(0,1fr)) 112px;min-height:140px;gap:0}
+.kt134-unified .route:before{left:6%;right:6%}
+.kt134-unified .gate{min-height:128px;margin:0 5px;font-size:18px}
+.kt134-unified .node{width:66px;height:66px;font-size:25px}
+.kt134-unified .kt134-progress-panel{width:100%;min-height:82px}
+.kt134-unified .kt134-progress-panel .subrow{width:100%;max-width:none;margin:0 9px;justify-content:center}
+.kt134-unified .kt134-progress-panel .track{width:min(24%,220px)}
+@media(max-width:850px){
+ .kt134-unified .autohead{align-items:flex-start;flex-wrap:wrap}
+ .kt134-unified .route{grid-template-columns:64px repeat(5,minmax(0,1fr)) 64px;min-height:95px}
+ .kt134-unified .gate{min-height:90px;font-size:12px;border-width:5px;padding-top:27px}
+ .kt134-unified .node{width:42px;height:42px;font-size:15px;border-width:3px}
+ .kt134-unified .auto-label>div{gap:5px}
+}
+@media(max-width:480px){
+ .kt134-unified .route{grid-template-columns:41px repeat(5,minmax(0,1fr)) 41px;min-height:65px}
+ .kt134-unified .gate{min-height:58px;font-size:9px;margin:0 1px;border-width:3px;padding-top:15px}
+ .kt134-unified .node{width:29px;height:29px;font-size:12px;border-width:2px}
+ .kt134-unified .kt134-progress-panel .subrow{margin:0 3px;padding:7px}
+}
+
+/* Финална експертна визия: без бели полета, ясно отчетлива скала, малко празни пространства */
+html.kt134-embedded .kt134-choice input,
+html.kt134-embedded .kt134-choice select,
+.kt134-choice input,.kt134-choice select{
+ color-scheme:dark!important;background:#174b36!important;color:#f8e8ba!important;
+ border:1px solid #cbae69!important;border-radius:10px!important;box-shadow:inset 0 2px 8px #071b1455
+}
+.kt134-choice input::file-selector-button{background:#8f7035!important;border:1px solid #e4c57c!important;color:#fff4d1!important}
+.kt134-choice select option{background:#143c2b;color:#f5e8c8}
+.kt134-choice.active input,.kt134-choice.active select{background:#1b4b35!important;color:#f7e9c8!important}
+.kt134-unified .stages{margin:10px 0;gap:12px}
+.kt134-unified .stage{min-height:152px;padding:14px 16px}
+.kt134-unified .stage>span:first-child{font-size:21px}
+.kt134-unified .stage>div{font-size:15px;line-height:1.25}
+.kt134-unified .stage .stage-icon{height:58px;width:58px;bottom:13px;right:16px}
+.kt134-unified .auto{margin-top:4px;padding-top:11px}
+.kt134-unified .route{min-height:125px}
+.kt134-unified .gate{min-height:115px}
+.kt134-unified .kt134-progress-panel{
+ display:block;min-height:0;padding:16px 16px 14px;margin:9px 0 0;border:1px solid #a98f5c;
+ border-radius:18px;background:linear-gradient(115deg,#103c2b,#175238 65%,#103a2a);box-shadow:inset 0 0 17px #e8cc7522
+}
+.kt134-unified .kt134-progress-panel::before{display:none}
+.kt134-progress-body{position:relative;z-index:2;width:100%;display:flex;flex-direction:column;gap:10px}
+.kt134-progress-heading,.kt134-progress-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;color:#f2dd9c}
+.kt134-progress-heading{font:bold 15px Verdana,Arial}.kt134-progress-heading #kt134-percent{font:bold 25px Verdana,Arial;color:#ffdc84;font-variant-numeric:tabular-nums}
+.kt134-progress-track{width:100%;height:24px;border:2px solid #d8b66c;border-radius:20px;background:#092c20;box-shadow:inset 0 2px 6px #061c14,0 0 8px #d7b96855;overflow:hidden}
+.kt134-progress-track .fill{width:0;height:100%;background:linear-gradient(90deg,#a47f30,#f8de89 55%,#d4ae57);box-shadow:0 0 12px #f3d27d;transition:width .35s ease}
+.kt134-progress-foot{justify-content:flex-start;font-size:13px;color:#f0e4c8}
+.kt134-progress-dot{color:#e4c277;font-size:18px}
+.kt134-progress-foot #subtitle{flex:1;min-width:0;color:#f0e4c8!important;font-size:13px!important}
+.kt134-elapsed{font-size:12px;color:#e0c680;white-space:nowrap}
+.kt134-unified{padding:14px 17px}
+.kt134-unified .kt134-intake-choices{margin-bottom:9px}
+.kt134-unified .unified-start{margin:8px 0 10px}
+html.kt134-embedded .kt134-unified .kt134-progress-panel{border:1px solid #a98f5c;background:linear-gradient(115deg,#103c2b,#175238 65%,#103a2a)}
+@media(max-width:850px){.kt134-unified .stage{min-height:125px;padding:10px}.kt134-unified .stage>div{font-size:12px}.kt134-unified .route{min-height:90px}.kt134-unified .gate{min-height:86px}}
+@media(max-width:550px){.kt134-unified .kt134-progress-panel{padding:12px}.kt134-progress-heading{font-size:13px}.kt134-progress-foot #subtitle{font-size:11px!important}.kt134-progress-track{height:18px}}
+
+/* Последно правило с приоритет над наследения бял списък */
+html.kt134-embedded .kt134-unified #kt134-case-select,
+html.kt134-embedded #kt134-case-select,
+.kt134-unified #kt134-case-select{
+ appearance:auto!important;color-scheme:dark!important;
+ background-color:#164832!important;background-image:none!important;
+ color:#f6e5b9!important;border:2px solid #c7a75f!important;
+ box-shadow:inset 0 1px 7px #041d1455!important
+}
+html.kt134-embedded #kt134-case-select option,
+#kt134-case-select option{background-color:#173d2d!important;color:#f2e3b9!important}
+html.kt134-embedded .kt134-unified #kt134-new-file,
+.kt134-unified #kt134-new-file{background:#164832!important;color:#f6e5b9!important;border:2px solid #c7a75f!important;color-scheme:dark!important}
+html.kt134-embedded .kt134-unified .kt134-choice input::file-selector-button{
+ background:#876832!important;color:#fbeac3!important;border:1px solid #e1c67c!important
+}
+.kt134-unified .kt134-choice-hint,.kt134-unified .choice-note{font-size:12px;line-height:1.4}
+
+/* KT134 visual cleanup: fewer repeated labels, no manual archive refresh,
+   compact stage rhythm without altering accepted gates or controls. */
+.kt134-unified #kt134-refresh{display:none!important}
+.kt134-unified .stages{margin:8px 0;gap:10px}
+.kt134-unified .stage{min-height:136px;padding:12px 14px}
+.kt134-unified .stage .stage-icon{height:52px;width:52px;bottom:11px}
+.kt134-unified .auto{margin-top:2px;padding-top:8px}
+.kt134-unified .route{min-height:108px}
+.kt134-unified .gate{min-height:100px}
+.kt134-unified .kt134-intake-choices{margin-bottom:6px}
+.kt134-unified .unified-start{margin:6px 0 8px}
+
+/* Small non-primary actions: remain distinct from the one Start button. */
+.kt134-screen-tools{display:flex;justify-content:flex-end;gap:9px;margin:0 0 9px;flex-wrap:wrap}
+.kt134-screen-tools button{font:600 12px Verdana,Arial,sans-serif;padding:8px 15px;border:1px solid #b9995d;border-radius:9px;background:linear-gradient(125deg,#184f38,#123a2b);color:#edd395;cursor:pointer;min-height:34px}
+.kt134-screen-tools button:hover{background:#255d43;border-color:#e8c677}
+.kt134-screen-tools button:disabled{opacity:.45;cursor:not-allowed}
+
+/* One dashboard, one card deck: automation retains its gates but not five duplicate cards. */
+html.kt134-embedded #stages{display:none!important}
+html.kt134-embedded .kt134-unified .auto{margin-top:4px;padding-top:8px}
+.kt134-progress-track.waiting{position:relative;overflow:hidden}
+.kt134-progress-track.waiting:after{content:"";position:absolute;inset:2px auto 2px 0;width:16%;border-radius:99px;background:linear-gradient(90deg,transparent,#eed18888,transparent);animation:kt134Activity 1.7s ease-in-out infinite}
+@keyframes kt134Activity{0%{transform:translateX(-130%)}100%{transform:translateX(760%)}}
+@media(prefers-reduced-motion:reduce){.kt134-progress-track.waiting:after{animation:none}}
+
+/* WOW CINEMATIC V27.37.1 — visual styling only, no process, event or API changes. */
+:root{--cinematic-gold:#f1d38c;--cinematic-dark:#06231b}
+body{background:
+  radial-gradient(ellipse at 84% 8%,#caa65a39,transparent 34%),
+  linear-gradient(180deg,#031f18e7 0%,#093123f0 65%,#041c17f5 100%),
+  url('https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/scenes/screen_09.jpg') center/cover fixed;color:#f7edda}
+.portal-head{border-bottom-color:#f3cd80;background:linear-gradient(90deg,#04261de9,#0e4b33da,#082a20ee),
+  url('https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/scenes/screen_09.jpg') center/cover;
+  box-shadow:0 7px 24px #000a}
+.portal-intro{border-bottom:1px solid #b7985c7a;background:linear-gradient(90deg,#082b20c7,transparent)}
+.portal-intro h1{font-family:Georgia,serif;font-size:clamp(24px,2.8vw,38px);font-weight:500;color:#ffe4a2;text-shadow:0 3px 12px #000}
+.portal-intro p{color:#f9efd8}
+.bar,.case,.auto,.detail{box-shadow:0 14px 30px #0007,inset 0 0 0 1px #d4b6712b}
+.case{border-color:#c4aa75;background:linear-gradient(105deg,#0a3528f5,#0d4530f2)}
+.stages>.stage{border:1px solid #d7b879;border-radius:16px;overflow:hidden;
+ box-shadow:0 8px 24px #0007;background:linear-gradient(180deg,#082b20ba,#061e19f5)}
+.stages>.stage:nth-child(3){background:linear-gradient(180deg,#082b20bb,#061e19f1),
+ url('https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/relief_illustrative.jpg') center/cover}
+.stages>.stage span{color:#ffdc94}
+.stages>.stage.active{border-color:#ffe09e;box-shadow:0 0 16px #f2be5c97,0 8px 24px #0009}
+.stages>.stage.done{border-color:#8ecda4;box-shadow:0 0 13px #2f9c6060}
+.auto{border:1px solid #ebc77d;border-radius:16px;
+ background:linear-gradient(115deg,#06251de9,#12513ae6 54%,#092a22f5),
+ url('https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/scenes/screen_09.jpg') center/cover;
+ box-shadow:0 13px 40px #0009,0 0 16px #cda65942}
+.autohead strong{font:500 clamp(17px,2vw,24px) Georgia,serif;color:#ffe5aa;text-shadow:0 2px 10px #000}
+.gate{background:linear-gradient(145deg,#063d2c,#092b22);border:1px solid #edc678;
+ color:#ffe2a0;border-radius:16px;box-shadow:0 0 14px #edb85772,inset 0 1px 2px #fff3c744}
+.node{background:#123c2c;border-color:#c5ad73;color:#ebdcc1;box-shadow:0 1px 7px #0008}
+.node.done{background:#1b7947;border-color:#b9e2a4;box-shadow:0 0 10px #35bb6a84}
+.node.active{background:#a27725;border-color:#ffe0a0;box-shadow:0 0 14px #f3c76fbd}
+.track{background:#173d2f;box-shadow:inset 0 1px 4px #000}
+.fill{background:linear-gradient(90deg,#a67125,#f4cf7b,#ffefaa);box-shadow:0 0 11px #eec26b}
+button{border-color:#b6a06b;background:linear-gradient(180deg,#154e37,#0b3729);border-radius:10px;
+ box-shadow:0 5px 15px #0005;color:#fff1d8}
+button.primary{color:#1f301c;background:linear-gradient(180deg,#fff1b3,#e6bd67 65%,#c79a43);
+ border-color:#fff0b1;box-shadow:0 0 19px #e3bc6780,inset 0 2px 1px #fff4d1}
+button:focus-visible,a:focus-visible{outline:3px solid #fff4c5;outline-offset:3px}
+.output .detail,.detail{border:1px solid #aa925e;background:linear-gradient(155deg,#0b3529,#07271d);border-radius:13px}
+.output .detail h2{background:linear-gradient(90deg,#124631,#0b3025);color:#f8dc94;border-color:#b69b67}
+.paper{background:#fffaf0;color:#1b3026;box-shadow:0 9px 23px #0004}
+.output .actions{background:#092f25;border-color:#b5a06d}
+textarea{background:#fffcf4;color:#21372b}
+@media(prefers-reduced-motion:reduce){.fill{transition:none}}
+
+
+.kt134-unified{border-color:#9b8556;background:linear-gradient(155deg,#173e30,#102f24);box-shadow:none}
+.kt134-unified .route::before{height:4px;box-shadow:none;background:#d9b86d}
+.kt134-unified .gate{border-width:1px;box-shadow:none}
+.kt134-unified .node{box-shadow:none;border-width:2px}
+.kt134-unified .node.active{box-shadow:0 0 0 3px #d9b86d66}
+
+/* Cinematic route and progress share one panel in both embedded and full views. */
+html .kt134-unified .auto {
+  margin: 12px 0 0;
+  padding: 12px clamp(8px, 2vw, 22px) 0;
+  min-height: 0;
+  border: 1px solid #ac8f52;
+  border-bottom: 0;
+  border-radius: 16px 16px 0 0;
+  background: radial-gradient(ellipse at 50% 100%, #214a33, transparent 67%), #09291f;
+  box-shadow: none;
+}
+.kt134-unified .auto-label strong {font: 600 clamp(16px,2vw,23px) Georgia,serif;color:#f7d999;}
+html .kt134-unified .route {
+  grid-template-columns: clamp(50px,9vw,94px) repeat(5,minmax(0,1fr)) clamp(50px,9vw,94px);
+  min-height: clamp(70px,10vw,106px);
+  align-items: center;
+}
+html .kt134-unified .route::before {
+  height: 3px;
+  background: linear-gradient(90deg,#b68e48,#f6d58a 20%,#86b27b 50%,#f6d58a 80%,#b68e48);
+  box-shadow:0 0 8px #e9bf7360;
+}
+html .kt134-unified .route .gate {
+  min-height: clamp(52px,8vw,80px);
+  margin-inline: 2px;
+  padding-top: clamp(15px,3vw,28px);
+  border: 2px solid #e9c075;
+  border-radius: 30px 30px 9px 9px;
+  background: radial-gradient(ellipse at 50% 90%,#806338,#173a2a 66%,#08271e);
+  box-shadow: inset 0 0 12px #d7ae5266,0 0 12px #e4b95a55;
+  font-size: clamp(10px,1.3vw,15px);
+}
+html .kt134-unified .route .node {
+  width:clamp(25px,5vw,52px);height:clamp(25px,5vw,52px);
+  font-size:clamp(12px,2vw,21px);
+}
+html .kt134-unified .route .node.done {background:#1b7947;border-color:#b9e2a4;}
+html .kt134-unified .route .node.done::after {top:auto;left:50%;bottom:-17px;transform:translateX(-50%);font-size:13px;}
+html .kt134-unified .route .node.active {border-color:#ffe6a2;box-shadow:0 0 12px 3px #ffd87988;}
+html .kt134-unified .auto + .kt134-progress-panel {
+  min-height:0;margin:0;padding:10px clamp(10px,2vw,22px) 13px;
+  border:1px solid #ac8f52;border-top:0;border-radius:0 0 16px 16px;
+  background:#09291f;box-shadow:none;
+}
+.kt134-unified .kt134-progress-track {height:clamp(12px,1.6vw,20px);}
+</style><script>
+if(new URLSearchParams(location.search).get('embedded')==='1')
+ document.documentElement.classList.add('kt134-embedded');
+</script></head><body><main>
+<header class="portal-head"><div class="brand"><span class="leaf">❧</span><b>WOW · Административен пътеводител</b></div><div class="head-right">Работите като: <b>Експерт</b><a href="/auth/login">Моят профил</a><a href="/auth/logout" class="logout">Изход</a></div></header>
+<div class="portal-intro"><h1>Административен пътеводител</h1></div>
+<section class="bar"><div class="case">
+<div>Активен експерт: <strong id="expert">—</strong></div>
+<div>Вътрешен №: <strong id="caseid">—</strong></div>
+<div>Деловоден №: <strong id="registry">—</strong></div></div>
+<div class="kt134-unified" aria-label="Автоматичен анализ"><div class="kt134-screen-tools"><button type="button" id="kt134-clear-screen" title="Нулира само текущия екран — не изтрива документи или преписки">Изчисти екрана</button><button type="button" id="kt134-to-dashboard" title="Отвори раздела с всички панели">Към всички панели</button></div><div class="kt134-intake-choices">
+<section class="kt134-choice active" id="kt134-new-intake"><label class="choice-title" for="kt134-new-file">✚ Нова преписка</label><input id="kt134-new-file" type="file" accept=".zip,.pdf,.docx" aria-label="Документи за нова преписка"><span id="kt134-new-status" class="choice-note" aria-live="polite">Изберете ZIP, PDF или DOCX до 40 MB</span><button id="kt134-new-submit" type="button" disabled hidden>Регистрирай</button></section>
+<section class="kt134-choice" id="kt134-existing-intake"><label class="choice-title" for="kt134-case-select">▣ Преписка от архива</label><select id="kt134-case-select" disabled aria-label="Изберете преписка от архива"><option value="">Зареждане…</option></select><span id="kt134-case-help" class="choice-note" aria-live="polite"></span><div class="choice-tools"><button id="kt134-refresh" type="button" hidden aria-hidden="true" tabindex="-1">Обнови архива</button><a id="kt134-login-link" href="/auth/login">Вход</a></div></section>
+</div><div class="unified-start"><button class="primary" id="start" disabled>Стартирай автоматичния анализ</button></div><div class="stages" id="stages"></div><div class="auto"><div class="autohead"><div class="auto-label"><span>⚙</span><div><strong>Автоматичен ход</strong></div></div><span>EG Автор + независим рецензент</span></div><div class="route" id="route"></div>
+</div><div class="kt134-progress-panel"><div class="kt134-progress-body"><div class="kt134-progress-heading"><strong>Напредък на анализа</strong><strong id="kt134-percent" aria-live="polite">0%</strong></div><div class="kt134-progress-track" role="progressbar" aria-label="Напредък на анализа" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="fill" id="fill"></div></div><div class="kt134-progress-foot"><span class="kt134-progress-dot" aria-hidden="true">◉</span><span id="subtitle" aria-live="polite">Изберете преписка и стартирайте анализа</span><span id="kt134-elapsed" class="kt134-elapsed">—</span></div></div></div></div>
+
+<div id="error" role="alert" class="error" hidden></div>
+<p class="note">Проектът подлежи на окончателно одобрение от експерта.</p>
+</section>
+<section class="output" id="output"><div class="split">
+<div class="detail"><h2>Мотивирано предложение · Етап 4</h2>
+<p><b>Панел:</b> <span id="panel">—</span></p>
+<pre id="proposal"></pre><h2>Независим рецензент</h2><pre id="review"></pre>
+</div><div class="detail"><h2>Проект на документ · Етап 5</h2>
+<div class="paper"><b id="doc-title"></b><pre id="draft"></pre></div>
+<p class="confirmnote">Неодобрен проект. Окончателното потвърждение се извършва единствено в защитения експертен модул.</p>
+</div></div><div class="actions"><button class="primary" id="download" disabled>Изтегли реалния Word проект</button></div>
+</section></main>
+<script type="module">
+const labels=['Внасяне и анализ на преписката','Предмет и обхват на ИП','Имоти и пространствен анализ на ИП','Нормативна и процедурна преценка на ИП','Определяне на процедурата по ИП'];
+const stages=document.querySelector('#stages'),route=document.querySelector('#route');
+for(let i=0;i<5;i++){const e=document.createElement('div');e.className='stage';const n=document.createElement('span');n.textContent='Етап '+String(i+1);const t=document.createElement('div');t.textContent=labels[i];const ico=document.createElement('span');ico.className='stage-icon';ico.setAttribute('aria-hidden','true');ico.innerHTML=[
+'<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M17 20h26l9 10h29v47H17z M23 12h25l8 10h24v8 M29 44h40 M29 56h32 M29 68h27"/><circle cx="72" cy="72" r="13"/><path d="m81 81 9 9"/></svg>',
+'<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M12 32 50 12l38 20-38 20z M12 49l38 21 38-21 M12 64l38 22 38-22 M12 77l38 20 38-20"/></svg>',
+'<svg viewBox="0 0 100 100" aria-hidden="true"><path d="m10 45 27-9 27 9 26-9v48l-26 8-27-8-27 8z M37 36v48 M64 45v39 M50 13c-14 0-23 9-23 21 0 17 23 36 23 36s23-19 23-36c0-12-9-21-23-21z"/><circle cx="50" cy="34" r="7"/></svg>',
+'<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 12v73 M24 85h52 M50 21H18 M50 21h32 M22 21 9 55h26z M78 21 65 55h26z M9 55q13 17 26 0 M65 55q13 17 26 0"/></svg>',
+'<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="42" y="9" width="16" height="17" rx="2"/><path d="M50 26v22 M15 48h70 M15 48v15 M50 48v15 M85 48v15"/><rect x="4" y="63" width="22" height="22" rx="2"/><rect x="39" y="63" width="22" height="22" rx="2"/><rect x="74" y="63" width="22" height="22" rx="2"/></svg>'
+][i];e.append(n,t,ico);stages.append(e)}
+const gate=(text,cls)=>{const e=document.createElement('div');e.className=cls;e.textContent=text;route.append(e)};
+gate('Вход','gate');for(let i=1;i<=5;i++)gate(String(i),'node');gate('Изход','gate');
+const tiles=[...stages.children],nodes=[...route.children].slice(1,6);
+const el=id=>document.getElementById(id);
+function render(n){tiles.forEach((x,i)=>x.className='stage '+(i<n?'done':i===n?'active':''));nodes.forEach((x,i)=>x.className='node '+(i<n?'done':i===n?'active':''));const pct=n*20;el('fill').style.width=pct+'%';el('kt134-percent').textContent=pct+'%';document.querySelector('.kt134-progress-track').setAttribute('aria-valuenow',String(pct));document.querySelector('.kt134-progress-track').classList.remove('waiting');}
+function realE1Progress(pct,label){
+ const v=Math.max(0,Math.min(19,Math.round(pct)));
+ el('fill').style.width=v+'%';el('kt134-percent').textContent=v+'%';
+ document.querySelector('.kt134-progress-track').setAttribute('aria-valuenow',String(v));
+ if(label)el('subtitle').textContent=label;
+}
+function awaitingUnreportedStages(){
+ document.querySelector('.kt134-progress-track').classList.add('waiting');
+ el('subtitle').textContent='Етапи 2–5 · анализ и рецензия; очаква се потвърден резултат от сървъра';
+}
+function problem(msg){el('kt134-elapsed').textContent='Прекъснато';el('error').hidden=false;el('error').textContent=msg;el('subtitle').textContent='Автоматичната обработка не е завършила'}
+let context=null;
+let caseRows=[];
+let authenticated=false;
+let runBusy=false;
+render(0);
+const selector=el('kt134-case-select');
+const textOption=(value,label)=>{const o=document.createElement('option');o.value=value;o.textContent=label;return o;};
+function clearSelection(){
+ context=null;el('start').disabled=true;el('output').classList.remove('visible');
+ el('download').disabled=true;el('kt134-elapsed').textContent='—';render(0);
+}
+function rowLabel(c){
+ return [c.internalNumber||'Преписка',c.externalNumber||'без деловоден №',
+         c.title||''].filter(Boolean).join(' · ');
+}
+async function verifySelectedCase(caseId){
+ clearSelection();el('error').hidden=true;
+ if(!caseId)return;
+ el('subtitle').textContent='Проверка на правата за избраната преписка…';
+ try{
+  const c=caseRows.find(x=>x.caseId===caseId);
+  if(!c)throw Error('Непозната преписка в защитения регистър.');
+  const r=await fetch('/kt134/case-status?caseId='+encodeURIComponent(caseId),{
+    credentials:'same-origin',cache:'no-store'});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok||data.caseId!==caseId||data.authenticatedVia!=='KT125_NATIVE_CASE_ACL')
+    throw Error('КТ125 не потвърди достъпа ('+(data.error||r.status)+').');
+  context={caseId,registryNumber:c.externalNumber||'—'};
+  el('expert').textContent='Удостоверен експерт';
+  el('caseid').textContent=c.internalNumber||caseId;
+  el('registry').textContent=c.externalNumber||'—';
+  el('start').disabled=false;
+  el('subtitle').textContent='Преписката е потвърдена. Готовност за автоматичен анализ.';
+  history.replaceState(null,'','/kt134/final-test?caseId='+encodeURIComponent(caseId));
+ }catch(e){problem(e.message||'Няма потвърден достъп до преписката.');}
+}
+async function loadAccessibleCases(){
+ clearSelection();el('error').hidden=true;selector.disabled=true;
+ selector.replaceChildren(textOption('','Зареждане на преписките…'));
+ el('subtitle').textContent='Зареждане на регистъра през защитената сесия КТ125…';
+ try{
+  const r=await fetch('/kt134/available-cases',{credentials:'same-origin',cache:'no-store'});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok||data.authenticated!==true||
+    data.source!=='KT125_NATIVE_REGISTRY_CASE_READ_ACL'||
+    !Array.isArray(data.items))
+    throw Error(r.status===401?'Необходим е вход с действащия профил КТ125.':
+      'Регистърът не е достъпен ('+(data.error||r.status)+').');
+  authenticated=true;caseRows=data.items;
+  if(newFile.files?.[0] && /\.(zip|pdf|docx)$/i.test(newFile.files[0].name))newSubmit.disabled=false;
+   syncStart();
+  el('expert').textContent='Удостоверен експерт';
+  el('kt134-login-link').hidden=true;
+  selector.replaceChildren(textOption('','Изберете преписка от архива'));
+  caseRows.forEach(c=>selector.append(textOption(c.caseId,rowLabel(c))));
+  selector.disabled=!caseRows.length;
+  el('subtitle').textContent=caseRows.length?
+    'Заредени '+caseRows.length+' достъпни преписки. Изберете една.':
+    'Няма достъпни преписки за този профил.';
+  el('kt134-case-help').textContent=caseRows.length?
+    '':
+    'Няма преписки в архива.';
+  const preferred=new URL(location.href).searchParams.get('caseId');
+  if(preferred&&caseRows.some(x=>x.caseId===preferred)){
+    selector.value=preferred;setIntakeMode('existing');await verifySelectedCase(preferred);
+  }else if(caseRows.length===1){
+    selector.value=caseRows[0].caseId;setIntakeMode('existing');await verifySelectedCase(caseRows[0].caseId);
+  }
+ }catch(e){
+  authenticated=false;
+  newSubmit.disabled=true;
+  syncStart();
+  selector.replaceChildren(textOption('','Не е потвърдена сесия или регистър'));
+  el('kt134-login-link').hidden=false;
+  problem(e.message||'Регистърът не е достъпен.');
+ }
+}
+
+let intakeMode='new';
+function setIntakeMode(mode){intakeMode=mode;el('kt134-new-intake').classList.toggle('active',mode==='new');el('kt134-existing-intake').classList.toggle('active',mode==='existing');syncStart();}
+function syncStart(){const f=el('kt134-new-file').files?.[0];el('start').disabled=!authenticated||(intakeMode==='new'?!(f&&/\.(zip|pdf|docx)$/i.test(f.name)&&f.size>0&&f.size<=40000000):!context);}
+el('kt134-new-intake').addEventListener('click',()=>setIntakeMode('new'));
+el('kt134-existing-intake').addEventListener('click',()=>setIntakeMode('existing'));
+const newFile=el('kt134-new-file');
+const newSubmit=el('kt134-new-submit');
+const newStatus=el('kt134-new-status');
+let newRegistered=null;
+let registrationRequestKey=null;
+let stage1Intake=null;
+let readerLoad=null;
+async function loadApprovedE1Reader(){
+ if(window.V26LocalIntake?.process)return window.V26LocalIntake;
+ if(!readerLoad){
+  readerLoad=new Promise((resolve,reject)=>{
+   const script=document.createElement('script');
+   script.src='/kt134/e1/approved-reader.js';
+   script.onload=()=>window.V26LocalIntake?.process?
+     resolve(window.V26LocalIntake):reject(Error('Утвърденият четец Е1 не се инициализира.'));
+   script.onerror=()=>reject(Error('Не може да се зареди утвърденият четец на Етап 1.'));
+   document.head.appendChild(script);
+  }).catch(error=>{readerLoad=null;throw error});
+ }
+ return readerLoad;
+}
+newFile.addEventListener('change',()=>{
+ const file=newFile.files?.[0];
+ newRegistered=null;stage1Intake=null;
+ registrationRequestKey=crypto.randomUUID();
+ const valid=!!file && /\.(zip|pdf|docx)$/i.test(file.name) &&
+   file.size>0 && file.size<=40_000_000;
+ newSubmit.disabled=!valid||!authenticated;
+ setIntakeMode('new');
+ newStatus.textContent=!authenticated?'Необходим е вход в профила.':valid?'Избран файл: '+file.name+'.':
+  'Изберете ZIP, PDF или DOCX с размер до 40 MB.';
+});
+async function sendNew(path,body,contentType){
+ const response=await fetch(path,{method:'POST',credentials:'same-origin',
+  headers:{'Content-Type':contentType},body});
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok)throw Error(data.error||'Неуспешен запис в КТ126 ('+response.status+').');
+ return data;
+}
+async function registerNewCase(){
+ if(!authenticated){newSubmit.disabled=true;newStatus.textContent='Не е потвърден достъп до общия регистър КТ126.';return;}
+ const file=newFile.files?.[0];
+ if(!file||!(/\.(zip|pdf|docx)$/i.test(file.name))||file.size<1||
+    file.size>40_000_000)return;
+ newSubmit.disabled=true;el('error').hidden=true;
+ let id=newRegistered?.caseId||null;
+ try{
+  // The approved V26 E1 reader processes the entire dossier BEFORE
+  // consuming a native KT126 number; registration is not E1 completion.
+  if(!stage1Intake){
+   newStatus.textContent='Етап 1 · разчитане и обработка на всички документи…';
+    realE1Progress(1,'Етап 1 · разчитане на входните документи');
+   const reader=await loadApprovedE1Reader();
+   const parsed=await reader.process(file);
+   if(!Array.isArray(parsed?.document_texts)||!parsed.document_texts.length)
+    throw Error('Не са прочетени документи — няма надеждна основа за водещ документ.');
+   stage1Intake=parsed;
+    realE1Progress(4,'Етап 1 · документите са разчетени');
+  }
+  const bytes=new Uint8Array(await file.arrayBuffer());
+  const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)))
+    .map(n=>n.toString(16).padStart(2,'0')).join('');
+  const meta={filename:file.name,size:bytes.byteLength,sha256:digest};
+  const registerMeta={...meta,requestKey:registrationRequestKey};
+  if(!id){
+   newStatus.textContent='Регистрация на преписката с общия номератор КТ126…';
+   const record=await sendNew('/kt134/new-case/register',JSON.stringify(registerMeta),'application/json');
+   id=record.caseId;
+    realE1Progress(7,'Етап 1 · регистрирана е нова преписка');
+   if(!id||!record.internalNumber)throw Error('КТ126 не върна потвърден вътрешен номер.');
+   newRegistered={caseId:id,internalNumber:record.internalNumber,sourceId:null};
+  }
+  newStatus.textContent='Преписка '+newRegistered.internalNumber+' · записване на оригинала…';
+  if(!newRegistered.sourceId){
+   const initial=await sendNew('/kt134/new-case/original/'+encodeURIComponent(id)+'/start',
+     JSON.stringify(meta),'application/json');
+   // Native KT126 E1 stores the primary dossier under the fixed source
+   // identity "original", not a randomly generated source UUID.
+   const source=initial.receipt||{};
+   if(source.error||source.ok===false)
+    throw Error('КТ126 не потвърди началото на запис на оригинала.');
+   newRegistered.sourceId='original';
+    realE1Progress(9,'Етап 1 · започва записът на оригинала');
+  }
+  const sourceId=newRegistered.sourceId;
+  const chunkSize=256*1024;
+  for(let pos=0,i=0;pos<bytes.length;pos+=chunkSize,i++){
+   newStatus.textContent='Преписка '+newRegistered.internalNumber+
+     ' · запис на документ, част '+(i+1)+'…';
+   await sendNew('/kt134/new-case/original/'+encodeURIComponent(id)+
+    '/part/'+i,
+    bytes.slice(pos,pos+chunkSize),'application/octet-stream');
+    realE1Progress(9+6*Math.min(1,(pos+chunkSize)/bytes.length),
+      'Етап 1 · записване на оригиналните документи');
+  }
+  await sendNew('/kt134/new-case/original/'+encodeURIComponent(id)+'/finish',
+   JSON.stringify({}),'application/json');
+  realE1Progress(16,'Етап 1 · оригиналът е записан');
+   newStatus.textContent='Етап 1 · EG Авторът и рецензентът определят водещия документ…';
+  const e1=await sendNew('/kt134/new-case/complete-stage1',
+   JSON.stringify({caseId:id,sha256:digest,intake:{
+    archive_name:stage1Intake.archive_name,
+    files:(stage1Intake.files||[]).slice(0,50).map(f=>({
+      name:f.name||f.filename||f.file,status:f.status||''})),
+    document_texts:(stage1Intake.document_texts||[]).slice(0,50).map(d=>({
+      source:d.source,text:String(d.text||'').slice(0,8000)})),
+    dossier_documents:(stage1Intake.dossier_documents||[]).slice(0,50).map(d=>({
+      file:d.file||d.name,type:d.type||'',date:d.date||''})),
+    classification:stage1Intake.classification||{},
+    subject_candidates:(stage1Intake.subject_candidates||[]).slice(0,20)
+      .map(d=>({source:d.source,title:d.title||'',evidence:String(d.evidence||'').slice(0,500)})),
+    all_parcels:(stage1Intake.all_parcels||[]).slice(0,100)
+   }}),'application/json');
+  if(e1.caseId!==id||!['stage1_completed','stage1_already_completed'].includes(e1.status)||
+     !e1.leadingDocument?.sourceId)
+   throw Error('Етап 1 не е потвърден от общия регистър КТ126.');
+  render(1);
+   newStatus.textContent='Етап 1 завършен · '+newRegistered.internalNumber+
+   ' · водещ документ: '+e1.leadingDocument.fileName+
+   '. Преписката е достъпна и за класическия маршрут.';
+  newFile.value='';stage1Intake=null;
+  await loadAccessibleCases();
+  if(caseRows.some(x=>x.caseId===id)){
+   // The same Start click continues with the newly registered case.
+   // Verify native KT125 case ACL but never switch to or require archive selection.
+   await verifySelectedCase(id);
+   if(context?.caseId!==id)throw Error('КТ125 не потвърди новата преписка за автоматичния маршрут.');
+   selector.value='';
+   setIntakeMode('new');
+   newStatus.textContent='Етап 1 завършен · '+newRegistered.internalNumber+
+     ' · преминаване към автоматичния анализ без повторен избор или старт.';
+   return true;
+  }else{
+   newStatus.textContent+=' Записът ще се появи в списъка след обновяване.';
+  }
+ }catch(error){
+  const name=newRegistered?.internalNumber||'';
+  newStatus.textContent=(name?'Регистрирана преписка '+name+'. ':'')+
+    (error.message||'Неуспешно въвеждане.');
+  // No new number is allocated on retry. Partial registration is
+  // retained only for this browser session and only for the selected file.
+  newSubmit.disabled=!authenticated;
+  syncStart();
+ }
+ return false;
+}
+
+selector.addEventListener('change',()=>{setIntakeMode('existing');verifySelectedCase(selector.value);});
+el('kt134-refresh').addEventListener('click',loadAccessibleCases);
+loadAccessibleCases();
+let word=null;
+el('kt134-clear-screen').addEventListener('click',()=>{
+ if(runBusy)return;
+ // Clear presentation and local intake state ONLY. KT126 records and
+ // original uploaded documents remain safely stored and unchanged.
+ newFile.value='';newRegistered=null;registrationRequestKey=null;stage1Intake=null;
+ newSubmit.disabled=true;newStatus.textContent='Изберете ZIP, PDF или DOCX до 40 MB';
+ selector.value='';word=null;
+ clearSelection();
+ el('caseid').textContent='—';el('registry').textContent='—';
+ el('expert').textContent=authenticated?'Удостоверен експерт':'—';
+ el('panel').textContent='—';el('proposal').textContent='';
+ el('review').textContent='';el('doc-title').textContent='';
+ el('draft').textContent='';
+ el('error').hidden=true;el('error').textContent='';
+ el('subtitle').textContent='Изберете нова преписка или преписка от архива.';
+ setIntakeMode('new');
+ const url=new URL(location.href);url.searchParams.delete('caseId');
+ history.replaceState(null,'',url.pathname+url.search);
+ // Reset layout after the output shrinks; never delete the saved KT126 case.
+ if(document.documentElement.classList.contains('kt134-embedded')){
+  parent.postMessage({type:'kt134:reset-layout'},location.origin);
+ }else{window.scrollTo({top:0,behavior:'instant'});}
+});
+el('kt134-to-dashboard').addEventListener('click',()=>{
+ if(runBusy)return;
+ if(window.top===window){location.assign('/kt134/dashboard#all-panels');return;}
+ window.top.location.hash='all-panels';
+});
+el('start').addEventListener('click',async()=>{
+ if(runBusy)return;
+ runBusy=true;el('kt134-clear-screen').disabled=true;el('kt134-to-dashboard').disabled=true;
+ try{
+ if(intakeMode==='new'){el('start').disabled=true;if(!(await registerNewCase())){syncStart();return;}}
+ if(!context){syncStart();return;}el('start').disabled=true;el('error').hidden=true;
+  if(intakeMode!=='new')render(0);
+  awaitingUnreportedStages();
+ el('subtitle').textContent='Анализът се изпълнява · изчаква се потвърден резултат от етапите';el('kt134-elapsed').textContent='Обработва…';
+ try{
+  const r=await fetch('/kt134/automatic/draft-events',{method:'POST',credentials:'same-origin',
+   headers:{'Content-Type':'application/json'},body:JSON.stringify({caseId:context.caseId})});
+  if(!r.ok||!r.body)throw Error('Няма връзка със защитеното отчитане на етапите ('+r.status+').');
+  const reader=r.body.getReader(),decoder=new TextDecoder();
+  let buffer='',final=null,streamFinished=false;
+  const accept=line=>{
+   if(!line.trim())return;
+   const event=JSON.parse(line);
+   if(event.type==='progress'){
+    if(!Number.isInteger(event.stage)||event.stage<2||event.stage>5||
+       event.percent!==event.stage*20)return;
+    render(event.stage);
+    if(event.label)el('subtitle').textContent=event.label;
+   }else if(event.type==='result'){
+    final=event;streamFinished=true;
+   }
+  };
+  while(true){
+   const {done,value}=await reader.read();
+   if(done)break;
+   buffer+=decoder.decode(value,{stream:true});
+   let i;
+   while((i=buffer.indexOf('\n'))>=0){
+    accept(buffer.slice(0,i));buffer=buffer.slice(i+1);
+   }
+  }
+  buffer+=decoder.decode();if(buffer.trim())accept(buffer);
+  if(!streamFinished)throw Error('Връзката прекъсна преди сървърът да завърши проекта.');
+  const data=final.data||{};
+  if(final.status!==200||data.status!=='draft_ready'||!data.stage5||!data.docxBase64)
+    throw Error('Защитеният маршрут не върна завършен проект ('+
+      (data.error||data.status||final.status)+').');
+  if(data.caseId!==context.caseId||data.expertApproved!==false||data.finalDecision!==null)
+    throw Error('Връщане на несъвместима преписка или неразрешено одобрение.');
+  word=data.docxBase64;
+  el('registry').textContent=data.registryNumber||context.registryNumber||'—';
+  el('panel').textContent='№'+data.stage5.panelId;
+  el('proposal').textContent=data.author?.content||'—';
+  el('review').textContent=data.intermediateDecision?.reasoning||'—';
+  el('doc-title').textContent=data.stage5.documentTitle||'Проект';
+  el('draft').textContent=data.stage5.content||'—';
+  render(5);el('kt134-elapsed').textContent='Завършено';el('subtitle').textContent='Готов проект · очаква окончателно решение на експерта';
+  el('output').classList.add('visible');el('download').disabled=false;
+ }catch(e){document.querySelector('.kt134-progress-track').classList.remove('waiting');problem(e.message||'Неуспешно изпълнение');el('start').disabled=false}
+ }finally{runBusy=false;el('kt134-clear-screen').disabled=false;el('kt134-to-dashboard').disabled=false;}
+});
+el('download').addEventListener('click',()=>{
+ if(!word||!context)return;
+ try{
+  const bin=atob(word),bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  const url=URL.createObjectURL(new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}));
+  const a=document.createElement('a');a.href=url;a.download='KT134_'+context.caseId+'_PROEKT.docx';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+ }catch{problem('Word файлът не може да бъде изтеглен.')}
+});
+</script><script>
+if(document.documentElement.classList.contains('kt134-embedded')){
+ const notify=()=>{
+  // Measure actual content, not the iframe viewport which cannot shrink.
+  const bounds=document.querySelector('main').getBoundingClientRect();
+  const h=Math.ceil(bounds.bottom+window.scrollY+12);
+  parent.postMessage({type:'kt134:inline-height',height:h},location.origin);
+ };
+ if(typeof ResizeObserver!=='undefined')new ResizeObserver(notify).observe(document.querySelector('main'));
+ addEventListener('message',e=>{
+  if(e.origin===location.origin&&e.source===window.parent&&e.data?.type==='kt134:measure-layout')notify();
+ });
+ addEventListener('load',notify);
+ notify();
+}
+</script></body></html>

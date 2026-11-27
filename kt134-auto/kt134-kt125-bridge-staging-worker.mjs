@@ -9,6 +9,8 @@ import {createKt134NativeCaseList} from './kt134-native-case-list.mjs';
 import {createKt134NativeAutomaticHandler} from './kt134-native-automatic-route.mjs';
 import {createKt134NativeCaseRegistration} from './kt134-native-new-case-registration.mjs';
 import {createKt134NativeOriginalTransport} from './kt134-native-original-transport.mjs';
+import visualDashboardUI from './KT134_CINEMATIC_DASHBOARD_PREVIEW.html';
+import visualAutoUI from './KT134_CINEMATIC_AUTOMATIC_PREVIEW.html';
 import autoUI from './KT134_PROTECTED_INTEGRATION_UI.html';
 import dashboardUI from './KT134_EMBEDDED_DASHBOARD.html';
 import approvedE1Reader from './kt134-e1-approved-reader-text.mjs';
@@ -124,7 +126,7 @@ export default {
   }
   if(path==='/kt134/dashboard'){
    if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
-   return new Response(dashboardUI,{headers:{
+   return new Response(url.searchParams.get('preview')==='cinematic' ? visualDashboardUI : dashboardUI,{headers:{
      'content-type':'text/html; charset=utf-8',
      'cache-control':'no-store, private','x-content-type-options':'nosniff',
      'referrer-policy':'no-referrer',
@@ -135,7 +137,7 @@ export default {
    if(request.method!=='GET')return json({error:'METHOD_NOT_ALLOWED'},405);
    // The HTML never supplies authentication facts to the server; those are
    // independently verified on every native-KT125 case request.
-   return new Response(autoUI,{headers:{'content-type':'text/html; charset=utf-8',
+   return new Response(url.searchParams.get('preview')==='cinematic' ? visualAutoUI : autoUI,{headers:{'content-type':'text/html; charset=utf-8',
      'cache-control':'no-store, private','x-content-type-options':'nosniff',
      'referrer-policy':'no-referrer','x-frame-options':'SAMEORIGIN',
      'content-security-policy':"default-src 'self'; script-src 'unsafe-inline' 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'unsafe-inline'; connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; worker-src 'self' blob: https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://emilgergov.github.io; form-action 'self'; base-uri 'none'; frame-ancestors 'self'"}});
