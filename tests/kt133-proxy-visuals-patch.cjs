@@ -73,7 +73,10 @@ export default {
      if(isKt134DeepStage)el.append('<style id="kt134-pending-stage-style">body{visibility:hidden!important}</style><script>setTimeout(function(){var e=document.getElementById("kt134-pending-stage-style");if(e)e.remove()},9000)</script>',{html:true});
      el.append('<link rel="stylesheet" href="/__kt133_approved_visuals.css?v=20261127no-flash" />',{html:true});
    }})
-   .on('body',{element(el){el.append('<script defer src="/__kt133_approved_visuals.js?v=20261127no-flash"></script>',{html:true});}})
+   .on('body',{element(el){
+     if(isKt134DeepStage)el.append('<script>document.addEventListener("click",function(event){if(!event.target.closest("#kt80DashboardBack"))return;event.preventDefault();event.stopImmediatePropagation();location.assign("https://tpu-plovdiv-kt134-test.emilgergov.workers.dev/kt134/dashboard");},true);</script>',{html:true});
+     el.append('<script defer src="/__kt133_approved_visuals.js?v=20261127no-flash"></script>',{html:true});
+   }})
    .transform(response);
  }
 };`;
