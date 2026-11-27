@@ -215,7 +215,7 @@ jobs:
           NODE
           # KT134 final dashboard: the automatic route MUST be inline, not a second-click menu.
           curl --fail --silent --show-error --max-time 15 "$BASE/kt134/dashboard" -o /tmp/kt134-dashboard.html
-          grep -Fq '<details id="auto">' /tmp/kt134-dashboard.html
+          grep -Fq '<details id="auto" open>' /tmp/kt134-dashboard.html
           grep -Fq 'src="/kt134/final-test?embedded=1"' /tmp/kt134-dashboard.html
           if grep -Fq 'Отвори автоматичния режим' /tmp/kt134-dashboard.html; then
             echo '::error::Unexpected second-click auto button'; exit 1

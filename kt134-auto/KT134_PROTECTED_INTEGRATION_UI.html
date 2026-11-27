@@ -697,9 +697,8 @@ el('kt134-clear-screen').addEventListener('click',()=>{
 });
 el('kt134-to-dashboard').addEventListener('click',()=>{
  if(runBusy)return;
- // Same-origin navigation to the main dashboard, not to the automatic
- // form, both when embedded in iframe and when opened standalone.
- window.top.location.assign('https://kt133-tpu-plovdiv-kt125-local-auth.emilgergov.workers.dev/module/vt03/kt80/KT83_VT02_P1_P6_VISUAL_TEST.html');
+ if(window.top===window){location.assign('/kt134/dashboard#all-panels');return;}
+ window.top.location.hash='all-panels';
 });
 el('start').addEventListener('click',async()=>{
  if(runBusy)return;
