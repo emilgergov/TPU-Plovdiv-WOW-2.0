@@ -117,7 +117,7 @@ export function renderInstitutionalWord({templateBytes,codec,parseXml,serializeX
  let signProps=Array.from(firstSignature.childNodes).find(n=>n.namespaceURI===W&&n.localName==='pPr');
  if(!signProps){signProps=WN('pPr');firstSignature.insertBefore(signProps,firstSignature.firstChild)}
  for(const jc of Array.from(signProps.getElementsByTagNameNS(W,'jc')))jc.parentNode.removeChild(jc);
- const align=WN('jc');align.setAttributeNS(W,'w:val','left');signProps.append(align);
+ const align=WN('jc');align.setAttributeNS(W,'w:val','left');signProps.appendChild(align);
  const closing=allPar.find(p=>textIn(p).trim()==='С уважение,');
  if(!closing)throw Error('Липсва заключителният реквизит „С уважение,“.');
  replacePara(closing,'С уважение,',false,true);
@@ -137,9 +137,9 @@ export function renderInstitutionalWord({templateBytes,codec,parseXml,serializeX
  let subjectProps=Array.from(subj.childNodes).find(n=>n.namespaceURI===W&&n.localName==='pPr');
  if(!subjectProps){subjectProps=WN('pPr');subj.insertBefore(subjectProps,subj.firstChild)}
  for(const node of Array.from(subjectProps.childNodes).filter(n=>n.namespaceURI===W&&(n.localName==='jc'||n.localName==='ind')))subjectProps.removeChild(node);
- const subjectAlign=WN('jc');subjectAlign.setAttributeNS(W,'w:val','both');subjectProps.append(subjectAlign);
- const subjectIndent=WN('ind');subjectIndent.setAttributeNS(W,'w:firstLine','567');subjectProps.append(subjectIndent);
- subjectProps.append(WN('widowControl'));
+ const subjectAlign=WN('jc');subjectAlign.setAttributeNS(W,'w:val','both');subjectProps.appendChild(subjectAlign);
+ const subjectIndent=WN('ind');subjectIndent.setAttributeNS(W,'w:firstLine','567');subjectProps.appendChild(subjectIndent);
+ subjectProps.appendChild(WN('widowControl'));
  // Retain original confirmed subject content; formatting is independent from proposal text.
  const nodes=bodyLines.map(x=>newPara(x));
  // Keep the closing signature block together with the preceding substantive
@@ -148,7 +148,7 @@ export function renderInstitutionalWord({templateBytes,codec,parseXml,serializeX
  const lastBody=nodes.at(-1);
  if(lastBody){
    const props=Array.from(lastBody.childNodes).find(n=>n.namespaceURI===W&&n.localName==='pPr');
-   if(props&&!Array.from(props.childNodes).some(n=>n.namespaceURI===W&&n.localName==='keepNext'))props.append(WN('keepNext'));
+   if(props&&!Array.from(props.childNodes).some(n=>n.namespaceURI===W&&n.localName==='keepNext'))props.appendChild(WN('keepNext'));
  }
  for(const p of nodes)body.insertBefore(p,anchor);
  body.removeChild(anchor);
