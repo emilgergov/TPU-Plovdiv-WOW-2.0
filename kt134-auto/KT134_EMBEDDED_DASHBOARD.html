@@ -114,6 +114,34 @@ details[open]>summary{box-shadow:inset 0 -1px 0 #c4a66c6b}
 a:focus-visible,summary:focus-visible{outline:3px solid #fff1bd;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.main>.grid>.stage{transition:none}}
 
+
+/* WOW CINEMATIC cleanup: the scenic source scenes contain presentation
+   captions; defocus visual textures so pre-rendered words never compete
+   with actual dashboard labels. No DOM or stage navigation changes. */
+body{background:radial-gradient(ellipse at 85% 4%,#ad804b38,transparent 42%),
+linear-gradient(115deg,#041d18 5%,#0d3729 58%,#061e18 100%)!important}
+.top{background:linear-gradient(90deg,#031e18,#0d3b2b 70%,#06281d)!important}
+.intro{background:linear-gradient(90deg,#062a20,#154530 72%,#103324)!important}
+.main>.grid>.stage,.main>.grid>.stage:first-child{
+ background:#092c21!important;isolation:isolate;overflow:hidden!important}
+.main>.grid>.stage::before{
+ content:"";position:absolute;inset:-15px;z-index:-1;pointer-events:none;
+ background:linear-gradient(180deg,#02190f4d 0%,#021b15ed 100%),
+ url('https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/scenes/screen_04.jpg') center/cover;
+ filter:blur(11px) saturate(1.12);transform:scale(1.05)}
+.main>.grid>.stage:nth-child(2)::before{
+ background-image:linear-gradient(180deg,#02190f56,#021b15f0),
+ url('https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/scenes/screen_05.jpg')}
+.main>.grid>.stage:nth-child(3)::before{
+ background-image:linear-gradient(180deg,#02190f56,#021b15f0),
+ url('https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/relief_illustrative.jpg')}
+.main>.grid>.stage:nth-child(4)::before{
+ background-image:linear-gradient(180deg,#02190f56,#021b15f0),
+ url('https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/scenes/screen_07.jpg')}
+.main>.grid>.stage:nth-child(5)::before{
+ background-image:linear-gradient(180deg,#02190f56,#021b15f0),
+ url('https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/scenes/screen_08.jpg')}
+
 </style><script>
 addEventListener('message',e=>{
  if(e.origin!==location.origin||e.source!==document.getElementById('kt134-live')?.contentWindow)return;
