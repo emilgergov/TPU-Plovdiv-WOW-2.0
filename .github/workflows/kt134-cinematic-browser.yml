@@ -11,7 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: kt134-auto
+          sparse-checkout: |
+            kt134-auto
+            tests
       - uses: actions/checkout@v4
         with:
           ref: 05463d61d30cfd9594416b326cadc2b3e8a1f220
@@ -20,6 +22,14 @@ jobs:
             index.html
             scenes/wow-plovdiv-panorama.webp
           sparse-checkout-cone-mode: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ce73ad53e9291b28ef0aa225c68d924f28b7e28a
+          path: classic-reference
+          sparse-checkout: |
+            vt03
+            kt80
+            v26-test
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
