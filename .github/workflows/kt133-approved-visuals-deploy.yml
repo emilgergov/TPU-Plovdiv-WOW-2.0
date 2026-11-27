@@ -4,6 +4,7 @@ name: KT133 — Publish approved visual modifications (rollback protected)
 # Fix return links from the five KT134 stage entries.
 # Style the guarded Stage 5 information view on direct KT134 entry.
 # Apply approved cinematic styling to both existing Stage 5 views.
+# Match Stage 5 backdrop styles to the actual class emitted by the live module.
 on:
   push:
     branches: [main]
