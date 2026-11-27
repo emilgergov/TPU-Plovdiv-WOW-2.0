@@ -82,7 +82,7 @@ if(host&&five){
  const actions=mk('div');actions.className='actions';
  const change=mk('button','Редактирай целия текст'),confirm=mk('button','Потвърди и продължи към Етап 5'),storeEdit=mk('button','Запази редакцията'),cancel=mk('button','Откажи редакцията');
  storeEdit.hidden=true;cancel.hidden=true;actions.append(change,confirm,storeEdit,cancel);
- const note=mk('p');note.className='note';
+ const note=mk('p');note.className='note';note.setAttribute('role','status');
  const next=mk('button','Продължи към Етап 5');next.hidden=true;
  const save=mk('button','Запази защитено копие');save.hidden=true;
  const password=mk('input');password.type='password';password.placeholder='Парола за копието (12+ знака)';password.autocomplete='new-password';password.hidden=true;
@@ -117,7 +117,12 @@ if(host&&five){
  }
 
  const evidence=()=>collectStageEvidence(window);
- const current=()=>proposal&&proposal.localId===evidence().caseId&&proposal.revision===evidence().evidenceRevision&&proposal.generation===evidence().generation&&proposal.key===evidence().key;
+ const current=()=>{
+  if(!proposal)return false;
+  const {caseId,evidenceRevision,generation,key}=evidence();
+  return proposal.localId===caseId&&proposal.revision===evidenceRevision&&proposal.generation===generation&&proposal.key===key;
+ };
+ const staleMessage='Предложението е за предишна версия на данните. Изгответе нов проект с EG Автора в Етап 4 и го потвърдете.';
  // KT123 — the same explicit legal matrix as the Worker; the expert may edit
  // the reasoning, but the selected administrative direction cannot contradict it.
  const validateStage4Direction=text=>{
@@ -229,7 +234,7 @@ if(host&&five){
  };
  cancel.onclick=display;
  confirm.onclick=async()=>{
-  if(!current()){note.textContent='Данните по преписката са променени.';return;}
+  if(!current()){note.textContent=staleMessage;return;}
   const expert=val(actor.value);if(expert.length<2){note.textContent='Посочете експерта.';actor.focus();return;}
   const v=history.at(-1);
   // KT124-R6: Reviewer status is advisory. The expert's express
@@ -274,7 +279,8 @@ if(host&&five){
  // This case-bound confirmation instead opens ONLY the new Stage 5 preview.
  // No procedure activation, external document, or normative approval occurs.
  next.onclick=()=>{
-  if(!approved||!current())return;
+  if(!current()){note.textContent=staleMessage;return;}
+  if(!approved){note.textContent='Потвърдете предложената процедура, за да отворите Етап 5.';return;}
   render5();
   // Refresh the Stage 5 case-bound input before switching the visible stage.
   window.KT117Document?.refresh?.();
