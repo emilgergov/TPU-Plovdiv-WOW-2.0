@@ -39,9 +39,10 @@ jobs:
           const history=await api('/deployments');
           const previous=(history.deployments||history.items)[0].versions.map(({version_id,percentage})=>({version_id,percentage}));
           const registry={name:'KT126_REGISTRY',type:'service',service:native,entrypoint:'LocalAuthService'};
-          assert.ok(!settings.bindings.some(b=>b.name===registry.name),'Registry already configured');
+          const existing=settings.bindings.find(b=>b.name===registry.name);
+          if(existing)assert.ok(existing.type===registry.type&&existing.service===native&&existing.entrypoint===registry.entrypoint);
           const metadata={main_module:'worker.mjs',compatibility_date:settings.compatibility_date,compatibility_flags:settings.compatibility_flags||[],
-            keep_bindings:['secret_text'],bindings:[...settings.bindings.filter(b=>b.type!=='secret_text'),registry]};
+            keep_bindings:['secret_text'],bindings:[...settings.bindings.filter(b=>b.type!=='secret_text'&&b.name!==registry.name),registry]};
           for(const key of ['observability','logpush','placement','limits','tail_consumers'])if(settings[key]!==undefined)metadata[key]=settings[key];
           const source=readFileSync('/tmp/registry-author.mjs','utf8');
           assert.ok(source.includes('KT126_REGISTRY')&&source.includes('getCaseContext'));
@@ -49,7 +50,12 @@ jobs:
           form.set('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
           form.set('worker.mjs',new Blob([source],{type:'application/javascript+module'}),'worker.mjs');
           try{
+            const listed=async()=>{const v=await api('/versions?per_page=20');return (Array.isArray(v)?v:v.items||[]).map(x=>x.id||x.version_id);};
+            const before=new Set(await listed());
             await api('',{method:'PUT',body:form});
+            const version=(await listed()).find(id=>!before.has(id));
+            assert.ok(version,'New author version not found');
+            await api('/deployments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({strategy:'percentage',versions:[{version_id:version,percentage:100}]})});
             const updated=await api('/settings');
             assert.ok(updated.bindings.some(b=>b.name===registry.name&&b.service===native&&b.entrypoint===registry.entrypoint));
             const url='https://'+author+'.emilgergov.workers.dev';
