@@ -182,7 +182,7 @@ function boot(){
  let serial=0,pendingSignature='',finishedSignature='',lastResult=null;
  const clear=()=>{
   serial++;pendingSignature='';finishedSignature='';lastResult=null;password.value='';
-  if(dialog.open)dialog.close();button.disabled=false;output.textContent='';output.style.display='none';
+  if(dialog.open)dialog.close();button.disabled=false;button.removeAttribute('aria-busy');output.textContent='';output.style.display='none';
   status.textContent='';status.style.display='none';lead.textContent='';lead.style.display='none';expanded.style.display='none';expanded.open=false;showEstablishedEvidence();
  };
  async function generate(firstPassword=null){
@@ -198,8 +198,8 @@ function boot(){
   if(!requestId){status.textContent='Не може да се създаде уникален ИД за заявката.';return;}
   const ticket=++serial;
   pendingSignature=identity.signature;finishedSignature='';lastResult=null;
-  button.disabled=true;output.style.display='none';output.textContent='';
-  status.textContent='EG Авторът подготвя проект за текущата преписка. Това не е окончателна правна преценка.';
+  button.disabled=true;button.setAttribute('aria-busy','true');output.style.display='none';output.textContent='';
+  status.textContent='Обработва се… EG Авторът подготвя проект за текущата преписка.';
   const request={
    task:'draft_normative_proposal',documentType:'PROJECT_NOT_ACT',
    caseId:identity.caseId,caseIdType:identity.caseIdType,
@@ -237,7 +237,11 @@ function boot(){
    }
    const response=await window.KT80EGSession.request(ENDPOINT,prepared.payload,firstPassword);
    const data=await response.json().catch(()=>({}));
-   if(ticket!==serial||pendingSignature!==caseIdentity().signature)return;
+   if(ticket!==serial)return;
+   if(pendingSignature!==caseIdentity().signature){
+    status.textContent='Данните са променени по време на обработката. Изгответе нов проект за текущите данни.';
+    return;
+   }
    if(response.status===401||response.status===403){status.textContent='Достъпът до EG Автора е отказан. Паролата за тази сесия е изчистена.';return;}
    if(!response.ok){
     const findings=Array.isArray(data.reviewFindings)?data.reviewFindings.slice(0,5).map(x=>str(x)).filter(Boolean):[];
@@ -429,7 +433,7 @@ function boot(){
    const reviewInfo=audit.reviewed===true?
     (audit.reviewVerdict==='revise'?'Поправен след вторичен независим нормативен преглед. ':'Преминал вторичен независим преглед за логическа съгласуваност. '):
     'Независим нормативен преглед не е удостоверен. ';
-   status.textContent=reviewInfo+(audit.fullArticlesVerified===true?'Относимите пълни нормативни текстове от MASTER V11 са предоставени. Правната приложимост подлежи на експертно потвърждение.':'Пълните нормативни текстове не са удостоверени като използвани; необходима е експертна проверка.');
+   status.textContent='Проектът е готов за експертен преглед. '+reviewInfo+(audit.fullArticlesVerified===true?'Относимите пълни нормативни текстове от MASTER V11 са предоставени. Правната приложимост подлежи на експертно потвърждение.':'Пълните нормативни текстове не са удостоверени като използвани; необходима е експертна проверка.');
    document.dispatchEvent(new CustomEvent('kt115:stage4-draft',{detail:{
     caseId:identity.caseId,evidenceRevision:h.evidenceRevision,requestId,
     sourceDraft:str(data.draft),warnings:[],qualityPassed:true,
@@ -444,7 +448,7 @@ function boot(){
     'мрежова грешка или липсващ достъпен сървърен маршрут.':'връзката с услугата не е установена.')+' Не е заместен с алгоритмичен текст.';
   }finally{
    if(activityTicket!==undefined)window.KT80Busy?.finish?.(activityTicket);
-   if(ticket===serial){button.disabled=false;pendingSignature='';}
+   if(ticket===serial){button.disabled=false;button.removeAttribute('aria-busy');pendingSignature='';}
   }
  }
  button.addEventListener('click',()=>generate());
