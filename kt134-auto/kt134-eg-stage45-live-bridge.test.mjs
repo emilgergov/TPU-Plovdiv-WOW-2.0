@@ -63,7 +63,8 @@ test('oversized Stage 5 falls back after upstream 413 without changing the signe
  const documents=Array.from({length:18},(_,i)=>({source:'Документ '+i,text:'Ж'.repeat(2600)}));
  const f=fixture({documents,stage5MaxBytes:42000});
  const result=await run(f);
- assert.equal(result.stage5.status,'draft');
+ assert.equal(result.stage5.panelId,19);
+ assert.match(f.wordText(),/Текст от Етап 5/u);
  assert.equal(f.calls.length,3);
  const request=f.calls[2].body;
  assert.ok(new TextEncoder().encode(JSON.stringify(request)).length<=41000);
