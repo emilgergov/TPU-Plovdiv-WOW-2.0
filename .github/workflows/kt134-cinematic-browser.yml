@@ -1,0 +1,33 @@
+name: KT134 cinematic browser acceptance
+on:
+  push:
+    branches: [kt134-five-reference-cinematic-dashboard]
+permissions:
+  contents: read
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: kt134-auto
+      - uses: actions/checkout@v4
+        with:
+          ref: 05463d61d30cfd9594416b326cadc2b3e8a1f220
+          path: portal-reference
+          sparse-checkout: |
+            index.html
+            scenes/wow-plovdiv-panorama.webp
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --package-lock=false playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - run: node kt134-auto/kt134-cinematic-browser-check.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: KT134-cinematic-browser
+          path: visual-check/
