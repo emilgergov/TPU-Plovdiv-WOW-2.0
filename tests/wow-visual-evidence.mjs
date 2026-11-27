@@ -30,11 +30,11 @@ async function shot(name,viewport,path,selector,action){
   finally{await page.close()}
 }
 const desktop={width:1365,height:900},mobile={width:390,height:844};
-await shot('01-tree-desktop',desktop,'/index.html#tree','#tree');
-await shot('02-tree-mobile',mobile,'/index.html#tree','#tree');
-await shot('03-media-hub-desktop',desktop,'/index.html#media','#wowMediaHub');
-await shot('04-video-desktop',desktop,'/index.html#video','#wowVideoPanel');
-await shot('05-video-mobile',mobile,'/index.html#video','#wowVideoPanel');
+await shot('01-tree-desktop',desktop,'/wow-presentation.html#tree','#tree');
+await shot('02-tree-mobile',mobile,'/wow-presentation.html#tree','#tree');
+await shot('03-media-hub-desktop',desktop,'/wow-presentation.html#media','#wowMediaHub');
+await shot('04-video-desktop',desktop,'/wow-presentation.html#video','#wowVideoPanel');
+await shot('05-video-mobile',mobile,'/wow-presentation.html#video','#wowVideoPanel');
 await shot('06-zones-desktop',desktop,'/WOW_APP.html#wow-route=zones','body');
 await shot('07-zones-mobile',mobile,'/WOW_APP.html#wow-route=zones','body');
 await shot('08-gis-desktop',desktop,'/WOW_APP.html#wow-route=map','body',async p=>{
@@ -45,7 +45,7 @@ await shot('08-gis-desktop',desktop,'/WOW_APP.html#wow-route=map','body',async p
 {
  const page=await browser.newPage({viewport:mobile,hasTouch:true,isMobile:true,deviceScaleFactor:1});
  try{
-  await page.goto(base+'/index.html#tree',{waitUntil:'domcontentloaded'});
+  await page.goto(base+'/wow-presentation.html#tree',{waitUntil:'domcontentloaded'});
   await page.locator('#tree').waitFor({state:'visible'});
   const stage=page.locator('.tree-stage');
   const bounds=await stage.evaluate(e=>({width:e.clientWidth,content:e.scrollWidth}));
