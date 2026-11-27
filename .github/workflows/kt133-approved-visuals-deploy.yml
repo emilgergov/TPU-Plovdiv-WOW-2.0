@@ -1,5 +1,5 @@
 name: KT133 — Publish approved visual modifications (rollback protected)
-# KT134 NAVIGATION 2026-11-27: exact-stage deep-link dispatch to existing KT133 stage buttons; dry run passed, no process or backend changes.
+# KT134 VISUAL 2026-11-27: prepaint stage navigation, original step handler and non-overlapping notices; dry run passed, backend unchanged.
 on:
   push:
     branches: [main]
