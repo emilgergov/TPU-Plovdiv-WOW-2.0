@@ -32,8 +32,15 @@ jobs:
           const history=(result.deployments||result.items||[]).sort((a,b)=>Date.parse(b.created_on)-Date.parse(a.created_on));
           assert.equal(history[0]?.versions?.length,1);
           const active=history[0].versions[0].version_id;
-          const previous=history.find(d=>d.versions?.length===1&&d.versions[0].percentage===100&&d.versions[0].version_id!==active)?.versions[0].version_id;
-          assert.ok(previous,'Previous deployment unavailable');
+          let previous=history.find(d=>d.versions?.length===1&&d.versions[0].percentage===100&&d.versions[0].version_id!==active)?.versions[0].version_id;
+          if(!previous){
+            const {result:listed}=await (await api('/versions?per_page=20')).json();
+            const versions=Array.isArray(listed)?listed:listed.items||[];
+            const sorted=versions.sort((a,b)=>Date.parse(b.metadata?.created_on||b.created_on)-Date.parse(a.metadata?.created_on||a.created_on));
+            assert.equal(sorted[0]?.id,active,'Active version does not match latest upload');
+            previous=sorted[1]?.id;
+          }
+          assert.ok(previous&&previous!==active,'Previous version unavailable');
           const r=await (await api('/deployments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({strategy:'percentage',versions:[{version_id:previous,percentage:100}]})})).json();
           assert.equal(r.success,true);
           const {result:after}=await (await api('/deployments')).json();
