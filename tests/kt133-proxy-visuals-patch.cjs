@@ -63,12 +63,16 @@ export default {
    if(!remote.ok)return new Response('Visual asset unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
    return new Response(remote.body,{status:200,headers:{'Content-Type':mime,'Cache-Control':'public,max-age=300','X-Content-Type-Options':'nosniff'}});
   }
+  const isKt134DeepStage=/^[1-5]$/.test(u.searchParams.get('kt134-stage')||'');
   const response=await __kt133Core.fetch(request,env,ctx);
   if(request.method!=='GET'||!/^\\/module(?:\\/|$)/.test(u.pathname)||
      !(response.headers.get('content-type')||'').toLowerCase().includes('text/html'))return response;
   return new HTMLRewriter()
-   .on('head',{element(el){el.append('<link rel="stylesheet" href="/__kt133_approved_visuals.css?v=20261127stagefix" />',{html:true});}})
-   .on('body',{element(el){el.append('<script defer src="/__kt133_approved_visuals.js?v=20261127stagefix"></script>',{html:true});}})
+   .on('head',{element(el){
+     if(isKt134DeepStage)el.append('<style id="kt134-pending-stage-style">body{visibility:hidden!important}</style><script>setTimeout(function(){var e=document.getElementById("kt134-pending-stage-style");if(e)e.remove()},9000)</script>',{html:true});
+     el.append('<link rel="stylesheet" href="/__kt133_approved_visuals.css?v=20261127no-flash" />',{html:true});
+   }})
+   .on('body',{element(el){el.append('<script defer src="/__kt133_approved_visuals.js?v=20261127no-flash"></script>',{html:true});}})
    .transform(response);
  }
 };`;
