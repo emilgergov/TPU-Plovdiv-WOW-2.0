@@ -11,6 +11,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/kt133-approved-visuals-deploy.yml'
+      - 'tests/kt133-proxy-visuals-patch.cjs'
   workflow_dispatch:
 # KT133: restore approved short titles without ИП and readable larger typography; entry isolation unchanged.
 permissions:
