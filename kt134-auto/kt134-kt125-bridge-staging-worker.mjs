@@ -1,3 +1,4 @@
+import {cinematicAccountBackdrop} from './kt134-cinematic-account.mjs';
 /**
  * KT134 isolated test. Native service binding only, no production D1 binding.
  * Preserve prior synthetic preview and storage smoke endpoints untouched.
@@ -119,7 +120,7 @@ export default {
    return new HTMLRewriter()
     .on('a[href="/module/"],a[href="/module"]',{element(el){el.setAttribute('href','/kt134/dashboard');}})
     .on('a[href="/member"]',{element(el){el.setAttribute('href','/kt134/profile');}})
-    .on('head',{element(el){el.append('<style>body{background:radial-gradient(ellipse at 15% 70%,#235944,transparent 55%),#0a251b!important}main{width:min(92%,580px)!important;margin-inline:auto!important}h1{font-family:Georgia,serif!important;color:#f6d698!important}a[href="/kt134/dashboard"]{background:linear-gradient(#ffe9b2,#d7a33e)!important;color:#102b22!important;border-radius:12px}</style>',{html:true});}})
+    .on('head',{element(el){el.append('<style>body{background:radial-gradient(ellipse at 15% 70%,#235944,transparent 55%),#0a251b!important}main{width:min(92%,580px)!important;margin-inline:auto!important}h1{font-family:Georgia,serif!important;color:#f6d698!important}a[href="/kt134/dashboard"]{background:linear-gradient(#ffe9b2,#d7a33e)!important;color:#102b22!important;border-radius:12px}'+cinematicAccountBackdrop+'</style>',{html:true});}})
     .transform(response);
   }
   if(path==='/kt134/dashboard'){
