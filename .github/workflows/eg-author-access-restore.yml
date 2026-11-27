@@ -1,4 +1,4 @@
-name: Restore registered EG Author transport
+name: Restore paired KT133 preview versions
 on:
   push:
     branches: [main]
@@ -8,76 +8,47 @@ permissions:
 jobs:
   restore:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: work/kt125-access-register-from-kt124-r6
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Bundle the registry-enabled author
-        run: |
-          npx --yes esbuild@0.25.12 cloudflare/ai-author-v27/src/worker.js --bundle --platform=browser --format=esm --target=es2022 --outfile=/tmp/registry-author.mjs
-          node --check /tmp/registry-author.mjs
-      - name: Restore the established service binding and verify live guards
+      - name: Verify the paired version references and restore the author override
         env:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           node --input-type=module <<'JS'
           import assert from 'node:assert/strict';
-          import {readFileSync} from 'node:fs';
-          const native='tpu-plovdiv-kt125-local-auth', author='tpu-plovdiv-ai-author-v27';
-          const root='https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1/workers/scripts/'+author;
-          async function api(path='',init={}){
-            const r=await fetch(root+path,{...init,headers:{Authorization:'Bearer '+process.env.CF_TOKEN,...init.headers},signal:AbortSignal.timeout(30000)});
-            const data=await r.json();
-            assert.ok(r.ok&&data.success,'Cloudflare HTTP '+r.status+' on '+path);
-            return data.result;
+          const native='tpu-plovdiv-kt125-local-auth',author='tpu-plovdiv-ai-author-v27';
+          const base='https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1/workers/scripts/';
+          async function api(path,init={}){
+            const r=await fetch(base+path,{...init,headers:{Authorization:'Bearer '+process.env.CF_TOKEN,...init.headers},signal:AbortSignal.timeout(20000)});
+            const d=await r.json();assert.ok(r.ok&&d.success,'Cloudflare HTTP '+r.status+' on '+path);return d.result;
           }
-          const settings=await api('/settings');
-          const history=await api('/deployments');
-          const previous=(history.deployments||history.items)[0].versions.map(({version_id,percentage})=>({version_id,percentage}));
-          const registry={name:'KT126_REGISTRY',type:'service',service:native,entrypoint:'LocalAuthService'};
-          const existing=settings.bindings.find(b=>b.name===registry.name);
-          if(existing)assert.ok(existing.type===registry.type&&existing.service===native&&existing.entrypoint===registry.entrypoint);
-          const metadata={main_module:'worker.mjs',compatibility_date:settings.compatibility_date,compatibility_flags:settings.compatibility_flags||[],
-            keep_bindings:['secret_text'],bindings:[...settings.bindings.filter(b=>b.type!=='secret_text'&&b.name!==registry.name),registry]};
-          for(const key of ['observability','logpush','placement','limits','tail_consumers'])if(settings[key]!==undefined)metadata[key]=settings[key];
-          const source=readFileSync('/tmp/registry-author.mjs','utf8');
-          assert.ok(source.includes('KT126_REGISTRY')&&source.includes('getCaseContext'));
-          const form=new FormData();
-          form.set('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
-          form.set('worker.mjs',new Blob([source],{type:'application/javascript+module'}),'worker.mjs');
-          try{
-            const listed=async()=>{const v=await api('/versions?per_page=20');return (Array.isArray(v)?v:v.items||[]).map(x=>x.id||x.version_id);};
-            const before=new Set(await listed());
-            await api('',{method:'PUT',body:form});
-            const version=(await listed()).find(id=>!before.has(id));
-            assert.ok(version,'New author version not found');
-            await api('/deployments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({strategy:'percentage',versions:[{version_id:version,percentage:100}]})});
-            const updated=await api('/settings');
-            assert.ok(updated.bindings.some(b=>b.name===registry.name&&b.service===native&&b.entrypoint===registry.entrypoint));
-            const url='https://'+author+'.emilgergov.workers.dev';
-            const health=await fetch(url+'/health').then(r=>r.json());
-            assert.equal(health.stage5Contract,'KT117_DOCUMENT_DRAFT_V1');
-            assert.equal(health.aiGenerationEnabled,true);
-            for(const path of ['/stage4-proposal','/stage5-document']){
-              const origin='https://'+native+'.emilgergov.workers.dev';
-              let preflight;
-              for(let attempt=0;attempt<8;attempt++){
-                preflight=await fetch(url+path,{method:'OPTIONS',headers:{Origin:origin,'Access-Control-Request-Method':'POST'}});
-                if(preflight.status===204)break;
-                await new Promise(resolve=>setTimeout(resolve,3000));
-              }
-              assert.equal(preflight.status,204);
-              assert.equal(preflight.headers.get('Access-Control-Allow-Origin'),origin);
-              const rejected=await fetch(url+path,{method:'POST',headers:{Origin:origin,'Content-Type':'application/json','X-KT126-Case':'11111111-1111-4111-8111-111111111111','X-KT126-Session':'invalid'},body:'{}'});
-              assert.equal(rejected.status,403);
-            }
-            console.log('Live author service ready; native origin and registry guard confirmed for stages 4 and 5.');
-          }catch(e){
-            await api('/deployments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({strategy:'percentage',versions:previous})});
-            throw e;
+          const [router,authorHistory,nativeHistory]=await Promise.all([
+            api('kt133-'+native+'/settings'),api(author+'/deployments'),api(native+'/deployments')
+          ]);
+          const read=(bindings,name)=>bindings.find(b=>b.name===name&&b.type==='plain_text')?.text;
+          const uuid=/^[0-9a-f-]{36}$/i;
+          const nativeId=read(router.bindings,'KT131_NATIVE_VERSION');
+          assert.match(nativeId||'',uuid);
+          assert.ok(router.bindings.some(b=>b.name==='KT131_NATIVE'&&b.service===native));
+          const paired=await api(native+'/versions/'+nativeId);
+          const authorId=read(paired.resources.bindings,'KT131_AUTHOR_VERSION');
+          assert.match(authorId||'',uuid);
+          assert.ok(paired.resources.bindings.some(b=>b.name==='KT133_EVIDENCE_KEY'),'Native preview has no evidence signature binding');
+          const av=await api(author+'/versions/'+authorId);
+          assert.ok(av.resources.bindings.some(b=>b.name==='KT133_EVIDENCE_KEY'),'Paired author has no evidence signature binding');
+          const authorAlloc=authorHistory.deployments[0].versions;
+          const nativeAlloc=nativeHistory.deployments[0].versions;
+          assert.ok(nativeAlloc.some(v=>v.version_id===nativeId),'Router native override is not active');
+          assert.equal(authorAlloc.filter(v=>v.percentage===100).length,1);
+          if(!authorAlloc.some(v=>v.version_id===authorId)){
+            const versions=[...authorAlloc.map(({version_id,percentage})=>({version_id,percentage})),{version_id:authorId,percentage:0}];
+            await api(author+'/deployments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({strategy:'percentage',versions})});
           }
+          const after=(await api(author+'/deployments')).deployments[0].versions;
+          assert.ok(after.some(v=>v.version_id===authorId),'Paired author override missing');
+          assert.equal(after.find(v=>v.percentage===100).version_id,authorAlloc.find(v=>v.percentage===100).version_id);
+          console.log('KT133 paired signed-evidence author override is available; primary author traffic unchanged.');
           JS
