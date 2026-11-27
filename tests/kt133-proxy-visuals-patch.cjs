@@ -54,8 +54,8 @@ export default {
  async fetch(request,env,ctx) {
   const u=new URL(request.url);
   const assets={
-   '/__kt133_approved_visuals.css':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/76d76688b9f99e799d5c1545dbf22daa5c31c57c/kt80/KT133_APPROVED_VISUALS.css','text/css; charset=utf-8'],
-   '/__kt133_approved_visuals.js':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/76d76688b9f99e799d5c1545dbf22daa5c31c57c/kt80/KT133_APPROVED_VISUALS.js','text/javascript; charset=utf-8']
+   '/__kt133_approved_visuals.css':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/20b6727a9e64da4fad0fbd698958e64da1ae32de/kt80/KT133_APPROVED_VISUALS.css','text/css; charset=utf-8'],
+   '/__kt133_approved_visuals.js':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/20b6727a9e64da4fad0fbd698958e64da1ae32de/kt80/KT133_APPROVED_VISUALS.js','text/javascript; charset=utf-8']
   };
   if(Object.prototype.hasOwnProperty.call(assets,u.pathname) && request.method==='GET'){
    const [target,mime]=assets[u.pathname];
@@ -63,12 +63,17 @@ export default {
    if(!remote.ok)return new Response('Visual asset unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
    return new Response(remote.body,{status:200,headers:{'Content-Type':mime,'Cache-Control':'public,max-age=300','X-Content-Type-Options':'nosniff'}});
   }
+  const isKt134DeepStage=/^[1-5]$/.test(u.searchParams.get('kt134-stage')||'');
   const response=await __kt133Core.fetch(request,env,ctx);
   if(request.method!=='GET'||!/^\\/module(?:\\/|$)/.test(u.pathname)||
      !(response.headers.get('content-type')||'').toLowerCase().includes('text/html'))return response;
   return new HTMLRewriter()
-   .on('head',{element(el){el.append('<link rel="stylesheet" href="/__kt133_approved_visuals.css?v=20261123" />',{html:true});}})
-   .on('body',{element(el){el.append('<script defer src="/__kt133_approved_visuals.js?v=20261123"></script>',{html:true});}})
+   .on('head',{element(el){
+     if(isKt134DeepStage)el.append('<style id="kt134-stage-cinematic">body[data-kt80-view="stage"]{background:radial-gradient(ellipse at 15% 55%,#23594488,transparent 55%),linear-gradient(145deg,#153a2e,#071e17 70%)!important}body[data-kt80-view="stage"] #kt80ScreenTitle{color:#f6d698;font-family:Georgia,serif!important;font-size:clamp(22px,2.4vw,34px)!important}body[data-kt80-view="stage"] .kt80-stage-panel{border-color:#89764c;border-radius:17px;background-color:#153d30}body[data-kt80-view="stage"] .kt80-stage-panel h2{color:#f6d698}</style>',{html:true});
+     if(isKt134DeepStage)el.append('<style id="kt134-pending-stage-style">body{visibility:hidden!important}</style><script>setTimeout(function(){var e=document.getElementById("kt134-pending-stage-style");if(e)e.remove()},9000)</script>',{html:true});
+     el.append('<link rel="stylesheet" href="/__kt133_approved_visuals.css?v=20261127no-flash" />',{html:true});
+   }})
+   .on('body',{element(el){el.append('<script defer src="/__kt133_approved_visuals.js?v=20261127no-flash"></script>',{html:true});}})
    .transform(response);
  }
 };`;
