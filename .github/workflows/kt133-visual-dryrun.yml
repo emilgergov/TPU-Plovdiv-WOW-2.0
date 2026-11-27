@@ -22,7 +22,7 @@ jobs:
         run: |
           set -euo pipefail
           for asset in KT133_APPROVED_VISUALS.css KT133_APPROVED_VISUALS.js; do
-            if curl -fsS --retry 2 --retry-delay 2 --max-time 15 "https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/1cfc6aa561ad4fbec57a7d2219d3b2aa455a9a26/kt80/$asset" -o "/tmp/$asset"; then
+            if curl -fsS --retry 2 --retry-delay 2 --max-time 15 "https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/944af4b76399498172d7fd90debfcdf35e400ffa/kt80/$asset" -o "/tmp/$asset"; then
               test "$(wc -c <"/tmp/$asset")" -gt 1000
               echo "Published asset accessible: $asset"
             else
