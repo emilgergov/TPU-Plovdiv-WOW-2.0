@@ -159,7 +159,15 @@ body{background:radial-gradient(ellipse at 15% 68%,#23594499,transparent 55%),ra
 #all-panels .catalog-group .panel p{margin-top:9px;max-width:32ch}
 #all-panels .catalog-group .panel.special{background-image:linear-gradient(90deg,#082b21f5,#092c224a),var(--catalog-art)}
 #all-panels .panel.special .catalog-icon{box-shadow:0 0 10px #ffd47b78}
-</style><script>
+@media(min-width:981px){
+.main:has(#auto[open])>.intro{padding-block:8px;margin-bottom:4px}
+.main:has(#auto[open])>#kt134-classic-title{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
+.main:has(#auto[open])>.grid{margin-block:6px 10px}
+.main:has(#auto[open])>.grid>.stage{min-height:68px;padding:8px 30px 8px 10px}
+.main:has(#auto[open])>.grid>.stage p{font-size:14px;margin:3px 0}
+.main:has(#auto[open])>.grid>.stage .arrow{right:8px;bottom:4px;font-size:19px}
+.main:has(#auto[open]) #kt134-live{height:640px}
+}</style><script>
 addEventListener('message',e=>{
  if(e.origin!==location.origin||e.source!==document.getElementById('kt134-live')?.contentWindow)return;
  const iframe=document.getElementById('kt134-live');

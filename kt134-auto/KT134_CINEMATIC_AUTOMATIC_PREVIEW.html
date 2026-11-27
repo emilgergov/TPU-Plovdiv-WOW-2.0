@@ -436,6 +436,17 @@ html .kt134-unified .auto + .kt134-progress-panel {
   background:#09291f;box-shadow:none;
 }
 .kt134-unified .kt134-progress-track {height:clamp(12px,1.6vw,20px);}
+html.kt134-embedded .bar:has(+.output.visible) .kt134-unified>:not(.kt134-screen-tools){display:none}
+.output .project-heading{position:sticky;top:-16px;z-index:2;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:-16px -16px 12px;padding:8px 12px;background:#103a2b;border-bottom:1px solid #b69b67}
+.output .project-heading h2{position:static;margin:0;padding:0;background:none;border:0}
+.output .project-heading #download{padding:7px 10px;font-size:12px}
+@media(min-width:981px){
+html.kt134-embedded main{padding-bottom:5px}
+html.kt134-embedded .kt134-unified{padding-block:8px;margin-top:6px}
+html.kt134-embedded .kt134-unified .route{min-height:77px}
+html.kt134-embedded .kt134-unified .route .gate{min-height:60px;padding-top:18px}
+html.kt134-embedded .output .detail{max-height:min(460px,65vh)}
+}
 </style><script>
 if(new URLSearchParams(location.search).get('embedded')==='1')
  document.documentElement.classList.add('kt134-embedded');
@@ -459,10 +470,10 @@ if(new URLSearchParams(location.search).get('embedded')==='1')
 <div class="detail"><h2>Мотивирано предложение · Етап 4</h2>
 <p><b>Панел:</b> <span id="panel">—</span></p>
 <pre id="proposal"></pre><h2>Независим рецензент</h2><pre id="review"></pre>
-</div><div class="detail"><h2>Проект на документ · Етап 5</h2>
+</div><div class="detail"><div class="project-heading"><h2>Проект на документ · Етап 5</h2><button class="primary" id="download" disabled>Изтегли реалния Word проект</button></div>
 <div class="paper"><b id="doc-title"></b><pre id="draft"></pre></div>
 <p class="confirmnote">Неодобрен проект. Окончателното потвърждение се извършва единствено в защитения експертен модул.</p>
-</div></div><div class="actions"><button class="primary" id="download" disabled>Изтегли реалния Word проект</button></div>
+</div></div>
 </section></main>
 <script type="module">
 const labels=['Внасяне и анализ на преписката','Предмет и обхват на ИП','Имоти и пространствен анализ на ИП','Нормативна и процедурна преценка на ИП','Определяне на процедурата по ИП'];
