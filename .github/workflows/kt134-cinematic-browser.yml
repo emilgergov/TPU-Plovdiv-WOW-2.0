@@ -24,7 +24,7 @@ jobs:
           sparse-checkout-cone-mode: false
       - uses: actions/checkout@v4
         with:
-          ref: ce73ad53e9291b28ef0aa225c68d924f28b7e28a
+          ref: 20b6727a9e64da4fad0fbd698958e64da1ae32de
           path: classic-reference
           sparse-checkout: |
             vt03
