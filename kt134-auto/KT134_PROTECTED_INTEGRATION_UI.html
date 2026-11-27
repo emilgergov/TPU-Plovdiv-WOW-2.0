@@ -390,6 +390,52 @@ textarea{background:#fffcf4;color:#21372b}
 .kt134-unified .gate{border-width:1px;box-shadow:none}
 .kt134-unified .node{box-shadow:none;border-width:2px}
 .kt134-unified .node.active{box-shadow:0 0 0 3px #d9b86d66}
+
+/* Cinematic route and progress share one panel in both embedded and full views. */
+html .kt134-unified .auto {
+  margin: 12px 0 0;
+  padding: 12px clamp(8px, 2vw, 22px) 0;
+  min-height: 0;
+  border: 1px solid #ac8f52;
+  border-bottom: 0;
+  border-radius: 16px 16px 0 0;
+  background: radial-gradient(ellipse at 50% 100%, #214a33, transparent 67%), #09291f;
+  box-shadow: none;
+}
+.kt134-unified .auto-label strong {font: 600 clamp(16px,2vw,23px) Georgia,serif;color:#f7d999;}
+html .kt134-unified .route {
+  grid-template-columns: clamp(50px,9vw,94px) repeat(5,minmax(0,1fr)) clamp(50px,9vw,94px);
+  min-height: clamp(70px,10vw,106px);
+  align-items: center;
+}
+html .kt134-unified .route::before {
+  height: 3px;
+  background: linear-gradient(90deg,#b68e48,#f6d58a 20%,#86b27b 50%,#f6d58a 80%,#b68e48);
+  box-shadow:0 0 8px #e9bf7360;
+}
+html .kt134-unified .route .gate {
+  min-height: clamp(52px,8vw,80px);
+  margin-inline: 2px;
+  padding-top: clamp(15px,3vw,28px);
+  border: 2px solid #e9c075;
+  border-radius: 30px 30px 9px 9px;
+  background: radial-gradient(ellipse at 50% 90%,#806338,#173a2a 66%,#08271e);
+  box-shadow: inset 0 0 12px #d7ae5266,0 0 12px #e4b95a55;
+  font-size: clamp(10px,1.3vw,15px);
+}
+html .kt134-unified .route .node {
+  width:clamp(25px,5vw,52px);height:clamp(25px,5vw,52px);
+  font-size:clamp(12px,2vw,21px);
+}
+html .kt134-unified .route .node.done {background:#1b7947;border-color:#b9e2a4;}
+html .kt134-unified .route .node.done::after {top:auto;left:50%;bottom:-17px;transform:translateX(-50%);font-size:13px;}
+html .kt134-unified .route .node.active {border-color:#ffe6a2;box-shadow:0 0 12px 3px #ffd87988;}
+html .kt134-unified .auto + .kt134-progress-panel {
+  min-height:0;margin:0;padding:10px clamp(10px,2vw,22px) 13px;
+  border:1px solid #ac8f52;border-top:0;border-radius:0 0 16px 16px;
+  background:#09291f;box-shadow:none;
+}
+.kt134-unified .kt134-progress-track {height:clamp(12px,1.6vw,20px);}
 </style><script>
 if(new URLSearchParams(location.search).get('embedded')==='1')
  document.documentElement.classList.add('kt134-embedded');
