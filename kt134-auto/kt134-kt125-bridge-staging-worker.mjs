@@ -1,3 +1,5 @@
+import {cinematicAccountBackdrop, panorama} from './kt134-cinematic-account.mjs';
+import cinematicPortalUI from './KT134_CINEMATIC_PORTAL_PREVIEW.html';
 /**
  * KT134 isolated test. Native service binding only, no production D1 binding.
  * Preserve prior synthetic preview and storage smoke endpoints untouched.
@@ -34,6 +36,11 @@ export default {
  async fetch(request,env,ctx){
   const url=new URL(request.url);
   const path=url.pathname;
+  const cinematic=url.searchParams.get('preview')==='cinematic';
+  const previewQuery=cinematic?'?preview=cinematic':'';
+  if(path==='/kt134/portal-preview'&&request.method==='GET'){
+   return new Response(cinematicPortalUI.replaceAll('scenes/wow-plovdiv-panorama.webp',panorama),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}});
+  }
   const nativeFetch=env.KT125_NATIVE?.fetch?.bind(env.KT125_NATIVE);
   if(path==='/auth/login'||path==='/auth/logout'){
    if(!nativeFetch)return json({error:'KT125_NATIVE_NOT_CONFIGURED'},503);
@@ -104,24 +111,24 @@ export default {
   }
   if(path==='/kt134/profile'&&request.method==='GET'){
    const cookie=request.headers.get('cookie')||'';
-   if(!cookie||cookie.length>8000)return Response.redirect(new URL('/auth/login',request.url),303);
+   if(!cookie||cookie.length>8000)return Response.redirect(new URL('/auth/login'+previewQuery,request.url),303);
    if(!nativeFetch)return json({error:'KT125_NATIVE_NOT_CONFIGURED'},503);
    let profile;
    try{
     profile=await nativeFetch(new Request(nativeOrigin+'/member',{
      headers:{Accept:'text/html',Cookie:cookie},redirect:'manual'
     }));
-   }catch{return Response.redirect(new URL('/kt134/dashboard',request.url),303);}
+   }catch{return Response.redirect(new URL('/kt134/dashboard'+previewQuery,request.url),303);}
    if(!profile.ok||!(profile.headers.get('content-type')||'').includes('text/html'))
-    return Response.redirect(new URL('/kt134/dashboard',request.url),303);
+    return Response.redirect(new URL('/kt134/dashboard'+previewQuery,request.url),303);
    const headers=new Headers(profile.headers);
    headers.set('Cache-Control','private, no-store');
    headers.set('X-Frame-Options','DENY');
    const response=new Response(profile.body,{status:profile.status,headers});
    return new HTMLRewriter()
-    .on('a[href="/module/"],a[href="/module"]',{element(el){el.setAttribute('href','/kt134/dashboard');}})
-    .on('a[href="/member"]',{element(el){el.setAttribute('href','/kt134/profile');}})
-    .on('head',{element(el){el.append('<style>body{background:radial-gradient(ellipse at 15% 70%,#235944,transparent 55%),#0a251b!important}main{width:min(92%,580px)!important;margin-inline:auto!important}h1{font-family:Georgia,serif!important;color:#f6d698!important}a[href="/kt134/dashboard"]{background:linear-gradient(#ffe9b2,#d7a33e)!important;color:#102b22!important;border-radius:12px}</style>',{html:true});}})
+    .on('a[href="/module/"],a[href="/module"]',{element(el){el.setAttribute('href','/kt134/dashboard'+previewQuery);}})
+    .on('a[href="/member"]',{element(el){el.setAttribute('href','/kt134/profile'+previewQuery);}})
+    .on('head',{element(el){el.append('<style>body{background:radial-gradient(ellipse at 15% 70%,#235944,transparent 55%),#0a251b!important}main{width:min(92%,580px)!important;margin-inline:auto!important}h1{font-family:Georgia,serif!important;color:#f6d698!important}a[href^="/kt134/dashboard"]{background:linear-gradient(#ffe9b2,#d7a33e)!important;color:#102b22!important;border-radius:12px}'+(cinematic?cinematicAccountBackdrop:'')+'</style>',{html:true});}})
     .transform(response);
   }
   if(path==='/kt134/dashboard'){

@@ -523,7 +523,7 @@ async function verifySelectedCase(caseId){
   el('registry').textContent=c.externalNumber||'—';
   el('start').disabled=false;
   el('subtitle').textContent='Преписката е потвърдена. Готовност за автоматичен анализ.';
-  history.replaceState(null,'','/kt134/final-test?caseId='+encodeURIComponent(caseId));
+  history.replaceState(null,'','/kt134/final-test?preview=cinematic&caseId='+encodeURIComponent(caseId));
  }catch(e){problem(e.message||'Няма потвърден достъп до преписката.');}
 }
 async function loadAccessibleCases(){
@@ -749,7 +749,7 @@ el('kt134-clear-screen').addEventListener('click',()=>{
 });
 el('kt134-to-dashboard').addEventListener('click',()=>{
  if(runBusy)return;
- if(window.top===window){location.assign('/kt134/dashboard#all-panels');return;}
+ if(window.top===window){location.assign('/kt134/dashboard?preview=cinematic#all-panels');return;}
  window.top.location.hash='all-panels';
 });
 el('start').addEventListener('click',async()=>{
