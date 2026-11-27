@@ -411,3 +411,26 @@
 #overlay .dialog button:focus-visible{outline:3px solid #fff2b8;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){
  #kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"]{transition:none!important}}
+
+
+/* KT134 V27.37.1 — remove transient overlap, leave all notices and actions active. */
+body[data-kt80-view="stage"] #kt80DashboardSubnav{
+  flex-wrap:wrap!important;align-items:center;gap:10px 16px!important;
+  padding:10px 22px 12px!important;border-bottom:1px solid #ac945e55;
+}
+body[data-kt80-view="stage"] #kt80ScreenTitle{
+  flex:1 1 100%!important;min-width:0;
+  display:block!important;line-height:1.45!important;
+  font-size:clamp(17px,1.6vw,22px)!important;
+  overflow-wrap:break-word;
+}
+/* Notification remains available and dismissible, but below the work area
+   rather than over the page heading and its navigation controls. */
+#kt84FeedbackDock{
+  top:auto!important;bottom:64px!important;right:18px!important;
+  max-height:min(42vh,370px);overflow-y:auto;
+}
+@media(max-width:600px){
+ body[data-kt80-view="stage"] #kt80DashboardSubnav{padding:10px!important}
+ #kt84FeedbackDock{right:8px!important;bottom:55px!important;max-height:36vh}
+}
