@@ -1050,8 +1050,13 @@ async function handleStage5Document(request,env){
    editorialFlags.push("Редакционна бележка по Classic A/Б: правното основание и входящият номер вече са въведени служебно; следващият абзац трябва да започва с фактическата или правната констатация.");
  }
 
- const categoricalOutside=/(?:не\s+попада|извън\s+обхвата)\s+(?:в|на)\s+(?:приложени[ея]|приложения)\s*№\s*[12]|не\s+попада\s+в\s+нито\s+една\s+от\s+категориите|не\s+се\s+отнася\s+към\s+(?:никоя|категориите)/iu.test(draft);
- if(!independentExpert&&uncertainCategories&&categoricalOutside)return reply({error:"UNSUPPORTED_CATEGORICAL_CONCLUSION",message:"Проектът твърди неприложимост, но конкретна нормативна предпоставка в Етап 4 е неопределена. Проверете посочените редове и доказателствата; изборът на панел не се променя автоматично.",findings:Object.entries(legalMatrix).filter(([,row])=>row?.status==="НЕОПРЕДЕЛЕНА").map(([test,row])=>({test,actual:row.status,reason:row.reason})),expertReviewRequired:true,projectOnly:true},422);
+ const categoricalOutside=/(?:не\s+попада|извън\s+обхвата)\s+(?:в|на)\s+(?:приложени[ея]|приложения)\s*№\s*[12]|не\s+попада\s+в\s+нито\s+една\s+от\s+категориите|не\s+се\s+отнася\s+към\s+(?:никоя|категориите)/iu;
+ if(!independentExpert&&uncertainCategories&&categoricalOutside.test(draft)){
+  if(!reviewedExpertChoice)return reply({error:"UNSUPPORTED_CATEGORICAL_CONCLUSION",message:"Проектът твърди неприложимост, но конкретна нормативна предпоставка в Етап 4 е неопределена. Проверете посочените редове и доказателствата; изборът на панел не се променя автоматично.",findings:Object.entries(legalMatrix).filter(([,row])=>row?.status==="НЕОПРЕДЕЛЕНА").map(([test,row])=>({test,actual:row.status,reason:row.reason})),expertReviewRequired:true,projectOnly:true},422);
+  const neutral="По представените данни приложимостта на относимите нормативни критерии остава неустановена.";
+  draft=draft.split(/((?<=[.!?])\s+(?=[А-ЯA-Z„])|\n+)/u).map(part=>categoricalOutside.test(part)?neutral:part).join("");
+  editorialFlags.unshift("Категоричен извод за неприложимост е заменен с отбелязване на неустановената предпоставка. Сверете мотивите с доказателствата от Етап 4 преди потвърждение.");
+ }
  if(/(?:няма\s+липсващи\s+данни|не\s+са\s+установени\s+(?:липсващи|съществени\s+липси))[\s\S]{0,900}(?:липсват\s+(?:технически\s+)?данни|непълн(?:а|и)\s+(?:информация|данни))/iu.test(draft)||
  /(?:липсват\s+(?:технически\s+)?данни|непълн(?:а|и)\s+(?:информация|данни))[\s\S]{0,900}(?:няма\s+липсващи\s+данни|не\s+са\s+установени\s+(?:липсващи|съществени\s+липси))/iu.test(draft))
    editorialFlags.push("Вътрешно противоречие относно пълнотата на данните — необходима е експертна редакция.");
