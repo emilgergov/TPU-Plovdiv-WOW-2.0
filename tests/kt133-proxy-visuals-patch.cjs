@@ -54,6 +54,7 @@ export default {
  async fetch(request,env,ctx) {
   const u=new URL(request.url);
   const assets={
+   '/__kt133_institutional_word.mjs':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/c1a2f36b8fc16089c7e1ffc229fc6d88c96f35f2/vt03/kt80/integration/kt119-institutional-word.mjs','text/javascript; charset=utf-8'],
    '/__kt133_approved_visuals.css':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/20b6727a9e64da4fad0fbd698958e64da1ae32de/kt80/KT133_APPROVED_VISUALS.css','text/css; charset=utf-8'],
    '/__kt133_approved_visuals.js':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/20b6727a9e64da4fad0fbd698958e64da1ae32de/kt80/KT133_APPROVED_VISUALS.js','text/javascript; charset=utf-8']
   };
@@ -65,6 +66,28 @@ export default {
   }
   const isKt134DeepStage=/^[1-5]$/.test(u.searchParams.get('kt134-stage')||'');
   const response=await __kt133Core.fetch(request,env,ctx);
+  if(request.method==='GET'&&response.status===200&&
+      u.pathname==='/module/vt03/kt80/integration/kt119-docx-generator.mjs'&&
+      /javascript|ecmascript/.test(response.headers.get('content-type')||'')){
+   const source=await response.clone().text();
+   const signature=' function buildWord(approved,stage4){';
+   const start=source.indexOf(signature);
+   const end=source.indexOf('     return contents;',start);
+   if(start!==-1&&end!==-1){
+    const titleStart=source.indexOf('     const chosen=',start);
+    const titleEnd=source.indexOf('     const contents=',titleStart);
+    if(titleStart>start&&titleEnd>titleStart&&titleEnd<end){
+     const render='import {renderInstitutionalWord} from "/__kt133_institutional_word.mjs";'+String.fromCharCode(10)+
+      source.slice(0,start)+signature+String.fromCharCode(10)+source.slice(titleStart,titleEnd)+
+      '     return renderInstitutionalWord({templateBytes,codec:window.fflate,text:approved.text,title:docTitle,parseXml:xml=>new DOMParser().parseFromString(xml,"application/xml"),serializeXml:dom=>new XMLSerializer().serializeToString(dom)});'+
+      source.slice(end+'     return contents;'.length);
+     const headers=new Headers(response.headers);
+     for(const name of ['Content-Length','Content-Encoding','ETag','Last-Modified'])headers.delete(name);
+     headers.set('Cache-Control','private, no-store');
+     return new Response(render,{status:200,headers});
+    }
+   }
+  }
   // Apply feedback to the guarded source returned by the existing module gateway.
   const feedbackModule=u.pathname.startsWith('/module/')&&u.pathname.match(/(kt116-expert-approval-handoff|kt96-eg-ai-stage4-author)\\.mjs$/);
   if(request.method==='GET'&&feedbackModule&&response.status===200&&/javascript|ecmascript/.test(response.headers.get('content-type')||'')){
