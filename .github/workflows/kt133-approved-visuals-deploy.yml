@@ -5,6 +5,7 @@ name: KT133 — Publish approved visual modifications (rollback protected)
 # Style the guarded Stage 5 information view on direct KT134 entry.
 # Apply approved cinematic styling to both existing Stage 5 views.
 # Match Stage 5 backdrop styles to the actual class emitted by the live module.
+# Preserve the selected KT134 dashboard when leaving a directly opened stage.
 on:
   push:
     branches: [main]

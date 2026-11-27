@@ -76,7 +76,7 @@ export default {
      el.append('<link rel="stylesheet" href="/__kt133_approved_visuals.css?v=20261127no-flash" />',{html:true});
    }})
    .on('body',{element(el){
-     if(isKt134DeepStage)el.append('<script>document.addEventListener("click",function(event){if(!event.target.closest("#kt80DashboardBack"))return;event.preventDefault();event.stopImmediatePropagation();location.assign("https://tpu-plovdiv-kt134-test.emilgergov.workers.dev/kt134/dashboard");},true);</script>',{html:true});
+     if(isKt134DeepStage)el.append('<script>(function(){const params=new URLSearchParams(location.search);const preview=params.get("preview")==="cinematic";const stage5=preview&&params.get("kt134-stage")==="5";const destination="https://tpu-plovdiv-kt134-test.emilgergov.workers.dev/kt134/dashboard"+(preview?"?preview=cinematic":"");function returnToDashboard(event){event.preventDefault();event.stopImmediatePropagation();location.assign(destination);}document.addEventListener("click",function(event){const target=event.target;if(target.closest?.("#kt80DashboardBack")||(stage5&&(target.closest?.("#kt83PreviewClose")||target.matches?.(".kt83-preview-overlay:not([hidden])"))))returnToDashboard(event);},true);if(stage5)document.addEventListener("keydown",function(event){if(event.key==="Escape"&&!document.querySelector(".kt83-help-overlay:not([hidden])")&&document.querySelector(".kt83-preview-overlay:not([hidden])"))returnToDashboard(event);},true);})();</script>',{html:true});
      el.append('<script defer src="/__kt133_approved_visuals.js?v=20261127no-flash"></script>',{html:true});
    }})
    .transform(response);
