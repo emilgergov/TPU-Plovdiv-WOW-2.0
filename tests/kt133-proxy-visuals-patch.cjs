@@ -69,6 +69,7 @@ export default {
      !(response.headers.get('content-type')||'').toLowerCase().includes('text/html'))return response;
   return new HTMLRewriter()
    .on('head',{element(el){
+     if(u.searchParams.get('kt134-stage')==='5')el.append('<style id="kt134-stage5-preview">#kt83-preview-overlay:not([hidden]){background:radial-gradient(ellipse at 18% 20%,#284d37,#071d17 78%)!important}#kt83-preview-overlay .kt83-preview-dialog{border:1px solid #d9b675;box-shadow:0 20px 60px #0009;background:#12382a;color:#fff0d2}#kt83PreviewTitle{font-family:Georgia,serif;color:#f5d89c}</style>',{html:true});
      if(isKt134DeepStage)el.append('<style id="kt134-stage-cinematic">body[data-kt80-view="stage"]{background:radial-gradient(ellipse at 15% 55%,#23594488,transparent 55%),linear-gradient(145deg,#153a2e,#071e17 70%)!important}body[data-kt80-view="stage"] #kt80ScreenTitle{color:#f6d698;font-family:Georgia,serif!important;font-size:clamp(22px,2.4vw,34px)!important}body[data-kt80-view="stage"] .kt80-stage-panel{border-color:#89764c;border-radius:17px;background-color:#153d30}body[data-kt80-view="stage"] .kt80-stage-panel h2{color:#f6d698}</style>',{html:true});
      if(isKt134DeepStage)el.append('<style id="kt134-pending-stage-style">body{visibility:hidden!important}</style><script>setTimeout(function(){var e=document.getElementById("kt134-pending-stage-style");if(e)e.remove()},9000)</script>',{html:true});
      el.append('<link rel="stylesheet" href="/__kt133_approved_visuals.css?v=20261127no-flash" />',{html:true});
