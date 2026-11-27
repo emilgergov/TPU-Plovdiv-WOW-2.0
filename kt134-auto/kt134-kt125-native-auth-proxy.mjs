@@ -63,7 +63,7 @@ function redirectTarget(value,visibleOrigin) {
   p=>path===p||path.startsWith(p+'/')))
   return visibleOrigin+path+next.search;
  // On successful KT125 authentication return to the unified WOW dashboard.
- return visibleOrigin+'/kt134/dashboard';
+ return visibleOrigin+'/kt134/profile';
 }
 export function createKt134NativeAuthProxy({nativeFetch,upstreamOrigin=nativeOrigin}={}){
  if(typeof nativeFetch!=='function'||upstreamOrigin!==nativeOrigin)
@@ -153,7 +153,8 @@ export function createKt134NativeAuthProxy({nativeFetch,upstreamOrigin=nativeOri
       '; Path=/; Max-Age=600; Secure; HttpOnly; SameSite=Strict');
     outgoing.set('Referrer-Policy','same-origin');
     outgoing.set('Cache-Control','no-store, private');
-    return new Response(safeHtml,{status:response.status,headers:outgoing});
+    const themedHtml=safeHtml.replace(/<\/head>/i,"<style id=\"wow-approved-login\">\nbody{min-height:100vh;background:radial-gradient(ellipse at 15% 68%,#23594499,transparent 55%),radial-gradient(ellipse at 88% 12%,#8e783b38,transparent 48%),linear-gradient(145deg,#153a2e,#071e17 62%,#102920)!important;color:#fff2d7!important}\nbody::before{content:\"\";position:fixed;inset:12vh 0 0;pointer-events:none;opacity:.2;background:repeating-radial-gradient(ellipse at -12% 34%,transparent 0 24px,#dabc71 25px 26px,transparent 27px 49px) left top/18vw 33vh no-repeat,repeating-radial-gradient(ellipse at 112% 66%,transparent 0 24px,#dabc71 25px 26px,transparent 27px 49px) right bottom/18vw 33vh no-repeat}\nmain{width:min(92%,530px)!important;margin:clamp(24px,8vh,84px) auto!important;position:relative}\nmain h1{font:clamp(29px,5vw,44px)/1.1 Georgia,serif!important;color:#f6d698!important}\nform[action=\"/auth/login\"]{max-width:none}\nform[action=\"/auth/login\"] fieldset{display:block!important;min-width:0}\nform[action=\"/auth/login\"] fieldset>div{display:block!important}\nform[action=\"/auth/login\"] input:not([type=hidden]){display:block;width:100%;box-sizing:border-box;border:1px solid #8a8060;border-radius:10px;background:#09251d!important;color:#fff2d7!important}\nform[action=\"/auth/login\"] button{width:100%;border-radius:12px;background:linear-gradient(#ffe9b2,#d7a33e)!important;color:#102b22!important}\nform[action=\"/auth/login\"] :focus-visible{outline:2px solid #ffe5a1;outline-offset:3px}\n</style></head>");
+    return new Response(themedHtml,{status:response.status,headers:outgoing});
   }
   if(request.method==='POST'){
     outgoing.append('Set-Cookie',LOGIN_CSRF_COOKIE+
