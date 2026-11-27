@@ -76,7 +76,9 @@ export default {
      .replace('next.onclick=()=>{'+String.fromCharCode(10)+'  if(!approved||!current())return;',
       'next.onclick=()=>{if(!current()){note.textContent='+JSON.stringify(message)+';return;}if(!approved){note.textContent="Потвърдете предложената процедура, за да отворите Етап 5.";return;}');
    }else{
-    source=source.replace('EG Авторът подготвя проект','Обработва се… EG Авторът подготвя проект')
+    source=source.replace('const permanent=bound?.verified===true&&str(bound?.caseId)?str(bound.caseId):null;',
+      'const registeredCase=str(window.KT126Registry?.current?.()?.case_id);const permanent=registeredCase||(bound?.verified===true&&str(bound?.caseId)?str(bound.caseId):null);')
+     .replace('EG Авторът подготвя проект','Обработва се… EG Авторът подготвя проект')
      .replace('status.textContent=reviewInfo+','status.textContent="Проектът е готов за експертен преглед. "+reviewInfo+');
    }
    const headers=new Headers(response.headers);
