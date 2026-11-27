@@ -445,3 +445,31 @@ function init(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
 else init();
 })();
+
+
+/* KT134 classic-stage direct entry — navigation only.
+   Read a whitelisted stage number and click the ALREADY EXISTING
+   KT133 dashboard tile. All original handlers, guards and case state run.
+   Never auto-open a stage unless the URL explicitly asks for it. */
+(function(){
+ 'use strict';
+ let stage;
+ try{
+  const raw=new URL(location.href).searchParams.get('kt134-stage');
+  if(!/^[1-5]$/.test(raw||''))return;
+  stage=Number(raw);
+ }catch{return}
+ let opened=false;
+ function navigate(){
+  if(opened)return;
+  const card=document.querySelector(
+    '#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="'+stage+'"]');
+  if(!card||card.disabled||card.getAttribute('aria-disabled')==='true')return;
+  opened=true;
+  card.click(); // exact existing action, including validation and stage guard
+ }
+ // The original KT133 dashboard is created at DOMContentLoaded and its
+ // layout scripts continue loading; navigate once after the native page loads.
+ if(document.readyState==='complete')navigate();
+ else window.addEventListener('load',navigate,{once:true});
+})();
