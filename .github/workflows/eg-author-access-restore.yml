@@ -1,4 +1,4 @@
-name: Check live EG Author access configuration
+name: Restore registered EG Author transport
 on:
   push:
     branches: [main]
@@ -8,36 +8,65 @@ permissions:
 jobs:
   restore:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
-    env:
-      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    timeout-minutes: 5
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/kt125-access-register-from-kt124-r6
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Inspect live bridge and bindings without case data
+      - name: Bundle the registry-enabled author
+        run: |
+          npx --yes esbuild@0.25.12 cloudflare/ai-author-v27/src/worker.js --bundle --platform=browser --format=esm --target=es2022 --outfile=/tmp/registry-author.mjs
+          node --check /tmp/registry-author.mjs
+      - name: Restore the established service binding and verify live guards
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           node --input-type=module <<'JS'
           import assert from 'node:assert/strict';
-          const base='https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1/workers/scripts/';
-          const headers={Authorization:'Bearer '+process.env.CF_TOKEN};
-          async function get(path){
-            const r=await fetch(base+path,{headers,signal:AbortSignal.timeout(20000)});
-            assert.ok(r.ok,'Cloudflare HTTP '+r.status+' on '+path);
-            return r;
+          import {readFileSync} from 'node:fs';
+          const native='tpu-plovdiv-kt125-local-auth', author='tpu-plovdiv-ai-author-v27';
+          const root='https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1/workers/scripts/'+author;
+          async function api(path='',init={}){
+            const r=await fetch(root+path,{...init,headers:{Authorization:'Bearer '+process.env.CF_TOKEN,...init.headers},signal:AbortSignal.timeout(30000)});
+            const data=await r.json();
+            assert.ok(r.ok&&data.success,'Cloudflare HTTP '+r.status+' on '+path);
+            return data.result;
           }
-          const author='tpu-plovdiv-ai-author-v27', native='tpu-plovdiv-kt125-local-auth';
-          const [source,authorSettings,nativeSettings]=await Promise.all([
-            get(author).then(r=>r.text()), get(author+'/settings').then(r=>r.json()),get(native+'/settings').then(r=>r.json())
-          ]);
-          assert.equal(authorSettings.success,true);
-          assert.equal(nativeSettings.success,true);
-          const has=(settings,name,type)=>settings.result.bindings.some(b=>b.name===name&&b.type===type);
-          console.log(JSON.stringify({
-            authorHasCaseRegistryCheck:source.includes('KT126_REGISTRY')&&source.includes('getCaseContext'),
-            authorHasNativeOrigin:source.includes('https://'+native+'.emilgergov.workers.dev'),
-            authorRegistryBinding:has(authorSettings,'KT126_REGISTRY','service'),
-            nativeAuthorBinding:has(nativeSettings,'KT128_AUTHOR','service'),
-            editorialCorrection:source.includes('editorialFlags.unshift(')&&source.includes('UNSUPPORTED_CATEGORICAL_CONCLUSION')
-          }));
+          const settings=await api('/settings');
+          const history=await api('/deployments');
+          const previous=(history.deployments||history.items)[0].versions.map(({version_id,percentage})=>({version_id,percentage}));
+          const registry={name:'KT126_REGISTRY',type:'service',service:native,entrypoint:'LocalAuthService'};
+          assert.ok(!settings.bindings.some(b=>b.name===registry.name),'Registry already configured');
+          const metadata={main_module:'worker.mjs',compatibility_date:settings.compatibility_date,compatibility_flags:settings.compatibility_flags||[],
+            keep_bindings:['secret_text'],bindings:[...settings.bindings.filter(b=>b.type!=='secret_text'),registry]};
+          for(const key of ['observability','logpush','placement','limits','tail_consumers'])if(settings[key]!==undefined)metadata[key]=settings[key];
+          const source=readFileSync('/tmp/registry-author.mjs','utf8');
+          assert.ok(source.includes('KT126_REGISTRY')&&source.includes('getCaseContext'));
+          const form=new FormData();
+          form.set('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
+          form.set('worker.mjs',new Blob([source],{type:'application/javascript+module'}),'worker.mjs');
+          try{
+            await api('',{method:'PUT',body:form});
+            const updated=await api('/settings');
+            assert.ok(updated.bindings.some(b=>b.name===registry.name&&b.service===native&&b.entrypoint===registry.entrypoint));
+            const url='https://'+author+'.emilgergov.workers.dev';
+            const health=await fetch(url+'/health').then(r=>r.json());
+            assert.equal(health.stage5Contract,'KT117_DOCUMENT_DRAFT_V1');
+            assert.equal(health.aiGenerationEnabled,true);
+            for(const path of ['/stage4-proposal','/stage5-document']){
+              const origin='https://'+native+'.emilgergov.workers.dev';
+              const preflight=await fetch(url+path,{method:'OPTIONS',headers:{Origin:origin,'Access-Control-Request-Method':'POST'}});
+              assert.equal(preflight.status,204);
+              assert.equal(preflight.headers.get('Access-Control-Allow-Origin'),origin);
+              const rejected=await fetch(url+path,{method:'POST',headers:{Origin:origin,'Content-Type':'application/json','X-KT126-Case':'11111111-1111-4111-8111-111111111111','X-KT126-Session':'invalid'},body:'{}'});
+              assert.equal(rejected.status,403);
+            }
+            console.log('Live author service ready; native origin and registry guard confirmed for stages 4 and 5.');
+          }catch(e){
+            await api('/deployments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({strategy:'percentage',versions:previous})});
+            throw e;
+          }
           JS
