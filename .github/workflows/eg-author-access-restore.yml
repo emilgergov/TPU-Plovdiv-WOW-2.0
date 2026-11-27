@@ -1,0 +1,42 @@
+name: Restore previous EG Author access
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/eg-author-access-restore.yml']
+permissions:
+  contents: read
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reactivate the version preceding the editorial deployment
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          const root='https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1/workers/scripts/tpu-plovdiv-ai-author-v27';
+          const headers={Authorization:'Bearer '+process.env.CF_TOKEN};
+          async function api(path='', init={}){
+            const r=await fetch(root+path,{...init,headers:{...headers,...init.headers},signal:AbortSignal.timeout(20000)});
+            assert.ok(r.ok,'Cloudflare HTTP '+r.status+' on '+path);
+            return r;
+          }
+          const source=await (await api()).text();
+          assert.ok(source.includes('Категоричен извод за неприложимост е заменен'), 'Active source is not the known editorial deployment');
+          const {result}=await (await api('/deployments')).json();
+          const history=(result.deployments||result.items||[]).sort((a,b)=>Date.parse(b.created_on)-Date.parse(a.created_on));
+          assert.equal(history[0]?.versions?.length,1);
+          const active=history[0].versions[0].version_id;
+          const previous=history.find(d=>d.versions?.length===1&&d.versions[0].percentage===100&&d.versions[0].version_id!==active)?.versions[0].version_id;
+          assert.ok(previous,'Previous deployment unavailable');
+          const r=await (await api('/deployments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({strategy:'percentage',versions:[{version_id:previous,percentage:100}]})})).json();
+          assert.equal(r.success,true);
+          const {result:after}=await (await api('/deployments')).json();
+          assert.equal((after.deployments||after.items)[0].versions[0].version_id,previous);
+          console.log('Previous deployed version restored');
+          JS
