@@ -106,7 +106,7 @@ export default {
      'content-type':'text/html; charset=utf-8',
      'cache-control':'no-store, private','x-content-type-options':'nosniff',
      'referrer-policy':'no-referrer',
-     'content-security-policy':"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; frame-src 'self'; base-uri 'none'; frame-ancestors 'none'"
+     'content-security-policy':"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: https://emilgergov.github.io; connect-src 'self'; frame-src 'self'; base-uri 'none'; frame-ancestors 'none'"
    }});
   }
   if(path==='/kt134/final-test'){
@@ -116,7 +116,7 @@ export default {
    return new Response(autoUI,{headers:{'content-type':'text/html; charset=utf-8',
      'cache-control':'no-store, private','x-content-type-options':'nosniff',
      'referrer-policy':'no-referrer','x-frame-options':'SAMEORIGIN',
-     'content-security-policy':"default-src 'self'; script-src 'unsafe-inline' 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'unsafe-inline'; connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; worker-src 'self' blob: https://cdnjs.cloudflare.com; img-src 'self' data: blob:; form-action 'self'; base-uri 'none'; frame-ancestors 'self'"}});
+     'content-security-policy':"default-src 'self'; script-src 'unsafe-inline' 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'unsafe-inline'; connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; worker-src 'self' blob: https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://emilgergov.github.io; form-action 'self'; base-uri 'none'; frame-ancestors 'self'"}});
   }
   // Only service readiness, no legal passages or case data are exposed.
   if(path==='/kt134/normative-bridge-check'){
