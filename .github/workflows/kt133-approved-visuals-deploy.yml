@@ -1,5 +1,6 @@
 name: KT133 — Publish approved visual modifications (rollback protected)
 # KT134 VISUAL 2026-11-27: prepaint stage navigation, original step handler and non-overlapping notices; dry run passed, backend unchanged.
+# KT134 approved cinematic release for the five protected stage entry screens.
 on:
   push:
     branches: [main]
