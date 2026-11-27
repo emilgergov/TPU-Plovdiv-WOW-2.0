@@ -1,4 +1,4 @@
-name: Restore previous EG Author access
+name: Check live EG Author access configuration
 on:
   push:
     branches: [main]
@@ -15,35 +15,29 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Reactivate the version preceding the editorial deployment
+      - name: Inspect live bridge and bindings without case data
         run: |
           node --input-type=module <<'JS'
           import assert from 'node:assert/strict';
-          const root='https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1/workers/scripts/tpu-plovdiv-ai-author-v27';
+          const base='https://api.cloudflare.com/client/v4/accounts/90df5489417e4b53179a852c446aeed1/workers/scripts/';
           const headers={Authorization:'Bearer '+process.env.CF_TOKEN};
-          async function api(path='', init={}){
-            const r=await fetch(root+path,{...init,headers:{...headers,...init.headers},signal:AbortSignal.timeout(20000)});
+          async function get(path){
+            const r=await fetch(base+path,{headers,signal:AbortSignal.timeout(20000)});
             assert.ok(r.ok,'Cloudflare HTTP '+r.status+' on '+path);
             return r;
           }
-          const source=await (await api()).text();
-          assert.ok(source.includes('editorialFlags.unshift(') && source.includes('UNSUPPORTED_CATEGORICAL_CONCLUSION'), 'Active source is not the known editorial deployment');
-          const {result}=await (await api('/deployments')).json();
-          const history=(result.deployments||result.items||[]).sort((a,b)=>Date.parse(b.created_on)-Date.parse(a.created_on));
-          assert.equal(history[0]?.versions?.length,1);
-          const active=history[0].versions[0].version_id;
-          let previous=history.find(d=>d.versions?.length===1&&d.versions[0].percentage===100&&d.versions[0].version_id!==active)?.versions[0].version_id;
-          if(!previous){
-            const {result:listed}=await (await api('/versions?per_page=20')).json();
-            const versions=Array.isArray(listed)?listed:listed.items||[];
-            const sorted=versions.sort((a,b)=>Date.parse(b.metadata?.created_on||b.created_on)-Date.parse(a.metadata?.created_on||a.created_on));
-            assert.equal(sorted[0]?.id,active,'Active version does not match latest upload');
-            previous=sorted[1]?.id;
-          }
-          assert.ok(previous&&previous!==active,'Previous version unavailable');
-          const r=await (await api('/deployments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({strategy:'percentage',versions:[{version_id:previous,percentage:100}]})})).json();
-          assert.equal(r.success,true);
-          const {result:after}=await (await api('/deployments')).json();
-          assert.equal((after.deployments||after.items)[0].versions[0].version_id,previous);
-          console.log('Previous deployed version restored');
+          const author='tpu-plovdiv-ai-author-v27', native='tpu-plovdiv-kt125-local-auth';
+          const [source,authorSettings,nativeSettings]=await Promise.all([
+            get(author).then(r=>r.text()), get(author+'/settings').then(r=>r.json()),get(native+'/settings').then(r=>r.json())
+          ]);
+          assert.equal(authorSettings.success,true);
+          assert.equal(nativeSettings.success,true);
+          const has=(settings,name,type)=>settings.result.bindings.some(b=>b.name===name&&b.type===type);
+          console.log(JSON.stringify({
+            authorHasCaseRegistryCheck:source.includes('KT126_REGISTRY')&&source.includes('getCaseContext'),
+            authorHasNativeOrigin:source.includes('https://'+native+'.emilgergov.workers.dev'),
+            authorRegistryBinding:has(authorSettings,'KT126_REGISTRY','service'),
+            nativeAuthorBinding:has(nativeSettings,'KT128_AUTHOR','service'),
+            editorialCorrection:source.includes('editorialFlags.unshift(')&&source.includes('UNSUPPORTED_CATEGORICAL_CONCLUSION')
+          }));
           JS
