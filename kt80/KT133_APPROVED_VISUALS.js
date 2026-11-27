@@ -462,11 +462,16 @@ else init();
  let opened=false;
  function navigate(){
   if(opened)return;
-  const card=document.querySelector(
-    '#kt80DashboardFive .kt80-dashboard-tile[data-kt80-kind="step"][data-kt80-index="'+stage+'"]');
-  if(!card||card.disabled||card.getAttribute('aria-disabled')==='true')return;
+  const stepButton=document.querySelector('.kt80-step[data-step="'+stage+'"]');
+  if(!stepButton||stepButton.disabled||stepButton.getAttribute('aria-disabled')==='true')return;
   opened=true;
-  card.click(); // exact existing action, including validation and stage guard
+  // Dispatch the already-existing native stage button, bypassing only the
+  // dashboard card's 260 ms decorative departure animation.
+  stepButton.click();
+  // The original stage handlers and legal guards have completed their event
+  // dispatch; make the page visible only after they choose the correct view.
+  const reveal=()=>document.getElementById('kt134-pending-stage-style')?.remove();
+  requestAnimationFrame(reveal);
  }
  // The original KT133 dashboard is created at DOMContentLoaded and its
  // layout scripts continue loading; navigate once after the native page loads.
