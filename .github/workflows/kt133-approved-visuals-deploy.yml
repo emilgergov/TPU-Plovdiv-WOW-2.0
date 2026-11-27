@@ -3,6 +3,7 @@ name: KT133 — Publish approved visual modifications (rollback protected)
 # KT134 approved cinematic release for the five protected stage entry screens.
 # Fix return links from the five KT134 stage entries.
 # Style the guarded Stage 5 information view on direct KT134 entry.
+# Apply approved cinematic styling to both existing Stage 5 views.
 on:
   push:
     branches: [main]
