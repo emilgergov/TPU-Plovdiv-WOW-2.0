@@ -10,6 +10,25 @@ import {limitKt134Stage4Payload} from './kt134-stage4-transport-budget.mjs';
 const invalid=(code)=>{const e=new Error(code);e.code=code;throw e;};
 const value=x=>typeof x==='string'?x.trim():'';
 const chosen=text=>value(text).match(/ИЗБРАН\s+ПАНЕЛ\s*:\s*0?(\d{1,2})\s*[—–-]?\s*([^\n]*)/iu);
+const byteSize=x=>new TextEncoder().encode(JSON.stringify(x)).byteLength;
+function fitStage5Request(request,maxBytes){
+ if(byteSize(request)<=maxBytes)return request;
+ const context=request.caseContext;
+ const notice='Предоставени са извадки; липсващите части следва да се проверят в оригиналите.';
+ const documents=context.documents;
+ const candidate=limit=>({...request,caseContext:{...context,
+  sourceTruncationNotice:notice,documents:documents.map(d=>d.text.length<=limit?d:{
+   ...d,text:d.text.slice(0,limit)+'\n[… извадка …]',excerptOnly:true
+  })}});
+ if(!documents.length||byteSize(candidate(120))>maxBytes)invalid('EG_STAGE5_PAYLOAD_TOO_LARGE');
+ let low=120,high=Math.max(...documents.map(d=>d.text.length));
+ while(low<high){
+  const mid=Math.ceil((low+high)/2);
+  if(byteSize(candidate(mid))<=maxBytes)low=mid;
+  else high=mid-1;
+ }
+ return candidate(low);
+}
 export function createKt134EgStage45Bridge({workerBase,accessToken,fetchImpl,
   stage4RequestFactory}={}){
  if(!/^https:\/\//u.test(workerBase||'')||!value(accessToken)||
@@ -122,7 +141,13 @@ export function createKt134EgStage45Bridge({workerBase,accessToken,fetchImpl,
       }
     };
     if(!stage5Request.documentTitle)invalid('EG_STAGE5_NO_DOCUMENT_TITLE');
-    const result=await post('/stage5-document',stage5Request);
+    let result;
+    try{
+      result=await post('/stage5-document',fitStage5Request(stage5Request,96000));
+    }catch(error){
+      if(error.code!=='EG_STAGE5_PAYLOAD_TOO_LARGE'||byteSize(stage5Request)<=41000)throw error;
+      result=await post('/stage5-document',fitStage5Request(stage5Request,41000));
+    }
     if(result.caseId!==caseId||!value(result.draft)||result.projectOnly!==true||
        result.documentIssued!==false||result.automaticReviewerIntermediate!==true)
        invalid('EG_STAGE5_RESULT_MISMATCH');
