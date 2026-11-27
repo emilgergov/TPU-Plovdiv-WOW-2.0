@@ -6,7 +6,7 @@ assert.ok(ACCOUNT&&TOKEN,'Cloudflare access not available');
 const target='kt133-tpu-plovdiv-kt125-local-auth';
 const root='https://api.cloudflare.com/client/v4/accounts/'+ACCOUNT+'/workers/scripts/'+target;
 const publicRoot='https://'+target+'.emilgergov.workers.dev';
-const fileBase='https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/41ee433c59c7543fe370f56938dd7eb3747e00d0/kt80/';
+const fileBase='https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/20b6727a9e64da4fad0fbd698958e64da1ae32de/kt80/';
 async function cf(uri,options={}){
  const response=await fetch(uri,{...options,headers:{Authorization:'Bearer '+TOKEN,...options.headers},signal:AbortSignal.timeout(30000)});
  if(!response.ok)throw Error('Cloudflare HTTP '+response.status+' on '+new URL(uri).pathname);
