@@ -1,5 +1,5 @@
 name: KT133 — Publish approved visual modifications (rollback protected)
-# Re-run 2026-11-23: correct 20 visible routes, caption and animated candidate entry screens; no backend changes.
+# WOW CINEMATIC 2026-11-27: CSS-only update to existing five stages, panel list and work dialogs; original backend and actions remain untouched.
 on:
   push:
     branches: [main]
