@@ -65,6 +65,25 @@ export default {
   }
   const isKt134DeepStage=/^[1-5]$/.test(u.searchParams.get('kt134-stage')||'');
   const response=await __kt133Core.fetch(request,env,ctx);
+  // Apply feedback to the guarded source returned by the existing module gateway.
+  const feedbackModule=u.pathname.startsWith('/module/')&&u.pathname.match(/(kt116-expert-approval-handoff|kt96-eg-ai-stage4-author)\\.mjs$/);
+  if(request.method==='GET'&&feedbackModule&&response.status===200&&/javascript|ecmascript/.test(response.headers.get('content-type')||'')){
+   let source=await response.clone().text();
+   if(feedbackModule[1]==='kt116-expert-approval-handoff'){
+    const message='Предложението е за предишна версия на данните. Изгответе нов проект с EG Автора в Етап 4 и го потвърдете.';
+    source=source.replace("note.className='note';","note.className='note';note.setAttribute('role','status');")
+     .replace("note.textContent='Данните по преписката са променени.'","note.textContent="+JSON.stringify(message))
+     .replace('next.onclick=()=>{'+String.fromCharCode(10)+'  if(!approved||!current())return;',
+      'next.onclick=()=>{if(!current()){note.textContent='+JSON.stringify(message)+';return;}if(!approved){note.textContent="Потвърдете предложената процедура, за да отворите Етап 5.";return;}');
+   }else{
+    source=source.replace('EG Авторът подготвя проект','Обработва се… EG Авторът подготвя проект')
+     .replace('status.textContent=reviewInfo+','status.textContent="Проектът е готов за експертен преглед. "+reviewInfo+');
+   }
+   const headers=new Headers(response.headers);
+   for(const name of ['Content-Length','Content-Encoding','ETag','Last-Modified'])headers.delete(name);
+   headers.set('Cache-Control','private, no-store');
+   return new Response(source,{status:200,headers});
+  }
   if(request.method!=='GET'||!/^\\/module(?:\\/|$)/.test(u.pathname)||
      !(response.headers.get('content-type')||'').toLowerCase().includes('text/html'))return response;
   return new HTMLRewriter()
