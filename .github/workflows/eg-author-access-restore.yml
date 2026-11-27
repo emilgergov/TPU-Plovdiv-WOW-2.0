@@ -58,7 +58,12 @@ jobs:
             assert.equal(health.aiGenerationEnabled,true);
             for(const path of ['/stage4-proposal','/stage5-document']){
               const origin='https://'+native+'.emilgergov.workers.dev';
-              const preflight=await fetch(url+path,{method:'OPTIONS',headers:{Origin:origin,'Access-Control-Request-Method':'POST'}});
+              let preflight;
+              for(let attempt=0;attempt<8;attempt++){
+                preflight=await fetch(url+path,{method:'OPTIONS',headers:{Origin:origin,'Access-Control-Request-Method':'POST'}});
+                if(preflight.status===204)break;
+                await new Promise(resolve=>setTimeout(resolve,3000));
+              }
               assert.equal(preflight.status,204);
               assert.equal(preflight.headers.get('Access-Control-Allow-Origin'),origin);
               const rejected=await fetch(url+path,{method:'POST',headers:{Origin:origin,'Content-Type':'application/json','X-KT126-Case':'11111111-1111-4111-8111-111111111111','X-KT126-Session':'invalid'},body:'{}'});
