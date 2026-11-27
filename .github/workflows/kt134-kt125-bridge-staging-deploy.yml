@@ -3,6 +3,7 @@ on:
   push:
     branches: [kt134-auto-mode-isolated]
     paths:
+      - 'kt134-auto/KT134_CINEMATIC_*_PREVIEW.html'
       - 'kt134-auto/kt134-kt125-bridge-staging-worker.mjs'
       - 'kt134-auto/kt134-native-stage1-completion.mjs'
       - 'kt134-auto/kt134-native-stage1-completion.test.mjs'
