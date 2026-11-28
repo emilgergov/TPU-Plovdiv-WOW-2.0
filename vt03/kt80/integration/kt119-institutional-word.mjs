@@ -60,13 +60,7 @@ export function renderInstitutionalWord({templateBytes,codec,parseXml,serializeX
      }else addText(p,rest,false,true);
      return;
    }
-   const regex=/(?:чл\.\s*\d+[а-я]?|ал\.\s*\d+|т\.\s*\d+|§\s*\d+|приложени(?:е|ето|я)\s*№\s*\d+)/giu;
-   let start=0,m;while((m=regex.exec(line))){
-     if(m.index>start)addText(p,line.slice(start,m.index));
-     addText(p,m[0],true);start=m.index+m[0].length;
-   }
-   if(start<line.length)addText(p,line.slice(start));
-   if(!line.length)addText(p,'');
+   addText(p,line);
  };
  const textIn=p=>Array.from(p.getElementsByTagNameNS(W,'t')).map(n=>n.textContent).join('');
  const replacePara=(para,line,subject=false,title=false)=>{
