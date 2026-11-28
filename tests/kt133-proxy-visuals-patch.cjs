@@ -54,7 +54,7 @@ export default {
  async fetch(request,env,ctx) {
   const u=new URL(request.url);
   const assets={
-   '/__kt133_institutional_word.mjs':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/c1a2f36b8fc16089c7e1ffc229fc6d88c96f35f2/vt03/kt80/integration/kt119-institutional-word.mjs','text/javascript; charset=utf-8'],
+   '/__kt133_institutional_word.mjs':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/dba97a465a88243b7de609ad2c3559323cf3aa81/vt03/kt80/integration/kt119-institutional-word.mjs','text/javascript; charset=utf-8'],
    '/__kt133_approved_visuals.css':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/20b6727a9e64da4fad0fbd698958e64da1ae32de/kt80/KT133_APPROVED_VISUALS.css','text/css; charset=utf-8'],
    '/__kt133_approved_visuals.js':['https://raw.githubusercontent.com/emilgergov/TPU-Plovdiv-WOW-2.0/20b6727a9e64da4fad0fbd698958e64da1ae32de/kt80/KT133_APPROVED_VISUALS.js','text/javascript; charset=utf-8']
   };
