@@ -8,7 +8,7 @@ const obj=v=>v!==null&&typeof v==='object'&&!Array.isArray(v)?v:{};
 const list=v=>Array.isArray(v)?v:[];
 const str=v=>typeof v==='string'?v.trim():'';
 const error=code=>{const e=new Error(code);e.code=code;throw e;};
-const parcelId=v=>str(v?.identifier||v?.cadastralId||v?.cadnum||v?.input||v?.id);
+const parcelId=v=>str(typeof v==='string'?v:v?.identifier||v?.cadastralId||v?.cadnum||v?.input||v?.id);
 const unique=v=>[...new Set(v.filter(Boolean))];
 function parcelRows(state,gis){
  const confirmed=state.parcelsConfirmed;
@@ -16,10 +16,21 @@ function parcelRows(state,gis){
  const fromConfirmed=declared.filter(x=>parcelId(x))
   .map(x=>({...x,identifier:parcelId(x),sourceId:str(x.sourceId)||'KT126_CONFIRMED_PARCELS'}));
  const ids=unique([...fromConfirmed.map(x=>x.identifier),...list(gis.ids).map(str)]);
- return {parcels:fromConfirmed.length?fromConfirmed:ids.map(identifier=>({
-  identifier,sourceId:'KT80FreeGISResults',
-  evidenceStatus:'GIS_SOURCE_ID_NOT_EXPERT_CONFIRMED'
- })),ids};
+ const parcels=new Map(fromConfirmed.map(row=>[row.identifier,row]));
+ for(const row of list(obj(state.intake).all_parcels)){
+  const identifier=parcelId(row);
+  if(identifier&&!parcels.has(identifier))parcels.set(identifier,{
+   ...obj(row),identifier,sourceId:str(row?.sourceId)||'KT134_INTAKE_ALL_PARCELS',
+   evidenceStatus:'DOCUMENT_CANDIDATE_NOT_EXPERT_CONFIRMED'
+  });
+ }
+ for(const identifier of ids){
+  if(!parcels.has(identifier))parcels.set(identifier,{
+   identifier,sourceId:'KT80FreeGISResults',
+   evidenceStatus:'GIS_SOURCE_ID_NOT_EXPERT_CONFIRMED'
+  });
+ }
+ return {parcels:[...parcels.values()],ids};
 }
 function verifiedIntersectionRows(rows,ids){
  if(!ids.length||!rows.length)return false;
