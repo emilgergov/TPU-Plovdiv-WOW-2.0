@@ -31,6 +31,7 @@ jobs:
           for attempt in $(seq 1 30); do
             if curl -fsS --max-time 15 "https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/?verify=$GITHUB_RUN_ID-$attempt" -o "$RUNNER_TEMP/wow-public.html" &&
               grep -Fq 'tpu-plovdiv-kt134-test.emilgergov.workers.dev/auth/login' "$RUNNER_TEMP/wow-public.html" &&
+              curl -fsS --max-time 15 "https://tpu-plovdiv-kt134-test.emilgergov.workers.dev/auth/login?preview=cinematic" -o /dev/null &&
               grep -Fq 'WOW Портал' "$RUNNER_TEMP/wow-public.html" &&
               grep -Fq 'href="wow-presentation.html"' "$RUNNER_TEMP/wow-public.html" &&
               curl -fsS --max-time 15 "https://emilgergov.github.io/TPU-Plovdiv-WOW-2.0/wow-presentation.html" -o "$RUNNER_TEMP/wow-presentation.html" &&
