@@ -1,7 +1,7 @@
 import {getLegalContext} from "./legal-v11-loader.mjs";
 import {createKt134Stage1LeadingHandler} from "./kt134-stage1-leading.mjs";
 import {kt134ReviewerRouteIssues,kt134ReviewerActionMatch,kt134ComposeAlignedReviewerDraft} from "./kt134-reviewer-route-alignment.mjs";
-import {deriveKt134LegalDisposition,kt134DispositionTextIssues,composeKt134GroundedReviewerAlternative} from "./kt134-legal-disposition.mjs";
+import {deriveKt134LegalDisposition,kt134DispositionTextIssues} from "./kt134-legal-disposition.mjs";
 import {KT109_ROUTE_CATALOG,KT109_ROUTE_BY_ID} from "./kt109-route-catalog.mjs";
 import {evaluateDraft} from "./kt123-decision-model.mjs";
 import {substantiveDraftIssues} from "./kt123-substance-guard.mjs";
@@ -1157,96 +1157,34 @@ async function handleStage5Document(request,env){
      });
      if(composeResponse.ok){
        const data=await composeResponse.json();
-       const candidate=(data.output||[]).flatMap(x=>x.content||[])
+       body=(data.output||[]).flatMap(x=>x.content||[])
          .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
-       if(candidate.startsWith("Относно:")&&candidate.length>=280&&
-          !/(?:\bMISSING_[A-Z_]+\b|\bPANEL_\d\d_[A-Z_]+\b|\bUNSUPPORTED_[A-Z_]+\b)/u.test(candidate)){
-         body=candidate;
-         // KT134: legal redaction remains the reviewer's job. A draft must
-         // not turn missing physical evidence into an EIA/OS exclusion, or
-         // preselect an outcome under art. 93. Request ONE corrective rewrite,
-         // preserving the same case and without human intermediate clicks.
-         const unsupported=/(?:не\s+се\s+достигат\s+законови\s+предпоставки|изключва\s+необходимостта|липсата\s+на\s+ново\s+строителство[^.!?]*изключва|няма\s+основания\s+за\s+ОС|отрицателен\s+изход|не\s+се\s+налагат\s+(?:други|допълнителни)\s+процедури|да\s+се\s+издаде\s+решение\s+по\s+чл\.?\s*93[^.!?]*не\s+се\s+налага|решение\s+по\s+чл\.?\s*93[^.!?]*липса\s+на\s+необходимост)/iu;
-         if((unsupported.test(candidate)&&issues.length)||internalProposal.test(candidate)||kt134DispositionTextIssues(candidate,disposition).length){
-           const repair=await fetch("https://api.openai.com/v1/responses",{
-             method:"POST",signal:AbortSignal.timeout(45000),
-             headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
-             body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_output_tokens:2500,
-               input:[
-                {role:"system",content:[
-                  "Ти си същият независим рецензент. Коригирай САМО доказателствената и правната обоснованост в пълния проект. Върни ЕДИН завършен проект на български, започващ с Относно:.",
-                  "ЗАДЪЛЖИТЕЛНА ПОПРАВКА: Няма доказан правен критерий, който позволява от липсата на ново строителство, непълните данни или ГИС непресичането да заключиш категорична неприложимост на ОВОС/ОС или предварително отрицателен резултат по чл. 93 ЗООС.",
-                  "Изясни конкретните липсващи ФИЗИЧЕСКИ факти от реално представените документи и съпостави точно приложимите законови категории, без да прехвърляш правната квалификация на възложителя.",
-                  "Не искай нов ГИС анализ, ако caseContext.gis вече съдържа PDF1 и пространствени констатации. Не искай факти, които документите вече доказват.",
-                  "При необходимост от допълнителна информация посочи за всеки поискан параметър: кой фактически документ е непълен, какъв конкретен физически факт се нуждае от уточнение и коя законова предпоставка зависи от него. Не използвай общо искане за всички технически характеристики, емисии, води, отпадъци и опасни вещества, освен ако всеки отделен елемент не е мотивиран.",
-                  "Състави проект на крайния административен документ за адресата от името на компетентния орган. Използвай точни формулировки според вида на документа и определеното действие. Изключи вътрешните преразкази и указанията към експерта. Указанията към адресата трябва да са конкретни и обосновани. Запази панела, фактите, степента на сигурност, правните основания и процедурния извод. Отбележи неустановеното с точни думи.",
-                  "Не променяй фиксираната идентичност на преписката. Човекът експерт единствено одобрява окончателно."
-                ].join("\n")},
-                {role:"user",content:JSON.stringify({
-                  subject:input.subject,scope:input.scope,caseContext:input.caseContext||null,
-                  reviewedDraft:candidate,reviewerSelectedPanel:proposedPanel,signedReviewerAction,
-                  physicalGap:disposition.physicalGap,detectedDraftIssues:kt134DispositionTextIssues(candidate,disposition),
-                  unresolvedLegalFindings:issues,qualificationRecord:input.qualificationRecord||null,
-                  officialNormativeExcerpts:Array.isArray(d.verifiedLegalExcerpts)?d.verifiedLegalExcerpts:[]
-                })}
-               ]})
-           });
-           if(repair.ok){
-             const rd=await repair.json();
-             const revised=(rd.output||[]).flatMap(x=>x.content||[])
-               .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
-             if(revised.startsWith("Относно:")&&revised.length>=280&&!unsupported.test(revised)&&
-                !internalProposal.test(revised)&&!kt134DispositionTextIssues(revised,disposition).length&&
-                !/(?:\bMISSING_[A-Z_]+\b|\bPANEL_\d\d_[A-Z_]+\b)/u.test(revised))
-               body=revised;
-           }
-         }
-       }
      }
    }catch{}
-   let reviewerProposalOnly=!body||internalProposal.test(body);
-   if(!body){
-     // Service-independent proposal: no invented statutory determination.
-     const safeIssues=[
-       "Правната квалификация и съответствието на избрания панел с установените предпоставки не са достатъчно обосновани.",
-       "Не се приема за установена отрицателна приложимост само поради липса на технически параметри или пространствено непресичане."
-     ];
+   const reviewerAlternativeUsed=!body;
+   const contentIssues=kt134DispositionTextIssues(body,disposition);
+   if(body&&internalProposal.test(body))contentIssues.push("INTERNAL_REVIEW_PROCESS_IN_DOCUMENT");
+   const editorialFlags=[...issues];
+   if(contentIssues.length){
+     editorialFlags.push("Проектът съдържа формулировки за експертен преглед. Проверете текста спрямо мотивите и избраното действие преди одобрение.");
+   }
+   if(reviewerAlternativeUsed){
+     editorialFlags.push("ЕГ услугата не върна текст за Етап 5. Показано е предложеното действие от рецензията за редакция.");
      body=[
        "Относно: „"+subject+"“",
-       "ПРОЕКТ НА МОТИВИРАНО ПРЕДЛОЖЕНИЕ ЗА ЕКСПЕРТНА ПРЕЦЕНКА",
-       "Фактически констатации",
        clean(input.scope),
-       "Правни предпоставки",
-       ...safeIssues,
-       "Мотивирано предложение",
-       "Рецензентът предлага да се разгледа направлението "+proposedPanel+
-         " като работна хипотеза, чиято нормативна приложимост не е установена окончателно.",
-       "Заключение и следващо действие",
-       "Компетентният експерт следва да се произнесе по представеното мотивирано предложение, като отчете конкретните недоказани предпоставки; този текст не е административен акт."
-     ].join("\n");
-   }
-   // Content quality is decided against actual qualified legal predicates,
-   // not solely the model's narrative. Reviewer never blocks the workflow:
-   // it returns one case-specific administrative alternative where necessary.
-   const contentIssues=kt134DispositionTextIssues(body,disposition);
-   let reviewerAlternativeUsed=false;
-   if(contentIssues.length){
-     body=composeKt134GroundedReviewerAlternative({
-       subject:input.subject,scope:input.scope,disposition,
-       reviewedText:d.reviewedText,caseContext:input.caseContext||{}
-     });
-     reviewerAlternativeUsed=true;
-     reviewerProposalOnly=true;
+       signedReviewerAction
+     ].filter(Boolean).join("\n\n");
    }
    return reply({caseId:input.caseId,evidenceRevision:input.evidenceRevision,
      requestId:input.requestId,stage4Version:input.stage4Version,
      selectedPanelLine:input.selectedPanelLine,
-     documentTitle:reviewerProposalOnly?"Проект на мотивирано предложение за експертна преценка":title,
+     documentTitle:title,
      incomingReference:safeReference,draft:body,
-     editorialFlags:issues,projectOnly:true,expertReviewRequired:true,
+     editorialFlags,projectOnly:true,expertReviewRequired:true,
      documentIssued:false,wordTemplateApplied:false,
      automaticReviewerIntermediate:true,expertApproved:false,
-     reviewerProposalOnly,unresolvedLegalIssues:issues,
+     reviewerProposalOnly:false,unresolvedLegalIssues:issues,
      normativeDisposition:{qualified:disposition.qualificationValidated,
        proposedPanel:disposition.proposedPanel,
        formalDecisionReady:disposition.formalDecisionReady,
