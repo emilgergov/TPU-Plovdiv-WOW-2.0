@@ -24,7 +24,8 @@ export function buildKt134CompleteStage4Request({caseId,revision,bundle,requestI
  const parcels=many(bundle.parcels).filter(x=>plain(x)&&parcelKey(x))
    .map(x=>({identifier:parcelKey(x),settlement:safeText(x.settlement,120),
     municipality:safeText(x.municipality,120),landAreaSqm:Number.isFinite(x.areaSqm)?x.areaSqm:null,
-    landUse:safeText(x.landUse,250),sourceId:safeText(x.sourceId,140)}));
+    landUse:safeText(x.landUse,250),sourceId:safeText(x.sourceId,140),
+    evidenceStatus:safeText(x.evidenceStatus,100)}));
  const spatial=plain(bundle.gis)?bundle.gis:null;
  const mode=bundle.gisMode;
  if(!['required','contextual_skip','spatial_review','contextual_review'].includes(mode))
@@ -83,7 +84,7 @@ export function buildKt134CompleteStage4Request({caseId,revision,bundle,requestI
    description:'Междинна проверка за качество на преписката'}]:[]),
   {factId:'CASE_SUBJECT',value:subject,status:'established',sourceId:leadSource,sourceLocation:'Етап 2 — състояние КТ126',description:'Предмет на преписката'},
   {factId:'CASE_SCOPE',value:scope,status:'established',sourceId:leadSource,sourceLocation:'Етап 2 — състояние КТ126',description:'Обхват на ИП'},
-  ...parcels.filter(p=>p.sourceId).map((p,i)=>({factId:'PARCEL_'+(i+1),
+  ...parcels.filter(p=>p.sourceId&&!p.evidenceStatus.endsWith('_NOT_EXPERT_CONFIRMED')).map((p,i)=>({factId:'PARCEL_'+(i+1),
    value:'Имот '+p.identifier+(p.settlement?'; населено място '+p.settlement:'')+
      (p.municipality?'; община '+p.municipality:'')+
      (Number.isFinite(p.landAreaSqm)?'; площ '+p.landAreaSqm+' кв. м':'')+
