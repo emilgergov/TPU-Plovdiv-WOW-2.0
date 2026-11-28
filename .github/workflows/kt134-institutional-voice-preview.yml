@@ -2,7 +2,9 @@ name: KT134 institutional voice test deployment
 on:
   push:
     branches: [kt134-stage5-institutional-voice]
-    paths: ['.github/workflows/kt134-institutional-voice-preview.yml']
+    paths:
+      - '.github/workflows/kt134-institutional-voice-preview.yml'
+      - 'cloudflare/ai-author-v27/src/worker.js'
 permissions:
   contents: write
 jobs:
