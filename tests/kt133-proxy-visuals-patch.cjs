@@ -62,7 +62,13 @@ export default {
    const [target,mime]=assets[u.pathname];
    const remote=await fetch(target,{cf:{cacheEverything:true,cacheTtl:300}});
    if(!remote.ok)return new Response('Visual asset unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
-   return new Response(remote.body,{status:200,headers:{'Content-Type':mime,'Cache-Control':'public,max-age=300','X-Content-Type-Options':'nosniff'}});
+   let body=remote.body;
+   if(u.pathname==='/__kt133_institutional_word.mjs'){
+    body=(await remote.text()).replace('text,title:docTitle})','text,title:docTitle,recipientFields})')
+     .replace('for(const para of [recipient,recipientParty,recipientAddress])replacePara(para,textIn(para));',
+      'replacePara(recipient,textIn(recipient));replacePara(recipientParty,recipientFields?.name?"Възложител: "+recipientFields.name:textIn(recipientParty));replacePara(recipientAddress,recipientFields?.address?"Адрес: "+recipientFields.address:textIn(recipientAddress));');
+   }
+   return new Response(body,{status:200,headers:{'Content-Type':mime,'Cache-Control':'public,max-age=300','X-Content-Type-Options':'nosniff'}});
   }
   const isKt134DeepStage=/^[1-5]$/.test(u.searchParams.get('kt134-stage')||'');
   const response=await __kt133Core.fetch(request,env,ctx);
@@ -79,7 +85,7 @@ export default {
     if(titleStart>start&&titleEnd>titleStart&&titleEnd<end){
      const render='import {renderInstitutionalWord} from "/__kt133_institutional_word.mjs";'+String.fromCharCode(10)+
       source.slice(0,titleEnd)+
-      '     return renderInstitutionalWord({templateBytes,codec:window.fflate,text:approved.text,title:docTitle,parseXml:xml=>new DOMParser().parseFromString(xml,"application/xml"),serializeXml:dom=>new XMLSerializer().serializeToString(dom)});'+
+      '     return renderInstitutionalWord({templateBytes,codec:window.fflate,text:approved.text,title:docTitle,recipientFields:approved.recipient,parseXml:xml=>new DOMParser().parseFromString(xml,"application/xml"),serializeXml:dom=>new XMLSerializer().serializeToString(dom)});'+
       source.slice(end+'     return contents;'.length);
      const headers=new Headers(response.headers);
      for(const name of ['Content-Length','Content-Encoding','ETag','Last-Modified'])headers.delete(name);
@@ -111,7 +117,16 @@ export default {
    const marker='const normalized=formatDraftSubject(data.draft);';
    if(source.split(marker).length===2){
     const cleanGenerated=${JSON.stringify("raw=>{\n const lines=raw.split(/\\r?\\n/u);\n const closing=lines.findLastIndex(line=>/^\\s*С уважение\\s*[,!]?\\s*$/iu.test(line));\n const fields=/^(?:\\[[^\\]]+\\]|(?:Име и длъжност|Дата|Електронен подпис|Подпис)\\s*:.*|Директор|(?:РИОСВ|Регионална инспекция по околната среда и водите)\\s*[—–-]\\s*Пловдив)$/iu;\n if(closing>0&&lines.slice(closing+1).every(line=>!line.trim()||fields.test(line.trim())))lines.splice(closing);\n const normalize=line=>line.trim().replace(/\\s+/gu,' ');\n const subject=normalize(lines[0]||'');\n return lines.filter((line,index)=>index===0||!subject.startsWith('Относно:')||normalize(line)!==subject).join('\\n').trim();\n}")};
-    const revised=source.replace(marker,()=> 'const normalized=formatDraftSubject(('+cleanGenerated+')(data.draft));');
+    let revised=source.replace(marker,()=> 'const normalized=formatDraftSubject(('+cleanGenerated+')(data.draft));');
+    const wordFields=${JSON.stringify(" const recipientFields=make('fieldset');\n recipientFields.append(make('legend','Адресат за Word бланката'));\n const recipientName=make('input'),recipientAddress=make('input');\n for(const [label,input] of [['Възложител',recipientName],['Адрес',recipientAddress]]){\n  const row=make('label',label+' ');input.type='text';input.maxLength=500;row.append(input);recipientFields.append(row);\n }\n ui.insertBefore(recipientFields,reviewActions);\n")};
+    const formMarker=' ui.append(heading,context,action,note,editorial,preview,textarea,reviewActions,decisionStatus,confirmedText,footer,wordInfo,original);';
+    const confirmMarker='confirmed=Object.freeze({...v,caseId:source.caseId,stage4Version:source.version,';
+    const resetMarker='source=a;versions=[];confirmed=null;';
+    if([formMarker,confirmMarker,resetMarker].every(key=>revised.split(key).length===2)){
+     revised=revised.replace(formMarker,()=>formMarker+String.fromCharCode(10)+wordFields)
+      .replace(resetMarker,()=>resetMarker+"recipientName.value='';recipientAddress.value='';")
+      .replace(confirmMarker,()=>confirmMarker+'recipient:{name:recipientName.value.trim(),address:recipientAddress.value.trim()},');
+    }
     const headers=new Headers(response.headers);
     for(const name of ['Content-Length','Content-Encoding','ETag','Last-Modified'])headers.delete(name);
     headers.set('Cache-Control','private, no-store');
