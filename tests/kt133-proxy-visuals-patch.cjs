@@ -78,7 +78,7 @@ export default {
     const titleEnd=source.indexOf('     const contents=',titleStart);
     if(titleStart>start&&titleEnd>titleStart&&titleEnd<end){
      const render='import {renderInstitutionalWord} from "/__kt133_institutional_word.mjs";'+String.fromCharCode(10)+
-      source.slice(0,start)+signature+String.fromCharCode(10)+source.slice(titleStart,titleEnd)+
+      source.slice(0,titleEnd)+
       '     return renderInstitutionalWord({templateBytes,codec:window.fflate,text:approved.text,title:docTitle,parseXml:xml=>new DOMParser().parseFromString(xml,"application/xml"),serializeXml:dom=>new XMLSerializer().serializeToString(dom)});'+
       source.slice(end+'     return contents;'.length);
      const headers=new Headers(response.headers);
