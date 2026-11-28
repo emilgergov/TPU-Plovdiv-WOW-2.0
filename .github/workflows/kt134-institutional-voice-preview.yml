@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/kt134-institutional-voice-preview.yml'
       - 'cloudflare/ai-author-v27/src/worker.js'
+      - 'kt134-auto/kt134-native-gis-evidence*.mjs'
+      - 'kt134-auto/kt134-complete-dossier-stage4*.mjs'
 permissions:
   contents: write
 jobs:
@@ -25,6 +27,7 @@ jobs:
           grep -Fxq 'name = "tpu-plovdiv-kt134-eg-test"' kt134-auto/wrangler.eg-staging.toml
           grep -Fxq 'name = "tpu-plovdiv-kt134-test"' kt134-auto/wrangler.auth-bridge.toml
           node --check cloudflare/ai-author-v27/src/worker.js
+          node --test kt134-auto/kt134-native-gis-evidence.test.mjs kt134-auto/kt134-complete-dossier-stage4.test.mjs
           node --test kt134-auto/kt134-eg-stage45-live-bridge.test.mjs
           node --test cloudflare/ai-author-v27/src/kt134-legal-disposition.test.mjs
           node --test cloudflare/ai-author-v27/src/kt134-reviewer-route-alignment.test.mjs
