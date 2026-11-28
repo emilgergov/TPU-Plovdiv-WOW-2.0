@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/kt134-institutional-voice-preview.yml'
       - 'cloudflare/ai-author-v27/src/worker.js'
+      - 'vt03/kt80/integration/kt119-institutional-word.mjs'
       - 'kt134-auto/kt134-native-gis-evidence*.mjs'
       - 'kt134-auto/kt134-complete-dossier-stage4*.mjs'
 permissions:
