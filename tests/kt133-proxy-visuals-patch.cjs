@@ -88,6 +88,21 @@ export default {
     }
    }
   }
+  // Clean recognized model-generated template fields before expert confirmation.
+  if(request.method==='GET'&&response.status===200&&
+     u.pathname==='/module/vt03/kt80/integration/kt117-stage5-document-author.mjs'&&
+     /javascript|ecmascript/.test(response.headers.get('content-type')||'')){
+   const source=await response.clone().text();
+   const marker='const normalized=formatDraftSubject(data.draft);';
+   if(source.split(marker).length===2){
+    const cleanGenerated=${JSON.stringify("raw=>{\n const lines=raw.split(/\\r?\\n/u);\n const closing=lines.findLastIndex(line=>/^\\s*С уважение\\s*[,!]?\\s*$/iu.test(line));\n const fields=/^(?:\\[[^\\]]+\\]|(?:Име и длъжност|Дата|Електронен подпис|Подпис)\\s*:.*|Директор|(?:РИОСВ|Регионална инспекция по околната среда и водите)\\s*[—–-]\\s*Пловдив)$/iu;\n if(closing>0&&lines.slice(closing+1).every(line=>!line.trim()||fields.test(line.trim())))lines.splice(closing);\n const normalize=line=>line.trim().replace(/\\s+/gu,' ');\n const subject=normalize(lines[0]||'');\n return lines.filter((line,index)=>index===0||!subject.startsWith('Относно:')||normalize(line)!==subject).join('\\n').trim();\n}")};
+    const revised=source.replace(marker,()=> 'const normalized=formatDraftSubject(('+cleanGenerated+')(data.draft));');
+    const headers=new Headers(response.headers);
+    for(const name of ['Content-Length','Content-Encoding','ETag','Last-Modified'])headers.delete(name);
+    headers.set('Cache-Control','private, no-store');
+    return new Response(revised,{status:200,headers});
+   }
+  }
   // Apply feedback to the guarded source returned by the existing module gateway.
   const feedbackModule=u.pathname.startsWith('/module/')&&u.pathname.match(/(kt116-expert-approval-handoff|kt96-eg-ai-stage4-author)\\.mjs$/);
   if(request.method==='GET'&&feedbackModule&&response.status===200&&/javascript|ecmascript/.test(response.headers.get('content-type')||'')){
