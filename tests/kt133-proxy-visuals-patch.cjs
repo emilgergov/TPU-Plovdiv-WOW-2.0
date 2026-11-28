@@ -88,6 +88,21 @@ export default {
     }
    }
   }
+  if(request.method==='GET'&&response.status===200&&u.pathname==='/kt126/client.js'&&
+     /javascript|ecmascript/.test(response.headers.get('content-type')||'')){
+   const source=await response.clone().text();
+   const saveMarker="  for(const event of ['kt115:stage4-draft','kt116:stage4-confirmed','kt116:stage5-open'])document.addEventListener(event,saveSoon);";
+   const displayMarker=' function display(){';
+   if(source.split(saveMarker).length===2&&source.split(displayMarker).length===2){
+    const displayCode=${JSON.stringify(" function display(){\n  try{\n   if(record?.case_id)sessionStorage.setItem('wow.kt133.activeCase',record.case_id);\n   else sessionStorage.removeItem('wow.kt133.activeCase');\n  }catch{}\n")};
+    const saveCode=${JSON.stringify("  document.addEventListener('kt115:stage4-draft',saveSoon);\n  for(const event of ['kt116:stage4-confirmed','kt116:stage5-open','kt123:stage5-confirmed']){\n   document.addEventListener(event,()=>{\n    if(restoring||restore||!record)return;\n    clearTimeout(timer);\n    save().catch(showError);\n   });\n  }\n  let previousCase='';\n  try{\n   if(performance.getEntriesByType('navigation')[0]?.type==='reload')\n    previousCase=sessionStorage.getItem('wow.kt133.activeCase')||'';\n  }catch{}\n  if(!record&&/^[a-z0-9-]{1,100}$/i.test(previousCase))openCase(previousCase).catch(showError);\n")};
+    const revised=source.replace(displayMarker,()=>displayCode).replace(saveMarker,()=>saveCode);
+    const headers=new Headers(response.headers);
+    for(const name of ['Content-Length','Content-Encoding','ETag','Last-Modified'])headers.delete(name);
+    headers.set('Cache-Control','private, no-store');
+    return new Response(revised,{status:200,headers});
+   }
+  }
   // Clean recognized model-generated template fields before expert confirmation.
   if(request.method==='GET'&&response.status===200&&
      u.pathname==='/module/vt03/kt80/integration/kt117-stage5-document-author.mjs'&&
