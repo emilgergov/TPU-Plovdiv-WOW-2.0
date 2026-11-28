@@ -1106,6 +1106,7 @@ async function handleStage5Document(request,env){
    // KT134: one coherent working draft, not a raw dump of reviewer findings.
    // The reviewer still proposes an action; the expert retains final authority.
    // Technical error codes remain in metadata, NEVER in institutional prose.
+   const internalProposal = /(?:мотивирано предложение за експертна преценка|рецензентът предлага|компетентният експерт следва|предлага се (?:да се )?(?:издаде|изпрати))/iu;
    let body="";
    try {
      const composeResponse=await fetch("https://api.openai.com/v1/responses",{
@@ -1121,11 +1122,11 @@ async function handleStage5Document(request,env){
           "Площ на поземлен имот НЕ Е площ на сграда или РЗП. Използвай конкретните етикети за площ от caseContext; ако площ на сградата не е доказана, не ѝ приписвай стойност.",
           "Когато не е доказана категория по приложение №1 или №2 към ЗООС, НЕ твърди, че преценка по чл. 93 ЗООС е задължителна, нито че решение по чл. 93, ал. 6 ЗООС се издава като отказ от процедура. Не избирай правен изход само защото ГИС не пресича ЗЗ/ЗТ.",
           "НЕ прави категорично отрицателно заключение за приложимостта на ОВОС или ОС само защото не е описан технологичен процес, липсва информация за капацитет или ГИС резултатът сочи непресичане. Сравни конкретните законови критерии с наличните положителни факти. Правната неопределеност НЕ Е неприложимост.",
-          "Ако не е доказана законова категория, обособи точно недоказаното условие и предложи допустим следващ административен ход. Не предлагай писмо за окончателно неприложими ОВОС/ОС, когато подлежащите предпоставки не са действително проверени.",
+          "Ако не е доказана законова категория, изложи точно недоказаното условие и формулирай вече избраното административно действие. Не предлагай писмо за окончателно неприложими ОВОС/ОС, когато подлежащите предпоставки не са действително проверени.",
           "Ако предлагаш писмо за допълнителни данни, посочи САМО конкретните технически факти, които действително липсват според document/source excerpts, и защо всеки факт е необходим за конкретен правен критерий. Не изисквай общо всички параметри, всички документи, нов ГИС анализ или потвърждение на факти, вече установени от преписката.",
           "Не изисквай от възложителя сам да квалифицира ИП по приложенията към ЗООС или Наредбата за ОС. Това е правна преценка на компетентния орган. Отбележи изрично кое е установено и кое остава необосновано, без да описваш второто като доказана липса на въздействие.",
           "За всеки извод посочи документ, факт и приложима норма само ако нормата е налична във verifiedLegalContext. Не представяй само заглавие на закон или числов праг като проверена разпоредба.",
-          "Формулирай действието на органа пряко към адресата според вида на документа.",
+          "Формулирай действието на органа пряко към адресата според вида на документа. При избран панел №02 изготви писмо до възложителя с конкретното обосновано искане. formalDecisionReady=false ограничава окончателното произнасяне и не препятства проект на писмо за конкретно уточнение.",
           "Не използвай изрази Предложението е окончателно, следва задължително, утвърждава се или актът се издава, когато предпоставките остават неопределени. Резултатът е работен проект за човешки преглед.",
           "Предложеният панел не удостоверява сам по себе си наличието на процесуални условия. Полето formalDecisionReady от подписаната четирикомпонентна квалификация определя дали изобщо може да се формулира предложение за издаване на формално решение. При false изложи границата на установеното без окончателно произнасяне.",
           "Когато qualificationValidated=false, четирите изхода не са доказани дори ако рецензентският текст ги излага категорично. Не ги повишавай до фактически проверени изводи.",
@@ -1166,7 +1167,7 @@ async function handleStage5Document(request,env){
          // preselect an outcome under art. 93. Request ONE corrective rewrite,
          // preserving the same case and without human intermediate clicks.
          const unsupported=/(?:не\s+се\s+достигат\s+законови\s+предпоставки|изключва\s+необходимостта|липсата\s+на\s+ново\s+строителство[^.!?]*изключва|няма\s+основания\s+за\s+ОС|отрицателен\s+изход|не\s+се\s+налагат\s+(?:други|допълнителни)\s+процедури|да\s+се\s+издаде\s+решение\s+по\s+чл\.?\s*93[^.!?]*не\s+се\s+налага|решение\s+по\s+чл\.?\s*93[^.!?]*липса\s+на\s+необходимост)/iu;
-         if(unsupported.test(candidate)&&issues.length){
+         if((unsupported.test(candidate)&&issues.length)||internalProposal.test(candidate)||kt134DispositionTextIssues(candidate,disposition).length){
            const repair=await fetch("https://api.openai.com/v1/responses",{
              method:"POST",signal:AbortSignal.timeout(45000),
              headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},
@@ -1183,7 +1184,8 @@ async function handleStage5Document(request,env){
                 ].join("\n")},
                 {role:"user",content:JSON.stringify({
                   subject:input.subject,scope:input.scope,caseContext:input.caseContext||null,
-                  reviewedDraft:candidate,reviewerSelectedPanel:proposedPanel,
+                  reviewedDraft:candidate,reviewerSelectedPanel:proposedPanel,signedReviewerAction,
+                  physicalGap:disposition.physicalGap,detectedDraftIssues:kt134DispositionTextIssues(candidate,disposition),
                   unresolvedLegalFindings:issues,qualificationRecord:input.qualificationRecord||null,
                   officialNormativeExcerpts:Array.isArray(d.verifiedLegalExcerpts)?d.verifiedLegalExcerpts:[]
                 })}
@@ -1194,6 +1196,7 @@ async function handleStage5Document(request,env){
              const revised=(rd.output||[]).flatMap(x=>x.content||[])
                .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
              if(revised.startsWith("Относно:")&&revised.length>=280&&!unsupported.test(revised)&&
+                !internalProposal.test(revised)&&!kt134DispositionTextIssues(revised,disposition).length&&
                 !/(?:\bMISSING_[A-Z_]+\b|\bPANEL_\d\d_[A-Z_]+\b)/u.test(revised))
                body=revised;
            }
@@ -1201,7 +1204,7 @@ async function handleStage5Document(request,env){
        }
      }
    }catch{}
-   let reviewerProposalOnly=!body||/(?:мотивирано предложение за експертна преценка|рецензентът предлага|компетентният експерт следва|предлага се (?:да се )?(?:издаде|изпрати))/iu.test(body);
+   let reviewerProposalOnly=!body||internalProposal.test(body);
    if(!body){
      // Service-independent proposal: no invented statutory determination.
      const safeIssues=[
