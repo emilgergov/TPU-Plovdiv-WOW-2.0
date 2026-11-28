@@ -1,0 +1,52 @@
+name: KT134 institutional voice test deployment
+on:
+  push:
+    branches: [kt134-stage5-institutional-voice]
+    paths: ['.github/workflows/kt134-institutional-voice-preview.yml']
+permissions:
+  contents: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: "90df5489417e4b53179a852c446aeed1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify and bundle the two isolated test Workers
+        run: |
+          set -euo pipefail
+          grep -Fxq 'name = "tpu-plovdiv-kt134-eg-test"' kt134-auto/wrangler.eg-staging.toml
+          grep -Fxq 'name = "tpu-plovdiv-kt134-test"' kt134-auto/wrangler.auth-bridge.toml
+          node --check cloudflare/ai-author-v27/src/worker.js
+          node --test kt134-auto/kt134-eg-stage45-live-bridge.test.mjs
+          node --test cloudflare/ai-author-v27/src/kt134-legal-disposition.test.mjs
+          node --test cloudflare/ai-author-v27/src/kt134-reviewer-route-alignment.test.mjs
+          npm install --no-save --ignore-scripts --no-audit --no-fund fflate@0.8.2
+          node kt134-auto/kt134-build-acceptance-package.mjs
+          node --test kt134-auto/kt134-official-word-builder.test.mjs
+          npx --yes wrangler@4 deploy --config kt134-auto/wrangler.eg-staging.toml --dry-run --outdir /tmp/eg-test
+          npx --yes wrangler@4 deploy --config kt134-auto/wrangler.auth-bridge.toml --dry-run --outdir /tmp/bridge-test
+      - name: Deploy the existing test Workers with their configured credentials
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 deploy --config kt134-auto/wrangler.eg-staging.toml --keep-vars
+          (cd kt134-auto && npx --yes wrangler@4 deploy --config wrangler.auth-bridge.toml --keep-vars)
+          curl -fsS --retry 4 https://tpu-plovdiv-kt134-eg-test.emilgergov.workers.dev/health | node -e 'let s="";process.stdin.on("data",x=>s+=x);process.stdin.on("end",()=>{const h=JSON.parse(s);if(!h.aiGenerationEnabled||!h.apiKeyConfigured)process.exit(1);})'
+          curl -fsS --retry 4 https://tpu-plovdiv-kt134-test.emilgergov.workers.dev/kt134/portal-preview >/dev/null
+      - name: Record the test deployment result
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OUTCOME: ${{ job.status }}
+        run: |
+          path=kt134-auto/KT134_INSTITUTIONAL_VOICE_TEST_STATUS.json
+          result=$(jq -n --arg status "$OUTCOME" --arg run "$GITHUB_RUN_ID" --arg source "$GITHUB_SHA" '{status:$status,runId:$run,source:$source}' | base64 -w0)
+          sha=$(gh api "repos/$GITHUB_REPOSITORY/contents/$path?ref=kt134-stage5-institutional-voice" --jq '.sha' 2>/dev/null || true)
+          args=()
+          if [ -n "$sha" ]; then args=(-f "sha=$sha"); fi
+          gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$path" -f branch=kt134-stage5-institutional-voice -f message='Record the KT134 voice test deployment' -f content="$result" "${args[@]}" >/dev/null
