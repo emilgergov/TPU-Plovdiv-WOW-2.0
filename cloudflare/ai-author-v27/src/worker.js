@@ -1157,8 +1157,16 @@ async function handleStage5Document(request,env){
      });
      if(composeResponse.ok){
        const data=await composeResponse.json();
-       body=(data.output||[]).flatMap(x=>x.content||[])
+       const generated=(data.output||[]).flatMap(x=>x.content||[])
          .filter(x=>x.type==="output_text").map(x=>x.text).join("\n").trim();
+       const lines=generated.split(/\r?\n/u);
+       // The Word renderer requires a subject paragraph followed by body text.
+       // Supply the established subject and preserve the generated body.
+       if(generated){
+         if(/^Относно\s*:/iu.test(lines[0]))lines.shift();
+         const generatedBody=lines.join("\n").trim();
+         if(generatedBody)body=["Относно: „"+subject+"“",generatedBody].join("\n\n");
+       }
      }
    }catch{}
    const reviewerAlternativeUsed=!body;
