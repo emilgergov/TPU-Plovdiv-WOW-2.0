@@ -150,10 +150,9 @@ export function createKt134EgStage45Bridge({workerBase,accessToken,fetchImpl,
     if(result.caseId!==caseId||!value(result.draft)||result.projectOnly!==true||
        result.documentIssued!==false||result.automaticReviewerIntermediate!==true)
        invalid('EG_STAGE5_RESULT_MISMATCH');
-    if(result.reviewerProposalOnly===true)invalid('EG_STAGE5_RECIPIENT_DRAFT_UNAVAILABLE');
     return {caseId,revision,status:'draft',expertApproved:false,
        panelId:reviewerDecision.panelId,
-       documentTitle:stage5Request.documentTitle,
+       documentTitle:result.reviewerProposalOnly===true?result.documentTitle:stage5Request.documentTitle,
        content:result.draft};
   }
  });
