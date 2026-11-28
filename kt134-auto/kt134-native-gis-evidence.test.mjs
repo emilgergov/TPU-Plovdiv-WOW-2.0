@@ -42,3 +42,14 @@ test('GIS overlap missing even one parcel cannot be declared complete',()=>{
   ids:['56789.22.1','56789.22.2'],results:[base]}}});
  assert.equal(r.mode,'contextual_review');
 });
+
+test('document parcels survive a partial saved GIS list without becoming verified',()=>{
+ const identifier='56789.22.2';
+ const state={intake:{all_parcels:[{identifier},'56789.22.3']}};
+ const result=adapt({state,globals:{KT80FreeGISResults:{
+  ids:[base.input],results:[base]}}});
+ assert.deepEqual(result.parcels.map(row=>row.identifier),
+  [identifier,'56789.22.3',base.input]);
+ assert.equal(result.parcels[0].evidenceStatus,'DOCUMENT_CANDIDATE_NOT_EXPERT_CONFIRMED');
+ assert.deepEqual(result.gis.verifiedParcelIds,[base.input]);
+});
