@@ -5,7 +5,6 @@
  * the complete preassembled case/source payload, never a public page.
  */
 import {buildKt134CompleteStage4Request} from './kt134-complete-dossier-stage4.mjs';
-import {composeKt134CaseAwareStage5Draft} from './kt134-case-aware-word-body.mjs';
 import {limitKt134Stage4Payload} from './kt134-stage4-transport-budget.mjs';
 const invalid=(code)=>{const e=new Error(code);e.code=code;throw e;};
 const value=x=>typeof x==='string'?x.trim():'';
@@ -151,12 +150,11 @@ export function createKt134EgStage45Bridge({workerBase,accessToken,fetchImpl,
     if(result.caseId!==caseId||!value(result.draft)||result.projectOnly!==true||
        result.documentIssued!==false||result.automaticReviewerIntermediate!==true)
        invalid('EG_STAGE5_RESULT_MISMATCH');
+    if(result.reviewerProposalOnly===true)invalid('EG_STAGE5_RECIPIENT_DRAFT_UNAVAILABLE');
     return {caseId,revision,status:'draft',expertApproved:false,
        panelId:reviewerDecision.panelId,
-       documentTitle:result.reviewerProposalOnly===true?result.documentTitle:stage5Request.documentTitle,
-       content:stage4.completeCaseEvidence?.evidenceProvenance==='CASE_SPECIFIC_NO_SYNTHETIC_SOURCE'
-        ?composeKt134CaseAwareStage5Draft({stage5Text:result.draft,stage4Request:stage4})
-        :result.draft};
+       documentTitle:stage5Request.documentTitle,
+       content:result.draft};
   }
  });
 }
